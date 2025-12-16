@@ -1,0 +1,17 @@
+             pestpp-sen: a tool for global sensitivity analysis
+
+                         by The PEST++ Development Team
+
+
+
+version: 5.2.16
+binary compiled on Dec  1 2024 at 07:49:46
+
+using control file: "--help"
+in directory: "C:\DSSAT48\Tomato_Cal\Workspace"
+on host: "LIDAEUS-DESK"
+
+started at 12/12/25 04:37:26
+Error prococessing control file: --help
+
+control file stream is not good

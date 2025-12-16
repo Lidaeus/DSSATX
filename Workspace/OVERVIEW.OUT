@@ -1,0 +1,361 @@
+*SIMULATION OVERVIEW FILE
+
+*DSSAT Cropping System Model Ver. 4.8.2.000 -release  DEC 12, 2025 06:02:47
+
+*RUN   1        : Sunny, Avg, auto,N-off    CRGRO048 UFBR9401    4
+ MODEL          : CRGRO048 - Tomato
+ EXPERIMENT     : UFBR9401 TM 1994 FERTILIZER TRIAL, SUNNY, BRADENTON
+ DATA PATH      :
+ TREATMENT  4   : Sunny, Avg, auto,N-off    CRGRO048
+
+
+ CROP           : Tomato           CULTIVAR : Florida 47 2010  ECOTYPE :TM0001
+ STARTING DATE  : FEB 19 1994
+ PLANTING DATE  : MAR  1 1994      PLANTS/m2 :     1.1    ROW SPACING : 152.cm
+ WEATHER        : UFBR   1994
+ SOIL           : UFBR950001     TEXTURE : SA    - Eaugallie fine sand (IMPE
+ WATER BALANCE  : NOT SIMULATED ; NO H2O-STRESS
+ IRRIGATION     :
+ NITROGEN BAL.  : NOT SIMULATED ; NO N-STRESS
+ N-FERTILIZER   :
+ RESIDUE/MANURE :
+ ENVIRONM. OPT. : DAYL=    0.00  SRAD=    0.00  TMAX=    0.00  TMIN=    0.00
+                  RAIN=    0.00  CO2 =    0.00  DEW =    0.00  WIND=    0.00
+ SIMULATION OPT : WATER   :N  NITROGEN:N  N-FIX:N  PHOSPH :N  PESTS  :N
+                  PHOTO   :L  ET      :R  INFIL:S  HYDROL :R  SOM    :G
+                  CO2 358ppm  NSWIT   :1  EVAP :R  SOIL   :2  STEMP  :D
+ MANAGEMENT OPT : PLANTING:R  IRRIG   :A  FERT :R  RESIDUE:N  HARVEST:M
+                  WEATHER :M  TILLAGE :N
+
+*SUMMARY OF SOIL AND GENETIC INPUT PARAMETERS
+
+ Tomato           CULTIVAR: TM0001-Florida 47 2010    ECOTYPE: TM0001
+ CSDVAR :12.30  PPSEN  :30.00  EMG-FLW:24.40  FLW-FSD:*****  FSD-PHM :545.10
+ WTPSD  :*****  SDPDVR :230.0  SDFDUR :26.00  PODDUR : 5.00  XFRUIT  :  0.70
+ THRESH : 48.5  SDPRO  :0.300  SDLIP   : 0.050
+
+
+*SIMULATED CROP AND SOIL STATUS AT MAIN DEVELOPMENT STAGES
+
+ RUN NO.     1     Sunny, Avg, auto,N-off  
+
+        CROP GROWTH     BIOMASS         LEAF   CROP N     STRESS      STRESS                                           
+   DATE  AGE STAGE        kg/ha    LAI   NUM  kg/ha  %   H2O  Nitr Phos1 Phos2  RSTG                                   
+ ------  --- ----------   -----  -----  ----  ---  ---  ----  ----  ----  ----  ----                                   
+ 19 FEB    0 Start Sim        0   0.00   0.0    0  0.0  0.00  0.00  0.00  0.00     0
+  1 MAR    0 Transplant       2   0.01   2.8    0  3.8  0.00  0.00  0.00  0.00     0
+  3 MAR    2 Flower Ind       2   0.01   3.5    0  3.6  0.00  0.51  0.00  0.00     0
+ 28 MAR   27 First Flwr      13   0.01  12.2    0  3.7  0.00  0.83  0.00  0.00     1
+ 31 MAR   30 First Pod       17   0.02  13.3    1  3.8  0.00  0.71  0.00  0.00     2
+ 16 JUL  137 Harvest      11929  46.74  56.8  541  4.5  0.00  0.01  0.00  0.00     2
+
+
+*MAIN GROWTH AND DEVELOPMENT VARIABLES
+
+@     VARIABLE                                         SIMULATED     MEASURED
+      --------                                         ---------     --------
+      Anthesis day (dap)                                      27          -99
+      Physiological maturity day (dap)                       -99          -99
+      Yield at harvest maturity (kg [dm]/ha)                   0          -99
+      Pod/Ear/Panicle weight at maturity (kg [dm]/ha)          0         8291
+      Tops weight at anthesis (kg [dm]/ha)                    13          -99
+      Tops weight at maturity (kg [dm]/ha)                 11929        11959
+      By-product produced (stalk) at maturity (kg[dm]/ha   11930          -99
+      Number at maturity (no/m2)                               0          -99
+      Unit wt at maturity (g [dm]/unit)                   0.0000          -99
+      Number at maturity (no/unit)                          0.00          -99
+      Harvest index at maturity                            0.000          -99
+      Threshing % at maturity                               0.00          -99
+      Leaf area index, maximum                             46.74         5.62
+      Leaf number per stem at maturity                     56.75          -99
+      Canopy height (m)                                     2.15          -99
+      Tops N at anthesis (kg/ha)                               0          -99
+      Tops N at maturity (kg/ha)                             541        262.9
+      Stem N at maturity (kg/ha)                             201          -99
+      Grain N at maturity (kg/ha)                              0          -99
+      Grain N at maturity (%)                               0.00          -99
+      Grain oil at maturity (%)                             0.00          -99
+
+
+*ENVIRONMENTAL AND STRESS FACTORS
+
+ |-----Development Phase------|--------------------------------------Environment--------------------------------------|-----------------Stress-----------------|
+                              |---------------Average--------------|-----Cumulative-----|--------Count of days--------|          (0=Min, 1=Max Stress)         |
+                         Time  Temp  Temp  Temp Solar Photop                Evapo    Pot TMIN TMIN TMAX TMAX TMAX RAIN|----Water----|---Nitrogen--|-Phosphorus-|
+                         Span   Max   Min  Mean   Rad  [day]    CO2   Rain  Trans     ET   <    <    >    >    >    >   Photo         Photo         Photo
+                         days     C     C     C MJ/m2     hr    ppm     mm     mm    mm   0 C  2 C 30 C 32 C 34 C  0mm  synth Growth  synth Growth  synth Growth
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ First Flower-First Seed  110  31.7  20.3  26.0  22.6  13.28  358.4  373.6    0.0    0.0    0    0   82   45   25   28  0.000  0.000  0.000  0.028  0.000  0.000
+   
+ Planting to Harvest      138  30.5  19.2  24.9  21.7  12.98  358.3  420.9    0.0    0.0    0    0   83   45   25   30  0.000  0.000  0.000  0.181  0.000  0.000
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------------
+
+                    Tomato YIELD :        0 kg/ha    [Dry weight] 
+
+**************************************************************************************************************
+
+*DSSAT Cropping System Model Ver. 4.8.2.000 -release  DEC 12, 2025 06:02:47
+
+*RUN   2        : 06-Ctrl WB "on"           CRGRO048 UFGA0602    4
+ MODEL          : CRGRO048 - Tomato
+ EXPERIMENT     : UFGA0602 TM SPRING 2006,FLA 47,DRIP-IRR.
+ DATA PATH      :
+ TREATMENT  4   : 06-Ctrl WB "on"           CRGRO048
+
+
+ CROP           : Tomato           CULTIVAR : Florida 47 2010  ECOTYPE :TM0001
+ STARTING DATE  : MAR 30 2006
+ PLANTING DATE  : APR  5 2006      PLANTS/m2 :     1.2    ROW SPACING : 183.cm
+ HARVEST DATE   : JUL  2 2006
+ WEATHER        : UFGA   2006
+ SOIL           : UFGA010700     TEXTURE : SA    - Candler
+ SOIL INIT COND : DEPTH:180cm EXTR. H2O: 68.2mm  NO3:  0.0kg/ha  NH4:  0.0kg/ha
+ WATER BALANCE  : IRRIGATE ON REPORTED DATE(S)
+ IRRIGATION     :      516 mm IN    92 APPLICATIONS
+ NITROGEN BAL.  : NOT SIMULATED ; NO N-STRESS
+ N-FERTILIZER   :
+ RESIDUE/MANURE :
+ ENVIRONM. OPT. : DAYL=    0.00  SRAD=    0.00  TMAX=    0.00  TMIN=    0.00
+                  RAIN=    0.00  CO2 =    0.00  DEW =    0.00  WIND=    0.00
+ SIMULATION OPT : WATER   :Y  NITROGEN:N  N-FIX:N  PHOSPH :N  PESTS  :N
+                  PHOTO   :L  ET      :R  INFIL:S  HYDROL :R  SOM    :G
+                  CO2 381ppm  NSWIT   :1  EVAP :R  SOIL   :2  STEMP  :D
+ MANAGEMENT OPT : PLANTING:R  IRRIG   :R  FERT :A  RESIDUE:N  HARVEST:R
+                  WEATHER :M  TILLAGE :N
+
+*SUMMARY OF SOIL AND GENETIC INPUT PARAMETERS
+
+   SOIL LOWER UPPER   SAT  EXTR  INIT   ROOT   BULK     pH    NO3    NH4    ORG
+  DEPTH LIMIT LIMIT    SW    SW    SW   DIST   DENS                          C
+   cm   cm3/cm3    cm3/cm3    cm3/cm3         g/cm3         ugN/g  ugN/g     %
+-------------------------------------------------------------------------------
+  0-  5 0.045 0.091 0.412 0.046 0.092   1.00   1.49   5.50   1.00   0.20   0.48
+  5- 15 0.045 0.091 0.412 0.046 0.075   1.00   1.49   5.50   1.00   0.20   0.48
+ 15- 30 0.037 0.076 0.404 0.039 0.059   0.64   1.52   5.30   1.00   0.20   0.18
+ 30- 45 0.034 0.071 0.415 0.037 0.058   0.47   1.49   5.10   0.70   0.14   0.09
+ 45- 60 0.034 0.071 0.415 0.037 0.057   0.35   1.49   5.10   0.50   0.10   0.09
+ 60- 90 0.043 0.081 0.412 0.038 0.087   0.22   1.50   5.20   0.35   0.10   0.09
+ 90-120 0.042 0.078 0.412 0.036 0.169   0.12   1.50   5.30   0.03   0.03   0.02
+120-150 0.047 0.084 0.416 0.037 0.400   0.07   1.49   5.20   0.00   0.00   0.02
+150-180 0.047 0.084 0.416 0.037 0.400   0.04   1.49   5.20   0.00   0.00   0.02
+
+TOT-180   7.6  14.4  74.4   6.8  35.5  <--cm   -  kg/ha-->    0.0    0.0      0
+SOIL ALBEDO    : 0.17      EVAPORATION LIMIT : 6.00         MIN. FACTOR  : 1.00
+RUNOFF CURVE # :64.00      DRAINAGE RATE     : 0.85         FERT. FACTOR : 0.95
+
+ Tomato           CULTIVAR: TM0001-Florida 47 2010    ECOTYPE: TM0001
+ CSDVAR :12.30  PPSEN  :30.00  EMG-FLW:24.40  FLW-FSD:*****  FSD-PHM :545.10
+ WTPSD  :*****  SDPDVR :230.0  SDFDUR :26.00  PODDUR : 5.00  XFRUIT  :  0.70
+ THRESH : 48.5  SDPRO  :0.300  SDLIP   : 0.050
+
+
+*SIMULATED CROP AND SOIL STATUS AT MAIN DEVELOPMENT STAGES
+
+ RUN NO.     2     06-Ctrl WB "on"         
+
+        CROP GROWTH     BIOMASS         LEAF   CROP N     STRESS      STRESS                                           
+   DATE  AGE STAGE        kg/ha    LAI   NUM  kg/ha  %   H2O  Nitr Phos1 Phos2  RSTG                                   
+ ------  --- ----------   -----  -----  ----  ---  ---  ----  ----  ----  ----  ----                                   
+ 30 MAR    0 Start Sim        0   0.00   0.0    0  0.0  0.00  0.00  0.00  0.00     0
+  5 APR    0 Transplant       2   0.01   4.1    0  3.8  0.00  0.00  0.00  0.00     0
+  2 JUL   88 Harvest       2261   3.11  36.0   77  3.4  0.08  0.38  0.00  0.00     0
+
+
+*MAIN GROWTH AND DEVELOPMENT VARIABLES
+
+@     VARIABLE                                         SIMULATED     MEASURED
+      --------                                         ---------     --------
+      Anthesis day (dap)                                     -99          -99
+      Physiological maturity day (dap)                       -99          -99
+      Yield at harvest maturity (kg [dm]/ha)                   0          -99
+      Pod/Ear/Panicle weight at maturity (kg [dm]/ha)          0          -99
+      Tops weight at anthesis (kg [dm]/ha)                     0          -99
+      Tops weight at maturity (kg [dm]/ha)                  2261          -99
+      By-product produced (stalk) at maturity (kg[dm]/ha    2260          -99
+      Number at maturity (no/m2)                               0          -99
+      Unit wt at maturity (g [dm]/unit)                   0.0000          -99
+      Number at maturity (no/unit)                          0.00          -99
+      Harvest index at maturity                            0.000          -99
+      Threshing % at maturity                               0.00          -99
+      Leaf area index, maximum                              3.11          -99
+      Leaf number per stem at maturity                     35.95          -99
+      Canopy height (m)                                     0.77          -99
+      Tops N at anthesis (kg/ha)                               0          -99
+      Tops N at maturity (kg/ha)                              77          -99
+      Stem N at maturity (kg/ha)                              55          -99
+      Grain N at maturity (kg/ha)                              0          -99
+      Grain N at maturity (%)                               0.00          -99
+      Grain oil at maturity (%)                             0.00          -99
+
+
+*ENVIRONMENTAL AND STRESS FACTORS
+
+ |-----Development Phase------|--------------------------------------Environment--------------------------------------|-----------------Stress-----------------|
+                              |---------------Average--------------|-----Cumulative-----|--------Count of days--------|          (0=Min, 1=Max Stress)         |
+                         Time  Temp  Temp  Temp Solar Photop                Evapo    Pot TMIN TMIN TMAX TMAX TMAX RAIN|----Water----|---Nitrogen--|-Phosphorus-|
+                         Span   Max   Min  Mean   Rad  [day]    CO2   Rain  Trans     ET   <    <    >    >    >    >   Photo         Photo         Photo
+                         days     C     C     C MJ/m2     hr    ppm     mm     mm    mm   0 C  2 C 30 C 32 C 34 C  0mm  synth Growth  synth Growth  synth Growth
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+   
+ Planting to Harvest       89  31.0  18.1  24.5  19.3  13.42  381.5  193.5  273.7  440.6    0    0   60   36   15   24  0.018  0.082  0.000  0.375  0.000  0.000
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+*Resource Productivity
+ Growing season length:  89 days 
+
+ Precipitation during growing season       193.5 mm[rain]
+   Dry Matter Productivity                  1.17 kg[DM]/m3[rain]          =   11.7 kg[DM]/ha per mm[rain]
+   Yield Productivity                       0.00 kg[grain yield]/m3[rain] =    0.0 kg[yield]/ha per mm[rain]
+
+ Evapotranspiration during growing season  273.7 mm[ET]
+   Dry Matter Productivity                  0.83 kg[DM]/m3[ET]            =    8.3 kg[DM]/ha per mm[ET]
+   Yield Productivity                       0.00 kg[grain yield]/m3[ET]   =    0.0 kg[yield]/ha per mm[ET]
+
+ Transpiration during growing season        98.0 mm[EP]
+   Dry Matter Productivity                  2.31 kg[DM]/m3[EP]            =   23.1 kg[DM]/ha per mm[EP]
+   Yield Productivity                       0.00 kg[grain yield]/m3[EP]   =    0.0 kg[yield]/ha per mm[EP]
+
+ Irrigation during growing season          515.9 mm[irrig]
+   Dry Matter Productivity                  0.44 kg[DM]/m3[irrig]         =    4.4 kg[DM]/ha per mm[irrig]
+   Yield Productivity                       0.00 kg[grain yield]/m3[irrig]=    0.0 kg[yield]/ha per mm[irrig]
+
+--------------------------------------------------------------------------------------------------------------
+
+                    Tomato YIELD :        0 kg/ha    [Dry weight] 
+
+**************************************************************************************************************
+
+*DSSAT Cropping System Model Ver. 4.8.2.000 -release  DEC 12, 2025 06:02:47
+
+*RUN   3        : 07-Ctrl"W on"             CRGRO048 UFGA0701    4
+ MODEL          : CRGRO048 - Tomato
+ EXPERIMENT     : UFGA0701 TM SPRING 2007,FLA 47,DRIP-IRR.
+ DATA PATH      :
+ TREATMENT  4   : 07-Ctrl"W on"             CRGRO048
+
+
+ CROP           : Tomato           CULTIVAR : Florida 47 2010  ECOTYPE :TM0001
+ STARTING DATE  : FEB 15 2007
+ PLANTING DATE  : APR  7 2007      PLANTS/m2 :     1.2    ROW SPACING : 183.cm
+ HARVEST DATE   : JUL  5 2007
+ WEATHER        : UFGA   2007
+ SOIL           : UFGA017000     TEXTURE : SA    - Tavares
+ SOIL INIT COND : DEPTH:180cm EXTR. H2O: 79.7mm  NO3:  0.0kg/ha  NH4:  0.0kg/ha
+ WATER BALANCE  : IRRIGATE ON REPORTED DATE(S)
+ IRRIGATION     :      516 mm IN    92 APPLICATIONS
+ NITROGEN BAL.  : NOT SIMULATED ; NO N-STRESS
+ N-FERTILIZER   :
+ RESIDUE/MANURE :
+ ENVIRONM. OPT. : DAYL=    0.00  SRAD=    0.00  TMAX=    0.00  TMIN=    0.00
+                  RAIN=    0.00  CO2 =    0.00  DEW =    0.00  WIND=    0.00
+ SIMULATION OPT : WATER   :Y  NITROGEN:N  N-FIX:N  PHOSPH :N  PESTS  :N
+                  PHOTO   :L  ET      :R  INFIL:S  HYDROL :R  SOM    :G
+                  CO2 383ppm  NSWIT   :1  EVAP :R  SOIL   :2  STEMP  :D
+ MANAGEMENT OPT : PLANTING:R  IRRIG   :R  FERT :R  RESIDUE:N  HARVEST:R
+                  WEATHER :M  TILLAGE :N
+
+*SUMMARY OF SOIL AND GENETIC INPUT PARAMETERS
+
+   SOIL LOWER UPPER   SAT  EXTR  INIT   ROOT   BULK     pH    NO3    NH4    ORG
+  DEPTH LIMIT LIMIT    SW    SW    SW   DIST   DENS                          C
+   cm   cm3/cm3    cm3/cm3    cm3/cm3         g/cm3         ugN/g  ugN/g     %
+-------------------------------------------------------------------------------
+  0-  5 0.072 0.142 0.364 0.070 0.092   1.00   1.60   4.20   1.00   0.20   1.41
+  5- 15 0.072 0.142 0.364 0.070 0.075   1.00   1.60   4.20   1.00   0.20   1.41
+ 15- 30 0.051 0.102 0.371 0.051 0.059   0.64   1.60   4.30   1.00   0.20   0.66
+ 30- 45 0.044 0.091 0.373 0.047 0.058   0.47   1.60   4.30   0.70   0.14   0.44
+ 45- 60 0.045 0.092 0.347 0.047 0.057   0.35   1.67   4.20   0.50   0.10   0.44
+ 60- 90 0.038 0.078 0.350 0.040 0.087   0.22   1.67   4.20   0.35   0.10   0.18
+ 90-120 0.046 0.086 0.364 0.040 0.169   0.12   1.63   4.30   0.03   0.03   0.18
+120-150 0.048 0.087 0.365 0.039 0.400   0.07   1.63   4.30   0.00   0.00   0.08
+150-180 0.052 0.091 0.358 0.039 0.400   0.04   1.65   4.40   0.00   0.00   0.05
+
+TOT-180   8.7  16.7  64.9   8.0  35.5  <--cm   -  kg/ha-->    0.0    0.0      0
+SOIL ALBEDO    : 0.17      EVAPORATION LIMIT : 6.00         MIN. FACTOR  : 1.00
+RUNOFF CURVE # :64.00      DRAINAGE RATE     : 0.40         FERT. FACTOR : 0.95
+
+ Tomato           CULTIVAR: TM0001-Florida 47 2010    ECOTYPE: TM0001
+ CSDVAR :12.30  PPSEN  :30.00  EMG-FLW:24.40  FLW-FSD:*****  FSD-PHM :545.10
+ WTPSD  :*****  SDPDVR :230.0  SDFDUR :26.00  PODDUR : 5.00  XFRUIT  :  0.70
+ THRESH : 48.5  SDPRO  :0.300  SDLIP   : 0.050
+
+
+*SIMULATED CROP AND SOIL STATUS AT MAIN DEVELOPMENT STAGES
+
+ RUN NO.     3     07-Ctrl"W on"           
+
+        CROP GROWTH     BIOMASS         LEAF   CROP N     STRESS      STRESS                                           
+   DATE  AGE STAGE        kg/ha    LAI   NUM  kg/ha  %   H2O  Nitr Phos1 Phos2  RSTG                                   
+ ------  --- ----------   -----  -----  ----  ---  ---  ----  ----  ----  ----  ----                                   
+ 15 FEB    0 Start Sim        0   0.00   0.0    0  0.0  0.00  0.00  0.00  0.00     0
+  7 APR    0 Transplant       2   0.01   4.6    0  3.8  0.00  0.00  0.00  0.00     0
+  5 JUL   89 Harvest       1793   2.40  36.2   60  3.4  0.02  0.47  0.00  0.00     0
+
+
+*MAIN GROWTH AND DEVELOPMENT VARIABLES
+
+@     VARIABLE                                         SIMULATED     MEASURED
+      --------                                         ---------     --------
+      Anthesis day (dap)                                     -99          -99
+      Physiological maturity day (dap)                       -99          -99
+      Yield at harvest maturity (kg [dm]/ha)                   0          -99
+      Pod/Ear/Panicle weight at maturity (kg [dm]/ha)          0          -99
+      Tops weight at anthesis (kg [dm]/ha)                     0          -99
+      Tops weight at maturity (kg [dm]/ha)                  1793          -99
+      By-product produced (stalk) at maturity (kg[dm]/ha    1790          -99
+      Number at maturity (no/m2)                               0          -99
+      Unit wt at maturity (g [dm]/unit)                   0.0000          -99
+      Number at maturity (no/unit)                          0.00          -99
+      Harvest index at maturity                            0.000          -99
+      Threshing % at maturity                               0.00          -99
+      Leaf area index, maximum                              2.40          -99
+      Leaf number per stem at maturity                     36.19          -99
+      Canopy height (m)                                     0.70          -99
+      Tops N at anthesis (kg/ha)                               0          -99
+      Tops N at maturity (kg/ha)                              60          -99
+      Stem N at maturity (kg/ha)                              45          -99
+      Grain N at maturity (kg/ha)                              0          -99
+      Grain N at maturity (%)                               0.00          -99
+      Grain oil at maturity (%)                             0.00          -99
+
+
+*ENVIRONMENTAL AND STRESS FACTORS
+
+ |-----Development Phase------|--------------------------------------Environment--------------------------------------|-----------------Stress-----------------|
+                              |---------------Average--------------|-----Cumulative-----|--------Count of days--------|          (0=Min, 1=Max Stress)         |
+                         Time  Temp  Temp  Temp Solar Photop                Evapo    Pot TMIN TMIN TMAX TMAX TMAX RAIN|----Water----|---Nitrogen--|-Phosphorus-|
+                         Span   Max   Min  Mean   Rad  [day]    CO2   Rain  Trans     ET   <    <    >    >    >    >   Photo         Photo         Photo
+                         days     C     C     C MJ/m2     hr    ppm     mm     mm    mm   0 C  2 C 30 C 32 C 34 C  0mm  synth Growth  synth Growth  synth Growth
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+   
+ Planting to Harvest       90  28.8  14.7  21.8  20.4  13.45  383.3  143.5  393.7  457.8    1    1   37   15    4   10  0.009  0.019  0.000  0.462  0.000  0.000
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+*Resource Productivity
+ Growing season length:  90 days 
+
+ Precipitation during growing season       143.5 mm[rain]
+   Dry Matter Productivity                  1.25 kg[DM]/m3[rain]          =   12.5 kg[DM]/ha per mm[rain]
+   Yield Productivity                       0.00 kg[grain yield]/m3[rain] =    0.0 kg[yield]/ha per mm[rain]
+
+ Evapotranspiration during growing season  393.7 mm[ET]
+   Dry Matter Productivity                  0.46 kg[DM]/m3[ET]            =    4.6 kg[DM]/ha per mm[ET]
+   Yield Productivity                       0.00 kg[grain yield]/m3[ET]   =    0.0 kg[yield]/ha per mm[ET]
+
+ Transpiration during growing season        77.7 mm[EP]
+   Dry Matter Productivity                  2.31 kg[DM]/m3[EP]            =   23.1 kg[DM]/ha per mm[EP]
+   Yield Productivity                       0.00 kg[grain yield]/m3[EP]   =    0.0 kg[yield]/ha per mm[EP]
+
+ Irrigation during growing season          515.9 mm[irrig]
+   Dry Matter Productivity                  0.35 kg[DM]/m3[irrig]         =    3.5 kg[DM]/ha per mm[irrig]
+   Yield Productivity                       0.00 kg[grain yield]/m3[irrig]=    0.0 kg[yield]/ha per mm[irrig]
+
+--------------------------------------------------------------------------------------------------------------
+
+                    Tomato YIELD :        0 kg/ha    [Dry weight] 
+
+**************************************************************************************************************

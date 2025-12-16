@@ -1,0 +1,67 @@
+*Soil Carbon Balance
+
+*DSSAT Cropping System Model Ver. 4.8.2.000 -release  DEC 12, 2025 06:02:47
+
+*RUN   1        : Sunny, Avg, auto,N-off    CRGRO048 UFBR9401    4
+ MODEL          : CRGRO048 - Tomato
+ EXPERIMENT     : UFBR9401 TM 1994 FERTILIZER TRIAL, SUNNY, BRADENTON
+ DATA PATH      :
+ TREATMENT  4   : Sunny, Avg, auto,N-off    CRGRO048
+  
+
+!                                                 Initial               Final
+!                                                Year/DOY            Year/DOY
+!                                                1994-049            1994-049
+! SOIL C BALANCE                                 --------- kg[C]/ha ---------
+!  SOIL & SURFACE ORGANIC C
+!   Soil Organic C                              158634.50           158042.42
+!   Surface Organic C                                0.00                0.00
+!   Soil Litter C                                    0.40              415.38
+!   Surface Litter C                                 0.00             1467.57
+!   Soil methane C stored                            0.00                0.00
+!                                                --------            --------
+!   Total C in Soil and Surface Layers          158634.91           159925.38
+!  ADDITIONS AND REMOVALS:
+!   C in Harvest Residues from Previous              0.00
+!   C from Organic Applications                      0.00
+!   C in returned senesced material               1882.55
+!   CO2-C emitted                                  592.08
+!   CH4-C emitted                                    0.00
+!   CH4-C leached                                    0.00
+!   CH4-C plant uptake                               0.00
+!                                                --------            --------
+! TOTAL C BALANCE                               160517.45           160517.45
+!   Balance                                                            -0.002
+
+*DSSAT Cropping System Model Ver. 4.8.2.000 -release  DEC 12, 2025 06:02:47
+
+*RUN   3        : 07-Ctrl"W on"             CRGRO048 UFGA0701    4
+ MODEL          : CRGRO048 - Tomato
+ EXPERIMENT     : UFGA0701 TM SPRING 2007,FLA 47,DRIP-IRR.
+ DATA PATH      :
+ TREATMENT  4   : 07-Ctrl"W on"             CRGRO048
+  
+
+!                                                 Initial               Final
+!                                                Year/DOY            Year/DOY
+!                                                2007-045            2007-045
+! SOIL C BALANCE                                 --------- kg[C]/ha ---------
+!  SOIL & SURFACE ORGANIC C
+!   Soil Organic C                               95469.00            95325.79
+!   Surface Organic C                                0.00                0.00
+!   Soil Litter C                                    0.40               27.76
+!   Surface Litter C                                 0.00               23.61
+!   Soil methane C stored                            0.00                0.00
+!                                                --------            --------
+!   Total C in Soil and Surface Layers           95469.40            95377.16
+!  ADDITIONS AND REMOVALS:
+!   C in Harvest Residues from Previous              0.00
+!   C from Organic Applications                      0.00
+!   C in returned senesced material                 50.97
+!   CO2-C emitted                                  143.19
+!   CH4-C emitted                                    0.00
+!   CH4-C leached                                    0.00
+!   CH4-C plant uptake                               0.00
+!                                                --------            --------
+! TOTAL C BALANCE                                95520.37            95520.35
+!   Balance                                                            -0.021

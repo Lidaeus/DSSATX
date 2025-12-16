@@ -1,0 +1,59 @@
+pcf
+* control data
+             restart          estimation
+        12        13         1         0         7
+         1         1              single               point         1
+   2.000000E+01  -3.000000E+00   3.000000E-01   1.000000E-02        -7
+   1.000000E+01   1.000000E+01   1.000000E-03
+   1.000000E-01
+        20   1.000000E-02         3         3   1.000000E-02         3
+         0         0         0
+* singular value decomposition
+         1
+  10000000    1.000000E-06
+1
+* parameter groups
+cultivar               relative              1.0000000000E-02      0.0 switch                2.0000000000E+00      parabolic             1.0000000000E-05      5.0000000000E-01      smaller              
+* parameter data
+CSDL                  fixed                 factor                1.2330000000E+01      1.2330000000E+01      1.2330000000E+01      cultivar              1.0000000000E+00      0.0000000000E+00      1          
+EM-FL                 none                  factor                2.4400000000E+01      2.4400000000E+01      3.1000000000E+01      cultivar              1.0000000000E+00      0.0000000000E+00      1          
+FL-LF                 none                  factor                5.2000000000E+01      4.7000000000E+01      5.2000000000E+01      cultivar              1.0000000000E+00      0.0000000000E+00      1          
+FL-SD                 none                  factor                1.9000000000E+01      1.9000000000E+01      2.1000000000E+01      cultivar              1.0000000000E+00      0.0000000000E+00      1          
+FL-SH                 none                  factor                2.2000000000E+00      2.2000000000E+00      4.6000000000E+00      cultivar              1.0000000000E+00      0.0000000000E+00      1          
+PODUR                 none                  factor                5.5000000000E+01      5.4000000000E+01      5.8000000000E+01      cultivar              1.0000000000E+00      0.0000000000E+00      1          
+PPSEN                 fixed                 factor                0.0000000000E+00      0.0000000000E+00      0.0000000000E+00      cultivar              1.0000000000E+00      0.0000000000E+00      1          
+SD-PM                 none                  factor                4.5200000000E+01      4.5000000000E+01      4.7000000000E+01      cultivar              1.0000000000E+00      0.0000000000E+00      1          
+SDPDV                 fixed                 factor                3.0000000000E+02      3.0000000000E+02      3.0000000000E+02      cultivar              1.0000000000E+00      0.0000000000E+00      1          
+SFDUR                 none                  factor                2.6000000000E+01      2.6000000000E+01      2.7000000000E+01      cultivar              1.0000000000E+00      0.0000000000E+00      1          
+WTPSD                 fixed                 factor                4.0000000000E-03      4.0000000000E-03      4.0000000000E-03      cultivar              1.0000000000E+00      0.0000000000E+00      1          
+XFRT                  none                  factor                7.8000000000E-01      7.3000000000E-01      7.8000000000E-01      cultivar              1.0000000000E+00      0.0000000000E+00      1          
+* observation groups
+ADAPM                
+CNAMM                
+CWAMM                
+LAIXM                
+MDAPM                
+PD1PM                
+PWAMM                
+* observation data
+ADAPS_R1              0.0000000000E+00      0.0000000000E+00      ADAPM                
+ADAPS_R2              0.0000000000E+00      0.0000000000E+00      ADAPM                
+ADAPS_R3              0.0000000000E+00      0.0000000000E+00      ADAPM                
+CNAMS_R1              2.6290000000E+02      1.0000000000E+00      CNAMM                
+CWAMS_R1              1.1959000000E+04      1.0000000000E+00      CWAMM                
+LAIXS_R1              5.6200000000E+00      1.0000000000E+00      LAIXM                
+MDAPS_R1              0.0000000000E+00      0.0000000000E+00      MDAPM                
+MDAPS_R2              0.0000000000E+00      0.0000000000E+00      MDAPM                
+MDAPS_R3              0.0000000000E+00      0.0000000000E+00      MDAPM                
+PD1PS_R1              0.0000000000E+00      0.0000000000E+00      PD1PM                
+PD1PS_R2              0.0000000000E+00      0.0000000000E+00      PD1PM                
+PD1PS_R3              0.0000000000E+00      0.0000000000E+00      PD1PM                
+PWAMS_R1              8.2910000000E+03      1.0000000000E+00      PWAMM                
+* model command line
+python run_dssat.py
+* model input/output
+C:\DSSAT48\Tomato_Cal\Workspace\pest_params.csv.tpl C:\DSSAT48\Tomato_Cal\Workspace\pest_params.csv
+C:\DSSAT48\Tomato_Cal\Workspace\Evaluate.OUT.ins C:\DSSAT48\Tomato_Cal\Workspace\Evaluate.OUT
+++ies_num_reals(100)
+++ies_bad_phi_sigma(2.0)
+++overdue_giveup_fac(4.0)

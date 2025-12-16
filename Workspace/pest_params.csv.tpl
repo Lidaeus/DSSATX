@@ -1,0 +1,14 @@
+ptf ~
+name,value
+CSDL,~ CSDL ~
+PPSEN,~ PPSEN ~
+EM-FL,~ EM-FL ~
+FL-SH,~ FL-SH ~
+FL-SD,~ FL-SD ~
+SD-PM,~ SD-PM ~
+FL-LF,~ FL-LF ~
+XFRT,~ XFRT ~
+WTPSD,~ WTPSD ~
+SFDUR,~ SFDUR ~
+SDPDV,~ SDPDV ~
+PODUR,~ PODUR ~

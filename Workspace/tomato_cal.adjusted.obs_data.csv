@@ -1,0 +1,14 @@
+name,value,group,weight
+adaps_r1,0,adapm,0
+adaps_r2,0,adapm,0
+adaps_r3,0,adapm,0
+cnams_r1,262.9,cnamm,1
+cwams_r1,11959,cwamm,1
+laixs_r1,5.62,laixm,1
+mdaps_r1,0,mdapm,0
+mdaps_r2,0,mdapm,0
+mdaps_r3,0,mdapm,0
+pd1ps_r1,0,pd1pm,0
+pd1ps_r2,0,pd1pm,0
+pd1ps_r3,0,pd1pm,0
+pwams_r1,8291,pwamm,1

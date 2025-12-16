@@ -1,0 +1,2 @@
+group,mean_change,std_change,num_at_near_lbound,percent_at_near_lbound,num_at_near_ubound,percent_at_near_ubound,initial_cv,current_cv
+cultivar,1.1708838260058738179,32.66887430252328528,432,58.064516129032263336,90,12.096774193548387899,0.030909390803226022282,0.021065635588530366024
