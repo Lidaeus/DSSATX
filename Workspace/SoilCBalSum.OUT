@@ -1,9 +1,0 @@
-*Soil Carbon Balance Summary
-
-*DSSAT Cropping System Model Ver. 4.8.2.000 -release  DEC 12, 2025 06:02:47
-!                             <----------------- Initial State Variables ----------------><------------------ Final State Variables -----------------><----------- Added ----------><---------------- Lost ---------------->
-!                             <-------- SOM-C -------><-------- FOM-C -------><-----CH4--><-------- SOM-C -------><-------- FOM-C -------><-----CH4--><---OM---><Senesced><-HarvRes><----------------- GHG ----------------><--Balance->
-!                                     Surf        Soil        Surf        Soil     Storage        Surf        Soil        Surf        Soil     Storage 
-@Run FILEX               TN CR       SC0Di      SOMCTi       LC0Di       LCTDi     CH4STDi        SC0D       SOMCT        LC0D        LCTD      CH4STD      OMAC     SENCC      HRCH     CO2EC     CH4EC    CH4LCC    CH4COC      CUMBAL
-   1 UFBR9401.TMX         4 TM        0.00   158634.50        0.00        0.40        0.00        0.00   158042.42     1467.57      415.38        0.00      0.00   1882.55      0.00    592.08      0.00      0.00      0.00     -0.0015
-   3 UFGA0701.TMX         4 TM        0.00    95469.00        0.00        0.40        0.00        0.00    95325.79       23.61       27.76        0.00      0.00     50.97      0.00    143.19      0.00      0.00      0.00     -0.0206

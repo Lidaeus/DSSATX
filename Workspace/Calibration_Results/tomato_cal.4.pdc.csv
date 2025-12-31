@@ -1,4 +1,0 @@
-name,obs_mean,obs_std,obs_min,obs_max,obs_stat_min,obs_stat_max,sim_mean,sim_std,sim_min,sim_max,sim_stat_min,sim_stat_max,distance
-cnams_r1,262.9,1.1426e-13,262.9,262.9,262.9,262.9,0.43299,0.557285,0,2,-0.124296,0.990275,260.9
-laixs_r1,5.62,8.92653e-16,5.62,5.62,5.62,5.62,-99,0,-99,-99,-99,-99,104.62
-pwams_r1,8291,0,8291,8291,8291,8291,7.51546,20.6514,0,92,-13.136,28.1669,8199
