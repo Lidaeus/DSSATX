@@ -1,3 +1,4 @@
+import argparse
 import pandas as pd
 import numpy as np
 import os
@@ -6,7 +7,6 @@ import pyemu
 import shutil
 
 WORKSPACE = r"C:\DSSAT48\Tomato_Cal\Workspace"
-PST_FILE = os.path.join(WORKSPACE, "tomato_cal.pst")
 RESULTS_DIR = os.path.join(WORKSPACE, "Calibration_Results")
 
 def ensure_results_dir():
@@ -23,7 +23,7 @@ def get_ensemble_files(pattern):
     files_wksp = glob.glob(os.path.join(WORKSPACE, pattern))
     return files_res + files_wksp
 
-def cleanup_workspace():
+def cleanup_workspace(prefix):
     """
     Moves PEST output CSV files to RESULTS_DIR to clean up the workspace.
     """
@@ -32,11 +32,11 @@ def cleanup_workspace():
     
     # Patterns to move
     patterns = [
-        "tomato_cal.*.obs.csv",
-        "tomato_cal.*.par.csv",
-        "tomato_cal.phi.*.csv",
-        "tomato_cal.*.pdc.csv", # Prior Data Conflict
-        "tomato_cal.*.pcs.csv"  # Parameter Change Summary
+        f"{prefix}.*.obs.csv",
+        f"{prefix}.*.par.csv",
+        f"{prefix}.phi.*.csv",
+        f"{prefix}.*.pdc.csv",
+        f"{prefix}.*.pcs.csv",
     ]
     
     count = 0
@@ -52,13 +52,14 @@ def cleanup_workspace():
                 
     print(f"Moved {count} files to {RESULTS_DIR}")
 
-def analyze():
-    print("Loading PEST control file...")
-    if not os.path.exists(PST_FILE):
-        print(f"Error: {PST_FILE} not found!")
+def analyze(prefix):
+    pst_file = os.path.join(WORKSPACE, f"{prefix}.pst")
+    print(f"Loading PEST control file: {pst_file}")
+    if not os.path.exists(pst_file):
+        print(f"Error: {pst_file} not found!")
         return
 
-    pst = pyemu.Pst(PST_FILE)
+    pst = pyemu.Pst(pst_file)
     
     # Ensure results directory exists
     ensure_results_dir()
@@ -68,7 +69,7 @@ def analyze():
     obs['measured'] = obs['obsval']
     
     # Find the latest observation ensemble file
-    obs_files = get_ensemble_files("tomato_cal.*.obs.csv")
+    obs_files = get_ensemble_files(f"{prefix}.*.obs.csv")
     
     # Filter for numeric iteration numbers
     iter_files = []
@@ -133,7 +134,7 @@ def analyze():
     res_df = pd.DataFrame(results)
     
     # Save to RESULTS_DIR
-    output_path = os.path.join(RESULTS_DIR, "calibration_results_analysis.csv")
+    output_path = os.path.join(RESULTS_DIR, f"{prefix}_error_diag.csv")
     res_df.to_csv(output_path, index=False)
     print(f"Detailed analysis saved to {output_path}")
     
@@ -149,7 +150,7 @@ def analyze():
         print("\nNo weighted observations found for statistics.")
 
     # Parameter Analysis
-    par_files = get_ensemble_files("tomato_cal.*.par.csv")
+    par_files = get_ensemble_files(f"{prefix}.*.par.csv")
     par_iter_files = []
     for f in par_files:
         basename = os.path.basename(f)
@@ -168,15 +169,15 @@ def analyze():
         par_stats = par_ens.describe(percentiles=[0.025, 0.975]).T
         par_stats['mean'] = par_ens.mean()
         
-        par_output_path = os.path.join(RESULTS_DIR, "parameter_uncertainty_analysis.csv")
+        par_output_path = os.path.join(RESULTS_DIR, f"{prefix}_parameter_uncertainty.csv")
         par_stats.to_csv(par_output_path)
         print(f"Parameter uncertainty saved to {par_output_path}")
 
         # 2. Identify Best Realization (Minimum Phi)
         # Check RESULTS_DIR first, then WORKSPACE
-        phi_file = os.path.join(RESULTS_DIR, "tomato_cal.phi.actual.csv")
+        phi_file = os.path.join(RESULTS_DIR, f"{prefix}.phi.actual.csv")
         if not os.path.exists(phi_file):
-            phi_file = os.path.join(WORKSPACE, "tomato_cal.phi.actual.csv")
+            phi_file = os.path.join(WORKSPACE, f"{prefix}.phi.actual.csv")
             
         if os.path.exists(phi_file):
              phi_df = pd.read_csv(phi_file)
@@ -199,7 +200,7 @@ def analyze():
                  # Extract best parameters
                  if best_real_name in par_ens.index:
                      best_pars = par_ens.loc[best_real_name]
-                     best_par_file = os.path.join(RESULTS_DIR, "best_parameters.csv")
+                     best_par_file = os.path.join(RESULTS_DIR, f"{prefix}_best_parameters.csv")
                      best_pars.to_csv(best_par_file, header=["Value"])
                      print(f"Best parameter set saved to {best_par_file}")
                      print("(Recommended for use in deterministic simulations)")
@@ -207,7 +208,10 @@ def analyze():
                      print(f"Warning: Realization {best_real_name} not found in parameter ensemble.")
 
     # Perform Cleanup
-    cleanup_workspace()
+    cleanup_workspace(prefix)
 
 if __name__ == "__main__":
-    analyze()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--prefix", default="tomato_cal")
+    args = parser.parse_args()
+    analyze((args.prefix or "tomato_cal").strip())
