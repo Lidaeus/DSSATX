@@ -1311,7 +1311,9 @@ def _cul_param_spans_from_template_line(cul_line, n_fields):
     while pos < len(line) and line[pos] != " ":
         pos += 1
 
-    field_re = re.compile(r"\s+[-+]?\d*\.?\d+(?:[Ee][-+]?\d+)?")
+    field_re = re.compile(
+        r"\s+[-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[Ee][-+]?\d+)?"
+    )
     matches = list(field_re.finditer(line[pos:]))
     if len(matches) < n_fields:
         return None
@@ -1331,7 +1333,9 @@ def _eco_param_spans_from_template_line(eco_line, n_fields):
     while pos < len(line) and line[pos] != " ":
         pos += 1
 
-    field_re = re.compile(r"\s+[-+]?\d*\.?\d+(?:[Ee][-+]?\d+)?")
+    field_re = re.compile(
+        r"\s+[-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[Ee][-+]?\d+)?"
+    )
     matches = list(field_re.finditer(line[pos:]))
     if len(matches) < n_fields:
         return None
@@ -1383,7 +1387,7 @@ def _infer_ecotype_from_cul(cul_path, target_cultivar):
     if not cul_path or not target_cultivar or not os.path.exists(cul_path):
         return None
 
-    number_re = re.compile(r"[-+]?\d*\.?\d+(?:[Ee][-+]?\d+)?")
+    number_re = re.compile(r"[-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[Ee][-+]?\d+)?")
     with open(cul_path, "r") as f:
         for line in f:
             if not line.startswith(target_cultivar):
@@ -1402,10 +1406,22 @@ def update_cul_file(param_csv_path=PARAM_CSV, target_cultivar=None):
     """
     Reads pest_params.csv and TMGRO048.CUL.base, updates values, writes TMGRO048.CUL.
     """
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    cul_base_path = None
+    cand = os.path.join(script_dir, CUL_BASE_FILE)
+    if os.path.exists(cand):
+        cul_base_path = cand
+    elif os.path.exists(CUL_BASE_FILE):
+        cul_base_path = CUL_BASE_FILE
+    else:
+        cand = os.path.normpath(os.path.join(script_dir, "..", "..", "Genotype", CUL_FILE))
+        if os.path.exists(cand):
+            cul_base_path = cand
+
     if not os.path.exists(param_csv_path):
         print(f"No {param_csv_path} found. Using base CUL file.")
-        if os.path.exists(CUL_BASE_FILE):
-            shutil.copy(CUL_BASE_FILE, CUL_FILE)
+        if cul_base_path and os.path.exists(cul_base_path):
+            shutil.copy(cul_base_path, CUL_FILE)
         return
 
     try:
@@ -1414,11 +1430,11 @@ def update_cul_file(param_csv_path=PARAM_CSV, target_cultivar=None):
         print(f"Error reading parameter CSV: {e}")
         return
 
-    if not os.path.exists(CUL_BASE_FILE):
+    if not cul_base_path or (not os.path.exists(cul_base_path)):
         print(f"Error: {CUL_BASE_FILE} not found.")
         return
 
-    with open(CUL_BASE_FILE, 'r') as f:
+    with open(cul_base_path, "r") as f:
         lines = f.readlines()
 
     # Parse Base File to find column indices
@@ -1629,7 +1645,7 @@ def update_spe_file(param_csv_path=PARAM_CSV):
     if not keys:
         return
 
-    number_re = re.compile(r"[-+]?\d*\.?\d+(?:[Ee][-+]?\d+)?")
+    number_re = re.compile(r"[-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[Ee][-+]?\d+)?")
     with open(spe_base_path, "r") as f:
         lines = f.readlines()
 
@@ -1778,39 +1794,47 @@ def run_model():
             print(f"Stdout: {result.stdout}")
             print(f"Stderr: {result.stderr}")
         else:
-            _sync_outputs_from_filex_dir(BATCH_FILE, cwd_script, OUTPUT_FILES)
+            orig_cwd = os.getcwd()
+            try:
+                os.chdir(run_dir)
+                _sync_outputs_from_filex_dir(BATCH_FILE, cwd_script, OUTPUT_FILES)
 
-            if not os.path.exists("Evaluate.OUT") or os.path.getsize("Evaluate.OUT") == 0:
-                print("Evaluate.OUT missing or empty after sync.")
-                handle_failure(999)
-                return
+                if not os.path.exists("Evaluate.OUT") or os.path.getsize("Evaluate.OUT") == 0:
+                    print("Evaluate.OUT missing or empty after sync.")
+                    handle_failure(999)
+                    return
 
-            print("Evaluate.OUT generated successfully.")
-            try:
-                _write_pest_eval_from_evaluate("Evaluate.OUT", PEST_EVAL_FILE)
-            except Exception as e:
-                print(f"Warning: failed to write {PEST_EVAL_FILE}: {e}")
-            try:
-                _write_pest_grow_from_evaluate("Evaluate.OUT", PEST_GROW_FILE)
-            except Exception as e:
-                print(f"Warning: failed to write {PEST_GROW_FILE}: {e}")
-            try:
-                _write_pest_joint_from_evaluate("Evaluate.OUT", PEST_JOINT_FILE)
-            except Exception as e:
-                print(f"Warning: failed to write {PEST_JOINT_FILE}: {e}")
-            try:
-                _write_pest_harvest_from_tmt_and_freshwt(
-                    BATCH_FILE,
-                    "FreshWt.OUT",
-                    PEST_HARVEST_FILE,
-                    harvest_var=HARVEST_VAR,
-                )
-            except Exception as e:
-                print(f"Warning: failed to write {PEST_HARVEST_FILE}: {e}")
-            try:
-                _write_pest_tmtgrow_from_tmt_and_plantgro(BATCH_FILE, "PlantGro.OUT", PEST_TMTGROW_FILE)
-            except Exception as e:
-                print(f"Warning: failed to write {PEST_TMTGROW_FILE}: {e}")
+                print("Evaluate.OUT generated successfully.")
+                try:
+                    _write_pest_eval_from_evaluate("Evaluate.OUT", PEST_EVAL_FILE)
+                except Exception as e:
+                    print(f"Warning: failed to write {PEST_EVAL_FILE}: {e}")
+                try:
+                    _write_pest_grow_from_evaluate("Evaluate.OUT", PEST_GROW_FILE)
+                except Exception as e:
+                    print(f"Warning: failed to write {PEST_GROW_FILE}: {e}")
+                try:
+                    _write_pest_joint_from_evaluate("Evaluate.OUT", PEST_JOINT_FILE)
+                except Exception as e:
+                    print(f"Warning: failed to write {PEST_JOINT_FILE}: {e}")
+                try:
+                    _write_pest_harvest_from_tmt_and_freshwt(
+                        BATCH_FILE,
+                        "FreshWt.OUT",
+                        PEST_HARVEST_FILE,
+                        harvest_var=HARVEST_VAR,
+                    )
+                except Exception as e:
+                    print(f"Warning: failed to write {PEST_HARVEST_FILE}: {e}")
+                try:
+                    _write_pest_tmtgrow_from_tmt_and_plantgro(BATCH_FILE, "PlantGro.OUT", PEST_TMTGROW_FILE)
+                except Exception as e:
+                    print(f"Warning: failed to write {PEST_TMTGROW_FILE}: {e}")
+            finally:
+                try:
+                    os.chdir(orig_cwd)
+                except Exception:
+                    pass
 
             cleanup(run_dir, keep_dssat_outputs=True)
             cleanup(cwd_script, keep_dssat_outputs=True)
@@ -1830,14 +1854,17 @@ if __name__ == "__main__":
     BATCH_FILE = args.batch
     HARVEST_VAR = (args.harvest_var or "CHPDT").strip().upper()
 
+    cwd_script = os.path.dirname(os.path.abspath(__file__))
+
     cultivar = args.cultivar
     if not cultivar:
-        filex = _first_batch_filex_path(BATCH_FILE)
+        cwd_script = os.path.dirname(os.path.abspath(__file__))
+        filex = _resolve_filex_from_batch(BATCH_FILE, cwd_script)
         cultivar = _infer_cultivar_from_filex(filex)
     if not cultivar:
         cultivar = "TM0001"
 
-    cleanup(".", keep_dssat_outputs=False)
+    cleanup(cwd_script, keep_dssat_outputs=False)
     update_cul_file(param_csv_path=args.param_csv, target_cultivar=cultivar)
     ecotype = _infer_ecotype_from_cul(CUL_FILE, cultivar) or "TM0001"
     update_eco_file(param_csv_path=args.param_csv, target_ecotype=ecotype)
