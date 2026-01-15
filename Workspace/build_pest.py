@@ -18,15 +18,17 @@ PEST_TMTGROW_FILE = os.path.join(WORKSPACE, "PestTmtGrow.OUT")
 ECO_BOUNDS_EGGPLANT = {
     "PL-EM": (3.0, 12.0),
     "EM-V1": (10.0, 40.0),
-    "V1-JU": (0.0, 30.0),
+    "V1-JU": (0.0, 0.0),
     "JU-R0": (2.0, 20.0),
-    "FL-VS": (10.0, 60.0),
+    "FL-VS": (100.0, 100.0),
     "TRIFL": (0.20, 0.80),
     "RWDTH": (0.70, 1.60),
     "RHGHT": (0.70, 2.00),
     "OPTBI": (0.0, 20.0),
     "SLOBI": (-0.50, 0.0),
     "XMAGE": (5.0, 30.0),
+    "XFPHT": (5.0, 40.0),
+    "XFINT": (0.10, 1.20),
 }
 
 SPE_TEMP_BOUNDS_EGGPLANT = {
@@ -34,7 +36,171 @@ SPE_TEMP_BOUNDS_EGGPLANT = {
     "TO1": (22.0, 28.0),
     "TO2": (27.0, 32.0),
     "TM": (33.0, 40.0),
+    "TB1": (8.0, 12.0),
+    "TO11": (22.0, 28.0),
+    "TO21": (27.0, 32.0),
+    "TM1": (33.0, 40.0),
+    "TB2": (8.0, 12.0),
+    "TO12": (22.0, 28.0),
+    "TO22": (27.0, 32.0),
+    "TM2": (33.0, 40.0),
+    "TB3": (8.0, 12.0),
+    "TO13": (22.0, 28.0),
+    "TO23": (27.0, 32.0),
+    "TM3": (33.0, 40.0),
 }
+
+
+def _param_location_from_group(pargp):
+    g = (pargp or "").strip().lower()
+    if g == "cultivar":
+        return "CUL"
+    if g == "ecotype":
+        return "ECO"
+    if g == "species":
+        return "SPE"
+    return ""
+
+
+def _param_file_from_location(location):
+    loc = (location or "").strip().upper()
+    if loc == "CUL":
+        return os.path.basename(CUL_BASE_FILE)
+    if loc == "ECO":
+        return os.path.basename(ECO_FILE)
+    if loc == "SPE":
+        return os.path.basename(SPE_FILE)
+    return ""
+
+
+def write_param_review_csv(params, csv_path, cultivar=None, ecotype=None, mode=None):
+    rows = []
+    for p in params:
+        pargp = p.get("pargp", "")
+        location = _param_location_from_group(pargp)
+        rows.append(
+            {
+                "name": p.get("name"),
+                "init": p.get("init"),
+                "lower": p.get("lower"),
+                "upper": p.get("upper"),
+                "status": p.get("status"),
+                "pargp": pargp,
+                "location": location,
+                "file": _param_file_from_location(location),
+                "cultivar": cultivar or "",
+                "ecotype": ecotype or "",
+                "mode": mode or "",
+            }
+        )
+
+    df = pd.DataFrame(rows)
+    df.to_csv(csv_path, index=False, encoding="utf-8-sig")
+
+
+def _coerce_float(v):
+    if v is None:
+        return None
+    if isinstance(v, (int, float)):
+        if pd.isna(v):
+            return None
+        return float(v)
+    s = str(v).strip()
+    if not s or s.lower() == "nan":
+        return None
+    try:
+        return float(s)
+    except Exception:
+        return None
+
+
+def _coerce_str(v):
+    if v is None:
+        return None
+    if isinstance(v, str):
+        s = v.strip()
+        return s if s else None
+    if pd.isna(v):
+        return None
+    s = str(v).strip()
+    return s if s else None
+
+
+def apply_param_review_csv(params, csv_path):
+    if not csv_path or not os.path.exists(csv_path):
+        return params
+
+    df = pd.read_csv(csv_path)
+    if df.empty:
+        return params
+
+    cols_lower = {str(c).strip().lower(): c for c in df.columns}
+
+    def _col(*names):
+        for n in names:
+            key = str(n).strip().lower()
+            if key in cols_lower:
+                return cols_lower[key]
+        return None
+
+    name_col = _col("name", "parnme", "parameter")
+    if name_col is None:
+        return params
+
+    init_col = _col("init", "initial", "value", "parval1")
+    lb_col = _col("lower", "lb", "parlbnd")
+    ub_col = _col("upper", "ub", "parubnd")
+    status_col = _col("status", "partrans")
+    pargp_col = _col("pargp", "group")
+
+    by_name = {}
+    for _, r in df.iterrows():
+        k = _coerce_str(r.get(name_col))
+        if not k:
+            continue
+        by_name[k.strip().lower()] = r
+
+    for p in params:
+        k = str(p.get("name", "")).strip().lower()
+        if not k or k not in by_name:
+            continue
+        r = by_name[k]
+
+        init_v = _coerce_float(r.get(init_col)) if init_col else None
+        lb_v = _coerce_float(r.get(lb_col)) if lb_col else None
+        ub_v = _coerce_float(r.get(ub_col)) if ub_col else None
+        status_v = _coerce_str(r.get(status_col)) if status_col else None
+        pargp_v = _coerce_str(r.get(pargp_col)) if pargp_col else None
+
+        if lb_v is not None:
+            p["lower"] = float(lb_v)
+        if ub_v is not None:
+            p["upper"] = float(ub_v)
+        if init_v is not None:
+            p["init"] = float(init_v)
+        if status_v is not None:
+            p["status"] = str(status_v)
+        if pargp_v is not None:
+            p["pargp"] = str(pargp_v)
+
+        try:
+            lb = float(p.get("lower"))
+            ub = float(p.get("upper"))
+            if lb > ub:
+                p["lower"], p["upper"] = ub, lb
+                lb, ub = ub, lb
+            init = float(p.get("init"))
+            if init < lb:
+                p["init"] = lb
+            elif init > ub:
+                p["init"] = ub
+        except Exception:
+            pass
+
+        if float(p.get("lower", 0.0)) == float(p.get("upper", 0.0)):
+            p["status"] = "fixed"
+
+    return params
 
 
 def _parse_batch_entries(batch_file):
@@ -149,9 +315,23 @@ def _read_spe_temp_init_values():
     if pheno_idx == -1:
         return {}
 
+    def _stage_for_line(line):
+        u = (line or "").upper()
+        if "VEGETATIVE DEVELOPMENT" in u:
+            return 1
+        if "EARLY REPRODUCTIVE DEVELOPMENT" in u:
+            return 2
+        if "LATE REPRODUCTIVE DEVELOPMENT" in u:
+            return 3
+        return None
+
+    out = {}
     for i in range(pheno_idx + 1, min(pheno_idx + 60, len(lines))):
         s = lines[i]
-        if "VEGETATIVE DEVELOPMENT" not in s.upper():
+        if "DEVELOPMENT" not in s.upper():
+            continue
+        stage = _stage_for_line(s)
+        if stage is None:
             continue
         matches = [m.group(0) for m in number_re.finditer(s)]
         if len(matches) < 4:
@@ -160,8 +340,19 @@ def _read_spe_temp_init_values():
             tb, to1, to2, tm = (float(matches[0]), float(matches[1]), float(matches[2]), float(matches[3]))
         except Exception:
             continue
-        return {"TB": tb, "TO1": to1, "TO2": to2, "TM": tm}
-    return {}
+
+        out[f"TB{stage}"] = tb
+        out[f"TO1{stage}"] = to1
+        out[f"TO2{stage}"] = to2
+        out[f"TM{stage}"] = tm
+
+        if stage == 1:
+            out["TB"] = tb
+            out["TO1"] = to1
+            out["TO2"] = to2
+            out["TM"] = tm
+
+    return out
 
 
 def parse_extra_params(init_map, bounds_map, allowed_params=None, pargp="ecotype"):
@@ -234,26 +425,58 @@ def _read_tmt_harvest_events(tmt_path):
             continue
 
         chpdt = _as_float(r.get("CHPDT"), default=-99.0)
+        hpodw = _as_float(r.get("HPODW"), default=-99.0)
         pwad = _as_float(r.get("PWAD"), default=-99.0)
-        if chpdt == -99.0 and pwad == -99.0:
+        chfpw = _as_float(r.get("CHFPW"), default=-99.0)
+        hfpow = _as_float(r.get("HFPOW"), default=-99.0)
+        if all(v == -99.0 for v in [chpdt, hpodw, pwad, chfpw, hfpow]):
             continue
 
-        events_by_tn.setdefault(tn, []).append({"date": date, "chpdt": chpdt, "pwad": pwad})
+        events_by_tn.setdefault(tn, []).append(
+            {
+                "date": date,
+                "chpdt": chpdt,
+                "hpodw": hpodw,
+                "pwad": pwad,
+                "chfpw": chfpw,
+                "hfpow": hfpow,
+            }
+        )
 
     out = {}
     for tn, evs in events_by_tn.items():
         evs_sorted = sorted(evs, key=lambda x: x["date"])
-        cum = 0.0
+        dry_cum = 0.0
+        fresh_cum = 0.0
         out_list = []
         for idx, e in enumerate(evs_sorted, start=1):
             if e["chpdt"] != -99.0:
-                cum_val = e["chpdt"]
-                cum = cum_val
+                dry_cum = float(e["chpdt"])
             else:
-                inc = 0.0 if e["pwad"] == -99.0 else e["pwad"]
-                cum += inc
-                cum_val = cum
-            out_list.append({"hno": idx, "date": int(e["date"]), "obs_cum": float(cum_val)})
+                if e.get("hpodw", -99.0) != -99.0:
+                    inc = float(e["hpodw"])
+                elif e.get("pwad", -99.0) != -99.0:
+                    inc = float(e["pwad"])
+                else:
+                    inc = 0.0
+                dry_cum += inc
+
+            if e["chfpw"] != -99.0:
+                fresh_cum = float(e["chfpw"])
+            else:
+                inc = 0.0 if e["hfpow"] == -99.0 else float(e["hfpow"])
+                fresh_cum += inc
+
+            out_list.append(
+                {
+                    "hno": idx,
+                    "date": int(e["date"]),
+                    "dry_cum": float(dry_cum)
+                    if e["chpdt"] != -99.0 or e.get("hpodw", -99.0) != -99.0 or e.get("pwad", -99.0) != -99.0
+                    else -99.0,
+                    "fresh_cum": float(fresh_cum) if e["chfpw"] != -99.0 or e["hfpow"] != -99.0 else -99.0,
+                }
+            )
         out[tn] = out_list
 
     return out
@@ -304,15 +527,18 @@ def _read_tmt_process_points(tmt_path):
         if tn <= 0 or date <= 0:
             continue
 
+        lnsd = _as_float(r.get("L#SD"), default=-99.0)
         laid = _as_float(r.get("LAID"), default=-99.0)
         lwad = _as_float(r.get("LWAD"), default=-99.0)
         swad = _as_float(r.get("SWAD"), default=-99.0)
-        if laid == -99.0 and lwad == -99.0 and swad == -99.0:
+
+        if lnsd == -99.0 and laid == -99.0 and lwad == -99.0 and swad == -99.0:
             continue
 
         points_by_tn.setdefault(tn, []).append(
             {
                 "date": int(date),
+                "lnsd": float(lnsd),
                 "laid": float(laid),
                 "lwad": float(lwad),
                 "swad": float(swad),
@@ -546,6 +772,7 @@ def create_ins_and_pst(
     group_sigmas=None,
     evaluate_out_path=OUT_FILE,
     df_override=None,
+    model_cmd_extra=None,
 ):
     if df_override is not None:
         df = df_override.copy()
@@ -705,7 +932,10 @@ def create_ins_and_pst(
     pst.pestpp_options["ies_bad_phi_sigma"] = 2.0
     pst.pestpp_options["overdue_giveup_fac"] = 4.0
 
-    pst.model_command = [f"python run_dssat.py --param-csv {os.path.basename(param_csv_path)}"]
+    cmd = f"python run_dssat.py --param-csv {os.path.basename(param_csv_path)}"
+    if model_cmd_extra:
+        cmd = f"{cmd} {str(model_cmd_extra).strip()}"
+    pst.model_command = [cmd]
     pst.model_input_data = pd.DataFrame({"pest_file": [os.path.basename(param_csv_tpl_path)], "model_file": [os.path.basename(param_csv_path)]})
     pst.model_output_data = pd.DataFrame({"pest_file": [os.path.basename(ins_path)], "model_file": [os.path.basename(model_out_path)]})
 
@@ -847,6 +1077,7 @@ def create_ins_and_pst_multi(
     ies_num_reals,
     outputs,
     evaluate_out_path=OUT_FILE,
+    model_cmd_extra=None,
 ):
     try:
         eval_df = _read_evaluate_out(evaluate_out_path)
@@ -910,7 +1141,10 @@ def create_ins_and_pst_multi(
     pst.pestpp_options["ies_bad_phi_sigma"] = 2.0
     pst.pestpp_options["overdue_giveup_fac"] = 4.0
 
-    pst.model_command = [f"python run_dssat.py --param-csv {os.path.basename(param_csv_path)}"]
+    cmd = f"python run_dssat.py --param-csv {os.path.basename(param_csv_path)}"
+    if model_cmd_extra:
+        cmd = f"{cmd} {str(model_cmd_extra).strip()}"
+    pst.model_command = [cmd]
     pst.model_input_data = pd.DataFrame(
         {"pest_file": [os.path.basename(param_csv_tpl_path)], "model_file": [os.path.basename(param_csv_path)]}
     )
@@ -964,6 +1198,16 @@ if __name__ == "__main__":
     parser.add_argument("--ies-num-reals", type=int, default=50)
     parser.add_argument("--batch", default=os.path.join(WORKSPACE, "DSSBatch.v48"))
     parser.add_argument("--init-from", action="append", default=None)
+    parser.add_argument(
+        "--param-review-mode",
+        choices=["auto", "export", "import", "off"],
+        default="auto",
+    )
+    parser.add_argument("--param-review-csv", default=None)
+    parser.add_argument("--pwadm-sigma0", type=float, default=250.0)
+    parser.add_argument("--pwadm-cv", type=float, default=0.08)
+    parser.add_argument("--pwadm-sigma-factor", type=float, default=1.0)
+    parser.add_argument("--harvest-var", default="CHPDT")
     args = parser.parse_args()
 
     mode = (args.mode or "").strip().lower()
@@ -974,6 +1218,9 @@ if __name__ == "__main__":
 
     df_override = None
     stage2_outputs = None
+
+    harvest_var = (args.harvest_var or "CHPDT").strip().upper()
+    model_cmd_extra = f"--batch {os.path.basename(args.batch)} --harvest-var {harvest_var}"
 
     if mode == "eggplant_pheno":
         prefix = args.prefix or "eggplant_pheno"
@@ -1032,6 +1279,7 @@ if __name__ == "__main__":
             "SFDUR",
             "SDPDV",
             "PODUR",
+            "THRSH",
         }
         extra_allowed = {
             "XMAGE",
@@ -1039,6 +1287,8 @@ if __name__ == "__main__":
             "TRIFL",
             "RWDTH",
             "RHGHT",
+            "XFPHT",
+            "XFINT",
             "PL-EM",
             "EM-V1",
             "V1-JU",
@@ -1075,13 +1325,14 @@ if __name__ == "__main__":
                 tn = int(e.get("tn", -99))
 
                 for ev in events_by_tn.get(tn, []):
+                    obs_cum = ev.get("dry_cum", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_cum", -99.0)
                     harvest_rows.append(
                         {
                             "@RUN": run_no,
                             "TN": tn,
                             "HNO": int(ev["hno"]),
                             "DATE": int(ev["date"]),
-                            "PWADM": float(ev["obs_cum"]),
+                            "PWADM": float(obs_cum),
                             "PWADS": -99.0,
                         }
                     )
@@ -1108,9 +1359,11 @@ if __name__ == "__main__":
             if not df_harvest.empty:
                 for hno, g in df_harvest.groupby("HNO"):
                     med = float(g["PWADM"].median())
-                    sigma0 = 250.0
-                    cv = 0.08
+                    sigma0 = float(args.pwadm_sigma0)
+                    cv = float(args.pwadm_cv)
+                    sigma_factor = float(args.pwadm_sigma_factor)
                     sigma = (sigma0**2 + (cv * abs(med)) ** 2) ** 0.5
+                    sigma = sigma * sigma_factor
                     harvest_sigmas[f"PWADM_H{int(hno)}"] = float(sigma)
 
             process_sigmas = {"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
@@ -1190,12 +1443,13 @@ if __name__ == "__main__":
                 run_no = int(e["run"])
                 tn = int(e.get("tn", -99))
                 for ev in events_by_tn.get(tn, []):
+                    obs_cum = ev.get("dry_cum", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_cum", -99.0)
                     rows.append({
                         "@RUN": run_no,
                         "TN": tn,
                         "HNO": int(ev["hno"]),
                         "DATE": int(ev["date"]),
-                        "PWADM": float(ev["obs_cum"]),
+                        "PWADM": float(obs_cum),
                         "PWADS": -99.0,
                     })
 
@@ -1206,11 +1460,175 @@ if __name__ == "__main__":
                 group_sigmas = {"PWADM": 1.0}
                 for hno, g in df_override.groupby("HNO"):
                     med = float(g["PWADM"].median())
-                    sigma0 = 250.0
-                    cv = 0.08
+                    sigma0 = float(args.pwadm_sigma0)
+                    cv = float(args.pwadm_cv)
+                    sigma_factor = float(args.pwadm_sigma_factor)
                     sigma = (sigma0 ** 2 + (cv * abs(med)) ** 2) ** 0.5
+                    sigma = sigma * sigma_factor
                     group_sigmas[f"PWADM_H{int(hno)}"] = float(sigma)
         extra_allowed = {"XMAGE", "FL-VS", "TRIFL"}
+    elif mode == "eggplant_v13":
+        prefix = args.prefix or "eggplant_v13"
+        allowed = {
+            "CSDL",
+            "PPSEN",
+            "EM-FL",
+            "FL-SH",
+            "FL-SD",
+            "SD-PM",
+            "FL-LF",
+            "SLAVR",
+            "SIZLF",
+            "LFMAX",
+            "XFRT",
+            "WTPSD",
+            "SFDUR",
+            "SDPDV",
+            "PODUR",
+            "THRSH",
+        }
+
+        entries = _parse_batch_entries(args.batch)
+
+        if not entries:
+            df_harvest = pd.DataFrame(columns=["@RUN", "TN", "HNO", "DATE", "PWADM", "PWADS"])
+            harvest_sigmas = {"PWADM": 1.0}
+            df_process = pd.DataFrame(
+                columns=[
+                    "@RUN",
+                    "TN",
+                    "DATE",
+                    "L#SDM",
+                    "LAIDM",
+                    "LWADM",
+                    "SWADM",
+                    "L#SDS",
+                    "LAIDS",
+                    "LWADS",
+                    "SWADS",
+                ]
+            )
+            process_sigmas = {"L#SDM": 0.6, "LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
+        else:
+            filex = entries[0]["filex"]
+            filex_path = filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex)
+            excode = _infer_excode_from_filex(filex_path)
+            tmt_path = os.path.join(os.path.dirname(os.path.abspath(filex_path)), f"{excode}.TMT") if excode else None
+
+            events_by_tn = _read_tmt_harvest_events(tmt_path)
+            points_by_tn = _read_tmt_process_points(tmt_path)
+
+            harvest_rows = []
+            process_rows = []
+
+            for e in entries:
+                run_no = int(e["run"])
+                tn = int(e.get("tn", -99))
+
+                for ev in events_by_tn.get(tn, []):
+                    obs_cum = ev.get("dry_cum", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_cum", -99.0)
+                    harvest_rows.append(
+                        {
+                            "@RUN": run_no,
+                            "TN": tn,
+                            "HNO": int(ev["hno"]),
+                            "DATE": int(ev["date"]),
+                            "PWADM": float(obs_cum),
+                            "PWADS": -99.0,
+                        }
+                    )
+
+                for p in points_by_tn.get(tn, []):
+                    process_rows.append(
+                        {
+                            "@RUN": run_no,
+                            "TN": tn,
+                            "DATE": int(p["date"]),
+                            "L#SDM": float(p.get("lnsd", -99.0)),
+                            "LAIDM": float(p["laid"]),
+                            "LWADM": float(p["lwad"]),
+                            "SWADM": float(p["swad"]),
+                            "L#SDS": -99.0,
+                            "LAIDS": -99.0,
+                            "LWADS": -99.0,
+                            "SWADS": -99.0,
+                        }
+                    )
+
+            df_harvest = pd.DataFrame(harvest_rows)
+            if df_harvest.empty:
+                harvest_sigmas = {"PWADM": 1.0}
+            else:
+                harvest_sigmas = {"PWADM": 1.0}
+                for hno, g in df_harvest.groupby("HNO"):
+                    med = float(g["PWADM"].median())
+                    sigma0 = float(args.pwadm_sigma0)
+                    cv = float(args.pwadm_cv)
+                    sigma_factor = float(args.pwadm_sigma_factor)
+                    sigma = (sigma0**2 + (cv * abs(med)) ** 2) ** 0.5
+                    sigma = sigma * sigma_factor
+                    harvest_sigmas[f"PWADM_H{int(hno)}"] = float(sigma)
+
+            df_process = pd.DataFrame(process_rows)
+            process_sigmas = {"L#SDM": 0.6, "LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
+            if not df_process.empty:
+                for var, sigma0, cv in [
+                    ("L#SDM", 0.5, 0.15),
+                    ("LAIDM", 1.6, 0.50),
+                    ("LWADM", 80.0, 0.25),
+                    ("SWADM", 100.0, 0.25),
+                ]:
+                    g = df_process[df_process[var] != -99.0]
+                    if g.empty:
+                        continue
+                    for date, gg in g.groupby("DATE"):
+                        med = float(gg[var].median())
+                        sigma = (sigma0**2 + (cv * abs(med)) ** 2) ** 0.5
+                        process_sigmas[f"{var}_D{int(date)}"] = float(sigma)
+
+        stage2_outputs = [
+            {
+                "model_out_path": PEST_HARVEST_FILE,
+                "obs_bases": {"PWAD"},
+                "critical_obs": set(),
+                "group_sigmas": harvest_sigmas,
+                "df": df_harvest,
+            },
+            {
+                "model_out_path": PEST_TMTGROW_FILE,
+                "obs_bases": {"L#SD", "LAID", "LWAD", "SWAD"},
+                "critical_obs": set(),
+                "group_sigmas": process_sigmas,
+                "df": df_process,
+            },
+        ]
+        extra_allowed = {
+            "PL-EM",
+            "EM-V1",
+            "V1-JU",
+            "JU-R0",
+            "FL-VS",
+            "TRIFL",
+            "RWDTH",
+            "RHGHT",
+            "OPTBI",
+            "SLOBI",
+            "XMAGE",
+            "XFPHT",
+            "XFINT",
+            "TB1",
+            "TO11",
+            "TO21",
+            "TM1",
+            "TB2",
+            "TO12",
+            "TO22",
+            "TM2",
+            "TB3",
+            "TO13",
+            "TO23",
+            "TM3",
+        }
     elif mode == "eggplant_process":
         prefix = args.prefix or "eggplant_process"
         allowed = {"SLAVR", "SIZLF", "LFMAX", "XFRT", "WTPSD", "SFDUR", "SDPDV", "PODUR"}
@@ -1274,7 +1692,20 @@ if __name__ == "__main__":
         group_sigmas = {
             "ADAPM": 15.0,
         }
-        extra_allowed = {"TB", "TO1", "TO2", "TM"}
+        extra_allowed = {
+            "TB1",
+            "TO11",
+            "TO21",
+            "TM1",
+            "TB2",
+            "TO12",
+            "TO22",
+            "TM2",
+            "TB3",
+            "TO13",
+            "TO23",
+            "TM3",
+        }
     else:
         prefix = args.prefix or "tomato_cal"
         allowed = None
@@ -1316,6 +1747,26 @@ if __name__ == "__main__":
             if k and k in override:
                 p["init"] = float(override[k])
 
+    param_review_csv = args.param_review_csv
+    if not param_review_csv:
+        param_review_csv = os.path.join(WORKSPACE, f"{prefix}_param_review.csv")
+
+    prm_mode = (args.param_review_mode or "auto").strip().lower()
+    if prm_mode != "off":
+        exists = os.path.exists(param_review_csv)
+        if prm_mode in {"auto", "export"} and not exists:
+            write_param_review_csv(params, param_review_csv, cultivar=cultivar, ecotype=ecotype, mode=mode)
+            print(f"Parameter review CSV written to {param_review_csv}")
+            if prm_mode != "export":
+                print("Edit this file and re-run with --param-review-mode import")
+            raise SystemExit(0)
+        if prm_mode == "export":
+            write_param_review_csv(params, param_review_csv, cultivar=cultivar, ecotype=ecotype, mode=mode)
+            print(f"Parameter review CSV written to {param_review_csv}")
+            raise SystemExit(0)
+        if exists and prm_mode in {"auto", "import"}:
+            params = apply_param_review_csv(params, param_review_csv)
+
     if stage2_outputs is not None:
         create_ins_and_pst_multi(
             params,
@@ -1324,6 +1775,7 @@ if __name__ == "__main__":
             ies_num_reals=args.ies_num_reals,
             outputs=stage2_outputs,
             evaluate_out_path=evaluate_out_path,
+            model_cmd_extra=model_cmd_extra,
         )
     else:
         create_ins_and_pst(
@@ -1337,4 +1789,5 @@ if __name__ == "__main__":
             group_sigmas=group_sigmas,
             evaluate_out_path=evaluate_out_path,
             df_override=df_override,
+            model_cmd_extra=model_cmd_extra,
         )

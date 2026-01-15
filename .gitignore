@@ -55,6 +55,8 @@ Workspace/DETAIL.OUT
 Workspace/WARNING.OUT
 Workspace/RunList.OUT
 
+!Workspace/DSSBatch.v48
+
 # Keep Source/Input Files
 !Workspace/*.py
 !Workspace/*.tpl
@@ -101,3 +103,13 @@ Desktop.ini
 # IDE
 .vscode/
 .idea/
+
+Workspace/eggplant_stage2_v*
+Workspace/eggplant_v13.*
+Workspace/eggplant_v13pdc.csv
+Workspace/eggplant_v13pcs.csv
+!Workspace/eggplant_v13.pst
+!Workspace/eggplant_v13_params.csv
+!Workspace/eggplant_v13_params.csv.tpl
+!Workspace/eggplant_v13_PestHarvest.OUT.ins
+!Workspace/eggplant_v13_PestTmtGrow.OUT.ins
