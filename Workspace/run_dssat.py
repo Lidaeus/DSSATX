@@ -9,6 +9,7 @@ import argparse
 import re
 import datetime
 import math
+import tempfile
 
 # Configuration
 DSSAT_EXE = "DSCSM048.EXE"
@@ -17,6 +18,8 @@ CUL_BASE_FILE = "TMGRO048.CUL.base"
 CUL_FILE = "TMGRO048.CUL"
 ECO_FILE = "TMGRO048.ECO"
 SPE_FILE = "TMGRO048.SPE"
+SOIL_FILE = "SOIL.SOL"
+SOIL_BASE_FILE = "SOIL.SOL.base"
 PARAM_CSV = "pest_params.csv"
 
 OUTPUT_FILES = [
@@ -575,6 +578,82 @@ def _copy_with_retries(src, dst, n_tries=5, sleep_s=0.2):
     return last_err
 
 
+def _acquire_file_lock(lock_path, timeout_s=120.0, poll_s=0.10, stale_s=900.0):
+    lock_path = os.path.normpath(str(lock_path))
+    parent = os.path.dirname(os.path.abspath(lock_path))
+    if parent and (not os.path.exists(parent)):
+        os.makedirs(parent, exist_ok=True)
+
+    start = time.time()
+    last_err = None
+    while True:
+        try:
+            fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_RDWR)
+            with os.fdopen(fd, "w", encoding="utf-8", errors="ignore", newline="") as f:
+                f.write(f"pid={os.getpid()}\n")
+                f.write(f"time={time.time():0.6f}\n")
+            return None
+        except FileExistsError as e:
+            last_err = e
+            if stale_s:
+                try:
+                    age_s = time.time() - os.path.getmtime(lock_path)
+                    if age_s > float(stale_s):
+                        try:
+                            os.remove(lock_path)
+                            continue
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+
+            if (time.time() - start) >= float(timeout_s):
+                return TimeoutError(f"Timeout acquiring lock: {lock_path} ({last_err})")
+            time.sleep(float(poll_s))
+        except Exception as e:
+            return e
+
+
+def _release_file_lock(lock_path):
+    try:
+        os.remove(os.path.normpath(str(lock_path)))
+    except FileNotFoundError:
+        return
+    except Exception:
+        return
+
+
+def _atomic_write_lines(path, lines, n_tries=8, sleep_s=0.15):
+    path = os.path.normpath(path)
+    parent = os.path.dirname(os.path.abspath(path))
+    if parent and (not os.path.exists(parent)):
+        os.makedirs(parent, exist_ok=True)
+    last_err = None
+    for _ in range(int(n_tries)):
+        tmp_path = None
+        try:
+            fd, tmp_path = tempfile.mkstemp(prefix=os.path.basename(path) + ".tmp.", dir=parent, text=True)
+            with os.fdopen(fd, "w", encoding="utf-8", errors="ignore", newline="") as f:
+                f.writelines(lines)
+                try:
+                    f.flush()
+                    os.fsync(f.fileno())
+                except Exception:
+                    pass
+            os.replace(tmp_path, path)
+            return None
+        except Exception as e:
+            last_err = e
+            try:
+                if tmp_path and os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+            except Exception:
+                pass
+            if sleep_s:
+                time.sleep(float(sleep_s))
+    return last_err
+
+
 def _sync_outputs_from_filex_dir(batch_file, base_dir, output_files, dest_dir=None):
     filex_path = _resolve_filex_from_batch(batch_file, base_dir)
     if not filex_path:
@@ -1002,6 +1081,46 @@ def _infer_cultivar_from_filex(filex_path):
 
     return None
 
+
+def _infer_soil_id_from_filex(filex_path):
+    if not filex_path or not os.path.exists(filex_path):
+        return None
+    header = None
+    soil_idx = None
+    in_fields = False
+    with open(filex_path, "r", encoding="utf-8", errors="ignore") as f:
+        for line in f:
+            s = line.rstrip("\n")
+            u = s.strip().upper()
+            if not u:
+                continue
+            if u.startswith("*FIELDS"):
+                in_fields = True
+                header = None
+                soil_idx = None
+                continue
+            if in_fields and u.startswith("*") and (not u.startswith("*FIELDS")):
+                break
+            if not in_fields:
+                continue
+            if s.lstrip().startswith("@"):
+                header = s.split()
+                try:
+                    soil_idx = header.index("ID_SOIL")
+                except ValueError:
+                    soil_idx = None
+                continue
+            if s.lstrip().startswith("!"):
+                continue
+            if header is None or soil_idx is None:
+                continue
+            parts = s.split()
+            if len(parts) <= soil_idx:
+                continue
+            sid = str(parts[soil_idx]).strip()
+            return sid or None
+    return None
+
 def cleanup(target_dir=".", keep_dssat_outputs=False):
     if not keep_dssat_outputs:
         for file in (OUTPUT_FILES + ["Evaluate.OUT"]):
@@ -1009,8 +1128,8 @@ def cleanup(target_dir=".", keep_dssat_outputs=False):
             if os.path.exists(p):
                 try:
                     os.remove(p)
-                except Exception as e:
-                    print(f"Warning: Could not remove {p}: {e}")
+                except Exception:
+                    pass
 
     for file in ["LUN.LST", "LUN.OUT", "LUN.REP", "DSSAT48.LST"]:
         p = os.path.join(target_dir, file)
@@ -1421,7 +1540,14 @@ def update_cul_file(param_csv_path=PARAM_CSV, target_cultivar=None):
     if not os.path.exists(param_csv_path):
         print(f"No {param_csv_path} found. Using base CUL file.")
         if cul_base_path and os.path.exists(cul_base_path):
-            shutil.copy(cul_base_path, CUL_FILE)
+            lock_path = os.path.abspath(CUL_FILE) + ".lock"
+            lock_err = _acquire_file_lock(lock_path, timeout_s=180.0, poll_s=0.10, stale_s=900.0)
+            if lock_err is not None:
+                raise lock_err
+            try:
+                _copy_with_retries(cul_base_path, CUL_FILE, n_tries=30, sleep_s=0.20)
+            finally:
+                _release_file_lock(lock_path)
         return
 
     try:
@@ -1480,9 +1606,17 @@ def update_cul_file(param_csv_path=PARAM_CSV, target_cultivar=None):
         new_chars[abs_s0:abs_s1] = list(formatted)
 
     lines[cultivar_idx] = "".join(new_chars) + "\n"
-    
-    with open(CUL_FILE, 'w') as f:
-        f.writelines(lines)
+
+    lock_path = os.path.abspath(CUL_FILE) + ".lock"
+    lock_err = _acquire_file_lock(lock_path, timeout_s=180.0, poll_s=0.10, stale_s=900.0)
+    if lock_err is not None:
+        raise lock_err
+    try:
+        last_err = _atomic_write_lines(CUL_FILE, lines, n_tries=60, sleep_s=0.20)
+        if last_err is not None:
+            raise last_err
+    finally:
+        _release_file_lock(lock_path)
 
 
 def update_eco_file(param_csv_path=PARAM_CSV, target_ecotype=None):
@@ -1605,8 +1739,16 @@ def update_eco_file(param_csv_path=PARAM_CSV, target_ecotype=None):
             new_chars[abs_s0:abs_s1] = list(formatted)
 
     lines[eco_idx] = "".join(new_chars) + "\n"
-    with open(ECO_FILE, "w") as f:
-        f.writelines(lines)
+    lock_path = os.path.abspath(ECO_FILE) + ".lock"
+    lock_err = _acquire_file_lock(lock_path, timeout_s=180.0, poll_s=0.10, stale_s=900.0)
+    if lock_err is not None:
+        raise lock_err
+    try:
+        last_err = _atomic_write_lines(ECO_FILE, lines, n_tries=60, sleep_s=0.20)
+        if last_err is not None:
+            raise last_err
+    finally:
+        _release_file_lock(lock_path)
 
 
 def update_spe_file(param_csv_path=PARAM_CSV):
@@ -1641,13 +1783,65 @@ def update_spe_file(param_csv_path=PARAM_CSV):
     for stage in (1, 2, 3):
         stage_names.extend([f"TB{stage}", f"TO1{stage}", f"TO2{stage}", f"TM{stage}"])
 
-    keys = [k for k in (base_names + stage_names) if k in param_dict]
+    direct_keys = [
+        "PARMAX",
+        "PHTMAX",
+        "KCAN",
+        "KC_SLOPE",
+        "WTFSD",
+        "PORPT",
+        "FRSTMF",
+        "FRLFF",
+        "ATOP",
+        "FRCNOD",
+        "FINREF",
+        "SLAREF",
+        "SIZREF",
+        "VSSINK",
+        "EVMODC",
+    ]
+
+    keys = [k for k in (base_names + stage_names + direct_keys) if k in param_dict]
     if not keys:
         return
 
     number_re = re.compile(r"[-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[Ee][-+]?\d+)?")
     with open(spe_base_path, "r") as f:
         lines = f.readlines()
+
+    def _update_named_line(contains_text, param_order):
+        if not contains_text or not param_order:
+            return
+        if not any((str(p).strip().upper() in param_dict) for p in param_order):
+            return
+        idx = -1
+        for j, s in enumerate(lines):
+            if contains_text in s:
+                idx = j
+                break
+        if idx == -1:
+            return
+        s = lines[idx]
+        matches = list(number_re.finditer(s))
+        if len(matches) < len(param_order):
+            return
+        new_chars = list(s.rstrip("\n"))
+        for name, m in zip(param_order, matches[: len(param_order)]):
+            key = str(name).strip().upper()
+            if key not in param_dict:
+                continue
+            v = float(param_dict[key])
+            orig = m.group(0)
+            width = m.end() - m.start()
+            formatted = _format_to_width(v, width, orig_token=orig)
+            if len(formatted) != width:
+                formatted = formatted[:width].rjust(width)
+            new_chars[m.start() : m.end()] = list(formatted)
+        lines[idx] = "".join(new_chars) + "\n"
+
+    _update_named_line("PARMAX,PHTMAX", ["PARMAX", "PHTMAX", "KCAN", "KC_SLOPE"])
+    _update_named_line("WTFSD,PORPT", ["WTFSD", "PORPT", "FRSTMF", "FRLFF", "ATOP", "FRCNOD"])
+    _update_named_line("FINREF,SLAREF", ["FINREF", "SLAREF", "SIZREF", "VSSINK", "EVMODC"])
 
     pheno_idx = -1
     for i, line in enumerate(lines):
@@ -1709,8 +1903,227 @@ def update_spe_file(param_csv_path=PARAM_CSV):
             new_chars[m.start() : m.end()] = list(formatted)
         lines[i] = "".join(new_chars) + "\n"
 
-    with open(SPE_FILE, "w") as f:
-        f.writelines(lines)
+    lock_path = os.path.abspath(SPE_FILE) + ".lock"
+    lock_err = _acquire_file_lock(lock_path, timeout_s=180.0, poll_s=0.10, stale_s=900.0)
+    if lock_err is not None:
+        raise lock_err
+    try:
+        last_err = _atomic_write_lines(SPE_FILE, lines, n_tries=60, sleep_s=0.20)
+        if last_err is not None:
+            raise last_err
+    finally:
+        _release_file_lock(lock_path)
+
+
+def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=None):
+    if not os.path.exists(param_csv_path):
+        return
+
+    try:
+        param_dict = _read_param_dict(param_csv_path)
+    except Exception as e:
+        print(f"Error reading parameter CSV: {e}")
+        return
+    if not param_dict:
+        return
+
+    soil_keys = [k for k in param_dict.keys() if str(k).strip().upper().startswith("SOIL_")]
+    if not soil_keys:
+        return
+
+    cwd_script = os.path.dirname(os.path.abspath(__file__))
+    filex_path = _resolve_filex_from_batch(batch_file, os.getcwd()) or _resolve_filex_from_batch(batch_file, cwd_script)
+    if soil_id is None:
+        soil_id = _infer_soil_id_from_filex(filex_path)
+    soil_id = str(soil_id).strip() if soil_id else None
+    if not soil_id:
+        return
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    soil_base_path = None
+    cand = os.path.join(script_dir, SOIL_BASE_FILE)
+    if os.path.exists(cand):
+        soil_base_path = cand
+    else:
+        cand2 = os.path.join(script_dir, SOIL_FILE)
+        if os.path.exists(cand2):
+            soil_base_path = cand2
+        elif os.path.exists(SOIL_FILE):
+            soil_base_path = SOIL_FILE
+        else:
+            cand3 = os.path.normpath(os.path.join(script_dir, "..", "SOIL.SOL"))
+            if os.path.exists(cand3):
+                soil_base_path = cand3
+
+    if not soil_base_path or (not os.path.exists(soil_base_path)):
+        return
+
+    with open(soil_base_path, "r", encoding="utf-8", errors="ignore") as f:
+        lines = f.readlines()
+
+    def _as_layer_key(base, layer_idx_1):
+        return f"SOIL_{base}_{int(layer_idx_1):02d}"
+
+    def _clamp(x, lo, hi):
+        try:
+            v = float(x)
+        except Exception:
+            return None
+        if v < float(lo):
+            v = float(lo)
+        if v > float(hi):
+            v = float(hi)
+        return v
+
+    def _safe_water_triplet(slll, sdul, ssat):
+        a = _clamp(slll, 0.01, 0.80) if slll is not None else None
+        b = _clamp(sdul, 0.01, 0.80) if sdul is not None else None
+        c = _clamp(ssat, 0.01, 0.80) if ssat is not None else None
+        if a is None or b is None or c is None:
+            return a, b, c
+        eps = 1e-3
+        if not (a < b):
+            b = min(max(a + 0.01, a + eps), 0.80)
+        if not (b < c):
+            c = min(max(b + 0.01, b + eps), 0.80)
+        if c - a < 2 * eps:
+            c = min(0.80, a + 0.02)
+            b = min(max(a + 0.01, a + eps), c - eps)
+        return a, b, c
+
+    sec_start = None
+    for i, s in enumerate(lines):
+        if s.startswith("*"):
+            sid = s[1:].strip().split()[0] if s[1:].strip() else ""
+            if sid.upper() == soil_id.upper():
+                sec_start = i
+                break
+    if sec_start is None:
+        return
+
+    sec_end = len(lines)
+    for j in range(sec_start + 1, len(lines)):
+        if lines[j].startswith("*"):
+            sec_end = j
+            break
+
+    scom_header_idx = None
+    layer_header_idx = None
+    for j in range(sec_start, sec_end):
+        u = lines[j].strip().upper()
+        if u.startswith("@") and "SCOM" in u and "SALB" in u:
+            scom_header_idx = j
+        if u.startswith("@") and "SLLL" in u and "SDUL" in u and "SSAT" in u:
+            layer_header_idx = j
+
+    if scom_header_idx is not None:
+        header_line = lines[scom_header_idx].rstrip("\n")
+        want = ["SALB", "SLDR", "SLRO"]
+        line_len = max(len(header_line), len(lines[scom_header_idx + 1].rstrip("\n")) if (scom_header_idx + 1) < sec_end else len(header_line))
+        spans = _field_spans_from_header(header_line, want, line_len)
+        if spans is not None and (scom_header_idx + 1) < sec_end:
+            data_idx = None
+            for j in range(scom_header_idx + 1, sec_end):
+                if not lines[j].strip():
+                    continue
+                if lines[j].lstrip().startswith("@") or lines[j].startswith("*"):
+                    break
+                data_idx = j
+                break
+            if data_idx is not None:
+                s = lines[data_idx].rstrip("\n").ljust(line_len)
+                new_chars = list(s)
+                for name, (abs_s0, abs_s1) in zip(want, spans):
+                    key = f"SOIL_{name}"
+                    if key not in param_dict:
+                        continue
+                    v = float(param_dict[key])
+                    if name == "SALB":
+                        v2 = _clamp(v, 0.05, 0.35)
+                    elif name == "SLDR":
+                        v2 = _clamp(v, 0.01, 5.00)
+                    elif name == "SLRO":
+                        v2 = _clamp(v, 1.0, 99.0)
+                    else:
+                        v2 = v
+                    if v2 is None:
+                        continue
+                    orig = s[abs_s0:abs_s1]
+                    width = abs_s1 - abs_s0
+                    formatted = _format_to_width_preserve_space(v2, width, orig_token=orig)
+                    new_chars[abs_s0:abs_s1] = list(formatted)
+                lines[data_idx] = "".join(new_chars).rstrip() + "\n"
+
+    if layer_header_idx is not None:
+        header_line = lines[layer_header_idx].rstrip("\n")
+        want = ["SLLL", "SDUL", "SSAT", "SBDM", "SLOC"]
+        line_len = len(header_line)
+        for j in range(layer_header_idx + 1, sec_end):
+            if not lines[j].strip():
+                continue
+            if lines[j].lstrip().startswith("@") or lines[j].startswith("*"):
+                break
+            line_len = max(line_len, len(lines[j].rstrip("\n")))
+        spans = _field_spans_from_header(header_line, want, line_len)
+        if spans is not None:
+            layer_lines = []
+            for j in range(layer_header_idx + 1, sec_end):
+                if not lines[j].strip():
+                    continue
+                if lines[j].lstrip().startswith("@") or lines[j].startswith("*"):
+                    break
+                layer_lines.append(j)
+
+            for li, idx in enumerate(layer_lines, start=1):
+                s = lines[idx].rstrip("\n").ljust(line_len)
+                new_chars = list(s)
+
+                slll_key = _as_layer_key("SLLL", li)
+                sdul_key = _as_layer_key("SDUL", li)
+                ssat_key = _as_layer_key("SSAT", li)
+                slll_in = float(param_dict[slll_key]) if slll_key in param_dict else None
+                sdul_in = float(param_dict[sdul_key]) if sdul_key in param_dict else None
+                ssat_in = float(param_dict[ssat_key]) if ssat_key in param_dict else None
+                slll_v, sdul_v, ssat_v = _safe_water_triplet(slll_in, sdul_in, ssat_in)
+                if slll_v is not None:
+                    param_dict[slll_key] = slll_v
+                if sdul_v is not None:
+                    param_dict[sdul_key] = sdul_v
+                if ssat_v is not None:
+                    param_dict[ssat_key] = ssat_v
+
+                for name, (abs_s0, abs_s1) in zip(want, spans):
+                    key = _as_layer_key(name, li)
+                    if key not in param_dict:
+                        continue
+                    v = float(param_dict[key])
+                    if name in {"SLLL", "SDUL", "SSAT"}:
+                        v2 = _clamp(v, 0.01, 0.80)
+                    elif name == "SBDM":
+                        v2 = _clamp(v, 0.5, 2.2)
+                    elif name == "SLOC":
+                        v2 = _clamp(v, 0.0, 10.0)
+                    else:
+                        v2 = v
+                    if v2 is None:
+                        continue
+                    orig = s[abs_s0:abs_s1]
+                    width = abs_s1 - abs_s0
+                    formatted = _format_to_width_preserve_space(v2, width, orig_token=orig)
+                    new_chars[abs_s0:abs_s1] = list(formatted)
+
+                lines[idx] = "".join(new_chars).rstrip() + "\n"
+
+    lock_path = os.path.abspath(SOIL_FILE) + ".lock"
+    lock_err = _acquire_file_lock(lock_path, timeout_s=180.0, poll_s=0.10, stale_s=900.0)
+    if lock_err is not None:
+        raise lock_err
+    try:
+        last_err = _atomic_write_lines(SOIL_FILE, lines, n_tries=60, sleep_s=0.20)
+        if last_err is not None:
+            raise last_err
+    finally:
+        _release_file_lock(lock_path)
 
 def run_model():
     """Runs the DSSAT model."""
@@ -1719,10 +2132,9 @@ def run_model():
     
     try:
         cwd_script = os.path.dirname(os.path.abspath(__file__))
-        filex_path = _resolve_filex_from_batch(BATCH_FILE, cwd_script)
-        run_dir = cwd_script
+        run_dir = os.getcwd()
+        filex_path = _resolve_filex_from_batch(BATCH_FILE, run_dir) or _resolve_filex_from_batch(BATCH_FILE, cwd_script)
 
-        cleanup(cwd_script, keep_dssat_outputs=False)
         cleanup(run_dir, keep_dssat_outputs=False)
 
         exe_path = shutil.which(DSSAT_EXE)
@@ -1749,9 +2161,7 @@ def run_model():
 
         localized_filex = _localize_experiment_files(filex_path, run_dir)
 
-        _sync_genotype_files_to_run_dir(cwd_script, run_dir)
-
-        batch_src = _resolve_batch_path(BATCH_FILE, base_dir=cwd_script)
+        batch_src = _resolve_batch_path(BATCH_FILE, base_dir=run_dir) or _resolve_batch_path(BATCH_FILE, base_dir=cwd_script)
 
         batch_dst_name = os.path.basename(BATCH_FILE) if BATCH_FILE else "DSSBatch.v48"
         if not batch_dst_name:
@@ -1797,7 +2207,7 @@ def run_model():
             orig_cwd = os.getcwd()
             try:
                 os.chdir(run_dir)
-                _sync_outputs_from_filex_dir(BATCH_FILE, cwd_script, OUTPUT_FILES)
+                _sync_outputs_from_filex_dir(BATCH_FILE, run_dir, OUTPUT_FILES + ["Evaluate.OUT"], dest_dir=run_dir)
 
                 if not os.path.exists("Evaluate.OUT") or os.path.getsize("Evaluate.OUT") == 0:
                     print("Evaluate.OUT missing or empty after sync.")
@@ -1837,7 +2247,6 @@ def run_model():
                     pass
 
             cleanup(run_dir, keep_dssat_outputs=True)
-            cleanup(cwd_script, keep_dssat_outputs=True)
 
     except Exception as e:
         print(f"Exception running model: {e}")
@@ -1869,4 +2278,5 @@ if __name__ == "__main__":
     ecotype = _infer_ecotype_from_cul(CUL_FILE, cultivar) or "TM0001"
     update_eco_file(param_csv_path=args.param_csv, target_ecotype=ecotype)
     update_spe_file(param_csv_path=args.param_csv)
+    update_soil_file(param_csv_path=args.param_csv, batch_file=BATCH_FILE)
     run_model()

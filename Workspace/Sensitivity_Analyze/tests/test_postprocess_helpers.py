@@ -4,6 +4,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = ROOT / "SA_Project_Code" / "sa_postprocess_sobol.py"
 spec = importlib.util.spec_from_file_location("sa_postprocess_sobol", MODULE_PATH)
+assert spec is not None and spec.loader is not None
 sobol = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sobol)
 

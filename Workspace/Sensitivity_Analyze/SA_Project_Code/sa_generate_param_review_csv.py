@@ -298,7 +298,7 @@ def _infer_soil_id_from_filex(filex_path):
     return None
 
 
-def _read_soil_params(soil_path, soil_id):
+def _read_soil_params(soil_path, soil_id, max_depth_cm=100):
     if not soil_path or not os.path.exists(soil_path) or not soil_id:
         return {}
 
@@ -360,21 +360,37 @@ def _read_soil_params(soil_path, soil_id):
             header = lines[j].split()
             if header and str(header[0]).strip().startswith("@"):
                 header = header[1:]
-            data_idx = _next_data_line(j)
-            if data_idx is None:
-                continue
-            parts = lines[data_idx].split()
-            for name in ["SLLL", "SDUL", "SSAT", "SBDM", "SLOC"]:
-                try:
-                    k = header.index(name)
-                except ValueError:
+            try:
+                slb_idx = header.index("SLB")
+            except ValueError:
+                slb_idx = None
+            layer_idx = 0
+            for data_idx in range(j + 1, sec_end):
+                line = lines[data_idx]
+                if not line.strip():
                     continue
-                if len(parts) <= k:
+                if line.lstrip().startswith("@") or line.startswith("*") or line.lstrip().startswith("!"):
+                    break
+                parts = line.split()
+                if slb_idx is None or len(parts) <= slb_idx:
                     continue
-                v = _parse_float(parts[k])
-                if v is None:
+                depth = _parse_float(parts[slb_idx])
+                if depth is None:
                     continue
-                out[f"SOIL_{name}_01"] = v
+                if float(depth) > float(max_depth_cm):
+                    break
+                layer_idx += 1
+                for name in ["SLLL", "SDUL", "SSAT", "SBDM", "SLOC"]:
+                    try:
+                        k = header.index(name)
+                    except ValueError:
+                        continue
+                    if len(parts) <= k:
+                        continue
+                    v = _parse_float(parts[k])
+                    if v is None:
+                        continue
+                    out[f"SOIL_{name}_{layer_idx:02d}"] = v
 
     return out
 
@@ -561,16 +577,7 @@ def generate_review_csv(paths: Paths, cultivar: str, ecotype: str):
 
     soil_id = _infer_soil_id_from_filex(paths.filex_path)
     soil_vals = _read_soil_params(paths.soil_path, soil_id)
-    soil_keep = {
-        "SOIL_SALB",
-        "SOIL_SLDR",
-        "SOIL_SLRO",
-        "SOIL_SLLL_01",
-        "SOIL_SDUL_01",
-        "SOIL_SSAT_01",
-        "SOIL_SBDM_01",
-        "SOIL_SLOC_01",
-    }
+    soil_keep = {k for k in soil_vals.keys() if str(k).strip().upper().startswith("SOIL_")}
     for k in sorted(soil_keep):
         if k not in soil_vals:
             continue

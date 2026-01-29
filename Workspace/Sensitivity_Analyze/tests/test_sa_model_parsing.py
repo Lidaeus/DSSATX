@@ -4,6 +4,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = ROOT / "SA_Project_Code" / "sa_model.py"
 spec = importlib.util.spec_from_file_location("sa_model", MODULE_PATH)
+assert spec is not None and spec.loader is not None
 sa_model = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sa_model)
 

@@ -22,7 +22,7 @@
 !         (cm2/g)
 ! SIZLF   Maximum size of full leaf (three leaflets) (cm2)
 ! XFRT    Maximum fraction of daily growth that is partitioned to seed + shell
-!         (WTPSD) Maximum weight per seed (g)
+! WTPSD   Maximum weight per seed (g)
 ! SFDUR   Seed filling duration for pod cohort at standard growth conditions
 !         (photothermal days)
 ! SDPDV   Average seed per pod under standard growing conditions (#/pod)
@@ -37,14 +37,10 @@
 !             P/G/N:Phenology/Growth/Not used for calbration
 !
 @VAR#  VRNAME.......... EXPNO   ECO#  CSDL PPSEN EM-FL FL-SH FL-SD SD-PM FL-LF LFMAX SLAVR SIZLF  XFRT WTPSD SFDUR SDPDV PODUR THRSH SDPRO SDLIP
-!Coeffient #                             1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18
-!Calibration                             P     P     P     P     P     P     P     G     G     G     G     G     P     G     P     N     N     N
+!Coefficient #                           1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18
+!Calibration                             P     P     P     P     P     P     P     N     N     N     G     G     P     G     P     N     N     N
 
-999991 MINIMA               . DFAULT 12.33  0.00  20.0   1.0  12.0 25.00 50.00  0.80  150. 150.0  0.50 .0040  26.0 300.0  54.0   8.5  .300  .050
-999992 MAXIMA               . DFAULT 12.33  0.00  40.0  10.0  35.0 90.00 400.0  2.50  500. 800.0  0.90 .0040  27.0 300.0  58.0   8.5  .300  .050
+999991 MINIMA               . DFAULT 12.33  0.00  23.0   1.0   7.0 45.00 47.00  1.27  250. 250.0  0.73 .0040  10.0 100.0  30.0   8.5  .300  .050
+999992 MAXIMA               . DFAULT 12.33  0.00  31.0   4.6  21.0 400.0 400.0  1.36  300. 350.0  0.99 .0040  27.0 300.0  58.0   8.5  .300  .050
 
-TM0001 Florida 47 2010 Cal  . TM0001 12.33  0.00  24.4   2.2  19.0 45.20 52.00  1.36  300. 300.0  0.78 .0040  26.0 300.0  55.0   8.5  .300  .050
-TM0002 Solarset 2010 Cal    . TM0001 12.33  0.00  31.0   4.6  21.0 47.00 47.00  1.36  300. 300.0  0.78 .0040  27.0 300.0  56.0   8.5  .300  .050
-TM0005 Agriset 761 10' Cal  . TM0001 12.33  0.00  24.4   2.2  19.0 45.20 52.00  1.36  300. 300.0  0.78 .0040  26.0 300.0  54.0   8.5  .300  .050
-TM0007 Sunny S-D 2010 Cal   . TM0001 12.33  0.00  24.4   2.2  19.0 45.20 52.00  1.36  300. 300.0  0.78 .0040  26.0 300.0  54.0   8.5  .300  .050
-TM0008 Brilliance           . TM0001 12.33  0.00  24.4   2.2  19.0 45.20 52.00  1.36  300. 300.0  0.78 0.004  26.0 300.0  54.0   8.5  0.30  0.05
+TM0008 Brilliance           . TM0001 12.33  0.00  25.2   2.0  16.5 400.0 400.0  1.27  293. 297.1  0.82 .0040  11.7 111.4  33.0   8.2  .300  .050
