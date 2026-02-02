@@ -172,6 +172,16 @@ powershell -ExecutionPolicy Bypass -File .\start_agents.ps1
 powershell -ExecutionPolicy Bypass -File .\start_manager.ps1 -Wait
 ```
 
+### 一条命令启动（推荐）
+
+在仓库根目录执行：
+
+```powershell
+cd C:\DSSAT48\Tomato_Cal
+
+python tools\parallel\run_parallel.py --run-dir $runDir --case $case --mode ies --n-agents 6 --wait
+```
+
 停止与清理：
 
 ```powershell
