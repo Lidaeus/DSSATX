@@ -35,6 +35,7 @@ pip install pandas numpy pyemu matplotlib
 - [7 权重策略 方案A 早期采收增量加权](#7-权重策略-方案a-早期采收增量加权)
 - [8 SPE 中与低氮耐受相关的参数](#8-spe-中与低氮耐受相关的参数)
 - [9 关键生理参数速查](#9-关键生理参数速查)
+- [并行运行（方案A：PEST++ manager/agent）](#并行运行方案apest-manageragent)
 - [常见问题与定位](#常见问题与定位)
 
 ## 核心约定
@@ -119,12 +120,77 @@ python build_pest.py `
 
 ## 2 运行 PEST++ IES
 
+## 并行运行（方案A：PEST++ manager/agent）
+
+目标：并行跑 DSSAT 前向（IES 率定或 SEN 敏感性均可各自使用），在不改动算法的前提下显著加速。
+
+原则：每个并行 worker 必须在独立目录运行，避免 DSSAT 输出互相覆盖。
+
+### 1) 为某个 run_dir 准备 agent 目录与脚本
+
+在仓库根目录执行：
+
 ```powershell
-cd $runDir
-..\..\..\pestpp-5.2.16-win\bin\pestpp-ies.exe "$prefix.pst"
+cd C:\DSSAT48\Tomato_Cal
+
+$runDir = "C:\DSSAT48\Tomato_Cal\Workspace\Calibration_Results\_runs\20260202_eggplant_stage2_v13_rootN_incEarly9"
+$case = "eggplant_stage2_v13_rootN_incEarly9"
+
+python tools\parallel\prepare_agents.py --run-dir $runDir --case $case --n-agents 6 --port 4010
 ```
 
-以 `.rec/.log` 中的 error/fail 与命令返回码判断是否成功。
+如果不指定 `--n-agents/--port`，脚本将自动设置：
+
+- `n_agents = max(1, CPU核心数-2)`
+- `port = 4010..4999` 中的可用端口
+
+成功后会在 `$runDir` 下生成：
+
+- `_agents\agent_01..agent_06\`（每个 agent 一个独立工作目录）
+- `start_agents.ps1` / `start_manager.ps1`（IES 并行启动脚本）
+- `stop_agents.ps1` / `stop_manager.ps1` / `clean_agents.ps1`
+- `start_sen_agents.ps1` / `start_sen_manager.ps1`（SEN 并行启动脚本）
+- `stop_sen_agents.ps1` / `stop_sen_manager.ps1` / `clean_sen_agents.ps1`
+
+日志与 PID：
+
+- agent：`_agents\agent_*\panther_agent.stdout.log|stderr.log` 与 `panther_agent.pid`
+- manager：`panther_manager.stdout.log|stderr.log` 与 `panther_manager.pid`
+
+### 2) 启动 IES 并行
+
+在 `$runDir` 下先启动 agents（会启动多个 pestpp-ies 进程）：
+
+```powershell
+cd $runDir
+powershell -ExecutionPolicy Bypass -File .\start_agents.ps1
+```
+
+然后启动 manager（默认阻塞运行直到结束；也可用 `-Wait:$false` 后台运行）：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\start_manager.ps1 -Wait
+```
+
+### 一条命令启动（推荐）
+
+在仓库根目录执行：
+
+```powershell
+cd C:\DSSAT48\Tomato_Cal
+
+python tools\parallel\run_parallel.py --run-dir $runDir --case $case --mode ies --n-agents 6 --wait
+```
+
+说明：敏感性分析与遗传参数率定是两个独立项目，不需要也不建议在同一次命令中串联。
+
+停止与清理：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\stop_manager.ps1
+powershell -ExecutionPolicy Bypass -File .\stop_agents.ps1
+powershell -ExecutionPolicy Bypass -File .\clean_agents.ps1
+```
 
 ## 3 后处理与最优参数导出
 

@@ -2494,7 +2494,9 @@ if __name__ == "__main__":
     if not cultivar:
         cultivar = "TM0001"
 
-    cleanup(cwd_script, keep_dssat_outputs=False)
+    run_dir = os.getcwd()
+    if os.path.normcase(os.path.abspath(run_dir)) == os.path.normcase(os.path.abspath(cwd_script)):
+        cleanup(cwd_script, keep_dssat_outputs=False)
     update_cul_file(param_csv_path=args.param_csv, target_cultivar=cultivar)
     ecotype = _infer_ecotype_from_cul(CUL_FILE, cultivar) or "TM0001"
     update_eco_file(param_csv_path=args.param_csv, target_ecotype=ecotype)
