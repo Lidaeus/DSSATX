@@ -139,11 +139,23 @@ $case = "eggplant_stage2_v13_rootN_incEarly9"
 python tools\parallel\prepare_agents.py --run-dir $runDir --case $case --n-agents 6 --port 4010
 ```
 
+如果不指定 `--n-agents/--port`，脚本将自动设置：
+
+- `n_agents = max(1, CPU核心数-2)`
+- `port = 4010..4999` 中的可用端口
+
 成功后会在 `$runDir` 下生成：
 
 - `_agents\agent_01..agent_06\`（每个 agent 一个独立工作目录）
 - `start_agents.ps1` / `start_manager.ps1`（IES 并行启动脚本）
+- `stop_agents.ps1` / `stop_manager.ps1` / `clean_agents.ps1`
 - `start_sen_agents.ps1` / `start_sen_manager.ps1`（SEN 并行启动脚本）
+- `stop_sen_agents.ps1` / `stop_sen_manager.ps1` / `clean_sen_agents.ps1`
+
+日志与 PID：
+
+- agent：`_agents\agent_*\panther_agent.stdout.log|stderr.log` 与 `panther_agent.pid`
+- manager：`panther_manager.stdout.log|stderr.log` 与 `panther_manager.pid`
 
 ### 2) 启动 IES 并行
 
@@ -154,18 +166,19 @@ cd $runDir
 powershell -ExecutionPolicy Bypass -File .\start_agents.ps1
 ```
 
-然后启动 manager（阻塞运行直到结束）：
+然后启动 manager（默认阻塞运行直到结束；也可用 `-Wait:$false` 后台运行）：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\start_manager.ps1
+powershell -ExecutionPolicy Bypass -File .\start_manager.ps1 -Wait
 ```
+
+停止与清理：
 
 ```powershell
-cd $runDir
-..\..\..\pestpp-5.2.16-win\bin\pestpp-ies.exe "$prefix.pst"
+powershell -ExecutionPolicy Bypass -File .\stop_manager.ps1
+powershell -ExecutionPolicy Bypass -File .\stop_agents.ps1
+powershell -ExecutionPolicy Bypass -File .\clean_agents.ps1
 ```
-
-以 `.rec/.log` 中的 error/fail 与命令返回码判断是否成功。
 
 ## 3 后处理与最优参数导出
 
