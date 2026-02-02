@@ -73,8 +73,8 @@
 - `PestEval.OUT`（物候模式使用，当前列为 `ADAPS/ADAPM`）；
 - `PestGrow.OUT`（生长模式使用，当前列为 `HWAMS/LAIXS/CNAMS`）；
 - `PestJoint.OUT`（联合模式使用，当前列为 `HWAMS/LAIXS/CNAMS/CHTAS/CNAAS/PWAMS/H#AMS/HIAMS`）；
-- `PestHarvest.OUT`（多次采收模式使用，按 `RUN/TN/HNO/DATE` 输出 `@PWADS@`，由 `PlantGro.OUT(PWAD)` 与 `XXQL2501.TMT` 对齐生成）。
-- `PestTmtGrow.OUT`（过程观测模式使用，按 `RUN/TN/DATE` 输出 `@LAIDS@/@LWADS@/@SWADS@`，由 `PlantGro.OUT(LAID/LWAD/SWAD)` 与 `XXQL2501.TMT` 对齐生成）。
+- `PestHarvest.OUT`（多次采收模式使用，按 `RUN/TN/HNO/DATE` 输出 `@PWADS@/@PWAIS@`，由 `FreshWt.OUT` 与 `XXQL2501.TMT` 对齐生成，变量口径由 `--harvest-var` 决定）。
+- `PestTmtGrow.OUT`（过程观测模式使用，按 `RUN/TN/DATE` 输出 `@L#SDS@/@LAIDS@/@LWADS@/@SWADS@`，由 `PlantGro.OUT` 与 `XXQL2501.TMT` 对齐生成）。
 
 `run_dssat.py` 已支持：
 

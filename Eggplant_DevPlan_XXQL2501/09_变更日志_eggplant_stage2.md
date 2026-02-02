@@ -88,7 +88,7 @@
 
 - `XFRT` 上限从 `0.99` 提升到 `1.00`：`Tomato_Cal/Workspace/TMGRO048.CUL.base:44`。
 
-**可复现命令（已执行）**
+**历史命令（已执行；v13+ 推荐参见 07_率定流程_阶段2_全局联合优化与诊断.md）**
 
 - 构建 v10：
   - `python build_pest.py --mode eggplant_stage2 --prefix eggplant_stage2_v10 --noptmax 6 --ies-num-reals 40 --batch DSSBatch.v48 --harvest-var CHFPW --param-review-mode off --pwadm-sigma0 500 --pwadm-cv 0.008`
@@ -129,7 +129,7 @@
   - stage2 允许列表：`Tomato_Cal/Workspace/build_pest.py:1215-1248`
 - 控制出叶速率参数使用 `TRIFL`（ECO 参数）并已在 stage2 中启用（同上）。
 
-**可复现命令（已执行）**
+**历史命令（已执行；v13+ 推荐参见 07_率定流程_阶段2_全局联合优化与诊断.md）**
 
 - 构建 v11：
   - `python build_pest.py --mode eggplant_stage2 --prefix eggplant_stage2_v11 --noptmax 6 --ies-num-reals 40 --batch DSSBatch.v48 --harvest-var CHFPW --param-review-mode off --pwadm-sigma0 500 --pwadm-cv 0.008`
@@ -145,3 +145,53 @@
 
 - v11 中 `LAIXM` 组对目标函数贡献占比最高，且由于边界显著放宽，初始集合出现大量“极差 realizations”，导致 ensemble mean phi 显著放大（见 `eggplant_stage2_v11.rec` 的 group phi summary）。
 - `THRSH / SDPDV / XFPHT / XFINT` 在当前观测配置下敏感度较弱，BASE 解相对 v11 初值变化很小（对照 `eggplant_stage2_v11.0.base.par` 与 `eggplant_stage2_v11.6.base.par`）。
+
+---
+
+## v12（产量聚焦与参数空间收缩：yieldfocus）
+
+**动机**
+
+- 在多次采收曲线仍存在结构性偏差的阶段，优先把目标函数的“信号”聚焦到 harvest/process/joint 的关键指标组合，并收缩参数空间以提升可识别性。
+
+**关键变更**
+
+- 强化 `stage2` 的参数筛选与边界复审流程（以 `Sensitivity_Analyze/SA_Project_Output/sensitivity_param_review.csv` 为 single source of truth）。
+
+---
+
+## v13（引入根系供氮参数 + 强化早期采收约束：rootN_incEarly9）
+
+**动机**
+
+- 针对水-氮梯度下的处理差异，引入根系供氮相关参数作为显式机理入口，避免将处理差异“挤压”进纯品种参数。
+- 对多次采收“前段曲线形态”施加更强约束，降低“前期偏差被后期总量抵消”的等价解风险。
+
+**关键变更**
+
+- stage2 引入根系供氮参数 `RTNO3/RTNH4/RTEXF` 进入联合率定参数集（当前工程已改为默认启用；如需临时关闭用 `--no-include-n-uptake`）。
+- 引入早期采收权重增强：
+  - `--harvest-early-hno-max 4`
+  - `--harvest-early-weight-factor 9`
+  - `--harvest-early-apply-to inc`
+
+**结果概览（用于版本间 sanity check）**
+
+- v13 的最优 fixed 参数中 `RTNO3` 接近上界（提示模型倾向提高 NO3 吸收能力以缓解早期 N-stress）。
+
+---
+
+## v14（剔除 TN5/TN9/TN13：exclTN5_TN9_TN13）
+
+**动机**
+
+- 针对 TN5/TN9/TN13 在 harvest_curve 上表现出的强冲突（疑似 G×E 或观测/管理不一致），先做“处理屏蔽”实验以判断它们是否导致参数识别偏置。
+
+**关键变更**
+
+- 新增 batch 文件：`Workspace/DSSBatch_excl_TN5_TN9_TN13.v48`。
+- stage2 使用替代 batch 完成完整 IES，形成与 v13 可直接对照的“剔除处理”版本。
+
+**结果概览（用于版本间 sanity check）**
+
+- 与 v13 相比，overall（TN=-99）层面的 harvest_curve 与 harvest_total 指标显著改善；根系供氮参数最优值基本稳定（说明 RTNO3/RTNH4/RTEXF 在保留处理集合下可较稳定识别）。
