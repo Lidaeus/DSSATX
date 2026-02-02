@@ -114,4 +114,7 @@ Workspace/eggplant_v13pcs.csv
 !Workspace/eggplant_v13_PestHarvest.OUT.ins
 !Workspace/eggplant_v13_PestTmtGrow.OUT.ins
 
+Workspace/Sensitivity_Analyze/SA_Project_Output/sen_case/
+Workspace/Sensitivity_Analyze/SA_Project_Output/sen_case/**
+
 wAppDataLocalProgramsTraeresourcesappoutvsworkbenchcontribterminalcommonscripts*

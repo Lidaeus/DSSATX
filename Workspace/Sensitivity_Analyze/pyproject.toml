@@ -11,6 +11,7 @@ ignore = ["E501"]
 python_version = "3.9"
 ignore_missing_imports = true
 show_error_codes = true
+exclude = "(SA_Project_Output|SA_Project_Docs|DSSAT_Output_Interpretation)"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
