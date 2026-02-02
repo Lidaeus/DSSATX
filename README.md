@@ -35,6 +35,7 @@ pip install pandas numpy pyemu matplotlib
 - [7 权重策略 方案A 早期采收增量加权](#7-权重策略-方案a-早期采收增量加权)
 - [8 SPE 中与低氮耐受相关的参数](#8-spe-中与低氮耐受相关的参数)
 - [9 关键生理参数速查](#9-关键生理参数速查)
+- [并行运行（方案A：PEST++ manager/agent）](#并行运行方案apest-manageragent)
 - [常见问题与定位](#常见问题与定位)
 
 ## 核心约定
@@ -118,6 +119,46 @@ python build_pest.py `
 - `--hwamm-sigma/--pwamm-sigma/--hiamm-sigma/...`：各观测组（obs group）的权重（权重=1/sigma^2）。
 
 ## 2 运行 PEST++ IES
+
+## 并行运行（方案A：PEST++ manager/agent）
+
+目标：并行跑 DSSAT 前向（IES / SEN 均适用），在不改动率定算法的前提下显著加速。
+
+原则：每个并行 worker 必须在独立目录运行，避免 DSSAT 输出互相覆盖。
+
+### 1) 为某个 run_dir 准备 agent 目录与脚本
+
+在仓库根目录执行：
+
+```powershell
+cd C:\DSSAT48\Tomato_Cal
+
+$runDir = "C:\DSSAT48\Tomato_Cal\Workspace\Calibration_Results\_runs\20260202_eggplant_stage2_v13_rootN_incEarly9"
+$case = "eggplant_stage2_v13_rootN_incEarly9"
+
+python tools\parallel\prepare_agents.py --run-dir $runDir --case $case --n-agents 6 --port 4010
+```
+
+成功后会在 `$runDir` 下生成：
+
+- `_agents\agent_01..agent_06\`（每个 agent 一个独立工作目录）
+- `start_agents.ps1` / `start_manager.ps1`（IES 并行启动脚本）
+- `start_sen_agents.ps1` / `start_sen_manager.ps1`（SEN 并行启动脚本）
+
+### 2) 启动 IES 并行
+
+在 `$runDir` 下先启动 agents（会启动多个 pestpp-ies 进程）：
+
+```powershell
+cd $runDir
+powershell -ExecutionPolicy Bypass -File .\start_agents.ps1
+```
+
+然后启动 manager（阻塞运行直到结束）：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\start_manager.ps1
+```
 
 ```powershell
 cd $runDir
