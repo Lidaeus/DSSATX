@@ -122,7 +122,7 @@ python build_pest.py `
 
 ## 并行运行（方案A：PEST++ manager/agent）
 
-目标：并行跑 DSSAT 前向（IES / SEN 均适用），在不改动率定算法的前提下显著加速。
+目标：并行跑 DSSAT 前向（IES 率定或 SEN 敏感性均可各自使用），在不改动算法的前提下显著加速。
 
 原则：每个并行 worker 必须在独立目录运行，避免 DSSAT 输出互相覆盖。
 
@@ -181,6 +181,8 @@ cd C:\DSSAT48\Tomato_Cal
 
 python tools\parallel\run_parallel.py --run-dir $runDir --case $case --mode ies --n-agents 6 --wait
 ```
+
+说明：敏感性分析与遗传参数率定是两个独立项目，不需要也不建议在同一次命令中串联。
 
 停止与清理：
 
