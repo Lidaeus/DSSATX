@@ -1,0 +1,18 @@
+参与校准（需要敏感性分析）的遗传参数
+
+SPE：
+- `PARMAX`、`PHTMAX` 参数的第四列从 `0.10` 调整为 `0.03`，表明光合最大速率的校准更为保守。
+- `WTFSD` 系列系数的第二列从 `0.21` 改为 `0.61`，显著提升了根系对水分的利用效率。
+- `VSSINK`（源限制因子）从 `4.1` 降至 `1.1`，这将导致早期叶面积指数（LAI）增长更快，符合对茄子早熟的需求。
+-三个时期的  TB   TO1   TO2    TM ：
+!*PHENOLOGY PARAMETERS
+!  TB   TO1   TO2    TM                I
+  9.8  23.5  32.0  39.8              1 VEGETATIVE DEVELOPMENT 
+  9.8  23.5  32.0  39.8              2 EARLY REPRODUCTIVE DEVELOPMENT
+  9.8  23.5  32.0  39.8              3 LATE REPRODUCTIVE DEVELOPMENT
+
+ECO：
+ PL-EM EM-V1  JU-R0  PM06  PM09 LNGSH  FL-VS TRIFL RWDTH RHGHT  XMAGE XFPHT XFINT
+
+CUL:
+  EM-FL FL-SH FL-SD SD-PM FL-LF LFMAX SLAVR SIZLF  XFRT  SFDUR SDPDV PODUR THRSH

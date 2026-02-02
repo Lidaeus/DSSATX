@@ -1,15 +1,15 @@
-import os
-import subprocess
-import sys
-import shutil
-import time
-import glob
-import pandas as pd
 import argparse
-import re
 import datetime
+import glob
 import math
+import os
+import re
+import shutil
+import subprocess
 import tempfile
+import time
+
+import pandas as pd
 
 # Configuration
 DSSAT_EXE = "DSCSM048.EXE"
@@ -66,7 +66,7 @@ def _parse_batch_entries(batch_file):
             s = line.strip()
             if not s:
                 continue
-            if s.startswith("$") or s.startswith("@"):  # header/comment
+            if s.startswith("$") or s.startswith("@") or s.startswith("!"):
                 continue
             parts = s.split()
             if not parts:
@@ -439,7 +439,7 @@ def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harv
     entries = _parse_batch_entries(batch_file)
     if not entries:
         with open(pest_harvest_path, "w") as f:
-            f.write("RUN 1 TN -99 HNO -99 DATE -99 @PWADS@ -99.000\n")
+            f.write("RUN 1 TN -99 HNO -99 DATE -99 @PWADS@ -99.000 @PWAIS@ -99.000\n")
         return
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -459,6 +459,7 @@ def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harv
             run_no = int(e["run"])
             tn = int(e.get("tn", -99))
             events = events_by_tn.get(tn, [])
+            prev_cum = None
             for ev in events:
                 hno = int(ev["hno"])
                 date = int(ev["date"])
@@ -466,8 +467,15 @@ def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harv
                 sim_val = _nearest_on_or_before(var_by_run.get(run_no, {}), sim_date)
                 if sim_val is None:
                     sim_val = -99.0
+                sim_inc = -99.0
+                if sim_val != -99.0:
+                    if prev_cum is None:
+                        sim_inc = float(sim_val)
+                    else:
+                        sim_inc = float(sim_val) - float(prev_cum)
+                    prev_cum = float(sim_val)
                 f.write(
-                    f"RUN {run_no:d} TN {tn:d} HNO {hno:d} DATE {date:d} @PWADS@ {float(sim_val):0.3f}\n"
+                    f"RUN {run_no:d} TN {tn:d} HNO {hno:d} DATE {date:d} @PWADS@ {float(sim_val):0.3f} @PWAIS@ {float(sim_inc):0.3f}\n"
                 )
                 wrote_any = True
 
@@ -475,7 +483,7 @@ def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harv
             for e in entries:
                 run_no = int(e["run"])
                 tn = int(e.get("tn", -99))
-                f.write(f"RUN {run_no:d} TN {tn:d} HNO -99 DATE -99 @PWADS@ -99.000\n")
+                f.write(f"RUN {run_no:d} TN {tn:d} HNO -99 DATE -99 @PWADS@ -99.000 @PWAIS@ -99.000\n")
 
 
 def _write_pest_tmtgrow_from_tmt_and_plantgro(batch_file, plantgro_path, pest_tmtgrow_path, tmt_path=None):
@@ -730,7 +738,7 @@ def _write_local_batch(batch_src_path, batch_dst_path, filex_basename):
     out_lines = []
     for line in lines:
         s = line.strip()
-        if not s or s.startswith("$") or s.startswith("@"):
+        if not s or s.startswith("$") or s.startswith("@") or s.startswith("!"):
             out_lines.append(line)
             continue
 
@@ -765,7 +773,7 @@ def _count_batch_runs(batch_file):
             s = line.strip()
             if not s:
                 continue
-            if s.startswith("$") or s.startswith("@"):
+            if s.startswith("$") or s.startswith("@") or s.startswith("!"):
                 continue
             n += 1
     return n
@@ -959,9 +967,9 @@ def _write_pest_joint_from_evaluate(evaluate_out_path, pest_joint_path):
             for i in range(1, n_runs + 1):
                 f.write(
                     f"RUN {i:d} TN {-99:d} "
-                    f"@HWAMS@ {-99.0:0.3f} @LAIXS@ {-99.0:0.3f} @CNAMS@ {-99.0:0.3f} "
+                    f"@HWAMS@ {-99.0:0.3f} @HIAMS@ {-99.0:0.3f} @LAIXS@ {-99.0:0.3f} @CNAMS@ {-99.0:0.3f} "
                     f"@CHTAS@ {-99.0:0.3f} @CNAAS@ {-99.0:0.3f} "
-                    f"@PWAMS@ {-99.0:0.3f} @H#AMS@ {-99.0:0.3f} @HIAMS@ {-99.0:0.3f}\n"
+                    f"@PWAMS@ {-99.0:0.3f} @H#AMS@ {-99.0:0.3f}\n"
                 )
         return
 
@@ -999,9 +1007,9 @@ def _write_pest_joint_from_evaluate(evaluate_out_path, pest_joint_path):
             hiams = float(row["HIAMS"]) if not pd.isna(row["HIAMS"]) else -99.0
             f.write(
                 f"RUN {run_no:d} TN {tn:d} "
-                f"@HWAMS@ {hwams:0.3f} @LAIXS@ {laixs:0.3f} @CNAMS@ {cnams:0.3f} "
+                f"@HWAMS@ {hwams:0.3f} @HIAMS@ {hiams:0.3f} @LAIXS@ {laixs:0.3f} @CNAMS@ {cnams:0.3f} "
                 f"@CHTAS@ {chtas:0.3f} @CNAAS@ {cnaas:0.3f} "
-                f"@PWAMS@ {pwams:0.3f} @H#AMS@ {h_n_ams:0.3f} @HIAMS@ {hiams:0.3f}\n"
+                f"@PWAMS@ {pwams:0.3f} @H#AMS@ {h_n_ams:0.3f}\n"
             )
 
 def _first_batch_filex_path(batch_file):
@@ -1013,7 +1021,7 @@ def _first_batch_filex_path(batch_file):
             s = line.strip()
             if not s:
                 continue
-            if s.startswith("$") or s.startswith("@"):
+            if s.startswith("$") or s.startswith("@") or s.startswith("!"):
                 continue
             return s.split()[0]
     return None
@@ -1224,7 +1232,7 @@ def handle_failure(exit_code):
                 n_runs = 1
             with open(PEST_HARVEST_FILE, "w") as f:
                 for i in range(1, n_runs + 1):
-                    f.write(f"RUN {i:d} TN {-99:d} HNO -99 DATE -99 @PWADS@ -99.000\n")
+                    f.write(f"RUN {i:d} TN {-99:d} HNO -99 DATE -99 @PWADS@ -99.000 @PWAIS@ -99.000\n")
 
     if not os.path.exists(PEST_TMTGROW_FILE):
         try:
@@ -1788,6 +1796,25 @@ def update_spe_file(param_csv_path=PARAM_CSV):
         "PHTMAX",
         "KCAN",
         "KC_SLOPE",
+        "RNO3C",
+        "RNH4C",
+        "RPRO",
+        "RFIXN",
+        "CMOBMX",
+        "CADSTF",
+        "CADPR1",
+        "NMOBMX",
+        "NVSMOB",
+        "NRCVR",
+        "FNPGN1",
+        "FNPGN2",
+        "FNPGN3",
+        "FNPGN4",
+        "SLWREF",
+        "SLWSLO",
+        "NSLOPE",
+        "LNREF",
+        "PGREF",
         "WTFSD",
         "PORPT",
         "FRSTMF",
@@ -1799,6 +1826,10 @@ def update_spe_file(param_csv_path=PARAM_CSV):
         "SIZREF",
         "VSSINK",
         "EVMODC",
+        "RTNO3",
+        "RTNH4",
+        "PORMIN",
+        "RTEXF",
     ]
 
     keys = [k for k in (base_names + stage_names + direct_keys) if k in param_dict]
@@ -1840,8 +1871,13 @@ def update_spe_file(param_csv_path=PARAM_CSV):
         lines[idx] = "".join(new_chars) + "\n"
 
     _update_named_line("PARMAX,PHTMAX", ["PARMAX", "PHTMAX", "KCAN", "KC_SLOPE"])
+    _update_named_line("RNO3C,RNH4C", ["RNO3C", "RNH4C", "RPRO", "RFIXN"])
+    _update_named_line("CMOBMX,CADSTF", ["CMOBMX", "CADSTF", "CADPR1", "NMOBMX", "NVSMOB", "NRCVR"])
+    _update_named_line("FNPGN(4)", ["FNPGN1", "FNPGN2", "FNPGN3", "FNPGN4"])
+    _update_named_line("SLWREF,SLWSLO", ["SLWREF", "SLWSLO", "NSLOPE", "LNREF", "PGREF"])
     _update_named_line("WTFSD,PORPT", ["WTFSD", "PORPT", "FRSTMF", "FRLFF", "ATOP", "FRCNOD"])
     _update_named_line("FINREF,SLAREF", ["FINREF", "SLAREF", "SIZREF", "VSSINK", "EVMODC"])
+    _update_named_line("RTNO3,RTNH4", ["RTNO3", "RTNH4", "PORMIN", "RTEXF"])
 
     pheno_idx = -1
     for i, line in enumerate(lines):
@@ -2055,64 +2091,76 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
                 lines[data_idx] = "".join(new_chars).rstrip() + "\n"
 
     if layer_header_idx is not None:
-        header_line = lines[layer_header_idx].rstrip("\n")
+        header_cols = lines[layer_header_idx].split()
+        if header_cols and header_cols[0] == "@":
+            header_cols = header_cols[1:]
         want = ["SLLL", "SDUL", "SSAT", "SBDM", "SLOC"]
-        line_len = len(header_line)
+        col_pos = {k: header_cols.index(k) for k in want if k in header_cols}
+        layer_lines = []
         for j in range(layer_header_idx + 1, sec_end):
             if not lines[j].strip():
                 continue
             if lines[j].lstrip().startswith("@") or lines[j].startswith("*"):
                 break
-            line_len = max(line_len, len(lines[j].rstrip("\n")))
-        spans = _field_spans_from_header(header_line, want, line_len)
-        if spans is not None:
-            layer_lines = []
-            for j in range(layer_header_idx + 1, sec_end):
-                if not lines[j].strip():
+            layer_lines.append(j)
+
+        for li, idx in enumerate(layer_lines, start=1):
+            slll_key = _as_layer_key("SLLL", li)
+            sdul_key = _as_layer_key("SDUL", li)
+            ssat_key = _as_layer_key("SSAT", li)
+            slll_in = float(param_dict[slll_key]) if slll_key in param_dict else None
+            sdul_in = float(param_dict[sdul_key]) if sdul_key in param_dict else None
+            ssat_in = float(param_dict[ssat_key]) if ssat_key in param_dict else None
+            slll_v, sdul_v, ssat_v = _safe_water_triplet(slll_in, sdul_in, ssat_in)
+            if slll_v is not None:
+                param_dict[slll_key] = slll_v
+            if sdul_v is not None:
+                param_dict[sdul_key] = sdul_v
+            if ssat_v is not None:
+                param_dict[ssat_key] = ssat_v
+
+            s = lines[idx].rstrip("\n")
+            matches = list(re.finditer(r"[-+]?\d*\.\d+|[-+]?\d+", s))
+
+            for name in ["SLLL", "SDUL", "SSAT", "SBDM", "SLOC"]:
+                key = _as_layer_key(name, li)
+                if key not in param_dict:
                     continue
-                if lines[j].lstrip().startswith("@") or lines[j].startswith("*"):
-                    break
-                layer_lines.append(j)
-
-            for li, idx in enumerate(layer_lines, start=1):
-                s = lines[idx].rstrip("\n").ljust(line_len)
-                new_chars = list(s)
-
-                slll_key = _as_layer_key("SLLL", li)
-                sdul_key = _as_layer_key("SDUL", li)
-                ssat_key = _as_layer_key("SSAT", li)
-                slll_in = float(param_dict[slll_key]) if slll_key in param_dict else None
-                sdul_in = float(param_dict[sdul_key]) if sdul_key in param_dict else None
-                ssat_in = float(param_dict[ssat_key]) if ssat_key in param_dict else None
-                slll_v, sdul_v, ssat_v = _safe_water_triplet(slll_in, sdul_in, ssat_in)
-                if slll_v is not None:
-                    param_dict[slll_key] = slll_v
-                if sdul_v is not None:
-                    param_dict[sdul_key] = sdul_v
-                if ssat_v is not None:
-                    param_dict[ssat_key] = ssat_v
-
-                for name, (abs_s0, abs_s1) in zip(want, spans):
-                    key = _as_layer_key(name, li)
-                    if key not in param_dict:
-                        continue
-                    v = float(param_dict[key])
-                    if name in {"SLLL", "SDUL", "SSAT"}:
-                        v2 = _clamp(v, 0.01, 0.80)
-                    elif name == "SBDM":
-                        v2 = _clamp(v, 0.5, 2.2)
-                    elif name == "SLOC":
-                        v2 = _clamp(v, 0.0, 10.0)
-                    else:
-                        v2 = v
+                if name not in col_pos:
+                    continue
+                pos = int(col_pos[name])
+                if pos < 0 or pos >= len(matches):
+                    continue
+                m = matches[pos]
+                orig_tok = s[m.start() : m.end()]
+                v = float(param_dict[key])
+                if name in {"SLLL", "SDUL", "SSAT"}:
+                    v2 = _clamp(v, 0.01, 0.80)
                     if v2 is None:
                         continue
-                    orig = s[abs_s0:abs_s1]
-                    width = abs_s1 - abs_s0
-                    formatted = _format_to_width_preserve_space(v2, width, orig_token=orig)
-                    new_chars[abs_s0:abs_s1] = list(formatted)
+                    new_tok = f"{v2:.3f}"
+                elif name == "SBDM":
+                    v2 = _clamp(v, 0.5, 2.2)
+                    if v2 is None:
+                        continue
+                    new_tok = f"{v2:.2f}"
+                elif name == "SLOC":
+                    v2 = _clamp(v, 0.0, 10.0)
+                    if v2 is None:
+                        continue
+                    new_tok = f"{v2:.2f}"
+                else:
+                    new_tok = str(v)
 
-                lines[idx] = "".join(new_chars).rstrip() + "\n"
+                if len(new_tok) <= len(orig_tok):
+                    new_tok = new_tok.rjust(len(orig_tok))
+                else:
+                    new_tok = new_tok[-len(orig_tok) :]
+
+                s = s[: m.start()] + new_tok + s[m.end() :]
+                matches = list(re.finditer(r"[-+]?\d*\.\d+|[-+]?\d+", s))
+
+            lines[idx] = s + "\n"
 
     lock_path = os.path.abspath(SOIL_FILE) + ".lock"
     lock_err = _acquire_file_lock(lock_path, timeout_s=180.0, poll_s=0.10, stale_s=900.0)
@@ -2120,6 +2168,177 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
         raise lock_err
     try:
         last_err = _atomic_write_lines(SOIL_FILE, lines, n_tries=60, sleep_s=0.20)
+        if last_err is not None:
+            raise last_err
+    finally:
+        _release_file_lock(lock_path)
+
+
+def update_initial_conditions_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, filex_path=None):
+    if not os.path.exists(param_csv_path):
+        return
+
+    try:
+        param_dict = _read_param_dict(param_csv_path)
+    except Exception as e:
+        print(f"Error reading parameter CSV: {e}")
+        return
+    if not param_dict:
+        return
+
+    ic_keys = [k for k in param_dict.keys() if str(k).strip().upper().startswith("IC_SH2O_")]
+    if not ic_keys:
+        return
+
+    cwd_script = os.path.dirname(os.path.abspath(__file__))
+    if not filex_path:
+        filex_path = _resolve_filex_from_batch(batch_file, os.getcwd()) or _resolve_filex_from_batch(batch_file, cwd_script)
+    if not filex_path or not os.path.exists(filex_path):
+        return
+
+    with open(filex_path, "r", encoding="utf-8", errors="ignore") as f:
+        lines = f.readlines()
+
+    ic_start = None
+    ic_end = None
+    for i, line in enumerate(lines):
+        u = line.strip().upper()
+        if u.startswith("*INITIAL CONDITIONS"):
+            ic_start = i
+            continue
+        if ic_start is not None and u.startswith("*") and (not u.startswith("*INITIAL CONDITIONS")):
+            ic_end = i
+            break
+    if ic_start is None:
+        return
+    if ic_end is None:
+        ic_end = len(lines)
+
+    header_idx = None
+    for j in range(ic_start + 1, ic_end):
+        u = lines[j].strip().upper()
+        if lines[j].lstrip().startswith("@C") and ("ICBL" in u) and ("SH2O" in u):
+            header_idx = j
+            break
+    if header_idx is None:
+        return
+
+    def _is_valid_yyddd(tok):
+        try:
+            v = int(float(tok))
+        except Exception:
+            return False
+        return 10000 <= v <= 99999
+
+    default_icdat = None
+    pcr_in_table = False
+    pcr_cols = None
+    pcr_icdat_col = None
+
+    layer_idx = 0
+    in_sh2o_table = False
+    sh2o_col = None
+    header_cols = None
+
+    for j in range(ic_start + 1, ic_end):
+        s = lines[j].rstrip("\n")
+        u = s.strip().upper()
+        if not u:
+            continue
+
+        if u.startswith("*") and (not u.startswith("*INITIAL CONDITIONS")):
+            break
+
+        if s.lstrip().startswith("@C") and ("PCR" in u) and ("ICDAT" in u):
+            pcr_cols = s.split()
+            pcr_icdat_col = None
+            try:
+                pcr_icdat_col = pcr_cols.index("ICDAT")
+            except ValueError:
+                pcr_icdat_col = None
+            pcr_in_table = pcr_icdat_col is not None
+            continue
+
+        if s.lstrip().startswith("@C") and ("ICBL" in u) and ("SH2O" in u):
+            header_cols = s.split()
+            sh2o_col = None
+            try:
+                sh2o_col = header_cols.index("SH2O")
+            except ValueError:
+                sh2o_col = None
+            in_sh2o_table = sh2o_col is not None
+            layer_idx = 0
+            continue
+
+        if s.lstrip().startswith("@"):
+            pcr_in_table = False
+            pcr_cols = None
+            pcr_icdat_col = None
+            in_sh2o_table = False
+            sh2o_col = None
+            header_cols = None
+            layer_idx = 0
+            continue
+
+        if pcr_in_table and pcr_cols and (pcr_icdat_col is not None):
+            parts = s.split()
+            if len(parts) < 2:
+                continue
+            if len(parts) < len(pcr_cols):
+                parts += ["-99"] * (len(pcr_cols) - len(parts))
+
+            icdat_tok = parts[pcr_icdat_col]
+            if default_icdat is None and _is_valid_yyddd(icdat_tok):
+                default_icdat = icdat_tok
+                continue
+
+            if default_icdat is None:
+                continue
+            if _is_valid_yyddd(icdat_tok) or (icdat_tok == "-99"):
+                continue
+
+            data_offset = 1 if (pcr_cols and str(pcr_cols[0]).upper() == "@C") else 0
+            icdat_pos = int(pcr_icdat_col) - data_offset
+            matches = list(re.finditer(r"[-+]?\d*\.\d+|[-+]?\d+", s))
+            if icdat_pos < 0 or icdat_pos >= len(matches):
+                continue
+            m = matches[icdat_pos]
+            orig_tok = s[m.start() : m.end()]
+            new_tok = str(default_icdat)
+            if len(new_tok) <= len(orig_tok):
+                new_tok = new_tok.rjust(len(orig_tok))
+            else:
+                new_tok = new_tok[-len(orig_tok) :]
+            lines[j] = (s[: m.start()] + new_tok + s[m.end() :] + "\n")
+            continue
+
+        if not in_sh2o_table or sh2o_col is None or not header_cols:
+            continue
+
+        parts = s.split()
+        if len(parts) < 2:
+            continue
+        if len(parts) < len(header_cols):
+            parts += ["-99"] * (len(header_cols) - len(parts))
+
+        layer_idx += 1
+        key = f"IC_SH2O_{layer_idx:02d}"
+        if key not in param_dict:
+            continue
+        try:
+            v = float(param_dict[key])
+        except Exception:
+            continue
+        v = max(0.01, min(0.80, v))
+        parts[sh2o_col] = f"{v:.3f}"
+        lines[j] = " ".join(parts).rstrip() + "\n"
+
+    lock_path = os.path.abspath(filex_path) + ".lock"
+    lock_err = _acquire_file_lock(lock_path, timeout_s=180.0, poll_s=0.10, stale_s=900.0)
+    if lock_err is not None:
+        raise lock_err
+    try:
+        last_err = _atomic_write_lines(filex_path, lines, n_tries=60, sleep_s=0.20)
         if last_err is not None:
             raise last_err
     finally:
@@ -2133,7 +2352,7 @@ def run_model():
     try:
         cwd_script = os.path.dirname(os.path.abspath(__file__))
         run_dir = os.getcwd()
-        filex_path = _resolve_filex_from_batch(BATCH_FILE, run_dir) or _resolve_filex_from_batch(BATCH_FILE, cwd_script)
+        filex_path = _resolve_filex_from_batch(BATCH_FILE, cwd_script) or _resolve_filex_from_batch(BATCH_FILE, run_dir)
 
         cleanup(run_dir, keep_dssat_outputs=False)
 
@@ -2160,6 +2379,7 @@ def run_model():
                 pass
 
         localized_filex = _localize_experiment_files(filex_path, run_dir)
+        update_initial_conditions_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, filex_path=localized_filex or filex_path)
 
         batch_src = _resolve_batch_path(BATCH_FILE, base_dir=run_dir) or _resolve_batch_path(BATCH_FILE, base_dir=cwd_script)
 
@@ -2261,6 +2481,7 @@ if __name__ == "__main__":
     args, _ = parser.parse_known_args()
 
     BATCH_FILE = args.batch
+    PARAM_CSV = args.param_csv
     HARVEST_VAR = (args.harvest_var or "CHPDT").strip().upper()
 
     cwd_script = os.path.dirname(os.path.abspath(__file__))

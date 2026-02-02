@@ -95,6 +95,11 @@ def _default_bounds(name, init, location):
             ub = min(10.0, float(init) * 1.3)
             return lb, ub, "active" if lb != ub else "fixed"
 
+    if loc == "IC" or n.startswith("IC_SH2O"):
+        lb = max(0.01, float(init) * 0.7)
+        ub = min(0.80, float(init) * 1.3)
+        return lb, ub, "active" if lb != ub else "fixed"
+
     eco_bounds = {
         "PL-EM": (3.0, 12.0),
         "EM-V1": (10.0, 40.0),
@@ -176,6 +181,11 @@ def _infer_pargp(name, location):
         if n in {"SOIL_SALB", "SOIL_SLDR", "SOIL_SLRO"}:
             return "SOIL_SurfaceHydro"
         return "SOIL_Other"
+
+    if loc == "IC":
+        if n.startswith("IC_SH2O"):
+            return "IC_InitialWater"
+        return "IC_Other"
 
     if loc == "SPE":
         if n in {"PARMAX", "PHTMAX", "KCAN", "KC_SLOPE"}:
@@ -395,6 +405,70 @@ def _read_soil_params(soil_path, soil_id, max_depth_cm=100):
     return out
 
 
+def _read_initial_conditions_sh2o(filex_path, max_layers=20):
+    if not filex_path or not os.path.exists(filex_path):
+        return {}
+
+    with open(filex_path, "r", encoding="utf-8", errors="ignore") as f:
+        lines = f.readlines()
+
+    in_ic = False
+    header = None
+    sh2o_idx = None
+    icbl_idx = None
+    layer_idx = 0
+    out = {}
+
+    for line in lines:
+        u = line.strip().upper()
+        if u.startswith("*INITIAL CONDITIONS"):
+            in_ic = True
+            header = None
+            sh2o_idx = None
+            icbl_idx = None
+            layer_idx = 0
+            continue
+        if in_ic and u.startswith("*") and not u.startswith("*INITIAL CONDITIONS"):
+            break
+        if not in_ic:
+            continue
+
+        if line.lstrip().startswith("@C") and ("ICBL" in u) and ("SH2O" in u):
+            header = line.split()
+            try:
+                sh2o_idx = header.index("SH2O")
+                icbl_idx = header.index("ICBL")
+            except ValueError:
+                header = None
+                sh2o_idx = None
+                icbl_idx = None
+            layer_idx = 0
+            continue
+
+        if header is None:
+            continue
+
+        if not line.strip():
+            continue
+        if line.lstrip().startswith("@") or line.startswith("*"):
+            break
+
+        parts = line.split()
+        if sh2o_idx is None or icbl_idx is None or len(parts) <= max(sh2o_idx, icbl_idx):
+            continue
+
+        layer_idx += 1
+        if layer_idx > int(max_layers):
+            break
+
+        v = _parse_float(parts[sh2o_idx])
+        if v is None:
+            continue
+        out[f"IC_SH2O_{layer_idx:02d}"] = v
+
+    return out
+
+
 def generate_review_csv(paths: Paths, cultivar: str, ecotype: str):
     cul_header, _, cul_row = _read_table_row_by_key(paths.cul_base_path, cultivar, "@VAR#")
     cul_min_row = None
@@ -593,6 +667,29 @@ def generate_review_csv(paths: Paths, cultivar: str, ecotype: str):
                 "pargp": _infer_pargp(k, "SOIL"),
                 "location": "SOIL",
                 "file": os.path.basename(paths.soil_path),
+                "cultivar": cultivar,
+                "ecotype": ecotype,
+                "mode": "both",
+            }
+        )
+
+    ic_vals = _read_initial_conditions_sh2o(paths.filex_path)
+    ic_keep = {k for k in ic_vals.keys() if str(k).strip().upper().startswith("IC_SH2O")}
+    for k in sorted(ic_keep):
+        if k not in ic_vals:
+            continue
+        init = _parse_float(ic_vals.get(k))
+        lb, ub, status = _default_bounds(k, init, "IC")
+        rows.append(
+            {
+                "name": k,
+                "init": init,
+                "lower": lb,
+                "upper": ub,
+                "status": status,
+                "pargp": _infer_pargp(k, "IC"),
+                "location": "IC",
+                "file": os.path.basename(paths.filex_path),
                 "cultivar": cultivar,
                 "ecotype": ecotype,
                 "mode": "both",

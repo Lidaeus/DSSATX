@@ -1,11 +1,12 @@
 import argparse
-import pandas as pd
-import numpy as np
-import os
-import glob
-import shutil
-import re
 import datetime
+import glob
+import os
+import re
+import shutil
+
+import numpy as np
+import pandas as pd
 
 WORKSPACE = r"C:\DSSAT48\Tomato_Cal\Workspace"
 RESULTS_DIR = os.path.join(WORKSPACE, "Calibration_Results")
@@ -21,7 +22,7 @@ def _parse_batch_entries(batch_file):
             s = line.strip()
             if not s:
                 continue
-            if s.startswith("$") or s.startswith("@"): 
+            if s.startswith("$") or s.startswith("@") or s.startswith("!"):
                 continue
             parts = s.split()
             if not parts:
@@ -103,7 +104,7 @@ def _read_freshwt_var_by_run(freshwt_path, var_name):
             if header is None or idx is None:
                 continue
 
-            if not s.strip() or s.startswith("*") or s.startswith("!"):
+            if not s.strip() or s.lstrip().startswith("*") or s.lstrip().startswith("!"):
                 continue
 
             parts = s.split()
@@ -342,7 +343,7 @@ def _read_plantgro_vars_by_run(plantgro_path, var_names):
             if header is None or idx_map is None:
                 continue
 
-            if not s.strip() or s.startswith("*") or s.startswith("!"):
+            if not s.strip() or s.lstrip().startswith("*") or s.lstrip().startswith("!"):
                 continue
 
             parts = s.split()
@@ -365,7 +366,7 @@ def _read_plantgro_vars_by_run(plantgro_path, var_names):
     return by_run
 
 
-def deterministic_process_compare(prefix, batch_file, var_names=None):
+def deterministic_process_compare(prefix, batch_file, var_names=None, run_dir=None):
     ensure_results_dir()
     entries = _parse_batch_entries(batch_file)
     if not entries:
@@ -377,10 +378,15 @@ def deterministic_process_compare(prefix, batch_file, var_names=None):
     excode = _infer_excode_from_filex(filex_abs)
     tmt_path = os.path.join(filex_dir, f"{excode}.TMT") if excode else None
 
-    plantgro_candidates = [
-        os.path.join(WORKSPACE, "PlantGro.OUT"),
-        os.path.join(filex_dir, "PlantGro.OUT"),
-    ]
+    plantgro_candidates = []
+    if run_dir:
+        plantgro_candidates.append(os.path.join(run_dir, "PlantGro.OUT"))
+    plantgro_candidates.extend(
+        [
+            os.path.join(WORKSPACE, "PlantGro.OUT"),
+            os.path.join(filex_dir, "PlantGro.OUT"),
+        ]
+    )
     plantgro_path = _pick_latest_by_mtime(plantgro_candidates)
     if not plantgro_path:
         plantgro_path = os.path.join(WORKSPACE, "PlantGro.OUT")
@@ -426,7 +432,7 @@ def deterministic_process_compare(prefix, batch_file, var_names=None):
     return out_csv
 
 
-def deterministic_harvest_compare(prefix, batch_file):
+def deterministic_harvest_compare(prefix, batch_file, run_dir=None):
     ensure_results_dir()
     entries = _parse_batch_entries(batch_file)
     if not entries:
@@ -438,10 +444,15 @@ def deterministic_harvest_compare(prefix, batch_file):
     excode = _infer_excode_from_filex(filex_abs)
     tmt_path = os.path.join(filex_dir, f"{excode}.TMT") if excode else None
 
-    freshwt_candidates = [
-        os.path.join(WORKSPACE, "FreshWt.OUT"),
-        os.path.join(filex_dir, "FreshWt.OUT"),
-    ]
+    freshwt_candidates = []
+    if run_dir:
+        freshwt_candidates.append(os.path.join(run_dir, "FreshWt.OUT"))
+    freshwt_candidates.extend(
+        [
+            os.path.join(WORKSPACE, "FreshWt.OUT"),
+            os.path.join(filex_dir, "FreshWt.OUT"),
+        ]
+    )
     freshwt_path = _pick_latest_by_mtime(freshwt_candidates)
     if not freshwt_path:
         freshwt_path = os.path.join(WORKSPACE, "FreshWt.OUT")
@@ -497,6 +508,99 @@ def deterministic_harvest_compare(prefix, batch_file):
     df = pd.DataFrame(rows)
     out_csv = os.path.join(RESULTS_DIR, f"{prefix}_deterministic_harvest_compare.csv")
     df.to_csv(out_csv, index=False)
+    return out_csv
+
+
+def _read_evaluate_out(path):
+    rows = []
+    header = None
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        for line in f:
+            s = line.rstrip("\n")
+            if not s.strip():
+                continue
+            stripped = s.lstrip()
+            if stripped.startswith("@RUN"):
+                header = stripped.split()
+                continue
+            if header is None:
+                continue
+            if stripped.startswith("*") or stripped.startswith("@"):  
+                continue
+            if not re.match(r"^\s*\d+\s+", s):
+                continue
+            parts = stripped.split()
+            if len(parts) < len(header):
+                parts += ["-99"] * (len(header) - len(parts))
+            rows.append(dict(zip(header, parts[: len(header)])))
+    return pd.DataFrame(rows)
+
+
+def deterministic_joint_compare(prefix, batch_file, var_bases=None, run_dir=None):
+    ensure_results_dir()
+    entries = _parse_batch_entries(batch_file)
+    if not entries:
+        raise ValueError(f"No batch entries found in {batch_file}")
+
+    filex0 = entries[0]["filex"]
+    filex_abs = filex0 if os.path.isabs(filex0) else os.path.join(WORKSPACE, filex0)
+    filex_dir = os.path.dirname(os.path.abspath(filex_abs))
+
+    evaluate_candidates = []
+    if run_dir:
+        evaluate_candidates.append(os.path.join(run_dir, "Evaluate.OUT"))
+    evaluate_candidates.extend(
+        [
+            os.path.join(WORKSPACE, "Evaluate.OUT"),
+            os.path.join(filex_dir, "Evaluate.OUT"),
+        ]
+    )
+    evaluate_path = _pick_latest_by_mtime(evaluate_candidates)
+    if not evaluate_path:
+        evaluate_path = os.path.join(WORKSPACE, "Evaluate.OUT")
+    if not os.path.exists(evaluate_path):
+        raise FileNotFoundError(
+            f"Evaluate.OUT not found (looked in run_dir={run_dir}, {WORKSPACE}, and {filex_dir})"
+        )
+
+    bases = var_bases
+    if bases is None:
+        bases = ["HWAM", "LAIX", "CNAM", "CNAA"]
+    bases = [str(v).strip().upper() for v in bases if str(v).strip()]
+    if not bases:
+        raise ValueError("Empty var_bases")
+
+    df = _read_evaluate_out(evaluate_path)
+    if df.empty:
+        raise ValueError(f"Evaluate.OUT is empty: {evaluate_path}")
+
+    run_to_tn = {int(e["run"]): int(e.get("tn", -99)) for e in entries}
+    if "@RUN" not in df.columns:
+        raise ValueError("Evaluate.OUT missing @RUN column")
+    df["RUN"] = pd.to_numeric(df["@RUN"], errors="coerce")
+    df = df[~df["RUN"].isna()].copy()
+    df["RUN"] = df["RUN"].astype(int)
+    df["TN"] = df["RUN"].map(run_to_tn).fillna(-99).astype(int)
+
+    out_rows = []
+    for _, r in df.iterrows():
+        row = {"RUN": int(r["RUN"]), "TN": int(r["TN"])}
+        for b in bases:
+            om = f"{b}M"
+            os_ = f"{b}S"
+            if om in df.columns:
+                row[f"OBS_{b}"] = float(pd.to_numeric(r.get(om), errors="coerce"))
+            else:
+                row[f"OBS_{b}"] = np.nan
+            if os_ in df.columns:
+                row[f"SIM_{b}"] = float(pd.to_numeric(r.get(os_), errors="coerce"))
+            else:
+                row[f"SIM_{b}"] = np.nan
+        out_rows.append(row)
+
+    out_df = pd.DataFrame(out_rows)
+    out_csv = os.path.join(RESULTS_DIR, f"{prefix}_deterministic_joint_compare.csv")
+    out_df.to_csv(out_csv, index=False)
     return out_csv
 
 def ensure_results_dir():
@@ -558,11 +662,25 @@ def cleanup_workspace(prefix):
                 
     print(f"Moved {count} files to {RESULTS_DIR}")
 
-def analyze(prefix):
-    pst_file = os.path.join(WORKSPACE, f"{prefix}.pst")
+def _find_pst_path(prefix, run_dir=None):
+    candidates = []
+    if run_dir:
+        candidates.append(os.path.join(run_dir, f"{prefix}.pst"))
+    candidates.append(os.path.join(WORKSPACE, f"{prefix}.pst"))
+
+    runs_root = os.path.join(RESULTS_DIR, "_runs")
+    if os.path.isdir(runs_root):
+        candidates.extend(glob.glob(os.path.join(runs_root, "*", f"{prefix}.pst")))
+        candidates.extend(glob.glob(os.path.join(runs_root, "*", "*", f"{prefix}.pst")))
+
+    return _pick_latest_by_mtime(candidates)
+
+
+def analyze(prefix, run_dir=None):
+    pst_file = _find_pst_path(prefix, run_dir=run_dir)
     print(f"Loading PEST control file: {pst_file}")
-    if not os.path.exists(pst_file):
-        print(f"Error: {pst_file} not found!")
+    if not pst_file or not os.path.exists(pst_file):
+        print(f"Error: {prefix}.pst not found")
         return
 
     import warnings
@@ -718,7 +836,7 @@ def analyze(prefix):
                  best_real_name = phi_vals.idxmin()
                  best_phi_val = phi_vals.min()
                  
-                 print(f"\n[Best Fit Analysis]")
+                 print("\n[Best Fit Analysis]")
                  print(f"Best Realization: {best_real_name} (Phi = {best_phi_val:.4f})")
                  
                  # Extract best parameters
@@ -728,6 +846,66 @@ def analyze(prefix):
                      best_pars.to_csv(best_par_file, header=["Value"])
                      print(f"Best parameter set saved to {best_par_file}")
                      print("(Recommended for use in deterministic simulations)")
+
+                     fixed_csv = os.path.join(RESULTS_DIR, f"{prefix}_best_parameters_fixed.csv")
+                     pd.DataFrame({"name": best_pars.index, "value": best_pars.values}).to_csv(
+                         fixed_csv, index=False, encoding="utf-8-sig"
+                     )
+                     print(f"Fixed-parameter CSV saved to {fixed_csv}")
+
+                     try:
+                         par_data = pst.parameter_data.copy()
+                         par_data.index = par_data.index.astype(str)
+                         rows = []
+                         tol_rel = 1e-6
+                         tol_abs = 1e-10
+                         for name in best_pars.index.astype(str):
+                             if name not in par_data.index:
+                                 continue
+                             v = float(best_pars.loc[name])
+                             lb = float(par_data.loc[name, "parlbnd"])
+                             ub = float(par_data.loc[name, "parubnd"])
+                             if lb > ub:
+                                 lb, ub = ub, lb
+                             rng = ub - lb
+                             tol = max(tol_abs, tol_rel * abs(rng))
+                             near_lb = abs(v - lb) <= tol
+                             near_ub = abs(v - ub) <= tol
+                             rel_pos = (v - lb) / rng if rng > 0 else np.nan
+                             frac_lb = np.nan
+                             frac_ub = np.nan
+                             if name in par_ens.columns:
+                                 s = pd.to_numeric(par_ens[name], errors="coerce")
+                                 frac_lb = float(np.mean(np.abs(s - lb) <= tol))
+                                 frac_ub = float(np.mean(np.abs(s - ub) <= tol))
+                             rows.append(
+                                 {
+                                     "name": name,
+                                     "value": v,
+                                     "lower": lb,
+                                     "upper": ub,
+                                     "near_lower": bool(near_lb),
+                                     "near_upper": bool(near_ub),
+                                     "rel_pos": rel_pos,
+                                     "ens_frac_near_lower": frac_lb,
+                                     "ens_frac_near_upper": frac_ub,
+                                 }
+                             )
+
+                         if rows:
+                             bdf = pd.DataFrame(rows)
+                             bdf = bdf.sort_values(by=["near_lower", "near_upper", "ens_frac_near_lower", "ens_frac_near_upper"], ascending=False)
+                             bound_file = os.path.join(RESULTS_DIR, f"{prefix}_bound_hits.csv")
+                             bdf.to_csv(bound_file, index=False, encoding="utf-8-sig")
+                             n_near = int((bdf["near_lower"] | bdf["near_upper"]).sum())
+                             if n_near > 0:
+                                 print(f"\n[Bound Hit Report] {n_near} best-fit parameters are at bounds")
+                                 print(f"Report saved to {bound_file}")
+                             else:
+                                 print("\n[Bound Hit Report] No best-fit parameters at bounds")
+                                 print(f"Report saved to {bound_file}")
+                     except Exception as e:
+                         print(f"Warning: could not generate bound-hit report: {e}")
                  else:
                      print(f"Warning: Realization {best_real_name} not found in parameter ensemble.")
 
@@ -741,6 +919,172 @@ def _safe_series(df, col):
     s = pd.to_numeric(df[col], errors="coerce")
     s = s.replace([-99, -99.0], np.nan)
     return s
+
+
+def _rmse_nrmse_d(obs, sim):
+    obs = pd.to_numeric(obs, errors="coerce").astype(float)
+    sim = pd.to_numeric(sim, errors="coerce").astype(float)
+    obs = obs.replace([-99, -99.0], np.nan)
+    sim = sim.replace([-99, -99.0], np.nan)
+    mask = (~obs.isna()) & (~sim.isna())
+    n = int(mask.sum())
+    if n == 0:
+        return 0, np.nan, np.nan, np.nan
+
+    o = obs[mask].astype(float)
+    s = sim[mask].astype(float)
+    diff = (s - o).astype(float)
+    rmse = float(np.sqrt(np.mean(diff * diff)))
+
+    mean_obs = float(np.mean(o))
+    if mean_obs == 0.0:
+        nrmse = np.nan
+    else:
+        nrmse = float(rmse / abs(mean_obs) * 100.0)
+
+    denom = np.sum((np.abs(s - mean_obs) + np.abs(o - mean_obs)) ** 2)
+    if denom == 0.0:
+        d_index = np.nan
+    else:
+        d_index = float(1.0 - (np.sum((s - o) ** 2) / denom))
+    return n, rmse, nrmse, d_index
+
+
+def _metrics_rows_from_pairs(df, tn_col, pairs, prefix, source, scope_label):
+    rows = []
+    for var, obs_col, sim_col, target_nrmse, target_d in pairs:
+        n, rmse, nrmse, d_index = _rmse_nrmse_d(df.get(obs_col), df.get(sim_col))
+        rows.append(
+            {
+                "prefix": prefix,
+                "scope": scope_label,
+                "TN": int(df[tn_col].iloc[0]) if scope_label != "overall" and tn_col in df.columns else -99,
+                "source": source,
+                "variable": var,
+                "n": n,
+                "rmse": rmse,
+                "nrmse_pct": nrmse,
+                "d_index": d_index,
+                "target_nrmse_pct": target_nrmse,
+                "target_d_index": target_d,
+            }
+        )
+    return rows
+
+
+def _harvest_total_by_run(df):
+    if df.empty:
+        return pd.DataFrame(columns=["RUN", "TN", "OBS_DRY_TOTAL", "SIM_DRY_TOTAL"])
+
+    dd = df.copy()
+    if "DATE" not in dd.columns:
+        dd["DATE"] = 0
+    dd["DATE"] = pd.to_numeric(dd["DATE"], errors="coerce")
+    dd = dd.sort_values(by=["RUN", "DATE"])
+    out = dd.groupby(["RUN", "TN"], as_index=False).tail(1)
+    out = out[["RUN", "TN", "OBS_DRY_CUM", "SIM_DRY_CUM"]].rename(
+        columns={"OBS_DRY_CUM": "OBS_DRY_TOTAL", "SIM_DRY_CUM": "SIM_DRY_TOTAL"}
+    )
+    return out
+
+
+def metrics_grid(prefixes, batch_file, out_name=None, joint_vars=None, process_vars=None, run_dir=None):
+    ensure_results_dir()
+    prefixes = [p.strip() for p in (prefixes or []) if p and p.strip()]
+    if not prefixes:
+        raise ValueError("No valid prefixes provided")
+
+    joint_bases = joint_vars
+    if joint_bases is None:
+        joint_bases = ["HWAM", "LAIX", "CNAM", "CNAA"]
+    joint_bases = [str(v).strip().upper() for v in joint_bases if str(v).strip()]
+
+    proc_vars = process_vars
+    if proc_vars is None:
+        proc_vars = ["LAID", "LWAD", "SWAD"]
+    proc_vars = [str(v).strip().upper() for v in proc_vars if str(v).strip()]
+
+    all_rows = []
+    for prefix in prefixes:
+        harvest_csv = os.path.join(RESULTS_DIR, f"{prefix}_deterministic_harvest_compare.csv")
+        if not os.path.exists(harvest_csv):
+            harvest_csv = deterministic_harvest_compare(prefix, batch_file, run_dir=run_dir)
+        try:
+            harvest_df = pd.read_csv(harvest_csv)
+        except Exception:
+            harvest_csv = deterministic_harvest_compare(prefix, batch_file, run_dir=run_dir)
+            harvest_df = pd.read_csv(harvest_csv)
+        if harvest_df.empty:
+            harvest_csv = deterministic_harvest_compare(prefix, batch_file, run_dir=run_dir)
+            harvest_df = pd.read_csv(harvest_csv)
+
+        process_csv = os.path.join(RESULTS_DIR, f"{prefix}_deterministic_process_compare.csv")
+        if not os.path.exists(process_csv):
+            process_csv = deterministic_process_compare(prefix, batch_file, var_names=proc_vars, run_dir=run_dir)
+        try:
+            process_df = pd.read_csv(process_csv)
+        except Exception:
+            process_csv = deterministic_process_compare(prefix, batch_file, var_names=proc_vars, run_dir=run_dir)
+            process_df = pd.read_csv(process_csv)
+        if process_df.empty:
+            process_csv = deterministic_process_compare(prefix, batch_file, var_names=proc_vars, run_dir=run_dir)
+            process_df = pd.read_csv(process_csv)
+
+        joint_csv = os.path.join(RESULTS_DIR, f"{prefix}_deterministic_joint_compare.csv")
+        if not os.path.exists(joint_csv):
+            joint_csv = deterministic_joint_compare(prefix, batch_file, var_bases=joint_bases, run_dir=run_dir)
+        try:
+            joint_df = pd.read_csv(joint_csv)
+        except Exception:
+            joint_csv = deterministic_joint_compare(prefix, batch_file, var_bases=joint_bases, run_dir=run_dir)
+            joint_df = pd.read_csv(joint_csv)
+        if joint_df.empty:
+            joint_csv = deterministic_joint_compare(prefix, batch_file, var_bases=joint_bases, run_dir=run_dir)
+            joint_df = pd.read_csv(joint_csv)
+
+        harvest_df_total = _harvest_total_by_run(harvest_df)
+
+        harvest_pairs = [
+            ("dry_cum", "OBS_DRY_CUM", "SIM_DRY_CUM", 15.0, 0.85),
+            ("dry_inc", "OBS_DRY_INC", "SIM_DRY_INC", np.nan, np.nan),
+            ("dry_total", "OBS_DRY_TOTAL", "SIM_DRY_TOTAL", 15.0, 0.85),
+        ]
+
+        process_pairs = [
+            (v, f"OBS_{v}", f"SIM_{v}", 20.0 if v == "LAID" else np.nan, 0.80 if v == "LAID" else np.nan)
+            for v in proc_vars
+        ]
+
+        joint_pairs = [
+            (b, f"OBS_{b}", f"SIM_{b}", 15.0 if b == "HWAM" else 20.0 if b == "LAIX" else np.nan, 0.85 if b == "HWAM" else 0.80 if b == "LAIX" else np.nan)
+            for b in joint_bases
+        ]
+
+        all_rows.extend(_metrics_rows_from_pairs(harvest_df, "TN", harvest_pairs[:2], prefix, "harvest_curve", "overall"))
+        all_rows.extend(
+            _metrics_rows_from_pairs(harvest_df_total, "TN", harvest_pairs[2:], prefix, "harvest_total", "overall")
+        )
+        all_rows.extend(_metrics_rows_from_pairs(process_df, "TN", process_pairs, prefix, "process", "overall"))
+        all_rows.extend(_metrics_rows_from_pairs(joint_df, "TN", joint_pairs, prefix, "joint", "overall"))
+
+        for tn, g in harvest_df.groupby("TN"):
+            all_rows.extend(_metrics_rows_from_pairs(g, "TN", harvest_pairs[:2], prefix, "harvest_curve", f"TN{int(tn)}"))
+        for tn, g in harvest_df_total.groupby("TN"):
+            all_rows.extend(
+                _metrics_rows_from_pairs(g, "TN", harvest_pairs[2:], prefix, "harvest_total", f"TN{int(tn)}")
+            )
+        for tn, g in process_df.groupby("TN"):
+            all_rows.extend(_metrics_rows_from_pairs(g, "TN", process_pairs, prefix, "process", f"TN{int(tn)}"))
+        for tn, g in joint_df.groupby("TN"):
+            all_rows.extend(_metrics_rows_from_pairs(g, "TN", joint_pairs, prefix, "joint", f"TN{int(tn)}"))
+
+    out_df = pd.DataFrame(all_rows)
+    out_file = out_name.strip() if out_name else "metrics_grid.csv"
+    if not out_file.lower().endswith(".csv"):
+        out_file += ".csv"
+    out_path = os.path.join(RESULTS_DIR, out_file)
+    out_df.to_csv(out_path, index=False, encoding="utf-8-sig")
+    return out_path
 
 
 def _harvest_metrics_from_compare_df(df):
@@ -887,17 +1231,119 @@ def harvest_metrics(prefixes, batch_file, out_name=None):
     out_df.to_csv(out_path)
     return out_path
 
+
+def suggest_xxql2501_bounds(prefix, bounds_review_csv, out_path=None, extend_frac=0.20):
+    ensure_results_dir()
+    bh_path = os.path.join(RESULTS_DIR, f"{prefix}_bound_hits.csv")
+    if not os.path.exists(bh_path):
+        raise FileNotFoundError(f"Bound hit report not found: {bh_path}")
+    bdf = pd.read_csv(bh_path)
+    if bdf.empty:
+        raise ValueError(f"Empty bound hit report: {bh_path}")
+
+    base_csv = bounds_review_csv
+    if not base_csv:
+        raise ValueError("bounds_review_csv is required")
+    if not os.path.exists(base_csv):
+        raise FileNotFoundError(f"Bounds review CSV not found: {base_csv}")
+    sdf = pd.read_csv(base_csv)
+    if sdf.empty:
+        raise ValueError(f"Empty bounds review CSV: {base_csv}")
+
+    cols = {str(c).strip().lower(): c for c in sdf.columns}
+    name_c = cols.get("name") or cols.get("parnme") or cols.get("parameter")
+    lb_c = cols.get("lower") or cols.get("lb") or cols.get("parlbnd")
+    ub_c = cols.get("upper") or cols.get("ub") or cols.get("parubnd")
+    if not name_c or not lb_c or not ub_c:
+        raise ValueError("Bounds review CSV must contain name/lower/upper columns")
+
+    if "near_lower" not in bdf.columns or "near_upper" not in bdf.columns:
+        raise ValueError("Bound hit report missing near_lower/near_upper columns")
+    hit = bdf[bdf["near_lower"].astype(bool) | bdf["near_upper"].astype(bool)].copy()
+    if hit.empty:
+        raise ValueError("No bound hits found; no need to generate XXQL2501-specific bounds")
+
+    hit_names = {str(x).strip().upper() for x in hit["name"].astype(str).tolist() if str(x).strip()}
+    sdf["_NAME_UPPER"] = sdf[name_c].astype(str).str.strip().str.upper()
+    sdf["_lb"] = pd.to_numeric(sdf[lb_c], errors="coerce")
+    sdf["_ub"] = pd.to_numeric(sdf[ub_c], errors="coerce")
+
+    extend_frac = abs(float(extend_frac))
+    rows = []
+    for _, r in sdf[sdf["_NAME_UPPER"].isin(hit_names)].iterrows():
+        name = str(r["_NAME_UPPER"]).strip().upper()
+        lb0 = float(r["_lb"]) if not pd.isna(r["_lb"]) else np.nan
+        ub0 = float(r["_ub"]) if not pd.isna(r["_ub"]) else np.nan
+        if np.isnan(lb0) or np.isnan(ub0):
+            continue
+        if lb0 > ub0:
+            lb0, ub0 = ub0, lb0
+        rng = ub0 - lb0
+        dd = rng * extend_frac
+        if dd == 0.0:
+            continue
+
+        sub = hit[hit["name"].astype(str).str.strip().str.upper() == name]
+        near_lb = bool(sub["near_lower"].any()) if "near_lower" in sub.columns else False
+        near_ub = bool(sub["near_upper"].any()) if "near_upper" in sub.columns else False
+        frac_lb = float(sub["ens_frac_near_lower"].max()) if "ens_frac_near_lower" in sub.columns else np.nan
+        frac_ub = float(sub["ens_frac_near_upper"].max()) if "ens_frac_near_upper" in sub.columns else np.nan
+
+        lb1 = lb0 - dd if near_lb else lb0
+        ub1 = ub0 + dd if near_ub else ub0
+
+        reason = []
+        if near_lb:
+            reason.append(f"best_fit_at_lower_bound (ens_frac={frac_lb:.3g})" if not np.isnan(frac_lb) else "best_fit_at_lower_bound")
+        if near_ub:
+            reason.append(f"best_fit_at_upper_bound (ens_frac={frac_ub:.3g})" if not np.isnan(frac_ub) else "best_fit_at_upper_bound")
+
+        rows.append(
+            {
+                "name": name,
+                "lower": lb1,
+                "upper": ub1,
+                "prev_lower": lb0,
+                "prev_upper": ub0,
+                "extend_frac": extend_frac,
+                "reason": "; ".join(reason) if reason else "",
+                "evidence_file": os.path.basename(bh_path),
+                "note": "XXQL2501-specific bounds suggestion; review before use",
+            }
+        )
+
+    out_df = pd.DataFrame(rows)
+    if out_df.empty:
+        raise ValueError("No matching parameters found in bounds review CSV for the bound-hit names")
+
+    if out_path:
+        dst = out_path
+    else:
+        dst = os.path.join(RESULTS_DIR, f"{prefix}_xxql2501_bounds_suggestions.csv")
+    out_df.to_csv(dst, index=False, encoding="utf-8-sig")
+    return dst
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--prefix", default="tomato_cal")
+    parser.add_argument("--run-dir", default="")
     parser.add_argument("--deterministic-harvest-compare", action="store_true")
     parser.add_argument("--deterministic-process-compare", action="store_true")
+    parser.add_argument("--deterministic-joint-compare", action="store_true")
     parser.add_argument("--harvest-metrics", action="store_true")
     parser.add_argument("--process-metrics", action="store_true")
+    parser.add_argument("--metrics-grid", action="store_true")
+    parser.add_argument("--suggest-xxql-bounds", action="store_true")
     parser.add_argument("--prefixes", default="")
     parser.add_argument("--out", default="")
+    parser.add_argument("--bounds-review-csv", default="")
+    parser.add_argument("--extend-frac", type=float, default=0.20)
+    parser.add_argument("--joint-vars", default="")
+    parser.add_argument("--process-vars", default="")
     parser.add_argument("--batch", default=os.path.join(WORKSPACE, "DSSBatch.v48"))
     args = parser.parse_args()
+
+    run_dir = (args.run_dir or "").strip() or None
 
     prefix = (args.prefix or "tomato_cal").strip()
     if args.harvest_metrics:
@@ -913,10 +1359,37 @@ if __name__ == "__main__":
         out_path = process_metrics(prefixes, args.batch, out_name=args.out)
         print(f"Process metrics saved to {out_path}")
     elif args.deterministic_harvest_compare:
-        out_csv = deterministic_harvest_compare(prefix, args.batch)
+        out_csv = deterministic_harvest_compare(prefix, args.batch, run_dir=run_dir)
         print(f"Deterministic harvest comparison saved to {out_csv}")
     elif args.deterministic_process_compare:
-        out_csv = deterministic_process_compare(prefix, args.batch)
+        out_csv = deterministic_process_compare(prefix, args.batch, run_dir=run_dir)
         print(f"Deterministic process comparison saved to {out_csv}")
+    elif args.deterministic_joint_compare:
+        bases = [p.strip() for p in (args.joint_vars or "").split(",") if p.strip()]
+        out_csv = deterministic_joint_compare(prefix, args.batch, var_bases=bases or None, run_dir=run_dir)
+        print(f"Deterministic joint comparison saved to {out_csv}")
+    elif args.metrics_grid:
+        prefixes = [p.strip() for p in (args.prefixes or "").split(",") if p.strip()]
+        if not prefixes:
+            prefixes = [prefix]
+        joint_bases = [p.strip() for p in (args.joint_vars or "").split(",") if p.strip()]
+        process_vars = [p.strip() for p in (args.process_vars or "").split(",") if p.strip()]
+        out_path = metrics_grid(
+            prefixes,
+            args.batch,
+            out_name=args.out,
+            joint_vars=joint_bases or None,
+            process_vars=process_vars or None,
+            run_dir=run_dir,
+        )
+        print(f"Metrics grid saved to {out_path}")
+    elif args.suggest_xxql_bounds:
+        dst = suggest_xxql2501_bounds(
+            prefix,
+            bounds_review_csv=args.bounds_review_csv,
+            out_path=args.out or None,
+            extend_frac=float(args.extend_frac),
+        )
+        print(f"XXQL2501 bounds suggestions saved to {dst}")
     else:
-        analyze(prefix)
+        analyze(prefix, run_dir=run_dir)

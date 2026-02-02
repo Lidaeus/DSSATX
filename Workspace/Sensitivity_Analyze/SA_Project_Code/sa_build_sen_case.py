@@ -82,7 +82,7 @@ def build_case(
     case_dir,
     workspace_dir,
     cultivar="TM0008",
-    morris_r=4,
+    morris_r=100,
     morris_p=None,
     morris_delta=None,
 ):
@@ -166,7 +166,7 @@ def build_case(
     pst_sobol_path = os.path.join(case_dir, "sa_sen_sobol.pst")
     pst_sobol = pyemu.Pst(pst_path)
     pst_sobol.pestpp_options["gsa_method"] = "sobol"
-    pst_sobol.pestpp_options["gsa_sobol_samples"] = 200
+    pst_sobol.pestpp_options["gsa_sobol_samples"] = 1000
     pst_sobol.write(pst_sobol_path)
 
     for fp in [model_script]:
@@ -184,7 +184,7 @@ def main():
     )
     parser.add_argument("--case-dir", default=None)
     parser.add_argument("--cultivar", default="TM0008")
-    parser.add_argument("--morris-r", type=int, default=4)
+    parser.add_argument("--morris-r", type=int, default=100)
     parser.add_argument("--morris-p", type=int, default=None)
     parser.add_argument("--morris-delta", type=float, default=None)
     args = parser.parse_args()

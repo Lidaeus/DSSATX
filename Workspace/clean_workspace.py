@@ -1,8 +1,8 @@
-import os
-import glob
-import shutil
 import argparse
 import datetime
+import glob
+import os
+import shutil
 
 
 def _ensure_dir(p):
@@ -50,6 +50,7 @@ def _list_prefixes_from_pst(workspace):
 
 def _collect_artifacts_for_prefix(prefix):
     patterns = [
+        f"{prefix}.pst",
         f"{prefix}.rec",
         f"{prefix}.log",
         f"{prefix}.rei",
@@ -81,6 +82,10 @@ def _collect_artifacts_for_prefix(prefix):
         f"{prefix}.*.base.rei",
         f"{prefix}pdc.csv",
         f"{prefix}pcs.csv",
+        f"{prefix}_*.ins",
+        f"{prefix}_params.csv",
+        f"{prefix}_params.csv.tpl",
+        f"{prefix}_param_review.csv",
     ]
     files = []
     for pat in patterns:

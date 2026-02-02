@@ -1,13 +1,24 @@
-import os
 import argparse
+import os
+import re
+import shutil
+from typing import Dict, Optional, Set
+
 import pandas as pd
 import pyemu
-import re
 
 WORKSPACE = r"C:\DSSAT48\Tomato_Cal\Workspace"
 CUL_BASE_FILE = os.path.join(WORKSPACE, "TMGRO048.CUL.base")
 ECO_FILE = os.path.join(WORKSPACE, "TMGRO048.ECO")
 SPE_FILE = os.path.join(WORKSPACE, "TMGRO048.SPE")
+SOIL_FILE = os.path.join(WORKSPACE, "SOIL.SOL")
+SOIL_BASE_FILE = os.path.join(WORKSPACE, "SOIL.SOL.base")
+SENSITIVITY_PARAM_REVIEW_CSV = os.path.join(
+    WORKSPACE,
+    "Sensitivity_Analyze",
+    "SA_Project_Output",
+    "sensitivity_param_review.csv",
+)
 OUT_FILE = os.path.join(WORKSPACE, "Evaluate.OUT")
 PEST_EVAL_FILE = os.path.join(WORKSPACE, "PestEval.OUT")
 PEST_GROW_FILE = os.path.join(WORKSPACE, "PestGrow.OUT")
@@ -48,6 +59,15 @@ SPE_TEMP_BOUNDS_EGGPLANT = {
     "TO13": (22.0, 28.0),
     "TO23": (27.0, 32.0),
     "TM3": (33.0, 40.0),
+}
+
+
+SPE_DIRECT_BOUNDS_EGGPLANT = {
+    "KC_SLOPE": (0.0, 0.40),
+    "VSSINK": (2.05, 8.20),
+    "RTNO3": (0.006, 0.030),
+    "RTNH4": (0.006, 0.030),
+    "RTEXF": (0.05, 0.25),
 }
 
 
@@ -203,6 +223,245 @@ def apply_param_review_csv(params, csv_path):
     return params
 
 
+def apply_bounds_review_csv(params, csv_path, cultivar=None, ecotype=None, mode=None):
+    if not csv_path or not os.path.exists(csv_path):
+        return params, {"applied": 0, "missing": 0, "missing_names": []}
+
+    df = pd.read_csv(csv_path)
+    if df.empty:
+        return params, {"applied": 0, "missing": 0, "missing_names": []}
+
+    cols_lower = {str(c).strip().lower(): c for c in df.columns}
+
+    def _col(*names):
+        for n in names:
+            key = str(n).strip().lower()
+            if key in cols_lower:
+                return cols_lower[key]
+        return None
+
+    name_col = _col("name", "parnme", "parameter")
+    lb_col = _col("lower", "lb", "parlbnd")
+    ub_col = _col("upper", "ub", "parubnd")
+    cul_col = _col("cultivar")
+    eco_col = _col("ecotype")
+    loc_col = _col("location")
+    mode_col = _col("mode")
+    if name_col is None or lb_col is None or ub_col is None:
+        return params, {"applied": 0, "missing": 0, "missing_names": []}
+
+    by_name = {}
+    for _, r in df.iterrows():
+        name_raw = _coerce_str(r.get(name_col))
+        if not name_raw:
+            continue
+        k = name_raw.strip().lower()
+        by_name.setdefault(k, []).append(r)
+
+    def _pick_row(rows, location=None, mode=None):
+        if not rows:
+            return None
+        if loc_col and location:
+            rows2 = []
+            for rr in rows:
+                if str(rr.get(loc_col, "")).strip().upper() == str(location).strip().upper():
+                    rows2.append(rr)
+            if rows2:
+                rows = rows2
+        if cul_col and cultivar:
+            rows2 = []
+            for rr in rows:
+                if str(rr.get(cul_col, "")).strip().upper() == str(cultivar).strip().upper():
+                    rows2.append(rr)
+            if rows2:
+                rows = rows2
+        if eco_col and ecotype:
+            rows2 = []
+            for rr in rows:
+                if str(rr.get(eco_col, "")).strip().upper() == str(ecotype).strip().upper():
+                    rows2.append(rr)
+            if rows2:
+                rows = rows2
+        if mode_col and mode:
+            rows2 = []
+            for rr in rows:
+                mv = str(rr.get(mode_col, "")).strip().lower()
+                if not mv or mv == str(mode).strip().lower() or mv == "both":
+                    rows2.append(rr)
+            if rows2:
+                rows = rows2
+        return rows[0]
+
+    applied = 0
+    missing_names = []
+    for p in params:
+        if str(p.get("pargp", "")).strip().lower() in {"soil", "initial_conditions"}:
+            continue
+        k = str(p.get("name", "")).strip().lower()
+        if not k:
+            continue
+        rows = by_name.get(k)
+        if not rows:
+            missing_names.append(p.get("name"))
+            continue
+        location = _param_location_from_group(p.get("pargp"))
+        r = _pick_row(rows, location=location, mode=mode)
+        if r is None:
+            missing_names.append(p.get("name"))
+            continue
+
+        lb_v = _coerce_float(r.get(lb_col))
+        ub_v = _coerce_float(r.get(ub_col))
+        if lb_v is None or ub_v is None:
+            continue
+        p["lower"] = float(lb_v)
+        p["upper"] = float(ub_v)
+        applied += 1
+
+        try:
+            lb = float(p.get("lower"))
+            ub = float(p.get("upper"))
+            if lb > ub:
+                p["lower"], p["upper"] = ub, lb
+                lb, ub = ub, lb
+            init = float(p.get("init"))
+            if init < lb:
+                p["init"] = lb
+            elif init > ub:
+                p["init"] = ub
+        except Exception:
+            pass
+
+        if float(p.get("lower", 0.0)) == float(p.get("upper", 0.0)):
+            p["status"] = "fixed"
+
+    return params, {"applied": applied, "missing": len(missing_names), "missing_names": missing_names}
+
+
+def validate_sensitivity_param_review_csv(csv_path):
+    issues = []
+    if not csv_path or not os.path.exists(csv_path):
+        return [f"missing_file: {csv_path}"]
+    try:
+        df = pd.read_csv(csv_path)
+    except Exception as e:
+        return [f"read_error: {e}"]
+    if df.empty:
+        return ["empty_csv"]
+
+    cols = {str(c).strip().lower(): c for c in df.columns}
+    name_c = cols.get("name")
+    init_c = cols.get("init")
+    lb_c = cols.get("lower")
+    ub_c = cols.get("upper")
+    status_c = cols.get("status")
+    loc_c = cols.get("location")
+    cul_c = cols.get("cultivar")
+    eco_c = cols.get("ecotype")
+
+    required = [name_c, init_c, lb_c, ub_c]
+    if any(c is None for c in required):
+        missing = [k for k in ("name", "init", "lower", "upper") if k not in cols]
+        issues.append(f"missing_required_columns: {','.join(missing)}")
+        return issues
+
+    def _norm_name(v):
+        s = _coerce_str(v)
+        return s.strip().upper() if s else None
+
+    def _norm_loc(v):
+        s = _coerce_str(v)
+        return s.strip().upper() if s else ""
+
+    seen = {}
+    for i, r in df.iterrows():
+        name = _norm_name(r.get(name_c))
+        if not name:
+            issues.append(f"row_{i+2}: missing_name")
+            continue
+
+        init = _coerce_float(r.get(init_c))
+        lb = _coerce_float(r.get(lb_c))
+        ub = _coerce_float(r.get(ub_c))
+        status = (_coerce_str(r.get(status_c)) or "").strip().lower() if status_c else ""
+        loc = _norm_loc(r.get(loc_c)) if loc_c else ""
+        cul = _coerce_str(r.get(cul_c)) if cul_c else ""
+        eco = _coerce_str(r.get(eco_c)) if eco_c else ""
+
+        if init is None or lb is None or ub is None:
+            issues.append(f"{name}: missing_numeric (row {i+2})")
+            continue
+        if lb > ub:
+            issues.append(f"{name}: lower_gt_upper ({lb}>{ub})")
+        if init < min(lb, ub) or init > max(lb, ub):
+            issues.append(f"{name}: init_outside_bounds (init={init}, lb={lb}, ub={ub})")
+        if status == "fixed" and float(lb) != float(ub):
+            issues.append(f"{name}: status_fixed_but_bounds_not_equal (lb={lb}, ub={ub})")
+        if status == "active" and float(lb) == float(ub):
+            issues.append(f"{name}: status_active_but_bounds_equal (v={lb})")
+
+        key = (name, loc, (cul or "").strip().upper(), (eco or "").strip().upper())
+        prev = seen.get(key)
+        if prev is not None:
+            issues.append(
+                f"{name}: duplicate_key (rows {prev},{i+2}, loc={loc or 'NA'}, cul={cul or 'NA'}, eco={eco or 'NA'})"
+            )
+        else:
+            seen[key] = i + 2
+
+    def _extract_layer(n):
+        m = re.search(r"_(\d{2})$", str(n))
+        if not m:
+            return None
+        try:
+            return int(m.group(1))
+        except Exception:
+            return None
+
+    soil = {}
+    for _, r in df.iterrows():
+        name = _norm_name(r.get(name_c))
+        if not name:
+            continue
+        if not name.startswith("SOIL_") and not name.startswith("IC_SH2O_"):
+            continue
+        soil[name] = {
+            "init": _coerce_float(r.get(init_c)),
+            "lb": _coerce_float(r.get(lb_c)),
+            "ub": _coerce_float(r.get(ub_c)),
+        }
+
+    layers = set()
+    for k in soil.keys():
+        layer = _extract_layer(k)
+        if layer is not None:
+            layers.add(layer)
+
+    for layer in sorted(layers):
+        slll = soil.get(f"SOIL_SLLL_{layer:02d}")
+        sdul = soil.get(f"SOIL_SDUL_{layer:02d}")
+        ssat = soil.get(f"SOIL_SSAT_{layer:02d}")
+        sh2o = soil.get(f"IC_SH2O_{layer:02d}")
+        if slll and sdul and ssat:
+            a, b, c = slll.get("init"), sdul.get("init"), ssat.get("init")
+            if a is not None and b is not None and a > b:
+                issues.append(f"SOIL layer {layer:02d}: SLLL_gt_SDUL (SLLL={a}, SDUL={b})")
+            if b is not None and c is not None and b > c:
+                issues.append(f"SOIL layer {layer:02d}: SDUL_gt_SSAT (SDUL={b}, SSAT={c})")
+            if a is not None and c is not None and a > c:
+                issues.append(f"SOIL layer {layer:02d}: SLLL_gt_SSAT (SLLL={a}, SSAT={c})")
+        if sh2o and slll and ssat:
+            w = sh2o.get("init")
+            a = slll.get("init")
+            c = ssat.get("init")
+            if w is not None and a is not None and w < a:
+                issues.append(f"SOIL layer {layer:02d}: SH2O_below_SLLL (SH2O={w}, SLLL={a})")
+            if w is not None and c is not None and w > c:
+                issues.append(f"SOIL layer {layer:02d}: SH2O_above_SSAT (SH2O={w}, SSAT={c})")
+
+    return issues
+
+
 def _parse_batch_entries(batch_file):
     entries = []
     if not batch_file or not os.path.exists(batch_file):
@@ -213,7 +472,7 @@ def _parse_batch_entries(batch_file):
             s = line.strip()
             if not s:
                 continue
-            if s.startswith("$") or s.startswith("@"):  # header/comment
+            if s.startswith("$") or s.startswith("@") or s.startswith("!"):  # header/comment
                 continue
             parts = s.split()
             if not parts:
@@ -355,6 +614,44 @@ def _read_spe_temp_init_values():
     return out
 
 
+def _read_spe_direct_init_values():
+    if not os.path.exists(SPE_FILE):
+        return {}
+
+    number_re = re.compile(r"[-+]?\d*\.?\d+(?:[Ee][-+]?\d+)?")
+    with open(SPE_FILE, "r") as f:
+        lines = f.readlines()
+
+    out = {}
+    for line in lines:
+        u = line.upper()
+        if "PARMAX,PHTMAX" in u and "KC_SLOPE" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 4:
+                try:
+                    out["KC_SLOPE"] = float(nums[3])
+                except Exception:
+                    pass
+        if "FINREF,SLAREF" in u and "VSSINK" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 4:
+                try:
+                    out["VSSINK"] = float(nums[3])
+                except Exception:
+                    pass
+        if "RTNO3,RTNH4" in u and "RTEXF" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 4:
+                try:
+                    out["RTNO3"] = float(nums[0])
+                    out["RTNH4"] = float(nums[1])
+                    out["PORMIN"] = float(nums[2])
+                    out["RTEXF"] = float(nums[3])
+                except Exception:
+                    pass
+    return out
+
+
 def parse_extra_params(init_map, bounds_map, allowed_params=None, pargp="ecotype"):
     params = []
     for name_raw, (lb, ub) in (bounds_map or {}).items():
@@ -449,9 +746,14 @@ def _read_tmt_harvest_events(tmt_path):
         dry_cum = 0.0
         fresh_cum = 0.0
         out_list = []
+        prev_dry_cum = None
+        prev_fresh_cum = None
         for idx, e in enumerate(evs_sorted, start=1):
+            dry_inc = -99.0
             if e["chpdt"] != -99.0:
+                prev = float(dry_cum)
                 dry_cum = float(e["chpdt"])
+                dry_inc = float(dry_cum - prev)
             else:
                 if e.get("hpodw", -99.0) != -99.0:
                     inc = float(e["hpodw"])
@@ -460,12 +762,24 @@ def _read_tmt_harvest_events(tmt_path):
                 else:
                     inc = 0.0
                 dry_cum += inc
+                dry_inc = float(inc)
 
+            fresh_inc = -99.0
             if e["chfpw"] != -99.0:
+                prev = float(fresh_cum)
                 fresh_cum = float(e["chfpw"])
+                fresh_inc = float(fresh_cum - prev)
             else:
                 inc = 0.0 if e["hfpow"] == -99.0 else float(e["hfpow"])
                 fresh_cum += inc
+                fresh_inc = float(inc) if e["hfpow"] != -99.0 else -99.0
+
+            if prev_dry_cum is None and dry_inc != -99.0 and dry_inc < 0:
+                dry_inc = float(dry_cum)
+            if prev_fresh_cum is None and fresh_inc != -99.0 and fresh_inc < 0:
+                fresh_inc = float(fresh_cum)
+            prev_dry_cum = float(dry_cum)
+            prev_fresh_cum = float(fresh_cum)
 
             out_list.append(
                 {
@@ -474,7 +788,11 @@ def _read_tmt_harvest_events(tmt_path):
                     "dry_cum": float(dry_cum)
                     if e["chpdt"] != -99.0 or e.get("hpodw", -99.0) != -99.0 or e.get("pwad", -99.0) != -99.0
                     else -99.0,
+                    "dry_inc": float(dry_inc)
+                    if e["chpdt"] != -99.0 or e.get("hpodw", -99.0) != -99.0 or e.get("pwad", -99.0) != -99.0
+                    else -99.0,
                     "fresh_cum": float(fresh_cum) if e["chfpw"] != -99.0 or e["hfpow"] != -99.0 else -99.0,
+                    "fresh_inc": float(fresh_inc) if e["chfpw"] != -99.0 or e["hfpow"] != -99.0 else -99.0,
                 }
             )
         out[tn] = out_list
@@ -599,7 +917,7 @@ def _first_batch_filex_path(batch_file):
             s = line.strip()
             if not s:
                 continue
-            if s.startswith("$") or s.startswith("@"):
+            if s.startswith("$") or s.startswith("@") or s.startswith("!"):
                 continue
             return s.split()[0]
     return None
@@ -609,11 +927,40 @@ def _evaluate_out_path_from_batch(batch_file, fallback=OUT_FILE):
     filex = _first_batch_filex_path(batch_file)
     if not filex:
         return fallback
-    filex_path = filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex)
+    filex_path = _resolve_filex_path(filex)
+    if not filex_path:
+        filex_path = filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex)
     eval_path = os.path.join(os.path.dirname(os.path.abspath(filex_path)), "Evaluate.OUT")
     if os.path.exists(eval_path):
         return eval_path
     return fallback
+
+
+def _dssat_root_from_workspace():
+    return os.path.abspath(os.path.join(WORKSPACE, os.pardir, os.pardir))
+
+
+def _try_read_evaluate_out(evaluate_out_path):
+    candidates = [
+        evaluate_out_path,
+        os.path.join(_dssat_root_from_workspace(), "Evaluate.OUT"),
+        os.path.join(WORKSPACE, "Evaluate.OUT"),
+    ]
+    tried = []
+    seen = set()
+    for p in candidates:
+        ap = os.path.abspath(p)
+        if ap in seen:
+            continue
+        seen.add(ap)
+        tried.append(ap)
+        if not os.path.exists(ap):
+            continue
+        try:
+            return _read_evaluate_out(ap)
+        except Exception:
+            continue
+    raise FileNotFoundError(f"Evaluate.OUT not found/readable. Tried: {tried}")
 
 def _infer_cultivar_from_filex(filex_path):
     if not filex_path or not os.path.exists(filex_path):
@@ -677,6 +1024,255 @@ def _infer_cultivar_from_filex(filex_path):
             return parts[2]
 
     return None
+
+
+def _resolve_filex_path(filex):
+    if not filex:
+        return None
+    p = str(filex).strip()
+    if not p:
+        return None
+    if os.path.exists(p):
+        return os.path.abspath(p)
+    if os.path.isabs(p):
+        return None
+    cand = os.path.join(WORKSPACE, p)
+    if os.path.exists(cand):
+        return os.path.abspath(cand)
+    return None
+
+
+def _infer_soil_id_from_filex(filex_path):
+    if not filex_path or not os.path.exists(filex_path):
+        return None
+    header = None
+    soil_idx = None
+    in_fields = False
+    with open(filex_path, "r", encoding="utf-8", errors="ignore") as f:
+        for line in f:
+            s = line.rstrip("\n")
+            u = s.strip().upper()
+            if not u:
+                continue
+            if u.startswith("*FIELDS"):
+                in_fields = True
+                header = None
+                soil_idx = None
+                continue
+            if in_fields and u.startswith("*") and (not u.startswith("*FIELDS")):
+                break
+            if not in_fields:
+                continue
+            if s.lstrip().startswith("@"):
+                header = s.split()
+                try:
+                    soil_idx = header.index("ID_SOIL")
+                except ValueError:
+                    soil_idx = None
+                continue
+            if s.lstrip().startswith("!"):
+                continue
+            if header is None or soil_idx is None:
+                continue
+            parts = s.split()
+            if len(parts) <= soil_idx:
+                continue
+            sid = str(parts[soil_idx]).strip()
+            return sid or None
+    return None
+
+
+def _soil_source_path():
+    return SOIL_BASE_FILE if os.path.exists(SOIL_BASE_FILE) else SOIL_FILE
+
+
+def _read_soil_layers(soil_path, soil_id):
+    if not soil_path or not os.path.exists(soil_path) or not soil_id:
+        return []
+
+    sec_start = None
+    with open(soil_path, "r", encoding="utf-8", errors="ignore") as f:
+        lines = f.readlines()
+
+    for i, s in enumerate(lines):
+        if s.startswith("*"):
+            sid = s[1:].strip().split()[0] if s[1:].strip() else ""
+            if sid.upper() == str(soil_id).strip().upper():
+                sec_start = i
+                break
+    if sec_start is None:
+        return []
+
+    sec_end = len(lines)
+    for j in range(sec_start + 1, len(lines)):
+        if lines[j].startswith("*"):
+            sec_end = j
+            break
+
+    header = None
+    col_idx = {}
+    layer_lines = []
+    for j in range(sec_start, sec_end):
+        s = lines[j].rstrip("\n")
+        u = s.strip().upper()
+        if not u:
+            continue
+        if u.startswith("@") and ("SLLL" in u and "SDUL" in u and "SSAT" in u):
+            header = s.split()
+            if header and header[0].startswith("@"):  # DSSAT header has a leading '@'
+                header = header[1:]
+            col_idx = {k: header.index(k) for k in ["SLLL", "SDUL", "SSAT", "SBDM"] if k in header}
+            continue
+        if header is None:
+            continue
+        if u.startswith("@") or u.startswith("*"):
+            break
+        if s.lstrip().startswith("!"):
+            continue
+        parts = s.split()
+        if not parts:
+            continue
+        layer_lines.append(parts)
+
+    layers = []
+    for parts in layer_lines:
+        rec = {}
+        for k, idx in col_idx.items():
+            if idx < len(parts):
+                try:
+                    rec[k] = float(parts[idx])
+                except Exception:
+                    rec[k] = None
+        layers.append(rec)
+    return layers
+
+
+def _read_initial_sh2o(filex_path):
+    if not filex_path or not os.path.exists(filex_path):
+        return []
+
+    with open(filex_path, "r", encoding="utf-8", errors="ignore") as f:
+        lines = f.readlines()
+
+    ic_start = None
+    ic_end = None
+    for i, line in enumerate(lines):
+        u = line.strip().upper()
+        if u.startswith("*INITIAL CONDITIONS"):
+            ic_start = i
+            continue
+        if ic_start is not None and u.startswith("*") and (not u.startswith("*INITIAL CONDITIONS")):
+            ic_end = i
+            break
+    if ic_start is None:
+        return []
+    if ic_end is None:
+        ic_end = len(lines)
+
+    sh2o_vals = []
+    header = None
+    sh2o_idx = None
+    for j in range(ic_start + 1, ic_end):
+        s = lines[j].rstrip("\n")
+        u = s.strip().upper()
+        if not u:
+            continue
+        if s.lstrip().startswith("@C") and ("ICBL" in u) and ("SH2O" in u):
+            header = s.split()
+            try:
+                sh2o_idx = header.index("SH2O")
+            except ValueError:
+                sh2o_idx = None
+            continue
+        if header is None or sh2o_idx is None:
+            continue
+        if u.startswith("@") or u.startswith("*"):
+            break
+        parts = s.split()
+        if len(parts) <= sh2o_idx:
+            continue
+        try:
+            v = float(parts[sh2o_idx])
+        except Exception:
+            continue
+        if v == -99.0:
+            continue
+        sh2o_vals.append(max(0.01, min(0.80, float(v))))
+    return sh2o_vals
+
+
+def _build_soil_sbdm_params(soil_layers, delta=None, frac=None):
+    params = []
+    d = abs(float(delta)) if delta is not None else None
+    f = abs(float(frac)) if frac is not None else None
+    for i, layer in enumerate(soil_layers, start=1):
+        init = layer.get("SBDM")
+        if init is None:
+            continue
+        init_v = float(init)
+        if f is not None:
+            lo0 = init_v * (1.0 - f)
+            hi0 = init_v * (1.0 + f)
+        else:
+            dd = float(d) if d is not None else 0.0
+            lo0 = init_v - dd
+            hi0 = init_v + dd
+        lb = max(0.5, lo0)
+        ub = min(2.2, hi0)
+        if lb == ub:
+            ub = min(2.2, lb + 1e-6)
+        params.append(
+            {
+                "name": f"SOIL_SBDM_{i:02d}",
+                "init": max(lb, min(ub, init_v)),
+                "lower": lb,
+                "upper": ub,
+                "idx": None,
+                "status": "none",
+                "pargp": "soil",
+            }
+        )
+    return params
+
+
+def _build_ic_sh2o_params(sh2o_vals, soil_layers, delta=None, frac=None):
+    params = []
+    d = abs(float(delta)) if delta is not None else None
+    f = abs(float(frac)) if frac is not None else None
+    for i, sh2o in enumerate(sh2o_vals, start=1):
+        lo = 0.01
+        hi = 0.80
+        if soil_layers and (i - 1) < len(soil_layers):
+            slll = soil_layers[i - 1].get("SLLL")
+            ssat = soil_layers[i - 1].get("SSAT")
+            if slll is not None:
+                lo = max(lo, float(slll))
+            if ssat is not None:
+                hi = min(hi, float(ssat))
+        init = max(lo, min(hi, float(sh2o)))
+        if f is not None:
+            lo0 = init * (1.0 - f)
+            hi0 = init * (1.0 + f)
+        else:
+            dd = float(d) if d is not None else 0.0
+            lo0 = init - dd
+            hi0 = init + dd
+        lb = max(lo, lo0)
+        ub = min(hi, hi0)
+        if lb == ub:
+            ub = min(hi, lb + 1e-6)
+        params.append(
+            {
+                "name": f"IC_SH2O_{i:02d}",
+                "init": max(lb, min(ub, init)),
+                "lower": lb,
+                "upper": ub,
+                "idx": None,
+                "status": "none",
+                "pargp": "initial_conditions",
+            }
+        )
+    return params
 
 def parse_cul_params(target_cultivar, allowed_params=None):
     with open(CUL_BASE_FILE, 'r') as f:
@@ -773,20 +1369,23 @@ def create_ins_and_pst(
     evaluate_out_path=OUT_FILE,
     df_override=None,
     model_cmd_extra=None,
+    out_dir=None,
 ):
+    out_dir = out_dir or WORKSPACE
+    os.makedirs(out_dir, exist_ok=True)
     if df_override is not None:
         df = df_override.copy()
     else:
         try:
-            df = _read_evaluate_out(evaluate_out_path)
+            df = _try_read_evaluate_out(evaluate_out_path)
         except Exception as e:
             print(f"Warning: Could not read model output file: {e}.")
             return
 
-    param_csv_tpl_path = os.path.join(WORKSPACE, f"{prefix}_params.csv.tpl")
-    param_csv_path = os.path.join(WORKSPACE, f"{prefix}_params.csv")
-    ins_path = os.path.join(WORKSPACE, f"{prefix}_{os.path.basename(model_out_path)}.ins")
-    pst_path = os.path.join(WORKSPACE, f"{prefix}.pst")
+    param_csv_tpl_path = os.path.join(out_dir, f"{prefix}_params.csv.tpl")
+    param_csv_path = os.path.join(out_dir, f"{prefix}_params.csv")
+    ins_path = os.path.join(out_dir, f"{prefix}_{os.path.basename(model_out_path)}.ins")
+    pst_path = os.path.join(out_dir, f"{prefix}.pst")
 
     obs_cols = [c for c in df.columns if isinstance(c, str) and c.endswith('M')]
     sim_cols = [c[:-1] + 'S' for c in obs_cols]
@@ -931,8 +1530,11 @@ def create_ins_and_pst(
     pst.pestpp_options["ies_num_reals"] = ies_num_reals
     pst.pestpp_options["ies_bad_phi_sigma"] = 2.0
     pst.pestpp_options["overdue_giveup_fac"] = 4.0
+    pst.pestpp_options["max_run_fail"] = 3
+    pst.pestpp_options["par_sigma_range"] = 6
 
-    cmd = f"python run_dssat.py --param-csv {os.path.basename(param_csv_path)}"
+    run_dssat_path = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "run_dssat.py"))
+    cmd = f"python \"{run_dssat_path}\" --param-csv {os.path.basename(param_csv_path)}"
     if model_cmd_extra:
         cmd = f"{cmd} {str(model_cmd_extra).strip()}"
     pst.model_command = [cmd]
@@ -1078,16 +1680,19 @@ def create_ins_and_pst_multi(
     outputs,
     evaluate_out_path=OUT_FILE,
     model_cmd_extra=None,
+    out_dir=None,
 ):
+    out_dir = out_dir or WORKSPACE
+    os.makedirs(out_dir, exist_ok=True)
     try:
-        eval_df = _read_evaluate_out(evaluate_out_path)
+        eval_df = _try_read_evaluate_out(evaluate_out_path)
     except Exception as e:
         print(f"Warning: Could not read model output file: {e}.")
         return
 
-    param_csv_tpl_path = os.path.join(WORKSPACE, f"{prefix}_params.csv.tpl")
-    param_csv_path = os.path.join(WORKSPACE, f"{prefix}_params.csv")
-    pst_path = os.path.join(WORKSPACE, f"{prefix}.pst")
+    param_csv_tpl_path = os.path.join(out_dir, f"{prefix}_params.csv.tpl")
+    param_csv_path = os.path.join(out_dir, f"{prefix}_params.csv")
+    pst_path = os.path.join(out_dir, f"{prefix}.pst")
 
     create_param_csv_tpl(params, param_csv_tpl_path)
     create_param_csv(params, param_csv_path)
@@ -1124,7 +1729,7 @@ def create_ins_and_pst_multi(
         )
         obs_data_all.extend(obs_data)
 
-        ins_path = os.path.join(WORKSPACE, f"{prefix}_{os.path.basename(model_out_path)}.ins")
+        ins_path = os.path.join(out_dir, f"{prefix}_{os.path.basename(model_out_path)}.ins")
         with open(ins_path, 'w') as f:
             f.write("\n".join(ins_lines))
 
@@ -1140,8 +1745,11 @@ def create_ins_and_pst_multi(
     pst.pestpp_options["ies_num_reals"] = ies_num_reals
     pst.pestpp_options["ies_bad_phi_sigma"] = 2.0
     pst.pestpp_options["overdue_giveup_fac"] = 4.0
+    pst.pestpp_options["max_run_fail"] = 3
+    pst.pestpp_options["par_sigma_range"] = 6
 
-    cmd = f"python run_dssat.py --param-csv {os.path.basename(param_csv_path)}"
+    run_dssat_path = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "run_dssat.py"))
+    cmd = f"python \"{run_dssat_path}\" --param-csv {os.path.basename(param_csv_path)}"
     if model_cmd_extra:
         cmd = f"{cmd} {str(model_cmd_extra).strip()}"
     pst.model_command = [cmd]
@@ -1152,6 +1760,147 @@ def create_ins_and_pst_multi(
 
     pst.write(pst_path)
     print(f"PST file written to {pst_path}")
+
+
+def _infer_pargp_for_name(name, cul_params=None, eco_params=None):
+    n = str(name or "").strip().upper()
+    if not n:
+        return "fixed"
+    if n.startswith("SOIL_"):
+        return "soil"
+    if n.startswith("IC_SH2O_"):
+        return "initial_conditions"
+    if cul_params and n in cul_params:
+        return "cultivar"
+    if eco_params and n in eco_params:
+        return "ecotype"
+    return "fixed"
+
+
+def _read_cul_param_names():
+    if not os.path.exists(CUL_BASE_FILE):
+        return set()
+    with open(CUL_BASE_FILE, "r") as f:
+        for line in f:
+            if line.startswith("@VAR#"):
+                headers = line.split()
+                return {str(h).strip().upper() for h in headers[4:]}
+    return set()
+
+
+def _read_eco_param_names():
+    if not os.path.exists(ECO_FILE):
+        return set()
+    with open(ECO_FILE, "r") as f:
+        for line in f:
+            if line.startswith("@ECO#"):
+                headers = line.split()
+                return {str(h).strip().upper() for h in headers[2:]}
+    return set()
+
+
+def apply_fixed_params_csv(params, fixed_csv_paths):
+    fixed_csv_paths = [p for p in (fixed_csv_paths or []) if p]
+    if not fixed_csv_paths:
+        return params
+
+    cul_params = _read_cul_param_names()
+    eco_params = _read_eco_param_names()
+
+    fixed_map = {}
+    for p in fixed_csv_paths:
+        fixed_map.update(_load_init_overrides(p))
+
+    existing = {str(p.get("name", "")).strip().upper(): p for p in (params or [])}
+    for k_raw, v in fixed_map.items():
+        name = str(k_raw).strip().upper()
+        if not name:
+            continue
+        try:
+            val = float(v)
+        except Exception:
+            continue
+
+        if name in existing:
+            p = existing[name]
+            p["init"] = val
+            p["lower"] = val
+            p["upper"] = val
+            p["status"] = "fixed"
+            continue
+
+        params.append(
+            {
+                "name": name,
+                "init": val,
+                "lower": val,
+                "upper": val,
+                "idx": None,
+                "status": "fixed",
+                "pargp": _infer_pargp_for_name(name, cul_params=cul_params, eco_params=eco_params),
+            }
+        )
+
+    return params
+
+
+def apply_tighten_params_csv(params, tighten_csv_paths, tighten_frac=0.05):
+    tighten_csv_paths = [p for p in (tighten_csv_paths or []) if p]
+    if not tighten_csv_paths:
+        return params
+    frac = abs(float(tighten_frac))
+    if frac <= 0.0:
+        return params
+
+    tighten_map = {}
+    for p in tighten_csv_paths:
+        tighten_map.update(_load_init_overrides(p))
+
+    if not tighten_map:
+        return params
+
+    existing = {str(p.get("name", "")).strip().upper(): p for p in (params or [])}
+    missing = []
+    for k_raw, v in tighten_map.items():
+        name = str(k_raw).strip().upper()
+        if not name:
+            continue
+        try:
+            val = float(v)
+        except Exception:
+            continue
+        if name not in existing:
+            missing.append(name)
+            continue
+
+        p = existing[name]
+        try:
+            lb0 = float(p.get("lower"))
+            ub0 = float(p.get("upper"))
+        except Exception:
+            continue
+
+        if lb0 > ub0:
+            lb0, ub0 = ub0, lb0
+        if lb0 == ub0:
+            continue
+
+        lo = val * (1.0 - frac)
+        hi = val * (1.0 + frac)
+        lb = max(lb0, min(lo, hi))
+        ub = min(ub0, max(lo, hi))
+        if lb > ub:
+            lb, ub = ub, lb
+
+        p["init"] = max(lb, min(ub, val))
+        p["lower"] = lb
+        p["upper"] = ub
+        p["status"] = "none" if float(lb) != float(ub) else "fixed"
+
+    if missing:
+        preview = ", ".join(missing[:12])
+        print(f"Tighten CSV missing {len(missing)} parameters (first: {preview})")
+    return params
 
 
 def _load_init_overrides(csv_path):
@@ -1198,29 +1947,81 @@ if __name__ == "__main__":
     parser.add_argument("--ies-num-reals", type=int, default=50)
     parser.add_argument("--batch", default=os.path.join(WORKSPACE, "DSSBatch.v48"))
     parser.add_argument("--init-from", action="append", default=None)
+    parser.add_argument("--fixed-from", action="append", default=None)
+    parser.add_argument("--tighten-from", action="append", default=None)
+    parser.add_argument("--tighten-frac", type=float, default=0.05)
+    parser.add_argument("--include-soil", action="store_true", default=False)
+    parser.add_argument("--include-ic", action="store_true", default=False)
+    parser.add_argument("--soil-sbdm-delta", type=float, default=None)
+    parser.add_argument("--soil-sbdm-frac", type=float, default=0.03)
+    parser.add_argument("--ic-sh2o-delta", type=float, default=None)
+    parser.add_argument("--ic-sh2o-frac", type=float, default=0.03)
     parser.add_argument(
         "--param-review-mode",
         choices=["auto", "export", "import", "off"],
         default="auto",
     )
     parser.add_argument("--param-review-csv", default=None)
+    parser.add_argument(
+        "--bounds-review-mode",
+        choices=["auto", "require", "off"],
+        default="auto",
+    )
+    parser.add_argument("--bounds-review-csv", default=SENSITIVITY_PARAM_REVIEW_CSV)
+    parser.add_argument("--validate-bounds-review-csv", action="store_true", default=False)
     parser.add_argument("--pwadm-sigma0", type=float, default=250.0)
     parser.add_argument("--pwadm-cv", type=float, default=0.08)
     parser.add_argument("--pwadm-sigma-factor", type=float, default=1.0)
+    parser.add_argument("--harvest-early-hno-max", type=int, default=0)
+    parser.add_argument("--harvest-early-weight-factor", type=float, default=1.0)
+    parser.add_argument(
+        "--harvest-early-apply-to",
+        choices=["inc", "cum", "both"],
+        default="inc",
+    )
+    parser.add_argument("--include-n-uptake", action="store_true", default=False)
+    parser.add_argument("--hwamm-sigma", type=float, default=500.0)
+    parser.add_argument("--pwamm-sigma", type=float, default=200.0)
+    parser.add_argument("--laixm-sigma", type=float, default=0.8)
+    parser.add_argument("--cnamm-sigma", type=float, default=25.0)
+    parser.add_argument("--hiamm-sigma", type=float, default=0.10)
+    parser.add_argument("--adapm-sigma", type=float, default=None)
     parser.add_argument("--harvest-var", default="CHPDT")
+    parser.add_argument("--out-dir", default=WORKSPACE)
     args = parser.parse_args()
 
     mode = (args.mode or "").strip().lower()
     filex = _first_batch_filex_path(args.batch)
-    cultivar = _infer_cultivar_from_filex(filex) or "TM0001"
+    cultivar = _infer_cultivar_from_filex(_resolve_filex_path(filex) or filex) or "TM0001"
     ecotype = _infer_ecotype_from_cul_base(cultivar) or "TM0001"
     evaluate_out_path = _evaluate_out_path_from_batch(args.batch)
 
     df_override = None
     stage2_outputs = None
 
+    out_dir = os.path.abspath(args.out_dir) if args.out_dir else WORKSPACE
+    os.makedirs(out_dir, exist_ok=True)
+
     harvest_var = (args.harvest_var or "CHPDT").strip().upper()
-    model_cmd_extra = f"--batch {os.path.basename(args.batch)} --harvest-var {harvest_var}"
+    adapm_sigma = float(args.adapm_sigma) if args.adapm_sigma is not None else None
+    batch_for_model = args.batch
+    try:
+        if args.batch and os.path.exists(args.batch):
+            bname = os.path.basename(args.batch)
+            dst = os.path.join(out_dir, bname)
+            if os.path.abspath(args.batch) != os.path.abspath(dst):
+                shutil.copy(args.batch, dst)
+            batch_for_model = bname
+    except Exception:
+        batch_for_model = os.path.basename(args.batch) if args.batch else args.batch
+
+    model_cmd_extra = f"--batch {batch_for_model} --harvest-var {harvest_var}"
+
+    allowed: Optional[Set[str]] = None
+    obs_bases: Optional[Set[str]] = None
+    critical: Set[str] = set()
+    group_sigmas: Optional[Dict[str, float]] = None
+    extra_allowed: Optional[Set[str]] = None
 
     if mode == "eggplant_pheno":
         prefix = args.prefix or "eggplant_pheno"
@@ -1229,7 +2030,7 @@ if __name__ == "__main__":
         critical = {'ADAPM'}
         model_out_path = PEST_EVAL_FILE
         group_sigmas = {
-            "ADAPM": 3.0,
+            "ADAPM": float(adapm_sigma) if adapm_sigma is not None else 25.0,
         }
         extra_allowed = None
     elif mode == "eggplant_growth":
@@ -1251,14 +2052,14 @@ if __name__ == "__main__":
         critical = set()
         model_out_path = PEST_JOINT_FILE
         group_sigmas = {
-            "HWAMM": 500.0,
-            "PWAMM": 200.0,
-            "LAIXM": 0.8,
-            "CNAMM": 25.0,
+            "HWAMM": float(args.hwamm_sigma),
+            "PWAMM": float(args.pwamm_sigma),
+            "LAIXM": float(args.laixm_sigma),
+            "CNAMM": float(args.cnamm_sigma),
             "CHTAM": 15.0,
             "CNAAM": 20.0,
             "H#AMM": 50.0,
-            "HIAMM": 0.10,
+            "HIAMM": float(args.hiamm_sigma),
         }
         extra_allowed = {"XMAGE", "FL-VS", "TRIFL", "RWDTH", "RHGHT"}
     elif mode == "eggplant_stage2":
@@ -1287,22 +2088,38 @@ if __name__ == "__main__":
             "TRIFL",
             "RWDTH",
             "RHGHT",
+            "KC_SLOPE",
+            "VSSINK",
+            "RTNO3",
+            "RTNH4",
+            "RTEXF",
             "XFPHT",
             "XFINT",
             "PL-EM",
             "EM-V1",
             "V1-JU",
             "JU-R0",
-            "TB",
-            "TO1",
-            "TO2",
-            "TM",
+            "TB1",
+            "TO11",
+            "TO21",
+            "TM1",
+            "TB2",
+            "TO12",
+            "TO22",
+            "TM2",
+            "TB3",
+            "TO13",
+            "TO23",
+            "TM3",
         }
+
+        if not bool(args.include_n_uptake):
+            extra_allowed = {p for p in extra_allowed if p not in {"RTNO3", "RTNH4", "RTEXF"}}
 
         entries = _parse_batch_entries(args.batch)
 
         if not entries:
-            df_harvest = pd.DataFrame(columns=["@RUN", "TN", "HNO", "DATE", "PWADM", "PWADS"])
+            df_harvest = pd.DataFrame(columns=["@RUN", "TN", "HNO", "DATE", "PWADM", "PWAIM", "PWADS", "PWAIS"])
             harvest_sigmas = {"PWADM": 1.0}
             df_process = pd.DataFrame(
                 columns=["@RUN", "TN", "DATE", "LAIDM", "LWADM", "SWADM", "LAIDS", "LWADS", "SWADS"]
@@ -1310,7 +2127,7 @@ if __name__ == "__main__":
             process_sigmas = {"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
         else:
             filex = entries[0]["filex"]
-            filex_path = filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex)
+            filex_path = _resolve_filex_path(filex) or (filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex))
             excode = _infer_excode_from_filex(filex_path)
             tmt_path = os.path.join(os.path.dirname(os.path.abspath(filex_path)), f"{excode}.TMT") if excode else None
 
@@ -1326,6 +2143,7 @@ if __name__ == "__main__":
 
                 for ev in events_by_tn.get(tn, []):
                     obs_cum = ev.get("dry_cum", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_cum", -99.0)
+                    obs_inc = ev.get("dry_inc", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_inc", -99.0)
                     harvest_rows.append(
                         {
                             "@RUN": run_no,
@@ -1333,7 +2151,9 @@ if __name__ == "__main__":
                             "HNO": int(ev["hno"]),
                             "DATE": int(ev["date"]),
                             "PWADM": float(obs_cum),
+                            "PWAIM": float(obs_inc),
                             "PWADS": -99.0,
+                            "PWAIS": -99.0,
                         }
                     )
 
@@ -1357,14 +2177,30 @@ if __name__ == "__main__":
 
             harvest_sigmas = {"PWADM": 1.0}
             if not df_harvest.empty:
+                early_hno_max = int(args.harvest_early_hno_max)
+                early_weight_factor = float(args.harvest_early_weight_factor)
+                early_apply_to = str(args.harvest_early_apply_to).strip().lower()
+                early_scale = 1.0
+                if early_weight_factor > 0:
+                    early_scale = float(early_weight_factor) ** -0.5
                 for hno, g in df_harvest.groupby("HNO"):
-                    med = float(g["PWADM"].median())
                     sigma0 = float(args.pwadm_sigma0)
                     cv = float(args.pwadm_cv)
                     sigma_factor = float(args.pwadm_sigma_factor)
-                    sigma = (sigma0**2 + (cv * abs(med)) ** 2) ** 0.5
-                    sigma = sigma * sigma_factor
-                    harvest_sigmas[f"PWADM_H{int(hno)}"] = float(sigma)
+
+                    med_cum = float(g["PWADM"].median())
+                    sigma_cum = (sigma0**2 + (cv * abs(med_cum)) ** 2) ** 0.5
+                    sigma_cum = sigma_cum * sigma_factor
+                    if early_hno_max > 0 and int(hno) <= early_hno_max and early_apply_to in {"cum", "both"}:
+                        sigma_cum = sigma_cum * early_scale
+                    harvest_sigmas[f"PWADM_H{int(hno)}"] = float(sigma_cum)
+
+                    med_inc = float(g["PWAIM"].median())
+                    sigma_inc = (sigma0**2 + (cv * abs(med_inc)) ** 2) ** 0.5
+                    sigma_inc = sigma_inc * sigma_factor
+                    if early_hno_max > 0 and int(hno) <= early_hno_max and early_apply_to in {"inc", "both"}:
+                        sigma_inc = sigma_inc * early_scale
+                    harvest_sigmas[f"PWAIM_H{int(hno)}"] = float(sigma_inc)
 
             process_sigmas = {"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
             if not df_process.empty:
@@ -1386,26 +2222,26 @@ if __name__ == "__main__":
                 "model_out_path": PEST_EVAL_FILE,
                 "obs_bases": {"ADAP"},
                 "critical_obs": {"ADAPM"},
-                "group_sigmas": {"ADAPM": 20.0},
+                "group_sigmas": {"ADAPM": float(adapm_sigma) if adapm_sigma is not None else 25.0},
             },
             {
                 "model_out_path": PEST_JOINT_FILE,
                 "obs_bases": {"HWAM", "LAIX", "CNAM", "CHTA", "CNAA", "PWAM", "H#AM", "HIAM"},
                 "critical_obs": set(),
                 "group_sigmas": {
-                    "HWAMM": 500.0,
-                    "PWAMM": 200.0,
-                    "LAIXM": 0.8,
-                    "CNAMM": 25.0,
+                    "HWAMM": float(args.hwamm_sigma),
+                    "PWAMM": float(args.pwamm_sigma),
+                    "LAIXM": float(args.laixm_sigma),
+                    "CNAMM": float(args.cnamm_sigma),
                     "CHTAM": 15.0,
                     "CNAAM": 20.0,
                     "H#AMM": 50.0,
-                    "HIAMM": 0.10,
+                    "HIAMM": float(args.hiamm_sigma),
                 },
             },
             {
                 "model_out_path": PEST_HARVEST_FILE,
-                "obs_bases": {"PWAD"},
+                "obs_bases": {"PWAD", "PWAI"},
                 "critical_obs": set(),
                 "group_sigmas": harvest_sigmas,
                 "df": df_harvest,
@@ -1421,18 +2257,18 @@ if __name__ == "__main__":
     elif mode == "eggplant_harvest":
         prefix = args.prefix or "eggplant_harvest"
         allowed = {"SLAVR", "SIZLF", "LFMAX", "XFRT", "WTPSD", "SFDUR", "SDPDV", "PODUR"}
-        obs_bases = {"PWAD"}
+        obs_bases = {"PWAD", "PWAI"}
         critical = set()
         model_out_path = PEST_HARVEST_FILE
 
         entries = _parse_batch_entries(args.batch)
         if not entries:
             print("Warning: batch file is empty; no harvest observations will be created.")
-            df_override = pd.DataFrame(columns=["@RUN", "TN", "HNO", "DATE", "PWADM", "PWADS"])
+            df_override = pd.DataFrame(columns=["@RUN", "TN", "HNO", "DATE", "PWADM", "PWAIM", "PWADS", "PWAIS"])
             group_sigmas = {"PWADM": 1.0}
         else:
             filex = entries[0]["filex"]
-            filex_path = filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex)
+            filex_path = _resolve_filex_path(filex) or (filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex))
             excode = _infer_excode_from_filex(filex_path)
             tmt_path = os.path.join(os.path.dirname(os.path.abspath(filex_path)), f"{excode}.TMT") if excode else None
 
@@ -1444,13 +2280,16 @@ if __name__ == "__main__":
                 tn = int(e.get("tn", -99))
                 for ev in events_by_tn.get(tn, []):
                     obs_cum = ev.get("dry_cum", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_cum", -99.0)
+                    obs_inc = ev.get("dry_inc", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_inc", -99.0)
                     rows.append({
                         "@RUN": run_no,
                         "TN": tn,
                         "HNO": int(ev["hno"]),
                         "DATE": int(ev["date"]),
                         "PWADM": float(obs_cum),
+                        "PWAIM": float(obs_inc),
                         "PWADS": -99.0,
+                        "PWAIS": -99.0,
                     })
 
             df_override = pd.DataFrame(rows)
@@ -1458,14 +2297,29 @@ if __name__ == "__main__":
                 group_sigmas = {"PWADM": 1.0}
             else:
                 group_sigmas = {"PWADM": 1.0}
+                early_hno_max = int(args.harvest_early_hno_max)
+                early_weight_factor = float(args.harvest_early_weight_factor)
+                early_apply_to = str(args.harvest_early_apply_to).strip().lower()
+                early_scale = 1.0
+                if early_weight_factor > 0:
+                    early_scale = float(early_weight_factor) ** -0.5
                 for hno, g in df_override.groupby("HNO"):
-                    med = float(g["PWADM"].median())
                     sigma0 = float(args.pwadm_sigma0)
                     cv = float(args.pwadm_cv)
                     sigma_factor = float(args.pwadm_sigma_factor)
-                    sigma = (sigma0 ** 2 + (cv * abs(med)) ** 2) ** 0.5
-                    sigma = sigma * sigma_factor
-                    group_sigmas[f"PWADM_H{int(hno)}"] = float(sigma)
+                    med_cum = float(g["PWADM"].median())
+                    sigma_cum = (sigma0 ** 2 + (cv * abs(med_cum)) ** 2) ** 0.5
+                    sigma_cum = sigma_cum * sigma_factor
+                    if early_hno_max > 0 and int(hno) <= early_hno_max and early_apply_to in {"cum", "both"}:
+                        sigma_cum = sigma_cum * early_scale
+                    group_sigmas[f"PWADM_H{int(hno)}"] = float(sigma_cum)
+
+                    med_inc = float(g["PWAIM"].median())
+                    sigma_inc = (sigma0 ** 2 + (cv * abs(med_inc)) ** 2) ** 0.5
+                    sigma_inc = sigma_inc * sigma_factor
+                    if early_hno_max > 0 and int(hno) <= early_hno_max and early_apply_to in {"inc", "both"}:
+                        sigma_inc = sigma_inc * early_scale
+                    group_sigmas[f"PWAIM_H{int(hno)}"] = float(sigma_inc)
         extra_allowed = {"XMAGE", "FL-VS", "TRIFL"}
     elif mode == "eggplant_v13":
         prefix = args.prefix or "eggplant_v13"
@@ -1511,7 +2365,7 @@ if __name__ == "__main__":
             process_sigmas = {"L#SDM": 0.6, "LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
         else:
             filex = entries[0]["filex"]
-            filex_path = filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex)
+            filex_path = _resolve_filex_path(filex) or (filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex))
             excode = _infer_excode_from_filex(filex_path)
             tmt_path = os.path.join(os.path.dirname(os.path.abspath(filex_path)), f"{excode}.TMT") if excode else None
 
@@ -1527,6 +2381,7 @@ if __name__ == "__main__":
 
                 for ev in events_by_tn.get(tn, []):
                     obs_cum = ev.get("dry_cum", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_cum", -99.0)
+                    obs_inc = ev.get("dry_inc", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_inc", -99.0)
                     harvest_rows.append(
                         {
                             "@RUN": run_no,
@@ -1534,7 +2389,9 @@ if __name__ == "__main__":
                             "HNO": int(ev["hno"]),
                             "DATE": int(ev["date"]),
                             "PWADM": float(obs_cum),
+                            "PWAIM": float(obs_inc),
                             "PWADS": -99.0,
+                            "PWAIS": -99.0,
                         }
                     )
 
@@ -1560,14 +2417,31 @@ if __name__ == "__main__":
                 harvest_sigmas = {"PWADM": 1.0}
             else:
                 harvest_sigmas = {"PWADM": 1.0}
+                early_hno_max = int(args.harvest_early_hno_max)
+                early_weight_factor = float(args.harvest_early_weight_factor)
+                early_apply_to = str(args.harvest_early_apply_to).strip().lower()
+                early_scale = 1.0
+                if early_weight_factor > 0:
+                    early_scale = float(early_weight_factor) ** -0.5
+
                 for hno, g in df_harvest.groupby("HNO"):
-                    med = float(g["PWADM"].median())
                     sigma0 = float(args.pwadm_sigma0)
                     cv = float(args.pwadm_cv)
                     sigma_factor = float(args.pwadm_sigma_factor)
-                    sigma = (sigma0**2 + (cv * abs(med)) ** 2) ** 0.5
-                    sigma = sigma * sigma_factor
-                    harvest_sigmas[f"PWADM_H{int(hno)}"] = float(sigma)
+
+                    med_cum = float(g["PWADM"].median())
+                    sigma_cum = (sigma0**2 + (cv * abs(med_cum)) ** 2) ** 0.5
+                    sigma_cum = sigma_cum * sigma_factor
+                    if early_hno_max > 0 and int(hno) <= early_hno_max and early_apply_to in {"cum", "both"}:
+                        sigma_cum = sigma_cum * early_scale
+                    harvest_sigmas[f"PWADM_H{int(hno)}"] = float(sigma_cum)
+
+                    med_inc = float(g["PWAIM"].median())
+                    sigma_inc = (sigma0**2 + (cv * abs(med_inc)) ** 2) ** 0.5
+                    sigma_inc = sigma_inc * sigma_factor
+                    if early_hno_max > 0 and int(hno) <= early_hno_max and early_apply_to in {"inc", "both"}:
+                        sigma_inc = sigma_inc * early_scale
+                    harvest_sigmas[f"PWAIM_H{int(hno)}"] = float(sigma_inc)
 
             df_process = pd.DataFrame(process_rows)
             process_sigmas = {"L#SDM": 0.6, "LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
@@ -1589,7 +2463,7 @@ if __name__ == "__main__":
         stage2_outputs = [
             {
                 "model_out_path": PEST_HARVEST_FILE,
-                "obs_bases": {"PWAD"},
+                "obs_bases": {"PWAD", "PWAI"},
                 "critical_obs": set(),
                 "group_sigmas": harvest_sigmas,
                 "df": df_harvest,
@@ -1643,7 +2517,7 @@ if __name__ == "__main__":
             group_sigmas = {"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
         else:
             filex = entries[0]["filex"]
-            filex_path = filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex)
+            filex_path = _resolve_filex_path(filex) or (filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex))
             excode = _infer_excode_from_filex(filex_path)
             tmt_path = os.path.join(os.path.dirname(os.path.abspath(filex_path)), f"{excode}.TMT") if excode else None
 
@@ -1690,7 +2564,7 @@ if __name__ == "__main__":
         critical = {"ADAPM"}
         model_out_path = PEST_EVAL_FILE
         group_sigmas = {
-            "ADAPM": 15.0,
+            "ADAPM": float(adapm_sigma) if adapm_sigma is not None else 25.0,
         }
         extra_allowed = {
             "TB1",
@@ -1720,6 +2594,7 @@ if __name__ == "__main__":
     if extra_allowed is not None:
         eco_init = _read_eco_init_values(ecotype)
         spe_init = _read_spe_temp_init_values()
+        spe_init.update(_read_spe_direct_init_values())
         params.extend(
             parse_extra_params(
                 init_map=eco_init,
@@ -1736,6 +2611,38 @@ if __name__ == "__main__":
                 pargp="species",
             )
         )
+        params.extend(
+            parse_extra_params(
+                init_map=spe_init,
+                bounds_map=SPE_DIRECT_BOUNDS_EGGPLANT,
+                allowed_params=extra_allowed,
+                pargp="species",
+            )
+        )
+
+    if args.include_soil or args.include_ic:
+        filex0 = _first_batch_filex_path(args.batch)
+        filex_path0 = _resolve_filex_path(filex0)
+        soil_id = _infer_soil_id_from_filex(filex_path0)
+        soil_layers = _read_soil_layers(_soil_source_path(), soil_id)
+        if args.include_soil:
+            params.extend(
+                _build_soil_sbdm_params(
+                    soil_layers,
+                    delta=args.soil_sbdm_delta,
+                    frac=args.soil_sbdm_frac,
+                )
+            )
+        if args.include_ic:
+            sh2o_vals = _read_initial_sh2o(filex_path0)
+            params.extend(
+                _build_ic_sh2o_params(
+                    sh2o_vals,
+                    soil_layers,
+                    delta=args.ic_sh2o_delta,
+                    frac=args.ic_sh2o_frac,
+                )
+            )
     print(f"Found {len(params)} adjustable parameters.")
 
     override = {}
@@ -1747,9 +2654,36 @@ if __name__ == "__main__":
             if k and k in override:
                 p["init"] = float(override[k])
 
+    brm_mode = (args.bounds_review_mode or "auto").strip().lower()
+    brm_csv = args.bounds_review_csv
+    if brm_mode != "off":
+        exists = bool(brm_csv and os.path.exists(brm_csv))
+        if brm_mode == "require" and not exists:
+            raise FileNotFoundError(f"Bounds review CSV not found: {brm_csv}")
+        if exists:
+            if args.validate_bounds_review_csv:
+                issues = validate_sensitivity_param_review_csv(brm_csv)
+                if issues:
+                    preview = "\n".join([str(x) for x in issues[:80]])
+                    raise SystemExit(f"Bounds review CSV validation failed ({len(issues)} issues)\n{preview}")
+                print(f"Bounds review CSV validated: {brm_csv}")
+
+            params, brm_report = apply_bounds_review_csv(
+                params,
+                brm_csv,
+                cultivar=cultivar,
+                ecotype=ecotype,
+                mode=mode,
+            )
+            if brm_report.get("applied", 0) > 0:
+                print(f"Applied bounds from {brm_csv} to {brm_report['applied']} parameters")
+            if brm_report.get("missing", 0) > 0:
+                missing_preview = ", ".join([str(x) for x in (brm_report.get("missing_names") or [])[:12]])
+                print(f"Bounds CSV missing {brm_report['missing']} parameters (first: {missing_preview})")
+
     param_review_csv = args.param_review_csv
     if not param_review_csv:
-        param_review_csv = os.path.join(WORKSPACE, f"{prefix}_param_review.csv")
+        param_review_csv = os.path.join(out_dir, f"{prefix}_param_review.csv")
 
     prm_mode = (args.param_review_mode or "auto").strip().lower()
     if prm_mode != "off":
@@ -1767,6 +2701,12 @@ if __name__ == "__main__":
         if exists and prm_mode in {"auto", "import"}:
             params = apply_param_review_csv(params, param_review_csv)
 
+    if args.tighten_from:
+        params = apply_tighten_params_csv(params, args.tighten_from, tighten_frac=float(args.tighten_frac))
+
+    if args.fixed_from:
+        params = apply_fixed_params_csv(params, args.fixed_from)
+
     if stage2_outputs is not None:
         create_ins_and_pst_multi(
             params,
@@ -1776,6 +2716,7 @@ if __name__ == "__main__":
             outputs=stage2_outputs,
             evaluate_out_path=evaluate_out_path,
             model_cmd_extra=model_cmd_extra,
+            out_dir=out_dir,
         )
     else:
         create_ins_and_pst(
@@ -1790,4 +2731,5 @@ if __name__ == "__main__":
             evaluate_out_path=evaluate_out_path,
             df_override=df_override,
             model_cmd_extra=model_cmd_extra,
+            out_dir=out_dir,
         )
