@@ -24,6 +24,7 @@ pip install pandas numpy pyemu matplotlib
 ## 目录
 
 - [核心约定](#核心约定)
+- [你在“率定”什么（3 分钟理解版）](#你在率定什么3-分钟理解版)
 - [0 基线检查](#0-基线检查)
 - [1 构建率定任务](#1-构建率定任务)
 - [2 运行 PEST++ IES](#2-运行-pest-ies)
@@ -33,6 +34,7 @@ pip install pandas numpy pyemu matplotlib
 - [6 手动微调最优参数并出图](#6-手动微调最优参数并出图)
 - [7 权重策略 方案A 早期采收增量加权](#7-权重策略-方案a-早期采收增量加权)
 - [8 SPE 中与低氮耐受相关的参数](#8-spe-中与低氮耐受相关的参数)
+- [9 关键生理参数速查](#9-关键生理参数速查)
 - [常见问题与定位](#常见问题与定位)
 
 ## 核心约定
@@ -40,6 +42,23 @@ pip install pandas numpy pyemu matplotlib
 - `prefix`：一次任务的唯一名称，建议包含阶段/日期/策略，例如 `eggplant_stage2_v12_yieldfocus`
 - `run_dir`：构建输出目录（包含 `.pst/.tpl/.ins` 与参数模板），建议：`Workspace\Calibration_Results\_runs\<timestamp>_<prefix>`
 - `det_dir`：确定性模拟目录（用某一套参数跑 DSSAT，用于出图/指标表），建议：`Workspace\Calibration_Results\_det\<prefix>_best`
+
+## 你在“率定”什么（3 分钟理解版）
+
+本项目以 DSSAT 的 Tomato 作物文件（`TMGRO048.*`）承载“茄子化”的参数体系。PEST++（IES）做的事情本质是：
+
+1) 生成一批候选参数集合（ensemble）
+2) 对每个集合跑一次 DSSAT（前向模型）
+3) 用观测-模拟残差计算目标函数（phi）并更新下一轮 ensemble
+
+在 `eggplant_stage2` 里，目标函数同时包含 4 类观测：
+
+- 物候（来自 `Evaluate.OUT → PestEval.OUT`，例如 `ADAPM`）
+- 季末生长/产量综合指标（来自 `Evaluate.OUT/PlantGro.OUT → PestJoint.OUT`）
+- 多次采收曲线（来自 `FreshWt.OUT → PestHarvest.OUT`，按采收事件对齐）
+- 过程点（来自 `PlantGro.OUT → PestTmtGrow.OUT`，按采样日期对齐）
+
+评价表默认输出 `RMSE / NRMSE / d-index`（总体与分 TN/TRNO），用于识别 Genotype-by-environment interaction 的残差结构。
 
 ## 0 基线检查
 
@@ -62,30 +81,41 @@ cd C:\DSSAT48\Tomato_Cal\Workspace
 $prefix = "eggplant_stage2_v12_yieldfocus"
 $runDir = "C:\DSSAT48\Tomato_Cal\Workspace\Calibration_Results\_runs\20260201_$prefix"
 
-python build_pest.py \
-  --mode eggplant_stage2 \
-  --prefix $prefix \
-  --noptmax 6 \
-  --ies-num-reals 80 \
-  --batch DSSBatch.v48 \
-  --harvest-var CHPDT \
-  --param-review-mode off \
-  --bounds-review-mode require \
-  --bounds-review-csv "Sensitivity_Analyze\SA_Project_Output\sensitivity_param_review.csv" \
-  --tighten-from "C:\DSSAT48\Tomato_Cal\Workspace\Calibration_Results\eggplant_stage2_v11_tight5_best_parameters_fixed.csv" \
-  --tighten-frac 0.10 \
-  --pwadm-sigma0 120 \
-  --pwadm-cv 0.05 \
-  --pwadm-sigma-factor 0.25 \
-  --hiamm-sigma 0.25 \
-  --hwamm-sigma 250 \
-  --pwamm-sigma 150 \
+python build_pest.py `
+  --mode eggplant_stage2 `
+  --prefix $prefix `
+  --noptmax 6 `
+  --ies-num-reals 80 `
+  --batch DSSBatch.v48 `
+  --harvest-var CHPDT `
+  --param-review-mode off `
+  --bounds-review-mode require `
+  --bounds-review-csv "Sensitivity_Analyze\SA_Project_Output\sensitivity_param_review.csv" `
+  --tighten-from "C:\DSSAT48\Tomato_Cal\Workspace\Calibration_Results\eggplant_stage2_v11_tight5_best_parameters_fixed.csv" `
+  --tighten-frac 0.10 `
+  --pwadm-sigma0 120 `
+  --pwadm-cv 0.05 `
+  --pwadm-sigma-factor 0.25 `
+  --hiamm-sigma 0.25 `
+  --hwamm-sigma 250 `
+  --pwamm-sigma 150 `
   --out-dir $runDir
 ```
 
 成功标志：输出 `PST file written to ...\{prefix}.pst`。
 
-提示：`eggplant_stage2` 默认将 `KC_SLOPE`、`VSSINK` 纳入率定参数集。
+提示：`eggplant_stage2` 默认将 `KC_SLOPE`、`VSSINK`、以及根系供氮参数（`RTNO3/RTNH4/RTEXF`）纳入率定参数集。
+
+### build_pest.py 关键参数含义（按你最常改的顺序）
+
+- `--noptmax`：IES 外循环迭代次数上限。调大不一定更好，建议先用 5–8 做稳定性测试。
+- `--ies-num-reals`：ensemble 大小，越大越稳但越慢。发表级不确定性建议 `>=100`。
+- `--batch`：DSSAT 批运行文件（决定试验文件与 TN/TRNO 集合）。
+- `--harvest-var CHPDT|CHFPW`：多次采收口径（干重累计/鲜重累计），贯穿到 `PestHarvest.OUT`。
+- `--bounds-review-*`：用敏感性分析生成的 `sensitivity_param_review.csv` 约束“哪些参数允许进入率定 + 默认边界”。
+- `--tighten-from/--tighten-frac`：围绕上一版最优参数收缩可行域，提升可识别性、减少等价解。
+- `--pwadm-sigma0/--pwadm-cv/--pwadm-sigma-factor`：多次采收（累计/增量）观测的权重体系。
+- `--hwamm-sigma/--pwamm-sigma/--hiamm-sigma/...`：各观测组（obs group）的权重（权重=1/sigma^2）。
 
 ## 2 运行 PEST++ IES
 
@@ -119,9 +149,9 @@ $detDir = "C:\DSSAT48\Tomato_Cal\Workspace\Calibration_Results\_det\${prefix}_be
 New-Item -ItemType Directory -Force -Path $detDir | Out-Null
 
 cd $detDir
-python "C:\DSSAT48\Tomato_Cal\Workspace\run_dssat.py" \
-  --param-csv "C:\DSSAT48\Tomato_Cal\Workspace\Calibration_Results\${prefix}_best_parameters_fixed.csv" \
-  --batch "C:\DSSAT48\Tomato_Cal\Workspace\DSSBatch.v48" \
+python "C:\DSSAT48\Tomato_Cal\Workspace\run_dssat.py" `
+  --param-csv "C:\DSSAT48\Tomato_Cal\Workspace\Calibration_Results\${prefix}_best_parameters_fixed.csv" `
+  --batch "C:\DSSAT48\Tomato_Cal\Workspace\DSSBatch.v48" `
   --harvest-var CHPDT
 
 cd C:\DSSAT48\Tomato_Cal\Workspace
@@ -209,17 +239,41 @@ python build_pest.py --mode eggplant_stage2 --prefix $prefix --noptmax 6 --ies-n
 
 脚本会把这些键写入 `TMGRO048.SPE`，从而在模拟中体现砧木特性。
 
-如需把根系供氮能力参数纳入率定（推荐放在 `eggplant_stage2` 阶段，且在物候已基本稳定后再引入），构建时加入：
+根系供氮能力参数在本项目中默认启用（`eggplant_stage2` 默认包含 `RTNO3/RTNH4/RTEXF`）。如需临时关闭，构建时加入：
 
 ```powershell
-python build_pest.py --mode eggplant_stage2 --include-n-uptake ...
+python build_pest.py --mode eggplant_stage2 --no-include-n-uptake ...
 ```
 
 默认范围（可在 `bounds_review_csv` 中进一步收紧）：
 
-- `RTNO3`: 0.006–0.030
-- `RTNH4`: 0.006–0.030
+- `RTNO3`: 0.010–0.050
+- `RTNH4`: 0.010–0.050
 - `RTEXF`: 0.05–0.25
+
+补充约束：
+
+- `XFINT` 已强制约束在 `0.12–0.50`（并满足 `<=1.0`），以规避 `IPDMND` 风险并减少不可解释的早期分配极端值。
+- `FL-VS` 为固定常数（默认 100），不作为率定参数进入搜索空间。
+
+## 9 关键生理参数速查
+
+以下是你在 `eggplant_stage2` 最常需要解释/讨论的一组参数（按论文写作友好度排序）。
+
+- 物候与 Thermal time
+  - `EM-FL/FL-SH/FL-SD/SD-PM/FL-LF`：用 photothermal time / thermal time 表达的阶段持续时间（决定开花、坐果、成熟的时间轴）。
+  - `CSDL/PPSEN`：光周期响应参数（控制日长效应与环境适应性）。
+- 碳分配与采收曲线
+  - `XFINT`：早期向果实分配的初始比例，影响“采收启动”与前段 harvest curve 形态（本项目已限定 `0.12–0.50`）。
+  - `XFRT`：分配/库强相关上限参数，主要影响 harvest_total 与后段潜力。
+  - `PODUR`：达到最终果负载所需的热时尺度，决定“前期集中/后期拉长”的季节分布。
+  - `XFPHT`：分配达到峰值所需的光热时间尺度，常用于缓解“前高后低/前低后高”的结构性偏差。
+- 冠层与源强
+  - `LFMAX/SLAVR/SIZLF`：叶光合潜力与比叶面积/叶片尺度，决定 LAI 动力学与源强上限。
+  - `TRIFL`：叶片出现速率（叶序形成），决定 LAI 上升速率与早期冠层建立。
+- 根系供氮与 N uptake（默认启用）
+  - `RTNO3/RTNH4`：根系对 NO3/NH4 的吸收能力标度参数（默认边界 `0.010–0.050`）。
+  - `RTEXF`：根系吸收相关的效率/扩展因子（影响吸收对环境的响应幅度）。
 
 ## 常见问题与定位
 
