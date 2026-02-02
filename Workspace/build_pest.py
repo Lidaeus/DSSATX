@@ -39,7 +39,7 @@ ECO_BOUNDS_EGGPLANT = {
     "SLOBI": (-0.50, 0.0),
     "XMAGE": (5.0, 30.0),
     "XFPHT": (5.0, 40.0),
-    "XFINT": (0.10, 1.20),
+    "XFINT": (0.12, 0.50),
 }
 
 SPE_TEMP_BOUNDS_EGGPLANT = {
@@ -65,8 +65,8 @@ SPE_TEMP_BOUNDS_EGGPLANT = {
 SPE_DIRECT_BOUNDS_EGGPLANT = {
     "KC_SLOPE": (0.0, 0.40),
     "VSSINK": (2.05, 8.20),
-    "RTNO3": (0.006, 0.030),
-    "RTNH4": (0.006, 0.030),
+    "RTNO3": (0.010, 0.050),
+    "RTNH4": (0.010, 0.050),
     "RTEXF": (0.05, 0.25),
 }
 
@@ -1979,7 +1979,18 @@ if __name__ == "__main__":
         choices=["inc", "cum", "both"],
         default="inc",
     )
-    parser.add_argument("--include-n-uptake", action="store_true", default=False)
+    n_uptake_group = parser.add_mutually_exclusive_group()
+    n_uptake_group.add_argument(
+        "--include-n-uptake",
+        dest="include_n_uptake",
+        action="store_true",
+    )
+    n_uptake_group.add_argument(
+        "--no-include-n-uptake",
+        dest="include_n_uptake",
+        action="store_false",
+    )
+    parser.set_defaults(include_n_uptake=True)
     parser.add_argument("--hwamm-sigma", type=float, default=500.0)
     parser.add_argument("--pwamm-sigma", type=float, default=200.0)
     parser.add_argument("--laixm-sigma", type=float, default=0.8)
@@ -2061,7 +2072,7 @@ if __name__ == "__main__":
             "H#AMM": 50.0,
             "HIAMM": float(args.hiamm_sigma),
         }
-        extra_allowed = {"XMAGE", "FL-VS", "TRIFL", "RWDTH", "RHGHT"}
+        extra_allowed = {"XMAGE", "TRIFL", "RWDTH", "RHGHT"}
     elif mode == "eggplant_stage2":
         prefix = args.prefix or "eggplant_stage2"
         allowed = {
@@ -2084,7 +2095,6 @@ if __name__ == "__main__":
         }
         extra_allowed = {
             "XMAGE",
-            "FL-VS",
             "TRIFL",
             "RWDTH",
             "RHGHT",
