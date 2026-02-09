@@ -174,6 +174,14 @@ def main():
                 title=f"{args.prefix}: cumulative fresh yield by TN",
                 out_png=os.path.join(out_dir, "timeseries_fresh_cum_by_TN.png"),
             )
+            _facet_timeseries(
+                dfh,
+                tn_col="TN",
+                date_col="DATE",
+                pairs=[("OBS_DRY_CUM", "SIM_DRY_CUM", "DryCum")],
+                title=f"{args.prefix}: cumulative dry yield by TN",
+                out_png=os.path.join(out_dir, "timeseries_dry_cum_by_TN.png"),
+            )
 
     if os.path.exists(joint_csv):
         dfj = pd.read_csv(joint_csv)

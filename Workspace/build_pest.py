@@ -68,6 +68,10 @@ SPE_DIRECT_BOUNDS_EGGPLANT = {
     "RTNO3": (0.010, 0.050),
     "RTNH4": (0.010, 0.050),
     "RTEXF": (0.05, 0.25),
+    "NSTFAC": (0.40, 0.85),
+    "NMOBMX": (0.15, 0.40),
+    "NVSMOB": (0.20, 0.50),
+    "NRCVR": (0.05, 0.30),
 }
 
 
@@ -630,6 +634,22 @@ def _read_spe_direct_init_values():
             if len(nums) >= 4:
                 try:
                     out["KC_SLOPE"] = float(nums[3])
+                except Exception:
+                    pass
+        if "CMOBMX,CADSTF" in u and "NMOBMX" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 6:
+                try:
+                    out["NMOBMX"] = float(nums[3])
+                    out["NVSMOB"] = float(nums[4])
+                    out["NRCVR"] = float(nums[5])
+                except Exception:
+                    pass
+        if "XPODF" in u and "NSTFAC" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 1:
+                try:
+                    out["NSTFAC"] = float(nums[-1])
                 except Exception:
                     pass
         if "FINREF,SLAREF" in u and "VSSINK" in u:
@@ -1991,9 +2011,12 @@ if __name__ == "__main__":
         action="store_false",
     )
     parser.set_defaults(include_n_uptake=True)
-    parser.add_argument("--hwamm-sigma", type=float, default=500.0)
-    parser.add_argument("--pwamm-sigma", type=float, default=200.0)
+    parser.add_argument("--hwamm-sigma", type=float, default=50.0)
+    parser.add_argument("--pwamm-sigma", type=float, default=20.0)
     parser.add_argument("--laixm-sigma", type=float, default=0.8)
+    parser.add_argument("--laidm-sigma-factor", type=float, default=1.0)
+    parser.add_argument("--lwadm-sigma-factor", type=float, default=1.0)
+    parser.add_argument("--swadm-sigma-factor", type=float, default=1.0)
     parser.add_argument("--cnamm-sigma", type=float, default=25.0)
     parser.add_argument("--hiamm-sigma", type=float, default=0.10)
     parser.add_argument("--adapm-sigma", type=float, default=None)
@@ -2103,6 +2126,10 @@ if __name__ == "__main__":
             "RTNO3",
             "RTNH4",
             "RTEXF",
+            "NSTFAC",
+            "NMOBMX",
+            "NVSMOB",
+            "NRCVR",
             "XFPHT",
             "XFINT",
             "PL-EM",
@@ -2212,7 +2239,14 @@ if __name__ == "__main__":
                         sigma_inc = sigma_inc * early_scale
                     harvest_sigmas[f"PWAIM_H{int(hno)}"] = float(sigma_inc)
 
-            process_sigmas = {"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
+            laidm_sigma_factor = float(args.laidm_sigma_factor)
+            lwadm_sigma_factor = float(args.lwadm_sigma_factor)
+            swadm_sigma_factor = float(args.swadm_sigma_factor)
+            process_sigmas = {
+                "LAIDM": 2.0 * laidm_sigma_factor,
+                "LWADM": 150.0 * lwadm_sigma_factor,
+                "SWADM": 200.0 * swadm_sigma_factor,
+            }
             if not df_process.empty:
                 for var, sigma0, cv in [
                     ("LAIDM", 1.6, 0.50),
@@ -2225,6 +2259,12 @@ if __name__ == "__main__":
                     for date, gg in g.groupby("DATE"):
                         med = float(gg[var].median())
                         sigma = (sigma0**2 + (cv * abs(med)) ** 2) ** 0.5
+                        if var == "LAIDM":
+                            sigma = sigma * laidm_sigma_factor
+                        elif var == "LWADM":
+                            sigma = sigma * lwadm_sigma_factor
+                        elif var == "SWADM":
+                            sigma = sigma * swadm_sigma_factor
                         process_sigmas[f"{var}_D{int(date)}"] = float(sigma)
 
         stage2_outputs = [

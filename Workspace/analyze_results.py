@@ -4,6 +4,8 @@ import glob
 import os
 import re
 import shutil
+import subprocess
+import sys
 
 import numpy as np
 import pandas as pd
@@ -676,7 +678,101 @@ def _find_pst_path(prefix, run_dir=None):
     return _pick_latest_by_mtime(candidates)
 
 
-def analyze(prefix, run_dir=None):
+def _write_and_run_deterministic(prefix, batch_file, param_csv, det_dir, harvest_var="CHPDT"):
+    batch_file = os.path.abspath(batch_file)
+    param_csv = os.path.abspath(param_csv)
+    det_dir = os.path.abspath(det_dir)
+    os.makedirs(det_dir, exist_ok=True)
+
+    batch_local = os.path.join(det_dir, "DSSBatch.v48")
+    shutil.copy2(batch_file, batch_local)
+
+    run_dssat_path = os.path.join(WORKSPACE, "run_dssat.py")
+    cmd = [
+        sys.executable,
+        run_dssat_path,
+        "--param-csv",
+        param_csv,
+        "--batch",
+        batch_local,
+        "--harvest-var",
+        str(harvest_var),
+    ]
+    subprocess.run(cmd, cwd=det_dir, check=True)
+    return batch_local
+
+
+def _make_standard_plots(prefix, results_dir=RESULTS_DIR, out_dir=None, no_timeseries=False):
+    import plot_results as pr
+
+    results_dir = os.path.abspath(results_dir)
+    out_dir = out_dir.strip() if isinstance(out_dir, str) else ""
+    out_dir = out_dir or os.path.join(results_dir, "plots", prefix)
+    pr._ensure_dir(out_dir)
+
+    process_csv = os.path.join(results_dir, f"{prefix}_deterministic_process_compare.csv")
+    harvest_csv = os.path.join(results_dir, f"{prefix}_deterministic_harvest_compare.csv")
+    joint_csv = os.path.join(results_dir, f"{prefix}_deterministic_joint_compare.csv")
+
+    if os.path.exists(process_csv):
+        dfp = pd.read_csv(process_csv)
+        pr._scatter_1to1(dfp, "OBS_LAID", "SIM_LAID", f"{prefix}: LAID", os.path.join(out_dir, "scatter_LAID.png"))
+        pr._scatter_1to1(dfp, "OBS_LWAD", "SIM_LWAD", f"{prefix}: LWAD", os.path.join(out_dir, "scatter_LWAD.png"))
+        pr._scatter_1to1(dfp, "OBS_SWAD", "SIM_SWAD", f"{prefix}: SWAD", os.path.join(out_dir, "scatter_SWAD.png"))
+        if not no_timeseries:
+            pr._facet_timeseries(
+                dfp,
+                tn_col="TN",
+                date_col="DATE",
+                pairs=[("OBS_LAID", "SIM_LAID", "LAID")],
+                title=f"{prefix}: LAID time series by TN",
+                out_png=os.path.join(out_dir, "timeseries_LAID_by_TN.png"),
+            )
+
+    if os.path.exists(harvest_csv):
+        dfh = pd.read_csv(harvest_csv)
+        pr._scatter_1to1(
+            dfh,
+            "OBS_FRESH_CUM",
+            "SIM_FRESH_CUM",
+            f"{prefix}: Fresh yield cumulative",
+            os.path.join(out_dir, "scatter_fresh_cum.png"),
+        )
+        pr._scatter_1to1(
+            dfh,
+            "OBS_DRY_CUM",
+            "SIM_DRY_CUM",
+            f"{prefix}: Dry yield cumulative",
+            os.path.join(out_dir, "scatter_dry_cum.png"),
+        )
+        if not no_timeseries:
+            pr._facet_timeseries(
+                dfh,
+                tn_col="TN",
+                date_col="DATE",
+                pairs=[("OBS_FRESH_CUM", "SIM_FRESH_CUM", "FreshCum")],
+                title=f"{prefix}: cumulative fresh yield by TN",
+                out_png=os.path.join(out_dir, "timeseries_fresh_cum_by_TN.png"),
+            )
+            pr._facet_timeseries(
+                dfh,
+                tn_col="TN",
+                date_col="DATE",
+                pairs=[("OBS_DRY_CUM", "SIM_DRY_CUM", "DryCum")],
+                title=f"{prefix}: cumulative dry yield by TN",
+                out_png=os.path.join(out_dir, "timeseries_dry_cum_by_TN.png"),
+            )
+
+    if os.path.exists(joint_csv):
+        dfj = pd.read_csv(joint_csv)
+        pr._scatter_1to1(dfj, "OBS_HWAM", "SIM_HWAM", f"{prefix}: HWAM", os.path.join(out_dir, "scatter_HWAM.png"))
+        pr._scatter_1to1(dfj, "OBS_LAIX", "SIM_LAIX", f"{prefix}: LAIX", os.path.join(out_dir, "scatter_LAIX.png"))
+        pr._scatter_1to1(dfj, "OBS_CNAM", "SIM_CNAM", f"{prefix}: CNAM", os.path.join(out_dir, "scatter_CNAM.png"))
+
+    return out_dir
+
+
+def analyze(prefix, run_dir=None, batch_file=None, make_plots=True, plots_no_timeseries=False):
     pst_file = _find_pst_path(prefix, run_dir=run_dir)
     print(f"Loading PEST control file: {pst_file}")
     if not pst_file or not os.path.exists(pst_file):
@@ -694,6 +790,8 @@ def analyze(prefix, run_dir=None):
         import pyemu
 
     pst = pyemu.Pst(pst_file)
+
+    batch_file = (batch_file or "").strip() or os.path.join(WORKSPACE, "DSSBatch.v48")
     
     # Ensure results directory exists
     ensure_results_dir()
@@ -852,6 +950,18 @@ def analyze(prefix, run_dir=None):
                          fixed_csv, index=False, encoding="utf-8-sig"
                      )
                      print(f"Fixed-parameter CSV saved to {fixed_csv}")
+
+                     if make_plots:
+                         try:
+                             det_dir = os.path.join(RESULTS_DIR, "_det", prefix)
+                             batch_local = _write_and_run_deterministic(prefix, batch_file, fixed_csv, det_dir)
+                             deterministic_harvest_compare(prefix, batch_local, run_dir=det_dir)
+                             deterministic_process_compare(prefix, batch_local, run_dir=det_dir)
+                             deterministic_joint_compare(prefix, batch_local, run_dir=det_dir)
+                             out_dir = _make_standard_plots(prefix, results_dir=RESULTS_DIR, out_dir=None, no_timeseries=bool(plots_no_timeseries))
+                             print(f"Plots saved to {out_dir}")
+                         except Exception as e:
+                             print(f"Warning: failed to generate plots: {e}")
 
                      try:
                          par_data = pst.parameter_data.copy()
@@ -1341,6 +1451,8 @@ if __name__ == "__main__":
     parser.add_argument("--joint-vars", default="")
     parser.add_argument("--process-vars", default="")
     parser.add_argument("--batch", default=os.path.join(WORKSPACE, "DSSBatch.v48"))
+    parser.add_argument("--no-plots", action="store_true")
+    parser.add_argument("--plots-no-timeseries", action="store_true")
     args = parser.parse_args()
 
     run_dir = (args.run_dir or "").strip() or None
@@ -1392,4 +1504,10 @@ if __name__ == "__main__":
         )
         print(f"XXQL2501 bounds suggestions saved to {dst}")
     else:
-        analyze(prefix, run_dir=run_dir)
+        analyze(
+            prefix,
+            run_dir=run_dir,
+            batch_file=args.batch,
+            make_plots=not bool(args.no_plots),
+            plots_no_timeseries=bool(args.plots_no_timeseries),
+        )

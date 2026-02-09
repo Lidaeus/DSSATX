@@ -1806,6 +1806,7 @@ def update_spe_file(param_csv_path=PARAM_CSV):
         "NMOBMX",
         "NVSMOB",
         "NRCVR",
+        "NSTFAC",
         "FNPGN1",
         "FNPGN2",
         "FNPGN3",
@@ -1830,6 +1831,13 @@ def update_spe_file(param_csv_path=PARAM_CSV):
         "RTNH4",
         "PORMIN",
         "RTEXF",
+        "RTDEPI",
+        "RFAC1",
+        "RTSEN",
+        "RLDSM",
+        "RTSDF",
+        "RWUEP1",
+        "RWUMX",
     ]
 
     keys = [k for k in (base_names + stage_names + direct_keys) if k in param_dict]
@@ -1877,7 +1885,29 @@ def update_spe_file(param_csv_path=PARAM_CSV):
     _update_named_line("SLWREF,SLWSLO", ["SLWREF", "SLWSLO", "NSLOPE", "LNREF", "PGREF"])
     _update_named_line("WTFSD,PORPT", ["WTFSD", "PORPT", "FRSTMF", "FRLFF", "ATOP", "FRCNOD"])
     _update_named_line("FINREF,SLAREF", ["FINREF", "SLAREF", "SIZREF", "VSSINK", "EVMODC"])
+    _update_named_line("RTDEPI,RFAC1", ["RTDEPI", "RFAC1", "RTSEN", "RLDSM", "RTSDF", "RWUEP1", "RWUMX"])
     _update_named_line("RTNO3,RTNH4", ["RTNO3", "RTNH4", "PORMIN", "RTEXF"])
+    if "NSTFAC" in param_dict:
+        idx = -1
+        for j, s in enumerate(lines):
+            u = s.upper()
+            if "XPODF" in u and "NSTFAC" in u:
+                idx = j
+                break
+        if idx != -1:
+            s = lines[idx]
+            matches = list(number_re.finditer(s))
+            if matches:
+                m = matches[-1]
+                v = float(param_dict["NSTFAC"])
+                orig = m.group(0)
+                width = m.end() - m.start()
+                formatted = _format_to_width(v, width, orig_token=orig)
+                if len(formatted) != width:
+                    formatted = formatted[:width].rjust(width)
+                new_chars = list(s.rstrip("\n"))
+                new_chars[m.start() : m.end()] = list(formatted)
+                lines[idx] = "".join(new_chars) + "\n"
 
     pheno_idx = -1
     for i, line in enumerate(lines):
