@@ -1,0 +1,460 @@
+time,elapsed_seconds,message
+01:06:29,7.95e-05,PEST++ performance logger started
+01:06:29,0.0008482,starting to process control file
+01:06:29,0.0023197,finished processing control file
+01:06:29,0.0031828,starting basic model IO error checking
+01:06:29,0.0071583,finished basic model IO error checking
+01:06:29,0.0024211,initializing
+01:06:29,0.0012415,using glm algorithm
+01:06:29,0.0001184,using REDSVD for truncated svd solve
+01:06:29,0.0001,maxsing: 10000000
+01:06:29,0.0001461,eigthresh:  1e-06
+01:06:29,9.35e-05,initializing localizer
+01:06:29,6.66e-05,not using localization
+01:06:29,0.0001354,using lambda multipliers: 
+01:06:29,5.99e-05,using lambda scaling factors: 
+01:06:29,6.48e-05,acceptable phi factor:  1.05
+01:06:29,5.45e-05,lambda increase factor:  10
+01:06:29,7.02e-05,lambda decrease factor:  0.75
+01:06:29,0.0001069,max run fail:  3
+01:06:29,8.64e-05,sanity_check warnings
+01:06:29,8.32e-05,noptmax > 3, this is a lot of iterations for an ensemble method...
+01:06:29,6.61e-05,continuing initialization...
+01:06:29,7.55e-05,initializing prior parameter covariance matrix
+01:06:29,9.7e-06,initializing parcov
+01:06:29,0.0001416,parcov loaded  from parameter bounds, using par_sigma_range 6
+01:06:29,0.0001225,initializing observation noise covariance matrix
+01:06:29,0.000337,obscov loaded  from observation weights
+01:06:29,0.0003601,using reg_factor:  0
+01:06:29,8.24e-05,drawing parameter realizations:  80
+01:06:29,6.8e-05,parameters not grouped by parameter groups, reordering par ensemble
+01:06:29,0.0001309,making standard normal draws
+01:06:29,9.28e-05,scaling by std
+01:06:29,9.7e-06,checking realization for invalid values
+01:06:29,3.51e-05,resizing reals matrix
+01:06:29,1.05e-05,filling reals matrix and adding mean values
+01:06:29,0.0001565,not using prior parameter covariance matrix scaling
+01:06:29,0.000125,NOTE: no obs-noise-specific options have been passed, resetting to `ies_no_noise` to true
+01:06:29,7.93e-05,initializing no-noise observation ensemble of :  80
+01:06:29,0.0003962,setting weights ensemble from control file weights
+01:06:29,0.0361215,saved weight ensemble to  eggplant_stage2_v14_exclTN5_TN9_TN13.weights.csv
+01:06:29,2.31e-05,checking for denormal values in weights ensemble
+01:06:29,0.0001302,adding 'base' parameter values to ensemble
+01:06:29,0.0002673,adding 'base' observation values to ensemble
+01:06:29,0.0002833,adding 'base' weight values to weight ensemble
+01:06:29,0.0001998,checking for denormal values in pe
+01:06:29,0.003431,saved initial parameter ensemble to  eggplant_stage2_v14_exclTN5_TN9_TN13.0.par.csv
+01:06:29,2.5e-05,checking for denormal values in obs + noise ensemble
+01:06:29,0.0364127,saved obs+noise observation ensemble (obsval + noise realizations) to  eggplant_stage2_v14_exclTN5_TN9_TN13.obs+noise.csv
+01:06:29,9.46e-05,using subset in lambda testing, percentage of realizations used in subset testing:  10
+01:06:29,8.79e-05,subset how:  RANDOM
+01:06:29,0.000383,centering on ensemble mean vector
+01:06:29,1.71e-05,running initial ensemble
+01:06:29,6.82e-05,running initial ensemble of size 80
+01:06:29,2.92e-05,queuing 80 runs
+01:06:29,0.0038298,making runs
+01:08:11,101.912,processing runs
+01:08:11,0.036864,saved initial obs ensemble to eggplant_stage2_v14_exclTN5_TN9_TN13.0.obs.csv
+01:08:11,0.0081183,calc pre-drop phi
+01:08:11,0.0036632,pre-drop initial phi summary
+01:08:11,0.0044967,checking for prior-data conflict
+01:08:11,0.0021767,WARNING: 128 non-zero weighted observations are in conflict with the prior simulated ensemble.
+
+01:08:11,0.0005145,  WARNING: Prior-data conflict detected.  Continuing with IES parameter
+           adjustment will likely result in parameter and forecast bias.
+
+01:08:11,0.0008049,dropping realizations as bad:  3
+01:08:11,8.19e-05,dropping par:obs realizations: 25 : 25 , 46 : 46 , 53 : 53 , 
+01:08:11,0.0367345,saved adjusted weight ensemble to  eggplant_stage2_v14_exclTN5_TN9_TN13.adjusted.weights.csv
+01:08:11,0.0016412,calc initial phi
+01:08:11,0.0022799,initial phi summary
+01:08:11,0.0083672,current lambda: 0.1
+01:08:11,0.0001129,initialization complete
+01:08:11,0.0001378,starting solve for iteration: 1
+01:08:11,1.52e-05,starting solve for iteration: 1
+01:08:11,9.33e-05,current lambda:  0.1
+01:08:11,2.97e-05,subset defined as a percentage of ensemble size, using 7 realizations for subset
+
+01:08:11,8.5e-06,reordering variables in pe
+01:08:11,0.0001578,resizing weight ensemble from 80 realizations to 77 realizations
+01:08:11,0.0002078,preparing EnsembleSolver
+01:08:11,0.0005089,starting calcs for glm factor 0.01
+01:08:11,1.5e-05,see .log file for more details
+01:08:11,0.0082495,finished calcs for: 0.01
+01:08:11,9.87e-05,starting calcs for glm factor 0.1
+01:08:11,8.9e-06,see .log file for more details
+01:08:11,0.0090011,finished calcs for: 0.1
+01:08:11,9.34e-05,starting calcs for glm factor 1
+01:08:11,1.83e-05,see .log file for more details
+01:08:11,0.0080809,finished calcs for: 1
+01:08:11,0.0001336,running upgrade ensembles
+01:08:11,1.94e-05,queuing 9 ensembles
+01:08:11,0.0010074,subset idx:pe real name:  0:0, 10:10, 11:11, 19:19, 39:40, 60:63, 76:BASE, 
+01:08:11,0.0001032,subset idx:oe real name:  0:0, 10:10, 11:11, 19:19, 39:40, 60:63, 76:BASE, 
+01:08:11,0.0031476,making runs
+01:09:30,79.1167,processing runs
+01:09:30,0.0083096,evaluating upgrade ensembles
+01:09:30,9.06e-05,last mean:  582.918
+01:09:30,0.0001075,last stdev:  73.4101
+01:09:30,0.0012996,phi summary for lambda, scale fac:
+01:09:30,0.0016016,phi summary for lambda, scale fac:
+01:09:30,0.0011329,dropping realizations as bad:  1
+01:09:30,0.0001865,dropping par:obs realizations: 19 : 19 , 
+01:09:30,0.000851,phi summary for lambda, scale fac:
+01:09:30,0.001772,phi summary for lambda, scale fac:
+01:09:30,0.0017385,phi summary for lambda, scale fac:
+01:09:30,0.000973,dropping realizations as bad:  1
+01:09:30,8.1e-05,dropping par:obs realizations: 19 : 19 , 
+01:09:30,0.0009017,phi summary for lambda, scale fac:
+01:09:30,0.0016365,phi summary for lambda, scale fac:
+01:09:30,0.001576,phi summary for lambda, scale fac:
+01:09:30,0.0015321,phi summary for lambda, scale fac:
+01:09:30,0.0009491,phi summary for best lambda, scale fac: 
+01:09:30,0.0010838,running remaining realizations for best lambda, scale:
+01:09:30,1.19e-05,dropping subset idxs from remaining_pe_lam
+01:09:30,3.74e-05,dropping subset idxs from remaining_oe_lam
+01:09:30,8.56e-05,queuing 70 runs
+01:09:30,0.003739,making runs
+01:10:56,85.8519,processing runs
+01:10:56,0.0027156,assembling ensembles
+01:10:56,0.0032845,dropping realizations as bad:  2
+01:10:56,6.1e-05,dropping par:obs realizations: 12 : 12 , 54 : 54 , 
+01:10:56,0.0001415,updating phi
+01:10:56,0.0016726,phi summary for entire ensemble using lambda,scale_fac 
+01:10:56,0.0019335,last best mean phi * acceptable phi factor:  612.064
+01:10:56,4.78e-05,current best mean phi:  496.966
+01:10:56,0.0001052,updating parameter ensemble
+01:10:56,1.26e-05,updating parameter ensemble
+01:10:56,0.0001824,updating lambda to  0.075
+01:10:56,0.0573527,phi-based termination criteria check
+01:10:56,7.6e-05,phiredstp:  0.01
+01:10:56,7.2e-05,nphistp:  3
+01:10:56,6.42e-05,nphinored (also used for consecutive bad lambda cycles):  3
+01:10:56,8.4e-05,best mean phi sequence: 
+01:10:56,8.69e-05,best phi yet:  496.966
+01:10:56,6.59e-05,number of consecutive bad lambda testing cycles:  0
+01:10:56,5.84e-05,number of iterations satisfying phiredstp criteria:  1
+01:10:56,4.87e-05,number of iterations since best yet mean phi:  0
+01:10:56,9.41e-05,starting solve for iteration: 2
+01:10:56,9.6e-06,starting solve for iteration: 2
+01:10:56,5.7e-05,current lambda:  0.075
+01:10:56,1.07e-05,subset defined as a percentage of ensemble size, using 7 realizations for subset
+
+01:10:56,5.6e-06,reordering variables in pe
+01:10:56,0.0001255,resizing weight ensemble from 77 realizations to 74 realizations
+01:10:56,0.0001054,preparing EnsembleSolver
+01:10:56,0.0003448,starting calcs for glm factor 0.0075
+01:10:56,1.81e-05,see .log file for more details
+01:10:56,0.0083222,finished calcs for: 0.0075
+01:10:56,0.0001008,starting calcs for glm factor 0.075
+01:10:56,2.15e-05,see .log file for more details
+01:10:56,0.007606,finished calcs for: 0.075
+01:10:56,0.0001057,starting calcs for glm factor 0.75
+01:10:56,1.73e-05,see .log file for more details
+01:10:56,0.008172,finished calcs for: 0.75
+01:10:56,9.61e-05,running upgrade ensembles
+01:10:56,1.88e-05,queuing 9 ensembles
+01:10:56,0.0009078,subset idx:pe real name:  5:BASE, 21:20, 28:28, 51:55, 52:56, 59:64, 73:78, 
+01:10:56,7.96e-05,subset idx:oe real name:  5:BASE, 21:20, 28:28, 51:55, 52:56, 59:64, 73:78, 
+01:10:56,0.0031481,making runs
+01:12:11,74.6112,processing runs
+01:12:11,0.0079064,evaluating upgrade ensembles
+01:12:11,7.84e-05,last mean:  496.966
+01:12:11,6.44e-05,last stdev:  12.6629
+01:12:11,0.0004392,dropping realizations as bad:  1
+01:12:11,7.08e-05,dropping par:obs realizations: 56 : 56 , 
+01:12:11,0.0030479,phi summary for lambda, scale fac:
+01:12:11,0.000982,dropping realizations as bad:  1
+01:12:11,4.72e-05,dropping par:obs realizations: 55 : 55 , 
+01:12:11,0.0008193,phi summary for lambda, scale fac:
+01:12:11,0.0009376,dropping realizations as bad:  1
+01:12:11,7.68e-05,dropping par:obs realizations: 55 : 55 , 
+01:12:11,0.0008342,phi summary for lambda, scale fac:
+01:12:11,0.0016763,phi summary for lambda, scale fac:
+01:12:11,0.0015852,phi summary for lambda, scale fac:
+01:12:11,0.0009919,dropping realizations as bad:  1
+01:12:11,7.69e-05,dropping par:obs realizations: 55 : 55 , 
+01:12:11,0.0008625,phi summary for lambda, scale fac:
+01:12:11,0.0015637,phi summary for lambda, scale fac:
+01:12:11,0.0016248,phi summary for lambda, scale fac:
+01:12:11,0.0015531,phi summary for lambda, scale fac:
+01:12:11,0.0020745,phi summary for best lambda, scale fac: 
+01:12:11,0.0010621,running remaining realizations for best lambda, scale:
+01:12:11,1.26e-05,dropping subset idxs from remaining_pe_lam
+01:12:11,4.86e-05,dropping subset idxs from remaining_oe_lam
+01:12:11,9.4e-05,queuing 67 runs
+01:12:11,0.0033472,making runs
+01:13:32,80.8793,processing runs
+01:13:32,0.0025625,assembling ensembles
+01:13:32,0.000979,dropping realizations as bad:  2
+01:13:32,5.7e-05,dropping par:obs realizations: 47 : 47 , 61 : 61 , 
+01:13:32,0.0001163,updating phi
+01:13:32,0.0016569,phi summary for entire ensemble using lambda,scale_fac 
+01:13:32,0.0018284,last best mean phi * acceptable phi factor:  521.814
+01:13:32,0.0001166,current best mean phi:  488.725
+01:13:32,7.08e-05,updating parameter ensemble
+01:13:32,1.04e-05,updating parameter ensemble
+01:13:32,0.0001736,updating lambda to  0.005625
+01:13:32,0.0531151,phi-based termination criteria check
+01:13:32,8.45e-05,phiredstp:  0.01
+01:13:32,6.42e-05,nphistp:  3
+01:13:32,7.07e-05,nphinored (also used for consecutive bad lambda cycles):  3
+01:13:32,5.85e-05,best mean phi sequence: 
+01:13:32,5.25e-05,best phi yet:  488.725
+01:13:32,5.67e-05,number of consecutive bad lambda testing cycles:  0
+01:13:32,7.01e-05,number of iterations satisfying phiredstp criteria:  1
+01:13:32,7.59e-05,number of iterations since best yet mean phi:  0
+01:13:32,0.000126,starting solve for iteration: 3
+01:13:32,1.2e-05,starting solve for iteration: 3
+01:13:32,4.69e-05,current lambda:  0.005625
+01:13:32,1.91e-05,subset defined as a percentage of ensemble size, using 7 realizations for subset
+
+01:13:32,5.8e-06,reordering variables in pe
+01:13:32,0.0001336,resizing weight ensemble from 74 realizations to 71 realizations
+01:13:32,0.0001103,preparing EnsembleSolver
+01:13:32,0.0003414,starting calcs for glm factor 0.0005625
+01:13:32,1.42e-05,see .log file for more details
+01:13:32,0.0070566,finished calcs for: 0.0005625
+01:13:32,8.91e-05,starting calcs for glm factor 0.005625
+01:13:32,1.86e-05,see .log file for more details
+01:13:32,0.0067693,finished calcs for: 0.005625
+01:13:32,5.48e-05,starting calcs for glm factor 0.05625
+01:13:32,1.09e-05,see .log file for more details
+01:13:32,0.0068486,finished calcs for: 0.05625
+01:13:32,7.25e-05,running upgrade ensembles
+01:13:32,8.4e-06,queuing 9 ensembles
+01:13:32,0.0009053,subset idx:pe real name:  0:BASE, 1:20, 2:28, 26:21, 28:23, 31:27, 65:72, 
+01:13:32,9.87e-05,subset idx:oe real name:  0:BASE, 1:20, 2:28, 26:21, 28:23, 31:27, 65:72, 
+01:13:32,0.0032087,making runs
+01:14:51,78.652,processing runs
+01:14:51,0.0082898,evaluating upgrade ensembles
+01:14:51,9.91e-05,last mean:  488.725
+01:14:51,7.68e-05,last stdev:  9.40151
+01:14:51,0.0012754,phi summary for lambda, scale fac:
+01:14:51,0.0016163,phi summary for lambda, scale fac:
+01:14:51,0.0009343,dropping realizations as bad:  1
+01:14:51,4.46e-05,dropping par:obs realizations: 27 : 27 , 
+01:14:51,0.0009762,phi summary for lambda, scale fac:
+01:14:51,0.0015289,phi summary for lambda, scale fac:
+01:14:51,0.0015915,phi summary for lambda, scale fac:
+01:14:51,0.0010256,dropping realizations as bad:  1
+01:14:51,7.08e-05,dropping par:obs realizations: 27 : 27 , 
+01:14:51,0.000852,phi summary for lambda, scale fac:
+01:14:51,0.0015887,phi summary for lambda, scale fac:
+01:14:51,0.0016744,phi summary for lambda, scale fac:
+01:14:51,0.0013302,dropping realizations as bad:  1
+01:14:51,0.0001169,dropping par:obs realizations: 27 : 27 , 
+01:14:51,0.001003,phi summary for lambda, scale fac:
+01:14:51,0.0008696,phi summary for best lambda, scale fac: 
+01:14:51,0.0010169,running remaining realizations for best lambda, scale:
+01:14:51,9.3e-06,dropping subset idxs from remaining_pe_lam
+01:14:51,3.7e-05,dropping subset idxs from remaining_oe_lam
+01:14:51,9.22e-05,queuing 64 runs
+01:14:51,0.0034146,making runs
+01:16:08,77.6272,processing runs
+01:16:08,0.0025784,assembling ensembles
+01:16:08,0.0009117,dropping realizations as bad:  5
+01:16:08,8.93e-05,dropping par:obs realizations: 64 : 64 , 8 : 8 , 38 : 38 , 52 : 52 , 75 : 75 , 
+01:16:08,0.0001302,updating phi
+01:16:08,0.0014965,phi summary for entire ensemble using lambda,scale_fac 
+01:16:08,0.0034852,last best mean phi * acceptable phi factor:  513.161
+01:16:08,9.86e-05,current best mean phi:  482.884
+01:16:08,7.95e-05,updating parameter ensemble
+01:16:08,7e-06,updating parameter ensemble
+01:16:08,0.0001594,updating lambda to  0.0421875
+01:16:08,0.050218,phi-based termination criteria check
+01:16:08,0.0001302,phiredstp:  0.01
+01:16:08,8.05e-05,nphistp:  3
+01:16:08,8.05e-05,nphinored (also used for consecutive bad lambda cycles):  3
+01:16:08,6.53e-05,best mean phi sequence: 
+01:16:08,5.48e-05,best phi yet:  482.884
+01:16:08,7.08e-05,number of consecutive bad lambda testing cycles:  0
+01:16:08,6.81e-05,number of iterations satisfying phiredstp criteria:  1
+01:16:08,6.55e-05,number of iterations since best yet mean phi:  0
+01:16:08,0.0001107,starting solve for iteration: 4
+01:16:08,1.09e-05,starting solve for iteration: 4
+01:16:08,5.44e-05,current lambda:  0.0421875
+01:16:08,1.54e-05,subset defined as a percentage of ensemble size, using 6 realizations for subset
+
+01:16:08,5.3e-06,reordering variables in pe
+01:16:08,0.0001232,resizing weight ensemble from 71 realizations to 66 realizations
+01:16:08,9.7e-05,preparing EnsembleSolver
+01:16:08,0.0002857,starting calcs for glm factor 0.00421875
+01:16:08,1.28e-05,see .log file for more details
+01:16:08,0.006201,finished calcs for: 0.00421875
+01:16:08,8.33e-05,starting calcs for glm factor 0.0421875
+01:16:08,6.92e-05,see .log file for more details
+01:16:08,0.0061394,finished calcs for: 0.0421875
+01:16:08,5.26e-05,starting calcs for glm factor 0.421875
+01:16:08,8.1e-06,see .log file for more details
+01:16:08,0.0060623,finished calcs for: 0.421875
+01:16:08,5.44e-05,running upgrade ensembles
+01:16:08,7.3e-06,queuing 9 ensembles
+01:16:08,0.0009815,subset idx:pe real name:  0:BASE, 8:78, 22:13, 29:24, 32:30, 39:37, 
+01:16:08,0.0001001,subset idx:oe real name:  0:BASE, 8:78, 22:13, 29:24, 32:30, 39:37, 
+01:16:08,0.0067291,making runs
+01:17:17,68.9609,processing runs
+01:17:17,0.0072266,evaluating upgrade ensembles
+01:17:17,8.46e-05,last mean:  482.884
+01:17:17,6.4e-05,last stdev:  4.04459
+01:17:17,0.0012342,phi summary for lambda, scale fac:
+01:17:17,0.0017164,phi summary for lambda, scale fac:
+01:17:17,0.002167,phi summary for lambda, scale fac:
+01:17:17,0.0020763,phi summary for lambda, scale fac:
+01:17:17,0.0018097,phi summary for lambda, scale fac:
+01:17:17,0.0025003,phi summary for lambda, scale fac:
+01:17:17,0.0024215,phi summary for lambda, scale fac:
+01:17:17,0.0024427,phi summary for lambda, scale fac:
+01:17:17,0.0016675,phi summary for lambda, scale fac:
+01:17:17,0.0009154,phi summary for best lambda, scale fac: 
+01:17:17,0.0011876,running remaining realizations for best lambda, scale:
+01:17:17,1.27e-05,dropping subset idxs from remaining_pe_lam
+01:17:17,3.53e-05,dropping subset idxs from remaining_oe_lam
+01:17:17,7.9e-05,queuing 60 runs
+01:17:17,0.0030539,making runs
+01:18:35,77.4514,processing runs
+01:18:35,0.0024166,assembling ensembles
+01:18:35,0.0009075,dropping realizations as bad:  1
+01:18:35,7.24e-05,dropping par:obs realizations: 10 : 10 , 
+01:18:35,0.000197,updating phi
+01:18:35,0.0016159,phi summary for entire ensemble using lambda,scale_fac 
+01:18:35,0.0018481,last best mean phi * acceptable phi factor:  507.028
+01:18:35,9.2e-05,current best mean phi:  483.925
+01:18:35,9.16e-05,updating parameter ensemble
+01:18:35,1.08e-05,updating parameter ensemble
+01:18:35,0.000173,not updating lambda (standard deviation reduction criteria not met)
+01:18:35,0.0536633,phi-based termination criteria check
+01:18:35,7.53e-05,phiredstp:  0.01
+01:18:35,5.93e-05,nphistp:  3
+01:18:35,9.4e-05,nphinored (also used for consecutive bad lambda cycles):  3
+01:18:35,7.58e-05,best mean phi sequence: 
+01:18:35,6.83e-05,best phi yet:  482.884
+01:18:35,6.05e-05,number of consecutive bad lambda testing cycles:  0
+01:18:35,5.24e-05,number of iterations satisfying phiredstp criteria:  1
+01:18:35,7.63e-05,number of iterations since best yet mean phi:  1
+01:18:35,0.0001567,starting solve for iteration: 5
+01:18:35,1.49e-05,starting solve for iteration: 5
+01:18:35,6.12e-05,current lambda:  0.0421875
+01:18:35,1.39e-05,subset defined as a percentage of ensemble size, using 6 realizations for subset
+
+01:18:35,5.2e-06,reordering variables in pe
+01:18:35,0.0001731,resizing weight ensemble from 66 realizations to 65 realizations
+01:18:35,9.31e-05,preparing EnsembleSolver
+01:18:35,0.0003043,starting calcs for glm factor 0.00421875
+01:18:35,1.39e-05,see .log file for more details
+01:18:35,0.0062485,finished calcs for: 0.00421875
+01:18:35,7.02e-05,starting calcs for glm factor 0.0421875
+01:18:35,1.06e-05,see .log file for more details
+01:18:35,0.0060907,finished calcs for: 0.0421875
+01:18:35,0.0001753,starting calcs for glm factor 0.421875
+01:18:35,1.75e-05,see .log file for more details
+01:18:35,0.0081856,finished calcs for: 0.421875
+01:18:35,6.26e-05,running upgrade ensembles
+01:18:35,9e-06,queuing 9 ensembles
+01:18:35,0.0010327,subset idx:pe real name:  0:BASE, 4:30, 15:40, 36:34, 44:45, 58:69, 
+01:18:35,8.46e-05,subset idx:oe real name:  0:BASE, 4:30, 15:40, 36:34, 44:45, 58:69, 
+01:18:35,0.0021639,making runs
+01:19:40,65.0649,processing runs
+01:19:40,0.0065238,evaluating upgrade ensembles
+01:19:40,5.55e-05,last mean:  483.925
+01:19:40,4.69e-05,last stdev:  6.97879
+01:19:40,0.0011942,phi summary for lambda, scale fac:
+01:19:40,0.001716,phi summary for lambda, scale fac:
+01:19:40,0.00162,phi summary for lambda, scale fac:
+01:19:40,0.0020298,phi summary for lambda, scale fac:
+01:19:40,0.0017827,phi summary for lambda, scale fac:
+01:19:40,0.0014181,phi summary for lambda, scale fac:
+01:19:40,0.0014024,phi summary for lambda, scale fac:
+01:19:40,0.0014191,phi summary for lambda, scale fac:
+01:19:40,0.0014884,phi summary for lambda, scale fac:
+01:19:40,0.0007614,phi summary for best lambda, scale fac: 
+01:19:40,0.0008964,running remaining realizations for best lambda, scale:
+01:19:40,7.2e-06,dropping subset idxs from remaining_pe_lam
+01:19:40,3.14e-05,dropping subset idxs from remaining_oe_lam
+01:19:40,6.86e-05,queuing 59 runs
+01:19:40,0.0028433,making runs
+01:20:51,71.2736,processing runs
+01:20:51,0.0025611,assembling ensembles
+01:20:51,0.0009936,dropping realizations as bad:  2
+01:20:51,0.0001344,dropping par:obs realizations: 78 : 78 , 66 : 66 , 
+01:20:51,9.71e-05,updating phi
+01:20:51,0.0015611,phi summary for entire ensemble using lambda,scale_fac 
+01:20:51,0.0021543,last best mean phi * acceptable phi factor:  508.122
+01:20:51,7.97e-05,current best mean phi:  481.57
+01:20:51,7.31e-05,updating parameter ensemble
+01:20:51,1.4e-05,updating parameter ensemble
+01:20:51,0.0001432,updating lambda to  0.316406
+01:20:51,0.0506206,phi-based termination criteria check
+01:20:51,9.96e-05,phiredstp:  0.01
+01:20:51,7.03e-05,nphistp:  3
+01:20:51,7.27e-05,nphinored (also used for consecutive bad lambda cycles):  3
+01:20:51,8.58e-05,best mean phi sequence: 
+01:20:51,7.08e-05,best phi yet:  481.57
+01:20:51,6.75e-05,number of consecutive bad lambda testing cycles:  0
+01:20:51,5.53e-05,number of iterations satisfying phiredstp criteria:  1
+01:20:51,5.29e-05,number of iterations since best yet mean phi:  0
+01:20:51,9.92e-05,starting solve for iteration: 6
+01:20:51,6.7e-06,starting solve for iteration: 6
+01:20:51,5.65e-05,current lambda:  0.316406
+01:20:51,1.25e-05,subset defined as a percentage of ensemble size, using 6 realizations for subset
+
+01:20:51,5.7e-06,reordering variables in pe
+01:20:51,0.0001201,resizing weight ensemble from 65 realizations to 63 realizations
+01:20:51,9.23e-05,preparing EnsembleSolver
+01:20:51,0.0002968,starting calcs for glm factor 0.0316406
+01:20:51,1.32e-05,see .log file for more details
+01:20:51,0.0053983,finished calcs for: 0.0316406
+01:20:51,9.08e-05,starting calcs for glm factor 0.316406
+01:20:51,1.59e-05,see .log file for more details
+01:20:51,0.0055853,finished calcs for: 0.316406
+01:20:51,7.88e-05,starting calcs for glm factor 3.16406
+01:20:51,1.49e-05,see .log file for more details
+01:20:51,0.0058246,finished calcs for: 3.16406
+01:20:51,6.68e-05,running upgrade ensembles
+01:20:51,9e-06,queuing 9 ensembles
+01:20:51,0.0025992,subset idx:pe real name:  0:BASE, 9:20, 15:56, 26:9, 27:14, 37:33, 
+01:20:51,6.75e-05,subset idx:oe real name:  0:BASE, 9:20, 15:56, 26:9, 27:14, 37:33, 
+01:20:51,0.0024517,making runs
+01:22:05,73.7707,processing runs
+01:22:05,0.0086765,evaluating upgrade ensembles
+01:22:05,0.0001024,last mean:  481.57
+01:22:05,7.4e-05,last stdev:  4.63334
+01:22:05,0.0012007,phi summary for lambda, scale fac:
+01:22:05,0.0009876,dropping realizations as bad:  1
+01:22:05,6.65e-05,dropping par:obs realizations: 14 : 14 , 
+01:22:05,0.0009092,phi summary for lambda, scale fac:
+01:22:05,0.0009277,dropping realizations as bad:  1
+01:22:05,8.82e-05,dropping par:obs realizations: 14 : 14 , 
+01:22:05,0.0008022,phi summary for lambda, scale fac:
+01:22:05,0.00155,phi summary for lambda, scale fac:
+01:22:05,0.001541,phi summary for lambda, scale fac:
+01:22:05,0.0015607,phi summary for lambda, scale fac:
+01:22:05,0.0015929,phi summary for lambda, scale fac:
+01:22:05,0.0015196,phi summary for lambda, scale fac:
+01:22:05,0.001584,phi summary for lambda, scale fac:
+01:22:05,0.000893,phi summary for best lambda, scale fac: 
+01:22:05,0.0013632,running remaining realizations for best lambda, scale:
+01:22:05,1.47e-05,dropping subset idxs from remaining_pe_lam
+01:22:05,3.46e-05,dropping subset idxs from remaining_oe_lam
+01:22:05,7.6e-05,queuing 57 runs
+01:22:05,0.0037983,making runs
+01:23:14,69.0029,processing runs
+01:23:14,0.0025721,assembling ensembles
+01:23:14,0.0011204,dropping realizations as bad:  5
+01:23:14,7.47e-05,dropping par:obs realizations: 72 : 72 , 6 : 6 , 44 : 44 , 49 : 49 , 70 : 70 , 
+01:23:14,0.0001007,updating phi
+01:23:14,0.0014244,phi summary for entire ensemble using lambda,scale_fac 
+01:23:14,0.001621,last best mean phi * acceptable phi factor:  505.648
+01:23:14,0.0005184,current best mean phi:  480.941
+01:23:14,0.0001062,updating parameter ensemble
+01:23:14,9.9e-06,updating parameter ensemble
+01:23:14,0.0002092,updating lambda to  0.0237305
+01:23:14,0.0452345,phi-based termination criteria check
+01:23:14,6.78e-05,phiredstp:  0.01
+01:23:14,6.34e-05,nphistp:  3
+01:23:14,0.0001149,nphinored (also used for consecutive bad lambda cycles):  3
+01:23:14,0.0001948,best mean phi sequence: 
+01:23:14,7.6e-05,best phi yet:  480.941
+01:23:14,6.15e-05,number of consecutive bad lambda testing cycles:  0
+01:23:14,6.34e-05,number of iterations satisfying phiredstp criteria:  1
+01:23:14,6.61e-05,number of iterations since best yet mean phi:  0
