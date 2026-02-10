@@ -947,12 +947,24 @@ def _evaluate_out_path_from_batch(batch_file, fallback=OUT_FILE):
     filex = _first_batch_filex_path(batch_file)
     if not filex:
         return fallback
-    filex_path = _resolve_filex_path(filex)
-    if not filex_path:
-        filex_path = filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex)
-    eval_path = os.path.join(os.path.dirname(os.path.abspath(filex_path)), "Evaluate.OUT")
-    if os.path.exists(eval_path):
-        return eval_path
+    candidates = []
+    if os.path.isabs(filex):
+        candidates.append(filex)
+    if batch_file:
+        batch_dir = os.path.dirname(os.path.abspath(batch_file))
+        candidates.append(os.path.join(batch_dir, filex))
+    resolved = _resolve_filex_path(filex)
+    if resolved:
+        candidates.append(resolved)
+    candidates.append(os.path.join(WORKSPACE, filex))
+    for p in candidates:
+        if not p:
+            continue
+        if not os.path.exists(p):
+            continue
+        eval_path = os.path.join(os.path.dirname(os.path.abspath(p)), "Evaluate.OUT")
+        if os.path.exists(eval_path):
+            return eval_path
     return fallback
 
 
