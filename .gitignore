@@ -120,3 +120,13 @@ Workspace/Sensitivity_Analyze/SA_Project_Output/sen_case/**
 **/_agents/
 
 wAppDataLocalProgramsTraeresourcesappoutvsworkbenchcontribterminalcommonscripts*
+
+# ── 新目录结构（阶段 0+） ──
+workspace/runs/
+workspace/artifacts/
+workspace/trash/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.trae/
+.venv/

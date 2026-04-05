@@ -1,0 +1,431 @@
+"""param_registry.py — 参数注册表核心模块。
+
+提取自 sa_generate_param_review_csv.py 的边界推断逻辑和参数分组逻辑。
+这是参数管理的唯一权威来源，SA 和率定代码都应调用此模块而非各自硬编码。
+
+职责：
+1. 定义参数的物理硬边界（physical bounds）
+2. 推断默认建议边界（default bounds）
+3. 参数分组（parameter group inference）
+4. 加载/保存参数注册表 CSV
+"""
+
+from __future__ import annotations
+
+import csv
+import os
+from dataclasses import dataclass, field
+from typing import Optional
+
+
+# ── 注册表字段 ─────────────────────────────────────────────────
+
+REGISTRY_COLUMNS = [
+    "parameter_name",
+    "crop",
+    "parameter_family",     # CUL / ECO / SPE / SOIL / INIT / MANAGEMENT
+    "target_file",
+    "section",
+    "dtype",
+    "format_width",
+    "format_precision",
+    "base_value",
+    "physical_lower",
+    "physical_upper",
+    "default_step",
+    "calibration_stage",
+    "enabled_by_default",
+    "description",
+]
+
+
+# ── 物理硬边界字典 ────────────────────────────────────────────
+# 来源：DSSAT 数值稳定性约束、文件格式约束、文献值。
+# 这些边界是绝对安全范围，任何候选边界不得超出。
+
+PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
+    # --- CUL ---
+    "EM-FL":  (10.0,  80.0),
+    "FL-SH":  (1.0,   20.0),
+    "FL-SD":  (1.0,   30.0),
+    "SD-PM":  (10.0,  80.0),
+    "FL-LF":  (10.0, 100.0),
+    "LFMAX":  (0.5,    3.0),
+    "SLAVR":  (100.0, 500.0),
+    "SIZLF":  (50.0, 1000.0),
+    "XFRT":   (0.01,   1.0),
+    "WTPSD":  (0.01,   2.0),
+    "SFDUR":  (5.0,   50.0),
+    "SDPDV":  (0.5,   10.0),
+    "PODUR":  (5.0,   80.0),
+    "THRSH":  (0.0,   99.0),
+    # --- ECO ---
+    "PL-EM":  (3.0,   12.0),
+    "EM-V1":  (10.0,  40.0),
+    "V1-JU":  (0.0,   30.0),
+    "JU-R0":  (2.0,   20.0),
+    "FL-VS":  (100.0, 100.0),   # 固定常数
+    "TRIFL":  (0.10,   1.00),
+    "RWDTH":  (0.50,   2.00),
+    "RHGHT":  (0.50,   3.00),
+    "OPTBI":  (0.0,   20.0),
+    "SLOBI":  (-0.50,  0.0),
+    "XMAGE":  (5.0,   30.0),
+    "XFPHT":  (5.0,   40.0),
+    "XFINT":  (0.10,   1.20),
+    # --- SPE temperature ---
+    "TB":     (4.0,   15.0),
+    "TO1":    (18.0,  32.0),
+    "TO2":    (24.0,  38.0),
+    "TM":     (30.0,  48.0),
+    "TB1":    (4.0,   15.0),
+    "TO11":   (18.0,  32.0),
+    "TO21":   (24.0,  38.0),
+    "TM1":    (30.0,  48.0),
+    "TB2":    (4.0,   15.0),
+    "TO12":   (18.0,  32.0),
+    "TO22":   (24.0,  38.0),
+    "TM2":    (30.0,  48.0),
+    "TB3":    (4.0,   15.0),
+    "TO13":   (18.0,  32.0),
+    "TO23":   (24.0,  38.0),
+    "TM3":    (30.0,  48.0),
+    # --- SPE photosynthesis / source-sink ---
+    "PARMAX":  (5.0,  20.0),
+    "PHTMAX":  (10.0, 60.0),
+    "KCAN":    (0.40,  1.00),
+    "KC_SLOPE": (0.0,  0.30),
+    "FINREF":  (0.0,    5.0),
+    "SLAREF":  (100.0, 500.0),
+    "SIZREF":  (50.0, 1000.0),
+    "VSSINK":  (0.2,   50.0),
+    "EVMODC":  (0.1,    3.0),
+    # --- SPE root-water ---
+    "WTFSD":   (0.0,  1.0),
+    "PORPT":   (0.0,  1.0),
+    "FRSTMF":  (0.0,  1.0),
+    "FRLFF":   (0.0,  1.0),
+    "ATOP":    (0.0, 10.0),
+    "FRCNOD":  (0.0,  1.0),
+    # --- SOIL surface hydro ---
+    "SOIL_SALB": (0.01, 0.50),
+    "SOIL_SLDR": (0.05, 2.50),
+    "SOIL_SLRO": (20.0, 99.0),
+}
+
+
+# ── 默认建议边界 ──────────────────────────────────────────────
+# 比物理硬边界更窄的工作范围，来源是文献 + 历史率定经验。
+
+DEFAULT_BOUNDS: dict[str, tuple[float, float]] = {
+    # --- ECO ---
+    "PL-EM":  (3.0,  12.0),
+    "EM-V1":  (10.0, 40.0),
+    "V1-JU":  (0.0,   0.0),
+    "JU-R0":  (2.0,  20.0),
+    "FL-VS":  (100.0, 100.0),
+    "TRIFL":  (0.20,  0.80),
+    "RWDTH":  (0.70,  1.60),
+    "RHGHT":  (0.70,  2.00),
+    "OPTBI":  (0.0,  20.0),
+    "SLOBI":  (-0.50, 0.0),
+    "XMAGE":  (5.0,  30.0),
+    "XFPHT":  (5.0,  40.0),
+    "XFINT":  (0.10,  1.20),
+    # --- SPE temperature ---
+    "TB":     (8.0,  12.0),
+    "TO1":    (22.0, 28.0),
+    "TO2":    (27.0, 32.0),
+    "TM":     (33.0, 40.0),
+    "TB1":    (8.0,  12.0),
+    "TO11":   (22.0, 28.0),
+    "TO21":   (27.0, 32.0),
+    "TM1":    (33.0, 40.0),
+    "TB2":    (8.0,  12.0),
+    "TO12":   (22.0, 28.0),
+    "TO22":   (27.0, 32.0),
+    "TM2":    (33.0, 40.0),
+    "TB3":    (8.0,  12.0),
+    "TO13":   (22.0, 28.0),
+    "TO23":   (27.0, 32.0),
+    "TM3":    (33.0, 40.0),
+    # --- SOIL surface ---
+    "SOIL_SALB": (0.05, 0.35),
+    "SOIL_SLDR": (0.10, 2.00),
+    "SOIL_SLRO": (40.0, 95.0),
+}
+
+
+# ── 参数分组推断 ──────────────────────────────────────────────
+
+def infer_parameter_group(name: str, location: str) -> str:
+    """根据参数名和所属文件，推断参数组名。
+
+    Args:
+        name: 参数名（大写）
+        location: 所属文件族，如 CUL / ECO / SPE / SOIL / IC
+
+    Returns:
+        参数组名字符串（最长 12 字符，兼容 PEST 限制）
+    """
+    n = str(name).strip().upper()
+    loc = str(location).strip().upper()
+
+    if loc == "SOIL":
+        if "SLLL" in n or "SDUL" in n or "SSAT" in n:
+            return "SOIL_WatRet"
+        if "SBDM" in n:
+            return "SOIL_Phys"
+        if "SLOC" in n:
+            return "SOIL_Chem"
+        if n in {"SOIL_SALB", "SOIL_SLDR", "SOIL_SLRO"}:
+            return "SOIL_SfcHyd"
+        return "SOIL_Other"
+
+    if loc == "IC":
+        if n.startswith("IC_SH2O"):
+            return "IC_InitWat"
+        return "IC_Other"
+
+    if loc == "SPE":
+        if n in {"PARMAX", "PHTMAX", "KCAN", "KC_SLOPE"}:
+            return "SPE_Photo"
+        if n in {"WTFSD", "PORPT", "FRSTMF", "FRLFF", "ATOP", "FRCNOD"}:
+            return "SPE_RtWat"
+        if n in {"FINREF", "SLAREF", "SIZREF", "VSSINK", "EVMODC"}:
+            return "SPE_SrcSnk"
+        if (n.startswith("TB") or n.startswith("TO1") or
+                n.startswith("TO2") or n.startswith("TM")):
+            return "SPE_Temp"
+        return "SPE_Other"
+
+    if loc == "ECO":
+        if n in {"PL-EM", "EM-V1", "V1-JU", "JU-R0", "PM06", "PM09",
+                 "LNGSH", "FL-VS", "XMAGE", "XFPHT", "XFINT"}:
+            return "ECO_Pheno"
+        if n in {"TRIFL", "RWDTH", "RHGHT"}:
+            return "ECO_Arch"
+        return "ECO_Other"
+
+    if loc == "CUL":
+        if n in {"EM-FL", "FL-SH", "FL-SD", "SD-PM", "FL-LF",
+                 "SFDUR", "SDPDV", "PODUR"}:
+            return "CUL_PheHrv"
+        if n in {"LFMAX", "SLAVR", "SIZLF"}:
+            return "CUL_Growth"
+        if n in {"XFRT", "WTPSD", "THRSH"}:
+            return "CUL_HrvPar"
+        return "CUL_Other"
+
+    return ""
+
+
+# ── 默认边界推断 ──────────────────────────────────────────────
+
+def compute_default_bounds(
+    name: str,
+    init_value: Optional[float],
+    location: str,
+) -> tuple[Optional[float], Optional[float], str]:
+    """根据参数名、初始值和所属文件，推断默认建议边界。
+
+    Returns:
+        (lower_bound, upper_bound, status)
+        status 为 "active" / "fixed"
+    """
+    n = str(name).strip().upper()
+    if init_value is None:
+        return None, None, "fixed"
+
+    init = float(init_value)
+    loc = str(location).strip().upper()
+
+    # 1. 尝试查找固定边界表
+    if n in DEFAULT_BOUNDS:
+        lb, ub = DEFAULT_BOUNDS[n]
+        status = "active" if lb != ub else "fixed"
+        return lb, ub, status
+
+    # 2. SOIL 按初值比例
+    if loc == "SOIL":
+        return _soil_bounds(n, init)
+
+    # 3. IC 按初值比例
+    if loc == "IC" or n.startswith("IC_SH2O"):
+        lb = max(0.01, init * 0.7)
+        ub = min(0.80, init * 1.3)
+        return lb, ub, "active" if lb != ub else "fixed"
+
+    # 4. 特殊参数
+    if n == "VSSINK":
+        lb = max(0.2, 0.5 * init)
+        ub = max(lb + 0.2, 2.0 * init)
+        return lb, ub, "active"
+
+    if n == "KC_SLOPE":
+        lb = max(0.0, init - 0.10)
+        ub = init + 0.10
+        return lb, ub, "active"
+
+    # 5. 通用回退
+    if abs(init) < 1e-12:
+        return init, init, "fixed"
+
+    if 0.0 < init <= 1.0:
+        lb = max(0.0, init * 0.7)
+        ub = min(1.0, init * 1.3)
+        return lb, ub, "active" if lb != ub else "fixed"
+
+    lb = init * 0.75
+    ub = init * 1.25
+    if lb > ub:
+        lb, ub = ub, lb
+    return lb, ub, "active"
+
+
+def _soil_bounds(name: str, init: float) -> tuple[float, float, str]:
+    """SOIL 参数按初值比例推断边界。"""
+    n = name.upper()
+    if n == "SOIL_SALB":
+        return 0.05, 0.35, "active"
+    if n == "SOIL_SLDR":
+        return 0.10, 2.00, "active"
+    if n == "SOIL_SLRO":
+        return 40.0, 95.0, "active"
+    if n.startswith("SOIL_SLLL"):
+        lb = max(0.01, init * 0.8)
+        ub = min(0.80, init * 1.2)
+        return lb, ub, "active" if lb != ub else "fixed"
+    if n.startswith("SOIL_SDUL"):
+        lb = max(0.01, init * 0.8)
+        ub = min(0.80, init * 1.2)
+        return lb, ub, "active" if lb != ub else "fixed"
+    if n.startswith("SOIL_SSAT"):
+        lb = max(0.01, init * 0.85)
+        ub = min(0.80, init * 1.15)
+        return lb, ub, "active" if lb != ub else "fixed"
+    if n.startswith("SOIL_SBDM"):
+        lb = max(0.5, init * 0.9)
+        ub = min(2.2, init * 1.1)
+        return lb, ub, "active" if lb != ub else "fixed"
+    if n.startswith("SOIL_SLOC"):
+        lb = max(0.0, init * 0.7)
+        ub = min(10.0, init * 1.3)
+        return lb, ub, "active" if lb != ub else "fixed"
+    # 通用
+    lb = max(0.0, init * 0.8)
+    ub = init * 1.2
+    return lb, ub, "active" if lb != ub else "fixed"
+
+
+# ── 物理边界检查 ──────────────────────────────────────────────
+
+def clamp_to_physical(
+    name: str,
+    lower: Optional[float],
+    upper: Optional[float],
+) -> tuple[Optional[float], Optional[float]]:
+    """将候选边界截断到物理硬边界范围内。"""
+    n = name.strip().upper()
+    if n not in PHYSICAL_BOUNDS:
+        return lower, upper
+    phys_lb, phys_ub = PHYSICAL_BOUNDS[n]
+    if lower is not None:
+        lower = max(lower, phys_lb)
+    if upper is not None:
+        upper = min(upper, phys_ub)
+    return lower, upper
+
+
+# ── 注册表 I/O ────────────────────────────────────────────────
+
+@dataclass
+class RegistryEntry:
+    """一条参数注册表记录。"""
+    parameter_name: str
+    crop: str = ""
+    parameter_family: str = ""   # CUL / ECO / SPE / SOIL / INIT
+    target_file: str = ""
+    section: str = ""
+    dtype: str = "float"
+    format_width: int = 6
+    format_precision: int = 3
+    base_value: Optional[float] = None
+    physical_lower: Optional[float] = None
+    physical_upper: Optional[float] = None
+    default_step: Optional[float] = None
+    calibration_stage: str = ""
+    enabled_by_default: bool = True
+    description: str = ""
+
+
+def load_registry_csv(path: str) -> list[RegistryEntry]:
+    """从 CSV 加载参数注册表。"""
+    entries: list[RegistryEntry] = []
+    if not os.path.exists(path):
+        return entries
+    with open(path, "r", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            entry = RegistryEntry(
+                parameter_name=row.get("parameter_name", ""),
+                crop=row.get("crop", ""),
+                parameter_family=row.get("parameter_family", ""),
+                target_file=row.get("target_file", ""),
+                section=row.get("section", ""),
+                dtype=row.get("dtype", "float"),
+                format_width=int(row.get("format_width", 6) or 6),
+                format_precision=int(row.get("format_precision", 3) or 3),
+                base_value=_safe_float(row.get("base_value")),
+                physical_lower=_safe_float(row.get("physical_lower")),
+                physical_upper=_safe_float(row.get("physical_upper")),
+                default_step=_safe_float(row.get("default_step")),
+                calibration_stage=row.get("calibration_stage", ""),
+                enabled_by_default=row.get("enabled_by_default", "true").lower() in ("true", "1", "yes"),
+                description=row.get("description", ""),
+            )
+            entries.append(entry)
+    return entries
+
+
+def save_registry_csv(entries: list[RegistryEntry], path: str) -> None:
+    """保存参数注册表到 CSV。"""
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    with open(path, "w", newline="", encoding="utf-8-sig") as f:
+        writer = csv.DictWriter(f, fieldnames=REGISTRY_COLUMNS)
+        writer.writeheader()
+        for e in entries:
+            writer.writerow({
+                "parameter_name": e.parameter_name,
+                "crop": e.crop,
+                "parameter_family": e.parameter_family,
+                "target_file": e.target_file,
+                "section": e.section,
+                "dtype": e.dtype,
+                "format_width": e.format_width,
+                "format_precision": e.format_precision,
+                "base_value": _fmt_float(e.base_value),
+                "physical_lower": _fmt_float(e.physical_lower),
+                "physical_upper": _fmt_float(e.physical_upper),
+                "default_step": _fmt_float(e.default_step),
+                "calibration_stage": e.calibration_stage,
+                "enabled_by_default": str(e.enabled_by_default).lower(),
+                "description": e.description,
+            })
+
+
+def _safe_float(val) -> Optional[float]:
+    if val is None or str(val).strip() == "":
+        return None
+    try:
+        return float(val)
+    except (ValueError, TypeError):
+        return None
+
+
+def _fmt_float(val: Optional[float]) -> str:
+    if val is None:
+        return ""
+    if val == int(val):
+        return str(int(val))
+    return f"{val:.6g}"
