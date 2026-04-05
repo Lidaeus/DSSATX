@@ -1,4 +1,5 @@
 import argparse
+import sys
 import os
 import re
 import shutil
@@ -6,6 +7,9 @@ from typing import Dict, Optional, Set
 
 import pandas as pd
 import pyemu
+
+import subprocess
+from datetime import datetime, timezone
 
 WORKSPACE = r"C:\DSSAT48\Tomato_Cal\Workspace"
 CUL_BASE_FILE = os.path.join(WORKSPACE, "TMGRO048.CUL.base")
@@ -25,6 +29,61 @@ PEST_GROW_FILE = os.path.join(WORKSPACE, "PestGrow.OUT")
 PEST_JOINT_FILE = os.path.join(WORKSPACE, "PestJoint.OUT")
 PEST_HARVEST_FILE = os.path.join(WORKSPACE, "PestHarvest.OUT")
 PEST_TMTGROW_FILE = os.path.join(WORKSPACE, "PestTmtGrow.OUT")
+
+
+def _project_root():
+    """Locate Tomato_Cal project root (parent of Workspace/)."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    if os.path.basename(here).lower() == "workspace":
+        return os.path.dirname(here)
+    return here
+
+
+def _resolve_bounds_id(bounds_id, crop=None):
+    """Resolve a bounds_id to a frozen bounds CSV path."""
+    root = _project_root()
+    if crop:
+        candidate = os.path.join(root, "data", "parameter_registry",
+                                 "bounds_frozen", crop, bounds_id + ".csv")
+        if os.path.exists(candidate):
+            return candidate
+    candidate = os.path.join(root, "data", "parameter_registry",
+                             "bounds_frozen", bounds_id + ".csv")
+    if os.path.exists(candidate):
+        return candidate
+    if os.path.exists(bounds_id):
+        return os.path.abspath(bounds_id)
+    return None
+
+
+def _get_git_commit():
+    """Get current git commit hash."""
+    try:
+        result = subprocess.run(["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True, text=True, timeout=5, cwd=_project_root())
+        return result.stdout.strip() if result.returncode == 0 else ""
+    except Exception:
+        return ""
+
+
+def _write_run_manifest(out_dir, **kwargs):
+    """Write run_manifest.yaml to out_dir using simple YAML-like format."""
+    path = os.path.join(out_dir, "run_manifest.yaml")
+    with open(path, "w", encoding="utf-8") as f:
+        for key, val in kwargs.items():
+            if isinstance(val, (list, tuple)):
+                f.write(key + ':\n')
+                for item in val:
+                    f.write('  - ' + repr(str(item)) + '\n')
+            elif val is None:
+                f.write(key + ': null\n')
+            elif isinstance(val, bool):
+                f.write(key + ': ' + str(val).lower() + '\n')
+            elif isinstance(val, (int, float)):
+                f.write(key + ': ' + str(val) + '\n')
+            else:
+                f.write(key + ': "' + str(val) + '"\n')
+    return path
 
 ECO_BOUNDS_EGGPLANT = {
     "PL-EM": (3.0, 12.0),
@@ -2000,6 +2059,10 @@ if __name__ == "__main__":
         default="auto",
     )
     parser.add_argument("--bounds-review-csv", default=SENSITIVITY_PARAM_REVIEW_CSV)
+    parser.add_argument("--bounds-id", default=None,
+                        help="Frozen bounds ID (resolves to data/parameter_registry/bounds_frozen/{crop}/{id}.csv)")
+    parser.add_argument("--bounds-crop", default=None,
+                        help="Crop name for bounds-id resolution (tomato/eggplant)")
     parser.add_argument("--validate-bounds-review-csv", action="store_true", default=False)
     parser.add_argument("--pwadm-sigma0", type=float, default=250.0)
     parser.add_argument("--pwadm-cv", type=float, default=0.08)
@@ -2716,8 +2779,23 @@ if __name__ == "__main__":
             if k and k in override:
                 p["init"] = float(override[k])
 
-    brm_mode = (args.bounds_review_mode or "auto").strip().lower()
-    brm_csv = args.bounds_review_csv
+    # ── bounds-id resolution (Phase 1) ──
+    if args.bounds_id:
+        bounds_crop = args.bounds_crop
+        if not bounds_crop:
+            bounds_crop = "eggplant" if "eggplant" in mode else "tomato"
+        resolved = _resolve_bounds_id(args.bounds_id, crop=bounds_crop)
+        if not resolved:
+            raise FileNotFoundError(
+                f"Cannot resolve --bounds-id {args.bounds_id} "
+                f"(searched in data/parameter_registry/bounds_frozen/{bounds_crop}/)")
+        print(f"Using frozen bounds: {resolved}")
+        brm_csv = resolved
+        brm_mode = "require"
+    else:
+        brm_csv = args.bounds_review_csv
+        brm_mode = (args.bounds_review_mode or "auto").strip().lower()
+
     if brm_mode != "off":
         exists = bool(brm_csv and os.path.exists(brm_csv))
         if brm_mode == "require" and not exists:
@@ -2795,3 +2873,28 @@ if __name__ == "__main__":
             model_cmd_extra=model_cmd_extra,
             out_dir=out_dir,
         )
+
+    # ── Generate run_manifest.yaml (Phase 1) ──
+    manifest_path = _write_run_manifest(
+        out_dir,
+        run_id=prefix,
+        run_type="calibration",
+        crop="eggplant" if "eggplant" in mode else "tomato",
+        mode=mode,
+        created_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        git_commit=_get_git_commit(),
+        dssat_root=os.path.dirname(WORKSPACE),
+        workspace_root=WORKSPACE,
+        batch_file=os.path.basename(args.batch) if args.batch else None,
+        bounds_id=args.bounds_id or "",
+        bounds_csv=brm_csv if brm_mode != "off" else "",
+        tighten_from=[os.path.basename(p) for p in (args.tighten_from or [])],
+        tighten_frac=args.tighten_frac,
+        noptmax=args.noptmax,
+        ies_num_reals=args.ies_num_reals,
+        harvest_var=harvest_var,
+        n_params=len(params),
+        operator=os.environ.get("USERNAME", "unknown"),
+        command_line=" ".join(sys.argv),
+    )
+    print(f"Run manifest written to {manifest_path}")
