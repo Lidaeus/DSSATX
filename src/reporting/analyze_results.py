@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 WORKSPACE = r"C:\DSSAT48\Tomato_Cal\Workspace"
-RESULTS_DIR = os.path.join(WORKSPACE, "Calibration_Results")
+
 
 
 def _parse_batch_entries(batch_file):
@@ -429,7 +429,7 @@ def deterministic_process_compare(prefix, batch_file, var_names=None, run_dir=No
             rows.append(row)
 
     df = pd.DataFrame(rows)
-    out_csv = os.path.join(RESULTS_DIR, f"{prefix}_deterministic_process_compare.csv")
+    out_csv = os.path.join(run_dir or WORKSPACE, f"{prefix}_deterministic_process_compare.csv")
     df.to_csv(out_csv, index=False)
     return out_csv
 
@@ -508,7 +508,7 @@ def deterministic_harvest_compare(prefix, batch_file, run_dir=None):
             )
 
     df = pd.DataFrame(rows)
-    out_csv = os.path.join(RESULTS_DIR, f"{prefix}_deterministic_harvest_compare.csv")
+    out_csv = os.path.join(run_dir or WORKSPACE, f"{prefix}_deterministic_harvest_compare.csv")
     df.to_csv(out_csv, index=False)
     return out_csv
 
@@ -601,14 +601,12 @@ def deterministic_joint_compare(prefix, batch_file, var_bases=None, run_dir=None
         out_rows.append(row)
 
     out_df = pd.DataFrame(out_rows)
-    out_csv = os.path.join(RESULTS_DIR, f"{prefix}_deterministic_joint_compare.csv")
+    out_csv = os.path.join(run_dir or WORKSPACE, f"{prefix}_deterministic_joint_compare.csv")
     out_df.to_csv(out_csv, index=False)
     return out_csv
 
 def ensure_results_dir():
-    if not os.path.exists(RESULTS_DIR):
-        os.makedirs(RESULTS_DIR)
-        print(f"Created results directory: {RESULTS_DIR}")
+    pass  # Deprecated, use run_dir directly
 
 def get_ensemble_files(pattern):
     """
@@ -616,10 +614,9 @@ def get_ensemble_files(pattern):
     Returns combined list of files.
     """
     files = []
-    files.extend(glob.glob(os.path.join(RESULTS_DIR, pattern)))
     files.extend(glob.glob(os.path.join(WORKSPACE, pattern)))
-
-    runs_root = os.path.join(RESULTS_DIR, "_runs")
+    # Removed old RESULTS_DIR lookup for simplicity
+    runs_root = os.path.join(WORKSPACE, "Calibration_Results", "_runs")
     if os.path.isdir(runs_root):
         files.extend(glob.glob(os.path.join(runs_root, "*", "*", pattern)))
         files.extend(glob.glob(os.path.join(runs_root, "*", pattern)))
@@ -635,14 +632,11 @@ def _pick_latest_by_mtime(paths):
         return None
     return max(existing, key=lambda p: os.path.getmtime(p))
 
-def cleanup_workspace(prefix):
-    """
-    Moves PEST output CSV files to RESULTS_DIR to clean up the workspace.
-    """
-    print("\n[Cleanup] Moving intermediate CSV files to Calibration_Results...")
-    ensure_results_dir()
-    
-    # Patterns to move
+def cleanup_workspace(prefix, run_dir=None):
+    """Moves PEST output CSV files to run_dir."""
+    dst_dir = run_dir or WORKSPACE
+    if dst_dir == WORKSPACE: return
+    print(f"\n[Cleanup] Moving intermediate CSV files to {dst_dir}...")
     patterns = [
         f"{prefix}.*.obs.csv",
         f"{prefix}.*.par.csv",
@@ -650,12 +644,11 @@ def cleanup_workspace(prefix):
         f"{prefix}.*.pdc.csv",
         f"{prefix}.*.pcs.csv",
     ]
-    
     count = 0
     for pat in patterns:
         files = glob.glob(os.path.join(WORKSPACE, pat))
         for src in files:
-            dst = os.path.join(RESULTS_DIR, os.path.basename(src))
+            dst = os.path.join(dst_dir, os.path.basename(src))
             try:
                 shutil.move(src, dst)
                 count += 1
@@ -702,7 +695,8 @@ def _write_and_run_deterministic(prefix, batch_file, param_csv, det_dir, harvest
     return batch_local
 
 
-def _make_standard_plots(prefix, results_dir=RESULTS_DIR, out_dir=None, no_timeseries=False):
+def _make_standard_plots(prefix, results_dir=None, out_dir=None, no_timeseries=False):
+    results_dir = results_dir or WORKSPACE
     import plot_results as pr
 
     results_dir = os.path.abspath(results_dir)
@@ -1020,7 +1014,7 @@ def analyze(prefix, run_dir=None, batch_file=None, make_plots=True, plots_no_tim
                      print(f"Warning: Realization {best_real_name} not found in parameter ensemble.")
 
     # Perform Cleanup
-    cleanup_workspace(prefix)
+    cleanup_workspace(prefix, run_dir=run_dir)
 
 
 def _safe_series(df, col):
