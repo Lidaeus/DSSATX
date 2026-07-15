@@ -25,6 +25,12 @@ import sys
 import time
 from datetime import datetime, timezone
 
+_PROJECT_ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+
+from src.common.run_state import classify_manager_exit
+
 
 def _repo_root_from_this_file():
     here = os.path.dirname(os.path.abspath(__file__))
@@ -62,15 +68,32 @@ def _copy_dir(src_dir, dst_dir, ignore_names=None):
 
     if os.path.exists(dst_dir):
         shutil.rmtree(dst_dir, ignore_errors=True)
+        deadline = time.time() + 5.0
+        while os.path.exists(dst_dir) and time.time() < deadline:
+            time.sleep(0.1)
+            shutil.rmtree(dst_dir, ignore_errors=True)
+        if os.path.exists(dst_dir):
+            raise RuntimeError(f"agent_directory_in_use:{dst_dir}")
     shutil.copytree(src_dir, dst_dir, ignore=_ignore)
 
 
-def _start_proc(exe, args, cwd, stdout_path, stderr_path):
+def _start_proc(exe, args, cwd, stdout_path, stderr_path, *, append=False, detached=False):
     os.makedirs(cwd, exist_ok=True)
-    out_f = open(stdout_path, "w", encoding="utf-8")
-    err_f = open(stderr_path, "w", encoding="utf-8")
+    mode = "a" if append else "w"
+    out_f = open(stdout_path, mode, encoding="utf-8")
+    err_f = open(stderr_path, mode, encoding="utf-8")
     try:
-        p = subprocess.Popen(args, cwd=cwd, stdout=out_f, stderr=err_f, text=True)
+        creationflags = 0
+        if detached and os.name == "nt":
+            creationflags = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS
+        p = subprocess.Popen(
+            args,
+            cwd=cwd,
+            stdout=out_f,
+            stderr=err_f,
+            text=True,
+            creationflags=creationflags,
+        )
     except Exception:
         out_f.close()
         err_f.close()
@@ -122,6 +145,9 @@ def _stop_pidfile(pid_path):
         )
     except Exception:
         pass
+    deadline = time.time() + 5.0
+    while _is_pid_alive(pid) and time.time() < deadline:
+        time.sleep(0.1)
 
 
 def _write_json(path, data):
@@ -135,6 +161,19 @@ def _read_json(path):
         return None
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def _utc_now():
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _update_run_status(run_dir, **updates):
+    path = os.path.join(run_dir, "run_status.json")
+    data = _read_json(path) or {}
+    data.setdefault("state_schema_version", 2)
+    data.update(updates)
+    _write_json(path, data)
+    return data
 
 
 def _update_agent_last_job(agent_dir, **updates):
@@ -187,6 +226,8 @@ def cmd_status(run_dir, agents_dir="_agents"):
         print(f"  Case:    {run_status.get('case', '?')}")
         print(f"  Mode:    {run_status.get('mode', '?')}")
         print(f"  Created: {run_status.get('created_at', '?')}")
+        print(f"  Process: {run_status.get('status', '?')}")
+        print(f"  Science: {run_status.get('scientific_status', 'not_assessed')}")
 
     # Agent status
     if not os.path.isdir(agents_root):
@@ -238,6 +279,87 @@ def cmd_status(run_dir, agents_dir="_agents"):
     print(f"{'='*60}\n")
 
 
+def cmd_stop(run_dir, agents_dir="_agents", *, force=False):
+    """Request a traceable stop; force is reserved for unresponsive jobs."""
+    run_dir = os.path.abspath(run_dir)
+    manager_pid = _find_manager_pid(run_dir)
+    if not _is_pid_alive(manager_pid):
+        print("manager_not_running")
+        return False
+
+    now = _utc_now()
+    if not force:
+        stop_path = os.path.join(run_dir, "pest.stp")
+        with open(stop_path, "w", encoding="ascii") as handle:
+            handle.write("1\n")
+        _update_run_status(
+            run_dir,
+            status="stopping",
+            stop_requested_at=now,
+            stop_mode="pest.stp",
+            termination_reason="operator_graceful_stop_requested",
+        )
+        print(f"graceful_stop_requested={stop_path}")
+        return True
+
+    for path in [
+        os.path.join(run_dir, "manager", "panther_manager.pid"),
+        os.path.join(run_dir, "panther_manager.pid"),
+    ]:
+        _stop_pidfile(path)
+    agents_root = os.path.join(run_dir, agents_dir)
+    if os.path.isdir(agents_root):
+        for name in os.listdir(agents_root):
+            agent_dir = os.path.join(agents_root, name)
+            if not os.path.isdir(agent_dir) or not name.startswith("agent_"):
+                continue
+            _stop_pidfile(os.path.join(agent_dir, "state", "agent.pid"))
+            _stop_pidfile(os.path.join(agent_dir, "panther_agent.pid"))
+    _update_run_status(
+        run_dir,
+        status="aborted",
+        scientific_status="not_assessable",
+        stop_requested_at=now,
+        finished_at=now,
+        stop_mode="force",
+        termination_reason="operator_force_stop",
+    )
+    print("force_stop_completed")
+    return True
+
+
+def _launch_detached_controller(args):
+    """Run the waiting controller outside the caller's console/process group."""
+    run_dir = os.path.abspath(args.run_dir)
+    _ensure_case_pst(run_dir, args.case)
+    manager_dir = os.path.join(run_dir, "manager")
+    os.makedirs(manager_dir, exist_ok=True)
+    child_args = [value for value in sys.argv[1:] if value != "--no-wait"]
+    child_args.extend(["--wait", "--detached-child"])
+    stdout_path = os.path.join(manager_dir, "parallel_controller.stdout.log")
+    stderr_path = os.path.join(manager_dir, "parallel_controller.stderr.log")
+    process, out_f, err_f = _start_proc(
+        sys.executable,
+        [sys.executable, os.path.abspath(__file__), *child_args],
+        _repo_root_from_this_file(),
+        stdout_path,
+        stderr_path,
+        detached=True,
+    )
+    out_f.close()
+    err_f.close()
+    _update_run_status(
+        run_dir,
+        status="launching",
+        scientific_status="pending",
+        controller_pid=process.pid,
+        controller_stdout=stdout_path,
+        controller_stderr=stderr_path,
+        launched_at=_utc_now(),
+    )
+    print(f"detached_controller_started={process.pid}")
+
+
 # ═══════════════════════════════════════════════════════════════
 # Run subcommand
 # ═══════════════════════════════════════════════════════════════
@@ -249,6 +371,11 @@ def cmd_run(args):
         raise FileNotFoundError(run_dir)
 
     _ensure_case_pst(run_dir, args.case)
+    if args.resume and not os.path.isfile(os.path.join(run_dir, f"{args.case}.rns")):
+        raise FileNotFoundError(f"Cannot resume without run storage: {args.case}.rns")
+    stop_file = os.path.join(run_dir, "pest.stp")
+    if os.path.isfile(stop_file):
+        os.remove(stop_file)
 
     n_agents = int(args.n_agents)
     if n_agents <= 0:
@@ -274,7 +401,11 @@ def cmd_run(args):
     manager_dir = os.path.join(run_dir, "manager")
     os.makedirs(manager_dir, exist_ok=True)
 
-    ignore_names = {args.agents_dir, "_agents", "__pycache__", "manager", "state"}
+    ignore_names = {args.agents_dir, "_agents", "__pycache__", "manager", "state", "pest.stp"}
+    ignore_names.update(
+        name for name in os.listdir(run_dir)
+        if os.path.splitext(name)[1].lower() in {".rns", ".rmr", ".rnu", ".rnj", ".rnf", ".mio"}
+    )
     for i in range(1, int(n_agents) + 1):
         agent_dir = os.path.join(agents_root, f"agent_{i:02d}")
         _copy_dir(run_dir, agent_dir, ignore_names=ignore_names)
@@ -324,7 +455,9 @@ def cmd_run(args):
             out_path = os.path.join(agent_dir, "panther_agent.stdout.log")
             err_path = os.path.join(agent_dir, "panther_agent.stderr.log")
             cmd = [exe_path, args.case, "/h", f"{host}:{port}"]
-            p, out_f, err_f = _start_proc(exe_path, cmd, agent_dir, out_path, err_path)
+            p, out_f, err_f = _start_proc(
+                exe_path, cmd, agent_dir, out_path, err_path, append=args.resume
+            )
             # Write PID to both locations
             _write_pid(os.path.join(state_dir, "agent.pid"), p.pid)
             _write_pid(os.path.join(agent_dir, "panther_agent.pid"), p.pid)
@@ -335,16 +468,24 @@ def cmd_run(args):
 
         manager_out = os.path.join(manager_dir, "panther_manager.stdout.log")
         manager_err = os.path.join(manager_dir, "panther_manager.stderr.log")
-        manager_cmd = [exe_path, args.case, "/h", f":{port}"]
-        p, out_f, err_f = _start_proc(exe_path, manager_cmd, run_dir, manager_out, manager_err)
+        manager_cmd = [exe_path, args.case]
+        if args.resume:
+            manager_cmd.append("/r")
+        manager_cmd.extend(["/h", f":{port}"])
+        p, out_f, err_f = _start_proc(
+            exe_path, manager_cmd, run_dir, manager_out, manager_err, append=args.resume
+        )
         _write_pid(os.path.join(manager_dir, "panther_manager.pid"), p.pid)
         _write_pid(os.path.join(run_dir, "panther_manager.pid"), p.pid)
         manager_handle = (p, out_f, err_f)
 
         # Update run_status.json
         run_status_path = os.path.join(run_dir, "run_status.json")
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        now = _utc_now()
+        previous = _read_json(run_status_path) or {}
+        attempt = int(previous.get("attempt", 0) or 0) + 1
         _write_json(run_status_path, {
+            "state_schema_version": 2,
             "run_dir": run_dir,
             "case": args.case,
             "mode": args.mode,
@@ -353,15 +494,28 @@ def cmd_run(args):
             "n_agents": n_agents,
             "started_at": now,
             "status": "running",
+            "scientific_status": "pending",
             "manager_pid": p.pid,
+            "attempt": attempt,
+            "resumed": bool(args.resume),
         })
 
         if args.wait:
             rc = p.wait()
             print(f"manager_exit_code={rc}")
 
-            # Update run_status
+            current = _read_json(run_status_path) or {}
+            stop_requested = bool(current.get("stop_requested_at"))
+            process_state, termination_reason = classify_manager_exit(
+                rc, stop_requested=stop_requested
+            )
+            scientific_status = "pending" if process_state == "completed" else "not_assessable"
+            scientific_error = ""
+            finished_at = _utc_now()
+            # Persist process completion before the scientific audit reads
+            # run_status.json. Scientific validity is a separate dimension.
             _write_json(run_status_path, {
+                "state_schema_version": 2,
                 "run_dir": run_dir,
                 "case": args.case,
                 "mode": args.mode,
@@ -369,10 +523,48 @@ def cmd_run(args):
                 "port": port,
                 "n_agents": n_agents,
                 "started_at": now,
-                "finished_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "status": "completed" if rc == 0 else f"failed (exit {rc})",
+                "finished_at": finished_at,
+                "status": process_state,
+                "scientific_status": scientific_status,
+                "termination_reason": termination_reason,
                 "manager_pid": p.pid,
                 "manager_exit_code": rc,
+                "attempt": attempt,
+                "resumed": bool(args.resume),
+            })
+            if process_state == "completed" and args.mode == "sen":
+                try:
+                    from src.common.quality import assess_morris_audit
+                    from src.sensitivity.morris_audit import audit_morris_case, write_morris_audit
+
+                    audit = audit_morris_case(run_dir, case=args.case)
+                    audit_dir = os.path.join(run_dir, "morris_audit")
+                    write_morris_audit(audit, audit_dir)
+                    quality = assess_morris_audit(audit, run_id=os.path.basename(run_dir))
+                    quality.write(audit_dir, stem="morris_run_quality")
+                    scientific_status = "validated" if quality.science_validated else "failed"
+                except Exception as exc:
+                    scientific_status = "not_assessed"
+                    scientific_error = str(exc)
+
+            _write_json(run_status_path, {
+                "state_schema_version": 2,
+                "run_dir": run_dir,
+                "case": args.case,
+                "mode": args.mode,
+                "host": host,
+                "port": port,
+                "n_agents": n_agents,
+                "started_at": now,
+                "finished_at": finished_at,
+                "status": process_state,
+                "scientific_status": scientific_status,
+                "scientific_status_error": scientific_error,
+                "termination_reason": termination_reason,
+                "manager_pid": p.pid,
+                "manager_exit_code": rc,
+                "attempt": attempt,
+                "resumed": bool(args.resume),
             })
         else:
             print("manager_started")
@@ -380,6 +572,14 @@ def cmd_run(args):
             return
 
     except KeyboardInterrupt:
+        _update_run_status(
+            run_dir,
+            status="aborted",
+            scientific_status="not_assessable",
+            finished_at=_utc_now(),
+            termination_reason="keyboard_interrupt",
+            manager_exit_code=0xC000013A,
+        )
         _stop_all()
         raise
     finally:
@@ -422,7 +622,7 @@ def cmd_run(args):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="启动并行率定/SA 运行或查询运行状态"
+        description="Run, resume, stop, or inspect parallel PEST++ jobs"
     )
     parser.add_argument("--run-dir", required=True)
     parser.add_argument("--case", required=True)
@@ -437,16 +637,45 @@ def main():
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--status", action="store_true",
                         help="Query run status instead of starting a run")
+    parser.add_argument("--stop", action="store_true",
+                        help="Request a graceful, traceable stop using pest.stp")
+    parser.add_argument("--force-stop", action="store_true",
+                        help="Force-stop an unresponsive manager and agents")
+    parser.add_argument("--resume", action="store_true",
+                        help="Resume an interrupted run from the existing case.rns")
+    parser.add_argument("--detached-child", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
 
     if args.status:
         cmd_status(os.path.abspath(args.run_dir), agents_dir=args.agents_dir)
         return
+    if args.stop or args.force_stop:
+        cmd_stop(
+            os.path.abspath(args.run_dir),
+            agents_dir=args.agents_dir,
+            force=bool(args.force_stop),
+        )
+        return
 
     if args.cleanup and not args.wait:
         raise ValueError("--cleanup requires --wait")
 
-    cmd_run(args)
+    if not args.wait and not args.detached_child:
+        _launch_detached_controller(args)
+        return
+
+    try:
+        cmd_run(args)
+    except Exception as exc:
+        _update_run_status(
+            os.path.abspath(args.run_dir),
+            status="runtime_failed",
+            scientific_status="not_assessable",
+            finished_at=_utc_now(),
+            termination_reason="parallel_controller_exception",
+            controller_error=str(exc),
+        )
+        raise
 
 
 if __name__ == "__main__":

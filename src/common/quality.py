@@ -194,6 +194,85 @@ def assess_morris(
     return report
 
 
+def assess_morris_audit(
+    audit: dict[str, Any],
+    *,
+    run_id: str = "",
+    require_zero_model_failures: bool = True,
+) -> QualityReport:
+    """Require complete, trajectory-balanced Morris evidence before ranking."""
+    summary = dict(audit.get("summary") or {})
+    report = QualityReport(run_type="morris_run", run_id=run_id or str(summary.get("case", "")))
+    planned = int(summary.get("planned_runs", 0) or 0)
+    not_finalized = int(summary.get("not_finalized_runs", planned) or 0)
+    runtime_failed = int(summary.get("runtime_failed_runs", 0) or 0)
+    unknown_failed = int(summary.get("unknown_failed_runs", 0) or 0)
+    model_failed = int(summary.get("model_failed_runs", 0) or 0)
+    expected_trajectories = int(summary.get("expected_trajectories", 0) or 0)
+    fully_valid = int(summary.get("fully_valid_trajectories", 0) or 0)
+    minimum_effects = int(summary.get("minimum_valid_effects_per_parameter", 0) or 0)
+    process_state = str(summary.get("process_state", ""))
+
+    process_completed = (
+        planned > 0
+        and process_state == "completed"
+        and not_finalized == 0
+        and runtime_failed == 0
+        and unknown_failed == 0
+    )
+    report.add(
+        "process_completed",
+        process_completed,
+        "PEST++ manager completed and every planned run has a non-runtime terminal outcome",
+        actual={"state": process_state, "not_finalized": not_finalized},
+        threshold={"state": "completed", "not_finalized": 0},
+    )
+    report.add(
+        "morris_no_runtime_failures",
+        runtime_failed == 0 and unknown_failed == 0,
+        "No interruption/runtime/unknown failures are mixed with model outcomes",
+        actual=runtime_failed + unknown_failed,
+        threshold=0,
+    )
+    report.add(
+        "morris_no_model_failures",
+        model_failed == 0 or not require_zero_model_failures,
+        "Formal Morris rankings require a model-valid rectangular design domain",
+        actual=model_failed,
+        threshold=0,
+        warning=not require_zero_model_failures and model_failed > 0,
+    )
+    report.add(
+        "morris_complete_trajectories",
+        expected_trajectories > 0 and fully_valid == expected_trajectories,
+        "Every Morris trajectory contains only successful model evaluations",
+        actual=fully_valid,
+        threshold=expected_trajectories,
+    )
+    report.add(
+        "morris_balanced_effect_coverage",
+        expected_trajectories > 0 and minimum_effects == expected_trajectories,
+        "Every parameter has the requested number of valid elementary effects",
+        actual=minimum_effects,
+        threshold=expected_trajectories,
+    )
+    report.add(
+        "morris_final_summary_exists",
+        bool(summary.get("mio_exists")),
+        "PESTPP-SEN produced the final Morris summary (.mio)",
+        actual=bool(summary.get("mio_exists")),
+        threshold=True,
+    )
+    report.add(
+        "morris_design_structure",
+        not audit.get("design_warnings"),
+        "Each trajectory step changes exactly one parameter",
+        actual=len(audit.get("design_warnings") or []),
+        threshold=0,
+    )
+    return report
+
+
 def assess_sobol(
     frame: pd.DataFrame,
     *,

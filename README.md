@@ -11,7 +11,7 @@ Tomato_Cal 面向作物模型研究者，目标是在 Windows 环境中提供可
 - 当前开发基线是 [产品定义与系统设计](项目重构规划.md)；详细风险和任务见 [P0 科研可信性修复开发计划](docs/P0_科研可信性修复开发计划.md)。
 - P0 已在 `codex/p0-research-credibility` 实施并通过微型数值验证；后续批准的显式 log/处理均值 sigma 也已完成真实 DSSAT/PEST 冒烟，详见 [P0 验证报告](docs/reports/P0_verification_report.md) 与 [Observation Policy 验证记录](docs/reports/observation_policy_verification.md)。已有历史 SA 排名、率定最优参数或不确定性结果仍不得用于论文结论。
 - 科研图表已冻结为“双轨制”：Python 只做 SA/率定运行诊断与论文数据导出，未来可能进入论文的图全部由 R 绘制；完整 Fig. 1–6/Fig. S1–S8 规划见 [科研图表设计与开发计划](docs/科研图表设计与开发计划.md)。
-- P0 防退化加固已完成当前回归轮次；P1 的新 XXQL2501 输入包、57 个活跃参数和 10 TN/240 响应契约已批准。首轮预检正确拦截 v1 的 XMAGE/XFPHT 非法组合，当前边界已升级为 `eggplant_p1_xxql2501_v2_20260715`，准备重新执行 `5 seeds × r=30` 正式 Morris。详见 [P1 科研分析启动计划](docs/P1_科研分析启动计划.md) 与 [输入/输出设计审计](docs/reports/XXQL2501_input_and_SA_design_review.md)。
+- P0 防退化加固已完成当前回归轮次；P1 的新 XXQL2501 输入包、57 个活跃参数和 10 TN/240 响应契约已批准。P1-R1 已完成运行可靠性与失效诊断：v2 的 seed 20260715 在 TN2 存在可重复模型失败，正式 Morris 暂停；下一步须先解决 TN2/深层土壤数据风险，再按“2 个独立 seed 起步、稳定性不足时最多扩展到 5 个”的自适应计划重跑。详见 [P1 科研分析启动计划](docs/P1_科研分析启动计划.md)、[P1-R1 可靠性设计](docs/P1_R1_科研运行可靠性与失效诊断.md) 与 [seed 失效诊断](docs/reports/P1_R1_seed_20260715_failure_diagnosis.md)。
 
 ## 产品原则
 

@@ -12,7 +12,8 @@ import pandas as pd
 from matplotlib.colors import Normalize
 from matplotlib.ticker import ScalarFormatter
 
-from src.common.quality import assess_morris
+from src.common.quality import assess_morris, assess_morris_audit
+from src.sensitivity.morris_audit import audit_morris_case, write_morris_audit
 
 
 def _load_pyplot():
@@ -281,9 +282,18 @@ def postprocess_morris(
     plot_mode="compact",
 ):
     mio_path = os.path.join(case_dir, "sa_sen_morris.mio")
+    os.makedirs(out_dir, exist_ok=True)
+
+    run_audit = audit_morris_case(case_dir)
+    write_morris_audit(run_audit, out_dir)
+    run_quality = assess_morris_audit(
+        run_audit, run_id=os.path.basename(os.path.abspath(case_dir))
+    )
+    run_quality.write(out_dir, stem="morris_run_quality")
+    run_quality.require_pass()
+
     if not os.path.exists(mio_path):
         raise FileNotFoundError(mio_path)
-    os.makedirs(out_dir, exist_ok=True)
     _apply_pub_style(base_font_size=base_font_size)
 
     plot_mode = str(plot_mode or "compact").strip().lower()

@@ -274,6 +274,32 @@ def validate_input_bundle(input_dir: str | Path) -> tuple[dict[str, object], lis
                     continue
                 if not layer["SLLL"] <= row["sh2o"] <= layer["SSAT"]:
                     findings.append(InputFinding("IC_WATER_OUTSIDE_SOIL", "error", f"TN{tn} depth {row['depth']:g}: SH2O={row['sh2o']:g} outside [{layer['SLLL']:g}, {layer['SSAT']:g}]"))
+        missing_ks = [
+            row.get("SLB") for row in layers
+            if row.get("SSKS", -99.0) <= 0.0
+        ]
+        if missing_ks:
+            findings.append(
+                InputFinding(
+                    "SOIL_HYDRAULIC_CONDUCTIVITY_MISSING",
+                    "warning",
+                    "SSKS is missing/non-positive at soil depths "
+                    f"{[float(value) for value in missing_ks]}; DSSAT will treat conductivity as missing",
+                )
+            )
+        missing_texture = [
+            row.get("SLB") for row in layers
+            if row.get("SLCL", -99.0) < 0.0 or row.get("SLSI", -99.0) < 0.0
+        ]
+        if missing_texture:
+            findings.append(
+                InputFinding(
+                    "SOIL_TEXTURE_MISSING",
+                    "warning",
+                    "SLCL/SLSI is missing at soil depths "
+                    f"{[float(value) for value in missing_texture]}; DSSAT may substitute default texture",
+                )
+            )
 
     station = str(parsed.get("weather_station") or "")
     weather_files = sorted(root.glob(f"{station}*.WTH")) if station else []

@@ -15,6 +15,11 @@ FROZEN = ROOT / "data" / "parameter_registry" / "bounds_frozen" / "eggplant" / "
 def test_versioned_xxql2501_bundle_passes_cross_file_gates():
     summary, findings = validate_input_bundle(BUNDLE)
     assert not [item for item in findings if item.severity == "error"]
+    warning_codes = {item.code for item in findings if item.severity == "warning"}
+    assert {
+        "SOIL_HYDRAULIC_CONDUCTIVITY_MISSING",
+        "SOIL_TEXTURE_MISSING",
+    }.issubset(warning_codes)
     assert summary["soil_id"] == "IBTM910017"
     assert summary["treatments"] == [2, 3, 4, 5, 9, 10, 11, 12, 13, 14]
     manifest = json.loads((BUNDLE / "input_manifest.json").read_text(encoding="utf-8"))

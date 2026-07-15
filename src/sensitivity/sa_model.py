@@ -1,5 +1,6 @@
 import argparse
 import csv
+import json
 import os
 import re
 import shutil
@@ -216,6 +217,7 @@ def compute_indicators(
     time_points=None,
     obs_order_path=None,
     input_dir=None,
+    failure_artifact_dir=None,
 ):
     _ensure_base_files(workspace_dir)
 
@@ -400,6 +402,22 @@ def compute_indicators(
             _emit(f"MEAN_{key}", sum(finite) / float(len(finite)))
 
         _write_out(values)
+    except Exception as exc:
+        if failure_artifact_dir:
+            artifact_root = os.path.abspath(failure_artifact_dir)
+            os.makedirs(artifact_root, exist_ok=True)
+            shutil.copytree(run_dir, os.path.join(artifact_root, "run_files"), dirs_exist_ok=True)
+            context = {
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+                "workspace_dir": workspace_dir,
+                "batch_path": batch_path,
+                "param_csv_path": param_csv_path,
+                "input_dir": input_dir,
+            }
+            with open(os.path.join(artifact_root, "failure_context.json"), "w", encoding="utf-8") as handle:
+                json.dump(context, handle, ensure_ascii=False, indent=2)
+        raise
     finally:
         try:
             shutil.rmtree(run_dir, ignore_errors=True)
@@ -416,6 +434,7 @@ def main():
     parser.add_argument("--out", default="SA_Indicators.OUT")
     parser.add_argument("--obs-order", default=None)
     parser.add_argument("--input-dir", default=None)
+    parser.add_argument("--failure-artifact-dir", default=None)
     args = parser.parse_args()
 
     workspace_dir = os.path.normpath(args.workspace) if args.workspace else _workspace_dir_from_this_file()
@@ -428,6 +447,7 @@ def main():
         out_path=args.out,
         obs_order_path=args.obs_order,
         input_dir=args.input_dir,
+        failure_artifact_dir=args.failure_artifact_dir,
     )
 
 
