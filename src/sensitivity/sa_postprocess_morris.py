@@ -20,7 +20,7 @@ plt = _load_pyplot()
 
 def _default_case_dir():
     workspace_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
-    return os.path.join(workspace_dir, "Sensitivity_Analyze", "SA_Project_Output", "sen_case")
+    return os.path.join(workspace_dir, "workspace", "runs", "sa_output", "sen_case")
 
 
 def _read_mio(path):

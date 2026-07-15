@@ -7,7 +7,7 @@ import pyemu
 
 def _default_case_dir():
     workspace_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
-    return os.path.join(workspace_dir, "Sensitivity_Analyze", "SA_Project_Output", "sen_case")
+    return os.path.join(workspace_dir, "workspace", "runs", "sa_output", "sen_case")
 
 
 def prepare_sobol_case(case_dir, topk_csv, out_pst_name="sa_sen_sobol.pst", n_samples=1000):

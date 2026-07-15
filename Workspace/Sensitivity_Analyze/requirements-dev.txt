@@ -1,5 +1,0 @@
-pytest
-ruff
-mypy
-pandas
-matplotlib

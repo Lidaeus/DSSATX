@@ -146,7 +146,7 @@ def build_case(
 
     pst.observation_data.loc[:, "weight"] = 1.0
 
-    model_script = os.path.normpath(os.path.join(workspace_dir, "Sensitivity_Analyze", "SA_Project_Code", "sa_model.py"))
+    model_script = os.path.normpath(os.path.join(workspace_dir, "src", "sensitivity", "sa_model.py"))
     batch_path = os.path.normpath(os.path.join(workspace_dir, "DSSBatch.v48"))
     model_cmd = (
         f"python \"{model_script}\" --workspace . --batch \"{batch_path}\" "
@@ -193,12 +193,12 @@ def main():
     param_review = (
         os.path.normpath(args.param_review)
         if args.param_review
-        else os.path.join(workspace_dir, "Sensitivity_Analyze", "SA_Project_Output", "sensitivity_param_review.csv")
+        else os.path.join(workspace_dir, "workspace", "runs", "sa_output", "sensitivity_param_review.csv")
     )
     case_dir = (
         os.path.normpath(args.case_dir)
         if args.case_dir
-        else os.path.join(workspace_dir, "Sensitivity_Analyze", "SA_Project_Output", "sen_case")
+        else os.path.join(workspace_dir, "workspace", "runs", "sa_output", "sen_case")
     )
 
     pst_path = build_case(

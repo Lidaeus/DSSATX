@@ -17,7 +17,7 @@ def _repo_root_from_this_file():
 
 def _default_case_dir():
     workspace_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
-    return os.path.join(workspace_dir, "Sensitivity_Analyze", "SA_Project_Output", "sen_case")
+    return os.path.join(workspace_dir, "workspace", "runs", "sa_output", "sen_case")
 
 
 def run_pestpp_sen(case_dir, pst_name, exe_path):

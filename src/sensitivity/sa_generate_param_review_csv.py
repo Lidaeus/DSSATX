@@ -716,7 +716,7 @@ def main():
     out_csv = (
         args.out
         if args.out
-        else os.path.join(workspace_dir, "Sensitivity_Analyze", "SA_Project_Output", "sensitivity_param_review.csv")
+        else os.path.join(workspace_dir, "workspace", "runs", "sa_output", "sensitivity_param_review.csv")
     )
 
     paths = Paths(

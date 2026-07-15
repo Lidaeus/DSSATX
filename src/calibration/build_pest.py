@@ -11,12 +11,20 @@ import pyemu
 import subprocess
 from datetime import datetime, timezone
 
-WORKSPACE = r"C:\DSSAT48\Tomato_Cal\Workspace"
-CUL_BASE_FILE = os.path.join(WORKSPACE, "TMGRO048.CUL.base")
-ECO_FILE = os.path.join(WORKSPACE, "TMGRO048.ECO")
-SPE_FILE = os.path.join(WORKSPACE, "TMGRO048.SPE")
-SOIL_FILE = os.path.join(WORKSPACE, "SOIL.SOL")
-SOIL_BASE_FILE = os.path.join(WORKSPACE, "SOIL.SOL.base")
+from .weight_scheme import (
+    normalize_and_weight,
+    compute_cv_based_sigma,
+    compute_balanced_weights,
+    build_observation_weights,
+    VARIABLE_TREATMENT,
+)
+
+WORKSPACE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "workspace")
+CUL_BASE_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "templates", "genotype", "TMGRO048.CUL.base")
+ECO_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "templates", "genotype", "TMGRO048.ECO.base")
+SPE_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "templates", "genotype", "TMGRO048.SPE.base")
+SOIL_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "templates", "soil", "SOIL.SOL")
+SOIL_BASE_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "templates", "soil", "SOIL.SOL.base")
 SENSITIVITY_PARAM_REVIEW_CSV = os.path.join(
     WORKSPACE,
     "Sensitivity_Analyze",
@@ -1461,6 +1469,12 @@ def create_ins_and_pst(
     df_override=None,
     model_cmd_extra=None,
     out_dir=None,
+    weight_scheme="legacy",
+    apply_normalization=False,
+    apply_log_transform=False,
+    apply_pwtadj1=False,
+    cv_based_sigma=False,
+    noptmax0_sims=None,
 ):
     out_dir = out_dir or WORKSPACE
     os.makedirs(out_dir, exist_ok=True)
@@ -1597,6 +1611,25 @@ def create_ins_and_pst(
     } for p in params])
 
     obs_df = pd.DataFrame(obs_data)
+
+    if weight_scheme == "improved" and not obs_df.empty:
+        noptmax0_df = None
+        if noptmax0_sims is not None and os.path.exists(noptmax0_sims):
+            try:
+                noptmax0_df = pd.read_csv(noptmax0_sims)
+            except Exception:
+                pass
+        sim_baseline_df = noptmax0_df
+
+        obs_df = pd.DataFrame(build_observation_weights(
+            obs_data,
+            df_override=df_override,
+            sim_baseline=sim_baseline_df,
+            apply_normalization=apply_normalization,
+            apply_log_transform=apply_log_transform,
+            apply_pwtadj1=apply_pwtadj1,
+            cv_based_sigma=cv_based_sigma,
+        ))
 
     pst = pyemu.Pst.from_par_obs_names(par_df.parnme, obs_df.obsnme if not obs_df.empty else [])
 
@@ -1772,6 +1805,12 @@ def create_ins_and_pst_multi(
     evaluate_out_path=OUT_FILE,
     model_cmd_extra=None,
     out_dir=None,
+    weight_scheme="legacy",
+    apply_normalization=False,
+    apply_log_transform=False,
+    apply_pwtadj1=False,
+    cv_based_sigma=False,
+    noptmax0_sims=None,
 ):
     out_dir = out_dir or WORKSPACE
     os.makedirs(out_dir, exist_ok=True)
@@ -1829,6 +1868,26 @@ def create_ins_and_pst_multi(
         )
 
     obs_df = pd.DataFrame(obs_data_all)
+
+    if weight_scheme == "improved" and not obs_df.empty:
+        noptmax0_df = None
+        if noptmax0_sims is not None and os.path.exists(noptmax0_sims):
+            try:
+                noptmax0_df = pd.read_csv(noptmax0_sims)
+            except Exception:
+                pass
+        sim_baseline_df = noptmax0_df
+
+        obs_df = pd.DataFrame(build_observation_weights(
+            obs_data_all,
+            df_override=None,
+            sim_baseline=sim_baseline_df,
+            apply_normalization=apply_normalization,
+            apply_log_transform=apply_log_transform,
+            apply_pwtadj1=apply_pwtadj1,
+            cv_based_sigma=cv_based_sigma,
+        ))
+
     pst = pyemu.Pst.from_par_obs_names(par_df.parnme, obs_df.obsnme if not obs_df.empty else [])
     _populate_pst_from_par_obs(pst, par_df, obs_df)
 
@@ -2097,6 +2156,43 @@ if __name__ == "__main__":
     parser.add_argument("--adapm-sigma", type=float, default=None)
     parser.add_argument("--harvest-var", default="CHPDT")
     parser.add_argument("--out-dir", default=WORKSPACE)
+    parser.add_argument(
+        "--weight-scheme",
+        choices=["legacy", "improved"],
+        default="legacy",
+        help="Weight scheme: 'legacy' uses fixed sigma, 'improved' applies "
+             "normalization + log-transform + pwtadj1 balancing",
+    )
+    parser.add_argument(
+        "--apply-normalization",
+        action="store_true",
+        default=False,
+        help="Apply Min-Max normalization when using improved weight scheme",
+    )
+    parser.add_argument(
+        "--apply-log-transform",
+        action="store_true",
+        default=False,
+        help="Apply log transform to cumulative variables in improved weight scheme",
+    )
+    parser.add_argument(
+        "--apply-pwtadj1",
+        action="store_true",
+        default=False,
+        help="Apply pwtadj1-equivalent weight balancing in improved weight scheme",
+    )
+    parser.add_argument(
+        "--cv-based-sigma",
+        action="store_true",
+        default=False,
+        help="Estimate sigma from observed data CV when using improved weight scheme",
+    )
+    parser.add_argument(
+        "--noptmax0-sims",
+        type=str,
+        default=None,
+        help="Path to baseline (noptmax=0) simulation CSV for pwtadj1 balancing",
+    )
     args = parser.parse_args()
 
     mode = (args.mode or "").strip().lower()
@@ -2857,6 +2953,12 @@ if __name__ == "__main__":
             evaluate_out_path=evaluate_out_path,
             model_cmd_extra=model_cmd_extra,
             out_dir=out_dir,
+            weight_scheme=args.weight_scheme,
+            apply_normalization=args.apply_normalization,
+            apply_log_transform=args.apply_log_transform,
+            apply_pwtadj1=args.apply_pwtadj1,
+            cv_based_sigma=args.cv_based_sigma,
+            noptmax0_sims=args.noptmax0_sims,
         )
     else:
         create_ins_and_pst(
@@ -2872,6 +2974,12 @@ if __name__ == "__main__":
             df_override=df_override,
             model_cmd_extra=model_cmd_extra,
             out_dir=out_dir,
+            weight_scheme=args.weight_scheme,
+            apply_normalization=args.apply_normalization,
+            apply_log_transform=args.apply_log_transform,
+            apply_pwtadj1=args.apply_pwtadj1,
+            cv_based_sigma=args.cv_based_sigma,
+            noptmax0_sims=args.noptmax0_sims,
         )
 
     # ── Generate run_manifest.yaml (Phase 1) ──

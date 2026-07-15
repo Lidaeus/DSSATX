@@ -56,6 +56,34 @@ PEST_HARVEST_FILE = "PestHarvest.OUT"
 PEST_TMTGROW_FILE = "PestTmtGrow.OUT"
 
 
+def _get_pest_out_dir():
+    """Get the directory for pest output files.
+
+    If the PEST_OUT_DIR environment variable is set (by the PEST++ stub),
+    use that directory. Otherwise use the current working directory.
+
+    This allows the DSSAT model to run from the workspace directory
+    (where DSSAT inputs are) while writing pest output files to the
+    PEST++ run directory.
+    """
+    return os.environ.get("PEST_OUT_DIR") or os.getcwd()
+
+
+def _pest_path(filename):
+    """Return absolute path for a pest output file."""
+    return os.path.join(_get_pest_out_dir(), filename)
+
+
+def _eval_pest_file():
+    return _pest_path(PEST_EVAL_FILE)
+def _joint_pest_file():
+    return _pest_path(PEST_JOINT_FILE)
+def _harvest_pest_file():
+    return _pest_path(PEST_HARVEST_FILE)
+def _tmtgrow_pest_file():
+    return _pest_path(PEST_TMTGROW_FILE)
+
+
 def _parse_batch_entries(batch_file):
     entries = []
     batch_path = _resolve_batch_path(batch_file)
@@ -438,8 +466,10 @@ def _yyddd_add_days(yyddd, days):
 def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harvest_path, tmt_path=None, harvest_var="CHPDT"):
     entries = _parse_batch_entries(batch_file)
     if not entries:
-        with open(pest_harvest_path, "w") as f:
-            f.write("RUN 1 TN -99 HNO -99 DATE -99 @PWADS@ -99.000 @PWAIS@ -99.000\n")
+        _append_pest_file(
+            ["RUN 1 TN -99 HNO -99 DATE -99 @PWADS@ -99.000 @PWAIS@ -99.000"],
+            pest_harvest_path,
+        )
         return
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -454,36 +484,38 @@ def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harv
     var_by_run = _read_freshwt_var_by_run(freshwt_path, harvest_var)
 
     wrote_any = False
-    with open(pest_harvest_path, "w") as f:
+    new_lines = []
+    for e in entries:
+        run_no = int(e["run"])
+        tn = int(e.get("tn", -99))
+        events = events_by_tn.get(tn, [])
+        prev_cum = None
+        for ev in events:
+            hno = int(ev["hno"])
+            date = int(ev["date"])
+            sim_date = _yyddd_add_days(date, 1)
+            sim_val = _nearest_on_or_before(var_by_run.get(run_no, {}), sim_date)
+            if sim_val is None:
+                sim_val = -99.0
+            sim_inc = -99.0
+            if sim_val != -99.0:
+                if prev_cum is None:
+                    sim_inc = float(sim_val)
+                else:
+                    sim_inc = float(sim_val) - float(prev_cum)
+                prev_cum = float(sim_val)
+            new_lines.append(
+                f"RUN {run_no:d} TN {tn:d} HNO {hno:d} DATE {date:d} @PWADS@ {float(sim_val):0.3f} @PWAIS@ {float(sim_inc):0.3f}"
+            )
+            wrote_any = True
+
+    if not wrote_any:
         for e in entries:
             run_no = int(e["run"])
             tn = int(e.get("tn", -99))
-            events = events_by_tn.get(tn, [])
-            prev_cum = None
-            for ev in events:
-                hno = int(ev["hno"])
-                date = int(ev["date"])
-                sim_date = _yyddd_add_days(date, 1)
-                sim_val = _nearest_on_or_before(var_by_run.get(run_no, {}), sim_date)
-                if sim_val is None:
-                    sim_val = -99.0
-                sim_inc = -99.0
-                if sim_val != -99.0:
-                    if prev_cum is None:
-                        sim_inc = float(sim_val)
-                    else:
-                        sim_inc = float(sim_val) - float(prev_cum)
-                    prev_cum = float(sim_val)
-                f.write(
-                    f"RUN {run_no:d} TN {tn:d} HNO {hno:d} DATE {date:d} @PWADS@ {float(sim_val):0.3f} @PWAIS@ {float(sim_inc):0.3f}\n"
-                )
-                wrote_any = True
+            new_lines.append(f"RUN {run_no:d} TN {tn:d} HNO -99 DATE -99 @PWADS@ -99.000 @PWAIS@ -99.000")
 
-        if not wrote_any:
-            for e in entries:
-                run_no = int(e["run"])
-                tn = int(e.get("tn", -99))
-                f.write(f"RUN {run_no:d} TN {tn:d} HNO -99 DATE -99 @PWADS@ -99.000 @PWAIS@ -99.000\n")
+    _append_pest_file(new_lines, pest_harvest_path)
 
 
 def _write_pest_tmtgrow_from_tmt_and_plantgro(batch_file, plantgro_path, pest_tmtgrow_path, tmt_path=None):
@@ -778,6 +810,18 @@ def _count_batch_runs(batch_file):
             n += 1
     return n
 
+def _append_pest_file(new_lines, pest_path):
+    existing_lines = []
+    if os.path.exists(pest_path):
+        with open(pest_path, "r") as f:
+            existing_lines = [line.rstrip("\n") for line in f if line.strip()]
+    with open(pest_path, "w") as f:
+        for line in existing_lines:
+            f.write(line + "\n")
+        for line in new_lines:
+            f.write(line + "\n")
+
+
 def _write_pest_eval_from_evaluate(evaluate_out_path, pest_eval_path):
     def _read_evaluate_out(path):
         rows = []
@@ -795,7 +839,7 @@ def _write_pest_eval_from_evaluate(evaluate_out_path, pest_eval_path):
 
                 if header is None:
                     continue
-                if stripped.startswith("*") or stripped.startswith("@"): 
+                if stripped.startswith("*") or stripped.startswith("@"):
                     continue
                 if not re.match(r"^\s*\d+\s+", s):
                     continue
@@ -820,12 +864,12 @@ def _write_pest_eval_from_evaluate(evaluate_out_path, pest_eval_path):
         n_runs = _count_batch_runs(BATCH_FILE)
         if n_runs <= 0:
             n_runs = 1
-        with open(pest_eval_path, "w") as f:
-            for i in range(1, n_runs + 1):
-                f.write(
-                    f"RUN {i:d} TN {-99:d} @ADAPS@ {-99.0:0.3f} @ADAPM@ {-99.0:0.3f} "
-                    f"@MDAPS@ {-99.0:0.3f} @MDAPM@ {-99.0:0.3f}\n"
-                )
+        new_lines = [
+            f"RUN {i:d} TN {-99:d} @ADAPS@ {-99.0:0.3f} @ADAPM@ {-99.0:0.3f} "
+            f"@MDAPS@ {-99.0:0.3f} @MDAPM@ {-99.0:0.3f}"
+            for i in range(1, n_runs + 1)
+        ]
+        _append_pest_file(new_lines, pest_eval_path)
         return
 
     expected_cols = ["@RUN", "TN", "ADAPS", "ADAPM", "MDAPS", "MDAPM"]
@@ -837,18 +881,19 @@ def _write_pest_eval_from_evaluate(evaluate_out_path, pest_eval_path):
         df[c] = pd.to_numeric(df[c], errors="coerce").fillna(-99)
 
     out_df = df[expected_cols].copy().sort_values(by="@RUN", kind="mergesort")
-    with open(pest_eval_path, "w") as f:
-        for _, row in out_df.iterrows():
-            run_no = _as_int(row["@RUN"], default=-99)
-            tn = _as_int(row["TN"], default=-99)
-            adaps = float(row["ADAPS"]) if not pd.isna(row["ADAPS"]) else -99.0
-            adapm = float(row["ADAPM"]) if not pd.isna(row["ADAPM"]) else -99.0
-            mdaps = float(row["MDAPS"]) if not pd.isna(row["MDAPS"]) else -99.0
-            mdapm = float(row["MDAPM"]) if not pd.isna(row["MDAPM"]) else -99.0
-            f.write(
-                f"RUN {run_no:d} TN {tn:d} @ADAPS@ {adaps:0.3f} @ADAPM@ {adapm:0.3f} "
-                f"@MDAPS@ {mdaps:0.3f} @MDAPM@ {mdapm:0.3f}\n"
-            )
+    new_lines = []
+    for _, row in out_df.iterrows():
+        run_no = _as_int(row["@RUN"], default=-99)
+        tn = _as_int(row["TN"], default=-99)
+        adaps = float(row["ADAPS"]) if not pd.isna(row["ADAPS"]) else -99.0
+        adapm = float(row["ADAPM"]) if not pd.isna(row["ADAPM"]) else -99.0
+        mdaps = float(row["MDAPS"]) if not pd.isna(row["MDAPS"]) else -99.0
+        mdapm = float(row["MDAPM"]) if not pd.isna(row["MDAPM"]) else -99.0
+        new_lines.append(
+            f"RUN {run_no:d} TN {tn:d} @ADAPS@ {adaps:0.3f} @ADAPM@ {adapm:0.3f} "
+            f"@MDAPS@ {mdaps:0.3f} @MDAPM@ {mdapm:0.3f}"
+        )
+    _append_pest_file(new_lines, pest_eval_path)
 
 
 def _write_pest_grow_from_evaluate(evaluate_out_path, pest_grow_path):
@@ -893,11 +938,11 @@ def _write_pest_grow_from_evaluate(evaluate_out_path, pest_grow_path):
         n_runs = _count_batch_runs(BATCH_FILE)
         if n_runs <= 0:
             n_runs = 1
-        with open(pest_grow_path, "w") as f:
-            for i in range(1, n_runs + 1):
-                f.write(
-                    f"RUN {i:d} TN {-99:d} @HWAMS@ {-99.0:0.3f} @LAIXS@ {-99.0:0.3f} @CNAMS@ {-99.0:0.3f}\n"
-                )
+        new_lines = [
+            f"RUN {i:d} TN {-99:d} @HWAMS@ {-99.0:0.3f} @LAIXS@ {-99.0:0.3f} @CNAMS@ {-99.0:0.3f}"
+            for i in range(1, n_runs + 1)
+        ]
+        _append_pest_file(new_lines, pest_grow_path)
         return
 
     expected_cols = ["@RUN", "TN", "HWAMS", "LAIXS", "CNAMS"]
@@ -909,16 +954,17 @@ def _write_pest_grow_from_evaluate(evaluate_out_path, pest_grow_path):
         df[c] = pd.to_numeric(df[c], errors="coerce").fillna(-99)
 
     out_df = df[expected_cols].copy().sort_values(by="@RUN", kind="mergesort")
-    with open(pest_grow_path, "w") as f:
-        for _, row in out_df.iterrows():
-            run_no = _as_int(row["@RUN"], default=-99)
-            tn = _as_int(row["TN"], default=-99)
-            hwams = float(row["HWAMS"]) if not pd.isna(row["HWAMS"]) else -99.0
-            laixs = float(row["LAIXS"]) if not pd.isna(row["LAIXS"]) else -99.0
-            cnams = float(row["CNAMS"]) if not pd.isna(row["CNAMS"]) else -99.0
-            f.write(
-                f"RUN {run_no:d} TN {tn:d} @HWAMS@ {hwams:0.3f} @LAIXS@ {laixs:0.3f} @CNAMS@ {cnams:0.3f}\n"
-            )
+    new_lines = []
+    for _, row in out_df.iterrows():
+        run_no = _as_int(row["@RUN"], default=-99)
+        tn = _as_int(row["TN"], default=-99)
+        hwams = float(row["HWAMS"]) if not pd.isna(row["HWAMS"]) else -99.0
+        laixs = float(row["LAIXS"]) if not pd.isna(row["LAIXS"]) else -99.0
+        cnams = float(row["CNAMS"]) if not pd.isna(row["CNAMS"]) else -99.0
+        new_lines.append(
+            f"RUN {run_no:d} TN {tn:d} @HWAMS@ {hwams:0.3f} @LAIXS@ {laixs:0.3f} @CNAMS@ {cnams:0.3f}"
+        )
+    _append_pest_file(new_lines, pest_grow_path)
 
 
 def _write_pest_joint_from_evaluate(evaluate_out_path, pest_joint_path):
@@ -963,14 +1009,14 @@ def _write_pest_joint_from_evaluate(evaluate_out_path, pest_joint_path):
         n_runs = _count_batch_runs(BATCH_FILE)
         if n_runs <= 0:
             n_runs = 1
-        with open(pest_joint_path, "w") as f:
-            for i in range(1, n_runs + 1):
-                f.write(
-                    f"RUN {i:d} TN {-99:d} "
-                    f"@HWAMS@ {-99.0:0.3f} @HIAMS@ {-99.0:0.3f} @LAIXS@ {-99.0:0.3f} @CNAMS@ {-99.0:0.3f} "
-                    f"@CHTAS@ {-99.0:0.3f} @CNAAS@ {-99.0:0.3f} "
-                    f"@PWAMS@ {-99.0:0.3f} @H#AMS@ {-99.0:0.3f}\n"
-                )
+        new_lines = [
+            f"RUN {i:d} TN {-99:d} "
+            f"@HWAMS@ {-99.0:0.3f} @HIAMS@ {-99.0:0.3f} @LAIXS@ {-99.0:0.3f} @CNAMS@ {-99.0:0.3f} "
+            f"@CHTAS@ {-99.0:0.3f} @CNAAS@ {-99.0:0.3f} "
+            f"@PWAMS@ {-99.0:0.3f} @H#AMS@ {-99.0:0.3f}"
+            for i in range(1, n_runs + 1)
+        ]
+        _append_pest_file(new_lines, pest_joint_path)
         return
 
     expected_cols = [
@@ -993,24 +1039,25 @@ def _write_pest_joint_from_evaluate(evaluate_out_path, pest_joint_path):
         df[c] = pd.to_numeric(df[c], errors="coerce").fillna(-99)
 
     out_df = df[expected_cols].copy().sort_values(by="@RUN", kind="mergesort")
-    with open(pest_joint_path, "w") as f:
-        for _, row in out_df.iterrows():
-            run_no = _as_int(row["@RUN"], default=-99)
-            tn = _as_int(row["TN"], default=-99)
-            hwams = float(row["HWAMS"]) if not pd.isna(row["HWAMS"]) else -99.0
-            laixs = float(row["LAIXS"]) if not pd.isna(row["LAIXS"]) else -99.0
-            cnams = float(row["CNAMS"]) if not pd.isna(row["CNAMS"]) else -99.0
-            chtas = float(row["CHTAS"]) if not pd.isna(row["CHTAS"]) else -99.0
-            cnaas = float(row["CNAAS"]) if not pd.isna(row["CNAAS"]) else -99.0
-            pwams = float(row["PWAMS"]) if not pd.isna(row["PWAMS"]) else -99.0
-            h_n_ams = float(row["H#AMS"]) if not pd.isna(row["H#AMS"]) else -99.0
-            hiams = float(row["HIAMS"]) if not pd.isna(row["HIAMS"]) else -99.0
-            f.write(
-                f"RUN {run_no:d} TN {tn:d} "
-                f"@HWAMS@ {hwams:0.3f} @HIAMS@ {hiams:0.3f} @LAIXS@ {laixs:0.3f} @CNAMS@ {cnams:0.3f} "
-                f"@CHTAS@ {chtas:0.3f} @CNAAS@ {cnaas:0.3f} "
-                f"@PWAMS@ {pwams:0.3f} @H#AMS@ {h_n_ams:0.3f}\n"
-            )
+    new_lines = []
+    for _, row in out_df.iterrows():
+        run_no = _as_int(row["@RUN"], default=-99)
+        tn = _as_int(row["TN"], default=-99)
+        hwams = float(row["HWAMS"]) if not pd.isna(row["HWAMS"]) else -99.0
+        laixs = float(row["LAIXS"]) if not pd.isna(row["LAIXS"]) else -99.0
+        cnams = float(row["CNAMS"]) if not pd.isna(row["CNAMS"]) else -99.0
+        chtas = float(row["CHTAS"]) if not pd.isna(row["CHTAS"]) else -99.0
+        cnaas = float(row["CNAAS"]) if not pd.isna(row["CNAAS"]) else -99.0
+        pwams = float(row["PWAMS"]) if not pd.isna(row["PWAMS"]) else -99.0
+        h_n_ams = float(row["H#AMS"]) if not pd.isna(row["H#AMS"]) else -99.0
+        hiams = float(row["HIAMS"]) if not pd.isna(row["HIAMS"]) else -99.0
+        new_lines.append(
+            f"RUN {run_no:d} TN {tn:d} "
+            f"@HWAMS@ {hwams:0.3f} @HIAMS@ {hiams:0.3f} @LAIXS@ {laixs:0.3f} @CNAMS@ {cnams:0.3f} "
+            f"@CHTAS@ {chtas:0.3f} @CNAAS@ {cnaas:0.3f} "
+            f"@PWAMS@ {pwams:0.3f} @H#AMS@ {h_n_ams:0.3f}"
+        )
+    _append_pest_file(new_lines, pest_joint_path)
 
 def _first_batch_filex_path(batch_file):
     batch_path = _resolve_batch_path(batch_file)
@@ -1189,32 +1236,32 @@ def handle_failure(exit_code):
         except Exception as e:
             print(f"Error creating dummy output: {e}")
 
-    if not os.path.exists(PEST_EVAL_FILE):
+    if not os.path.exists(_eval_pest_file()):
         n_runs = _count_batch_runs(BATCH_FILE)
         if n_runs <= 0:
             n_runs = 1
-        with open(PEST_EVAL_FILE, "w") as f:
+        with open(_eval_pest_file(), "w") as f:
             for i in range(1, n_runs + 1):
                 f.write(
                     f"RUN {i:d} TN {-99:d} @ADAPS@ {-99.0:0.3f} @ADAPM@ {-99.0:0.3f} "
                     f"@MDAPS@ {-99.0:0.3f} @MDAPM@ {-99.0:0.3f}\n"
                 )
 
-    if not os.path.exists(PEST_GROW_FILE):
+    if not os.path.exists(_pest_path(PEST_GROW_FILE)):
         n_runs = _count_batch_runs(BATCH_FILE)
         if n_runs <= 0:
             n_runs = 1
-        with open(PEST_GROW_FILE, "w") as f:
+        with open(_pest_path(PEST_GROW_FILE), "w") as f:
             for i in range(1, n_runs + 1):
                 f.write(
                     f"RUN {i:d} TN {-99:d} @HWAMS@ {-99.0:0.3f} @LAIXS@ {-99.0:0.3f} @CNAMS@ {-99.0:0.3f}\n"
                 )
 
-    if not os.path.exists(PEST_JOINT_FILE):
+    if not os.path.exists(_joint_pest_file()):
         n_runs = _count_batch_runs(BATCH_FILE)
         if n_runs <= 0:
             n_runs = 1
-        with open(PEST_JOINT_FILE, "w") as f:
+        with open(_joint_pest_file(), "w") as f:
             for i in range(1, n_runs + 1):
                 f.write(
                     f"RUN {i:d} TN {-99:d} "
@@ -1223,25 +1270,25 @@ def handle_failure(exit_code):
                     f"@PWAMS@ {-99.0:0.3f} @H#AMS@ {-99.0:0.3f} @HIAMS@ {-99.0:0.3f}\n"
                 )
 
-    if not os.path.exists(PEST_HARVEST_FILE):
+    if not os.path.exists(_harvest_pest_file()):
         try:
-            _write_pest_harvest_from_tmt_and_freshwt(BATCH_FILE, "FreshWt.OUT", PEST_HARVEST_FILE)
+            _write_pest_harvest_from_tmt_and_freshwt(BATCH_FILE, "FreshWt.OUT", _harvest_pest_file())
         except Exception:
             n_runs = _count_batch_runs(BATCH_FILE)
             if n_runs <= 0:
                 n_runs = 1
-            with open(PEST_HARVEST_FILE, "w") as f:
+            with open(_harvest_pest_file(), "w") as f:
                 for i in range(1, n_runs + 1):
                     f.write(f"RUN {i:d} TN {-99:d} HNO -99 DATE -99 @PWADS@ -99.000 @PWAIS@ -99.000\n")
 
-    if not os.path.exists(PEST_TMTGROW_FILE):
+    if not os.path.exists(_tmtgrow_pest_file()):
         try:
-            _write_pest_tmtgrow_from_tmt_and_plantgro(BATCH_FILE, "PlantGro.OUT", PEST_TMTGROW_FILE)
+            _write_pest_tmtgrow_from_tmt_and_plantgro(BATCH_FILE, "PlantGro.OUT", _tmtgrow_pest_file())
         except Exception:
             n_runs = _count_batch_runs(BATCH_FILE)
             if n_runs <= 0:
                 n_runs = 1
-            with open(PEST_TMTGROW_FILE, "w") as f:
+            with open(_tmtgrow_pest_file(), "w") as f:
                 for i in range(1, n_runs + 1):
                     f.write(
                         f"RUN {i:d} TN {-99:d} DATE -99 "
@@ -2389,7 +2436,14 @@ def run_model():
         exe_path = shutil.which(DSSAT_EXE)
         if not exe_path:
             candidate = os.path.normpath(os.path.join(cwd_script, "..", "..", DSSAT_EXE))
-            exe_path = candidate if os.path.exists(candidate) else DSSAT_EXE
+            if os.path.exists(candidate):
+                exe_path = candidate
+            else:
+                workspace_candidate = os.path.join(run_dir, DSSAT_EXE)
+                if os.path.exists(workspace_candidate):
+                    exe_path = workspace_candidate
+                else:
+                    exe_path = DSSAT_EXE
 
         dssat_root = os.path.normpath(os.path.join(cwd_script, "..", ".."))
         dssatpro_src = os.path.join(dssat_root, "DSSATPRO.v48")
@@ -2466,30 +2520,30 @@ def run_model():
 
                 print("Evaluate.OUT generated successfully.")
                 try:
-                    _write_pest_eval_from_evaluate("Evaluate.OUT", PEST_EVAL_FILE)
+                    _write_pest_eval_from_evaluate("Evaluate.OUT", _eval_pest_file())
                 except Exception as e:
-                    print(f"Warning: failed to write {PEST_EVAL_FILE}: {e}")
+                    print(f"Warning: failed to write {_eval_pest_file()}: {e}")
                 try:
-                    _write_pest_grow_from_evaluate("Evaluate.OUT", PEST_GROW_FILE)
+                    _write_pest_grow_from_evaluate("Evaluate.OUT", _pest_path(PEST_GROW_FILE))
                 except Exception as e:
-                    print(f"Warning: failed to write {PEST_GROW_FILE}: {e}")
+                    print(f"Warning: failed to write {_pest_path(PEST_GROW_FILE)}: {e}")
                 try:
-                    _write_pest_joint_from_evaluate("Evaluate.OUT", PEST_JOINT_FILE)
+                    _write_pest_joint_from_evaluate("Evaluate.OUT", _joint_pest_file())
                 except Exception as e:
-                    print(f"Warning: failed to write {PEST_JOINT_FILE}: {e}")
+                    print(f"Warning: failed to write {_joint_pest_file()}: {e}")
                 try:
                     _write_pest_harvest_from_tmt_and_freshwt(
                         BATCH_FILE,
                         "FreshWt.OUT",
-                        PEST_HARVEST_FILE,
+                        _harvest_pest_file(),
                         harvest_var=HARVEST_VAR,
                     )
                 except Exception as e:
-                    print(f"Warning: failed to write {PEST_HARVEST_FILE}: {e}")
+                    print(f"Warning: failed to write {_harvest_pest_file()}: {e}")
                 try:
-                    _write_pest_tmtgrow_from_tmt_and_plantgro(BATCH_FILE, "PlantGro.OUT", PEST_TMTGROW_FILE)
+                    _write_pest_tmtgrow_from_tmt_and_plantgro(BATCH_FILE, "PlantGro.OUT", _tmtgrow_pest_file())
                 except Exception as e:
-                    print(f"Warning: failed to write {PEST_TMTGROW_FILE}: {e}")
+                    print(f"Warning: failed to write {_tmtgrow_pest_file()}: {e}")
             finally:
                 try:
                     os.chdir(orig_cwd)
