@@ -1,0 +1,15 @@
+proposal_id: "eggplant_p1_xxql2501_v1_20260715"
+crop: "eggplant"
+created_at: "2026-07-15T15:45:23Z"
+review_status: "approved"
+derived_from: "eggplant_p1_candidate_v1_20260715.csv"
+derived_from_sha256: "b863f2e05b17408f3676e67ecf7874152980e8a068a2fa389cb2ab51c5d612b4"
+experiment_bundle: "xxql2501_20260715"
+input_manifest_sha256: "62d9082097a748b7c069ee7ceff8bb42c3bb97103679c0ff347ff5b75a0bb5a7"
+proposal_sha256: "0709373a558950c799fd21f70976bb3fcc645f3e74adad6322af1fdaf7190a66"
+parameter_count: 157
+active_parameter_count: 57
+fixed_soil_parameter_count: 43
+disabled_treatment_ic_count: 50
+approval_basis: "User approved boundary changes in project thread on 2026-07-15"
+notes: "Genotype ranges approved; soil fixed to input bundle; treatment-specific IC explicitly disabled"

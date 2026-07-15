@@ -6,11 +6,15 @@ import shutil
 import subprocess
 import tempfile
 import time
+import sys
 
 from pathlib import Path
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.sensitivity.output_contract import load_output_contract, observation_names
 
 
 def _workspace_dir_from_this_file():
@@ -19,41 +23,7 @@ def _workspace_dir_from_this_file():
 
 
 def _default_observation_names():
-    tns = [2, 3]
-    base = [
-        "YIELD_HWAMS",
-        "HIAMS",
-        "LAIXM",
-        "CWAMS",
-        "ADAPS",
-        "PDFPS",
-        "MDAPS",
-        "LAI_AUC",
-        "LAI_PEAK",
-        "LAI_TPEAK",
-        "LAI_END",
-        "FRUITD_AUC",
-        "FRUITD_END",
-        "LEAF_END_LWAD",
-        "STEM_END_SWAD",
-        "AGB_END_CWAD",
-        "HI_END_HIAD",
-    ]
-    daps = [28, 42, 56, 70, 84, 98, 112]
-    names = []
-    for tn in tns:
-        p = f"TN{tn}_"
-        for b in base:
-            names.append(p + b)
-        for d in daps:
-            names.append(f"{p}LAI_DAP{d:03d}")
-            names.append(f"{p}FRUITD_DAP{d:03d}")
-    for b in base:
-        names.append("MEAN_" + b)
-    for d in daps:
-        names.append(f"MEAN_LAI_DAP{d:03d}")
-        names.append(f"MEAN_FRUITD_DAP{d:03d}")
-    return names
+    return observation_names(load_output_contract())
 
 
 def _ensure_base_files(workspace_dir):
@@ -237,7 +207,16 @@ def _wait_for_file(path, timeout_s=2.0, poll_s=0.05):
     return os.path.exists(path)
 
 
-def compute_indicators(workspace_dir, batch_path, cultivar, param_csv_path, out_path, time_points=None, obs_order_path=None):
+def compute_indicators(
+    workspace_dir,
+    batch_path,
+    cultivar,
+    param_csv_path,
+    out_path,
+    time_points=None,
+    obs_order_path=None,
+    input_dir=None,
+):
     _ensure_base_files(workspace_dir)
 
     workspace_dir = os.path.abspath(workspace_dir)
@@ -324,6 +303,8 @@ def compute_indicators(workspace_dir, batch_path, cultivar, param_csv_path, out_
             "--harvest-var",
             "CHPDT",
         ]
+        if input_dir:
+            cmd.extend(["--input-dir", os.path.abspath(input_dir)])
         proc = subprocess.run(cmd, cwd=run_dir, capture_output=True, text=True)
         dssat_ok = proc.returncode == 0
         if not dssat_ok:
@@ -353,7 +334,7 @@ def compute_indicators(workspace_dir, batch_path, cultivar, param_csv_path, out_
                 tn = -99
             run_to_tn[run_no] = tn
 
-        time_points = time_points or [28, 42, 56, 70, 84, 98, 112]
+        time_points = time_points or list(load_output_contract()["time_points"])
         values = {}
 
         def _emit(name, val):
@@ -434,6 +415,7 @@ def main():
     parser.add_argument("--param-csv", default="pest_params.csv")
     parser.add_argument("--out", default="SA_Indicators.OUT")
     parser.add_argument("--obs-order", default=None)
+    parser.add_argument("--input-dir", default=None)
     args = parser.parse_args()
 
     workspace_dir = os.path.normpath(args.workspace) if args.workspace else _workspace_dir_from_this_file()
@@ -445,6 +427,7 @@ def main():
         param_csv_path=args.param_csv,
         out_path=args.out,
         obs_order_path=args.obs_order,
+        input_dir=args.input_dir,
     )
 
 

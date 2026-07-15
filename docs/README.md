@@ -15,7 +15,8 @@
 5. [观测误差与权重设计规范](权重设计方案改进提案.md)：目标函数、误差标准差、变换和相关观测的专题规范。
 6. [P0 验证报告](reports/P0_verification_report.md)：前后证据、数值 smoke 和保留限制。
 7. [Observation Policy 验证记录](reports/observation_policy_verification.md)：显式 log 与处理均值 sigma 的实现和真实程序证据。
-8. [P1 科研分析启动计划](P1_科研分析启动计划.md)：候选边界、正式门禁、分级计算预算和待审批输入。
+8. [P1 科研分析启动计划](P1_科研分析启动计划.md)：已批准输入/边界、10 TN/240 响应契约和正式 Morris 预算。
+9. [XXQL2501 输入与 SA 设计审计](reports/XXQL2501_input_and_SA_design_review.md)：新 FileX/SOIL 跨文件检查及 TN/输出科学性判断。
 
 发生冲突时，以更高层文档为准；实现细节若与产品设计冲突，应先修订文档并由用户审批。
 
@@ -65,4 +66,4 @@
 
 ## 6. 当前审批入口
 
-当前请优先审核 [P0 验证报告](reports/P0_verification_report.md)。P0 验收不等于批准正式边界或 P1；新 bounds proposal 与 P1 需单独审批。
+当前 P1 输入、边界、输出和 Morris 规模已获批准。下一审批点是正式 Morris 质量报告及其 Top-K proposal；该批准不自动延伸到 Sobol 或率定。

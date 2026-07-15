@@ -42,6 +42,7 @@ PEST++ 只负责提出候选参数和读取残差；DSSAT runner 负责参数注
 | 路径 | 职责 |
 |---|---|
 | `src/common/param_registry.py` | 物理硬边界、参数分组、注册表读写和默认边界 |
+| `src/common/experiment_inputs.py` | 用户输入包、FileX/批处理/观测/土壤/气象跨文件门禁 |
 | `src/calibration/build_pest.py` | 读取冻结边界和观测，生成 PST/TPL/INS 与运行清单 |
 | `src/calibration/weight_scheme.py` | 观测误差、变换和权重策略；P0 中进行数学审计 |
 | `src/dssat/run_dssat.py` | CUL/ECO/SPE/SOL/IC 注入、DSSAT 执行和 Pest 输出生成 |
@@ -50,6 +51,8 @@ PEST++ 只负责提出候选参数和读取残差；DSSAT runner 负责参数注
 | `src/reporting/` | 参数、预测、指标、后验和图表输出 |
 
 `workspace/` 只承载运行目录、产物和兼容入口。新业务逻辑不得继续写入一次性 workspace 脚本。
+
+正式实验输入存放在 `data/user/experiments/<bundle_id>/`，通过 `--input-dir` 显式选择。每个包必须含 `input_manifest.json` 和内容哈希；禁止覆盖既有 bundle ID，禁止从 `Workspace` 静默回退。
 
 ## 3. 科研质量门禁
 
@@ -199,4 +202,4 @@ FileA/FileT 当前以处理均值作为 DSSAT 观测。重复原始记录应保�
 6. 未经批准不修改原始观测、不替换正式冻结边界、不删除历史结果；
 7. 每个阶段通过用户验收后再进入下一阶段。
 
-当前已按用户批准推进观测策略的下一轮实现。未经用户另行批准，不生成新的正式 frozen；正式 P1 SA 仍须使用经审核的参数范围。
+当前经用户批准的 P1 frozen 为 `eggplant_p1_xxql2501_v1_20260715`，输入包为 `xxql2501_20260715`。后续不得静默改写两者；任何变化必须创建新 bundle/bounds ID。Morris 结果只可生成待审 Top-K proposal，不自动进入 Sobol 或率定。

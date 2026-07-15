@@ -2,6 +2,11 @@
 
 ## 2026-07-15
 
+- 将用户更新的 XXQL2501 FileX/SOIL 及配套 FileA/FileT/气象/批处理导入版本化输入包，新增 SHA-256 清单和跨文件科学门禁；权威坐标统一为 35.16°N、113.8°E。
+- DSSAT、SA 和率定入口新增显式 `--input-dir`，正式运行可隔离使用用户定义文件，避免从旧 `data/raw`/`Workspace` 隐式取值。
+- 批准并冻结 `eggplant_p1_xxql2501_v1_20260715`：57 active，8 层土壤实值 fixed，50 个 TN×层初始水分记录 disabled；废弃错误的 6 层共用 IC 语义。
+- 审计 TN2/TN3 与旧 90 项输出：改为全部 10 TN、240 项响应；过程点对齐 FileT 的 DAP 45/67/95/119，移除冗余跨处理均值。
+- 正式 Morris 预算提高为 5 个固定种子×`r=30`，合计理论 8700 次 DSSAT；新增输入、输出、边界和本地化回归测试。
 - 加固 P0 回归测试：固化 V14 的真实失败基线，拒绝空边界、active 零宽、空参数组、非法边界交换/夹紧、IES 非有限输出、Phi 非有限值及 realization 异常丢失。
 - 修正物理硬边界错误排除 DSSAT 自带基线的问题，并以 V14 设计 proposal 生成待审 P1 候选：57 个 CUL/ECO/SPE active，44 个 SOIL/IC 参数恢复 fixed。
 - 新增 P1 bounds readiness 门禁和启动计划；pending proposal 仅允许技术构建，未批准时正式预检必须失败。

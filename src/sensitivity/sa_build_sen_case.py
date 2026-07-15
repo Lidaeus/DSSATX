@@ -14,6 +14,8 @@ import pyemu
 
 from src.common.param_registry import assert_valid_frozen_bounds
 from src.common.project import git_metadata, sha256_file
+from src.common.experiment_inputs import validate_input_bundle
+from src.sensitivity.output_contract import DEFAULT_PROFILE, load_output_contract, observation_names
 
 
 def _workspace_dir_from_this_file():
@@ -50,40 +52,7 @@ def _write_indicators_ins(observation_names, ins_path):
 
 
 def _default_observation_names():
-    tns = [2, 3]
-    base = [
-        "YIELD_HWAMS",
-        "HIAMS",
-        "LAIXM",
-        "CWAMS",
-        "ADAPS",
-        "PDFPS",
-        "LAI_AUC",
-        "LAI_PEAK",
-        "LAI_TPEAK",
-        "LAI_END",
-        "FRUITD_AUC",
-        "FRUITD_END",
-        "LEAF_END_LWAD",
-        "STEM_END_SWAD",
-        "AGB_END_CWAD",
-        "HI_END_HIAD",
-    ]
-    daps = [28, 42, 56, 70, 84, 98, 112]
-    names = []
-    for tn in tns:
-        p = f"TN{tn}_"
-        for b in base:
-            names.append(p + b)
-        for d in daps:
-            names.append(f"{p}LAI_DAP{d:03d}")
-            names.append(f"{p}FRUITD_DAP{d:03d}")
-    for b in base:
-        names.append("MEAN_" + b)
-    for d in daps:
-        names.append(f"MEAN_LAI_DAP{d:03d}")
-        names.append(f"MEAN_FRUITD_DAP{d:03d}")
-    return names
+    return observation_names(load_output_contract())
 
 
 def build_case(
@@ -95,11 +64,22 @@ def build_case(
     morris_p=None,
     morris_delta=None,
     random_seed=20260715,
+    output_profile=DEFAULT_PROFILE,
+    input_dir=None,
 ):
     assert_valid_frozen_bounds(param_review_csv)
     os.makedirs(case_dir, exist_ok=True)
     case_dir = os.path.abspath(case_dir)
     workspace_dir = os.path.abspath(workspace_dir)
+    contract = load_output_contract(output_profile)
+    if input_dir:
+        input_dir = os.path.abspath(input_dir)
+        input_summary, input_findings = validate_input_bundle(input_dir)
+        errors = [item for item in input_findings if item.severity == "error"]
+        if errors:
+            raise ValueError("Input bundle validation failed: " + "; ".join(item.message for item in errors))
+        if set(contract["treatments"]) != set(input_summary["treatments"]):
+            raise ValueError("Output contract treatments do not match the selected input bundle")
 
     review_df = pd.read_csv(param_review_csv)
     review_df["name"] = review_df["name"].astype(str).str.strip().str.upper()
@@ -114,7 +94,7 @@ def build_case(
     out_name = "SA_Indicators.OUT"
     ins_name = "SA_Indicators.OUT.ins"
     ins_path = os.path.join(case_dir, ins_name)
-    obs_names = _default_observation_names()
+    obs_names = observation_names(contract)
     _write_indicators_ins(obs_names, ins_path)
     obs_order_path = os.path.join(case_dir, "sa_obs_order.txt")
     with open(obs_order_path, "w", encoding="utf-8") as f:
@@ -175,6 +155,8 @@ def build_case(
         f"python \"{model_script}\" --workspace . --batch \"{batch_path}\" "
         f"--cultivar {cultivar} --param-csv {params_csv_name} --out {out_name} --obs-order sa_obs_order.txt"
     )
+    if input_dir:
+        model_cmd += f' --input-dir "{input_dir}"'
     pst.model_command = [model_cmd]
 
     pst.pestpp_options["gsa_morris_r"] = int(morris_r)
@@ -197,7 +179,7 @@ def build_case(
     manifest = os.path.join(case_dir, "run_manifest.yaml")
     with open(manifest, "w", encoding="utf-8") as handle:
         handle.write(f"run_id: {os.path.basename(case_dir)}\n")
-        handle.write("run_type: sensitivity_smoke\n")
+        handle.write("run_type: sensitivity_formal_case\n")
         handle.write(f"git_commit: {git_info.get('git_commit', '')}\n")
         handle.write(f"git_branch: {git_info.get('git_branch', '')}\n")
         handle.write(f"git_dirty: {str(git_info.get('git_dirty', False)).lower()}\n")
@@ -207,6 +189,12 @@ def build_case(
         handle.write(f"morris_r: {int(morris_r)}\n")
         handle.write(f"morris_p: {'' if morris_p is None else int(morris_p)}\n")
         handle.write(f"cultivar: {cultivar}\n")
+        handle.write(f"observation_count: {len(obs_names)}\n")
+        handle.write(f"output_profile: {contract['path']}\n")
+        handle.write(f"output_profile_sha256: {sha256_file(contract['path'])}\n")
+        handle.write(f"input_dir: {input_dir or ''}\n")
+        manifest_path = os.path.join(input_dir, "input_manifest.json") if input_dir else ""
+        handle.write(f"input_manifest_sha256: {sha256_file(manifest_path) if manifest_path and os.path.isfile(manifest_path) else ''}\n")
 
     for fp in [model_script]:
         if os.path.exists(fp):
@@ -223,10 +211,12 @@ def main():
     )
     parser.add_argument("--case-dir", default=None)
     parser.add_argument("--cultivar", default="TM0008")
-    parser.add_argument("--morris-r", type=int, default=100)
+    parser.add_argument("--morris-r", type=int, default=30)
     parser.add_argument("--morris-p", type=int, default=None)
     parser.add_argument("--morris-delta", type=float, default=None)
     parser.add_argument("--random-seed", type=int, default=20260715)
+    parser.add_argument("--output-profile", default=str(DEFAULT_PROFILE))
+    parser.add_argument("--input-dir", default=None)
     args = parser.parse_args()
 
     workspace_dir = _workspace_dir_from_this_file()
@@ -250,6 +240,8 @@ def main():
         morris_p=args.morris_p,
         morris_delta=args.morris_delta,
         random_seed=args.random_seed,
+        output_profile=args.output_profile,
+        input_dir=args.input_dir,
     )
     print(f"Wrote: {pst_path}")
 

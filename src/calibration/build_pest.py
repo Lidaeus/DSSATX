@@ -41,6 +41,7 @@ ECO_FILE = str(PROJECT_ROOT / "data" / "templates" / "genotype" / "TMGRO048.ECO.
 SPE_FILE = str(PROJECT_ROOT / "data" / "templates" / "genotype" / "TMGRO048.SPE.base")
 SOIL_FILE = str(PROJECT_ROOT / "data" / "raw" / "soil" / "SOIL.SOL")
 SOIL_BASE_FILE = SOIL_FILE
+USER_INPUT_DIR = None
 SENSITIVITY_PARAM_REVIEW_CSV = os.path.join(
     WORKSPACE,
     "Sensitivity_Analyze",
@@ -1214,6 +1215,7 @@ def _resolve_filex_path(filex):
     if os.path.isabs(p):
         return None
     candidates = [
+        Path(USER_INPUT_DIR) / p if USER_INPUT_DIR else Path("__no_user_input__"),
         PROJECT_ROOT / "data" / "raw" / "experiments" / p,
         Path(WORKSPACE) / p,
     ]
@@ -1264,6 +1266,10 @@ def _infer_soil_id_from_filex(filex_path):
 
 
 def _soil_source_path():
+    if USER_INPUT_DIR:
+        user_soil = Path(USER_INPUT_DIR) / "SOIL.SOL"
+        if user_soil.is_file():
+            return str(user_soil)
     return SOIL_BASE_FILE if os.path.exists(SOIL_BASE_FILE) else SOIL_FILE
 
 
@@ -2203,6 +2209,11 @@ if __name__ == "__main__":
     parser.add_argument("--ies-num-reals", type=int, default=50)
     parser.add_argument("--random-seed", type=int, default=20260715)
     parser.add_argument("--batch", default=os.path.join(WORKSPACE, "DSSBatch.v48"))
+    parser.add_argument(
+        "--input-dir",
+        default=None,
+        help="Versioned user bundle containing FileX/FileA/FileT/SOIL/weather/batch inputs",
+    )
     parser.add_argument("--init-from", action="append", default=None)
     parser.add_argument("--fixed-from", action="append", default=None)
     parser.add_argument("--tighten-from", action="append", default=None)
@@ -2308,6 +2319,11 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    if args.input_dir:
+        USER_INPUT_DIR = str(Path(args.input_dir).expanduser().resolve())
+        if not Path(USER_INPUT_DIR).is_dir():
+            parser.error(f"--input-dir does not exist: {USER_INPUT_DIR}")
+
     if args.apply_normalization:
         parser.error("--apply-normalization is retired because candidate-dependent Min-Max changes the objective")
     if args.apply_log_transform:
@@ -2329,7 +2345,10 @@ if __name__ == "__main__":
             args.batch = str(
                 resolve_path(
                     args.batch,
-                    bases=[PROJECT_ROOT / "data" / "templates" / "batch", WORKSPACE_DIR],
+                    bases=(
+                        ([Path(USER_INPUT_DIR)] if USER_INPUT_DIR else [])
+                        + [PROJECT_ROOT / "data" / "templates" / "batch", WORKSPACE_DIR]
+                    ),
                 )
             )
         except FileNotFoundError as exc:
@@ -2375,6 +2394,8 @@ if __name__ == "__main__":
         batch_for_model = os.path.basename(args.batch) if args.batch else args.batch
 
     model_cmd_extra = f"--batch {batch_for_model} --harvest-var {harvest_var}"
+    if USER_INPUT_DIR:
+        model_cmd_extra += f' --input-dir "{USER_INPUT_DIR}"'
 
     allowed: Optional[Set[str]] = None
     obs_bases: Optional[Set[str]] = None
@@ -3160,6 +3181,13 @@ if __name__ == "__main__":
         dssat_root=os.path.dirname(WORKSPACE),
         workspace_root=WORKSPACE,
         batch_file=os.path.basename(args.batch) if args.batch else None,
+        batch_sha256=(sha256_file(args.batch) if args.batch and os.path.isfile(args.batch) else ""),
+        input_dir=USER_INPUT_DIR or "",
+        input_manifest_sha256=(
+            sha256_file(Path(USER_INPUT_DIR) / "input_manifest.json")
+            if USER_INPUT_DIR and (Path(USER_INPUT_DIR) / "input_manifest.json").is_file()
+            else ""
+        ),
         bounds_id=args.bounds_id or "",
         bounds_csv=brm_csv if brm_mode != "off" else "",
         bounds_sha256=(sha256_file(brm_csv) if brm_csv and os.path.isfile(brm_csv) else ""),

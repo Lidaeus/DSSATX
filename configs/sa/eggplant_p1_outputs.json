@@ -1,0 +1,32 @@
+{
+  "profile_id": "eggplant_p1_all_treatments_v1",
+  "experiment_bundle": "xxql2501_20260715",
+  "treatments": [2, 3, 4, 5, 9, 10, 11, 12, 13, 14],
+  "features": [
+    "YIELD_HWAMS",
+    "HIAMS",
+    "LAIXM",
+    "CWAMS",
+    "ADAPS",
+    "PDFPS",
+    "LAI_AUC",
+    "LAI_PEAK",
+    "LAI_TPEAK",
+    "LAI_END",
+    "FRUITD_AUC",
+    "FRUITD_END",
+    "LEAF_END_LWAD",
+    "STEM_END_SWAD",
+    "AGB_END_CWAD",
+    "HI_END_HIAD"
+  ],
+  "time_points": [45, 67, 95, 119],
+  "include_treatment_mean": false,
+  "observation_count": 240,
+  "design_notes": [
+    "All ten water-nitrogen treatments are retained; TN2/TN3 alone cover only irrigation level MI1.",
+    "DAP points align with FileT process sampling dates 25120, 25142, 25170 and 25194 relative to planting date 25075.",
+    "Redundant treatment means and seven highly correlated fixed-DAP pairs are omitted.",
+    "MDAPS is omitted because the reviewed baseline returns the DSSAT missing sentinel."
+  ]
+}

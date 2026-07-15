@@ -10,7 +10,7 @@ Tomato_Cal 面向作物模型研究者，目标是在 Windows 环境中提供可
 - 历史运行只能证明流程曾执行，不能证明其科研结论有效；P0 质量门现已能主动拒绝这些退化结果。
 - 当前开发基线是 [产品定义与系统设计](项目重构规划.md)；详细风险和任务见 [P0 科研可信性修复开发计划](docs/P0_科研可信性修复开发计划.md)。
 - P0 已在 `codex/p0-research-credibility` 实施并通过微型数值验证；后续批准的显式 log/处理均值 sigma 也已完成真实 DSSAT/PEST 冒烟，详见 [P0 验证报告](docs/reports/P0_verification_report.md) 与 [Observation Policy 验证记录](docs/reports/observation_policy_verification.md)。已有历史 SA 排名、率定最优参数或不确定性结果仍不得用于论文结论。
-- P0 正进行防退化加固；P1 候选边界已通过技术预检但仍为 `pending`，正式 Morris 尚未启动。启动边界见 [P1 科研分析启动计划](docs/P1_科研分析启动计划.md)。
+- P0 防退化加固已完成当前回归轮次；P1 的新 XXQL2501 输入包、57 个活跃参数边界和 10 TN/240 响应契约已批准并通过门禁，正在按 `5 seeds × r=30` 预备正式 Morris。详见 [P1 科研分析启动计划](docs/P1_科研分析启动计划.md) 与 [输入/输出设计审计](docs/reports/XXQL2501_input_and_SA_design_review.md)。
 
 ## 产品原则
 
@@ -61,6 +61,7 @@ src/
   reporting/              诊断、指标和图表
 data/
   raw/                    只读原始数据
+  user/                   版本化用户 FileX/FileA/FileT/SOIL/气象输入包
   templates/              DSSAT 基线模板
   parameter_registry/     参数边界生命周期
 configs/                  可版本控制的运行配置
@@ -73,6 +74,7 @@ docs/                     当前规范、开发计划和历史背景材料
 
 - `FL-VS` 固定为 `100.0`；`XFINT` 必须受数值安全边界约束。
 - 参数冻结文件是率定可消费的唯一参数提案；不得自动选取“最新”SA 结果。
+- 正式运行用 `--input-dir` 显式选择版本化用户输入包；当前包为 `data/user/experiments/xxql2501_20260715`。
 - PEST 目标函数按 `Phi = Σ(w_i × residual_i)^2` 理解。若 `sigma_i` 是观测误差标准差，则基础权重为 `1 / sigma_i`，不是 `1 / sigma_i²`。
 - 默认在原始物理尺度计算残差。任何对数等变换必须预先声明，并同时作用于观测和模拟；禁止用同批观测与候选模拟共同计算动态 Min–Max 范围。
 - FileA/FileT 继续保存处理均值；原始重复另表保存并用于估计均值 sigma，不把同一处理重复作为共享同一个模拟值的独立 PEST 观测。

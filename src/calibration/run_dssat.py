@@ -35,10 +35,20 @@ def _batch_argument(args: list[str]) -> str:
     return "DSSBatch.v48"
 
 
-def _local_batch(args: list[str], run_dir: Path) -> Path:
+def _input_dir_argument(args: list[str]) -> Path | None:
+    for index, value in enumerate(args):
+        if value == "--input-dir" and index + 1 < len(args):
+            return Path(args[index + 1]).expanduser().resolve()
+        if value.startswith("--input-dir="):
+            return Path(value.split("=", 1)[1]).expanduser().resolve()
+    return None
+
+
+def _local_batch(args: list[str], run_dir: Path, input_dir: Path | None = None) -> Path:
     requested = Path(_batch_argument(args))
     candidates = [
         requested if requested.is_absolute() else run_dir / requested,
+        input_dir / requested.name if input_dir else Path("__no_input_dir__"),
         DATA_DIR / "templates" / "batch" / requested.name,
         PROJECT_ROOT / "workspace" / requested.name,
     ]
@@ -65,12 +75,15 @@ def _experiment_names(batch_file: Path) -> set[str]:
 def prepare_run_directory(run_dir: Path, args: list[str]) -> Path:
     """Populate one run directory with immutable inputs required by DSSAT."""
     run_dir.mkdir(parents=True, exist_ok=True)
+    input_dir = _input_dir_argument(args)
+    if input_dir is not None and not input_dir.is_dir():
+        raise FileNotFoundError(f"User input directory does not exist: {input_dir}")
     genotype = DATA_DIR / "templates" / "genotype"
     for filename in ("TMGRO048.CUL", "TMGRO048.ECO", "TMGRO048.SPE"):
         _copy(genotype / f"{filename}.base", run_dir / f"{filename}.base")
         _copy(genotype / f"{filename}.base", run_dir / filename)
 
-    soil_source = DATA_DIR / "raw" / "soil" / "SOIL.SOL"
+    soil_source = (input_dir / "SOIL.SOL") if input_dir else (DATA_DIR / "raw" / "soil" / "SOIL.SOL")
     _copy(soil_source, run_dir / "SOIL.SOL.base")
     _copy(soil_source, run_dir / "SOIL.SOL")
 
@@ -87,8 +100,8 @@ def prepare_run_directory(run_dir: Path, args: list[str]) -> Path:
         raise FileNotFoundError("DSCSM048.EXE was not found in DSSAT48_HOME or workspace")
     _copy(executable, run_dir / "DSCSM048.EXE")
 
-    batch_file = _local_batch(args, run_dir)
-    experiments = DATA_DIR / "raw" / "experiments"
+    batch_file = _local_batch(args, run_dir, input_dir=input_dir)
+    experiments = input_dir if input_dir else DATA_DIR / "raw" / "experiments"
     for stem in _experiment_names(batch_file):
         matches = list(experiments.glob(f"{stem}.*"))
         model_files = [path for path in matches if path.suffix.upper() in {".TMX", ".TMA", ".TMT"}]
@@ -97,7 +110,7 @@ def prepare_run_directory(run_dir: Path, args: list[str]) -> Path:
         for source in model_files:
             _copy(source, run_dir / source.name)
 
-    weather = DATA_DIR / "raw" / "weather"
+    weather = input_dir if input_dir else DATA_DIR / "raw" / "weather"
     weather_files = list(weather.glob("*.WTH"))
     if not weather_files:
         raise FileNotFoundError(f"No weather files found in {weather}")
@@ -123,6 +136,10 @@ def main() -> int:
             skip = True
         elif value.startswith("--batch="):
             localized_args.append(f"--batch={batch_file.name}")
+        elif value == "--input-dir" and index + 1 < len(args):
+            skip = True
+        elif value.startswith("--input-dir="):
+            continue
         else:
             localized_args.append(value)
     if "--batch" not in localized_args and not any(value.startswith("--batch=") for value in localized_args):
