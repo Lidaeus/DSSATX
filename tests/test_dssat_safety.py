@@ -33,6 +33,20 @@ def test_candidate_validation_rejects_physical_and_relational_errors():
         )
 
 
+def test_candidate_validation_accepts_shipped_tmgro_baselines():
+    values = {
+        "WTPSD": 0.004,
+        "SD-PM": 400.0,
+        "FL-LF": 400.0,
+        "SDPDV": 111.4,
+        "PARMAX": 41.0,
+        "PHTMAX": 61.0,
+        "FINREF": 220.0,
+        "EVMODC": 0.0,
+    }
+    assert run_dssat.validate_candidate_parameters(values) == values
+
+
 def test_fresh_output_guard_rejects_empty_and_stale_files(tmp_path):
     output = tmp_path / "Evaluate.OUT"
     output.write_text("", encoding="utf-8")

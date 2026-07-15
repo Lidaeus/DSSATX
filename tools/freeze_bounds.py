@@ -72,6 +72,7 @@ def main() -> int:
                 'review_status: "approved"',
                 f'derived_from: "{proposal.name}"',
                 f'derived_from_sha256: "{sha256_file(proposal)}"',
+                f'bounds_sha256: "{sha256_file(frozen_csv)}"',
                 f"parameter_count: {len(rows)}",
                 'automatic_repairs: 0',
                 f'notes: "{args.notes}"',

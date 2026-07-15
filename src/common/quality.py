@@ -230,6 +230,9 @@ def assess_ies(
     phi_values: pd.DataFrame | pd.Series | None = None,
     run_id: str = "",
     tolerance: float = 1e-12,
+    max_invalid_fraction: float = 0.0,
+    max_realization_loss_fraction: float = 0.10,
+    min_realizations: int = 2,
 ) -> QualityReport:
     """Check ensemble variation, objective variation, and parameter updating."""
     report = QualityReport(run_type="ies", run_id=run_id)
@@ -240,6 +243,45 @@ def assess_ies(
     )
     par_numeric = parameter_initial.apply(pd.to_numeric, errors="coerce")
     obs_numeric = observation_ensemble.apply(pd.to_numeric, errors="coerce").replace(-99.0, np.nan)
+    report.add(
+        "ies_ensemble_size",
+        len(par_numeric) >= int(min_realizations),
+        "Prior ensemble contains enough realizations to assess variation",
+        actual=len(par_numeric),
+        threshold=int(min_realizations),
+    )
+    unique_indices = par_numeric.index.is_unique and obs_numeric.index.is_unique
+    report.add(
+        "ies_unique_realizations",
+        unique_indices,
+        "Parameter and observation realization identifiers are unique",
+    )
+    par_invalid_fraction = float(par_numeric.isna().sum().sum()) / max(int(par_numeric.size), 1)
+    obs_invalid_fraction = float(obs_numeric.isna().sum().sum()) / max(int(obs_numeric.size), 1)
+    report.add(
+        "ies_parameter_finite",
+        par_invalid_fraction <= max_invalid_fraction,
+        "Prior parameter ensemble contains finite numeric values",
+        actual=par_invalid_fraction,
+        threshold=max_invalid_fraction,
+    )
+    report.add(
+        "ies_observation_finite",
+        obs_invalid_fraction <= max_invalid_fraction,
+        "Simulated-observation failures remain below the configured limit",
+        actual=obs_invalid_fraction,
+        threshold=max_invalid_fraction,
+    )
+    initial_ids = set(map(str, par_numeric.index))
+    observation_ids = set(map(str, obs_numeric.index))
+    retained_fraction = len(initial_ids & observation_ids) / max(len(initial_ids), 1)
+    report.add(
+        "ies_realization_alignment",
+        retained_fraction >= 1.0 - max_realization_loss_fraction,
+        "Simulated observations retain the required fraction of prior realizations",
+        actual=retained_fraction,
+        threshold=1.0 - max_realization_loss_fraction,
+    )
     par_varying = int((par_numeric.var(axis=0, ddof=0) > tolerance).sum())
     obs_varying = int((obs_numeric.var(axis=0, ddof=0) > tolerance).sum())
     report.add("ies_prior_variation", par_varying > 0, "Adjustable prior parameters vary", actual=par_varying, threshold=1)
@@ -248,8 +290,15 @@ def assess_ies(
     if phi_values is None:
         report.add("ies_phi_variation", False, "Phi values were not supplied")
     else:
-        phi = pd.to_numeric(pd.Series(np.asarray(phi_values).ravel()), errors="coerce")
-        phi = phi[np.isfinite(phi)]
+        phi_all = pd.to_numeric(pd.Series(np.asarray(phi_values).ravel()), errors="coerce")
+        phi = phi_all[np.isfinite(phi_all)]
+        report.add(
+            "ies_phi_finite",
+            len(phi) == len(phi_all) and len(phi) > 0,
+            "All supplied Phi values are finite",
+            actual=len(phi),
+            threshold=len(phi_all),
+        )
         spread = float(phi.max() - phi.min()) if len(phi) else 0.0
         scale = max(float(phi.abs().mean()), 1.0) if len(phi) else 1.0
         relative_spread = spread / scale
@@ -268,9 +317,26 @@ def assess_ies(
         initial = par_numeric.sort_index(axis=1)
         final = parameter_final.apply(pd.to_numeric, errors="coerce").reindex(columns=initial.columns)
         common = initial.index.intersection(final.index)
+        final_retained_fraction = len(common) / max(len(initial), 1)
+        report.add(
+            "ies_final_realization_alignment",
+            final_retained_fraction >= 1.0 - max_realization_loss_fraction,
+            "Final parameters retain the required fraction of prior realizations",
+            actual=final_retained_fraction,
+            threshold=1.0 - max_realization_loss_fraction,
+        )
+        final_invalid_fraction = float(final.isna().sum().sum()) / max(int(final.size), 1)
+        report.add(
+            "ies_final_parameter_finite",
+            final_invalid_fraction <= max_invalid_fraction,
+            "Final parameter ensemble contains finite numeric values",
+            actual=final_invalid_fraction,
+            threshold=max_invalid_fraction,
+        )
         if len(common):
             delta = (final.loc[common] - initial.loc[common]).abs().to_numpy()
-            max_delta = float(np.nanmax(delta)) if delta.size else 0.0
+            finite_delta = delta[np.isfinite(delta)]
+            max_delta = float(finite_delta.max()) if finite_delta.size else 0.0
         else:
             max_delta = 0.0
         report.add("ies_parameter_update", max_delta > tolerance, "Parameter ensemble changes after assimilation", actual=max_delta, threshold=tolerance)

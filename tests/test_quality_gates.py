@@ -64,3 +64,38 @@ def test_valid_micro_ies_passes():
     final = pd.DataFrame({"p1": [1.2, 1.8]}, index=["r1", "r2"])
     report = assess_ies(initial, observations, parameter_final=final, phi_values=[4.0, 9.0])
     assert report.science_validated
+
+
+def test_ies_rejects_failed_outputs_nonfinite_phi_and_lost_realizations():
+    initial = pd.DataFrame({"p1": [1.0, 2.0, 3.0]}, index=["r1", "r2", "r3"])
+    observations = pd.DataFrame({"o1": [10.0, -99.0]}, index=["r1", "r2"])
+    final = pd.DataFrame({"p1": [1.1]}, index=["r1"])
+    report = assess_ies(
+        initial,
+        observations,
+        parameter_final=final,
+        phi_values=[4.0, float("nan")],
+    )
+    failed = {check.check_id for check in report.checks if check.status == "fail"}
+    assert {
+        "ies_observation_finite",
+        "ies_realization_alignment",
+        "ies_phi_finite",
+        "ies_final_realization_alignment",
+    }.issubset(failed)
+
+
+def test_ies_rejects_duplicate_realization_identifiers():
+    initial = pd.DataFrame({"p1": [1.0, 2.0]}, index=["r1", "r1"])
+    observations = pd.DataFrame({"o1": [10.0, 12.0]}, index=["r1", "r2"])
+    final = pd.DataFrame({"p1": [1.2, 1.8]}, index=["r1", "r2"])
+    report = assess_ies(initial, observations, parameter_final=final, phi_values=[4.0, 9.0])
+    assert next(c for c in report.checks if c.check_id == "ies_unique_realizations").status == "fail"
+
+
+def test_ies_rejects_nonfinite_final_parameters():
+    initial = pd.DataFrame({"p1": [1.0, 2.0]}, index=["r1", "r2"])
+    observations = pd.DataFrame({"o1": [10.0, 12.0]}, index=["r1", "r2"])
+    final = pd.DataFrame({"p1": [float("nan"), 1.8]}, index=["r1", "r2"])
+    report = assess_ies(initial, observations, parameter_final=final, phi_values=[4.0, 9.0])
+    assert next(c for c in report.checks if c.check_id == "ies_final_parameter_finite").status == "fail"

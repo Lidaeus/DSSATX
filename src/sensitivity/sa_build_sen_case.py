@@ -58,7 +58,6 @@ def _default_observation_names():
         "CWAMS",
         "ADAPS",
         "PDFPS",
-        "MDAPS",
         "LAI_AUC",
         "LAI_PEAK",
         "LAI_TPEAK",
@@ -122,6 +121,16 @@ def build_case(
         for n in obs_names:
             f.write(str(n) + "\n")
 
+    # PyEMU validates instruction files while building the PST. Supply a
+    # temporary one-value-per-line output with the same contract, then remove
+    # it so a future model run cannot mistake the fixture for fresh data.
+    placeholder_output = os.path.join(case_dir, out_name)
+    placeholder_created = not os.path.exists(placeholder_output)
+    if placeholder_created:
+        with open(placeholder_output, "w", encoding="utf-8") as handle:
+            for _ in obs_names:
+                handle.write(" 0\n")
+
     pst_path = os.path.join(case_dir, "sa_sen_morris.pst")
 
     cwd0 = os.getcwd()
@@ -135,6 +144,8 @@ def build_case(
         )
     finally:
         os.chdir(cwd0)
+        if placeholder_created and os.path.exists(placeholder_output):
+            os.remove(placeholder_output)
     pst.control_data.noptmax = 0
 
     for p in pst.parameter_data.parnme:

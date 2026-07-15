@@ -345,16 +345,14 @@ def apply_param_review_csv(params, csv_path):
         try:
             lb = float(p.get("lower"))
             ub = float(p.get("upper"))
-            if lb > ub:
-                p["lower"], p["upper"] = ub, lb
-                lb, ub = ub, lb
             init = float(p.get("init"))
-            if init < lb:
-                p["init"] = lb
-            elif init > ub:
-                p["init"] = ub
-        except Exception:
-            pass
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"Parameter review contains non-numeric bounds for {p.get('name')}") from exc
+        if not lb <= init <= ub:
+            raise ValueError(
+                f"Parameter review requires lower <= init <= upper for {p.get('name')}: "
+                f"{lb:g} <= {init:g} <= {ub:g}"
+            )
 
         if float(p.get("lower", 0.0)) == float(p.get("upper", 0.0)):
             p["status"] = "fixed"
@@ -455,31 +453,32 @@ def apply_bounds_review_csv(params, csv_path, cultivar=None, ecotype=None, mode=
         ub_v = _coerce_float(r.get(ub_col))
         if lb_v is None or ub_v is None:
             continue
-        p["lower"] = float(lb_v)
-        p["upper"] = float(ub_v)
         init_v = _coerce_float(r.get(init_col)) if init_col else None
-        if init_v is not None:
-            p["init"] = float(init_v)
+        candidate_init = float(init_v) if init_v is not None else float(p.get("init"))
+        candidate_lower = float(lb_v)
+        candidate_upper = float(ub_v)
+        if not candidate_lower <= candidate_init <= candidate_upper:
+            raise ValueError(
+                f"Bounds review requires lower <= init <= upper for {p.get('name')}: "
+                f"{candidate_lower:g} <= {candidate_init:g} <= {candidate_upper:g}"
+            )
+        p["lower"] = candidate_lower
+        p["upper"] = candidate_upper
+        p["init"] = candidate_init
+        source_status = ""
         if status_col:
             status_v = _coerce_str(r.get(status_col)).lower()
             if status_v in {"active", "fixed", "disabled"}:
+                source_status = status_v
                 p["status"] = {"active": "none", "fixed": "fixed", "disabled": "fixed"}[status_v]
                 p["disabled"] = status_v == "disabled"
+        if source_status == "fixed" and not candidate_lower == candidate_init == candidate_upper:
+            raise ValueError(
+                f"Fixed bounds review row requires lower == init == upper for {p.get('name')}"
+            )
+        if source_status == "active" and candidate_lower == candidate_upper:
+            raise ValueError(f"Active bounds review row has zero width for {p.get('name')}")
         applied += 1
-
-        try:
-            lb = float(p.get("lower"))
-            ub = float(p.get("upper"))
-            if lb > ub:
-                p["lower"], p["upper"] = ub, lb
-                lb, ub = ub, lb
-            init = float(p.get("init"))
-            if init < lb:
-                p["init"] = lb
-            elif init > ub:
-                p["init"] = ub
-        except Exception:
-            pass
 
         if float(p.get("lower", 0.0)) == float(p.get("upper", 0.0)):
             p["status"] = "fixed"

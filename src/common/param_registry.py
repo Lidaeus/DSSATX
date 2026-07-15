@@ -50,15 +50,17 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     "EM-FL":  (10.0,  80.0),
     "FL-SH":  (1.0,   20.0),
     "FL-SD":  (1.0,   30.0),
-    "SD-PM":  (10.0,  80.0),
-    "FL-LF":  (10.0, 100.0),
+    # The shipped TMGRO048 cultivar uses 400 for both SD-PM and FL-LF.
+    # These are DSSAT safety envelopes, not recommended calibration ranges.
+    "SD-PM":  (10.0, 600.0),
+    "FL-LF":  (10.0, 600.0),
     "LFMAX":  (0.5,    3.0),
     "SLAVR":  (100.0, 500.0),
     "SIZLF":  (50.0, 1000.0),
     "XFRT":   (0.01,   1.0),
-    "WTPSD":  (0.01,   2.0),
+    "WTPSD":  (0.001,  2.0),
     "SFDUR":  (5.0,   50.0),
-    "SDPDV":  (0.5,   10.0),
+    "SDPDV":  (0.5,  500.0),
     "PODUR":  (5.0,   80.0),
     "THRSH":  (0.0,   99.0),
     # --- ECO ---
@@ -93,15 +95,15 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     "TO23":   (24.0,  38.0),
     "TM3":    (30.0,  48.0),
     # --- SPE photosynthesis / source-sink ---
-    "PARMAX":  (5.0,  20.0),
-    "PHTMAX":  (10.0, 60.0),
+    "PARMAX":  (5.0, 100.0),
+    "PHTMAX":  (10.0, 100.0),
     "KCAN":    (0.40,  1.00),
-    "KC_SLOPE": (0.0,  0.30),
-    "FINREF":  (0.0,    5.0),
+    "KC_SLOPE": (0.0,  0.50),
+    "FINREF":  (0.0, 1000.0),
     "SLAREF":  (100.0, 500.0),
     "SIZREF":  (50.0, 1000.0),
     "VSSINK":  (0.2,   50.0),
-    "EVMODC":  (0.1,    3.0),
+    "EVMODC":  (0.0,    3.0),
     # --- SPE root-water ---
     "WTFSD":   (0.0,  1.0),
     "PORPT":   (0.0,  1.0),
@@ -377,6 +379,9 @@ def validate_frozen_bounds(path: str) -> list[ValidationIssue]:
             return [ValidationIssue("MISSING_COLUMNS", f"Missing required columns: {', '.join(missing)}")]
         rows = list(reader)
 
+    if not rows:
+        return [ValidationIssue("EMPTY_REGISTRY", "Frozen bounds file contains no parameters")]
+
     seen: set[str] = set()
     parsed: dict[str, dict[str, object]] = {}
     allowed_status = {"active", "fixed", "disabled"}
@@ -385,6 +390,7 @@ def validate_frozen_bounds(path: str) -> list[ValidationIssue]:
         status = str(row.get("status", "")).strip().lower()
         location = str(row.get("location", "")).strip().upper()
         target_file = str(row.get("file", "")).strip()
+        parameter_group = str(row.get("pargp", "")).strip()
         if not name:
             issues.append(ValidationIssue("EMPTY_NAME", f"Row {row_number} has no parameter name"))
             continue
@@ -393,6 +399,8 @@ def validate_frozen_bounds(path: str) -> list[ValidationIssue]:
         seen.add(name)
         if status not in allowed_status:
             issues.append(ValidationIssue("INVALID_STATUS", f"Unsupported status {status!r}", name))
+        if not parameter_group:
+            issues.append(ValidationIssue("EMPTY_PARAMETER_GROUP", "pargp is required", name))
         allowed_locations = {"CUL", "ECO", "SPE", "SOIL", "IC", "INIT"}
         if location not in allowed_locations:
             issues.append(ValidationIssue("INVALID_LOCATION", f"Unsupported location {location!r}", name))
@@ -426,11 +434,23 @@ def validate_frozen_bounds(path: str) -> list[ValidationIssue]:
                 issues.append(ValidationIssue("INIT_OUTSIDE_BOUNDS", f"init {init:g} not in [{lower:g}, {upper:g}]", name))
             if status == "fixed" and not (lower == init == upper):
                 issues.append(ValidationIssue("FIXED_NOT_CONSTANT", "fixed requires lower == init == upper", name))
+            if status == "active" and lower == upper:
+                issues.append(
+                    ValidationIssue(
+                        "ACTIVE_ZERO_WIDTH",
+                        "active parameters require lower < upper",
+                        name,
+                    )
+                )
 
             physical = PHYSICAL_BOUNDS.get(name)
             if physical:
                 phys_lower, phys_upper = physical
-                if min(init, lower, upper) < phys_lower or max(init, lower, upper) > phys_upper:
+                tolerance = 1e-12 * max(abs(phys_lower), abs(phys_upper), 1.0)
+                if (
+                    min(init, lower, upper) < phys_lower - tolerance
+                    or max(init, lower, upper) > phys_upper + tolerance
+                ):
                     issues.append(
                         ValidationIssue(
                             "OUTSIDE_PHYSICAL_BOUNDS",

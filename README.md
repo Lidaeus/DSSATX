@@ -10,6 +10,7 @@ Tomato_Cal 面向作物模型研究者，目标是在 Windows 环境中提供可
 - 历史运行只能证明流程曾执行，不能证明其科研结论有效；P0 质量门现已能主动拒绝这些退化结果。
 - 当前开发基线是 [产品定义与系统设计](项目重构规划.md)；详细风险和任务见 [P0 科研可信性修复开发计划](docs/P0_科研可信性修复开发计划.md)。
 - P0 已在 `codex/p0-research-credibility` 实施并通过微型数值验证；后续批准的显式 log/处理均值 sigma 也已完成真实 DSSAT/PEST 冒烟，详见 [P0 验证报告](docs/reports/P0_verification_report.md) 与 [Observation Policy 验证记录](docs/reports/observation_policy_verification.md)。已有历史 SA 排名、率定最优参数或不确定性结果仍不得用于论文结论。
+- P0 正进行防退化加固；P1 候选边界已通过技术预检但仍为 `pending`，正式 Morris 尚未启动。启动边界见 [P1 科研分析启动计划](docs/P1_科研分析启动计划.md)。
 
 ## 产品原则
 

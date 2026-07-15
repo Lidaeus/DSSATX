@@ -1,0 +1,109 @@
+﻿name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,review_note
+LFMAX,1.27,1.27,1.36,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; requires user review
+SIZLF,297.1,250.0,350.0,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; requires user review
+SLAVR,293.0,250.0,300.0,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; requires user review
+CSDL,12.33,12.33,12.33,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; requires user review
+PPSEN,0.0,0.0,0.0,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; requires user review
+THRSH,8.5,8.5,8.5,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; requires user review
+WTPSD,0.004,0.004,0.004,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; requires user review
+XFRT,0.99,0.73,0.99,active,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; requires user review
+EM-FL,23.3,23.0,31.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; requires user review
+FL-LF,400.0,47.0,400.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; requires user review
+FL-SD,8.1,7.0,21.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; requires user review
+FL-SH,2.0,1.0,4.6,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; requires user review
+PODUR,33.0,30.0,58.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; requires user review
+SD-PM,400.0,45.0,400.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; requires user review
+SDPDV,111.4,100.0,300.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; requires user review
+SFDUR,11.7,10.0,27.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; requires user review
+RHGHT,1.7,0.7,2.0,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; requires user review
+RWDTH,1.6,0.7,1.6,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; requires user review
+TRIFL,0.64,0.2,0.85,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; requires user review
+EM-V1,10.4,10.0,40.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; requires user review
+FL-VS,100.0,100.0,100.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; requires user review
+JU-R0,3.8,2.0,20.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; requires user review
+LNGSH,39.0,29.25,48.75,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; requires user review
+PL-EM,11.4,3.0,12.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; requires user review
+PM06,0.5,0.35,0.65,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; requires user review
+PM09,0.97,0.6789999999999999,1.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; requires user review
+V1-JU,0.0,0.0,0.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; requires user review
+XFINT,0.3,0.12,0.5,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; requires user review
+XFPHT,38.8,5.0,40.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; requires user review
+XMAGE,13.5,5.0,30.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; requires user review
+IC_SH2O_01,0.179,0.179,0.179,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+IC_SH2O_02,0.232,0.232,0.232,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+IC_SH2O_03,0.267,0.267,0.267,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+IC_SH2O_04,0.286,0.286,0.286,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+IC_SH2O_05,0.279,0.279,0.279,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+IC_SH2O_06,0.249,0.249,0.249,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SLOC_01,1.73,1.73,1.73,fixed,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SLOC_02,1.73,1.73,1.73,fixed,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SLOC_03,1.73,1.73,1.73,fixed,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SLOC_04,0.4,0.4,0.4,fixed,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SLOC_05,0.4,0.4,0.4,fixed,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SLOC_06,0.2,0.2,0.2,fixed,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SLOC_07,0.2,0.2,0.2,fixed,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SBDM_01,1.49,1.49,1.49,fixed,SOIL_Physical,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SBDM_02,1.49,1.49,1.49,fixed,SOIL_Physical,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SBDM_03,1.49,1.49,1.49,fixed,SOIL_Physical,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SBDM_04,1.41,1.41,1.41,fixed,SOIL_Physical,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SBDM_05,1.41,1.41,1.41,fixed,SOIL_Physical,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SBDM_06,1.44,1.44,1.44,fixed,SOIL_Physical,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SBDM_07,1.44,1.44,1.44,fixed,SOIL_Physical,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SALB,0.13,0.13,0.13,fixed,SOIL_SurfaceHydro,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SLDR,0.27,0.27,0.27,fixed,SOIL_SurfaceHydro,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SLRO,84.0,84.0,84.0,fixed,SOIL_SurfaceHydro,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SDUL_01,0.198,0.198,0.198,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SDUL_02,0.198,0.198,0.198,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SDUL_03,0.198,0.198,0.198,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SDUL_04,0.226,0.226,0.226,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SDUL_05,0.226,0.226,0.226,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SDUL_06,0.25,0.25,0.25,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SDUL_07,0.25,0.25,0.25,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SLLL_01,0.125,0.125,0.125,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SLLL_02,0.125,0.125,0.125,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SLLL_03,0.125,0.125,0.125,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SLLL_04,0.117,0.117,0.117,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SLLL_05,0.117,0.117,0.117,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SLLL_06,0.138,0.138,0.138,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SLLL_07,0.138,0.138,0.138,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SSAT_01,0.294,0.294,0.294,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SSAT_02,0.294,0.294,0.294,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SSAT_03,0.294,0.294,0.294,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SSAT_04,0.323,0.323,0.323,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SSAT_05,0.323,0.323,0.323,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SSAT_06,0.332,0.332,0.332,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+SOIL_SSAT_07,0.332,0.332,0.332,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,P1 default fixed; interface testing does not authorize calibration
+KCAN,0.66,0.4619999999999999,0.8580000000000001,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+KC_SLOPE,0.1,0.0,0.4,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+PARMAX,41.0,30.75,51.25,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,V14 mode label normalized; requires user review
+PHTMAX,61.0,45.75,76.25,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+ATOP,0.8,0.5599999999999999,1.0,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+FRCNOD,0.05,0.0349999999999999,0.065,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+FRLFF,0.37,0.259,0.481,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+FRSTMF,0.53,0.371,0.6890000000000001,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+PORPT,0.21,0.147,0.273,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+RTNO3,0.012,0.008,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+RTNH4,0.012,0.01,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+RTEXF,0.1,0.05,0.25,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+WTFSD,0.55,0.385,0.7150000000000001,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+EVMODC,0.0,0.0,0.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+FINREF,220.0,165.0,275.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+SIZREF,300.0,225.0,375.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+SLAREF,300.0,225.0,375.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+VSSINK,4.1,2.05,8.2,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+TB1,9.2,8.0,12.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; requires user review
+TB2,8.6,8.0,12.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; requires user review
+TB3,11.0,8.0,12.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; requires user review
+TM1,40.0,33.0,41.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; requires user review
+TM2,34.3,33.0,40.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; requires user review
+TM3,39.8,33.0,41.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; requires user review
+TO11,25.5,22.0,27.5,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; requires user review
+TO12,27.1,22.0,27.5,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; requires user review
+TO13,26.0,22.0,27.5,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; requires user review
+TO21,28.8,28.0,32.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; requires user review
+TO22,29.6,28.0,32.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; requires user review
+TO23,29.1,28.0,32.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; requires user review
+NSTFAC,0.5,0.3,0.85,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+NMOBMX,0.09,0.08,0.4,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+NVSMOB,0.38,0.2,0.5,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review
+NRCVR,0.15,0.05,0.3,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; requires user review

@@ -79,3 +79,15 @@ SOIL/IC 测试只证明接口生效，不代表批准它们进入正式率定。
 
 建议验收口径：批准 P0 工程与科学质量门实现；保持正式 frozen 和历史科研结论停用；另行审批 P1 及新边界后再开始正式 SA。
 
+## 8. 2026-07-15 防退化加固补充
+
+在以 V14 作为测试参考时发现，原 `PHYSICAL_BOUNDS` 有一部分把 DSSAT 自带 TMGRO048 基线误判为越界。现已区分两类问题：
+
+- 校验器误报已修正：硬安全包络现在包含 `WTPSD=0.004`、`SD-PM/FL-LF=400`、`SDPDV=111.4`、`PARMAX=41`、`PHTMAX=61`、`FINREF=220` 和 `EVMODC=0`；
+- V14 frozen 的真实错误继续保留：5 个倒置边界、8 个初值不在候选范围、2 个 fixed 不恒定、3 个温度范围交叠和 2 个土壤水分范围交叠，共 20 个 error findings；另有 44 个 SOIL/IC active 警告。
+
+新增回归门禁禁止：空边界表、active 零宽、空 `pargp`、构建器交换上下界或夹紧初值、IES 非有限模拟/Phi、重复 realization 以及超阈值 realization 丢失。
+
+加固后的纯 Python 回归为 `66 passed`，迁移检查为 `9 passed`，`pip check` 无破损依赖。P1 基线前向模型产生 90/90 个有限输出。
+
+基于 `proposal_from_sa_v14.csv` 生成了待审 `eggplant_p1_candidate_v1_20260715.csv`：57 个 CUL/ECO/SPE active，51 个 fixed，其中 44 个为 SOIL/IC。候选版本可以构建 57 参数、90 输出的 Morris 控制文件；基线中恒为 `-99` 的 MDAPS 已从当前默认输出移除。metadata 仍为 `pending`，因此正式 P1 readiness 按设计失败，未启动正式 Morris。
