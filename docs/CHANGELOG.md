@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-07-16
+
+- 冻结 Python/R 图表职责：Python 仅做 SA/率定诊断和论文数据导出，R 成为未来论文图与补充图的唯一渲染器。
+- 新增 `paper/R` 统一主题与 Fig. 2/3/4 核心实现、双重 DEMO 门和 R 产物 SHA-256 manifest；移除 Python 论文绘图入口与样式模块。
+
 ## 2026-07-15
 
 - 建立 Fig. 1–6/Fig. S1–S8 科研图表注册表、统一出版 profile、tidy 数据契约和图表 manifest。

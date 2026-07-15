@@ -26,13 +26,13 @@ COMPARISON_COLUMNS = [
 
 
 VARIABLE_SPECS: dict[str, dict[str, str]] = {
-    "LAID": {"label": "Leaf area index", "unit": "m$^2$ m$^{-2}$", "domain": "canopy"},
-    "LWAD": {"label": "Leaf dry mass", "unit": "kg ha$^{-1}$", "domain": "biomass"},
-    "SWAD": {"label": "Stem dry mass", "unit": "kg ha$^{-1}$", "domain": "biomass"},
-    "DRY_INC": {"label": "Incremental dry harvest", "unit": "kg ha$^{-1}$", "domain": "harvest"},
-    "FRESH_INC": {"label": "Incremental fresh harvest", "unit": "kg ha$^{-1}$", "domain": "harvest"},
-    "DRY_CUM": {"label": "Cumulative dry harvest", "unit": "kg ha$^{-1}$", "domain": "diagnostic"},
-    "FRESH_CUM": {"label": "Cumulative fresh harvest", "unit": "kg ha$^{-1}$", "domain": "diagnostic"},
+    "LAID": {"label": "Leaf area index", "unit": "m² m⁻²", "domain": "canopy"},
+    "LWAD": {"label": "Leaf dry mass", "unit": "kg ha⁻¹", "domain": "biomass"},
+    "SWAD": {"label": "Stem dry mass", "unit": "kg ha⁻¹", "domain": "biomass"},
+    "DRY_INC": {"label": "Incremental dry harvest", "unit": "kg ha⁻¹", "domain": "harvest"},
+    "FRESH_INC": {"label": "Incremental fresh harvest", "unit": "kg ha⁻¹", "domain": "harvest"},
+    "DRY_CUM": {"label": "Cumulative dry harvest", "unit": "kg ha⁻¹", "domain": "diagnostic"},
+    "FRESH_CUM": {"label": "Cumulative fresh harvest", "unit": "kg ha⁻¹", "domain": "diagnostic"},
 }
 
 

@@ -1,8 +1,8 @@
 figure_id,location,scientific_question,required_data,current_status,implementation
 Fig1,main,Which parameters robustly control each process?,Morris multi-seed stability and approved Sobol indices,pending_P1,planned
-Fig2,main,Did calibration update the ensemble without one group dominating?,Phi ensemble history and group Phi by iteration,core_partial,src/reporting/paper_figures.py
-Fig3,main,How accurately does the model reproduce calibration and validation observations?,Tidy observed-simulated table with dataset_role,core_implemented,src/reporting/paper_figures.py
-Fig4,main,Does the model reproduce treatment-specific temporal and harvest dynamics?,Tidy time-series comparison with uncertainty and treatment metadata,core_implemented,src/reporting/paper_figures.py
+Fig2,main,Did calibration update the ensemble without one group dominating?,Phi ensemble history and group Phi by iteration,r_core_partial,paper/R/fig_phi_convergence.R
+Fig3,main,How accurately does the model reproduce calibration and validation observations?,Tidy observed-simulated table with dataset_role,r_core_implemented,paper/R/fig_model_performance.R
+Fig4,main,Does the model reproduce treatment-specific temporal and harvest dynamics?,Tidy time-series comparison with uncertainty and treatment metadata,r_core_implemented,paper/R/fig_selected_dynamics.R
 Fig5,main,Which parameter combinations are identifiable or equifinal?,Prior/posterior ensembles bounds Phi and deterministic representative reruns,pending_P4,planned
 Fig6,main,What do calibrated predictions imply for water-nitrogen management?,Validated scenario ensemble with uncertainty,pending_P5,planned
 FigS1,supplement,Morris rank stability and output-specific effects?,Per-seed ranks mu-star sigma and valid trajectory counts,pending_P1,planned

@@ -10,7 +10,7 @@ Tomato_Cal 面向作物模型研究者，目标是在 Windows 环境中提供可
 - 历史运行只能证明流程曾执行，不能证明其科研结论有效；P0 质量门现已能主动拒绝这些退化结果。
 - 当前开发基线是 [产品定义与系统设计](项目重构规划.md)；详细风险和任务见 [P0 科研可信性修复开发计划](docs/P0_科研可信性修复开发计划.md)。
 - P0 已在 `codex/p0-research-credibility` 实施并通过微型数值验证；后续批准的显式 log/处理均值 sigma 也已完成真实 DSSAT/PEST 冒烟，详见 [P0 验证报告](docs/reports/P0_verification_report.md) 与 [Observation Policy 验证记录](docs/reports/observation_policy_verification.md)。已有历史 SA 排名、率定最优参数或不确定性结果仍不得用于论文结论。
-- 科研图表已建立统一 profile、tidy 数据接口、历史结果安全适配器和三类核心绘图；完整 Fig. 1–6/Fig. S1–S8 规划见 [科研图表设计与开发计划](docs/科研图表设计与开发计划.md)。
+- 科研图表已冻结为“双轨制”：Python 只做 SA/率定运行诊断与论文数据导出，未来可能进入论文的图全部由 R 绘制；完整 Fig. 1–6/Fig. S1–S8 规划见 [科研图表设计与开发计划](docs/科研图表设计与开发计划.md)。
 - P0 防退化加固已完成当前回归轮次；P1 的新 XXQL2501 输入包、57 个活跃参数和 10 TN/240 响应契约已批准。首轮预检正确拦截 v1 的 XMAGE/XFPHT 非法组合，当前边界已升级为 `eggplant_p1_xxql2501_v2_20260715`，准备重新执行 `5 seeds × r=30` 正式 Morris。详见 [P1 科研分析启动计划](docs/P1_科研分析启动计划.md) 与 [输入/输出设计审计](docs/reports/XXQL2501_input_and_SA_design_review.md)。
 
 ## 产品原则
@@ -59,7 +59,8 @@ src/
   dssat/                  DSSAT 正向运行
   sensitivity/            Morris/Sobol 工作流
   calibration/            PEST++ 任务构建与率定
-  reporting/              诊断、指标和图表
+  reporting/              Python 诊断、指标和 R 论文图数据导出
+paper/R/                  唯一论文成图入口与统一 R 样式
 data/
   raw/                    只读原始数据
   user/                   版本化用户 FileX/FileA/FileT/SOIL/气象输入包
@@ -84,7 +85,7 @@ docs/                     当前规范、开发计划和历史背景材料
 
 ## 环境与检查
 
-主要依赖为 Python 3.13+、`pandas`、`numpy`、`pyemu`、`flopy` 和 `matplotlib`；PEST++ 二进制位于 `pestpp-5.2.16-win/`，DSSAT 4.8 默认位于 `C:\DSSAT48\`。
+运行与诊断主要依赖 Python 3.13+、`pandas`、`numpy`、`pyemu`、`flopy` 和 `matplotlib`。论文图另需 R 4.3+ 以及 `ggplot2`、`patchwork`、`jsonlite`、`svglite`。PEST++ 二进制位于 `pestpp-5.2.16-win/`，DSSAT 4.8 默认位于 `C:\DSSAT48\`。
 
 依赖与代码级检查：
 
@@ -94,13 +95,18 @@ python -m pytest tests -q
 python -m compileall src tests tools
 ```
 
-历史结果仅用于检查图表版式时，必须显式生成 DEMO：
+历史结果仅用于检查图表版式时，必须在数据导出和 R 绘图两端显式生成 DEMO：
 
 ```powershell
-python -m src.reporting.paper_figures --prefix eggplant_stage2_v14_full `
+python -m src.reporting.export_paper_data --run-id eggplant_stage2_v14_full `
   --legacy-results-dir workspace `
   --phi-csv workspace/eggplant_stage2_v14_full.phi.actual.csv `
-  --out-dir workspace/runs/figure_demo --allow-unvalidated-demo
+  --out-dir workspace/runs/figure_demo/paper_data --allow-unvalidated-demo
+
+Rscript paper/R/make_all.R `
+  --input-dir workspace/runs/figure_demo/paper_data `
+  --out-dir workspace/runs/figure_demo/paper_figures `
+  --allow-unvalidated-demo
 ```
 
 持久化 IES 运行必须再执行科学质量门：

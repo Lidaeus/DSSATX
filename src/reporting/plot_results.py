@@ -1,8 +1,8 @@
 """Legacy diagnostic plots.
 
-Kept for compatibility with ``analyze_results.py``. New publication figures
-must use ``src.reporting.paper_figures`` so style, source data, and manifests
-remain consistent.
+Kept for compatibility with ``analyze_results.py`` as a Python runtime-
+diagnostic entry. Manuscript figures are rendered exclusively by
+``paper/R/make_all.R`` from a frozen data bundle.
 """
 
 import argparse
@@ -33,7 +33,7 @@ def _filter_pairs(df, obs_col, sim_col):
 
 
 def _rmse_nrmse_d(obs, sim):
-    from analyze_results import _rmse_nrmse_d as _impl
+    from src.reporting.analyze_results import _rmse_nrmse_d as _impl
 
     return _impl(obs, sim)
 
@@ -54,8 +54,9 @@ def _scatter_1to1(df, obs_col, sim_col, title, out_png):
     ax.plot([vmin - pad, vmax + pad], [vmin - pad, vmax + pad], color="black", linewidth=1)
     ax.set_xlim(vmin - pad, vmax + pad)
     ax.set_ylim(vmin - pad, vmax + pad)
-    ax.set_xlabel(f"OBS ({obs_col})")
-    ax.set_ylabel(f"SIM ({sim_col})")
+    ax.set_aspect("equal", adjustable="box")
+    ax.set_xlabel("Observed")
+    ax.set_ylabel("Simulated")
     ax.set_title(title)
     ax.text(
         0.02,
@@ -135,7 +136,7 @@ def main():
 
     print(
         "Note: plot_results.py is a legacy diagnostic entry point; "
-        "use python -m src.reporting.paper_figures for traceable publication figures."
+        "use src.reporting.export_paper_data then paper/R/make_all.R for manuscript figures."
     )
 
     results_dir = os.path.abspath(args.results_dir)
@@ -148,9 +149,9 @@ def main():
 
     if os.path.exists(process_csv):
         dfp = pd.read_csv(process_csv)
-        _scatter_1to1(dfp, "OBS_LAID", "SIM_LAID", f"{args.prefix}: LAID", os.path.join(out_dir, "scatter_LAID.png"))
-        _scatter_1to1(dfp, "OBS_LWAD", "SIM_LWAD", f"{args.prefix}: LWAD", os.path.join(out_dir, "scatter_LWAD.png"))
-        _scatter_1to1(dfp, "OBS_SWAD", "SIM_SWAD", f"{args.prefix}: SWAD", os.path.join(out_dir, "scatter_SWAD.png"))
+        _scatter_1to1(dfp, "OBS_LAID", "SIM_LAID", f"{args.prefix}: LAID", os.path.join(out_dir, "diagnostic_scatter_LAID.png"))
+        _scatter_1to1(dfp, "OBS_LWAD", "SIM_LWAD", f"{args.prefix}: LWAD", os.path.join(out_dir, "diagnostic_scatter_LWAD.png"))
+        _scatter_1to1(dfp, "OBS_SWAD", "SIM_SWAD", f"{args.prefix}: SWAD", os.path.join(out_dir, "diagnostic_scatter_SWAD.png"))
         if not args.no_timeseries:
             _facet_timeseries(
                 dfp,
@@ -158,7 +159,7 @@ def main():
                 date_col="DATE",
                 pairs=[("OBS_LAID", "SIM_LAID", "LAID")],
                 title=f"{args.prefix}: LAID time series by TN",
-                out_png=os.path.join(out_dir, "timeseries_LAID_by_TN.png"),
+                out_png=os.path.join(out_dir, "diagnostic_timeseries_LAID_by_TN.png"),
             )
 
     if os.path.exists(harvest_csv):
@@ -168,14 +169,14 @@ def main():
             "OBS_FRESH_CUM",
             "SIM_FRESH_CUM",
             f"{args.prefix}: Fresh yield cumulative",
-            os.path.join(out_dir, "scatter_fresh_cum.png"),
+            os.path.join(out_dir, "diagnostic_scatter_fresh_cum.png"),
         )
         _scatter_1to1(
             dfh,
             "OBS_DRY_CUM",
             "SIM_DRY_CUM",
             f"{args.prefix}: Dry yield cumulative",
-            os.path.join(out_dir, "scatter_dry_cum.png"),
+            os.path.join(out_dir, "diagnostic_scatter_dry_cum.png"),
         )
         if not args.no_timeseries:
             _facet_timeseries(
@@ -184,7 +185,7 @@ def main():
                 date_col="DATE",
                 pairs=[("OBS_FRESH_CUM", "SIM_FRESH_CUM", "FreshCum")],
                 title=f"{args.prefix}: cumulative fresh yield by TN",
-                out_png=os.path.join(out_dir, "timeseries_fresh_cum_by_TN.png"),
+                out_png=os.path.join(out_dir, "diagnostic_timeseries_fresh_cum_by_TN.png"),
             )
             _facet_timeseries(
                 dfh,
@@ -192,14 +193,14 @@ def main():
                 date_col="DATE",
                 pairs=[("OBS_DRY_CUM", "SIM_DRY_CUM", "DryCum")],
                 title=f"{args.prefix}: cumulative dry yield by TN",
-                out_png=os.path.join(out_dir, "timeseries_dry_cum_by_TN.png"),
+                out_png=os.path.join(out_dir, "diagnostic_timeseries_dry_cum_by_TN.png"),
             )
 
     if os.path.exists(joint_csv):
         dfj = pd.read_csv(joint_csv)
-        _scatter_1to1(dfj, "OBS_HWAM", "SIM_HWAM", f"{args.prefix}: HWAM", os.path.join(out_dir, "scatter_HWAM.png"))
-        _scatter_1to1(dfj, "OBS_LAIX", "SIM_LAIX", f"{args.prefix}: LAIX", os.path.join(out_dir, "scatter_LAIX.png"))
-        _scatter_1to1(dfj, "OBS_CNAM", "SIM_CNAM", f"{args.prefix}: CNAM", os.path.join(out_dir, "scatter_CNAM.png"))
+        _scatter_1to1(dfj, "OBS_HWAM", "SIM_HWAM", f"{args.prefix}: HWAM", os.path.join(out_dir, "diagnostic_scatter_HWAM.png"))
+        _scatter_1to1(dfj, "OBS_LAIX", "SIM_LAIX", f"{args.prefix}: LAIX", os.path.join(out_dir, "diagnostic_scatter_LAIX.png"))
+        _scatter_1to1(dfj, "OBS_CNAM", "SIM_CNAM", f"{args.prefix}: CNAM", os.path.join(out_dir, "diagnostic_scatter_CNAM.png"))
 
     print(out_dir)
 

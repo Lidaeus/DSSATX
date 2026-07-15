@@ -178,9 +178,9 @@ FileA/FileT 当前以处理均值作为 DSSAT 观测。重复原始记录应保�
 - 每张图保存源数据、配置、生成脚本版本和 caption registry；
 - 自动检查 DPI、物理尺寸、字体、裁切、文件大小和面板完整性。
 
-正式图表统一调用 `src/reporting/figure_style.py`，不得在各脚本重复定义字体、颜色和尺寸。绘图函数只消费结构化数据，不得在绘图时启动 DSSAT/PEST、猜测迭代号或推断处理映射。历史适配器必须写入 `legacy_unvalidated`，且只有显式 demo 开关才能生成图片。
+未来可能进入论文、补充材料或正式科研报告的图必须使用 R，并统一调用 `paper/R/common.R` 与 `configs/figures/publication.json`；不得在各脚本重复定义字体、颜色和尺寸。Python 只允许生成 `diagnostic_*` 运行诊断或通过 `export_paper_data.py` 冻结数据，不得生成 Fig/FigS。绘图函数只消费结构化数据，不得启动 DSSAT/PEST、猜测迭代号或推断处理映射。历史适配器写入 `legacy_unvalidated`，且 Python 导出和 R 绘图两端都必须显式启用 demo。
 
-核心接口与 Fig. 1–6/Fig. S1–S8 注册表见 [科研图表设计与开发计划](科研图表设计与开发计划.md)。旧 `src/reporting/plot_results.py` 只维持诊断兼容；新论文图写入 source CSV、metrics CSV 和 `figure_manifest.json`，PDF/SVG 为母版，PNG 仅作审阅。
+核心接口与 Fig. 1–6/Fig. S1–S8 注册表见 [科研图表设计与开发计划](科研图表设计与开发计划.md)。`src/reporting/plot_results.py` 只维持 Python 诊断兼容；`Rscript paper/R/make_all.R` 写入 source CSV、metrics CSV 和 `figure_manifest.json`，PDF/SVG 为母版，PNG 仅作审阅。
 
 具体目标期刊规范优先于通用 profile。
 
