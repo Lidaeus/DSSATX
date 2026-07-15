@@ -1,0 +1,15 @@
+figure_id,location,scientific_question,required_data,current_status,implementation
+Fig1,main,Which parameters robustly control each process?,Morris multi-seed stability and approved Sobol indices,pending_P1,planned
+Fig2,main,Did calibration update the ensemble without one group dominating?,Phi ensemble history and group Phi by iteration,core_partial,src/reporting/paper_figures.py
+Fig3,main,How accurately does the model reproduce calibration and validation observations?,Tidy observed-simulated table with dataset_role,core_implemented,src/reporting/paper_figures.py
+Fig4,main,Does the model reproduce treatment-specific temporal and harvest dynamics?,Tidy time-series comparison with uncertainty and treatment metadata,core_implemented,src/reporting/paper_figures.py
+Fig5,main,Which parameter combinations are identifiable or equifinal?,Prior/posterior ensembles bounds Phi and deterministic representative reruns,pending_P4,planned
+Fig6,main,What do calibrated predictions imply for water-nitrogen management?,Validated scenario ensemble with uncertainty,pending_P5,planned
+FigS1,supplement,Morris rank stability and output-specific effects?,Per-seed ranks mu-star sigma and valid trajectory counts,pending_P1,planned
+FigS2,supplement,Are Sobol indices converged?,S1 ST confidence intervals and sample-size convergence,pending_P1,planned
+FigS3,supplement,Are residual assumptions acceptable?,Raw-scale residuals fitted values time treatment and QQ diagnostics,pending_P2,planned
+FigS4,supplement,Are all treatments reproduced?,Complete treatment time-series comparison,core_adapter_ready,src/reporting/figure_data.py
+FigS5,supplement,How much did each parameter contract and hit bounds?,Prior/posterior ensemble bounds and shrinkage table,pending_P4,planned
+FigS6,supplement,Where are the strongest compensation structures?,Spearman correlation PCA VIF and selected pair plots,pending_P4,planned
+FigS7,supplement,Do distant good parameter sets make equivalent predictions?,Equifinal representative deterministic reruns,pending_P4,planned
+FigS8,supplement,Did the run pass scientific quality gates?,Machine-readable quality report summary,pending_quality_bundle,planned

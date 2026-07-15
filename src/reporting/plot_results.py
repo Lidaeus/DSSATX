@@ -1,3 +1,10 @@
+"""Legacy diagnostic plots.
+
+Kept for compatibility with ``analyze_results.py``. New publication figures
+must use ``src.reporting.paper_figures`` so style, source data, and manifests
+remain consistent.
+"""
+
 import argparse
 import os
 
@@ -125,6 +132,11 @@ def main():
     p.add_argument("--out-dir", default="")
     p.add_argument("--no-timeseries", action="store_true")
     args = p.parse_args()
+
+    print(
+        "Note: plot_results.py is a legacy diagnostic entry point; "
+        "use python -m src.reporting.paper_figures for traceable publication figures."
+    )
 
     results_dir = os.path.abspath(args.results_dir)
     out_dir = args.out_dir.strip() or os.path.join(results_dir, "plots", args.prefix)

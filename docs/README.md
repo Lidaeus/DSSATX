@@ -17,6 +17,7 @@
 7. [Observation Policy 验证记录](reports/observation_policy_verification.md)：显式 log 与处理均值 sigma 的实现和真实程序证据。
 8. [P1 科研分析启动计划](P1_科研分析启动计划.md)：已批准输入/边界、10 TN/240 响应契约和正式 Morris 预算。
 9. [XXQL2501 输入与 SA 设计审计](reports/XXQL2501_input_and_SA_design_review.md)：新 FileX/SOIL 跨文件检查及 TN/输出科学性判断。
+10. [科研图表设计与开发计划](科研图表设计与开发计划.md)：主图/补充图注册表、统一出版样式、数据接口和分阶段实现。
 
 发生冲突时，以更高层文档为准；实现细节若与产品设计冲突，应先修订文档并由用户审批。
 

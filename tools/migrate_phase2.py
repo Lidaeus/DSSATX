@@ -108,7 +108,6 @@ MIGRATIONS = [
     # ── 可视化/分析脚本 → src/reporting/ (move+stub) ──
     ("Workspace/analyze_results.py",     "src/reporting/analyze_results.py",     "move+stub"),
     ("Workspace/plot_results.py",        "src/reporting/plot_results.py",        "move+stub"),
-    ("Workspace/visualize_results.py",   "src/reporting/visualize_results.py",   "move+stub"),
 
     # ── 核心脚本 → src/ (move+stub) ──
     ("Workspace/build_pest.py",   "src/calibration/build_pest.py",   "move+stub"),

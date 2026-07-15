@@ -122,7 +122,6 @@ MIGRATION_SUGGESTIONS: list[tuple[str, str, str]] = [
     ("Workspace/run_dssat.py",                     "src/dssat/",                    "阶段 2 拆分并迁移"),
     ("Workspace/analyze_results.py",               "src/reporting/",               "阶段 2 迁移"),
     ("Workspace/plot_results.py",                  "src/reporting/",               "阶段 2 迁移"),
-    ("Workspace/visualize_results.py",             "src/reporting/",               "阶段 2 迁移"),
     ("Workspace/clean_workspace.py",               "tools/",                        "工具脚本"),
     ("Workspace/cluster_parameters.py",            "tools/",                        "工具脚本"),
     ("Workspace/download_pestpp.py",               "tools/",                        "工具脚本"),
