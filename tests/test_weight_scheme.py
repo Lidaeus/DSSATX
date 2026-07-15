@@ -86,6 +86,22 @@ def test_pwtadj1_requires_exact_group_mapping_and_baseline():
     assert all(value > 0 for value in adjusted.values())
 
 
+def test_deferred_group_balancing_uses_total_phi_not_group_mean():
+    obs = pd.DataFrame(
+        {
+            "obsnme": ["a1", "a2", "b1"],
+            "obsval": [0.0, 0.0, 0.0],
+            "obgnme": ["a", "a", "b"],
+        }
+    )
+    sim = pd.DataFrame(
+        {"obsnme": ["a1", "a2", "b1"], "simulated": [1.0, 1.0, 1.0]}
+    )
+    weights, _ = compute_balanced_weights(obs, sim, {"a": 1.0, "b": 1.0})
+    assert weights["a"] == pytest.approx(1.0 / math.sqrt(2.0))
+    assert weights["b"] == pytest.approx(1.0)
+
+
 def test_improved_flags_do_not_silently_fallback():
     observations = [
         {"obsnme": "o1", "obsval": 1.0, "weight": 1.0, "obgnme": "LAIXM", "sigma": 0.5}

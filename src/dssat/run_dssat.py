@@ -18,6 +18,7 @@ if str(_BOOTSTRAP_ROOT) not in sys.path:
     sys.path.insert(0, str(_BOOTSTRAP_ROOT))
 
 from src.common.param_registry import PHYSICAL_BOUNDS
+from src.calibration.observation_policy import apply_transform_config
 
 # Configuration
 DSSAT_EXE = "DSCSM048.EXE"
@@ -29,6 +30,7 @@ SPE_FILE = "TMGRO048.SPE"
 SOIL_FILE = "SOIL.SOL"
 SOIL_BASE_FILE = "SOIL.SOL.base"
 PARAM_CSV = "pest_params.csv"
+OBSERVATION_TRANSFORM_CONFIG = None
 
 OUTPUT_FILES = [
     "PlantGro.OUT",
@@ -2614,6 +2616,12 @@ def run_model():
                     _write_pest_tmtgrow_from_tmt_and_plantgro(BATCH_FILE, "PlantGro.OUT", _tmtgrow_pest_file())
                 except Exception as e:
                     print(f"Warning: failed to write {_tmtgrow_pest_file()}: {e}")
+                if OBSERVATION_TRANSFORM_CONFIG:
+                    config_path = OBSERVATION_TRANSFORM_CONFIG
+                    if not os.path.isabs(config_path):
+                        config_path = os.path.join(run_dir, config_path)
+                    apply_transform_config(config_path, _get_pest_out_dir())
+                    print(f"Applied audited observation transforms from {config_path}.")
             finally:
                 try:
                     os.chdir(orig_cwd)
@@ -2633,11 +2641,13 @@ if __name__ == "__main__":
     parser.add_argument("--batch", default=BATCH_FILE)
     parser.add_argument("--cultivar", default=None)
     parser.add_argument("--harvest-var", default="CHPDT")
+    parser.add_argument("--observation-transform-config", default=None)
     args, _ = parser.parse_known_args()
 
     BATCH_FILE = args.batch
     PARAM_CSV = args.param_csv
     HARVEST_VAR = (args.harvest_var or "CHPDT").strip().upper()
+    OBSERVATION_TRANSFORM_CONFIG = args.observation_transform_config
 
     candidate_parameters = _read_param_dict(PARAM_CSV)
     validate_candidate_parameters(candidate_parameters)

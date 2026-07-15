@@ -176,7 +176,10 @@ def compute_balanced_weights(
     for group, frame in merged.groupby("obgnme"):
         sigma = float(original_sigmas[str(group)])
         base = weight_from_sigma(sigma)
-        current[str(group)] = float(np.square(base * (frame["obsval"] - frame["simulated"])).mean())
+        # If this deferred feature is re-enabled, balance total group Phi, not
+        # mean per-observation Phi. Observation counts and correlation must be
+        # audited before callers are allowed to use the result.
+        current[str(group)] = float(np.square(base * (frame["obsval"] - frame["simulated"])).sum())
     if any(not math.isfinite(value) or value <= 0 for value in current.values()):
         raise ValueError("Group balancing requires positive finite baseline phi in every group")
 

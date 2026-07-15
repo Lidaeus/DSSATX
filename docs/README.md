@@ -14,6 +14,7 @@
 4. [开发者指南](DEVELOPER_GUIDE.md)：实现约束、开发流程和测试要求。
 5. [观测误差与权重设计规范](权重设计方案改进提案.md)：目标函数、误差标准差、变换和相关观测的专题规范。
 6. [P0 验证报告](reports/P0_verification_report.md)：前后证据、数值 smoke 和保留限制。
+7. [Observation Policy 验证记录](reports/observation_policy_verification.md)：显式 log 与处理均值 sigma 的实现和真实程序证据。
 
 发生冲突时，以更高层文档为准；实现细节若与产品设计冲突，应先修订文档并由用户审批。
 

@@ -26,6 +26,12 @@ from src.calibration.weight_scheme import (
     weight_from_sigma,
     VARIABLE_TREATMENT,
 )
+from src.calibration.observation_policy import (
+    POLICY_VERSION,
+    apply_observation_policy,
+    load_observation_policy,
+    write_transform_config,
+)
 from src.common.param_registry import assert_valid_frozen_bounds
 from src.common.project import PROJECT_ROOT, WORKSPACE_DIR, git_metadata, resolve_path, sha256_file
 
@@ -129,14 +135,30 @@ def _write_weight_audit(obs_df, out_dir, prefix):
     if "weight_policy_id" not in audit:
         audit["weight_policy_id"] = WEIGHT_POLICY_ID
     columns = [
-        "obsnme", "obgnme", "obsval", "sigma", "base_weight",
-        "group_multiplier", "weight", "transform", "weight_policy_id",
+        "obsnme", "obgnme", "raw_obsval", "obsval", "raw_sigma", "sigma",
+        "sigma_source", "base_weight", "group_multiplier", "weight",
+        "transform", "transform_offset", "transform_reference",
+        "sim_token", "model_output_file", "weight_policy_id",
     ]
     path = os.path.join(out_dir, f"{prefix}.weights.csv")
     audit[[column for column in columns if column in audit]].to_csv(
         path, index=False, encoding="utf-8-sig"
     )
     return path
+
+
+def _apply_policy_and_prepare_runner(obs_df, policies, out_dir, prefix, model_cmd_extra):
+    """Apply the approved observation policy and configure the model command."""
+    if obs_df.empty or not policies:
+        return obs_df, model_cmd_extra
+    obs_df, token_map = apply_observation_policy(obs_df, policies)
+    if not token_map:
+        return obs_df, model_cmd_extra
+    config_name = f"{prefix}.observation_transforms.json"
+    write_transform_config(os.path.join(out_dir, config_name), token_map)
+    extra = str(model_cmd_extra or "").strip()
+    transform_arg = f"--observation-transform-config {config_name}"
+    return obs_df, f"{extra} {transform_arg}".strip()
 
 ECO_BOUNDS_EGGPLANT = {
     "PL-EM": (3.0, 12.0),
@@ -1537,6 +1559,7 @@ def create_ins_and_pst(
     apply_pwtadj1=False,
     cv_based_sigma=False,
     noptmax0_sims=None,
+    observation_policies=None,
 ):
     out_dir = out_dir or WORKSPACE
     os.makedirs(out_dir, exist_ok=True)
@@ -1642,12 +1665,15 @@ def create_ins_and_pst(
             obs_data.append({
                 "obsnme": obs_name,
                 "obsval": val if val != -99 else 0,
+                "raw_obsval": val,
                 "weight": weight,
                 "obgnme": obgnme,
                 "sigma": sigma,
                 "base_weight": weight,
                 "group_multiplier": 1.0,
                 "transform": "raw",
+                "sim_token": sim_col,
+                "model_output_file": os.path.basename(model_out_path),
                 "weight_policy_id": WEIGHT_POLICY_ID,
             })
             if not is_tagged_output:
@@ -1692,6 +1718,10 @@ def create_ins_and_pst(
             apply_pwtadj1=apply_pwtadj1,
             cv_based_sigma=cv_based_sigma,
         ))
+
+    obs_df, model_cmd_extra = _apply_policy_and_prepare_runner(
+        obs_df, observation_policies, out_dir, prefix, model_cmd_extra
+    )
 
     _write_weight_audit(obs_df, out_dir, prefix)
 
@@ -1825,12 +1855,15 @@ def _build_ins_and_obs(df, obs_bases, critical_obs, model_out_path, group_sigmas
                 {
                     "obsnme": obs_name,
                     "obsval": val if val != -99 else 0,
+                    "raw_obsval": val,
                     "weight": weight,
                     "obgnme": obgnme,
                     "sigma": sigma,
                     "base_weight": weight,
                     "group_multiplier": 1.0,
                     "transform": "raw",
+                    "sim_token": sim_col,
+                    "model_output_file": os.path.basename(model_out_path),
                     "weight_policy_id": WEIGHT_POLICY_ID,
                 }
             )
@@ -1877,6 +1910,7 @@ def create_ins_and_pst_multi(
     apply_pwtadj1=False,
     cv_based_sigma=False,
     noptmax0_sims=None,
+    observation_policies=None,
 ):
     out_dir = out_dir or WORKSPACE
     os.makedirs(out_dir, exist_ok=True)
@@ -1953,6 +1987,10 @@ def create_ins_and_pst_multi(
             apply_pwtadj1=apply_pwtadj1,
             cv_based_sigma=cv_based_sigma,
         ))
+
+    obs_df, model_cmd_extra = _apply_policy_and_prepare_runner(
+        obs_df, observation_policies, out_dir, prefix, model_cmd_extra
+    )
 
     _write_weight_audit(obs_df, out_dir, prefix)
 
@@ -2243,7 +2281,7 @@ if __name__ == "__main__":
         "--apply-log-transform",
         action="store_true",
         default=False,
-        help="Reserved option; P0 rejects log residuals until both sides are transformed",
+        help="Retired global switch; use --observation-policy-csv for group-specific transforms",
     )
     parser.add_argument(
         "--apply-pwtadj1",
@@ -2263,14 +2301,30 @@ if __name__ == "__main__":
         default=None,
         help="Path to baseline (noptmax=0) simulation CSV for pwtadj1 balancing",
     )
+    parser.add_argument(
+        "--observation-policy-csv",
+        type=str,
+        default=None,
+        help="Audited group policy for transform, treatment-mean sigma, and group multiplier",
+    )
     args = parser.parse_args()
 
     if args.apply_normalization:
         parser.error("--apply-normalization is retired because candidate-dependent Min-Max changes the objective")
     if args.apply_log_transform:
-        parser.error("--apply-log-transform is unavailable in P0; use raw-scale residuals")
-    if args.apply_pwtadj1 and not args.noptmax0_sims:
-        parser.error("--apply-pwtadj1 requires --noptmax0-sims and is experimental")
+        parser.error(
+            "--apply-log-transform is retired; use --observation-policy-csv so each group "
+            "has an explicit transform and sigma definition"
+        )
+    if args.apply_pwtadj1:
+        parser.error(
+            "--apply-pwtadj1 is deferred: observation counts and temporal correlation "
+            "must be audited before total-group-Phi balancing is enabled"
+        )
+    try:
+        observation_policies = load_observation_policy(args.observation_policy_csv)
+    except (FileNotFoundError, ValueError) as exc:
+        parser.error(str(exc))
     if args.batch:
         try:
             args.batch = str(
@@ -3066,6 +3120,7 @@ if __name__ == "__main__":
             apply_pwtadj1=args.apply_pwtadj1,
             cv_based_sigma=args.cv_based_sigma,
             noptmax0_sims=args.noptmax0_sims,
+            observation_policies=observation_policies,
         )
     else:
         create_ins_and_pst(
@@ -3088,6 +3143,7 @@ if __name__ == "__main__":
             apply_pwtadj1=args.apply_pwtadj1,
             cv_based_sigma=args.cv_based_sigma,
             noptmax0_sims=args.noptmax0_sims,
+            observation_policies=observation_policies,
         )
 
     # ── Generate run_manifest.yaml (Phase 1) ──
@@ -3115,7 +3171,15 @@ if __name__ == "__main__":
         random_seed=args.random_seed,
         harvest_var=harvest_var,
         n_params=len(params),
-        weight_policy_id=WEIGHT_POLICY_ID,
+        weight_policy_id=(POLICY_VERSION if observation_policies else WEIGHT_POLICY_ID),
+        observation_policy_csv=(
+            os.path.abspath(args.observation_policy_csv) if args.observation_policy_csv else ""
+        ),
+        observation_policy_sha256=(
+            sha256_file(args.observation_policy_csv)
+            if args.observation_policy_csv and os.path.isfile(args.observation_policy_csv)
+            else ""
+        ),
         operator=os.environ.get("USERNAME", "unknown"),
         command_line=" ".join(sys.argv),
     )

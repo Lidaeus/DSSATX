@@ -9,7 +9,7 @@ Tomato_Cal 面向作物模型研究者，目标是在 Windows 环境中提供可
 - 代码已具备 DSSAT 运行、Morris/Sobol 分析、PEST++ IES 构建与结果整理的基础能力。
 - 历史运行只能证明流程曾执行，不能证明其科研结论有效；P0 质量门现已能主动拒绝这些退化结果。
 - 当前开发基线是 [产品定义与系统设计](项目重构规划.md)；详细风险和任务见 [P0 科研可信性修复开发计划](docs/P0_科研可信性修复开发计划.md)。
-- P0 已在 `codex/p0-research-credibility` 实施并通过微型数值验证，当前等待用户验收；详见 [P0 验证报告](docs/reports/P0_verification_report.md)。已有历史 SA 排名、率定最优参数或不确定性结果仍不得用于论文结论。
+- P0 已在 `codex/p0-research-credibility` 实施并通过微型数值验证；后续批准的显式 log/处理均值 sigma 也已完成真实 DSSAT/PEST 冒烟，详见 [P0 验证报告](docs/reports/P0_verification_report.md) 与 [Observation Policy 验证记录](docs/reports/observation_policy_verification.md)。已有历史 SA 排名、率定最优参数或不确定性结果仍不得用于论文结论。
 
 ## 产品原则
 
@@ -74,6 +74,7 @@ docs/                     当前规范、开发计划和历史背景材料
 - 参数冻结文件是率定可消费的唯一参数提案；不得自动选取“最新”SA 结果。
 - PEST 目标函数按 `Phi = Σ(w_i × residual_i)^2` 理解。若 `sigma_i` 是观测误差标准差，则基础权重为 `1 / sigma_i`，不是 `1 / sigma_i²`。
 - 默认在原始物理尺度计算残差。任何对数等变换必须预先声明，并同时作用于观测和模拟；禁止用同批观测与候选模拟共同计算动态 Min–Max 范围。
+- FileA/FileT 继续保存处理均值；原始重复另表保存并用于估计均值 sigma，不把同一处理重复作为共享同一个模拟值的独立 PEST 观测。
 - 多次采收优先使用增量观测；累计观测仅作诊断，或在显式处理协方差时进入目标函数。
 - IES 输出称为“条件参数集合”或“近似后验”，并同时报告先验、边界命中、收缩、相关性和预测覆盖。
 
