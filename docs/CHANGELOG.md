@@ -2,6 +2,11 @@
 
 ## 2026-07-15
 
+- 创建升级前快照 `fdfb5b1`，并在 `codex/p0-research-credibility` 实施 P0 科研可信性修复。
+- 统一项目路径与兼容入口，改为每个 worker 独立 DSSAT 运行目录，并拒绝陈旧/空输出。
+- 新增冻结边界、候选参数、Morris/Sobol 与 IES 科学质量门；历史退化运行现会明确失败。
+- 修复 CUL/ECO/SPE/SOIL/IC 注入链、IC 表状态解析和 frozen `init/status` 应用。
+- 完成真实 DSSAT 参数响应、非退化 Morris 和非退化 IES 微型验证，证据见 `reports/P0_verification_report.md`。
 - 重写产品定义与系统设计，将项目目标收敛为可信、有效、易用的 DSSAT SA/率定科研工具。
 - 建立 `process_completed` 与 `science_validated` 两级状态及阶段质量门。
 - 明确 SA 提案、人工审核、冻结边界和率定之间的受控衔接。

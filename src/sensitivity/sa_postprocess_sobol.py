@@ -1,11 +1,18 @@
 import argparse
 import os
 import re
+import sys
+
+_BOOTSTRAP_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if _BOOTSTRAP_ROOT not in sys.path:
+    sys.path.insert(0, _BOOTSTRAP_ROOT)
 
 import matplotlib
 import pandas as pd
 from matplotlib.colors import Normalize
 from matplotlib.ticker import ScalarFormatter
+
+from src.common.quality import assess_sobol
 
 
 def _load_pyplot():
@@ -302,6 +309,10 @@ def postprocess_sobol(
     out["group_key"] = out["key_norm"].map(_time_group_key)
     out = out[out["obs"].astype(str).str.strip().str.lower() != "phi"].copy()
     out.to_csv(os.path.join(out_dir, "sobol_raw.csv"), index=False, encoding="utf-8-sig")
+
+    quality_report = assess_sobol(out, run_id=os.path.basename(os.path.abspath(case_dir)))
+    quality_report.write(out_dir)
+    quality_report.require_pass()
 
     if "STi" in out.columns:
         val_col = "STi"

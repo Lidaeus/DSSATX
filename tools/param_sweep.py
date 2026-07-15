@@ -6,13 +6,19 @@ import re
 import shutil
 import subprocess
 import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 import numpy as np
 import pandas as pd
 
-import analyze_results as ar
+from src.common.project import WORKSPACE_DIR
+from src.reporting import analyze_results as ar
 
-WORKSPACE = r"C:\DSSAT48\Tomato_Cal\Workspace"
+WORKSPACE = str(WORKSPACE_DIR)
 
 
 def _parse_grid(grid_text):
@@ -229,7 +235,7 @@ def main():
 
         cmd = [
             sys.executable,
-            os.path.join(WORKSPACE, "run_dssat.py"),
+            str(PROJECT_ROOT / "src" / "calibration" / "run_dssat.py"),
             "--param-csv",
             case_param_csv,
             "--batch",

@@ -1,11 +1,18 @@
 import argparse
 import os
 import re
+import sys
+
+_BOOTSTRAP_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if _BOOTSTRAP_ROOT not in sys.path:
+    sys.path.insert(0, _BOOTSTRAP_ROOT)
 
 import matplotlib
 import pandas as pd
 from matplotlib.colors import Normalize
 from matplotlib.ticker import ScalarFormatter
+
+from src.common.quality import assess_morris
 
 
 def _load_pyplot():
@@ -291,6 +298,10 @@ def postprocess_morris(
     df["score"] = pd.to_numeric(df["score"], errors="coerce")
     if "sigma" in df.columns:
         df["sigma"] = pd.to_numeric(df["sigma"], errors="coerce")
+
+    quality_report = assess_morris(df, run_id=os.path.basename(os.path.abspath(case_dir)))
+    quality_report.write(out_dir)
+    quality_report.require_pass()
 
     df["key"] = df["obs"].map(_indicator_key)
     df["key_norm"] = df["key"].map(_normalize_key)

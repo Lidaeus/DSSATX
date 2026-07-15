@@ -1,0 +1,293 @@
+"""Machine-readable scientific quality gates for SA and calibration runs."""
+
+from __future__ import annotations
+
+import json
+import math
+from dataclasses import asdict, dataclass, field
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Iterable
+
+import numpy as np
+import pandas as pd
+
+
+class ScientificQualityError(RuntimeError):
+    """Raised when a completed process is not scientifically usable."""
+
+
+@dataclass(frozen=True)
+class QualityCheck:
+    check_id: str
+    status: str
+    message: str
+    actual: Any = None
+    threshold: Any = None
+
+    def __post_init__(self) -> None:
+        if self.status not in {"pass", "warn", "fail"}:
+            raise ValueError(f"Unsupported quality status: {self.status}")
+
+
+@dataclass
+class QualityReport:
+    run_type: str
+    run_id: str = ""
+    checks: list[QualityCheck] = field(default_factory=list)
+    generated_at: str = field(
+        default_factory=lambda: datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    )
+
+    @property
+    def status(self) -> str:
+        statuses = {check.status for check in self.checks}
+        if "fail" in statuses:
+            return "fail"
+        if "warn" in statuses:
+            return "warn"
+        return "pass"
+
+    @property
+    def process_completed(self) -> bool:
+        check = next((c for c in self.checks if c.check_id == "process_completed"), None)
+        return bool(check and check.status == "pass")
+
+    @property
+    def science_validated(self) -> bool:
+        return self.process_completed and self.status == "pass"
+
+    def add(
+        self,
+        check_id: str,
+        passed: bool,
+        message: str,
+        *,
+        actual: Any = None,
+        threshold: Any = None,
+        warning: bool = False,
+    ) -> None:
+        status = "pass" if passed else ("warn" if warning else "fail")
+        self.checks.append(QualityCheck(check_id, status, message, actual, threshold))
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": 1,
+            "run_type": self.run_type,
+            "run_id": self.run_id,
+            "generated_at": self.generated_at,
+            "process_completed": self.process_completed,
+            "science_validated": self.science_validated,
+            "status": self.status,
+            "checks": [asdict(check) for check in self.checks],
+        }
+
+    def write(self, out_dir: str | Path, stem: str = "quality_report") -> tuple[Path, Path]:
+        destination = Path(out_dir)
+        destination.mkdir(parents=True, exist_ok=True)
+        json_path = destination / f"{stem}.json"
+        md_path = destination / f"{stem}.md"
+        json_path.write_text(
+            json.dumps(self.to_dict(), ensure_ascii=False, indent=2, default=_json_default) + "\n",
+            encoding="utf-8",
+        )
+        lines = [
+            f"# Quality report: {self.run_id or self.run_type}",
+            "",
+            f"- Process completed: `{str(self.process_completed).lower()}`",
+            f"- Science validated: `{str(self.science_validated).lower()}`",
+            f"- Overall status: `{self.status}`",
+            "",
+            "| Check | Status | Actual | Threshold | Message |",
+            "|---|---|---:|---:|---|",
+        ]
+        for check in self.checks:
+            message = str(check.message).replace("|", "\\|")
+            lines.append(
+                f"| `{check.check_id}` | {check.status} | {_cell(check.actual)} | "
+                f"{_cell(check.threshold)} | {message} |"
+            )
+        md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        return json_path, md_path
+
+    def require_pass(self) -> None:
+        if not self.science_validated:
+            failed = ", ".join(c.check_id for c in self.checks if c.status == "fail")
+            raise ScientificQualityError(
+                f"Run {self.run_id or self.run_type} failed scientific quality gates: {failed}"
+            )
+
+
+def assess_numeric_matrix(
+    frame: pd.DataFrame,
+    *,
+    run_type: str,
+    run_id: str = "",
+    max_invalid_fraction: float = 0.0,
+    min_varying_columns: int = 1,
+    tolerance: float = 1e-12,
+) -> QualityReport:
+    """Assess forward-model output completeness and cross-run variation."""
+    report = QualityReport(run_type=run_type, run_id=run_id)
+    report.add("process_completed", not frame.empty, "Output matrix exists and contains rows", actual=len(frame), threshold=1)
+    numeric = frame.apply(pd.to_numeric, errors="coerce").replace(-99.0, np.nan)
+    total = int(numeric.size)
+    invalid = int(numeric.isna().sum().sum())
+    invalid_fraction = invalid / total if total else 1.0
+    report.add(
+        "output_finite",
+        invalid_fraction <= max_invalid_fraction,
+        "Invalid/failed model outputs remain below the configured limit",
+        actual=invalid_fraction,
+        threshold=max_invalid_fraction,
+    )
+    varying = int((numeric.nunique(dropna=True) > 1).sum())
+    variances = numeric.var(axis=0, ddof=0, skipna=True)
+    materially_varying = int((variances > tolerance).sum())
+    report.add(
+        "output_variation",
+        materially_varying >= min_varying_columns,
+        "At least one scientific output changes across parameter samples",
+        actual=materially_varying,
+        threshold=min_varying_columns,
+    )
+    report.add(
+        "output_unique_values",
+        varying >= min_varying_columns,
+        "Output columns are not repeated constants",
+        actual=varying,
+        threshold=min_varying_columns,
+    )
+    return report
+
+
+def assess_morris(
+    frame: pd.DataFrame,
+    *,
+    run_id: str = "",
+    score_column: str = "score",
+    tolerance: float = 1e-12,
+) -> QualityReport:
+    """Reject empty, non-finite, or all-zero Morris results."""
+    report = QualityReport(run_type="morris", run_id=run_id)
+    report.add("process_completed", not frame.empty, "Morris result table was produced", actual=len(frame), threshold=1)
+    if score_column not in frame:
+        report.add("morris_score_column", False, f"Missing Morris score column {score_column!r}")
+        return report
+    values = pd.to_numeric(frame[score_column], errors="coerce")
+    finite = values[np.isfinite(values)]
+    report.add(
+        "morris_finite",
+        len(finite) == len(values) and len(finite) > 0,
+        "All Morris effects are finite",
+        actual=len(finite),
+        threshold=len(values),
+    )
+    nonzero = int((finite.abs() > tolerance).sum())
+    report.add(
+        "morris_non_degenerate",
+        nonzero > 0,
+        "At least one elementary-effect summary is materially non-zero",
+        actual=nonzero,
+        threshold=1,
+    )
+    return report
+
+
+def assess_sobol(
+    frame: pd.DataFrame,
+    *,
+    run_id: str = "",
+    columns: Iterable[str] = ("Si", "STi", "S1", "ST"),
+    tolerance: float = 1e-12,
+) -> QualityReport:
+    """Reject empty or all-zero Sobol indices."""
+    report = QualityReport(run_type="sobol", run_id=run_id)
+    report.add("process_completed", not frame.empty, "Sobol result table was produced", actual=len(frame), threshold=1)
+    present = [column for column in columns if column in frame]
+    report.add("sobol_columns", bool(present), "At least one supported Sobol index column exists", actual=present)
+    if not present:
+        return report
+    values = pd.concat([pd.to_numeric(frame[column], errors="coerce") for column in present], ignore_index=True)
+    finite = values[np.isfinite(values)]
+    report.add(
+        "sobol_finite",
+        len(finite) == len(values) and len(finite) > 0,
+        "All Sobol indices are finite",
+        actual=len(finite),
+        threshold=len(values),
+    )
+    nonzero = int((finite.abs() > tolerance).sum())
+    report.add("sobol_non_degenerate", nonzero > 0, "At least one Sobol index is materially non-zero", actual=nonzero, threshold=1)
+    return report
+
+
+def assess_ies(
+    parameter_initial: pd.DataFrame,
+    observation_ensemble: pd.DataFrame,
+    *,
+    parameter_final: pd.DataFrame | None = None,
+    phi_values: pd.DataFrame | pd.Series | None = None,
+    run_id: str = "",
+    tolerance: float = 1e-12,
+) -> QualityReport:
+    """Check ensemble variation, objective variation, and parameter updating."""
+    report = QualityReport(run_type="ies", run_id=run_id)
+    report.add(
+        "process_completed",
+        not parameter_initial.empty and not observation_ensemble.empty,
+        "IES parameter and simulated-observation ensembles exist",
+    )
+    par_numeric = parameter_initial.apply(pd.to_numeric, errors="coerce")
+    obs_numeric = observation_ensemble.apply(pd.to_numeric, errors="coerce").replace(-99.0, np.nan)
+    par_varying = int((par_numeric.var(axis=0, ddof=0) > tolerance).sum())
+    obs_varying = int((obs_numeric.var(axis=0, ddof=0) > tolerance).sum())
+    report.add("ies_prior_variation", par_varying > 0, "Adjustable prior parameters vary", actual=par_varying, threshold=1)
+    report.add("ies_simulation_variation", obs_varying > 0, "Simulated observations vary across realizations", actual=obs_varying, threshold=1)
+
+    if phi_values is None:
+        report.add("ies_phi_variation", False, "Phi values were not supplied")
+    else:
+        phi = pd.to_numeric(pd.Series(np.asarray(phi_values).ravel()), errors="coerce")
+        phi = phi[np.isfinite(phi)]
+        spread = float(phi.max() - phi.min()) if len(phi) else 0.0
+        scale = max(float(phi.abs().mean()), 1.0) if len(phi) else 1.0
+        relative_spread = spread / scale
+        phi_relative_tolerance = 1e-8
+        report.add(
+            "ies_phi_variation",
+            relative_spread > phi_relative_tolerance,
+            "Phi differs materially across realizations or iterations",
+            actual=relative_spread,
+            threshold=phi_relative_tolerance,
+        )
+
+    if parameter_final is None:
+        report.add("ies_parameter_update", False, "Final parameter ensemble was not supplied")
+    else:
+        initial = par_numeric.sort_index(axis=1)
+        final = parameter_final.apply(pd.to_numeric, errors="coerce").reindex(columns=initial.columns)
+        common = initial.index.intersection(final.index)
+        if len(common):
+            delta = (final.loc[common] - initial.loc[common]).abs().to_numpy()
+            max_delta = float(np.nanmax(delta)) if delta.size else 0.0
+        else:
+            max_delta = 0.0
+        report.add("ies_parameter_update", max_delta > tolerance, "Parameter ensemble changes after assimilation", actual=max_delta, threshold=tolerance)
+    return report
+
+
+def _json_default(value: Any) -> Any:
+    if isinstance(value, (np.integer, np.floating)):
+        return value.item()
+    if isinstance(value, Path):
+        return str(value)
+    raise TypeError(f"Not JSON serializable: {type(value).__name__}")
+
+
+def _cell(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, float):
+        return f"{value:.6g}"
+    return str(value).replace("|", "\\|")

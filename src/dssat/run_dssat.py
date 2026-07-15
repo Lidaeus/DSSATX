@@ -6,10 +6,18 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
+from pathlib import Path
 
 import pandas as pd
+
+_BOOTSTRAP_ROOT = Path(__file__).resolve().parents[2]
+if str(_BOOTSTRAP_ROOT) not in sys.path:
+    sys.path.insert(0, str(_BOOTSTRAP_ROOT))
+
+from src.common.param_registry import PHYSICAL_BOUNDS
 
 # Configuration
 DSSAT_EXE = "DSCSM048.EXE"
@@ -29,6 +37,55 @@ OUTPUT_FILES = [
     "OVERVIEW.OUT",
     "WARNING.OUT"
 ]
+
+
+def validate_candidate_parameters(param_dict):
+    """Reject unsafe candidates before modifying any DSSAT input file."""
+    normalized = {str(key).strip().upper(): float(value) for key, value in param_dict.items()}
+    for name, value in normalized.items():
+        if not math.isfinite(value):
+            raise ValueError(f"Parameter {name} must be finite")
+        if name in PHYSICAL_BOUNDS:
+            lower, upper = PHYSICAL_BOUNDS[name]
+            if not lower <= value <= upper:
+                raise ValueError(f"Parameter {name}={value:g} outside physical bounds [{lower:g}, {upper:g}]")
+        if name.startswith(("SOIL_SLLL_", "SOIL_SDUL_", "SOIL_SSAT_", "IC_SH2O_")):
+            if not 0.01 <= value <= 0.80:
+                raise ValueError(f"Parameter {name}={value:g} outside water-content bounds [0.01, 0.80]")
+        if name.startswith("SOIL_SBDM_") and not 0.5 <= value <= 2.2:
+            raise ValueError(f"Parameter {name}={value:g} outside bulk-density bounds [0.5, 2.2]")
+        if name.startswith("SOIL_SLOC_") and not 0.0 <= value <= 10.0:
+            raise ValueError(f"Parameter {name}={value:g} outside soil-carbon bounds [0, 10]")
+
+    if "FL-VS" in normalized and normalized["FL-VS"] != 100.0:
+        raise ValueError("FL-VS must remain fixed at 100.0")
+    if "XMAGE" in normalized and "XFPHT" in normalized and normalized["XMAGE"] >= normalized["XFPHT"]:
+        raise ValueError("Expected XMAGE < XFPHT")
+
+    temperature_groups = [
+        ("TB", "TO1", "TO2", "TM"),
+        ("TB1", "TO11", "TO21", "TM1"),
+        ("TB2", "TO12", "TO22", "TM2"),
+        ("TB3", "TO13", "TO23", "TM3"),
+    ]
+    for names in temperature_groups:
+        if all(name in normalized for name in names):
+            values = [normalized[name] for name in names]
+            if not all(left < right for left, right in zip(values, values[1:])):
+                raise ValueError(f"Expected {' < '.join(names)}")
+
+    suffixes = {
+        name.rsplit("_", 1)[-1]
+        for name in normalized
+        if name.startswith(("SOIL_SLLL_", "SOIL_SDUL_", "SOIL_SSAT_"))
+    }
+    for suffix in suffixes:
+        names = [f"SOIL_{kind}_{suffix}" for kind in ("SLLL", "SDUL", "SSAT")]
+        if all(name in normalized for name in names):
+            values = [normalized[name] for name in names]
+            if not values[0] < values[1] < values[2]:
+                raise ValueError(f"Expected SLLL < SDUL < SSAT for soil layer {suffix}")
+    return normalized
 
 
 def _resolve_batch_path(batch_file, base_dir=None):
@@ -1608,12 +1665,10 @@ def update_cul_file(param_csv_path=PARAM_CSV, target_cultivar=None):
     try:
         param_dict = _read_param_dict(param_csv_path)
     except Exception as e:
-        print(f"Error reading parameter CSV: {e}")
-        return
+        raise RuntimeError(f"Could not read parameter CSV {param_csv_path}: {e}") from e
 
     if not cul_base_path or (not os.path.exists(cul_base_path)):
-        print(f"Error: {CUL_BASE_FILE} not found.")
-        return
+        raise FileNotFoundError(f"Cultivar base file not found: {CUL_BASE_FILE}")
 
     with open(cul_base_path, "r") as f:
         lines = f.readlines()
@@ -1629,8 +1684,9 @@ def update_cul_file(param_csv_path=PARAM_CSV, target_cultivar=None):
             cultivar_idx = i
 
     if header_idx == -1 or cultivar_idx == -1:
-        print("Error: Invalid CUL structure.")
-        return
+        raise RuntimeError(
+            f"Invalid CUL structure or cultivar {target_cultivar!r} is absent from {cul_base_path}"
+        )
 
     header_line = lines[header_idx].rstrip("\n")
     headers = header_line.split()
@@ -1676,9 +1732,9 @@ def update_cul_file(param_csv_path=PARAM_CSV, target_cultivar=None):
 
 def update_eco_file(param_csv_path=PARAM_CSV, target_ecotype=None):
     if not target_ecotype:
-        return
+        raise ValueError("A target ecotype is required for ECO injection")
     if not os.path.exists(param_csv_path):
-        return
+        raise FileNotFoundError(f"Parameter CSV not found: {param_csv_path}")
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     eco_base_path = None
@@ -1686,44 +1742,28 @@ def update_eco_file(param_csv_path=PARAM_CSV, target_ecotype=None):
     if os.path.exists(cand):
         eco_base_path = cand
     else:
-        cand = os.path.normpath(os.path.join(script_dir, "..", "..", "Genotype", ECO_FILE))
-        if os.path.exists(cand):
+        local_base = ECO_FILE + ".base"
+        if os.path.exists(local_base):
+            eco_base_path = local_base
+            cand = None
+        else:
+            cand = os.path.normpath(os.path.join(script_dir, "..", "..", "Genotype", ECO_FILE))
+        if cand and os.path.exists(cand):
             eco_base_path = cand
         elif os.path.exists(ECO_FILE):
             eco_base_path = ECO_FILE
 
     if not eco_base_path:
-        return
+        raise FileNotFoundError(f"Ecotype base file not found: {ECO_FILE}.base")
 
     try:
         param_dict = _read_param_dict(param_csv_path)
     except Exception as e:
-        print(f"Error reading parameter CSV: {e}")
-        return
+        raise RuntimeError(f"Could not read parameter CSV {param_csv_path}: {e}") from e
     if not param_dict:
         return
 
-    if "XFINT" in param_dict:
-        try:
-            xfint = float(param_dict.get("XFINT"))
-            xfrt = float(param_dict.get("XFRT", xfint))
-            upper = max(0.0, min(1.0, xfrt, 0.30))
-            if xfint < 0.0:
-                xfint = 0.0
-            if xfint > upper:
-                xfint = upper
-            param_dict["XFINT"] = xfint
-        except Exception:
-            pass
-
-    if "XMAGE" in param_dict and "XFPHT" in param_dict:
-        try:
-            xmage = float(param_dict.get("XMAGE"))
-            xfpht = float(param_dict.get("XFPHT"))
-            if xfpht <= xmage:
-                param_dict["XFPHT"] = xmage + 1.0
-        except Exception:
-            pass
+    validate_candidate_parameters(param_dict)
 
     with open(eco_base_path, "r") as f:
         lines = f.readlines()
@@ -1737,12 +1777,12 @@ def update_eco_file(param_csv_path=PARAM_CSV, target_ecotype=None):
             eco_idx = i
 
     if header_idx == -1 or eco_idx == -1:
-        return
+        raise RuntimeError(f"Invalid ECO structure or ecotype {target_ecotype!r} is absent from {eco_base_path}")
 
     header_line = lines[header_idx].rstrip("\n")
     headers = header_line.split()
     if len(headers) < 3:
-        return
+        raise RuntimeError(f"Invalid ECO header in {eco_base_path}")
     param_names = headers[2:]
 
     eco_line = lines[eco_idx]
@@ -1753,7 +1793,7 @@ def update_eco_file(param_csv_path=PARAM_CSV, target_ecotype=None):
         line_len = max(len(header_line), len(eco_line.rstrip("\n")))
         spans = _field_spans_from_header(header_line, param_names, line_len)
     if spans is None or len(spans) < len(param_names):
-        return
+        raise RuntimeError(f"Could not resolve fixed-width ECO fields in {eco_base_path}")
 
     new_chars = list(eco_line.rstrip("\n").ljust(line_len))
     for name, (abs_s0, abs_s1) in zip(param_names, spans[: len(param_names)]):
@@ -1786,12 +1826,8 @@ def update_eco_file(param_csv_path=PARAM_CSV, target_ecotype=None):
         except Exception:
             xfint = float("nan")
 
-        if (not math.isfinite(xfint)) or (xfint < 0.0) or (xfint > 1.0):
-            orig = eco_line[abs_s0:abs_s1]
-            width = abs_s1 - abs_s0
-            safe = 0.20
-            formatted = _format_to_width_preserve_space(safe, width, orig_token=orig)
-            new_chars[abs_s0:abs_s1] = list(formatted)
+        if (not math.isfinite(xfint)) or (xfint < 0.12) or (xfint > 0.50):
+            raise ValueError(f"Injected XFINT is invalid after formatting: {xfint!r}")
 
     lines[eco_idx] = "".join(new_chars) + "\n"
     lock_path = os.path.abspath(ECO_FILE) + ".lock"
@@ -1808,7 +1844,7 @@ def update_eco_file(param_csv_path=PARAM_CSV, target_ecotype=None):
 
 def update_spe_file(param_csv_path=PARAM_CSV):
     if not os.path.exists(param_csv_path):
-        return
+        raise FileNotFoundError(f"Parameter CSV not found: {param_csv_path}")
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     spe_base_path = None
@@ -1816,20 +1852,24 @@ def update_spe_file(param_csv_path=PARAM_CSV):
     if os.path.exists(cand):
         spe_base_path = cand
     else:
-        cand = os.path.normpath(os.path.join(script_dir, "..", "..", "Genotype", SPE_FILE))
-        if os.path.exists(cand):
+        local_base = SPE_FILE + ".base"
+        if os.path.exists(local_base):
+            spe_base_path = local_base
+            cand = None
+        else:
+            cand = os.path.normpath(os.path.join(script_dir, "..", "..", "Genotype", SPE_FILE))
+        if cand and os.path.exists(cand):
             spe_base_path = cand
         elif os.path.exists(SPE_FILE):
             spe_base_path = SPE_FILE
 
     if not spe_base_path:
-        return
+        raise FileNotFoundError(f"Species base file not found: {SPE_FILE}.base")
 
     try:
         param_dict = _read_param_dict(param_csv_path)
     except Exception as e:
-        print(f"Error reading parameter CSV: {e}")
-        return
+        raise RuntimeError(f"Could not read parameter CSV {param_csv_path}: {e}") from e
     if not param_dict:
         return
 
@@ -2035,8 +2075,7 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
     try:
         param_dict = _read_param_dict(param_csv_path)
     except Exception as e:
-        print(f"Error reading parameter CSV: {e}")
-        return
+        raise RuntimeError(f"Could not read parameter CSV {param_csv_path}: {e}") from e
     if not param_dict:
         return
 
@@ -2050,7 +2089,7 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
         soil_id = _infer_soil_id_from_filex(filex_path)
     soil_id = str(soil_id).strip() if soil_id else None
     if not soil_id:
-        return
+        raise RuntimeError("Could not infer a soil profile ID for SOIL parameter injection")
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     soil_base_path = None
@@ -2058,8 +2097,12 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
     if os.path.exists(cand):
         soil_base_path = cand
     else:
-        cand2 = os.path.join(script_dir, SOIL_FILE)
-        if os.path.exists(cand2):
+        if os.path.exists(SOIL_BASE_FILE):
+            soil_base_path = SOIL_BASE_FILE
+            cand2 = None
+        else:
+            cand2 = os.path.join(script_dir, SOIL_FILE)
+        if cand2 and os.path.exists(cand2):
             soil_base_path = cand2
         elif os.path.exists(SOIL_FILE):
             soil_base_path = SOIL_FILE
@@ -2258,8 +2301,7 @@ def update_initial_conditions_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FI
     try:
         param_dict = _read_param_dict(param_csv_path)
     except Exception as e:
-        print(f"Error reading parameter CSV: {e}")
-        return
+        raise RuntimeError(f"Could not read parameter CSV {param_csv_path}: {e}") from e
     if not param_dict:
         return
 
@@ -2271,7 +2313,7 @@ def update_initial_conditions_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FI
     if not filex_path:
         filex_path = _resolve_filex_from_batch(batch_file, os.getcwd()) or _resolve_filex_from_batch(batch_file, cwd_script)
     if not filex_path or not os.path.exists(filex_path):
-        return
+        raise FileNotFoundError("Experiment file for initial-condition injection was not found")
 
     with open(filex_path, "r", encoding="utf-8", errors="ignore") as f:
         lines = f.readlines()
@@ -2327,6 +2369,10 @@ def update_initial_conditions_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FI
             break
 
         if s.lstrip().startswith("@C") and ("PCR" in u) and ("ICDAT" in u):
+            in_sh2o_table = False
+            sh2o_col = None
+            header_cols = None
+            layer_idx = 0
             pcr_cols = s.split()
             pcr_icdat_col = None
             try:
@@ -2337,6 +2383,9 @@ def update_initial_conditions_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FI
             continue
 
         if s.lstrip().startswith("@C") and ("ICBL" in u) and ("SH2O" in u):
+            pcr_in_table = False
+            pcr_cols = None
+            pcr_icdat_col = None
             header_cols = s.split()
             sh2o_col = None
             try:
@@ -2406,7 +2455,8 @@ def update_initial_conditions_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FI
             v = float(param_dict[key])
         except Exception:
             continue
-        v = max(0.01, min(0.80, v))
+        if not 0.01 <= v <= 0.80:
+            raise ValueError(f"Initial water content {key}={v:g} is outside [0.01, 0.80]")
         parts[sh2o_col] = f"{v:.3f}"
         lines[j] = " ".join(parts).rstrip() + "\n"
 
@@ -2421,6 +2471,20 @@ def update_initial_conditions_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FI
     finally:
         _release_file_lock(lock_path)
 
+def _assert_fresh_nonempty(path, started_at, *, tolerance_seconds=2.0):
+    """Reject missing, empty, or pre-existing outputs after a model run."""
+    if not os.path.isfile(path):
+        raise RuntimeError(f"Required DSSAT output was not produced: {path}")
+    if os.path.getsize(path) <= 0:
+        raise RuntimeError(f"Required DSSAT output is empty: {path}")
+    modified = os.path.getmtime(path)
+    if modified < float(started_at) - float(tolerance_seconds):
+        raise RuntimeError(
+            f"Required DSSAT output is stale: {path} "
+            f"(mtime={modified:.3f}, run_started={started_at:.3f})"
+        )
+
+
 def run_model():
     """Runs the DSSAT model."""
     global BATCH_FILE
@@ -2429,7 +2493,13 @@ def run_model():
     try:
         cwd_script = os.path.dirname(os.path.abspath(__file__))
         run_dir = os.getcwd()
-        filex_path = _resolve_filex_from_batch(BATCH_FILE, cwd_script) or _resolve_filex_from_batch(BATCH_FILE, run_dir)
+        filex_candidates = [
+            _resolve_filex_from_batch(BATCH_FILE, run_dir),
+            _resolve_filex_from_batch(BATCH_FILE, cwd_script),
+        ]
+        filex_path = next((path for path in filex_candidates if path and os.path.exists(path)), None)
+        if filex_path is None:
+            raise FileNotFoundError(f"Experiment file referenced by {BATCH_FILE} was not found")
 
         cleanup(run_dir, keep_dssat_outputs=False)
 
@@ -2446,7 +2516,8 @@ def run_model():
                     exe_path = DSSAT_EXE
 
         dssat_root = os.path.normpath(os.path.join(cwd_script, "..", ".."))
-        dssatpro_src = os.path.join(dssat_root, "DSSATPRO.v48")
+        local_dssatpro = os.path.join(run_dir, "DSSATPRO.v48")
+        dssatpro_src = local_dssatpro if os.path.exists(local_dssatpro) else os.path.join(dssat_root, "DSSATPRO.v48")
         dssatpro_dst = os.path.join(run_dir, "DSSATPRO.v48")
         wrote_dssatpro = False
         try:
@@ -2505,18 +2576,17 @@ def run_model():
         
         if result.returncode != 0:
             handle_failure(result.returncode)
-            print(f"Stdout: {result.stdout}")
-            print(f"Stderr: {result.stderr}")
+            raise RuntimeError(
+                f"DSSAT exited with {result.returncode}\n"
+                f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+            )
         else:
             orig_cwd = os.getcwd()
             try:
                 os.chdir(run_dir)
                 _sync_outputs_from_filex_dir(BATCH_FILE, run_dir, OUTPUT_FILES + ["Evaluate.OUT"], dest_dir=run_dir)
 
-                if not os.path.exists("Evaluate.OUT") or os.path.getsize("Evaluate.OUT") == 0:
-                    print("Evaluate.OUT missing or empty after sync.")
-                    handle_failure(999)
-                    return
+                _assert_fresh_nonempty("Evaluate.OUT", start_time)
 
                 print("Evaluate.OUT generated successfully.")
                 try:
@@ -2555,9 +2625,10 @@ def run_model():
     except Exception as e:
         print(f"Exception running model: {e}")
         handle_failure(998)
+        raise
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(add_help=False)
+    parser = argparse.ArgumentParser(description="Inject parameters and run DSSAT in the current directory")
     parser.add_argument("--param-csv", default=PARAM_CSV)
     parser.add_argument("--batch", default=BATCH_FILE)
     parser.add_argument("--cultivar", default=None)
@@ -2568,12 +2639,17 @@ if __name__ == "__main__":
     PARAM_CSV = args.param_csv
     HARVEST_VAR = (args.harvest_var or "CHPDT").strip().upper()
 
+    candidate_parameters = _read_param_dict(PARAM_CSV)
+    validate_candidate_parameters(candidate_parameters)
+
     cwd_script = os.path.dirname(os.path.abspath(__file__))
 
     cultivar = args.cultivar
     if not cultivar:
-        cwd_script = os.path.dirname(os.path.abspath(__file__))
-        filex = _resolve_filex_from_batch(BATCH_FILE, cwd_script)
+        filex = _resolve_filex_from_batch(BATCH_FILE, os.getcwd())
+        if not (filex and os.path.exists(filex)):
+            cwd_script = os.path.dirname(os.path.abspath(__file__))
+            filex = _resolve_filex_from_batch(BATCH_FILE, cwd_script)
         cultivar = _infer_cultivar_from_filex(filex)
     if not cultivar:
         cultivar = "TM0001"

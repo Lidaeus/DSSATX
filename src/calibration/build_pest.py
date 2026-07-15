@@ -3,7 +3,13 @@ import sys
 import os
 import re
 import shutil
+from pathlib import Path
 from typing import Dict, Optional, Set
+
+# Support both ``python -m src.calibration.build_pest`` and direct execution.
+_BOOTSTRAP_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if _BOOTSTRAP_ROOT not in sys.path:
+    sys.path.insert(0, _BOOTSTRAP_ROOT)
 
 import pandas as pd
 import pyemu
@@ -11,20 +17,24 @@ import pyemu
 import subprocess
 from datetime import datetime, timezone
 
-from .weight_scheme import (
+from src.calibration.weight_scheme import (
+    WEIGHT_POLICY_ID,
     normalize_and_weight,
     compute_cv_based_sigma,
     compute_balanced_weights,
     build_observation_weights,
+    weight_from_sigma,
     VARIABLE_TREATMENT,
 )
+from src.common.param_registry import assert_valid_frozen_bounds
+from src.common.project import PROJECT_ROOT, WORKSPACE_DIR, git_metadata, resolve_path, sha256_file
 
-WORKSPACE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "workspace")
-CUL_BASE_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "templates", "genotype", "TMGRO048.CUL.base")
-ECO_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "templates", "genotype", "TMGRO048.ECO.base")
-SPE_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "templates", "genotype", "TMGRO048.SPE.base")
-SOIL_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "templates", "soil", "SOIL.SOL")
-SOIL_BASE_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "templates", "soil", "SOIL.SOL.base")
+WORKSPACE = str(WORKSPACE_DIR)
+CUL_BASE_FILE = str(PROJECT_ROOT / "data" / "templates" / "genotype" / "TMGRO048.CUL.base")
+ECO_FILE = str(PROJECT_ROOT / "data" / "templates" / "genotype" / "TMGRO048.ECO.base")
+SPE_FILE = str(PROJECT_ROOT / "data" / "templates" / "genotype" / "TMGRO048.SPE.base")
+SOIL_FILE = str(PROJECT_ROOT / "data" / "raw" / "soil" / "SOIL.SOL")
+SOIL_BASE_FILE = SOIL_FILE
 SENSITIVITY_PARAM_REVIEW_CSV = os.path.join(
     WORKSPACE,
     "Sensitivity_Analyze",
@@ -40,11 +50,8 @@ PEST_TMTGROW_FILE = os.path.join(WORKSPACE, "PestTmtGrow.OUT")
 
 
 def _project_root():
-    """Locate Tomato_Cal project root (parent of Workspace/)."""
-    here = os.path.dirname(os.path.abspath(__file__))
-    if os.path.basename(here).lower() == "workspace":
-        return os.path.dirname(here)
-    return here
+    """Return the repository root independently of the current directory."""
+    return str(PROJECT_ROOT)
 
 
 def _resolve_bounds_id(bounds_id, crop=None):
@@ -66,12 +73,7 @@ def _resolve_bounds_id(bounds_id, crop=None):
 
 def _get_git_commit():
     """Get current git commit hash."""
-    try:
-        result = subprocess.run(["git", "rev-parse", "--short", "HEAD"],
-            capture_output=True, text=True, timeout=5, cwd=_project_root())
-        return result.stdout.strip() if result.returncode == 0 else ""
-    except Exception:
-        return ""
+    return str(git_metadata().get("git_commit", ""))
 
 
 def _write_run_manifest(out_dir, **kwargs):
@@ -91,6 +93,49 @@ def _write_run_manifest(out_dir, **kwargs):
                 f.write(key + ': ' + str(val) + '\n')
             else:
                 f.write(key + ': "' + str(val) + '"\n')
+    return path
+
+
+def _resolve_sigma(group_sigmas, obgnme, obs_col):
+    """Resolve a declared observation sigma without a silent numeric fallback."""
+    if group_sigmas is None:
+        return None
+    for key in (obgnme, obs_col):
+        if key in group_sigmas:
+            sigma = float(group_sigmas[key])
+            weight_from_sigma(sigma)  # validates positive and finite
+            return sigma
+    raise KeyError(
+        f"No sigma configured for observation group {obgnme!r} "
+        f"(base variable {obs_col!r})"
+    )
+
+
+def _write_weight_audit(obs_df, out_dir, prefix):
+    """Write the exact statistical and final weights used in the PST."""
+    if obs_df.empty:
+        return None
+    audit = obs_df.copy()
+    if "sigma" not in audit:
+        audit["sigma"] = audit["weight"].map(
+            lambda value: (1.0 / float(value)) if float(value) > 0 else None
+        )
+    if "base_weight" not in audit:
+        audit["base_weight"] = audit["weight"]
+    if "group_multiplier" not in audit:
+        audit["group_multiplier"] = 1.0
+    if "transform" not in audit:
+        audit["transform"] = "raw"
+    if "weight_policy_id" not in audit:
+        audit["weight_policy_id"] = WEIGHT_POLICY_ID
+    columns = [
+        "obsnme", "obgnme", "obsval", "sigma", "base_weight",
+        "group_multiplier", "weight", "transform", "weight_policy_id",
+    ]
+    path = os.path.join(out_dir, f"{prefix}.weights.csv")
+    audit[[column for column in columns if column in audit]].to_csv(
+        path, index=False, encoding="utf-8-sig"
+    )
     return path
 
 ECO_BOUNDS_EGGPLANT = {
@@ -270,7 +315,8 @@ def apply_param_review_csv(params, csv_path):
         if init_v is not None:
             p["init"] = float(init_v)
         if status_v is not None:
-            p["status"] = str(status_v)
+            status_key = str(status_v).strip().lower()
+            p["status"] = {"active": "none", "disabled": "fixed"}.get(status_key, status_key)
         if pargp_v is not None:
             p["pargp"] = str(pargp_v)
 
@@ -312,8 +358,10 @@ def apply_bounds_review_csv(params, csv_path, cultivar=None, ecotype=None, mode=
         return None
 
     name_col = _col("name", "parnme", "parameter")
+    init_col = _col("init", "parval1", "initial")
     lb_col = _col("lower", "lb", "parlbnd")
     ub_col = _col("upper", "ub", "parubnd")
+    status_col = _col("status")
     cul_col = _col("cultivar")
     eco_col = _col("ecotype")
     loc_col = _col("location")
@@ -387,6 +435,14 @@ def apply_bounds_review_csv(params, csv_path, cultivar=None, ecotype=None, mode=
             continue
         p["lower"] = float(lb_v)
         p["upper"] = float(ub_v)
+        init_v = _coerce_float(r.get(init_col)) if init_col else None
+        if init_v is not None:
+            p["init"] = float(init_v)
+        if status_col:
+            status_v = _coerce_str(r.get(status_col)).lower()
+            if status_v in {"active", "fixed", "disabled"}:
+                p["status"] = {"active": "none", "fixed": "fixed", "disabled": "fixed"}[status_v]
+                p["disabled"] = status_v == "disabled"
         applied += 1
 
         try:
@@ -406,6 +462,7 @@ def apply_bounds_review_csv(params, csv_path, cultivar=None, ecotype=None, mode=
         if float(p.get("lower", 0.0)) == float(p.get("upper", 0.0)):
             p["status"] = "fixed"
 
+    params = [parameter for parameter in params if not parameter.get("disabled", False)]
     return params, {"applied": applied, "missing": len(missing_names), "missing_names": missing_names}
 
 
@@ -1135,9 +1192,13 @@ def _resolve_filex_path(filex):
         return os.path.abspath(p)
     if os.path.isabs(p):
         return None
-    cand = os.path.join(WORKSPACE, p)
-    if os.path.exists(cand):
-        return os.path.abspath(cand)
+    candidates = [
+        PROJECT_ROOT / "data" / "raw" / "experiments" / p,
+        Path(WORKSPACE) / p,
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return str(candidate.resolve())
     return None
 
 
@@ -1461,6 +1522,7 @@ def create_ins_and_pst(
     prefix,
     noptmax,
     ies_num_reals,
+    random_seed=20260715,
     obs_bases=None,
     critical_obs=None,
     model_out_path=OUT_FILE,
@@ -1570,23 +1632,23 @@ def create_ins_and_pst(
                 current_ins_line += "w " * skips
                 current_ins_line += f"!{obs_name}! "
 
+            obgnme = f"{obs_col}{suffix}" if suffix else obs_col
+            sigma = _resolve_sigma(group_sigmas, obgnme, obs_col)
             if val == -99:
                 weight = 0.0
             else:
-                if group_sigmas is None:
-                    weight = 1.0
-                else:
-                    obgnme = f"{obs_col}{suffix}" if suffix else obs_col
-                    sigma = float(group_sigmas.get(obgnme, group_sigmas.get(obs_col, 1.0)))
-                    if sigma <= 0:
-                        sigma = 1.0
-                    weight = 1.0 / (sigma ** 2)
+                weight = 1.0 if sigma is None else weight_from_sigma(sigma)
 
             obs_data.append({
                 "obsnme": obs_name,
                 "obsval": val if val != -99 else 0,
                 "weight": weight,
-                "obgnme": f"{obs_col}{suffix}" if suffix else obs_col
+                "obgnme": obgnme,
+                "sigma": sigma,
+                "base_weight": weight,
+                "group_multiplier": 1.0,
+                "transform": "raw",
+                "weight_policy_id": WEIGHT_POLICY_ID,
             })
             if not is_tagged_output:
                 last_idx = target_idx
@@ -1631,6 +1693,8 @@ def create_ins_and_pst(
             cv_based_sigma=cv_based_sigma,
         ))
 
+    _write_weight_audit(obs_df, out_dir, prefix)
+
     pst = pyemu.Pst.from_par_obs_names(par_df.parnme, obs_df.obsnme if not obs_df.empty else [])
 
     par_df_indexed = par_df.set_index('parnme')
@@ -1652,6 +1716,7 @@ def create_ins_and_pst(
 
     pst.control_data.noptmax = noptmax
     pst.pestpp_options["ies_num_reals"] = ies_num_reals
+    pst.pestpp_options["rand_seed"] = int(random_seed)
     pst.pestpp_options["ies_bad_phi_sigma"] = 2.0
     pst.pestpp_options["overdue_giveup_fac"] = 4.0
     pst.pestpp_options["max_run_fail"] = 3
@@ -1749,24 +1814,24 @@ def _build_ins_and_obs(df, obs_bases, critical_obs, model_out_path, group_sigmas
                 current_ins_line += "w " * skips
                 current_ins_line += f"!{obs_name}! "
 
+            obgnme = f"{obs_col}{suffix}" if suffix else obs_col
+            sigma = _resolve_sigma(group_sigmas, obgnme, obs_col)
             if val == -99:
                 weight = 0.0
             else:
-                if group_sigmas is None:
-                    weight = 1.0
-                else:
-                    obgnme = f"{obs_col}{suffix}" if suffix else obs_col
-                    sigma = float(group_sigmas.get(obgnme, group_sigmas.get(obs_col, 1.0)))
-                    if sigma <= 0:
-                        sigma = 1.0
-                    weight = 1.0 / (sigma ** 2)
+                weight = 1.0 if sigma is None else weight_from_sigma(sigma)
 
             obs_data.append(
                 {
                     "obsnme": obs_name,
                     "obsval": val if val != -99 else 0,
                     "weight": weight,
-                    "obgnme": f"{obs_col}{suffix}" if suffix else obs_col,
+                    "obgnme": obgnme,
+                    "sigma": sigma,
+                    "base_weight": weight,
+                    "group_multiplier": 1.0,
+                    "transform": "raw",
+                    "weight_policy_id": WEIGHT_POLICY_ID,
                 }
             )
             if not is_tagged_output:
@@ -1802,6 +1867,7 @@ def create_ins_and_pst_multi(
     noptmax,
     ies_num_reals,
     outputs,
+    random_seed=20260715,
     evaluate_out_path=OUT_FILE,
     model_cmd_extra=None,
     out_dir=None,
@@ -1888,11 +1954,14 @@ def create_ins_and_pst_multi(
             cv_based_sigma=cv_based_sigma,
         ))
 
+    _write_weight_audit(obs_df, out_dir, prefix)
+
     pst = pyemu.Pst.from_par_obs_names(par_df.parnme, obs_df.obsnme if not obs_df.empty else [])
     _populate_pst_from_par_obs(pst, par_df, obs_df)
 
     pst.control_data.noptmax = noptmax
     pst.pestpp_options["ies_num_reals"] = ies_num_reals
+    pst.pestpp_options["rand_seed"] = int(random_seed)
     pst.pestpp_options["ies_bad_phi_sigma"] = 2.0
     pst.pestpp_options["overdue_giveup_fac"] = 4.0
     pst.pestpp_options["max_run_fail"] = 3
@@ -2095,6 +2164,7 @@ if __name__ == "__main__":
     parser.add_argument("--prefix", default=None)
     parser.add_argument("--noptmax", type=int, default=5)
     parser.add_argument("--ies-num-reals", type=int, default=50)
+    parser.add_argument("--random-seed", type=int, default=20260715)
     parser.add_argument("--batch", default=os.path.join(WORKSPACE, "DSSBatch.v48"))
     parser.add_argument("--init-from", action="append", default=None)
     parser.add_argument("--fixed-from", action="append", default=None)
@@ -2158,22 +2228,22 @@ if __name__ == "__main__":
     parser.add_argument("--out-dir", default=WORKSPACE)
     parser.add_argument(
         "--weight-scheme",
-        choices=["legacy", "improved"],
-        default="legacy",
-        help="Weight scheme: 'legacy' uses fixed sigma, 'improved' applies "
-             "normalization + log-transform + pwtadj1 balancing",
+        choices=["raw", "legacy", "improved"],
+        default="raw",
+        help="P0 raw-scale sigma policy. 'legacy' is a compatibility alias; "
+             "'improved' may enable audited CV/pwtadj1 options only.",
     )
     parser.add_argument(
         "--apply-normalization",
         action="store_true",
         default=False,
-        help="Apply Min-Max normalization when using improved weight scheme",
+        help="Retired option; P0 rejects candidate-dependent Min-Max normalization",
     )
     parser.add_argument(
         "--apply-log-transform",
         action="store_true",
         default=False,
-        help="Apply log transform to cumulative variables in improved weight scheme",
+        help="Reserved option; P0 rejects log residuals until both sides are transformed",
     )
     parser.add_argument(
         "--apply-pwtadj1",
@@ -2194,6 +2264,37 @@ if __name__ == "__main__":
         help="Path to baseline (noptmax=0) simulation CSV for pwtadj1 balancing",
     )
     args = parser.parse_args()
+
+    if args.apply_normalization:
+        parser.error("--apply-normalization is retired because candidate-dependent Min-Max changes the objective")
+    if args.apply_log_transform:
+        parser.error("--apply-log-transform is unavailable in P0; use raw-scale residuals")
+    if args.apply_pwtadj1 and not args.noptmax0_sims:
+        parser.error("--apply-pwtadj1 requires --noptmax0-sims and is experimental")
+    if args.batch:
+        try:
+            args.batch = str(
+                resolve_path(
+                    args.batch,
+                    bases=[PROJECT_ROOT / "data" / "templates" / "batch", WORKSPACE_DIR],
+                )
+            )
+        except FileNotFoundError as exc:
+            parser.error(str(exc))
+
+    # Validate immutable frozen bounds before parsing templates or creating any
+    # run artifacts.  A malformed scientific input must be the first failure.
+    _prevalidated_bounds = None
+    _prevalidated_bound_issues = []
+    if args.bounds_id:
+        pre_crop = args.bounds_crop or ("eggplant" if "eggplant" in (args.mode or "").lower() else "tomato")
+        _prevalidated_bounds = _resolve_bounds_id(args.bounds_id, crop=pre_crop)
+        if not _prevalidated_bounds:
+            raise FileNotFoundError(
+                f"Cannot resolve --bounds-id {args.bounds_id} "
+                f"(searched in data/parameter_registry/bounds_frozen/{pre_crop}/)"
+            )
+        _prevalidated_bound_issues = assert_valid_frozen_bounds(_prevalidated_bounds)
 
     mode = (args.mode or "").strip().lower()
     filex = _first_batch_filex_path(args.batch)
@@ -2880,12 +2981,17 @@ if __name__ == "__main__":
         bounds_crop = args.bounds_crop
         if not bounds_crop:
             bounds_crop = "eggplant" if "eggplant" in mode else "tomato"
-        resolved = _resolve_bounds_id(args.bounds_id, crop=bounds_crop)
+        resolved = _prevalidated_bounds or _resolve_bounds_id(args.bounds_id, crop=bounds_crop)
         if not resolved:
             raise FileNotFoundError(
                 f"Cannot resolve --bounds-id {args.bounds_id} "
                 f"(searched in data/parameter_registry/bounds_frozen/{bounds_crop}/)")
         print(f"Using frozen bounds: {resolved}")
+        bound_issues = _prevalidated_bound_issues or assert_valid_frozen_bounds(resolved)
+        for issue in bound_issues:
+            if issue.severity == "warning":
+                print(str(issue))
+        print(f"Frozen bounds validated: {resolved}")
         brm_csv = resolved
         brm_mode = "require"
     else:
@@ -2949,6 +3055,7 @@ if __name__ == "__main__":
             prefix=prefix,
             noptmax=args.noptmax,
             ies_num_reals=args.ies_num_reals,
+            random_seed=args.random_seed,
             outputs=stage2_outputs,
             evaluate_out_path=evaluate_out_path,
             model_cmd_extra=model_cmd_extra,
@@ -2966,6 +3073,7 @@ if __name__ == "__main__":
             prefix=prefix,
             noptmax=args.noptmax,
             ies_num_reals=args.ies_num_reals,
+            random_seed=args.random_seed,
             obs_bases=obs_bases,
             critical_obs=critical,
             model_out_path=model_out_path,
@@ -2983,6 +3091,7 @@ if __name__ == "__main__":
         )
 
     # ── Generate run_manifest.yaml (Phase 1) ──
+    git_info = git_metadata()
     manifest_path = _write_run_manifest(
         out_dir,
         run_id=prefix,
@@ -2990,18 +3099,23 @@ if __name__ == "__main__":
         crop="eggplant" if "eggplant" in mode else "tomato",
         mode=mode,
         created_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        git_commit=_get_git_commit(),
+        git_commit=git_info.get("git_commit", ""),
+        git_branch=git_info.get("git_branch", ""),
+        git_dirty=git_info.get("git_dirty", False),
         dssat_root=os.path.dirname(WORKSPACE),
         workspace_root=WORKSPACE,
         batch_file=os.path.basename(args.batch) if args.batch else None,
         bounds_id=args.bounds_id or "",
         bounds_csv=brm_csv if brm_mode != "off" else "",
+        bounds_sha256=(sha256_file(brm_csv) if brm_csv and os.path.isfile(brm_csv) else ""),
         tighten_from=[os.path.basename(p) for p in (args.tighten_from or [])],
         tighten_frac=args.tighten_frac,
         noptmax=args.noptmax,
         ies_num_reals=args.ies_num_reals,
+        random_seed=args.random_seed,
         harvest_var=harvest_var,
         n_params=len(params),
+        weight_policy_id=WEIGHT_POLICY_ID,
         operator=os.environ.get("USERNAME", "unknown"),
         command_line=" ".join(sys.argv),
     )

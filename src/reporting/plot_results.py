@@ -121,7 +121,7 @@ def _facet_timeseries(df, tn_col, date_col, pairs, title, out_png, ncols=5):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--prefix", required=True)
-    p.add_argument("--results-dir", default=r"C:\DSSAT48\Tomato_Cal\Workspace\Calibration_Results")
+    p.add_argument("--results-dir", default=os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "workspace", "runs"))
     p.add_argument("--out-dir", default="")
     p.add_argument("--no-timeseries", action="store_true")
     args = p.parse_args()

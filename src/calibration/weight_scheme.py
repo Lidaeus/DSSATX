@@ -1,62 +1,86 @@
-"""src/calibration/weight_scheme.py - Advanced weight calculation scheme.
+"""Auditable observation-error and PEST weight calculations.
 
-Implements the improved weight design from the weight proposal:
-  - Inverse-variance weighting (base framework)
-  - Min-Max normalization for cross-variable balance
-  - Log transformation for heteroscedastic time-series data
-  - pwtadj1-equivalent automatic weight balancing (OLS -> WLS two-step)
-  - CV-based sigma estimation from observed data
+PEST evaluates ``phi = sum((weight * residual) ** 2)``.  Therefore an
+observation error standard deviation ``sigma`` maps to ``weight = 1/sigma``.
 
-Processing pipeline (Step 1-6):
-  [Step 1] Data preprocessing (normalization + log transform)
-            |
-  [Step 2] Compute base_weight = 1/sigma^2 (in physical or log units)
-            |
-  [Step 3] OLS single-group fitting (AgMIP Step 6)
-            |
-  [Step 4] Compute pwtadj1 adjustment factor (AgMIP Step 7)
-            |
-  [Step 5] final_weight = base_weight x adjustment_factor
-            |
-  [Step 6] Global WLS optimization
+P0 deliberately supports raw-scale residuals only.  Candidate-dependent
+Min-Max normalization and partially implemented log residuals are rejected so
+they cannot silently change the objective function between realizations.
 """
+
+from __future__ import annotations
+
+import math
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-from typing import Dict, Tuple, Optional
 
 
-LOG_TRANSFORM_VARS = {"LWADM", "SWADM", "LAIDM", "HWAMM", "CNAMM"}
+WEIGHT_POLICY_ID = "raw_sigma_v1"
+MISSING_VALUE = -99.0
 
+# Kept as public compatibility metadata.  P0 does not activate these transforms.
+LOG_TRANSFORM_VARS: set[str] = set()
 NON_CUMULATIVE_VARS = {"ADAPM", "HIAMM", "LAIXM", "CHTAM", "CNAAM", "H#AMM"}
 
 
-def minmax_normalize(obs_series: pd.Series, sim_series: pd.Series
-                      ) -> Tuple[pd.Series, pd.Series, float]:
-    """Normalize a pair of observed and simulated series to [0, 1].
+VARIABLE_TREATMENT = {
+    "ADAPM": {"log_transform": False, "sigma_base": 25.0, "cumulate": False},
+    "CNAMM": {"log_transform": False, "sigma_base": 25.0, "cumulate": True},
+    "HIAMM": {"log_transform": False, "sigma_base": 0.10, "cumulate": False},
+    "HWAMM": {"log_transform": False, "sigma_base": 50.0, "cumulate": True},
+    "LAIXM": {"log_transform": False, "sigma_base": 0.8, "cumulate": False},
+    "LAIDM": {"log_transform": False, "sigma_base": 2.0, "cumulate": False},
+    "LWADM": {"log_transform": False, "sigma_base": 150.0, "cumulate": False},
+    "SWADM": {"log_transform": False, "sigma_base": 200.0, "cumulate": False},
+    "CHTAM": {"log_transform": False, "sigma_base": 15.0, "cumulate": False},
+    "CNAAM": {"log_transform": False, "sigma_base": 20.0, "cumulate": False},
+    "H#AMM": {"log_transform": False, "sigma_base": 50.0, "cumulate": False},
+    "PWADM": {"log_transform": False, "sigma_base": 250.0, "cumulate": True},
+    "PWAIM": {"log_transform": False, "sigma_base": 250.0, "cumulate": False},
+}
 
-    Parameters
-    ----------
-    obs_series : pd.Series
-        Observed values.
-    sim_series : pd.Series
-        Simulated values (used only to determine min/max range).
-    Returns
-    -------
-    norm_obs, norm_sim, scale
-        Normalized series and the original range (max - min).
-    """
-    all_vals = pd.concat([obs_series, sim_series]).replace(-99.0, np.nan).dropna()
-    if all_vals.empty:
-        return obs_series, sim_series, 1.0
-    min_val = all_vals.min()
-    max_val = all_vals.max()
-    if max_val == min_val:
-        return obs_series, sim_series, 1.0
-    scale = max_val - min_val
-    norm_obs = (obs_series - min_val) / scale
-    norm_sim = (sim_series - min_val) / scale
-    return norm_obs, norm_sim, scale
+
+def weight_from_sigma(sigma: float, group_multiplier: float = 1.0) -> float:
+    """Convert a standard deviation and explicit multiplier to a PEST weight."""
+    sigma = float(sigma)
+    group_multiplier = float(group_multiplier)
+    if not math.isfinite(sigma) or sigma <= 0:
+        raise ValueError(f"sigma must be positive and finite, got {sigma!r}")
+    if not math.isfinite(group_multiplier) or group_multiplier <= 0:
+        raise ValueError(
+            f"group_multiplier must be positive and finite, got {group_multiplier!r}"
+        )
+    return group_multiplier / sigma
+
+
+def compute_phi(
+    observed: pd.Series | np.ndarray | list[float],
+    simulated: pd.Series | np.ndarray | list[float],
+    weights: pd.Series | np.ndarray | list[float],
+) -> float:
+    """Compute the PEST measurement objective for a hand-checkable test case."""
+    obs = np.asarray(observed, dtype=float)
+    sim = np.asarray(simulated, dtype=float)
+    weight = np.asarray(weights, dtype=float)
+    if obs.shape != sim.shape or obs.shape != weight.shape:
+        raise ValueError("observed, simulated, and weights must have the same shape")
+    if not np.isfinite(obs).all() or not np.isfinite(sim).all():
+        raise ValueError("observed and simulated values must be finite")
+    if not np.isfinite(weight).all() or (weight < 0).any():
+        raise ValueError("weights must be finite and non-negative")
+    return float(np.square(weight * (obs - sim)).sum())
+
+
+def minmax_normalize(
+    obs_series: pd.Series, sim_series: pd.Series
+) -> Tuple[pd.Series, pd.Series, float]:
+    """Reject the retired candidate-dependent Min-Max objective design."""
+    raise ValueError(
+        "Dynamic Min-Max normalization is disabled: it makes the residual scale "
+        "depend on each candidate simulation. Use raw-scale sigma weights."
+    )
 
 
 def normalize_and_weight(
@@ -64,192 +88,105 @@ def normalize_and_weight(
     sim_series: pd.Series,
     sigma_original: float,
     use_log_transform: bool = False,
-    eps: float = 1e-6
-) -> Tuple[float, pd.Series, pd.Series]:
-    """Compute weight for an observation group with correct processing order.
+    eps: float = 1e-6,
+) -> Tuple[float, pd.Series, pd.Series, float]:
+    """Compatibility entry point for the P0 raw-scale policy.
 
-    For cumulative variables (LWADM, SWADM, LAIDM, HWAMM, CNAMM):
-        Step 1: log transform (in original space to stabilize variance)
-        Step 2: Min-Max normalize in log space
-        Step 3: Compute weight in normalized space
-
-    For non-cumulative variables (ADAPM, HIAMM, LAIXM, etc.):
-        Step 1: Min-Max normalize directly
-        Step 2: Compute weight in normalized space
-
-    Parameters
-    ----------
-    obs_series : pd.Series
-        Observed values (may contain -99.0 for missing).
-    sim_series : pd.Series
-        Simulated values from model.
-    sigma_original : float
-        Base sigma value in physical units.
-    use_log_transform : bool
-        Whether to apply log transform first (for cumulative variables).
-    eps : float
-        Small constant added before log to avoid log(0).
-
-    Returns
-    -------
-    weight : float
-        Final weight = 1 / effective_sigma^2.
-    norm_obs : pd.Series
-        Normalized observed series.
-    norm_sim : pd.Series
-        Normalized simulated series.
+    No normalization is performed.  Log residuals are rejected until an
+    Observation Spec can transform both observations and model outputs before
+    PEST reads them.
     """
-    mask = (obs_series != -99.0) & (~obs_series.isna())
-    _obs = np.asarray(obs_series[mask], dtype=float)
-    _sim = np.asarray(sim_series[mask], dtype=float)
-
-    if _obs.size == 0:
-        return 0.0, obs_series, sim_series
-
+    del eps
     if use_log_transform:
-        log_obs = np.log(_obs + eps)
-        log_sim = np.log(_sim + eps)
-        all_log_vals = np.concatenate([log_obs, log_sim])
-        log_min = float(np.min(all_log_vals))
-        log_max = float(np.max(all_log_vals))
-        log_range = log_max - log_min + eps
-        norm_obs = (log_obs - log_min) / log_range
-        norm_sim = (log_sim - log_min) / log_range
-        effective_sigma = sigma_original / log_range
-    else:
-        all_vals = np.concatenate([_obs, _sim])
-        min_v = float(np.min(all_vals))
-        max_v = float(np.max(all_vals))
-        if max_v == min_v:
-            effective_sigma = float(sigma_original)
-        else:
-            effective_sigma = sigma_original / (max_v - min_v + eps)
-        norm_obs = (_obs - min_v) / (max_v - min_v + eps)
-        norm_sim = (_sim - min_v) / (max_v - min_v + eps)
-
-    effective_sigma = float(effective_sigma)
-    if effective_sigma <= 0:
-        effective_sigma = 1.0
-    weight = 1.0 / (effective_sigma ** 2)
-    return weight, pd.Series(norm_obs), pd.Series(norm_sim), effective_sigma
+        raise ValueError(
+            "Log residuals are not available in P0; observations and simulations "
+            "must be transformed together before weighting"
+        )
+    if len(obs_series) != len(sim_series):
+        raise ValueError("Observed and simulated series must have the same length")
+    weight = weight_from_sigma(sigma_original)
+    return weight, obs_series.copy(), sim_series.copy(), float(sigma_original)
 
 
 def compute_cv_based_sigma(
     obs_series: pd.Series,
     sigma0: float = 1.0,
-    cv_override: Optional[float] = None
+    cv_override: Optional[float] = None,
 ) -> Tuple[float, float]:
-    """Compute sigma from observed data using coefficient of variation.
-
-    sigma = sqrt(sigma0^2 + (cv * |median|)^2)
-
-    Parameters
-    ----------
-    obs_series : pd.Series
-        Observed values (may contain -99.0 for missing).
-    sigma0 : float
-        Base sigma (minimum uncertainty floor).
-    cv_override : float, optional
-        If provided, use this CV directly instead of estimating from data.
-
-    Returns
-    -------
-    sigma : float
-        Computed sigma value.
-    cv : float
-        The CV used (either estimated or overridden).
-    """
-    valid = obs_series[obs_series > 0].replace(-99.0, np.nan).dropna()
+    """Estimate ``sqrt(sigma0² + (cv * |median|)²)`` from valid observations."""
+    sigma0 = float(sigma0)
+    if not math.isfinite(sigma0) or sigma0 <= 0:
+        raise ValueError("sigma0 must be positive and finite")
+    valid = pd.to_numeric(obs_series, errors="coerce")
+    valid = valid[(valid != MISSING_VALUE) & valid.notna()]
     if valid.empty:
         return sigma0, 0.0
-    median_val = valid.median()
-    if cv_override is not None:
-        cv = cv_override
+    if cv_override is None:
+        mean = float(valid.mean())
+        std = float(valid.std(ddof=1)) if len(valid) > 1 else 0.0
+        cv = abs(std / mean) if mean != 0 else 0.0
     else:
-        mean_val = valid.mean()
-        std_val = valid.std()
-        cv = (std_val / mean_val) if mean_val != 0 else 0.2
-    sigma = np.sqrt(sigma0**2 + (cv * abs(median_val))**2)
-    return float(sigma), float(cv)
+        cv = float(cv_override)
+    if not math.isfinite(cv) or cv < 0:
+        raise ValueError("cv must be finite and non-negative")
+    sigma = math.sqrt(sigma0**2 + (cv * abs(float(valid.median()))) ** 2)
+    return sigma, cv
+
+
+def _validate_weight_frames(obs_df: pd.DataFrame, sim_df: pd.DataFrame) -> pd.DataFrame:
+    required_obs = {"obsnme", "obsval", "obgnme"}
+    required_sim = {"obsnme", "simulated"}
+    if not required_obs.issubset(obs_df.columns):
+        raise ValueError(f"obs_df missing columns: {sorted(required_obs - set(obs_df.columns))}")
+    if not required_sim.issubset(sim_df.columns):
+        raise ValueError(f"sim_df missing columns: {sorted(required_sim - set(sim_df.columns))}")
+    if obs_df["obsnme"].duplicated().any() or sim_df["obsnme"].duplicated().any():
+        raise ValueError("obsnme must be unique in observation and simulation tables")
+    merged = obs_df.merge(sim_df, on="obsnme", how="left", validate="one_to_one")
+    if merged["simulated"].isna().any():
+        missing = merged.loc[merged["simulated"].isna(), "obsnme"].tolist()
+        raise ValueError(f"Missing baseline simulations for observations: {missing[:10]}")
+    return merged
 
 
 def compute_balanced_weights(
     obs_df: pd.DataFrame,
     sim_df: pd.DataFrame,
     original_sigmas: Dict[str, float],
-    target_per_group: float = 1.0
+    target_per_group: float = 1.0,
 ) -> Tuple[Dict[str, float], Dict[str, float]]:
-    """Simulate PEST's pwtadj1.exe weight balancing logic.
+    """Experimental, explicit group-phi balancing.
 
-    Evaluates the initial residual variance of each observation group from
-    a baseline (noptmax=0) run and adjusts weights so that each group
-    contributes equally to the total objective function.
-
-    AgMIP Phase 4 Step 6-7:
-      Step 6 (OLS): Individual group fitting to get residual variance.
-      Step 7 (WLS): Adjust weights by inverse of group residual variance.
-
-    Parameters
-    ----------
-    obs_df : pd.DataFrame
-        DataFrame with 'obsnme', 'obsval', 'obgnme' columns.
-        obsval is the measured value.
-    sim_df : pd.DataFrame
-        DataFrame with 'obsnme', 'simulated' columns.
-        simulated is the model output at baseline parameters.
-    original_sigmas : Dict[str, float]
-        Base sigma per observation group (group name -> sigma).
-    target_per_group : float
-        Desired total contribution fraction per group (default 1/G where G
-        is number of groups, achieved by equal weighting).
-
-    Returns
-    -------
-    balanced_weights : Dict[str, float]
-        Adjusted weight per group (group name -> weight = 1/sigma^2).
-    adjusted_sigmas : Dict[str, float]
-        Adjusted sigma per group after balancing.
+    The function is strict by design: every observation group needs a sigma and
+    a baseline simulation.  It never falls back to a guessed group or weight.
     """
-    obs_df = obs_df.copy()
-    sim_df = sim_df.copy()
+    merged = _validate_weight_frames(obs_df, sim_df)
+    merged = merged[(merged["obsval"] != MISSING_VALUE)].copy()
+    groups = set(merged["obgnme"].astype(str))
+    sigma_groups = set(map(str, original_sigmas))
+    if groups != sigma_groups:
+        raise ValueError(
+            "Sigma keys must exactly match observation groups; "
+            f"missing={sorted(groups - sigma_groups)}, extra={sorted(sigma_groups - groups)}"
+        )
+    if not math.isfinite(float(target_per_group)) or target_per_group <= 0:
+        raise ValueError("target_per_group must be positive and finite")
 
-    if 'obsval' not in obs_df.columns or 'obgnme' not in obs_df.columns:
-        raise ValueError("obs_df must have 'obsval' and 'obgnme' columns")
-    if 'simulated' not in sim_df.columns:
-        raise ValueError("sim_df must have 'simulated' column")
+    current: dict[str, float] = {}
+    for group, frame in merged.groupby("obgnme"):
+        sigma = float(original_sigmas[str(group)])
+        base = weight_from_sigma(sigma)
+        current[str(group)] = float(np.square(base * (frame["obsval"] - frame["simulated"])).mean())
+    if any(not math.isfinite(value) or value <= 0 for value in current.values()):
+        raise ValueError("Group balancing requires positive finite baseline phi in every group")
 
-    obs_df = obs_df.rename(columns={'obsnme': 'obsnme'})
-    sim_df = sim_df.rename(columns={'obsnme': 'obsnme'})
-
-    merged = obs_df.merge(sim_df, on='obsnme', how='left')
-    merged['residual'] = merged['simulated'] - merged['obsval']
-    merged['residual_sq'] = merged['residual'] ** 2
-
-    groups = merged.groupby('obgnme')
-    n_groups = len(groups)
-
-    group_phi = {}
-    for obgnme, g in groups:
-        valid = g[g['obsval'] != -99.0]
-        if valid.empty:
-            group_phi[obgnme] = 0.0
-        else:
-            group_phi[obgnme] = float(valid['residual_sq'].sum() / len(valid))
-
-    total_phi = sum(group_phi.values())
-    if total_phi == 0:
-        return {k: 1.0 / (v**2) for k, v in original_sigmas.items()}, original_sigmas.copy()
-
-    adjusted_sigmas = {}
-    for obgnme, sigma in original_sigmas.items():
-        contrib_ratio = group_phi.get(obgnme, 1e-10) / total_phi
-        target_contribution = target_per_group / n_groups
-        adj_factor = np.sqrt(target_contribution * n_groups / (contrib_ratio + 1e-10))
-        adjusted_sigmas[obgnme] = sigma * adj_factor
-
-    balanced_weights = {k: 1.0 / (v**2) if v > 0 else 0.0
-                        for k, v in adjusted_sigmas.items()}
-    return balanced_weights, adjusted_sigmas
+    weights: dict[str, float] = {}
+    adjusted_sigmas: dict[str, float] = {}
+    for group, phi in current.items():
+        multiplier = math.sqrt(float(target_per_group) / phi)
+        weights[group] = weight_from_sigma(original_sigmas[group], multiplier)
+        adjusted_sigmas[group] = 1.0 / weights[group]
+    return weights, adjusted_sigmas
 
 
 def apply_weight_scheme_to_obs_df(
@@ -257,232 +194,107 @@ def apply_weight_scheme_to_obs_df(
     sim_df: pd.DataFrame,
     group_sigmas: Dict[str, float],
     use_log_transform_groups: Optional[Dict[str, bool]] = None,
-    apply_pwtadj1: bool = True,
-    noptmax0_sims: Optional[pd.DataFrame] = None
+    apply_pwtadj1: bool = False,
+    noptmax0_sims: Optional[pd.DataFrame] = None,
 ) -> pd.DataFrame:
-    """Apply the full improved weight scheme to an observation DataFrame.
-
-    This is the main entry point that orchestrates all five improvements:
-      1. CV-based sigma estimation
-      2. Min-Max normalization (cross-variable balance)
-      3. Log transformation (heteroscedasticity)
-      4. pwtadj1-equivalent balancing
-      5. Final weight computation
-
-    Parameters
-    ----------
-    obs_df : pd.DataFrame
-        DataFrame with 'obsnme', 'obsval', 'obgnme' columns.
-    sim_df : pd.DataFrame
-        DataFrame with 'obsnme', 'simulated' columns (from noptmax=0 run).
-    group_sigmas : Dict[str, float]
-        Base sigma per observation group.
-    use_log_transform_groups : Dict[str, bool], optional
-        Override for which groups use log transform.
-        If None, uses LOG_TRANSFORM_VARS set.
-    apply_pwtadj1 : bool
-        Whether to apply pwtadj1-equivalent balancing.
-    noptmax0_sims : pd.DataFrame, optional
-        Simulation results from a baseline (noptmax=0) run.
-        Required if apply_pwtadj1 is True.
-
-    Returns
-    -------
-    pd.DataFrame
-        Copy of obs_df with updated 'weight' and 'obgnme' columns.
-    """
-    use_log_transform_groups = use_log_transform_groups or {}
-
-    result_df = obs_df.copy()
-
-    balanced_weights = None
-    if apply_pwtadj1 and noptmax0_sims is not None:
-        balanced_weights, _ = compute_balanced_weights(
-            obs_df, noptmax0_sims, group_sigmas
-        )
-    elif apply_pwtadj1:
-        balanced_weights = {k: 1.0 / (v**2) if v > 0 else 0.0
-                            for k, v in group_sigmas.items()}
-
-    weights = {}
-    for obgnme, group_data in result_df.groupby('obgnme'):
-        sigma = group_sigmas.get(obgnme, 25.0)
-        use_log = use_log_transform_groups.get(
-            obgnme, obgnme in LOG_TRANSFORM_VARS
-        )
-
-        obs_vals = group_data['obsval']
-        sim_vals = sim_df.loc[group_data.index, 'simulated'] \
-            if 'simulated' in sim_df.columns else group_data['obsval']
-
-        weight, _, _, _ = normalize_and_weight(
-            obs_vals, sim_vals, sigma, use_log_transform=use_log
-        )
-
-        if balanced_weights is not None and obgnme in balanced_weights:
-            base_weight = balanced_weights[obgnme]
-        else:
-            base_weight = 1.0 / (sigma ** 2) if sigma > 0 else 0.0
-
-        weights[obgnme] = base_weight
-
-    result_df['weight'] = result_df['obgnme'].map(weights).fillna(1.0)
-    return result_df
-
-
-VARIABLE_TREATMENT = {
-    "ADAPM": {"log_transform": False, "sigma_base": 25.0, "cumulate": False},
-    "CNAMM": {"log_transform": True,  "sigma_base": 0.1,   "cumulate": True},
-    "HIAMM": {"log_transform": False, "sigma_base": 0.05,  "cumulate": False},
-    "HWAMM": {"log_transform": True,  "sigma_base": 0.1,   "cumulate": True},
-    "LAIXM": {"log_transform": False, "sigma_base": 0.1,   "cumulate": False},
-    "LAIDM": {"log_transform": True,  "sigma_base": 0.1,   "cumulate": True},
-    "LWADM": {"log_transform": True,  "sigma_base": 0.1,   "cumulate": True},
-    "SWADM": {"log_transform": True,  "sigma_base": 0.1,   "cumulate": True},
-    "CHTAM": {"log_transform": False, "sigma_base": 15.0,  "cumulate": False},
-    "CNAAM": {"log_transform": False, "sigma_base": 20.0,  "cumulate": False},
-    "H#AMM": {"log_transform": False, "sigma_base": 50.0,  "cumulate": False},
-    "PWADM": {"log_transform": True,  "sigma_base": 0.1,   "cumulate": True},
-    "PWAIM": {"log_transform": True,  "sigma_base": 0.1,   "cumulate": True},
-}
+    """Apply raw sigma weights, optionally enabling strict experimental balance."""
+    transforms = use_log_transform_groups or {}
+    if any(transforms.values()):
+        raise ValueError("Log residuals are disabled in the P0 raw-scale policy")
+    result = obs_df.copy()
+    groups = set(result["obgnme"].astype(str))
+    missing = groups - set(group_sigmas)
+    if missing:
+        raise ValueError(f"Missing sigma definitions for groups: {sorted(missing)}")
+    weights = {group: weight_from_sigma(group_sigmas[group]) for group in groups}
+    if apply_pwtadj1:
+        baseline = noptmax0_sims if noptmax0_sims is not None else sim_df
+        weights, _ = compute_balanced_weights(result, baseline, group_sigmas)
+    result["sigma"] = result["obgnme"].map(group_sigmas)
+    result["base_weight"] = result["obgnme"].map(
+        {group: weight_from_sigma(group_sigmas[group]) for group in groups}
+    )
+    result["group_multiplier"] = result.apply(
+        lambda row: weights[str(row["obgnme"])] / row["base_weight"], axis=1
+    )
+    result["weight"] = result["obgnme"].map(weights)
+    result["weight_policy_id"] = WEIGHT_POLICY_ID
+    return result
 
 
 def build_observation_weights(
     obs_data: list,
     df_override: Optional[pd.DataFrame] = None,
     sim_baseline: Optional[pd.DataFrame] = None,
-    apply_normalization: bool = True,
-    apply_log_transform: bool = True,
-    apply_pwtadj1: bool = True,
-    cv_based_sigma: bool = True,
+    apply_normalization: bool = False,
+    apply_log_transform: bool = False,
+    apply_pwtadj1: bool = False,
+    cv_based_sigma: bool = False,
 ) -> list:
-    """Apply the full improved weight scheme to an observation DataFrame.
-
-    Key design decisions:
-      - Weight is computed per variable-root (LAIDM, LWADM, etc.), NOT per date-specific
-        group. All dates of the same variable share the same weight, ensuring that
-        the normalization range (min/max) spans all observations of that variable.
-      - The VARIABLE_TREATMENT lookup uses the variable-root in UPPERCASE to match
-        the dictionary keys.
-      - For pwtadj1, the group key is the FULL obgnme (e.g., laidm_d25075), so
-        each date-specific group gets its own pwtadj1 adjustment factor.
-
-    Parameters
-    ----------
-    obs_data : list
-        List of observation dicts from create_ins_and_pst or _build_ins_and_obs.
-        Each dict has 'obsnme', 'obsval', 'weight', 'obgnme'.
-    df_override : pd.DataFrame, optional
-        If provided, use this DataFrame for normalization ranges.
-    sim_baseline : pd.DataFrame, optional
-        Baseline simulation results for pwtadj1 balancing.
-    apply_normalization : bool
-        Apply Min-Max normalization when computing effective sigma.
-    apply_log_transform : bool
-        Apply log transform to cumulative variables.
-    apply_pwtadj1 : bool
-        Apply pwtadj1-equivalent weight balancing.
-    cv_based_sigma : bool
-        Estimate sigma from observed data CV instead of using fixed values.
-
-    Returns
-    -------
-    list
-        Updated obs_data with new 'weight' values.
-    """
+    """Build an auditable raw-scale weight table from observation records."""
     if not obs_data:
         return obs_data
+    if apply_normalization:
+        raise ValueError("Dynamic Min-Max normalization is retired and cannot be enabled")
+    if apply_log_transform:
+        raise ValueError("Log residuals are not implemented in the P0 raw-scale policy")
+    if apply_pwtadj1 and sim_baseline is None:
+        raise ValueError("Experimental pwtadj1 balancing requires baseline simulations")
 
-    obs_df = pd.DataFrame(obs_data)
-    obs_df['_orig_weight'] = obs_df['weight']
+    obs_df = pd.DataFrame(obs_data).copy()
+    required = {"obsnme", "obsval", "obgnme", "weight"}
+    if not required.issubset(obs_df.columns):
+        raise ValueError(f"Observation records missing: {sorted(required - set(obs_df.columns))}")
+    obs_df["_var_root"] = (
+        obs_df["obgnme"].astype(str).str.replace(r"_H\d+|_D\d+$", "", regex=True).str.upper()
+    )
 
-    obs_df['_var_root_raw'] = obs_df['obgnme'].str.replace(r'_H\d+|_D\d+$', '', regex=True)
-    obs_df['_var_root'] = obs_df['_var_root_raw'].str.upper()
-
-    obs_df['_simulated'] = None
-    if sim_baseline is not None and 'simulated' in sim_baseline.columns:
-        sim_indexed = sim_baseline.set_index('obsnme')['simulated']
-        obs_df['_simulated'] = obs_df['obsnme'].map(sim_indexed)
-
-    var_roots = obs_df['_var_root'].unique()
-    var_treatments = {}
-    for vr in var_roots:
-        if vr in VARIABLE_TREATMENT:
-            var_treatments[vr] = dict(VARIABLE_TREATMENT[vr])
+    sigmas: dict[str, float] = {}
+    for group, frame in obs_df.groupby("obgnme"):
+        explicit = pd.to_numeric(frame.get("sigma"), errors="coerce") if "sigma" in frame else pd.Series(dtype=float)
+        if not explicit.empty and explicit.notna().any():
+            unique = explicit.dropna().unique()
+            if len(unique) != 1:
+                raise ValueError(f"Observation group {group} has inconsistent sigma values")
+            sigma = float(unique[0])
         else:
-            var_treatments[vr] = {
-                "log_transform": False,
-                "sigma_base": 1.0,
-                "cumulate": False
-            }
+            root = str(frame["_var_root"].iloc[0])
+            sigma = float(VARIABLE_TREATMENT.get(root, {"sigma_base": 1.0})["sigma_base"])
+        if cv_based_sigma:
+            sigma, _ = compute_cv_based_sigma(frame["obsval"], sigma0=sigma)
+        weight_from_sigma(sigma)
+        sigmas[str(group)] = sigma
 
-    if cv_based_sigma and df_override is not None:
-        for vr, treatment in var_treatments.items():
-            root_lower = vr.lower()
-            col_candidates = [
-                c for c in df_override.columns
-                if c.startswith(root_lower) and c.endswith('M')
-            ]
-            for col in col_candidates:
-                valid = df_override[df_override[col] != -99.0][col]
-                if not valid.empty:
-                    sigma_est, cv_est = compute_cv_based_sigma(
-                        valid, sigma0=treatment["sigma_base"], cv_override=None
-                    )
-                    treatment["sigma_base"] = sigma_est
-                    break
+    base_weights = {group: weight_from_sigma(sigma) for group, sigma in sigmas.items()}
+    final_weights = base_weights.copy()
+    if apply_pwtadj1:
+        final_weights, _ = compute_balanced_weights(
+            obs_df[["obsnme", "obsval", "obgnme"]], sim_baseline, sigmas
+        )
 
-    var_base_weights = {}
-    for vr, treatment in var_treatments.items():
-        sigma = treatment["sigma_base"]
-        use_log = apply_log_transform and treatment["log_transform"]
+    obs_df["sigma"] = obs_df["obgnme"].map(sigmas)
+    obs_df["base_weight"] = obs_df["obgnme"].map(base_weights)
+    obs_df["weight"] = obs_df["obgnme"].map(final_weights)
+    obs_df.loc[obs_df["obsval"] == MISSING_VALUE, "weight"] = 0.0
+    obs_df["group_multiplier"] = np.where(
+        obs_df["base_weight"] > 0, obs_df["weight"] / obs_df["base_weight"], 0.0
+    )
+    obs_df["transform"] = "raw"
+    obs_df["weight_policy_id"] = WEIGHT_POLICY_ID
+    return obs_df.drop(columns=["_var_root"]).to_dict("records")
 
-        var_obs = obs_df[obs_df['_var_root'] == vr]
-        obs_vals = var_obs['obsval']
-        sim_vals = var_obs['_simulated'].fillna(obs_vals)
 
-        if apply_normalization:
-            weight, _, _, effective_sigma = normalize_and_weight(
-                obs_vals.reset_index(drop=True),
-                sim_vals.reset_index(drop=True),
-                sigma,
-                use_log_transform=use_log
-            )
-        else:
-            effective_sigma = sigma
-
-        if effective_sigma <= 0:
-            effective_sigma = 1.0
-        var_base_weights[vr] = weight
-
-    obs_df['_base_weight'] = obs_df['_var_root'].map(var_base_weights).fillna(1.0)
-
-    if apply_pwtadj1 and sim_baseline is not None:
-        try:
-            obs_for_pwtadj1 = obs_df[obs_df['obsval'] != -99.0].copy()
-            if not obs_for_pwtadj1.empty and '_simulated' in obs_for_pwtadj1.columns:
-                sim_for_pwtadj1 = obs_for_pwtadj1[[
-                    'obsnme', 'obgnme', 'obsval', '_simulated'
-                ]].copy()
-                sim_for_pwtadj1 = sim_for_pwtadj1.rename(columns={'_simulated': 'simulated'})
-                balanced_w, _ = compute_balanced_weights(
-                    sim_for_pwtadj1[['obsnme', 'obsval', 'obgnme']],
-                    sim_for_pwtadj1[['obsnme', 'simulated', 'obgnme']],
-                    {vr: v["sigma_base"] for vr, v in var_treatments.items()}
-                )
-
-                obs_df['_pwtadj1_weight'] = obs_df.apply(
-                    lambda r: balanced_w.get(r['obgnme'], r['_base_weight']), axis=1
-                )
-                obs_df['weight'] = obs_df['_pwtadj1_weight']
-            else:
-                obs_df['weight'] = obs_df['_base_weight']
-        except Exception:
-            obs_df['weight'] = obs_df['_base_weight']
-    else:
-        obs_df['weight'] = obs_df['_base_weight']
-
-    obs_df['weight'] = obs_df['weight'].fillna(1.0).replace([float('inf')], 1.0)
-
-    keep_cols = [c for c in obs_df.columns if not c.startswith('_')]
-    return obs_df[keep_cols].to_dict('records')
+__all__ = [
+    "LOG_TRANSFORM_VARS",
+    "NON_CUMULATIVE_VARS",
+    "VARIABLE_TREATMENT",
+    "WEIGHT_POLICY_ID",
+    "apply_weight_scheme_to_obs_df",
+    "build_observation_weights",
+    "compute_balanced_weights",
+    "compute_cv_based_sigma",
+    "compute_phi",
+    "minmax_normalize",
+    "normalize_and_weight",
+    "weight_from_sigma",
+]

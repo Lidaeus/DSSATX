@@ -7,10 +7,17 @@ import shutil
 import subprocess
 import sys
 
+_BOOTSTRAP_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if _BOOTSTRAP_ROOT not in sys.path:
+    sys.path.insert(0, _BOOTSTRAP_ROOT)
+
 import numpy as np
 import pandas as pd
 
-WORKSPACE = r"C:\DSSAT48\Tomato_Cal\Workspace"
+from src.common.project import RUNS_DIR, WORKSPACE_DIR
+
+WORKSPACE = str(WORKSPACE_DIR)
+RESULTS_DIR = str(RUNS_DIR)
 
 
 

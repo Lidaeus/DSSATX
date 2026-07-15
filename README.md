@@ -7,9 +7,9 @@ Tomato_Cal 面向作物模型研究者，目标是在 Windows 环境中提供可
 ## 当前状态
 
 - 代码已具备 DSSAT 运行、Morris/Sobol 分析、PEST++ IES 构建与结果整理的基础能力。
-- 历史运行只能证明流程曾执行，不能证明其科研结论有效。当前已发现边界关系、输出变异性、目标函数、权重语义和入口一致性方面的问题。
+- 历史运行只能证明流程曾执行，不能证明其科研结论有效；P0 质量门现已能主动拒绝这些退化结果。
 - 当前开发基线是 [产品定义与系统设计](项目重构规划.md)；详细风险和任务见 [P0 科研可信性修复开发计划](docs/P0_科研可信性修复开发计划.md)。
-- P0 尚未实施，等待用户批准。P0 完成前，不应将已有 SA 排名、率定最优参数或不确定性结果用于论文结论。
+- P0 已在 `codex/p0-research-credibility` 实施并通过微型数值验证，当前等待用户验收；详见 [P0 验证报告](docs/reports/P0_verification_report.md)。已有历史 SA 排名、率定最优参数或不确定性结果仍不得用于论文结论。
 
 ## 产品原则
 
@@ -79,16 +79,23 @@ docs/                     当前规范、开发计划和历史背景材料
 
 ## 环境与检查
 
-主要依赖为 Python 3.13+、`pandas`、`numpy`、`pyemu` 和 `matplotlib`；PEST++ 二进制位于 `pestpp-5.2.16-win/`，DSSAT 4.8 默认位于 `C:\DSSAT48\`。
+主要依赖为 Python 3.13+、`pandas`、`numpy`、`pyemu`、`flopy` 和 `matplotlib`；PEST++ 二进制位于 `pestpp-5.2.16-win/`，DSSAT 4.8 默认位于 `C:\DSSAT48\`。
 
-当前可安全执行的代码级检查：
+依赖与代码级检查：
 
 ```powershell
+python -m pip install -r requirements-dev.txt
 python -m pytest tests -q
 python -m compileall src tests tools
 ```
 
-这些检查不替代 P0 计划中的端到端数值烟雾测试和科学质量门。P0 完成后，本页将补充经验证的标准命令。
+持久化 IES 运行必须再执行科学质量门：
+
+```powershell
+python tools/check_run_quality.py --run-dir workspace/runs/<run_id> --prefix <prefix>
+```
+
+当前正式 `eggplant_v14_20260405` 冻结边界会被预检拒绝，这是预期行为；不得用 `--bounds-review-mode off` 绕过后开展正式计算。
 
 ## 文档入口
 

@@ -7,6 +7,11 @@ import subprocess
 import tempfile
 import time
 
+from pathlib import Path
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
 
 def _workspace_dir_from_this_file():
     here = os.path.dirname(os.path.abspath(__file__))
@@ -304,9 +309,9 @@ def compute_indicators(workspace_dir, batch_path, cultivar, param_csv_path, out_
                 return
             shutil.copy(param_csv_path, param_snapshot)
 
-        run_dssat_path = os.path.join(workspace_dir, "run_dssat.py")
+        run_dssat_path = str(PROJECT_ROOT / "src" / "calibration" / "run_dssat.py")
         if not os.path.exists(run_dssat_path):
-            run_dssat_path = os.path.join(_workspace_dir_from_this_file(), "run_dssat.py")
+            raise FileNotFoundError(f"DSSAT calibration entry point not found: {run_dssat_path}")
         cmd = [
             "python",
             run_dssat_path,
@@ -321,6 +326,11 @@ def compute_indicators(workspace_dir, batch_path, cultivar, param_csv_path, out_
         ]
         proc = subprocess.run(cmd, cwd=run_dir, capture_output=True, text=True)
         dssat_ok = proc.returncode == 0
+        if not dssat_ok:
+            raise RuntimeError(
+                f"DSSAT sensitivity run failed with exit code {proc.returncode}\n"
+                f"stdout:\n{proc.stdout}\nstderr:\n{proc.stderr}"
+            )
 
         eval_rows = _parse_evaluate_out(os.path.join(run_dir, "Evaluate.OUT")) if dssat_ok else []
         plantgro = (

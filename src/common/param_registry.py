@@ -13,9 +13,11 @@
 from __future__ import annotations
 
 import csv
+import math
 import os
 from dataclasses import dataclass, field
-from typing import Optional
+from pathlib import Path
+from typing import Iterable, Optional
 
 
 # ── 注册表字段 ─────────────────────────────────────────────────
@@ -72,7 +74,7 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     "SLOBI":  (-0.50,  0.0),
     "XMAGE":  (5.0,   30.0),
     "XFPHT":  (5.0,   40.0),
-    "XFINT":  (0.10,   1.20),
+    "XFINT":  (0.12,   0.50),
     # --- SPE temperature ---
     "TB":     (4.0,   15.0),
     "TO1":    (18.0,  32.0),
@@ -335,6 +337,191 @@ def clamp_to_physical(
     if upper is not None:
         upper = min(upper, phys_ub)
     return lower, upper
+
+
+# ── 冻结边界校验 ──────────────────────────────────────────────
+
+@dataclass(frozen=True)
+class ValidationIssue:
+    """Machine-readable parameter validation finding."""
+
+    code: str
+    message: str
+    parameter: str = ""
+    severity: str = "error"
+
+    def __str__(self) -> str:
+        subject = f" [{self.parameter}]" if self.parameter else ""
+        return f"{self.severity.upper()} {self.code}{subject}: {self.message}"
+
+
+def validate_frozen_bounds(path: str) -> list[ValidationIssue]:
+    """Validate a frozen bounds CSV without changing it.
+
+    Frozen inputs are immutable scientific decisions.  Invalid ranges are
+    rejected rather than reordered, clipped, or expanded automatically.
+    """
+    required = {
+        "name", "init", "lower", "upper", "status", "pargp",
+        "location", "file", "cultivar", "ecotype", "mode",
+    }
+    issues: list[ValidationIssue] = []
+    if not os.path.isfile(path):
+        return [ValidationIssue("FILE_NOT_FOUND", f"Frozen bounds file not found: {path}")]
+
+    with open(path, "r", encoding="utf-8-sig", newline="") as handle:
+        reader = csv.DictReader(handle)
+        columns = set(reader.fieldnames or [])
+        missing = sorted(required - columns)
+        if missing:
+            return [ValidationIssue("MISSING_COLUMNS", f"Missing required columns: {', '.join(missing)}")]
+        rows = list(reader)
+
+    seen: set[str] = set()
+    parsed: dict[str, dict[str, object]] = {}
+    allowed_status = {"active", "fixed", "disabled"}
+    for row_number, row in enumerate(rows, start=2):
+        name = str(row.get("name", "")).strip().upper()
+        status = str(row.get("status", "")).strip().lower()
+        location = str(row.get("location", "")).strip().upper()
+        target_file = str(row.get("file", "")).strip()
+        if not name:
+            issues.append(ValidationIssue("EMPTY_NAME", f"Row {row_number} has no parameter name"))
+            continue
+        if name in seen:
+            issues.append(ValidationIssue("DUPLICATE_NAME", "Parameter name occurs more than once", name))
+        seen.add(name)
+        if status not in allowed_status:
+            issues.append(ValidationIssue("INVALID_STATUS", f"Unsupported status {status!r}", name))
+        allowed_locations = {"CUL", "ECO", "SPE", "SOIL", "IC", "INIT"}
+        if location not in allowed_locations:
+            issues.append(ValidationIssue("INVALID_LOCATION", f"Unsupported location {location!r}", name))
+        if not target_file:
+            issues.append(ValidationIssue("EMPTY_TARGET_FILE", "Target file is required", name))
+        elif location in {"CUL", "ECO", "SPE"} and f".{location}" not in target_file.upper():
+            issues.append(ValidationIssue("FILE_LOCATION_MISMATCH", f"{location} parameter targets {target_file!r}", name))
+        elif location == "SOIL" and not target_file.upper().endswith(".SOL"):
+            issues.append(ValidationIssue("FILE_LOCATION_MISMATCH", f"SOIL parameter targets {target_file!r}", name))
+        elif location in {"IC", "INIT"} and Path(target_file).suffix.upper() not in {".TMX", ".TMA", ".TMT"}:
+            issues.append(ValidationIssue("FILE_LOCATION_MISMATCH", f"IC parameter targets {target_file!r}", name))
+
+        values: dict[str, float] = {}
+        for key in ("init", "lower", "upper"):
+            raw = row.get(key)
+            try:
+                value = float(raw)
+            except (TypeError, ValueError):
+                issues.append(ValidationIssue("NON_NUMERIC", f"{key}={raw!r} is not numeric", name))
+                continue
+            if not math.isfinite(value):
+                issues.append(ValidationIssue("NON_FINITE", f"{key} must be finite", name))
+                continue
+            values[key] = value
+
+        if len(values) == 3:
+            init, lower, upper = values["init"], values["lower"], values["upper"]
+            if lower > upper:
+                issues.append(ValidationIssue("REVERSED_BOUNDS", f"lower {lower:g} exceeds upper {upper:g}", name))
+            if not lower <= init <= upper:
+                issues.append(ValidationIssue("INIT_OUTSIDE_BOUNDS", f"init {init:g} not in [{lower:g}, {upper:g}]", name))
+            if status == "fixed" and not (lower == init == upper):
+                issues.append(ValidationIssue("FIXED_NOT_CONSTANT", "fixed requires lower == init == upper", name))
+
+            physical = PHYSICAL_BOUNDS.get(name)
+            if physical:
+                phys_lower, phys_upper = physical
+                if min(init, lower, upper) < phys_lower or max(init, lower, upper) > phys_upper:
+                    issues.append(
+                        ValidationIssue(
+                            "OUTSIDE_PHYSICAL_BOUNDS",
+                            f"values must stay within [{phys_lower:g}, {phys_upper:g}]",
+                            name,
+                        )
+                    )
+            if name == "FL-VS" and not (init == lower == upper == 100.0):
+                issues.append(ValidationIssue("FL_VS_NOT_FIXED", "FL-VS must be fixed at 100.0", name))
+
+            parsed[name] = {**values, "status": status, "location": location}
+
+        if status == "active" and location in {"SOIL", "IC", "INIT"}:
+            issues.append(
+                ValidationIssue(
+                    "NUISANCE_PARAMETER_ACTIVE",
+                    "SOIL/IC parameters are fixed by default and require explicit scientific approval",
+                    name,
+                    severity="warning",
+                )
+            )
+
+    _validate_temperature_relationships(parsed, issues)
+    _validate_soil_water_relationships(parsed, issues)
+    return issues
+
+
+def _validate_temperature_relationships(
+    parsed: dict[str, dict[str, object]], issues: list[ValidationIssue]
+) -> None:
+    groups = [
+        ("TB", "TO1", "TO2", "TM"),
+        ("TB1", "TO11", "TO21", "TM1"),
+        ("TB2", "TO12", "TO22", "TM2"),
+        ("TB3", "TO13", "TO23", "TM3"),
+    ]
+    for names in groups:
+        if not all(name in parsed for name in names):
+            continue
+        init_values = [float(parsed[name]["init"]) for name in names]
+        if not all(a < b for a, b in zip(init_values, init_values[1:])):
+            issues.append(
+                ValidationIssue("TEMP_INIT_ORDER", f"Expected {' < '.join(names)} at initial values", "/".join(names))
+            )
+        for left, right in zip(names, names[1:]):
+            if float(parsed[left]["upper"]) >= float(parsed[right]["lower"]):
+                issues.append(
+                    ValidationIssue(
+                        "TEMP_RANGE_ORDER",
+                        f"Independent ranges do not guarantee {left} < {right}",
+                        f"{left}/{right}",
+                    )
+                )
+
+
+def _validate_soil_water_relationships(
+    parsed: dict[str, dict[str, object]], issues: list[ValidationIssue]
+) -> None:
+    suffixes: set[str] = set()
+    for name in parsed:
+        for marker in ("SOIL_SLLL_", "SOIL_SDUL_", "SOIL_SSAT_"):
+            if name.startswith(marker):
+                suffixes.add(name[len(marker):])
+    for suffix in sorted(suffixes):
+        names = tuple(f"SOIL_{kind}_{suffix}" for kind in ("SLLL", "SDUL", "SSAT"))
+        if not all(name in parsed for name in names):
+            continue
+        init_values = [float(parsed[name]["init"]) for name in names]
+        if not all(a < b for a, b in zip(init_values, init_values[1:])):
+            issues.append(
+                ValidationIssue("SOIL_WATER_INIT_ORDER", "Expected SLLL < SDUL < SSAT", "/".join(names))
+            )
+        for left, right in zip(names, names[1:]):
+            if float(parsed[left]["upper"]) >= float(parsed[right]["lower"]):
+                issues.append(
+                    ValidationIssue(
+                        "SOIL_WATER_RANGE_ORDER",
+                        f"Independent ranges do not guarantee {left} < {right}",
+                        f"{left}/{right}",
+                    )
+                )
+
+
+def assert_valid_frozen_bounds(path: str | Path) -> list[ValidationIssue]:
+    """Raise ValueError when a frozen file has any error-level finding."""
+    issues = validate_frozen_bounds(path)
+    errors = [issue for issue in issues if issue.severity == "error"]
+    if errors:
+        preview = "\n".join(str(issue) for issue in errors[:30])
+        raise ValueError(f"Frozen bounds validation failed ({len(errors)} errors):\n{preview}")
+    return issues
 
 
 # ── 注册表 I/O ────────────────────────────────────────────────

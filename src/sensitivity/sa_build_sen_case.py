@@ -1,9 +1,19 @@
 import argparse
 import os
 import shutil
+import sys
+
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 import pandas as pd
 import pyemu
+
+from src.common.param_registry import assert_valid_frozen_bounds
+from src.common.project import git_metadata, sha256_file
 
 
 def _workspace_dir_from_this_file():
@@ -85,7 +95,9 @@ def build_case(
     morris_r=100,
     morris_p=None,
     morris_delta=None,
+    random_seed=20260715,
 ):
+    assert_valid_frozen_bounds(param_review_csv)
     os.makedirs(case_dir, exist_ok=True)
     case_dir = os.path.abspath(case_dir)
     workspace_dir = os.path.abspath(workspace_dir)
@@ -147,7 +159,7 @@ def build_case(
     pst.observation_data.loc[:, "weight"] = 1.0
 
     model_script = os.path.normpath(os.path.join(workspace_dir, "src", "sensitivity", "sa_model.py"))
-    batch_path = os.path.normpath(os.path.join(workspace_dir, "DSSBatch.v48"))
+    batch_path = os.path.join(workspace_dir, "data", "templates", "batch", "DSSBatch.v48")
     model_cmd = (
         f"python \"{model_script}\" --workspace . --batch \"{batch_path}\" "
         f"--cultivar {cultivar} --param-csv {params_csv_name} --out {out_name} --obs-order sa_obs_order.txt"
@@ -160,6 +172,7 @@ def build_case(
     if morris_delta is not None:
         pst.pestpp_options["gsa_morris_delta"] = float(morris_delta)
     pst.pestpp_options["gsa_morris_obs_sen"] = True
+    pst.pestpp_options["rand_seed"] = int(random_seed)
 
     pst.write(pst_path)
 
@@ -168,6 +181,21 @@ def build_case(
     pst_sobol.pestpp_options["gsa_method"] = "sobol"
     pst_sobol.pestpp_options["gsa_sobol_samples"] = 1000
     pst_sobol.write(pst_sobol_path)
+
+    git_info = git_metadata()
+    manifest = os.path.join(case_dir, "run_manifest.yaml")
+    with open(manifest, "w", encoding="utf-8") as handle:
+        handle.write(f"run_id: {os.path.basename(case_dir)}\n")
+        handle.write("run_type: sensitivity_smoke\n")
+        handle.write(f"git_commit: {git_info.get('git_commit', '')}\n")
+        handle.write(f"git_branch: {git_info.get('git_branch', '')}\n")
+        handle.write(f"git_dirty: {str(git_info.get('git_dirty', False)).lower()}\n")
+        handle.write(f"bounds_csv: {os.path.abspath(param_review_csv)}\n")
+        handle.write(f"bounds_sha256: {sha256_file(param_review_csv)}\n")
+        handle.write(f"random_seed: {int(random_seed)}\n")
+        handle.write(f"morris_r: {int(morris_r)}\n")
+        handle.write(f"morris_p: {'' if morris_p is None else int(morris_p)}\n")
+        handle.write(f"cultivar: {cultivar}\n")
 
     for fp in [model_script]:
         if os.path.exists(fp):
@@ -187,6 +215,7 @@ def main():
     parser.add_argument("--morris-r", type=int, default=100)
     parser.add_argument("--morris-p", type=int, default=None)
     parser.add_argument("--morris-delta", type=float, default=None)
+    parser.add_argument("--random-seed", type=int, default=20260715)
     args = parser.parse_args()
 
     workspace_dir = _workspace_dir_from_this_file()
@@ -209,6 +238,7 @@ def main():
         morris_r=args.morris_r,
         morris_p=args.morris_p,
         morris_delta=args.morris_delta,
+        random_seed=args.random_seed,
     )
     print(f"Wrote: {pst_path}")
 

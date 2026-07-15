@@ -1,137 +1,89 @@
-"""freeze_bounds.py — 从 bounds_proposal 显式批准生成 bounds_frozen。
+"""Promote an explicitly approved bounds proposal to a frozen bounds ID."""
 
-用法：
-    python tools/freeze_bounds.py \\
-        --proposal data/parameter_registry/bounds_proposals/eggplant/proposal_20260405.csv \\
-        --crop eggplant \\
-        --bounds-id eggplant_v1_20260405 \\
-        [--notes "首次冻结，基于 Morris SA 结果"]
-
-输出：
-    data/parameter_registry/bounds_frozen/eggplant/eggplant_v1_20260405.csv
-    data/parameter_registry/bounds_frozen/eggplant/eggplant_v1_20260405.yaml
-"""
+from __future__ import annotations
 
 import argparse
 import csv
-import os
-import shutil
-import sys
 from datetime import datetime, timezone
-
-# 允许从项目根目录运行时导入 src
-sys.path.insert(0, os.path.normpath(os.path.join(os.path.dirname(__file__), "..")))
-
-try:
-    from src.common.param_registry import clamp_to_physical
-except ImportError:
-    def clamp_to_physical(name, lower, upper):
-        return lower, upper
+import os
+from pathlib import Path
+import sys
 
 
-def _safe_float(val):
-    if val is None or str(val).strip() == "":
-        return None
-    try:
-        return float(val)
-    except (ValueError, TypeError):
-        return None
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.common.param_registry import assert_valid_frozen_bounds
+from src.common.project import sha256_file
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="从 bounds_proposal 批准生成 bounds_frozen"
-    )
-    parser.add_argument("--proposal", required=True,
-                        help="候选边界文件路径 (CSV)")
-    parser.add_argument("--crop", required=True,
-                        help="作物名称 (tomato / eggplant)")
-    parser.add_argument("--bounds-id", required=True,
-                        help="冻结边界的唯一 ID")
-    parser.add_argument("--notes", default="",
-                        help="审批备注")
-    parser.add_argument("--out-dir", default=None,
-                        help="输出目录 (默认: data/parameter_registry/bounds_frozen/{crop}/)")
-    parser.add_argument("--operator", default=os.environ.get("USERNAME", "unknown"),
-                        help="操作者")
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Approve a validated bounds proposal as a frozen bounds ID")
+    parser.add_argument("--proposal", required=True, help="Reviewed proposal CSV")
+    parser.add_argument("--crop", required=True, help="Crop name, for example tomato or eggplant")
+    parser.add_argument("--bounds-id", required=True, help="Unique frozen bounds ID")
+    parser.add_argument("--notes", default="", help="Approval notes")
+    parser.add_argument("--out-dir", default=None)
+    parser.add_argument("--operator", default=os.environ.get("USERNAME", "unknown"))
     args = parser.parse_args()
 
-    # ── 读取候选边界 ──
-    proposal_path = os.path.abspath(args.proposal)
-    if not os.path.exists(proposal_path):
-        print(f"ERROR: 候选边界文件不存在: {proposal_path}", file=sys.stderr)
-        sys.exit(1)
+    proposal = Path(args.proposal).resolve()
+    if not proposal.is_file():
+        parser.error(f"Proposal file does not exist: {proposal}")
 
-    with open(proposal_path, "r", encoding="utf-8-sig") as f:
-        reader = csv.DictReader(f)
+    # Approval must never mutate, clamp, swap, or otherwise repair the proposal.
+    issues = assert_valid_frozen_bounds(proposal)
+    for warning in (issue for issue in issues if issue.severity == "warning"):
+        print(f"WARNING: {warning.message}")
+
+    with proposal.open("r", encoding="utf-8-sig", newline="") as handle:
+        reader = csv.DictReader(handle)
         rows = list(reader)
         fieldnames = reader.fieldnames or []
-
     if not rows:
-        print("ERROR: 候选边界文件为空", file=sys.stderr)
-        sys.exit(1)
+        parser.error("Proposal CSV is empty")
 
-    # ── 物理边界截断检查 ──
-    clamped_count = 0
-    for row in rows:
-        name = row.get("name", row.get("parameter_name", ""))
-        lb = _safe_float(row.get("lower", row.get("lower_bound")))
-        ub = _safe_float(row.get("upper", row.get("upper_bound")))
-        lb2, ub2 = clamp_to_physical(name, lb, ub)
-        if lb2 != lb or ub2 != ub:
-            clamped_count += 1
-            if "lower" in row:
-                row["lower"] = str(lb2) if lb2 is not None else ""
-            if "lower_bound" in row:
-                row["lower_bound"] = str(lb2) if lb2 is not None else ""
-            if "upper" in row:
-                row["upper"] = str(ub2) if ub2 is not None else ""
-            if "upper_bound" in row:
-                row["upper_bound"] = str(ub2) if ub2 is not None else ""
+    output_dir = (
+        Path(args.out_dir).resolve()
+        if args.out_dir
+        else PROJECT_ROOT / "data" / "parameter_registry" / "bounds_frozen" / args.crop
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    frozen_csv = output_dir / f"{args.bounds_id}.csv"
+    metadata = output_dir / f"{args.bounds_id}.yaml"
+    if frozen_csv.exists() or metadata.exists():
+        parser.error(f"Frozen bounds ID already exists: {args.bounds_id}")
 
-    if clamped_count > 0:
-        print(f"WARNING: {clamped_count} 个参数的边界被截断到物理硬边界范围内。")
-
-    # ── 确定输出目录 ──
-    root = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
-    if args.out_dir:
-        out_dir = os.path.abspath(args.out_dir)
-    else:
-        out_dir = os.path.join(root, "data", "parameter_registry",
-                               "bounds_frozen", args.crop)
-    os.makedirs(out_dir, exist_ok=True)
-
-    # ── 写冻结边界 CSV ──
-    frozen_csv_path = os.path.join(out_dir, f"{args.bounds_id}.csv")
-    with open(frozen_csv_path, "w", newline="", encoding="utf-8-sig") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
+    with frozen_csv.open("w", encoding="utf-8-sig", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
 
-    # ── 写元数据 YAML ──
-    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    proposal_basename = os.path.basename(proposal_path)
-    yaml_path = os.path.join(out_dir, f"{args.bounds_id}.yaml")
-    yaml_content = f"""bounds_id: "{args.bounds_id}"
-crop: "{args.crop}"
-created_at: "{now_str}"
-approved_at: "{now_str}"
-approved_by: "{args.operator}"
-review_status: "approved"
-derived_from: "{proposal_basename}"
-parameter_count: {len(rows)}
-clamped_count: {clamped_count}
-notes: "{args.notes}"
-"""
-    with open(yaml_path, "w", encoding="utf-8") as f:
-        f.write(yaml_content)
-
-    print(f"✓ 冻结边界已生成：")
-    print(f"  CSV:  {frozen_csv_path}")
-    print(f"  YAML: {yaml_path}")
-    print(f"  参数数: {len(rows)}")
-    print(f"  bounds_id: {args.bounds_id}")
+    created_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    metadata.write_text(
+        "\n".join(
+            [
+                f'bounds_id: "{args.bounds_id}"',
+                f'crop: "{args.crop}"',
+                f'created_at: "{created_at}"',
+                f'approved_at: "{created_at}"',
+                f'approved_by: "{args.operator}"',
+                'review_status: "approved"',
+                f'derived_from: "{proposal.name}"',
+                f'derived_from_sha256: "{sha256_file(proposal)}"',
+                f"parameter_count: {len(rows)}",
+                'automatic_repairs: 0',
+                f'notes: "{args.notes}"',
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    print(f"Frozen bounds created: {frozen_csv}")
+    print(f"Metadata: {metadata}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

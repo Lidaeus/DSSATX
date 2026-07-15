@@ -1,134 +1,96 @@
-"""tests/test_weight_scheme.py - Unit tests for weight_scheme module."""
+"""Regression tests for the P0 raw-scale PEST weight policy."""
 
-import os
-import sys
-
-PROJECT_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
+import math
 
 import pandas as pd
-import numpy as np
+import pytest
+
 from src.calibration.weight_scheme import (
-    normalize_and_weight,
-    compute_cv_based_sigma,
-    compute_balanced_weights,
+    WEIGHT_POLICY_ID,
     build_observation_weights,
-    VARIABLE_TREATMENT,
-    LOG_TRANSFORM_VARS,
+    compute_balanced_weights,
+    compute_cv_based_sigma,
+    compute_phi,
+    minmax_normalize,
+    normalize_and_weight,
+    weight_from_sigma,
 )
 
 
-def test_normalize_non_cumulative():
+def test_sigma_maps_to_pest_weight_not_inverse_variance():
+    assert weight_from_sigma(10.0) == pytest.approx(0.1)
+    assert weight_from_sigma(10.0, group_multiplier=2.0) == pytest.approx(0.2)
+
+
+def test_hand_calculated_phi_and_quadratic_residual_scaling():
+    weights = [weight_from_sigma(2.0), weight_from_sigma(4.0)]
+    phi = compute_phi([10.0, 20.0], [12.0, 16.0], weights)
+    assert phi == pytest.approx((2.0 / 2.0) ** 2 + (4.0 / 4.0) ** 2)
+    doubled = compute_phi([10.0, 20.0], [14.0, 12.0], weights)
+    assert doubled == pytest.approx(4.0 * phi)
+
+
+@pytest.mark.parametrize("sigma", [0.0, -1.0, float("nan"), float("inf")])
+def test_invalid_sigma_fails(sigma):
+    with pytest.raises(ValueError):
+        weight_from_sigma(sigma)
+
+
+def test_raw_compatibility_entry_does_not_change_values():
     obs = pd.Series([100.0, 110.0, 120.0])
     sim = pd.Series([102.0, 108.0, 118.0])
-    w, no, ns, eff_sig = normalize_and_weight(obs, sim, sigma_original=10.0, use_log_transform=False)
-    assert 0.1 < w < 10.0, f"Unexpected weight: {w}"
-    assert no.min() >= 0.0 and no.max() <= 1.0, "Normalized obs should be in [0,1]"
-    print("  PASS: normalize_non_cumulative")
+    weight, out_obs, out_sim, effective_sigma = normalize_and_weight(obs, sim, 10.0)
+    assert weight == pytest.approx(0.1)
+    pd.testing.assert_series_equal(out_obs, obs)
+    pd.testing.assert_series_equal(out_sim, sim)
+    assert effective_sigma == 10.0
 
 
-def test_normalize_cumulative_log_transform():
-    obs_cum = pd.Series([500.0, 1500.0, 5000.0, 8000.0])
-    sim_cum = pd.Series([480.0, 1550.0, 4900.0, 8200.0])
-    w2, no2, ns2, eff_sig2 = normalize_and_weight(obs_cum, sim_cum, sigma_original=0.1, use_log_transform=True)
-    assert w2 > 0, f"Weight should be positive: {w2}"
-    print("  PASS: normalize_cumulative_log_transform")
+def test_dynamic_minmax_and_partial_log_are_rejected():
+    obs = pd.Series([1.0, 2.0])
+    sim = pd.Series([1.1, 2.2])
+    with pytest.raises(ValueError, match="Min-Max"):
+        minmax_normalize(obs, sim)
+    with pytest.raises(ValueError, match="Log residuals"):
+        normalize_and_weight(obs, sim, 1.0, use_log_transform=True)
 
 
-def test_normalize_handles_missing():
-    obs = pd.Series([-99.0, 100.0, 110.0])
-    sim = pd.Series([100.0, 102.0, 108.0])
-    w, no, ns, eff_sig = normalize_and_weight(obs, sim, sigma_original=10.0, use_log_transform=False)
-    assert w > 0
-    print("  PASS: normalize_handles_missing")
-
-
-def test_cv_based_sigma():
-    obs_data = pd.Series([100, 110, 105, 115, 90])
-    sigma, cv = compute_cv_based_sigma(obs_data, sigma0=5.0)
-    assert sigma > 0
-    assert 0.0 < cv < 1.0
-    print(f"  PASS: cv_based_sigma (sigma={sigma:.4f}, cv={cv:.4f})")
-
-
-def test_cv_based_sigma_override():
-    obs_data = pd.Series([100, 110, 105, 115, 90])
-    sigma, cv = compute_cv_based_sigma(obs_data, sigma0=5.0, cv_override=0.1)
-    assert sigma > 0
+def test_cv_based_sigma_uses_absolute_and_relative_components():
+    sigma, cv = compute_cv_based_sigma(pd.Series([90.0, 100.0, 110.0]), sigma0=5.0, cv_override=0.1)
     assert cv == 0.1
-    print("  PASS: cv_based_sigma_override")
+    assert sigma == pytest.approx(math.sqrt(5.0**2 + 10.0**2))
 
 
-def test_balanced_weights():
-    obs_df = pd.DataFrame({
-        'obsnme': ['o1', 'o2', 'o3'],
-        'obsval': [100.0, 200.0, 150.0],
-        'obgnme': ['grp_a', 'grp_a', 'grp_b']
-    })
-    sim_df = pd.DataFrame({
-        'obsnme': ['o1', 'o2', 'o3'],
-        'simulated': [102.0, 195.0, 155.0]
-    })
-    original_sigmas = {'grp_a': 10.0, 'grp_b': 20.0}
-    bw, adj_s = compute_balanced_weights(obs_df, sim_df, original_sigmas)
-    assert all(v > 0 for v in bw.values()), f"Balanced weights should be positive: {bw}"
-    assert all(v > 0 for v in adj_s.values()), f"Adjusted sigmas should be positive: {adj_s}"
-    print(f"  PASS: balanced_weights {bw}")
-
-
-def test_build_observation_weights():
-    obs_data = [
-        {'obsnme': 'laixs_r1', 'obsval': 3.5, 'weight': 1.0, 'obgnme': 'LAIXM'},
-        {'obsnme': 'hwams_r1', 'obsval': 8000.0, 'weight': 1.0, 'obgnme': 'HWAMM'},
-        {'obsnme': 'adaps_r1', 'obsval': 70.0, 'weight': 1.0, 'obgnme': 'ADAPM'},
+def test_build_observation_weights_writes_audit_fields():
+    observations = [
+        {"obsnme": "lai_1", "obsval": 3.5, "weight": 1.0, "obgnme": "LAIXM", "sigma": 0.5},
+        {"obsnme": "yield_1", "obsval": 8000.0, "weight": 1.0, "obgnme": "HWAMM", "sigma": 200.0},
     ]
-    result = build_observation_weights(
-        obs_data,
-        df_override=None,
-        sim_baseline=None,
-        apply_normalization=True,
-        apply_log_transform=True,
-        apply_pwtadj1=False,
-        cv_based_sigma=False,
+    result = build_observation_weights(observations)
+    by_name = {row["obsnme"]: row for row in result}
+    assert by_name["lai_1"]["weight"] == pytest.approx(2.0)
+    assert by_name["yield_1"]["weight"] == pytest.approx(0.005)
+    assert all(row["weight_policy_id"] == WEIGHT_POLICY_ID for row in result)
+    assert all(row["transform"] == "raw" for row in result)
+
+
+def test_pwtadj1_requires_exact_group_mapping_and_baseline():
+    obs = pd.DataFrame(
+        {"obsnme": ["o1", "o2"], "obsval": [10.0, 20.0], "obgnme": ["a", "b"]}
     )
-    assert len(result) == 3
-    for r in result:
-        assert 'weight' in r
-        assert r['weight'] > 0
-    print("  PASS: build_observation_weights")
+    sim = pd.DataFrame({"obsnme": ["o1", "o2"], "simulated": [12.0, 24.0]})
+    with pytest.raises(ValueError, match="exactly match"):
+        compute_balanced_weights(obs, sim, {"a": 1.0})
+    weights, adjusted = compute_balanced_weights(obs, sim, {"a": 1.0, "b": 2.0})
+    assert set(weights) == {"a", "b"}
+    assert all(value > 0 for value in adjusted.values())
 
 
-def test_variable_treatment_definitions():
-    assert 'ADAPM' in VARIABLE_TREATMENT
-    assert 'LWADM' in VARIABLE_TREATMENT
-    assert 'HIAMM' in VARIABLE_TREATMENT
-    assert VARIABLE_TREATMENT['ADAPM']['log_transform'] is False
-    assert VARIABLE_TREATMENT['LWADM']['log_transform'] is True
-    assert VARIABLE_TREATMENT['HIAMM']['log_transform'] is False
-    print("  PASS: variable_treatment_definitions")
-
-
-def test_log_transform_vars():
-    assert 'LWADM' in LOG_TRANSFORM_VARS
-    assert 'SWADM' in LOG_TRANSFORM_VARS
-    assert 'ADAPM' not in LOG_TRANSFORM_VARS
-    assert 'HIAMM' not in LOG_TRANSFORM_VARS
-    print("  PASS: log_transform_vars")
-
-
-if __name__ == "__main__":
-    tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
-    passed = 0
-    failed = 0
-    for test in tests:
-        try:
-            test()
-            passed += 1
-        except Exception as e:
-            print(f"  FAIL: {test.__name__}: {e}")
-            import traceback
-            traceback.print_exc()
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed (total {passed + failed})")
-    sys.exit(1 if failed else 0)
+def test_improved_flags_do_not_silently_fallback():
+    observations = [
+        {"obsnme": "o1", "obsval": 1.0, "weight": 1.0, "obgnme": "LAIXM", "sigma": 0.5}
+    ]
+    with pytest.raises(ValueError, match="Min-Max"):
+        build_observation_weights(observations, apply_normalization=True)
+    with pytest.raises(ValueError, match="baseline"):
+        build_observation_weights(observations, apply_pwtadj1=True)
