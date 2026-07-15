@@ -2,11 +2,16 @@
 
 ## 2026-07-15
 
+- 建立 Fig. 1–6/Fig. S1–S8 科研图表注册表、统一出版 profile、tidy 数据契约和图表 manifest。
+- 新增多变量观测—模拟、代表处理动态和 realization 分布 Φ 收敛核心图，支持 PDF/SVG/600 dpi PNG 与源数据导出。
+- 删除硬编码迭代、目录并在绘图时重跑模型的旧 `visualize_results`/`visualize_eggplant`；旧 plot_results 仅保留诊断兼容。
+- 历史结果必须显式 `--allow-unvalidated-demo`，生成 `demo_` 文件与 `legacy_layout_demo` 标识，不能误作论文证据。
 - 将用户更新的 XXQL2501 FileX/SOIL 及配套 FileA/FileT/气象/批处理导入版本化输入包，新增 SHA-256 清单和跨文件科学门禁；权威坐标统一为 35.16°N、113.8°E。
 - DSSAT、SA 和率定入口新增显式 `--input-dir`，正式运行可隔离使用用户定义文件，避免从旧 `data/raw`/`Workspace` 隐式取值。
 - 批准并冻结 `eggplant_p1_xxql2501_v1_20260715`：57 active，8 层土壤实值 fixed，50 个 TN×层初始水分记录 disabled；废弃错误的 6 层共用 IC 语义。
 - 审计 TN2/TN3 与旧 90 项输出：改为全部 10 TN、240 项响应；过程点对齐 FileT 的 DAP 45/67/95/119，移除冗余跨处理均值。
 - 正式 Morris 预算提高为 5 个固定种子×`r=30`，合计理论 8700 次 DSSAT；新增输入、输出、边界和本地化回归测试。
+- 首个 v1 正式 seed 因 XMAGE/XFPHT 重叠范围产生非法轨迹而触发高失败率门禁并中止；v1 标记 superseded，v2 用 `XMAGE 5–20`、`XFPHT 25–40` 保证严格顺序，并将该关系加入 frozen validator 回归。
 - 加固 P0 回归测试：固化 V14 的真实失败基线，拒绝空边界、active 零宽、空参数组、非法边界交换/夹紧、IES 非有限输出、Phi 非有限值及 realization 异常丢失。
 - 修正物理硬边界错误排除 DSSAT 自带基线的问题，并以 V14 设计 proposal 生成待审 P1 候选：57 个 CUL/ECO/SPE active，44 个 SOIL/IC 参数恢复 fixed。
 - 新增 P1 bounds readiness 门禁和启动计划；pending proposal 仅允许技术构建，未批准时正式预检必须失败。

@@ -474,8 +474,27 @@ def validate_frozen_bounds(path: str) -> list[ValidationIssue]:
             )
 
     _validate_temperature_relationships(parsed, issues)
+    _validate_stage_relationships(parsed, issues)
     _validate_soil_water_relationships(parsed, issues)
     return issues
+
+
+def _validate_stage_relationships(
+    parsed: dict[str, dict[str, object]], issues: list[ValidationIssue]
+) -> None:
+    """Validate strict stage relations across every independent sample."""
+    if not all(name in parsed for name in ("XMAGE", "XFPHT")):
+        return
+    if float(parsed["XMAGE"]["init"]) >= float(parsed["XFPHT"]["init"]):
+        issues.append(ValidationIssue("STAGE_INIT_ORDER", "Expected XMAGE < XFPHT", "XMAGE/XFPHT"))
+    if float(parsed["XMAGE"]["upper"]) >= float(parsed["XFPHT"]["lower"]):
+        issues.append(
+            ValidationIssue(
+                "STAGE_RANGE_ORDER",
+                "Independent ranges do not guarantee XMAGE < XFPHT",
+                "XMAGE/XFPHT",
+            )
+        )
 
 
 def _validate_temperature_relationships(

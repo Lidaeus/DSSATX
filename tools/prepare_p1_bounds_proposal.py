@@ -41,6 +41,11 @@ TEMPERATURE_RANGES = {
     "TM3": (33.0, 41.0),
 }
 
+STAGE_RANGES = {
+    "XMAGE": (5.0, 20.0),
+    "XFPHT": (25.0, 40.0),
+}
+
 
 def prepare_proposal(source: str | Path, destination: str | Path) -> tuple[Path, Path, Path]:
     source_path = Path(source).resolve()
@@ -117,6 +122,22 @@ def prepare_proposal(source: str | Path, destination: str | Path) -> tuple[Path,
             lower=lower,
             upper=upper,
             review_note="P1 ordered temperature range; requires user review",
+        )
+
+    for name, (lower, upper) in STAGE_RANGES.items():
+        matches = output.index[output["name"] == name]
+        if len(matches) != 1:
+            raise ValueError(f"Expected exactly one V14 stage parameter {name}, found {len(matches)}")
+        index = int(matches[0])
+        initial = float(output.at[index, "init"])
+        if not lower <= initial <= upper:
+            raise ValueError(f"V14 initial value for {name}={initial:g} not in proposed range [{lower:g}, {upper:g}]")
+        record_change(
+            index,
+            "Ranges separated so all independent Morris samples preserve XMAGE < XFPHT",
+            lower=lower,
+            upper=upper,
+            review_note="P1 ordered stage range; requires user review",
         )
 
     destination_path.parent.mkdir(parents=True, exist_ok=True)

@@ -41,12 +41,13 @@ TN2/TN3 都是 MI1，只比较 MF1/MF2。用这两个处理进行全局 SA 会�
 ## 边界判断
 
 - 57 个 CUL/ECO/SPE 参数进入 P1 Morris；物理硬边界与温度顺序门禁通过。
+- v1 正式预检暴露 XMAGE/XFPHT 范围重叠，已按质量门中止并由 v2 取代；v2 用 `XMAGE 5–20`、`XFPHT 25–40` 保证所有独立样本满足阶段顺序。
 - 8 层土壤属性按输入实值固定。本轮研究目标是遗传参数筛选，不让土壤不确定性吞噬遗传参数效应。
 - 原 6 个共用 `IC_SH2O` 已不符合 FileX。新边界保存 50 个 TN×层 IC 记录但状态为 `disabled`；它们是输入证据，不是可调参数。
 
 ## 已验证证据
 
-- `python -m pytest tests -q`：71 passed；
+- `python -m pytest tests -q`：新增关系回归后 72 passed（不含并行开发中的图表测试）；
 - 迁移测试：9 passed；
 - P1 bounds readiness：pass；
 - 新输入包基线 DSSAT 实跑：240/240 输出有效，0 个 `-99`。

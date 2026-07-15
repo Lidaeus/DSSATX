@@ -9,7 +9,7 @@ from src.sensitivity.output_contract import load_output_contract, observation_na
 
 ROOT = Path(__file__).resolve().parents[1]
 BUNDLE = ROOT / "data" / "user" / "experiments" / "xxql2501_20260715"
-FROZEN = ROOT / "data" / "parameter_registry" / "bounds_frozen" / "eggplant" / "eggplant_p1_xxql2501_v1_20260715.csv"
+FROZEN = ROOT / "data" / "parameter_registry" / "bounds_frozen" / "eggplant" / "eggplant_p1_xxql2501_v2_20260715.csv"
 
 
 def test_versioned_xxql2501_bundle_passes_cross_file_gates():
@@ -49,3 +49,4 @@ def test_frozen_bounds_use_new_soil_and_treatment_specific_disabled_ic():
     assert len(ic) == 50
     assert set(ic["status"].str.lower()) == {"disabled"}
     assert not frame["name"].isin({"IC_SH2O_01", "IC_SH2O_02"}).any()
+    assert float(by_name.loc["XMAGE", "upper"]) < float(by_name.loc["XFPHT", "lower"])

@@ -58,6 +58,20 @@ def main() -> int:
     retained["review_note"] = retained["review_note"].astype(str).str.replace(
         "requires user review", "approved by user on 2026-07-15", regex=False
     )
+    relationship_ranges = {"XMAGE": (5.0, 20.0), "XFPHT": (25.0, 40.0)}
+    for name, (lower, upper) in relationship_ranges.items():
+        matches = retained.index[retained["name"].astype(str).str.upper() == name]
+        if len(matches) != 1:
+            parser.error(f"Expected exactly one {name} row, found {len(matches)}")
+        index = matches[0]
+        initial = float(retained.at[index, "init"])
+        if not lower <= initial <= upper:
+            parser.error(f"{name} initial {initial:g} is outside [{lower:g}, {upper:g}]")
+        retained.at[index, "lower"] = lower
+        retained.at[index, "upper"] = upper
+        retained.at[index, "review_note"] = (
+            "Range separated after formal preflight so every Morris sample preserves XMAGE < XFPHT"
+        )
     profile = summary["soil_profile"]
     nuisance: list[dict[str, object]] = []
     surface = profile["surface"]

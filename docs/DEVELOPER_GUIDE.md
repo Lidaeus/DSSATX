@@ -178,6 +178,10 @@ FileA/FileT 当前以处理均值作为 DSSAT 观测。重复原始记录应保�
 - 每张图保存源数据、配置、生成脚本版本和 caption registry；
 - 自动检查 DPI、物理尺寸、字体、裁切、文件大小和面板完整性。
 
+正式图表统一调用 `src/reporting/figure_style.py`，不得在各脚本重复定义字体、颜色和尺寸。绘图函数只消费结构化数据，不得在绘图时启动 DSSAT/PEST、猜测迭代号或推断处理映射。历史适配器必须写入 `legacy_unvalidated`，且只有显式 demo 开关才能生成图片。
+
+核心接口与 Fig. 1–6/Fig. S1–S8 注册表见 [科研图表设计与开发计划](科研图表设计与开发计划.md)。旧 `src/reporting/plot_results.py` 只维持诊断兼容；新论文图写入 source CSV、metrics CSV 和 `figure_manifest.json`，PDF/SVG 为母版，PNG 仅作审阅。
+
 具体目标期刊规范优先于通用 profile。
 
 ## 7. 测试分层
@@ -202,4 +206,4 @@ FileA/FileT 当前以处理均值作为 DSSAT 观测。重复原始记录应保�
 6. 未经批准不修改原始观测、不替换正式冻结边界、不删除历史结果；
 7. 每个阶段通过用户验收后再进入下一阶段。
 
-当前经用户批准的 P1 frozen 为 `eggplant_p1_xxql2501_v1_20260715`，输入包为 `xxql2501_20260715`。后续不得静默改写两者；任何变化必须创建新 bundle/bounds ID。Morris 结果只可生成待审 Top-K proposal，不自动进入 Sobol 或率定。
+当前经用户批准的 P1 frozen 为 `eggplant_p1_xxql2501_v2_20260715`，输入包为 `xxql2501_20260715`。v1 因 XMAGE/XFPHT 独立范围重叠而标记为 superseded。后续不得静默改写输入或 v2 CSV；任何变化必须创建新 bundle/bounds ID。Morris 结果只可生成待审 Top-K proposal，不自动进入 Sobol 或率定。

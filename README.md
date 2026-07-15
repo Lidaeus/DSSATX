@@ -10,7 +10,8 @@ Tomato_Cal 面向作物模型研究者，目标是在 Windows 环境中提供可
 - 历史运行只能证明流程曾执行，不能证明其科研结论有效；P0 质量门现已能主动拒绝这些退化结果。
 - 当前开发基线是 [产品定义与系统设计](项目重构规划.md)；详细风险和任务见 [P0 科研可信性修复开发计划](docs/P0_科研可信性修复开发计划.md)。
 - P0 已在 `codex/p0-research-credibility` 实施并通过微型数值验证；后续批准的显式 log/处理均值 sigma 也已完成真实 DSSAT/PEST 冒烟，详见 [P0 验证报告](docs/reports/P0_verification_report.md) 与 [Observation Policy 验证记录](docs/reports/observation_policy_verification.md)。已有历史 SA 排名、率定最优参数或不确定性结果仍不得用于论文结论。
-- P0 防退化加固已完成当前回归轮次；P1 的新 XXQL2501 输入包、57 个活跃参数边界和 10 TN/240 响应契约已批准并通过门禁，正在按 `5 seeds × r=30` 预备正式 Morris。详见 [P1 科研分析启动计划](docs/P1_科研分析启动计划.md) 与 [输入/输出设计审计](docs/reports/XXQL2501_input_and_SA_design_review.md)。
+- 科研图表已建立统一 profile、tidy 数据接口、历史结果安全适配器和三类核心绘图；完整 Fig. 1–6/Fig. S1–S8 规划见 [科研图表设计与开发计划](docs/科研图表设计与开发计划.md)。
+- P0 防退化加固已完成当前回归轮次；P1 的新 XXQL2501 输入包、57 个活跃参数和 10 TN/240 响应契约已批准。首轮预检正确拦截 v1 的 XMAGE/XFPHT 非法组合，当前边界已升级为 `eggplant_p1_xxql2501_v2_20260715`，准备重新执行 `5 seeds × r=30` 正式 Morris。详见 [P1 科研分析启动计划](docs/P1_科研分析启动计划.md) 与 [输入/输出设计审计](docs/reports/XXQL2501_input_and_SA_design_review.md)。
 
 ## 产品原则
 
@@ -91,6 +92,15 @@ docs/                     当前规范、开发计划和历史背景材料
 python -m pip install -r requirements-dev.txt
 python -m pytest tests -q
 python -m compileall src tests tools
+```
+
+历史结果仅用于检查图表版式时，必须显式生成 DEMO：
+
+```powershell
+python -m src.reporting.paper_figures --prefix eggplant_stage2_v14_full `
+  --legacy-results-dir workspace `
+  --phi-csv workspace/eggplant_stage2_v14_full.phi.actual.csv `
+  --out-dir workspace/runs/figure_demo --allow-unvalidated-demo
 ```
 
 持久化 IES 运行必须再执行科学质量门：

@@ -56,6 +56,17 @@ def test_temperature_ranges_must_guarantee_order(tmp_path):
     assert "TEMP_RANGE_ORDER" in {issue.code for issue in validate_frozen_bounds(str(path))}
 
 
+def test_xmage_xfpht_ranges_must_guarantee_stage_order(tmp_path):
+    path = _write_bounds(
+        tmp_path / "stage_order.csv",
+        [
+            "XMAGE,13.5,5,30,active,ECO_Pheno,ECO,TMGRO048.ECO.base,TM0008,TM0001,both",
+            "XFPHT,38.8,5,40,active,ECO_Pheno,ECO,TMGRO048.ECO.base,TM0008,TM0001,both",
+        ],
+    )
+    assert "STAGE_RANGE_ORDER" in {issue.code for issue in validate_frozen_bounds(str(path))}
+
+
 def test_current_v14_is_a_preserved_failure_fixture():
     path = Path("data/parameter_registry/bounds_frozen/eggplant/eggplant_v14_20260405.csv")
     issues = validate_frozen_bounds(str(path))
@@ -67,6 +78,7 @@ def test_current_v14_is_a_preserved_failure_fixture():
             "INIT_OUTSIDE_BOUNDS": 8,
             "FIXED_NOT_CONSTANT": 2,
             "TEMP_RANGE_ORDER": 3,
+            "STAGE_RANGE_ORDER": 1,
             "SOIL_WATER_RANGE_ORDER": 2,
         }
     )
