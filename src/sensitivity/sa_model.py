@@ -357,7 +357,9 @@ def compute_indicators(
 
             _emit(f"{prefix}_YIELD_HWAMS", r.get("HWAMS"))
             _emit(f"{prefix}_HIAMS", r.get("HIAMS"))
-            _emit(f"{prefix}_LAIXM", r.get("LAIXM"))
+            # DSSAT Evaluate.OUT suffixes M/S mean measured/simulated.  SA must
+            # expose the simulated maximum LAI, never the FileA measured value.
+            _emit(f"{prefix}_LAIXS", r.get("LAIXS"))
             _emit(f"{prefix}_CWAMS", r.get("CWAMS"))
             _emit(f"{prefix}_ADAPS", r.get("ADAPS"))
             _emit(f"{prefix}_PDFPS", r.get("PDFPS"))

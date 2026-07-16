@@ -6,6 +6,7 @@ import pytest
 from src.common.quality import (
     ScientificQualityError,
     assess_ies,
+    load_morris_summary,
     assess_morris,
     assess_numeric_matrix,
     assess_sobol,
@@ -26,6 +27,33 @@ def test_all_zero_morris_is_process_complete_but_scientifically_failed(tmp_path)
 def test_nonzero_morris_passes():
     report = assess_morris(pd.DataFrame({"score": [0.0, 0.25]}))
     assert report.science_validated
+
+
+def test_morris_rejects_a_declared_output_with_only_zero_effects():
+    report = assess_morris(
+        pd.DataFrame(
+            {
+                "obs": ["yield", "yield", "fruit_early", "fruit_early"],
+                "score": [0.1, 0.0, 0.0, 0.0],
+            }
+        )
+    )
+    check = next(
+        item for item in report.checks if item.check_id == "morris_output_non_degenerate"
+    )
+    assert check.status == "fail"
+    assert check.actual["degenerate_outputs"] == ["fruit_early"]
+
+
+def test_load_morris_summary_accepts_pestpp_sen_columns(tmp_path):
+    path = tmp_path / "case.mio"
+    path.write_text(
+        "observation_name,parameter_name,n_samples,sen_mean_abs\n"
+        "yield,p1,8,0.25\n",
+        encoding="utf-8",
+    )
+    frame = load_morris_summary(path)
+    assert frame.loc[0, ["obs", "par", "score"]].tolist() == ["yield", "p1", 0.25]
 
 
 def test_constant_forward_outputs_fail():

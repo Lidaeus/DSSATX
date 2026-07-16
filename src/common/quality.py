@@ -166,6 +166,7 @@ def assess_morris(
     *,
     run_id: str = "",
     score_column: str = "score",
+    observation_column: str = "obs",
     tolerance: float = 1e-12,
 ) -> QualityReport:
     """Reject empty, non-finite, or all-zero Morris results."""
@@ -191,7 +192,58 @@ def assess_morris(
         actual=nonzero,
         threshold=1,
     )
+    if observation_column in frame:
+        grouped = pd.DataFrame(
+            {
+                "observation": frame[observation_column].astype(str),
+                "score": values,
+            }
+        ).groupby("observation", sort=True)["score"]
+        degenerate_outputs = [
+            str(name)
+            for name, group in grouped
+            if not bool((group[np.isfinite(group)].abs() > tolerance).any())
+        ]
+        report.add(
+            "morris_output_non_degenerate",
+            not degenerate_outputs,
+            "Every declared response has at least one materially non-zero Morris effect",
+            actual={
+                "degenerate_count": len(degenerate_outputs),
+                "degenerate_outputs": degenerate_outputs,
+            },
+            threshold={"degenerate_count": 0},
+        )
     return report
+
+
+def load_morris_summary(path: str | Path) -> pd.DataFrame:
+    """Load a PESTPP-SEN .mio file into the quality-gate schema."""
+    frame = pd.read_csv(path)
+    columns = {str(column).strip().lower(): column for column in frame.columns}
+    observation = (
+        columns.get("observation_name")
+        or columns.get("obsnme")
+        or columns.get("obsname")
+        or columns.get("observation")
+    )
+    parameter = (
+        columns.get("parameter_name")
+        or columns.get("parnme")
+        or columns.get("parname")
+        or columns.get("parameter")
+    )
+    score = (
+        columns.get("mu*")
+        or columns.get("mu_star")
+        or columns.get("mustar")
+        or columns.get("sen_mean_abs")
+    )
+    if observation is None or parameter is None or score is None:
+        raise ValueError(f"Unexpected Morris summary columns: {list(frame.columns)}")
+    return frame.rename(
+        columns={observation: "obs", parameter: "par", score: "score"}
+    )
 
 
 def assess_morris_audit(

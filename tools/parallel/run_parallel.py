@@ -534,7 +534,11 @@ def cmd_run(args):
             })
             if process_state == "completed" and args.mode == "sen":
                 try:
-                    from src.common.quality import assess_morris_audit
+                    from src.common.quality import (
+                        assess_morris,
+                        assess_morris_audit,
+                        load_morris_summary,
+                    )
                     from src.sensitivity.morris_audit import audit_morris_case, write_morris_audit
 
                     audit = audit_morris_case(run_dir, case=args.case)
@@ -542,7 +546,18 @@ def cmd_run(args):
                     write_morris_audit(audit, audit_dir)
                     quality = assess_morris_audit(audit, run_id=os.path.basename(run_dir))
                     quality.write(audit_dir, stem="morris_run_quality")
-                    scientific_status = "validated" if quality.science_validated else "failed"
+                    result = load_morris_summary(
+                        os.path.join(run_dir, f"{args.case}.mio")
+                    )
+                    result_quality = assess_morris(
+                        result, run_id=os.path.basename(run_dir)
+                    )
+                    result_quality.write(audit_dir, stem="morris_result_quality")
+                    scientific_status = (
+                        "validated"
+                        if quality.science_validated and result_quality.science_validated
+                        else "failed"
+                    )
                 except Exception as exc:
                     scientific_status = "not_assessed"
                     scientific_error = str(exc)

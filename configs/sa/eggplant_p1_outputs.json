@@ -1,11 +1,11 @@
 {
-  "profile_id": "eggplant_p1_all_treatments_v2",
+  "profile_id": "eggplant_p1_all_treatments_v3",
   "experiment_bundle": "xxql2501_20260716",
   "treatments": [2, 3, 4, 5, 9, 10, 11, 12, 13, 14],
   "features": [
     "YIELD_HWAMS",
     "HIAMS",
-    "LAIXM",
+    "LAIXS",
     "CWAMS",
     "ADAPS",
     "PDFPS",
@@ -20,13 +20,16 @@
     "AGB_END_CWAD",
     "HI_END_HIAD"
   ],
-  "time_points": [45, 67, 95, 119],
+  "lai_time_points": [45, 67, 95, 119],
+  "fruit_time_points": [67, 95, 119],
   "include_treatment_mean": false,
-  "observation_count": 240,
+  "observation_count": 230,
   "design_notes": [
     "All ten water-nitrogen treatments are retained; TN2/TN3 alone cover only irrigation level MI1.",
     "DAP points align with FileT process sampling dates 25120, 25142, 25170 and 25194 relative to planting date 25075.",
     "Redundant treatment means and seven highly correlated fixed-DAP pairs are omitted.",
-    "MDAPS is omitted because the reviewed baseline returns the DSSAT missing sentinel."
+    "MDAPS is omitted because the reviewed baseline returns the DSSAT missing sentinel.",
+    "LAIXS is the simulated maximum LAI; LAIXM is measured and must not be used as a model response.",
+    "FRUITD_DAP045 is omitted because the r=8 preflight found it structurally zero for every treatment and parameter effect."
   ]
 }

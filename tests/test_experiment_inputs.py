@@ -49,12 +49,17 @@ def test_noncontiguous_fertilizer_factor_rows_are_rejected():
 def test_p1_output_contract_is_full_design_nonredundant_and_observed_time_aligned():
     contract = load_output_contract()
     names = observation_names(contract)
-    assert contract["profile_id"] == "eggplant_p1_all_treatments_v2"
+    assert contract["profile_id"] == "eggplant_p1_all_treatments_v3"
     assert contract["experiment_bundle"] == "xxql2501_20260716"
-    assert len(names) == contract["observation_count"] == 240
+    assert len(names) == contract["observation_count"] == 230
     assert contract["time_points"] == [45, 67, 95, 119]
+    assert contract["lai_time_points"] == [45, 67, 95, 119]
+    assert contract["fruit_time_points"] == [67, 95, 119]
     assert not any(name.startswith("MEAN_") for name in names)
     assert not any("MDAPS" in name for name in names)
+    assert not any("LAIXM" in name for name in names)
+    assert not any("FRUITD_DAP045" in name for name in names)
+    assert any("LAI_DAP045" in name for name in names)
 
 
 def test_frozen_bounds_use_new_soil_and_treatment_specific_disabled_ic():

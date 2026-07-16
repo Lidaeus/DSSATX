@@ -18,6 +18,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+_BOOTSTRAP_ROOT = Path(__file__).resolve().parents[2]
+if str(_BOOTSTRAP_ROOT) not in sys.path:
+    sys.path.insert(0, str(_BOOTSTRAP_ROOT))
+
 from src.common.run_state import canonical_status, normalize_exit_code
 
 
@@ -335,14 +339,20 @@ def main() -> int:
     audit = audit_morris_case(args.case_dir, case=args.case)
     out_dir = args.out_dir or str(Path(args.case_dir) / "morris_audit")
     paths = write_morris_audit(audit, out_dir)
-    from src.common.quality import assess_morris_audit
+    from src.common.quality import assess_morris, assess_morris_audit, load_morris_summary
 
     report = assess_morris_audit(audit, run_id=Path(args.case_dir).name)
     report.write(out_dir, stem="morris_run_quality")
+    result_report = assess_morris(
+        load_morris_summary(Path(args.case_dir) / f"{args.case}.mio"),
+        run_id=Path(args.case_dir).name,
+    )
+    result_report.write(out_dir, stem="morris_result_quality")
     print(json.dumps(audit["summary"], ensure_ascii=False, indent=2))
     print(f"audit={paths['json']}")
     if args.require_formal:
         report.require_pass()
+        result_report.require_pass()
     return 0
 
 

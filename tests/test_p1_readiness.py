@@ -76,7 +76,7 @@ def test_p1_candidate_builds_reproducible_morris_control_files(tmp_path):
     )
     pst = pyemu.Pst(pst_path)
     assert pst.npar_adj == 57
-    assert pst.nnz_obs == 240
+    assert pst.nnz_obs == 230
     assert int(pst.pestpp_options["gsa_morris_r"]) == 4
     assert int(pst.pestpp_options["gsa_morris_p"]) == 6
     assert int(pst.pestpp_options["rand_seed"]) == 20260715
