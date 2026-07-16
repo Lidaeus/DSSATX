@@ -2,6 +2,9 @@
 
 ## 2026-07-16
 
+- 完成三个 `r=30` 正式 Morris 案例；seed `20260812`、`20260826` 均1740/1740成功并通过230项逐响应门禁，跨 seed Spearman=0.9962、Top-15 Jaccard=0.875，按自适应预算停止扩展。
+- seed `20260729` 的1/1740模型失败定位为 TN2/TN3/TN14 与边界参数组合的可重复交互，整 seed 排除且不据此单独收紧 `SLAVR`；新增离线严格 finalize，应对 controller 丢失但 PEST++ 已正常完成的案例。
+- 生成待审 Morris Top-K proposal：14参数稳定核心加边界参数 `FL-SD`、`RTNH4` 的16参数保守并集；未自动启动 Sobol。
 - 用户批准并冻结 `eggplant_p1_xxql2501_v3_20260716`，冻结 CSV 与已验证 proposal 字节一致且无自动修复；P1 readiness 全部通过。
 - 正式 Morris 改为先构建两个新 seed，显式拒绝历史失败 seed `20260715`；新增跨 seed 稳定性分析，按响应内归一化、特征族和四过程组等权汇总，并自动应用 Spearman/Top-15 Jaccard 判停门槛。
 - r=8 预检发现旧响应契约把 DSSAT 实测 `LAIXM` 误作模拟响应，且 `FRUITD_DAP045` 在整个候选域结构性为零；修复为 `LAIXS`，拆分 LAI/果实过程点并将契约收敛为10 TN/230项。

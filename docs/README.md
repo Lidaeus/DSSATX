@@ -23,6 +23,7 @@
 13. [P1-R2 TN2 失效归因](reports/P1_R2_TN2_factor_attribution.md)：IC/MF 反事实、FileX 顺序缺陷、新输入包、v3 candidate 和少量失败处理政策。
 14. [P1 运行失败原因排查复盘](reports/P1_运行失败原因排查复盘.md)：失败分类、证据链、排除项、复查命令和日后最小排查流程。
 15. [P1-R3 Morris 可行性预检](reports/P1_R3_Morris可行性预检.md)：两轮 `r=8` 证据、LAIXM/LAIXS 语义修复、逐响应质量门和冻结审批依据。
+16. [P1-R4 正式 Morris 与跨 seed 稳定性](reports/P1_R4_正式Morris与跨seed稳定性.md)：三个正式 seed 的质量门、单点失败重放、稳定性判停和待审 Top-K proposal。
 
 发生冲突时，以更高层文档为准；实现细节若与产品设计冲突，应先修订文档并由用户审批。
 
@@ -72,4 +73,4 @@
 
 ## 6. 当前审批入口
 
-P1-R3 `r=8` 可行性预检已通过，v3、10 TN/230响应契约和两个独立 `r=30` 正式 seed 已批准。下一审批点取决于跨 seed 稳定性：稳定则审核 Morris Top-K proposal，不稳定则按预声明顺序增加 seed。Sobol 和率定仍需分别审批。
+正式 Morris 已完成：两个完整有效 seed 的 Spearman=0.9962、Top-15 Jaccard=0.875，达到预声明判停阈值；一个含单点模型失败的 seed 已整 seed 排除并保留诊断。当前审批点是采用16参数保守并集（14个稳定核心加 `FL-SD`、`RTNH4`）或仅14个稳定核心进入 Sobol。Sobol 和率定仍需分别审批。
