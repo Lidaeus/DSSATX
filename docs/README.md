@@ -15,13 +15,14 @@
 5. [观测误差与权重设计规范](权重设计方案改进提案.md)：目标函数、误差标准差、变换和相关观测的专题规范。
 6. [P0 验证报告](reports/P0_verification_report.md)：前后证据、数值 smoke 和保留限制。
 7. [Observation Policy 验证记录](reports/observation_policy_verification.md)：显式 log 与处理均值 sigma 的实现和真实程序证据。
-8. [P1 科研分析启动计划](P1_科研分析启动计划.md)：已批准输入/边界、10 TN/240 响应契约和正式 Morris 预算。
+8. [P1 科研分析启动计划](P1_科研分析启动计划.md)：已验证输入、待冻结 v3 边界、10 TN/230响应契约和正式 Morris 预算。
 9. [XXQL2501 输入与 SA 设计审计](reports/XXQL2501_input_and_SA_design_review.md)：新 FileX/SOIL 跨文件检查及 TN/输出科学性判断。
 10. [科研图表设计与开发计划](科研图表设计与开发计划.md)：Python 运行诊断/R 论文图分层、主图/补充图注册表、数据接口和分阶段实现。
 11. [P1-R1 科研运行可靠性与失效诊断](P1_R1_科研运行可靠性与失效诊断.md)：并行运行状态、Morris 轨迹门禁、失败重放和正式运行策略。
 12. [seed 20260715 失效诊断](reports/P1_R1_seed_20260715_failure_diagnosis.md)：模型失败/中断分离、TN2 定位、土壤缺失风险和 v3 决策依据。
 13. [P1-R2 TN2 失效归因](reports/P1_R2_TN2_factor_attribution.md)：IC/MF 反事实、FileX 顺序缺陷、新输入包、v3 candidate 和少量失败处理政策。
 14. [P1 运行失败原因排查复盘](reports/P1_运行失败原因排查复盘.md)：失败分类、证据链、排除项、复查命令和日后最小排查流程。
+15. [P1-R3 Morris 可行性预检](reports/P1_R3_Morris可行性预检.md)：两轮 `r=8` 证据、LAIXM/LAIXS 语义修复、逐响应质量门和冻结审批依据。
 
 发生冲突时，以更高层文档为准；实现细节若与产品设计冲突，应先修订文档并由用户审批。
 
@@ -71,4 +72,4 @@
 
 ## 6. 当前审批入口
 
-P1-R2 归因已完成。下一审批点是 `xxql2501_20260716` 输入包、`eggplant_p1_xxql2501_v3_candidate_20260716` 边界和一个 `r=8` 可行性预检；通过后才按自适应 seed 计划重启。正式 Morris 的 Top-K proposal、Sobol 和率定仍需分别审批。
+P1-R3 `r=8` 可行性预检已通过。下一审批点是把 `eggplant_p1_xxql2501_v3_candidate_20260716` 冻结、确认10 TN/230响应契约，并启动两个独立 `r=30` 正式 seed。正式 Morris 的 Top-K proposal、Sobol 和率定仍需分别审批。
