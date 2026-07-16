@@ -28,6 +28,9 @@ def test_graceful_stop_records_intent_without_killing_processes(tmp_path, monkey
 
 
 def test_offline_finalize_requires_complete_evidence_and_writes_science_status(tmp_path, monkeypatch):
+    (tmp_path / "sa_sen_morris.pst").write_text(
+        "++gsa_method(morris)\n", encoding="utf-8"
+    )
     (tmp_path / "sa_sen_morris.sen.par.csv").write_text(
         "run_id,a,b\n0,0,0\n1,1,0\n2,1,1\n3,0,0\n4,1,0\n5,1,1\n",
         encoding="utf-8",
@@ -58,3 +61,43 @@ def test_offline_finalize_requires_complete_evidence_and_writes_science_status(t
     assert status["termination_reason"] == "offline_finalize_verified_complete"
     assert status["controller_error"] == ""
     assert (tmp_path / "morris_audit" / "morris_result_quality.json").is_file()
+
+
+def test_offline_finalize_routes_sobol_to_sobol_audit(tmp_path, monkeypatch):
+    (tmp_path / "sa_sen_sobol.pst").write_text("++gsa_method(sobol)\n", encoding="utf-8")
+    (tmp_path / "run_manifest.yaml").write_text(
+        "run_id: synthetic\n"
+        "run_type: sensitivity_sobol_preflight_case\n"
+        "sensitivity_method: sobol\n"
+        "observation_count: 1\n"
+        "sobol_parameter_count: 1\n"
+        "sobol_expected_model_runs: 3\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "run_status.json").write_text(
+        json.dumps({"status": "running", "manager_pid": 123}), encoding="utf-8"
+    )
+    (tmp_path / "sa_obs_order.txt").write_text("yield\n", encoding="utf-8")
+    (tmp_path / "sa_sen_sobol.rec").write_text(
+        "pestpp-sen analysis complete\n", encoding="utf-8"
+    )
+    (tmp_path / "sa_sen_sobol.sobol.par.csv").write_text(
+        "run_id,p1\n0,1\n1,2\n2,3\n", encoding="utf-8"
+    )
+    (tmp_path / "sa_sen_sobol.sobol.obs.csv").write_text(
+        "run_id,failed_flag,yield\n0,0,10\n1,0,12\n2,0,14\n", encoding="utf-8"
+    )
+    (tmp_path / "sa_sen_sobol.sobol.si.csv").write_text(
+        "output,p1\nyield,0.2\n", encoding="utf-8"
+    )
+    (tmp_path / "sa_sen_sobol.sobol.sti.csv").write_text(
+        "output,p1\nyield,0.4\n", encoding="utf-8"
+    )
+    monkeypatch.setattr(run_parallel, "_find_manager_pid", lambda _run_dir: 123)
+    monkeypatch.setattr(run_parallel, "_is_pid_alive", lambda _pid: False)
+
+    assert run_parallel.cmd_finalize(str(tmp_path), "sa_sen_sobol", mode="sen")
+    status = json.loads((tmp_path / "run_status.json").read_text(encoding="utf-8"))
+    assert status["scientific_status"] == "validated"
+    assert (tmp_path / "sobol_audit" / "sobol_run_quality.json").is_file()
+    assert not (tmp_path / "morris_audit").exists()

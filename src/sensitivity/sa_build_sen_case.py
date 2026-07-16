@@ -68,7 +68,12 @@ def build_case(
     input_dir=None,
     run_type="sensitivity_formal_case",
 ):
-    allowed_run_types = {"sensitivity_formal_case", "sensitivity_preflight_case"}
+    allowed_run_types = {
+        "sensitivity_formal_case",
+        "sensitivity_preflight_case",
+        "sensitivity_sobol_preflight_case",
+        "sensitivity_sobol_formal_case",
+    }
     if run_type not in allowed_run_types:
         raise ValueError(f"Unsupported sensitivity run type: {run_type}")
     assert_valid_frozen_bounds(param_review_csv)
@@ -223,7 +228,12 @@ def main():
     parser.add_argument("--input-dir", default=None)
     parser.add_argument(
         "--run-type",
-        choices=("sensitivity_formal_case", "sensitivity_preflight_case"),
+        choices=(
+            "sensitivity_formal_case",
+            "sensitivity_preflight_case",
+            "sensitivity_sobol_preflight_case",
+            "sensitivity_sobol_formal_case",
+        ),
         default="sensitivity_formal_case",
     )
     args = parser.parse_args()

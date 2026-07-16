@@ -186,6 +186,40 @@ def _update_agent_last_job(agent_dir, **updates):
     _write_json(path, data)
 
 
+def _sensitivity_method(run_dir, case):
+    """Return the configured PESTPP-SEN method without trusting the case name."""
+    pst_path = os.path.join(run_dir, f"{case}.pst")
+    if not os.path.isfile(pst_path):
+        raise FileNotFoundError(pst_path)
+    with open(pst_path, "r", encoding="utf-8", errors="ignore") as handle:
+        text = handle.read().lower().replace(" ", "")
+    return "sobol" if "++gsa_method(sobol)" in text else "morris"
+
+
+def _assess_completed_sensitivity(run_dir, case):
+    """Run the method-specific scientific audit after process completion."""
+    method = _sensitivity_method(run_dir, case)
+    if method == "sobol":
+        from src.sensitivity.sobol_audit import write_sobol_audit
+
+        report = write_sobol_audit(run_dir, case=case)
+        return ("validated" if report.science_validated else "failed"), ""
+
+    from src.common.quality import assess_morris, assess_morris_audit, load_morris_summary
+    from src.sensitivity.morris_audit import audit_morris_case, write_morris_audit
+
+    audit = audit_morris_case(run_dir, case=case)
+    audit_dir = os.path.join(run_dir, "morris_audit")
+    write_morris_audit(audit, audit_dir)
+    quality = assess_morris_audit(audit, run_id=os.path.basename(run_dir))
+    quality.write(audit_dir, stem="morris_run_quality")
+    result = load_morris_summary(os.path.join(run_dir, f"{case}.mio"))
+    result_quality = assess_morris(result, run_id=os.path.basename(run_dir))
+    result_quality.write(audit_dir, stem="morris_result_quality")
+    status = "validated" if quality.science_validated and result_quality.science_validated else "failed"
+    return status, ""
+
+
 def _find_agent_pid(agent_dir):
     """Find agent PID from state/agent.pid or legacy panther_agent.pid."""
     pid = _read_pid(os.path.join(agent_dir, "state", "agent.pid"))
@@ -292,24 +326,29 @@ def cmd_finalize(run_dir, case, mode="sen"):
     if _is_pid_alive(manager_pid):
         raise RuntimeError(f"Refusing to finalize while manager is running: {manager_pid}")
 
-    from src.common.quality import assess_morris, assess_morris_audit, load_morris_summary
-    from src.sensitivity.morris_audit import audit_morris_case, write_morris_audit
-
-    preliminary = audit_morris_case(run_dir, case=case)
-    summary = preliminary["summary"]
     rec_path = os.path.join(run_dir, f"{case}.rec")
     rec_text = ""
     if os.path.isfile(rec_path):
         with open(rec_path, "r", encoding="utf-8", errors="ignore") as handle:
             rec_text = handle.read().lower()
-    if int(summary.get("not_finalized_runs", 0)) != 0:
-        raise RuntimeError("Refusing to finalize: design points remain non-terminal")
-    if not bool(summary.get("mio_exists")):
-        raise RuntimeError("Refusing to finalize: final Morris summary is missing")
     if "pestpp-sen analysis complete" not in rec_text:
         raise RuntimeError("Refusing to finalize: PEST++ completion marker is missing")
-    if int(summary.get("runtime_failed_runs", 0)) or int(summary.get("unknown_failed_runs", 0)):
-        raise RuntimeError("Refusing to finalize: runtime or unknown failures require recovery")
+    method = _sensitivity_method(run_dir, case)
+    if method == "morris":
+        from src.sensitivity.morris_audit import audit_morris_case
+
+        preliminary = audit_morris_case(run_dir, case=case)
+        summary = preliminary["summary"]
+        if int(summary.get("not_finalized_runs", 0)) != 0:
+            raise RuntimeError("Refusing to finalize: design points remain non-terminal")
+        if not bool(summary.get("mio_exists")):
+            raise RuntimeError("Refusing to finalize: final Morris summary is missing")
+        if int(summary.get("runtime_failed_runs", 0)) or int(summary.get("unknown_failed_runs", 0)):
+            raise RuntimeError("Refusing to finalize: runtime or unknown failures require recovery")
+    else:
+        for suffix in ("sobol.par.csv", "sobol.obs.csv", "sobol.si.csv", "sobol.sti.csv"):
+            if not os.path.isfile(os.path.join(run_dir, f"{case}.{suffix}")):
+                raise RuntimeError(f"Refusing to finalize: final Sobol output is missing ({suffix})")
 
     current = _read_json(os.path.join(run_dir, "run_status.json")) or {}
     finished_at = _utc_now()
@@ -322,26 +361,12 @@ def cmd_finalize(run_dir, case, mode="sen"):
         termination_reason="offline_finalize_verified_complete",
         controller_recovered=True,
     )
-    audit = audit_morris_case(run_dir, case=case)
-    audit_dir = os.path.join(run_dir, "morris_audit")
-    write_morris_audit(audit, audit_dir)
-    run_quality = assess_morris_audit(audit, run_id=os.path.basename(run_dir))
-    run_quality.write(audit_dir, stem="morris_run_quality")
-    result_quality = assess_morris(
-        load_morris_summary(os.path.join(run_dir, f"{case}.mio")),
-        run_id=os.path.basename(run_dir),
-    )
-    result_quality.write(audit_dir, stem="morris_result_quality")
-    scientific_status = (
-        "validated"
-        if run_quality.science_validated and result_quality.science_validated
-        else "failed"
-    )
+    scientific_status, scientific_error = _assess_completed_sensitivity(run_dir, case)
     _update_run_status(
         run_dir,
         status="completed",
         scientific_status=scientific_status,
-        scientific_status_error="",
+        scientific_status_error=scientific_error,
         finished_at=finished_at,
         manager_exit_code=0,
         termination_reason="offline_finalize_verified_complete",
@@ -609,29 +634,8 @@ def cmd_run(args):
             })
             if process_state == "completed" and args.mode == "sen":
                 try:
-                    from src.common.quality import (
-                        assess_morris,
-                        assess_morris_audit,
-                        load_morris_summary,
-                    )
-                    from src.sensitivity.morris_audit import audit_morris_case, write_morris_audit
-
-                    audit = audit_morris_case(run_dir, case=args.case)
-                    audit_dir = os.path.join(run_dir, "morris_audit")
-                    write_morris_audit(audit, audit_dir)
-                    quality = assess_morris_audit(audit, run_id=os.path.basename(run_dir))
-                    quality.write(audit_dir, stem="morris_run_quality")
-                    result = load_morris_summary(
-                        os.path.join(run_dir, f"{args.case}.mio")
-                    )
-                    result_quality = assess_morris(
-                        result, run_id=os.path.basename(run_dir)
-                    )
-                    result_quality.write(audit_dir, stem="morris_result_quality")
-                    scientific_status = (
-                        "validated"
-                        if quality.science_validated and result_quality.science_validated
-                        else "failed"
+                    scientific_status, scientific_error = _assess_completed_sensitivity(
+                        run_dir, args.case
                     )
                 except Exception as exc:
                     scientific_status = "not_assessed"
