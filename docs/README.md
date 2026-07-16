@@ -25,6 +25,7 @@
 15. [P1-R3 Morris 可行性预检](reports/P1_R3_Morris可行性预检.md)：两轮 `r=8` 证据、LAIXM/LAIXS 语义修复、逐响应质量门和冻结审批依据。
 16. [P1-R4 正式 Morris 与跨 seed 稳定性](reports/P1_R4_正式Morris与跨seed稳定性.md)：三个正式 seed 的质量门、单点失败重放、稳定性判停和待审 Top-K proposal。
 17. [P1-R5 Sobol工程预检与正式预算](reports/P1_R5_Sobol工程预检与正式预算.md)：16参数审批、72点真实预检、方法特异审计、bootstrap复算和正式自适应预算。
+18. [DSSAT并行隔离与输入路径规范](DSSAT并行隔离与输入路径规范.md)：SA 当前多 agent 隔离、FileX/FileA/FileT/SOIL/天气来源优先级，以及 P2 率定并行的强制接口与测试。
 
 发生冲突时，以更高层文档为准；实现细节若与产品设计冲突，应先修订文档并由用户审批。
 
