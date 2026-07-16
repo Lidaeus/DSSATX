@@ -15,6 +15,7 @@ _BOOTSTRAP_ROOT = Path(__file__).resolve().parents[2]
 if str(_BOOTSTRAP_ROOT) not in sys.path:
     sys.path.insert(0, str(_BOOTSTRAP_ROOT))
 
+from src.common.project import git_metadata, sha256_file
 from src.common.quality import QualityReport
 
 
@@ -243,6 +244,19 @@ def write_sobol_audit(
     destination = Path(out_dir).resolve() if out_dir else root / "sobol_audit"
     report = assess_sobol_case(root, case=case)
     report.write(destination, stem="sobol_run_quality")
+    git_info = git_metadata()
+    provenance = {
+        "schema_version": 1,
+        "audit_type": "sobol_run_quality",
+        "source_case": str(root),
+        "source_pst_sha256": sha256_file(root / f"{case}.pst"),
+        "audit_git_commit": git_info.get("git_commit", ""),
+        "audit_git_dirty": git_info.get("git_dirty", False),
+        "science_validated": report.science_validated,
+    }
+    (destination / "sobol_audit_manifest.json").write_text(
+        json.dumps(provenance, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     return report
 
 

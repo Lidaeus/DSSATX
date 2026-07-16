@@ -101,4 +101,5 @@ def test_offline_finalize_routes_sobol_to_sobol_audit(tmp_path, monkeypatch):
     status = json.loads((tmp_path / "run_status.json").read_text(encoding="utf-8"))
     assert status["scientific_status"] == "validated"
     assert (tmp_path / "sobol_audit" / "sobol_run_quality.json").is_file()
+    assert (tmp_path / "sobol_audit" / "sobol_audit_manifest.json").is_file()
     assert not (tmp_path / "morris_audit").exists()

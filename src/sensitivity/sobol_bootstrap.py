@@ -14,7 +14,7 @@ _BOOTSTRAP_ROOT = Path(__file__).resolve().parents[2]
 if str(_BOOTSTRAP_ROOT) not in sys.path:
     sys.path.insert(0, str(_BOOTSTRAP_ROOT))
 
-from src.common.project import sha256_file
+from src.common.project import git_metadata, sha256_file
 from src.common.quality import QualityReport
 from src.sensitivity.sobol_audit import read_flat_manifest
 
@@ -187,6 +187,7 @@ def bootstrap_sobol(
         threshold="record_only_in_preflight" if is_preflight else 0.95,
     )
     report.write(destination, stem="sobol_bootstrap_quality")
+    git_info = git_metadata()
     provenance = {
         "schema_version": 1,
         "run_type": "sobol_bootstrap",
@@ -196,6 +197,8 @@ def bootstrap_sobol(
         "source_output_sha256": sha256_file(root / f"{case}.sobol.obs.csv"),
         "replicates": replicates,
         "bootstrap_seed": int(bootstrap_seed),
+        "analysis_git_commit": git_info.get("git_commit", ""),
+        "analysis_git_dirty": git_info.get("git_dirty", False),
         "estimable_response_count": estimable_outputs,
         "response_count": len(output_names),
         "science_validated": report.science_validated,
