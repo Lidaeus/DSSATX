@@ -66,7 +66,11 @@ def build_case(
     random_seed=20260715,
     output_profile=DEFAULT_PROFILE,
     input_dir=None,
+    run_type="sensitivity_formal_case",
 ):
+    allowed_run_types = {"sensitivity_formal_case", "sensitivity_preflight_case"}
+    if run_type not in allowed_run_types:
+        raise ValueError(f"Unsupported sensitivity run type: {run_type}")
     assert_valid_frozen_bounds(param_review_csv)
     os.makedirs(case_dir, exist_ok=True)
     case_dir = os.path.abspath(case_dir)
@@ -179,7 +183,7 @@ def build_case(
     manifest = os.path.join(case_dir, "run_manifest.yaml")
     with open(manifest, "w", encoding="utf-8") as handle:
         handle.write(f"run_id: {os.path.basename(case_dir)}\n")
-        handle.write("run_type: sensitivity_formal_case\n")
+        handle.write(f"run_type: {run_type}\n")
         handle.write(f"git_commit: {git_info.get('git_commit', '')}\n")
         handle.write(f"git_branch: {git_info.get('git_branch', '')}\n")
         handle.write(f"git_dirty: {str(git_info.get('git_dirty', False)).lower()}\n")
@@ -217,6 +221,11 @@ def main():
     parser.add_argument("--random-seed", type=int, default=20260715)
     parser.add_argument("--output-profile", default=str(DEFAULT_PROFILE))
     parser.add_argument("--input-dir", default=None)
+    parser.add_argument(
+        "--run-type",
+        choices=("sensitivity_formal_case", "sensitivity_preflight_case"),
+        default="sensitivity_formal_case",
+    )
     args = parser.parse_args()
 
     workspace_dir = _workspace_dir_from_this_file()
@@ -242,6 +251,7 @@ def main():
         random_seed=args.random_seed,
         output_profile=args.output_profile,
         input_dir=args.input_dir,
+        run_type=args.run_type,
     )
     print(f"Wrote: {pst_path}")
 

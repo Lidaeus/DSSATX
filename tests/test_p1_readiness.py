@@ -72,6 +72,7 @@ def test_p1_candidate_builds_reproducible_morris_control_files(tmp_path):
         morris_r=4,
         morris_p=6,
         random_seed=20260715,
+        run_type="sensitivity_preflight_case",
     )
     pst = pyemu.Pst(pst_path)
     assert pst.npar_adj == 57
@@ -81,6 +82,7 @@ def test_p1_candidate_builds_reproducible_morris_control_files(tmp_path):
     assert int(pst.pestpp_options["rand_seed"]) == 20260715
     manifest = (case_dir / "run_manifest.yaml").read_text(encoding="utf-8")
     assert "bounds_sha256:" in manifest
+    assert "run_type: sensitivity_preflight_case" in manifest
     assert "random_seed: 20260715" in manifest
 
     expected_names = [line.strip().lower() for line in (case_dir / "sa_obs_order.txt").read_text(encoding="utf-8").splitlines()]
