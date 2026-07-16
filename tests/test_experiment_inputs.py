@@ -78,11 +78,27 @@ def test_frozen_bounds_use_new_soil_and_treatment_specific_disabled_ic():
     assert not soil["name"].str.contains("SSKS|SLCL|SLSI", regex=True).any()
 
 
-def test_v3_candidate_is_pending_and_preserves_baseline_inside_proposed_bounds():
+def test_v3_candidate_was_promoted_without_changing_approved_content():
     frame = pd.read_csv(V3_PROPOSAL, encoding="utf-8-sig").set_index("name")
     assert float(frame.loc["XMAGE", "lower"]) == 10.0
     assert float(frame.loc["SLAREF", "lower"]) == 260.0
     assert float(frame.loc["XMAGE", "lower"]) <= float(frame.loc["XMAGE", "init"])
     assert float(frame.loc["SLAREF", "lower"]) <= float(frame.loc["SLAREF", "init"])
     metadata = V3_PROPOSAL.with_suffix(".yaml").read_text(encoding="utf-8")
-    assert 'review_status: "pending"' in metadata
+    assert 'review_status: "promoted"' in metadata
+    assert 'promoted_to: "eggplant_p1_xxql2501_v3_20260716"' in metadata
+
+
+def test_v3_frozen_bounds_are_approved_and_byte_identical_to_candidate():
+    frozen = (
+        ROOT
+        / "data"
+        / "parameter_registry"
+        / "bounds_frozen"
+        / "eggplant"
+        / "eggplant_p1_xxql2501_v3_20260716.csv"
+    )
+    assert frozen.read_bytes() == V3_PROPOSAL.read_bytes()
+    metadata = frozen.with_suffix(".yaml").read_text(encoding="utf-8")
+    assert 'review_status: "approved"' in metadata
+    assert 'automatic_repairs: 0' in metadata

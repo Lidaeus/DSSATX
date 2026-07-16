@@ -1,0 +1,12 @@
+bounds_id: "eggplant_p1_xxql2501_v3_20260716"
+crop: "eggplant"
+created_at: "2026-07-16T05:40:24Z"
+approved_at: "2026-07-16T05:40:24Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_p1_xxql2501_v3_candidate_20260716.csv"
+derived_from_sha256: "6b7e31248c7eb1aca173209bf9f8c5c2f86822be55ac4915e60803e58000674a"
+bounds_sha256: "6b7e31248c7eb1aca173209bf9f8c5c2f86822be55ac4915e60803e58000674a"
+parameter_count: 157
+automatic_repairs: 0
+notes: "Approved after P1-R3 independent r=8 preflight: 464/464 successful runs, 8/8 valid trajectories, 230/230 non-degenerate responses; XMAGE lower 10 and SLAREF lower 260"
