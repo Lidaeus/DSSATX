@@ -206,6 +206,6 @@ FileA/FileT 当前以处理均值作为 DSSAT 观测。重复原始记录应保�
 6. 未经批准不修改原始观测、不替换正式冻结边界、不删除历史结果；
 7. 每个阶段通过用户验收后再进入下一阶段。
 
-当前批准的 P1 frozen 为 `eggplant_p1_xxql2501_v3_20260716`，正式输入包为 `xxql2501_20260716`；旧v2和旧输入包继续停用。Sobol仅可消费 `configs/sa/approved_topk/` 中哈希匹配、`review_status=approved` 的版本化清单，并必须在新目录构建。当前批准参数集为 `eggplant_p1_sobol_top16_20260716`；正式样本预算仍需审批。不得静默改写既有bundle、frozen或审批CSV，任何变化必须创建新ID。
+当前批准的 P1 frozen 为 `eggplant_p1_xxql2501_v3_20260716`。率定/验证必须使用保留处理实测 IC 的 `xxql2501_20260716`；遗传参数 SA 必须使用统一 SH2O/SNH4/SNO3、仅含核心2×4批处理的 `xxql2501_sa_counterfactual_v1_20260716`。二者禁止混用。当前输出契约为 `eggplant_p1_controlled_wn_v4`，一般遗传影响与水氮响应必须分别排名。旧 `eggplant_p1_sobol_top16_20260716` 只批准了 v3 哈希，不能自动用于 v4；v4 必须重新完成 Morris 与 Top-K 审批。不得静默改写既有 bundle、frozen 或审批 CSV，任何变化必须创建新 ID。
 
 并行 `pestpp-sen` 完成后必须根据 `.pst` 的实际 `gsa_method` 路由审计：Morris检查轨迹/elementary effects，Sobol检查完整Saltelli矩阵、失败标志、响应与参数契约、基础方差及S1/ST文件。Sobol正式结果还必须由原始A/B/混合矩阵复算点估计并产生bootstrap区间；预检案例无论质量门是否通过都不得进入正式排名。

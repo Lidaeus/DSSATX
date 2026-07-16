@@ -259,6 +259,26 @@ def _read_tmt_harvest_events(tmt_path):
     return out
 
 
+def _run_base_dir():
+    """Directory used to resolve the FileX/TMT for pest-output writers.
+
+    DSSAT runs from the current working directory, into which the calibration
+    stub (``src/calibration/run_dssat.py``) has copied the localized FileX and
+    ``{excode}.TMT``.  Resolving the FileX relative to the cwd (rather than the
+    script directory, where those inputs never live) is what lets the
+    TMT-derived ``PestTmtGrow.OUT`` / ``PestHarvest.OUT`` pick up the measured
+    process and harvest observations.  Falls back to the script directory when
+    the batch file cannot be found in the cwd (e.g. unit tests run in place).
+    """
+    cwd = os.getcwd()
+    if _resolve_filex_from_batch("DSSBatch.v48", cwd):
+        return cwd
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    if _resolve_filex_from_batch("DSSBatch.v48", script_dir):
+        return script_dir
+    return cwd
+
+
 def _read_tmt_process_points(tmt_path):
     if not tmt_path or not os.path.exists(tmt_path):
         return {}
@@ -531,7 +551,7 @@ def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harv
         )
         return
 
-    base_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = _run_base_dir()
     filex_abs = _resolve_filex_from_batch(batch_file, base_dir)
     if not tmt_path:
         excode = _infer_excode_from_filex(filex_abs or entries[0]["filex"])
@@ -574,7 +594,12 @@ def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harv
             tn = int(e.get("tn", -99))
             new_lines.append(f"RUN {run_no:d} TN {tn:d} HNO -99 DATE -99 @PWADS@ -99.000 @PWAIS@ -99.000")
 
-    _append_pest_file(new_lines, pest_harvest_path)
+    # Overwrite (not append): a pre-run fallback may have seeded the file with
+    # placeholder -99 header lines, and the .ins reads positionally, so stale
+    # leading rows would shift every observation out of alignment.
+    with open(pest_harvest_path, "w") as f:
+        for line in new_lines:
+            f.write(line + "\n")
 
 
 def _write_pest_tmtgrow_from_tmt_and_plantgro(batch_file, plantgro_path, pest_tmtgrow_path, tmt_path=None):
@@ -584,7 +609,7 @@ def _write_pest_tmtgrow_from_tmt_and_plantgro(batch_file, plantgro_path, pest_tm
             f.write("RUN 1 TN -99 DATE -99 @LAIDS@ -99.000 @LWADS@ -99.000 @SWADS@ -99.000\n")
         return
 
-    base_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = _run_base_dir()
     filex_abs = _resolve_filex_from_batch(batch_file, base_dir)
     if not tmt_path:
         excode = _infer_excode_from_filex(filex_abs or entries[0]["filex"])

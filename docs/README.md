@@ -15,17 +15,18 @@
 5. [观测误差与权重设计规范](权重设计方案改进提案.md)：目标函数、误差标准差、变换和相关观测的专题规范。
 6. [P0 验证报告](reports/P0_verification_report.md)：前后证据、数值 smoke 和保留限制。
 7. [Observation Policy 验证记录](reports/observation_policy_verification.md)：显式 log 与处理均值 sigma 的实现和真实程序证据。
-8. [P1 科研分析启动计划](P1_科研分析启动计划.md)：已冻结 v3 边界、10 TN/230响应契约、跨 seed 汇总规则和正式 Morris 预算。
-9. [XXQL2501 输入与 SA 设计审计](reports/XXQL2501_input_and_SA_design_review.md)：新 FileX/SOIL 跨文件检查及 TN/输出科学性判断。
-10. [科研图表设计与开发计划](科研图表设计与开发计划.md)：Python 运行诊断/R 论文图分层、主图/补充图注册表、数据接口和分阶段实现。
-11. [P1-R1 科研运行可靠性与失效诊断](P1_R1_科研运行可靠性与失效诊断.md)：并行运行状态、Morris 轨迹门禁、失败重放和正式运行策略。
-12. [seed 20260715 失效诊断](reports/P1_R1_seed_20260715_failure_diagnosis.md)：模型失败/中断分离、TN2 定位、土壤缺失风险和 v3 决策依据。
-13. [P1-R2 TN2 失效归因](reports/P1_R2_TN2_factor_attribution.md)：IC/MF 反事实、FileX 顺序缺陷、新输入包、v3 candidate 和少量失败处理政策。
-14. [P1 运行失败原因排查复盘](reports/P1_运行失败原因排查复盘.md)：失败分类、证据链、排除项、复查命令和日后最小排查流程。
-15. [P1-R3 Morris 可行性预检](reports/P1_R3_Morris可行性预检.md)：两轮 `r=8` 证据、LAIXM/LAIXS 语义修复、逐响应质量门和冻结审批依据。
-16. [P1-R4 正式 Morris 与跨 seed 稳定性](reports/P1_R4_正式Morris与跨seed稳定性.md)：三个正式 seed 的质量门、单点失败重放、稳定性判停和待审 Top-K proposal。
-17. [P1-R5 Sobol工程预检与正式预算](reports/P1_R5_Sobol工程预检与正式预算.md)：16参数审批、72点真实预检、方法特异审计、bootstrap复算和正式自适应预算。
-18. [DSSAT并行隔离与输入路径规范](DSSAT并行隔离与输入路径规范.md)：SA 当前多 agent 隔离、FileX/FileA/FileT/SOIL/天气来源优先级，以及 P2 率定并行的强制接口与测试。
+8. [P1 科研分析启动计划](P1_科研分析启动计划.md)：当前受控2×4水氮实验包、164项响应契约、双排名域和正式 Morris 规则。
+9. [P1 v4 下一阶段协作执行计划](P1_v4_下一阶段协作执行计划.md)：SA、率定、论文图表三条并行工作流的任务包、所有权、接口和审批门。
+10. [XXQL2501 输入与 SA 设计审计](reports/XXQL2501_input_and_SA_design_review.md)：v3 历史 FileX/SOIL 检查与输出设计审计，仅用于追溯。
+11. [科研图表设计与开发计划](科研图表设计与开发计划.md)：Python 运行诊断/R 论文图分层、主图/补充图注册表、数据接口和分阶段实现。
+12. [P1-R1 科研运行可靠性与失效诊断](P1_R1_科研运行可靠性与失效诊断.md)：并行运行状态、Morris 轨迹门禁、失败重放和正式运行策略。
+13. [seed 20260715 失效诊断](reports/P1_R1_seed_20260715_failure_diagnosis.md)：模型失败/中断分离、TN2 定位、土壤缺失风险和 v3 决策依据。
+14. [P1-R2 TN2 失效归因](reports/P1_R2_TN2_factor_attribution.md)：IC/MF 反事实、FileX 顺序缺陷、新输入包、v3 candidate 和少量失败处理政策。
+15. [P1 运行失败原因排查复盘](reports/P1_运行失败原因排查复盘.md)：失败分类、证据链、排除项、复查命令和日后最小排查流程。
+16. [P1-R3 Morris 可行性预检](reports/P1_R3_Morris可行性预检.md)：两轮 `r=8` 证据、LAIXM/LAIXS 语义修复、逐响应质量门和冻结审批依据。
+17. [P1-R4 正式 Morris 与跨 seed 稳定性](reports/P1_R4_正式Morris与跨seed稳定性.md)：三个正式 seed 的质量门、单点失败重放、稳定性判停和待审 Top-K proposal。
+18. [P1-R5 Sobol工程预检与正式预算](reports/P1_R5_Sobol工程预检与正式预算.md)：16参数审批、72点真实预检、方法特异审计、bootstrap复算和正式自适应预算。
+19. [DSSAT并行隔离与输入路径规范](DSSAT并行隔离与输入路径规范.md)：SA 当前多 agent 隔离、FileX/FileA/FileT/SOIL/天气来源优先级，以及 P2 率定并行的强制接口与测试。
 
 发生冲突时，以更高层文档为准；实现细节若与产品设计冲突，应先修订文档并由用户审批。
 
@@ -75,4 +76,4 @@
 
 ## 6. 当前审批入口
 
-正式 Morris 和16参数审批已完成，Sobol `N=4` 工程预检72/72通过但不提供科研排名。当前审批点是 `N=64 → 128 → 必要时256` 的正式自适应预算、1000次bootstrap和预声明稳定性门；率定仍需单独审批。
+旧 v3 的正式 Morris、16参数审批和 Sobol 运行只作历史追溯。v4 的受控输入和164项契约已批准，可继续执行预检与正式 Morris；完成双域稳定性后，在新的 Top-K/Sobol 参数并集与预算处暂停审批。率定和图表可并行开发，但正式科研产物必须分别通过 P2 与图表数据门禁。

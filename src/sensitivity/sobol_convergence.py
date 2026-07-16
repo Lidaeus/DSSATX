@@ -42,6 +42,8 @@ def _validated_case(case_dir: Path) -> tuple[dict[str, str], dict[str, Any]]:
 def _rank_case(
     case_dir: Path,
     lookup: dict[str, str],
+    ranking_domains: dict[str, list[str]] | None = None,
+    *,
     tolerance: float = 1e-12,
 ) -> tuple[int, pd.DataFrame, pd.DataFrame]:
     manifest, _ = _validated_case(case_dir)
@@ -75,15 +77,33 @@ def _rank_case(
         .mean()
         .rename(columns={"feature_score": "group_score"})
     )
+    # Rank within each ranking_domain separately, mirroring the Morris contract.
+    # Sobol convergence must NEVER average effects across domains, because a
+    # parameter important only to general growth would be diluted by (or dilute)
+    # the water/nitrogen response domain. When no ranking_domains are declared
+    # (synthetic unit-test profiles), all groups fall into a single "combined"
+    # domain so the math reduces to the previous behaviour.
+    if ranking_domains:
+        group_to_domain = {
+            str(group): str(domain)
+            for domain, groups in ranking_domains.items()
+            for group in groups
+        }
+        missing_groups = sorted(set(group_scores["response_group"]) - set(group_to_domain))
+        if missing_groups:
+            raise ValueError(f"Sobol response groups are absent from ranking_domains: {missing_groups}")
+    else:
+        group_to_domain = {str(group): "combined" for group in group_scores["response_group"].unique()}
+    group_scores["ranking_domain"] = group_scores["response_group"].map(group_to_domain)
     ranking = (
-        group_scores.groupby("parameter", as_index=False)["group_score"]
+        group_scores.groupby(["ranking_domain", "parameter"], as_index=False)["group_score"]
         .mean()
         .rename(columns={"group_score": "score"})
-        .sort_values(["score", "parameter"], ascending=[False, True], kind="stable")
+        .sort_values(["ranking_domain", "score", "parameter"], ascending=[True, False, True], kind="stable")
         .reset_index(drop=True)
     )
     ranking.insert(0, "base_samples", samples)
-    ranking["rank"] = ranking["score"].rank(method="average", ascending=False)
+    ranking["rank"] = ranking.groupby("ranking_domain")["score"].rank(method="average", ascending=False)
     group_scores.insert(0, "base_samples", samples)
     return samples, ranking, group_scores
 
@@ -113,6 +133,9 @@ def analyze_convergence(
     campaign = json.loads(Path(campaign_manifest).read_text(encoding="utf-8"))
     contract = load_output_contract(output_profile)
     lookup = _group_lookup(contract)
+    ranking_domains = contract.get("ranking_domains")
+    if ranking_domains is not None and not isinstance(ranking_domains, dict):
+        raise ValueError("ranking_domains must be an object")
     rankings: list[pd.DataFrame] = []
     groups: list[pd.DataFrame] = []
     scales: list[dict[str, Any]] = []
@@ -122,7 +145,7 @@ def analyze_convergence(
     for raw_case in case_dirs:
         case_dir = Path(raw_case).resolve()
         manifest, status = _validated_case(case_dir)
-        samples, ranking, group_scores = _rank_case(case_dir, lookup)
+        samples, ranking, group_scores = _rank_case(case_dir, lookup, ranking_domains)
         rankings.append(ranking)
         groups.append(group_scores)
         approval_ids.add(manifest.get("sobol_approval_id", ""))
@@ -148,27 +171,52 @@ def analyze_convergence(
     if len(levels) != len(case_dirs):
         raise ValueError("Formal Sobol sample levels must be unique")
     comparisons: list[dict[str, Any]] = []
+    domain_names = sorted(all_rankings["ranking_domain"].unique())
     for left, right in zip(levels[:-1], levels[1:]):
-        left_frame = all_rankings[all_rankings["base_samples"] == left].set_index("parameter")
-        right_frame = all_rankings[all_rankings["base_samples"] == right].set_index("parameter")
-        spearman = float(left_frame["rank"].corr(right_frame["rank"], method="spearman"))
-        left_top = set(left_frame.nsmallest(top_k, "rank").index)
-        right_top = set(right_frame.nsmallest(top_k, "rank").index)
-        union = left_top | right_top
-        jaccard = float(len(left_top & right_top) / len(union)) if union else 1.0
-        rank_shift = float(
-            max(abs(float(left_frame.loc[name, "rank"]) - float(right_frame.loc[name, "rank"])) for name in union)
-        )
-        passed = spearman >= min_spearman and jaccard >= min_jaccard and rank_shift <= max_rank_shift
+        # Compare each ranking domain independently. A parameter important in
+        # only one domain must not be averaged with the other domain; the
+        # convergence verdict is the AND over all domains (all must converge).
+        domain_rows: list[dict[str, Any]] = []
+        all_domains_pass = True
+        for domain in domain_names:
+            left_frame = (
+                all_rankings[(all_rankings["base_samples"] == left) & (all_rankings["ranking_domain"] == domain)]
+                .set_index("parameter")
+            )
+            right_frame = (
+                all_rankings[(all_rankings["base_samples"] == right) & (all_rankings["ranking_domain"] == domain)]
+                .set_index("parameter")
+            )
+            common = left_frame.index.intersection(right_frame.index)
+            left_frame = left_frame.loc[common]
+            right_frame = right_frame.loc[common]
+            spearman = float(left_frame["rank"].corr(right_frame["rank"], method="spearman"))
+            left_top = set(left_frame.nsmallest(top_k, "rank").index)
+            right_top = set(right_frame.nsmallest(top_k, "rank").index)
+            union = left_top | right_top
+            jaccard = float(len(left_top & right_top) / len(union)) if union else 1.0
+            rank_shift = float(
+                max(abs(float(left_frame.loc[name, "rank"]) - float(right_frame.loc[name, "rank"])) for name in union)
+            )
+            passed = spearman >= min_spearman and jaccard >= min_jaccard and rank_shift <= max_rank_shift
+            if not passed:
+                all_domains_pass = False
+            domain_rows.append(
+                {
+                    "ranking_domain": domain,
+                    "spearman": spearman,
+                    "top_k": int(top_k),
+                    "top_k_jaccard": jaccard,
+                    "max_top_k_rank_shift": rank_shift,
+                    "passes": passed,
+                }
+            )
         comparisons.append(
             {
                 "samples_a": int(left),
                 "samples_b": int(right),
-                "spearman": spearman,
-                "top_k": int(top_k),
-                "top_k_jaccard": jaccard,
-                "max_top_k_rank_shift": rank_shift,
-                "passes": passed,
+                "ranking_domains": domain_rows,
+                "passes": all_domains_pass,
             }
         )
     latest_passes = bool(comparisons[-1]["passes"])

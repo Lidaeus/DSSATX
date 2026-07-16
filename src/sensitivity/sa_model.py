@@ -190,6 +190,90 @@ def _curve_features(series, col):
     return {"peak": peak, "t_peak": t_peak, "end": end, "auc": auc}
 
 
+def _cumulative_dap_fraction(series, col, fraction=0.5):
+    """Return the first interpolated DAP reaching a fraction of final cumulative yield.
+
+    DAP50 is computed only by linear trans-interpolation between the original
+    DSSAT cumulative nodes — never from an R smoothing curve. A cumulative
+    harvest series must be non-decreasing and end positive; a decreasing node,
+    a non-positive final value, or an empty/missing series marks the response
+    as not estimable (``None``), which the caller emits as the DSSAT ``-99``
+    missing sentinel so the response audit flags it. The series is never
+    silently patched.
+    """
+
+    points = [
+        (float(row["DAP"]), float(row[col]))
+        for row in series
+        if "DAP" in row and col in row and float(row[col]) >= 0.0
+    ]
+    if not points or points[-1][1] <= 0.0:
+        return None
+    # A cumulative series must be non-decreasing at every node: the physical
+    # quantity (cumulative dry fruit mass) cannot drop, so any decrease signals
+    # an extraction/ordering error rather than a real trajectory. Verify the
+    # whole series up front so a late decrease still rejects the response.
+    for (_, current), (_, following) in zip(points, points[1:]):
+        if following < current:
+            return None
+    target = float(fraction) * points[-1][1]
+    previous_dap, previous_value = points[0]
+    if previous_value >= target:
+        return previous_dap
+    for dap, value in points[1:]:
+        if value >= target:
+            share = (target - previous_value) / (value - previous_value)
+            return previous_dap + share * (dap - previous_dap)
+        previous_dap, previous_value = dap, value
+    return points[-1][0]
+
+
+def _linear_slope(points):
+    """Return the ordinary least-squares slope for paired finite points."""
+
+    valid = [(float(x), float(y)) for x, y in points if y is not None and float(y) != -99.0]
+    if len(valid) < 2:
+        return None
+    x_mean = sum(x for x, _ in valid) / len(valid)
+    y_mean = sum(y for _, y in valid) / len(valid)
+    denominator = sum((x - x_mean) ** 2 for x, _ in valid)
+    if denominator <= 0.0:
+        return None
+    return sum((x - x_mean) * (y - y_mean) for x, y in valid) / denominator
+
+
+def derive_water_nitrogen_responses(values, contract):
+    """Derive paired water effects, N-response slopes and their interaction."""
+
+    design = contract.get("water_nitrogen_design")
+    if not isinstance(design, dict):
+        return {}
+    derived = {}
+    for feature in design["contrast_features"]:
+        for level, pair in design["water_pairs"].items():
+            high = values.get(f"TN{int(pair[0])}_{feature}")
+            low = values.get(f"TN{int(pair[1])}_{feature}")
+            if high is not None and low is not None and high != -99.0 and low != -99.0:
+                derived[f"WN_WATER_{str(level).upper()}_{feature}"] = float(high) - float(low)
+
+        slopes = {}
+        for water in ("W3", "W1"):
+            points = [
+                (
+                    float(row["n_kg_ha"]),
+                    values.get(f"TN{int(row['treatment'])}_{feature}"),
+                )
+                for row in design["nitrogen_series"][water]
+            ]
+            slope = _linear_slope(points)
+            if slope is not None:
+                slopes[water] = slope
+                derived[f"WN_NSLOPE_{water}_{feature}"] = slope
+        if set(slopes) == {"W3", "W1"}:
+            derived[f"WN_INTERACTION_{feature}"] = slopes["W3"] - slopes["W1"]
+    return derived
+
+
 def _as_float(v, default=-99.0):
     try:
         return float(v)
@@ -218,6 +302,7 @@ def compute_indicators(
     obs_order_path=None,
     input_dir=None,
     failure_artifact_dir=None,
+    output_profile=None,
 ):
     _ensure_base_files(workspace_dir)
 
@@ -247,8 +332,9 @@ def compute_indicators(
     if obs_order_path and os.path.exists(obs_order_path):
         with open(obs_order_path, "r", encoding="utf-8", errors="ignore") as f:
             ordered_names = [ln.strip() for ln in f.readlines() if ln.strip()]
+    contract = load_output_contract(output_profile) if output_profile else load_output_contract()
     if not ordered_names:
-        ordered_names = _default_observation_names()
+        ordered_names = observation_names(contract)
 
     def _write_out(values):
         os.makedirs(os.path.dirname(out_path), exist_ok=True) if os.path.dirname(out_path) else None
@@ -336,7 +422,11 @@ def compute_indicators(
                 tn = -99
             run_to_tn[run_no] = tn
 
-        time_points = time_points or list(load_output_contract()["time_points"])
+        lai_time_points = list(contract["lai_time_points"])
+        fruit_time_points = list(contract["fruit_time_points"])
+        if time_points is not None:
+            lai_time_points = list(time_points)
+            fruit_time_points = list(time_points)
         values = {}
 
         def _emit(name, val):
@@ -378,6 +468,7 @@ def compute_indicators(
 
             _emit(f"{prefix}_FRUITD_AUC", fruit.get("auc"))
             _emit(f"{prefix}_FRUITD_END", fruit.get("end"))
+            _emit(f"{prefix}_FRUITD_DAP50", _cumulative_dap_fraction(fw, "CHPDT", 0.5))
 
             if pg:
                 last = pg[-1]
@@ -386,9 +477,12 @@ def compute_indicators(
                 _emit(f"{prefix}_AGB_END_CWAD", last.get("CWAD"))
                 _emit(f"{prefix}_HI_END_HIAD", last.get("HIAD"))
 
-            for tp in time_points:
+            for tp in lai_time_points:
                 _emit(f"{prefix}_LAI_DAP{tp:03d}", _series_value_on_or_before(pg, tp, "LAID"))
+            for tp in fruit_time_points:
                 _emit(f"{prefix}_FRUITD_DAP{tp:03d}", _series_value_on_or_before(fw, tp, "CHPDT"))
+
+        values.update(derive_water_nitrogen_responses(values, contract))
 
         group_names = {}
         for name, val in values.items():
@@ -437,6 +531,7 @@ def main():
     parser.add_argument("--obs-order", default=None)
     parser.add_argument("--input-dir", default=None)
     parser.add_argument("--failure-artifact-dir", default=None)
+    parser.add_argument("--output-profile", default=None)
     args = parser.parse_args()
 
     workspace_dir = os.path.normpath(args.workspace) if args.workspace else _workspace_dir_from_this_file()
@@ -450,6 +545,7 @@ def main():
         obs_order_path=args.obs_order,
         input_dir=args.input_dir,
         failure_artifact_dir=args.failure_artifact_dir,
+        output_profile=args.output_profile,
     )
 
 

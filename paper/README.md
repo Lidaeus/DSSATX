@@ -17,6 +17,10 @@ src/reporting/
   plot_results.py    Python 运行诊断兼容入口，不生成论文图号
 ```
 
+动态图相关模块按科学问题拆分：`fig_selected_dynamics.R` 负责主文代表处理，
+`fig_residual_diagnostics.R` 负责 Fig. S3，`fig_all_treatment_dynamics.R`
+负责 Fig. S4。`make_all.R` 只编排这些模块并登记产物，不重复实现统计或图层。
+
 ## R 依赖
 
 要求 R 4.3 或更高版本，以及 `ggplot2`、`patchwork`、`jsonlite`、
@@ -34,6 +38,8 @@ src/reporting/
 ```powershell
 python -m src.reporting.export_paper_data --run-id <run_id> `
   --comparison-csv <comparison.csv> --phi-csv <case.phi.actual.csv> `
+  --trajectory-run-dir workspace/runs/<run_id> `
+  --treatment-metadata-csv configs/figures/treatment_metadata_xxql2501.csv `
   --out-dir workspace/runs/<run_id>/paper_data
 ```
 
@@ -48,3 +54,20 @@ Rscript paper/R/make_all.R `
 非 `science_validated` 数据默认被两端拒绝。仅版式开发可在两个命令中都
 显式加入 `--allow-unvalidated-demo`；输出使用 `DEMO_` 前缀并带水印，不能
 作为论文图引用。
+
+## 动态图数据与视觉编码
+
+`comparison.csv` 保存观测日期上的观测—模拟配对；`simulation_trajectory.csv`
+保存从 `PlantGro.OUT` 和 `FreshWt.OUT` 提取的日尺度确定性模拟；
+`treatment_metadata.csv` 显式保存处理标签、水水平和氮水平。三者不得在 R
+端通过处理号或文件名猜测。
+
+处理动态图使用氮水平颜色（N3 深红、N2 橙、N1 蓝、N0 灰）和水处理点形
+（W3 圆、W2 方、W1 三角、CK 菱形）。连续生长过程用日模拟线叠加实测点；
+增量采收使用事件图；累计采收同时输出普通事件折线和连续平滑备选图。平滑
+备选图采用采收日期模拟累计值的单调三次 Hermite 插值，只用于视觉表达，指标始终
+从未经插值的原始输出计算。
+
+残差补充图按 `dataset_role` 分开输出，残差定义为模拟值减观测值；全处理补充图
+按变量分页生成 5×2 小多图。历史布局数据只产生 `DEMO_` 文件，正式 Fig. S3/S4
+必须由通过科研质量门的数据包生成。

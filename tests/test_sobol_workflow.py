@@ -15,7 +15,7 @@ from src.sensitivity.sobol_case import build_sobol_case, load_approved_topk
 ROOT = Path(__file__).resolve().parents[1]
 APPROVAL = ROOT / "configs" / "sa" / "approved_topk" / "eggplant_p1_sobol_top16_20260716.json"
 BOUNDS = ROOT / "data" / "parameter_registry" / "bounds_frozen" / "eggplant" / "eggplant_p1_xxql2501_v3_20260716.csv"
-PROFILE = ROOT / "configs" / "sa" / "eggplant_p1_outputs.json"
+PROFILE = ROOT / "configs" / "sa" / "eggplant_p1_outputs_v3_legacy.json"
 INPUT = ROOT / "data" / "user" / "experiments" / "xxql2501_20260716"
 
 

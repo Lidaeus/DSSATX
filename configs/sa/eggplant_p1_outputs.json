@@ -1,42 +1,70 @@
 {
-  "profile_id": "eggplant_p1_all_treatments_v3",
-  "experiment_bundle": "xxql2501_20260716",
-  "treatments": [2, 3, 4, 5, 9, 10, 11, 12, 13, 14],
+  "profile_id": "eggplant_p1_controlled_wn_v4",
+  "experiment_bundle": "xxql2501_sa_counterfactual_v1_20260716",
+  "treatments": [2, 3, 4, 5, 10, 11, 12, 13],
   "features": [
     "YIELD_HWAMS",
-    "HIAMS",
     "LAIXS",
     "CWAMS",
     "ADAPS",
     "PDFPS",
     "LAI_AUC",
     "LAI_PEAK",
-    "LAI_TPEAK",
     "LAI_END",
-    "FRUITD_AUC",
     "FRUITD_END",
+    "FRUITD_DAP50",
     "LEAF_END_LWAD",
     "STEM_END_SWAD",
-    "AGB_END_CWAD",
-    "HI_END_HIAD"
+    "AGB_END_CWAD"
   ],
   "lai_time_points": [45, 67, 95, 119],
-  "fruit_time_points": [67, 95, 119],
+  "fruit_time_points": [],
   "include_treatment_mean": false,
-  "observation_count": 230,
+  "observation_count": 164,
   "response_groups": {
     "phenology": ["ADAPS", "PDFPS"],
-    "canopy": ["LAIXS", "LAI_AUC", "LAI_PEAK", "LAI_TPEAK", "LAI_END", "LAI_DAP"],
+    "canopy": ["LAIXS", "LAI_AUC", "LAI_PEAK", "LAI_END", "LAI_DAP"],
     "biomass": ["CWAMS", "LEAF_END_LWAD", "STEM_END_SWAD", "AGB_END_CWAD"],
-    "yield_harvest": ["YIELD_HWAMS", "HIAMS", "FRUITD_AUC", "FRUITD_END", "HI_END_HIAD", "FRUITD_DAP"]
+    "yield_harvest": ["YIELD_HWAMS", "FRUITD_END", "FRUITD_DAP50"],
+    "water_response": ["WATER_LAI_AUC", "WATER_AGB_END_CWAD", "WATER_FRUITD_END", "WATER_FRUITD_DAP50"],
+    "nitrogen_response": ["NITROGEN_LAI_AUC", "NITROGEN_AGB_END_CWAD", "NITROGEN_FRUITD_END", "NITROGEN_FRUITD_DAP50"],
+    "water_nitrogen_interaction": ["INTERACTION_LAI_AUC", "INTERACTION_AGB_END_CWAD", "INTERACTION_FRUITD_END", "INTERACTION_FRUITD_DAP50"]
+  },
+  "ranking_domains": {
+    "general_genetic": ["phenology", "canopy", "biomass", "yield_harvest"],
+    "water_nitrogen_response": ["water_response", "nitrogen_response", "water_nitrogen_interaction"]
+  },
+  "water_nitrogen_design": {
+    "contrast_features": ["LAI_AUC", "AGB_END_CWAD", "FRUITD_END", "FRUITD_DAP50"],
+    "water_pairs": {
+      "N3": [2, 10],
+      "N2": [3, 11],
+      "N1": [4, 12],
+      "N0": [5, 13]
+    },
+    "nitrogen_series": {
+      "W3": [
+        {"treatment": 5, "n_kg_ha": 0},
+        {"treatment": 4, "n_kg_ha": 130},
+        {"treatment": 3, "n_kg_ha": 271},
+        {"treatment": 2, "n_kg_ha": 399}
+      ],
+      "W1": [
+        {"treatment": 13, "n_kg_ha": 0},
+        {"treatment": 12, "n_kg_ha": 130},
+        {"treatment": 11, "n_kg_ha": 271},
+        {"treatment": 10, "n_kg_ha": 399}
+      ]
+    }
   },
   "design_notes": [
-    "All ten water-nitrogen treatments are retained; TN2/TN3 alone cover only irrigation level MI1.",
-    "DAP points align with FileT process sampling dates 25120, 25142, 25170 and 25194 relative to planting date 25075.",
-    "Redundant treatment means and seven highly correlated fixed-DAP pairs are omitted.",
+    "The formal factorial subset is TN2-TN5 and TN10-TN13: two irrigation schedules by four actual nitrogen rates.",
+    "The SA-only experiment bundle uses one depth-wise median SH2O/SNH4/SNO3 profile; calibration continues to use observed treatment-specific initial conditions.",
+    "LAI DAP points align with FileT process sampling dates; all fixed-DAP cumulative-fruit outputs are excluded.",
+    "Water contrasts, nitrogen slopes using 0/130/271/399 kg N ha-1, and slope-difference W x N interactions are computed from paired simulations.",
     "MDAPS is omitted because the reviewed baseline returns the DSSAT missing sentinel.",
     "LAIXS is the simulated maximum LAI; LAIXM is measured and must not be used as a model response.",
-    "FRUITD_DAP045 is omitted because the r=8 preflight found it structurally zero for every treatment and parameter effect.",
-    "Formal cross-seed ranking normalizes effects within each response, averages treatments and DAPs within feature families, then gives the four response groups equal weight."
+    "FRUITD_DAP50 is the simulated DAP at which cumulative harvested dry matter reaches 50% of its season-end value.",
+    "General genetic influence and water-nitrogen response are separate ranking domains and must not be averaged into one score."
   ]
 }

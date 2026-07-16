@@ -40,7 +40,11 @@ def _replace_tokens(line: str, replacements: dict[int, str]) -> str:
     updated = line
     for token_index, value in sorted(replacements.items(), reverse=True):
         start, end = spans[token_index]
-        updated = updated[:start] + str(value) + updated[end:]
+        replacement = str(value)
+        width = end - start
+        if len(replacement) <= width:
+            replacement = replacement.rjust(width)
+        updated = updated[:start] + replacement + updated[end:]
     return updated
 
 

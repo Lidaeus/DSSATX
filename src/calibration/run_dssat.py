@@ -1,8 +1,14 @@
 """PEST++ model-command entry point with per-run DSSAT isolation.
 
-Every invocation prepares immutable DSSAT inputs in the current PEST run
-directory and executes the real runner there.  No generated model file or
-output is shared between calibration workers.
+Implements the three-layer isolation prescribed by
+``docs/DSSAT并行隔离与输入路径规范.md`` §2.2/§5.3 for PEST++-IES calibration:
+each model call runs DSSAT inside a unique ephemeral directory under the
+agent's ``_iso_runs/``, using a snapshot of the PEST-written parameter CSV,
+while the PEST-facing ``Pest*.OUT`` files are written atomically back to the
+PEST run directory (the current working directory) where the ``.ins`` files
+read them.  The ephemeral directory is removed in ``finally`` so that retries,
+manual interruptions, and future in-agent concurrency can never reuse a stale
+``Evaluate.OUT``/``PlantGro.OUT``/genotype from a previous call.
 """
 
 from __future__ import annotations
@@ -12,10 +18,20 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tempfile
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "data"
+
+# Files the real runner writes into PEST_OUT_DIR and that PEST reads via .ins.
+_PEST_INTERFACE_FILES = (
+    "PestEval.OUT",
+    "PestGrow.OUT",
+    "PestJoint.OUT",
+    "PestHarvest.OUT",
+    "PestTmtGrow.OUT",
+)
 
 
 def _copy(source: Path, destination: Path) -> None:
@@ -119,44 +135,101 @@ def prepare_run_directory(run_dir: Path, args: list[str]) -> Path:
     return batch_file
 
 
-def main() -> int:
-    run_dir = Path.cwd().resolve()
-    args = list(sys.argv[1:])
-    batch_file = prepare_run_directory(run_dir, args)
-
-    # Always point the real runner at the localized batch file.
-    localized_args: list[str] = []
-    skip = False
+def _param_csv_name(args: list[str]) -> str:
+    """Return the basename of the parameter CSV referenced by ``--param-csv``."""
     for index, value in enumerate(args):
-        if skip:
-            skip = False
-            continue
-        if value == "--batch" and index + 1 < len(args):
-            localized_args.extend(["--batch", batch_file.name])
-            skip = True
-        elif value.startswith("--batch="):
-            localized_args.append(f"--batch={batch_file.name}")
-        elif value == "--input-dir" and index + 1 < len(args):
-            skip = True
-        elif value.startswith("--input-dir="):
-            continue
-        else:
-            localized_args.append(value)
-    if "--batch" not in localized_args and not any(value.startswith("--batch=") for value in localized_args):
-        localized_args.extend(["--batch", batch_file.name])
+        if value == "--param-csv" and index + 1 < len(args):
+            return os.path.basename(args[index + 1])
+        if value.startswith("--param-csv="):
+            return os.path.basename(value.split("=", 1)[1])
+    return "pest_params.csv"
 
-    env = os.environ.copy()
-    env["PEST_OUT_DIR"] = str(run_dir)
-    env["PYTHONIOENCODING"] = "utf-8"
-    python_path = env.get("PYTHONPATH", "")
-    env["PYTHONPATH"] = str(PROJECT_ROOT) + (os.pathsep + python_path if python_path else "")
-    result = subprocess.run(
-        [sys.executable, "-m", "src.dssat.run_dssat", *localized_args],
-        cwd=run_dir,
-        env=env,
-        check=False,
-    )
-    return result.returncode
+
+def _atomic_copy_back(source_dir: Path, dest_dir: Path) -> None:
+    """Atomically publish PEST interface files from the run dir to the PEST dir.
+
+    Writes to a per-file ``*.tmp`` and ``os.replace``s it into place so PEST
+    (and any concurrent reader) never observes a half-written ``Pest*.OUT``.
+    Missing files are skipped: the caller's freshness check decides validity.
+    """
+    for name in _PEST_INTERFACE_FILES:
+        source = source_dir / name
+        if not source.is_file():
+            continue
+        destination = dest_dir / name
+        tmp = dest_dir / f"{name}.tmp"
+        shutil.copy2(source, tmp)
+        os.replace(tmp, destination)
+
+
+def main() -> int:
+    # The PEST run directory is the current working directory; PEST reads its
+    # interface files (the ``Pest*.OUT``) from here via the .ins instructions.
+    pest_run_dir = Path.cwd().resolve()
+    args = list(sys.argv[1:])
+
+    # Spec §2.2/§5.3: each model call gets a unique ephemeral directory so that
+    # retries, interruptions, and future in-agent concurrency can never reuse a
+    # previous call's Evaluate.OUT / PlantGro.OUT / injected genotype.
+    iso_root = pest_run_dir / "_iso_runs"
+    iso_root.mkdir(parents=True, exist_ok=True)
+    run_dir = Path(tempfile.mkdtemp(prefix="run_", dir=str(iso_root)))
+
+    try:
+        batch_file = prepare_run_directory(run_dir, args)
+
+        # Spec §2.2 step 2: snapshot the PEST-written parameter CSV into the
+        # ephemeral dir so later mutation of the agent-root copy cannot affect
+        # this call, and the real runner finds it in its own working directory.
+        csv_name = _param_csv_name(args)
+        param_source = pest_run_dir / csv_name
+        if param_source.is_file():
+            shutil.copy2(param_source, run_dir / csv_name)
+
+        # Localize the batch reference and drop --input-dir (its inputs were
+        # already copied into run_dir by prepare_run_directory).
+        localized_args: list[str] = []
+        skip = False
+        for index, value in enumerate(args):
+            if skip:
+                skip = False
+                continue
+            if value == "--batch" and index + 1 < len(args):
+                localized_args.extend(["--batch", batch_file.name])
+                skip = True
+            elif value.startswith("--batch="):
+                localized_args.append(f"--batch={batch_file.name}")
+            elif value == "--input-dir" and index + 1 < len(args):
+                skip = True
+            elif value.startswith("--input-dir="):
+                continue
+            else:
+                localized_args.append(value)
+        if "--batch" not in localized_args and not any(value.startswith("--batch=") for value in localized_args):
+            localized_args.extend(["--batch", batch_file.name])
+
+        env = os.environ.copy()
+        # All outputs stay inside the ephemeral run_dir; only the PEST interface
+        # files are published back to pest_run_dir after a successful run.
+        env["PEST_OUT_DIR"] = str(run_dir)
+        env["PYTHONIOENCODING"] = "utf-8"
+        python_path = env.get("PYTHONPATH", "")
+        env["PYTHONPATH"] = str(PROJECT_ROOT) + (os.pathsep + python_path if python_path else "")
+        result = subprocess.run(
+            [sys.executable, "-m", "src.dssat.run_dssat", *localized_args],
+            cwd=run_dir,
+            env=env,
+            check=False,
+        )
+        # Spec §5.6: only on success, atomically write the PEST interface files
+        # back to the directory PEST reads from.  On failure the Pest*.OUT are
+        # left untouched (PEST treats a missing/stale run as failed via its own
+        # max_run_fail logic rather than receiving recycled outputs).
+        if result.returncode == 0:
+            _atomic_copy_back(run_dir, pest_run_dir)
+        return result.returncode
+    finally:
+        shutil.rmtree(run_dir, ignore_errors=True)
 
 
 if __name__ == "__main__":

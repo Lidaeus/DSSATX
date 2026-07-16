@@ -39,7 +39,8 @@ split_csv_arg <- function(value) {
 load_publication_profile <- function(path) {
   profile <- jsonlite::fromJSON(path, simplifyVector = TRUE)
   required <- c("profile_id", "column_width_mm", "double_column_width_mm",
-                "font_size_pt", "raster_dpi", "formats", "palette")
+                "font_size_pt", "raster_dpi", "formats", "palette",
+                "nitrogen_colors", "water_shapes")
   missing <- setdiff(required, names(profile))
   if (length(missing) > 0) stop("Figure profile missing: ", paste(missing, collapse = ", "))
   if (profile$font_size_pt < 5) stop("Final-size font must be at least 5 pt")
@@ -102,8 +103,40 @@ validate_comparison <- function(data) {
   data$observed <- as.numeric(data$observed)
   data$simulated <- as.numeric(data$simulated)
   data$time <- as.numeric(data$time)
+  optional_numeric <- c("date_code", "year", "doy", "dap", "harvest_number",
+                        "observed_sd", "observed_se", "n_rep")
+  for (column in optional_numeric) {
+    if (!column %in% names(data)) data[[column]] <- NA_real_
+    data[[column]] <- as.numeric(data[[column]])
+  }
   data <- data[is.finite(data$observed) & is.finite(data$simulated), , drop = FALSE]
   if (nrow(data) == 0) stop("comparison.csv has no finite pairs")
+  data
+}
+
+validate_trajectory <- function(data) {
+  required <- c("run_id", "data_status", "dataset_role", "variable", "variable_label",
+                "unit", "treatment", "time", "time_label", "year", "doy", "date_code",
+                "simulated", "statistic", "source_file")
+  missing <- setdiff(required, names(data))
+  if (length(missing) > 0) stop("simulation_trajectory.csv missing: ", paste(missing, collapse = ", "))
+  for (column in c("time", "year", "doy", "date_code", "simulated")) {
+    data[[column]] <- as.numeric(data[[column]])
+  }
+  data <- data[is.finite(data$time) & is.finite(data$simulated), , drop = FALSE]
+  if (nrow(data) == 0) stop("simulation_trajectory.csv has no finite values")
+  data
+}
+
+validate_treatment_metadata <- function(data) {
+  required <- c("treatment", "treatment_label", "water_level", "nitrogen_level")
+  missing <- setdiff(required, names(data))
+  if (length(missing) > 0) stop("treatment_metadata.csv missing: ", paste(missing, collapse = ", "))
+  for (column in required) {
+    data[[column]] <- trimws(as.character(data[[column]]))
+    if (any(!nzchar(data[[column]]))) stop("Treatment metadata has blank ", column)
+  }
+  if (anyDuplicated(data$treatment)) stop("Treatment metadata has duplicate treatment identifiers")
   data
 }
 
@@ -127,7 +160,16 @@ read_paper_bundle <- function(input_dir, allow_demo = FALSE) {
                                                     stringsAsFactors = FALSE, check.names = FALSE))
   phi_path <- file.path(input_dir, "phi_ensemble.csv")
   phi <- if (file.exists(phi_path)) utils::read.csv(phi_path, stringsAsFactors = FALSE) else NULL
-  list(manifest = manifest, comparison = comparison, phi = phi, is_demo = is_demo)
+  trajectory_path <- file.path(input_dir, "simulation_trajectory.csv")
+  trajectory <- if (file.exists(trajectory_path)) {
+    validate_trajectory(utils::read.csv(trajectory_path, stringsAsFactors = FALSE, check.names = FALSE))
+  } else NULL
+  metadata_path <- file.path(input_dir, "treatment_metadata.csv")
+  treatment_metadata <- if (file.exists(metadata_path)) {
+    validate_treatment_metadata(utils::read.csv(metadata_path, stringsAsFactors = FALSE, check.names = FALSE))
+  } else NULL
+  list(manifest = manifest, comparison = comparison, phi = phi, trajectory = trajectory,
+       treatment_metadata = treatment_metadata, is_demo = is_demo)
 }
 
 sha256_record <- function(path) {

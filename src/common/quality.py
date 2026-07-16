@@ -118,6 +118,69 @@ class QualityReport:
             )
 
 
+def load_quality_report(path: str | Path) -> QualityReport:
+    """Reconstruct a :class:`QualityReport` from a written ``quality_report.json``.
+
+    Inverse of :meth:`QualityReport.write`. Used by downstream consumers (e.g.
+    the paper-data exporter) to verify an upstream run passed its gates without
+    trusting a downstream self-reported status string.
+    """
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError(f"quality_report.json at {path} is not a JSON object")
+    run_type = str(data.get("run_type") or "unknown")
+    run_id = str(data.get("run_id") or "")
+    checks: list[QualityCheck] = []
+    for raw in data.get("checks") or []:
+        if not isinstance(raw, dict):
+            continue
+        status = str(raw.get("status") or "fail")
+        message = str(raw.get("message") or "")
+        check_id = str(raw.get("check_id") or "unknown")
+        if status not in {"pass", "warn", "fail"}:
+            status = "fail"
+        checks.append(
+            QualityCheck(
+                check_id=check_id,
+                status=status,
+                message=message,
+                actual=raw.get("actual"),
+                threshold=raw.get("threshold"),
+            )
+        )
+    return QualityReport(
+        run_type=run_type,
+        run_id=run_id,
+        checks=checks,
+        generated_at=str(data.get("generated_at") or ""),
+    )
+
+
+def read_flat_run_manifest_field(path: str | Path, key: str) -> str | None:
+    """Read a single scalar value from a flat ``key: value`` run_manifest.yaml.
+
+    The project writes run manifests as a simple flat YAML subset (see
+    ``build_pest._write_run_manifest``): scalars are rendered as
+    ``key: "value"``, ``key: 123``, ``key: true``, or ``key: null``. This parser
+    avoids a YAML dependency by handling only that subset and stripping the
+    surrounding quotes that ``_write_run_manifest`` emits for strings.
+    """
+    text = Path(path).read_text(encoding="utf-8", errors="ignore")
+    prefix = f"{key}:"
+    for raw in text.splitlines():
+        line = raw.rstrip("\n")
+        if line.startswith(prefix):
+            value = line[len(prefix):].strip()
+            if value in {"null", "~", ""}:
+                return None
+            if (value.startswith('"') and value.endswith('"')) or (
+                value.startswith("'") and value.endswith("'")
+            ):
+                return value[1:-1]
+            return value
+    return None
+
+
 def assess_numeric_matrix(
     frame: pd.DataFrame,
     *,

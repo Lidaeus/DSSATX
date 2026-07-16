@@ -76,7 +76,7 @@ def test_p1_candidate_builds_reproducible_morris_control_files(tmp_path):
     )
     pst = pyemu.Pst(pst_path)
     assert pst.npar_adj == 57
-    assert pst.nnz_obs == 230
+    assert pst.nnz_obs == 164
     assert int(pst.pestpp_options["gsa_morris_r"]) == 4
     assert int(pst.pestpp_options["gsa_morris_p"]) == 6
     assert int(pst.pestpp_options["rand_seed"]) == 20260715
@@ -99,5 +99,7 @@ def test_p1_candidate_builds_reproducible_morris_control_files(tmp_path):
     assert not any("MDAPS" in name.upper() for name in expected_names)
     assert not any(name.upper().startswith("MEAN_") for name in expected_names)
     assert {int(name.split("_")[0][2:]) for name in expected_names if name.startswith("tn")} == {
-        2, 3, 4, 5, 9, 10, 11, 12, 13, 14
+        2, 3, 4, 5, 10, 11, 12, 13
     }
+    assert not any("FRUITD_DAP067" in name.upper() for name in expected_names)
+    assert any(name.upper().startswith("WN_INTERACTION_") for name in expected_names)

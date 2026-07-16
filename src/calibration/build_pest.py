@@ -32,6 +32,10 @@ from src.calibration.observation_policy import (
     load_observation_policy,
     write_transform_config,
 )
+from src.common.input_manifest import (
+    InputManifestError,
+    verify_calibrated_input_bundle,
+)
 from src.common.param_registry import assert_valid_frozen_bounds
 from src.common.project import PROJECT_ROOT, WORKSPACE_DIR, git_metadata, resolve_path, sha256_file
 
@@ -2323,6 +2327,14 @@ if __name__ == "__main__":
         USER_INPUT_DIR = str(Path(args.input_dir).expanduser().resolve())
         if not Path(USER_INPUT_DIR).is_dir():
             parser.error(f"--input-dir does not exist: {USER_INPUT_DIR}")
+        # Enforce input-bundle integrity and use clauses before any template is
+        # parsed or artifact written. An SA counterfactual bundle declares
+        # ``parameter_calibration`` as a prohibited use and must hard-fail here;
+        # tampered bytes (hash mismatch) or a renamed directory fail the same way.
+        try:
+            _input_manifest = verify_calibrated_input_bundle(USER_INPUT_DIR)
+        except InputManifestError as exc:
+            parser.error(f"--input-dir failed manifest verification: {exc}")
 
     if args.apply_normalization:
         parser.error("--apply-normalization is retired because candidate-dependent Min-Max changes the objective")

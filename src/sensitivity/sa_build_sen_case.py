@@ -15,6 +15,7 @@ import pyemu
 from src.common.param_registry import assert_valid_frozen_bounds
 from src.common.project import git_metadata, sha256_file
 from src.common.experiment_inputs import validate_input_bundle
+from src.common.input_manifest import InputManifestError, verify_manifest_integrity
 from src.sensitivity.output_contract import DEFAULT_PROFILE, load_output_contract, observation_names
 
 
@@ -83,6 +84,14 @@ def build_case(
     contract = load_output_contract(output_profile)
     if input_dir:
         input_dir = os.path.abspath(input_dir)
+        # Unified manifest integrity gate: directory/bundle_id match + per-file
+        # SHA-256 verification (not just hashing the manifest file). Runs before
+        # the FileX/soil coherence check so a tampered or mis-identified bundle
+        # fails fast, before any case artifact is written.
+        try:
+            verify_manifest_integrity(input_dir)
+        except InputManifestError as exc:
+            raise ValueError(f"Input bundle manifest verification failed: {exc}") from exc
         input_summary, input_findings = validate_input_bundle(input_dir)
         errors = [item for item in input_findings if item.severity == "error"]
         if errors:
@@ -159,13 +168,18 @@ def build_case(
     pst.observation_data.loc[:, "weight"] = 1.0
 
     model_script = os.path.normpath(os.path.join(workspace_dir, "src", "sensitivity", "sa_model.py"))
-    batch_path = os.path.join(workspace_dir, "data", "templates", "batch", "DSSBatch.v48")
+    batch_path = (
+        os.path.join(input_dir, "DSSBatch.v48")
+        if input_dir
+        else os.path.join(workspace_dir, "data", "templates", "batch", "DSSBatch.v48")
+    )
     model_cmd = (
         f"python \"{model_script}\" --workspace . --batch \"{batch_path}\" "
         f"--cultivar {cultivar} --param-csv {params_csv_name} --out {out_name} --obs-order sa_obs_order.txt"
     )
     if input_dir:
         model_cmd += f' --input-dir "{input_dir}"'
+    model_cmd += f' --output-profile "{contract["path"]}"'
     pst.model_command = [model_cmd]
 
     pst.pestpp_options["gsa_morris_r"] = int(morris_r)

@@ -23,5 +23,17 @@
     "highlight": "#E69F00",
     "positive": "#009E73",
     "negative": "#CC79A7"
+  },
+  "nitrogen_colors": {
+    "N3": "#C0392B",
+    "N2": "#E67E22",
+    "N1": "#2980B9",
+    "N0": "#707070"
+  },
+  "water_shapes": {
+    "W3": 21,
+    "W2": 22,
+    "W1": 24,
+    "CK": 23
   }
 }
