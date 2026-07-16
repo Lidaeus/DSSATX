@@ -6,7 +6,7 @@ derived_from: "eggplant_p1_xxql2501_v2_20260715.csv"
 derived_from_sha256: "597af4164da16b27c4d22e18bb97c30923c2cfaa22864be1231952c79ed7cc89"
 experiment_bundle: "xxql2501_20260716"
 input_manifest_sha256: "5b7deac1502a5005cb46a1c2767a11d0567e13c094544f2faef3b9fdb950cb1b"
-proposal_sha256: "95637798bd5cfe0e4deb6089527c68fbff4dea36601d18dae9934002e40ddf73"
+proposal_sha256: "6b7e31248c7eb1aca173209bf9f8c5c2f86822be55ac4915e60803e58000674a"
 parameter_count: 157
 active_parameter_count: 57
 changed_bounds: "XMAGE lower 5->10; SLAREF lower 225->260"

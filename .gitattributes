@@ -1,0 +1,15 @@
+*.py text eol=lf
+*.md text eol=lf
+*.csv text eol=crlf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.R text eol=lf
+
+# DSSAT inputs are provenance-bearing bytes. Never rewrite their line endings.
+*.TMX -text
+*.TMA -text
+*.TMT -text
+*.SOL -text
+*.WTH -text
+*.v48 -text
