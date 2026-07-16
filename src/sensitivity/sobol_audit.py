@@ -138,6 +138,34 @@ def assess_sobol_case(case_dir: str | Path, case: str = "sa_sen_sobol") -> Quali
         actual=observed_output_count,
         threshold=expected_observations,
     )
+    base_samples = int(manifest.get("sobol_samples", "0") or 0)
+    zero_variance_outputs: list[str] = []
+    if base_samples > 0 and len(obs) >= 2 * base_samples:
+        for column in scientific_columns:
+            base_values = pd.concat(
+                [
+                    scientific_values[column].iloc[:base_samples],
+                    scientific_values[column].iloc[base_samples : 2 * base_samples],
+                ],
+                ignore_index=True,
+            )
+            if float(base_values.var(ddof=0)) <= 1e-12:
+                zero_variance_outputs.append(str(column))
+    is_preflight = manifest.get("run_type") == "sensitivity_sobol_preflight_case"
+    report.add(
+        "sobol_base_response_variance",
+        base_samples > 0 and (is_preflight or not zero_variance_outputs),
+        (
+            "Preflight records zero-variance base responses but does not interpret indices"
+            if is_preflight
+            else "Every formal Sobol response varies across the two base sample matrices"
+        ),
+        actual={
+            "zero_variance_count": len(zero_variance_outputs),
+            "zero_variance_outputs": zero_variance_outputs,
+        },
+        threshold={"zero_variance_count": "record_only_in_preflight" if is_preflight else 0},
+    )
 
     par_columns = [column for column in par.columns if str(column).strip().lower() != "run_id"]
     report.add(

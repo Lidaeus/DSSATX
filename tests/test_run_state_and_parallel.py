@@ -71,6 +71,7 @@ def test_offline_finalize_routes_sobol_to_sobol_audit(tmp_path, monkeypatch):
         "sensitivity_method: sobol\n"
         "observation_count: 1\n"
         "sobol_parameter_count: 1\n"
+        "sobol_samples: 1\n"
         "sobol_expected_model_runs: 3\n",
         encoding="utf-8",
     )
