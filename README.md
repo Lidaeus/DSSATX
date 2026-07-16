@@ -11,7 +11,7 @@ Tomato_Cal 面向作物模型研究者，目标是在 Windows 环境中提供可
 - 当前开发基线是 [产品定义与系统设计](项目重构规划.md)；详细风险和任务见 [P0 科研可信性修复开发计划](docs/P0_科研可信性修复开发计划.md)。
 - P0 已在 `codex/p0-research-credibility` 实施并通过微型数值验证；后续批准的显式 log/处理均值 sigma 也已完成真实 DSSAT/PEST 冒烟，详见 [P0 验证报告](docs/reports/P0_verification_report.md) 与 [Observation Policy 验证记录](docs/reports/observation_policy_verification.md)。已有历史 SA 排名、率定最优参数或不确定性结果仍不得用于论文结论。
 - 科研图表已冻结为“双轨制”：Python 只做 SA/率定运行诊断与论文数据导出，未来可能进入论文的图全部由 R 绘制；完整 Fig. 1–6/Fig. S1–S8 规划见 [科研图表设计与开发计划](docs/科研图表设计与开发计划.md)。
-- P0 防退化加固已完成当前回归轮次；P1 的新 XXQL2501 输入包、57 个活跃参数和 10 TN/240 响应契约已批准。P1-R1 已完成运行可靠性与失效诊断：v2 的 seed 20260715 在 TN2 存在可重复模型失败，正式 Morris 暂停；下一步须先解决 TN2/深层土壤数据风险，再按“2 个独立 seed 起步、稳定性不足时最多扩展到 5 个”的自适应计划重跑。详见 [P1 科研分析启动计划](docs/P1_科研分析启动计划.md)、[P1-R1 可靠性设计](docs/P1_R1_科研运行可靠性与失效诊断.md) 与 [seed 失效诊断](docs/reports/P1_R1_seed_20260715_failure_diagnosis.md)。
+- P0 防退化加固已完成当前回归轮次；P1 的57个活跃参数和10 TN/240响应契约已批准。P1-R2 已定位旧 FileX 的 MF2 施肥行错序并创建数据等价的 `xxql2501_20260716` 新包；深层缺失土壤字段不参与 SA。`XMAGE≥10、SLAREF≥260` 仅为待审 v3 candidate，计划审批后先做 `r=8` 可行性预检，再按“2个正式 seed 起步、稳定性不足时最多扩展到5个”执行。详见 [P1 科研分析启动计划](docs/P1_科研分析启动计划.md) 与 [P1-R2 归因报告](docs/reports/P1_R2_TN2_factor_attribution.md)。
 
 ## 产品原则
 
@@ -76,7 +76,7 @@ docs/                     当前规范、开发计划和历史背景材料
 
 - `FL-VS` 固定为 `100.0`；`XFINT` 必须受数值安全边界约束。
 - 参数冻结文件是率定可消费的唯一参数提案；不得自动选取“最新”SA 结果。
-- 正式运行用 `--input-dir` 显式选择版本化用户输入包；当前包为 `data/user/experiments/xxql2501_20260715`。
+- 正式运行用 `--input-dir` 显式选择版本化用户输入包；当前待审包为 `data/user/experiments/xxql2501_20260716`，旧 `20260715` 包已停用。
 - PEST 目标函数按 `Phi = Σ(w_i × residual_i)^2` 理解。若 `sigma_i` 是观测误差标准差，则基础权重为 `1 / sigma_i`，不是 `1 / sigma_i²`。
 - 默认在原始物理尺度计算残差。任何对数等变换必须预先声明，并同时作用于观测和模拟；禁止用同批观测与候选模拟共同计算动态 Min–Max 范围。
 - FileA/FileT 继续保存处理均值；原始重复另表保存并用于估计均值 sigma，不把同一处理重复作为共享同一个模拟值的独立 PEST 观测。

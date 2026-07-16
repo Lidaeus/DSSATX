@@ -1,4 +1,5 @@
 from src.sensitivity.replay_morris_failure import (
+    apply_candidate_minimums,
     batch_treatments,
     read_candidate,
     write_filtered_batch,
@@ -25,3 +26,12 @@ def test_candidate_and_treatment_batch_are_reconstructed(tmp_path):
     text = filtered.read_text(encoding="utf-8")
     assert " 3 1 0 0 0" in text
     assert " 2 1 0 0 0" not in text
+
+
+def test_diagnostic_minimums_only_raise_values_below_candidate_bound():
+    candidate, changes = apply_candidate_minimums(
+        {"slaref": "225", "xmage": "11", "other": "2"},
+        {"SLAREF": 250, "xmage": 10},
+    )
+    assert candidate == {"slaref": "250", "xmage": "11", "other": "2"}
+    assert changes == {"slaref": {"original": 225.0, "minimum": 250.0}}

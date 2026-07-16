@@ -1,0 +1,15 @@
+proposal_id: "eggplant_p1_xxql2501_v3_candidate_20260716"
+crop: "eggplant"
+created_at: "2026-07-16T12:49:44+08:00"
+review_status: "pending"
+derived_from: "eggplant_p1_xxql2501_v2_20260715.csv"
+derived_from_sha256: "597af4164da16b27c4d22e18bb97c30923c2cfaa22864be1231952c79ed7cc89"
+experiment_bundle: "xxql2501_20260716"
+input_manifest_sha256: "5b7deac1502a5005cb46a1c2767a11d0567e13c094544f2faef3b9fdb950cb1b"
+proposal_sha256: "95637798bd5cfe0e4deb6089527c68fbff4dea36601d18dae9934002e40ddf73"
+parameter_count: 157
+active_parameter_count: 57
+changed_bounds: "XMAGE lower 5->10; SLAREF lower 225->260"
+evidence: "Corrected MF2 row order; seven representative failures replayed over all ten treatments with 70/70 success after diagnostic clamping"
+limitations: "Not a proof of global feasibility; requires an independent r=6-10 Morris preflight before approval/freeze"
+approval_basis: "Awaiting user review"

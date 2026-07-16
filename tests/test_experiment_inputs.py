@@ -3,13 +3,15 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.common.experiment_inputs import parse_filex, validate_input_bundle
+from src.common.experiment_inputs import management_event_order_findings, parse_filex, validate_input_bundle
 from src.sensitivity.output_contract import load_output_contract, observation_names
 
 
 ROOT = Path(__file__).resolve().parents[1]
-BUNDLE = ROOT / "data" / "user" / "experiments" / "xxql2501_20260715"
+BUNDLE = ROOT / "data" / "user" / "experiments" / "xxql2501_20260716"
+OLD_BUNDLE = ROOT / "data" / "user" / "experiments" / "xxql2501_20260715"
 FROZEN = ROOT / "data" / "parameter_registry" / "bounds_frozen" / "eggplant" / "eggplant_p1_xxql2501_v2_20260715.csv"
+V3_PROPOSAL = ROOT / "data" / "parameter_registry" / "bounds_proposals" / "eggplant" / "eggplant_p1_xxql2501_v3_candidate_20260716.csv"
 
 
 def test_versioned_xxql2501_bundle_passes_cross_file_gates():
@@ -23,7 +25,8 @@ def test_versioned_xxql2501_bundle_passes_cross_file_gates():
     assert summary["soil_id"] == "IBTM910017"
     assert summary["treatments"] == [2, 3, 4, 5, 9, 10, 11, 12, 13, 14]
     manifest = json.loads((BUNDLE / "input_manifest.json").read_text(encoding="utf-8"))
-    assert manifest["science_status"] == "pass"
+    assert manifest["science_status"] == "pass_with_warnings"
+    assert manifest["derived_from_bundle"] == "xxql2501_20260715"
     assert manifest["authoritative_coordinates"] == [35.16, 113.8]
 
 
@@ -35,9 +38,19 @@ def test_tn2_tn3_do_not_cover_water_nitrogen_design():
     assert {factors[tn]["MF"] for tn in factors} == {1, 2, 3, 4}
 
 
+def test_noncontiguous_fertilizer_factor_rows_are_rejected():
+    findings = management_event_order_findings(OLD_BUNDLE / "XXQL2501.TMX")
+    codes = {item.code for item in findings}
+    assert "FILEX_FACTOR_ROWS_NONCONTIGUOUS" in codes
+    assert "FILEX_FACTOR_DATES_UNSORTED" in codes
+    assert not management_event_order_findings(BUNDLE / "XXQL2501.TMX")
+
+
 def test_p1_output_contract_is_full_design_nonredundant_and_observed_time_aligned():
     contract = load_output_contract()
     names = observation_names(contract)
+    assert contract["profile_id"] == "eggplant_p1_all_treatments_v2"
+    assert contract["experiment_bundle"] == "xxql2501_20260716"
     assert len(names) == contract["observation_count"] == 240
     assert contract["time_points"] == [45, 67, 95, 119]
     assert not any(name.startswith("MEAN_") for name in names)
@@ -55,3 +68,16 @@ def test_frozen_bounds_use_new_soil_and_treatment_specific_disabled_ic():
     assert set(ic["status"].str.lower()) == {"disabled"}
     assert not frame["name"].isin({"IC_SH2O_01", "IC_SH2O_02"}).any()
     assert float(by_name.loc["XMAGE", "upper"]) < float(by_name.loc["XFPHT", "lower"])
+    soil = frame[frame["file"].eq("SOIL.SOL")]
+    assert set(soil["status"].str.lower()) == {"fixed"}
+    assert not soil["name"].str.contains("SSKS|SLCL|SLSI", regex=True).any()
+
+
+def test_v3_candidate_is_pending_and_preserves_baseline_inside_proposed_bounds():
+    frame = pd.read_csv(V3_PROPOSAL, encoding="utf-8-sig").set_index("name")
+    assert float(frame.loc["XMAGE", "lower"]) == 10.0
+    assert float(frame.loc["SLAREF", "lower"]) == 260.0
+    assert float(frame.loc["XMAGE", "lower"]) <= float(frame.loc["XMAGE", "init"])
+    assert float(frame.loc["SLAREF", "lower"]) <= float(frame.loc["SLAREF", "init"])
+    metadata = V3_PROPOSAL.with_suffix(".yaml").read_text(encoding="utf-8")
+    assert 'review_status: "pending"' in metadata

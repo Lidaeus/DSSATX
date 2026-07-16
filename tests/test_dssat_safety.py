@@ -150,7 +150,7 @@ def test_run_directory_preparation_is_local_and_complete(tmp_path):
 
 
 def test_run_directory_uses_explicit_user_bundle_without_raw_fallback(tmp_path):
-    bundle = ROOT / "data" / "user" / "experiments" / "xxql2501_20260715"
+    bundle = ROOT / "data" / "user" / "experiments" / "xxql2501_20260716"
     batch = prepare_run_directory(
         tmp_path,
         ["--input-dir", str(bundle), "--batch", "DSSBatch.v48"],

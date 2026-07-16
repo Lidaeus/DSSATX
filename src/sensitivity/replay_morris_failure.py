@@ -11,6 +11,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from src.sensitivity.sa_model import compute_indicators
 
 
@@ -33,6 +37,25 @@ def read_candidate(parameter_file: str | Path, run_id: int) -> dict[str, str]:
             if int(row["run_id"]) == int(run_id):
                 return {name: row[name] for name in reader.fieldnames if name != "run_id"}
     raise KeyError(f"run_id {run_id} was not found")
+
+
+def apply_candidate_minimums(
+    candidate: dict[str, str], minimums: dict[str, float] | None
+) -> tuple[dict[str, str], dict[str, dict[str, float]]]:
+    """Clamp only values below diagnostic lower-bound candidates."""
+
+    updated = dict(candidate)
+    changes: dict[str, dict[str, float]] = {}
+    for raw_name, minimum in (minimums or {}).items():
+        name = raw_name.lower()
+        matching = next((key for key in updated if key.lower() == name), None)
+        if matching is None:
+            raise KeyError(f"Candidate parameter is absent: {raw_name}")
+        original = float(updated[matching])
+        if original < float(minimum):
+            updated[matching] = format(float(minimum), "g")
+            changes[matching] = {"original": original, "minimum": float(minimum)}
+    return updated, changes
 
 
 def batch_treatments(batch_path: str | Path) -> list[int]:
@@ -107,11 +130,13 @@ def replay_candidates(
     out_dir: str | Path,
     treatments: list[int | None],
     execute: bool,
+    input_dir_override: str | Path | None = None,
+    candidate_minimums: dict[str, float] | None = None,
 ) -> list[dict[str, Any]]:
     case_root = Path(case_dir).resolve()
     manifest = read_flat_manifest(case_root / "run_manifest.yaml")
     parameter_file = case_root / "sa_sen_morris.sen.par.csv"
-    input_dir = Path(manifest.get("input_dir", "")).resolve()
+    input_dir = Path(input_dir_override or manifest.get("input_dir", "")).resolve()
     if not input_dir.is_dir():
         raise FileNotFoundError(f"Input bundle is unavailable: {input_dir}")
     batch_source = input_dir / "DSSBatch.v48"
@@ -124,7 +149,9 @@ def replay_candidates(
 
     results: list[dict[str, Any]] = []
     for run_id in run_ids:
-        candidate = read_candidate(parameter_file, run_id)
+        candidate, candidate_changes = apply_candidate_minimums(
+            read_candidate(parameter_file, run_id), candidate_minimums
+        )
         for treatment in treatments:
             label = "all" if treatment is None else f"tn{int(treatment)}"
             replay_dir = destination / f"run_{int(run_id):04d}" / label
@@ -136,6 +163,7 @@ def replay_candidates(
                 "treatment": treatment,
                 "status": "prepared",
                 "replay_dir": str(replay_dir),
+                "candidate_changes": candidate_changes,
             }
             if execute:
                 try:
@@ -162,6 +190,8 @@ def replay_candidates(
         "schema_version": 1,
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "case_dir": str(case_root),
+        "input_dir": str(input_dir),
+        "candidate_minimums": candidate_minimums or {},
         "execute": bool(execute),
         "results": results,
     }
@@ -180,6 +210,17 @@ def main() -> int:
     parser.add_argument("--split-treatments", action="store_true")
     parser.add_argument("--include-all", action="store_true")
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument(
+        "--input-dir",
+        help="Optional diagnostic input bundle override; the case manifest remains unchanged",
+    )
+    parser.add_argument(
+        "--minimum",
+        action="append",
+        default=[],
+        metavar="NAME=VALUE",
+        help="Diagnostic candidate lower bound; values below it are clamped during replay",
+    )
     args = parser.parse_args()
 
     input_dir = Path(read_flat_manifest(Path(args.case_dir) / "run_manifest.yaml").get("input_dir", ""))
@@ -193,12 +234,24 @@ def main() -> int:
     if args.include_all and None not in treatments:
         treatments.insert(0, None)
 
+    minimums: dict[str, float] = {}
+    for item in args.minimum:
+        if "=" not in item:
+            parser.error(f"--minimum must be NAME=VALUE, got {item!r}")
+        name, value = item.split("=", 1)
+        try:
+            minimums[name.strip()] = float(value)
+        except ValueError:
+            parser.error(f"--minimum value must be numeric, got {item!r}")
+
     results = replay_candidates(
         args.case_dir,
         args.run_id,
         out_dir=args.out_dir,
         treatments=treatments,
         execute=args.execute,
+        input_dir_override=args.input_dir,
+        candidate_minimums=minimums,
     )
     failed = sum(item["status"] == "model_failed" for item in results)
     print(f"replays={len(results)} failed={failed} execute={args.execute}")

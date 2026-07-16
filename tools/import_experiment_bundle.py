@@ -44,6 +44,13 @@ def main() -> int:
     parser.add_argument("--site-lat", type=float, default=None)
     parser.add_argument("--site-lon", type=float, default=None)
     parser.add_argument("--out-root", default=str(PROJECT_ROOT / "data" / "user" / "experiments"))
+    parser.add_argument("--derived-from-bundle", default=None)
+    parser.add_argument(
+        "--correction-note",
+        action="append",
+        default=[],
+        help="Auditable description of a structural or metadata correction",
+    )
     args = parser.parse_args()
 
     source = Path(args.source_dir).resolve()
@@ -81,6 +88,8 @@ def main() -> int:
         files.append({"name": item.name, "sha256": sha256_file(item), "bytes": item.stat().st_size})
     manifest = {
         "bundle_id": args.bundle_id,
+        "derived_from_bundle": args.derived_from_bundle,
+        "correction_notes": args.correction_note,
         "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "source_files": [str(path) for path in sources],
         "authoritative_coordinates": [args.site_lat, args.site_lon] if args.site_lat is not None else None,

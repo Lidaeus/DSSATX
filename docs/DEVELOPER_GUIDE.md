@@ -206,4 +206,4 @@ FileA/FileT 当前以处理均值作为 DSSAT 观测。重复原始记录应保�
 6. 未经批准不修改原始观测、不替换正式冻结边界、不删除历史结果；
 7. 每个阶段通过用户验收后再进入下一阶段。
 
-当前经用户批准的 P1 frozen 为 `eggplant_p1_xxql2501_v2_20260715`，输入包为 `xxql2501_20260715`。v1 因 XMAGE/XFPHT 独立范围重叠而标记为 superseded。后续不得静默改写输入或 v2 CSV；任何变化必须创建新 bundle/bounds ID。Morris 结果只可生成待审 Top-K proposal，不自动进入 Sobol 或率定。
+当前已批准的 P1 frozen 仍为 `eggplant_p1_xxql2501_v2_20260715`，但其输入包 `xxql2501_20260715` 因 MF2 施肥行不连续而停用。待审替代为输入包 `xxql2501_20260716` 和 proposal `eggplant_p1_xxql2501_v3_candidate_20260716`；未经审批不得冻结或正式运行。后续不得静默改写既有 bundle/CSV，任何变化必须创建新 ID。Morris 结果只可生成待审 Top-K proposal，不自动进入 Sobol 或率定。

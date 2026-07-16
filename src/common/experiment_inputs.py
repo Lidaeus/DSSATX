@@ -13,6 +13,16 @@ import re
 
 
 MODEL_SUFFIXES = {".TMX", ".TMA", ".TMT"}
+MANAGEMENT_EVENT_HEADINGS = (
+    "*PLANTING DETAILS",
+    "*IRRIGATION AND WATER MANAGEMENT",
+    "*FERTILIZERS (INORGANIC)",
+    "*RESIDUES AND ORGANIC FERTILIZER",
+    "*CHEMICAL APPLICATIONS",
+    "*TILLAGE AND ROTATIONS",
+    "*ENVIRONMENT MODIFICATIONS",
+    "*HARVEST DETAILS",
+)
 
 
 @dataclass(frozen=True)
@@ -132,6 +142,59 @@ def parse_filex(path: str | Path) -> dict[str, object]:
     }
 
 
+def management_event_order_findings(path: str | Path) -> list[InputFinding]:
+    """Reject factor levels split into multiple blocks or dates out of order.
+
+    DSSAT management readers can interpret non-contiguous factor rows
+    differently from a logically equivalent chronological table. Treat row
+    order as part of the scientific input contract rather than presentation.
+    """
+
+    filex = Path(path)
+    findings: list[InputFinding] = []
+    for heading in MANAGEMENT_EVENT_HEADINGS:
+        section = _section_lines(filex, heading)
+        rows: list[tuple[int, int]] = []
+        for raw in section:
+            stripped = raw.strip()
+            if not stripped or stripped.startswith(("*", "@", "!")):
+                continue
+            tokens = stripped.split()
+            try:
+                rows.append((int(tokens[0]), int(tokens[1])))
+            except (ValueError, IndexError):
+                continue
+        if not rows:
+            continue
+        blocks: list[int] = []
+        for level, _ in rows:
+            if not blocks or blocks[-1] != level:
+                blocks.append(level)
+        repeated = sorted({level for level in blocks if blocks.count(level) > 1})
+        if repeated:
+            findings.append(
+                InputFinding(
+                    "FILEX_FACTOR_ROWS_NONCONTIGUOUS",
+                    "error",
+                    f"{heading} factor levels occur in multiple row blocks: {repeated}",
+                )
+            )
+        unsorted = []
+        for level in sorted({value for value, _ in rows}):
+            dates = [date for row_level, date in rows if row_level == level]
+            if dates != sorted(dates):
+                unsorted.append(level)
+        if unsorted:
+            findings.append(
+                InputFinding(
+                    "FILEX_FACTOR_DATES_UNSORTED",
+                    "error",
+                    f"{heading} factor levels have non-chronological event rows: {unsorted}",
+                )
+            )
+    return findings
+
+
 def parse_soil_profile(path: str | Path, soil_id: str) -> dict[str, object] | None:
     lines = Path(path).read_text(encoding="utf-8", errors="ignore").splitlines()
     start = next(
@@ -237,6 +300,7 @@ def validate_input_bundle(input_dir: str | Path) -> tuple[dict[str, object], lis
         findings.append(InputFinding("FILEX_MISSING", "error", f"Batch references missing {filex.name}"))
         return {}, findings
     parsed = parse_filex(filex)
+    findings.extend(management_event_order_findings(filex))
     batch_treatments = {tn for _, tn in entries}
     filex_treatments = set(parsed["treatments"])
     missing = sorted(batch_treatments - filex_treatments)
@@ -329,6 +393,6 @@ def findings_as_dicts(findings: list[InputFinding]) -> list[dict[str, str]]:
 
 
 __all__ = [
-    "InputFinding", "batch_entries", "findings_as_dicts", "parse_filex",
+    "InputFinding", "batch_entries", "findings_as_dicts", "management_event_order_findings", "parse_filex",
     "parse_soil_profile", "validate_input_bundle",
 ]
