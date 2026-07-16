@@ -5,7 +5,7 @@
   "approved_at": "2026-07-16",
   "approved_parameter_count": 16,
   "approved_topk_csv": "eggplant_p1_sobol_top16_20260716.csv",
-  "approved_topk_csv_sha256": "1a51ba1c72992c37f39f658a77cde01895e9c0a9af0bc5c34700b05aa792b3bd",
+  "approved_topk_csv_sha256": "18e2cb97f6d8be6361940dff99c4df730450bde813d728f3667f9158dde1376b",
   "source_morris_report": "docs/reports/P1_R4_正式Morris与跨seed稳定性.md",
   "source_stability_sha256": "65e34ebedf28e4d4cd45435f72a5f0dd00084a21cc2a6c003c3525bed191e42c",
   "source_proposal_sha256": "06034e916d42984ff7148a899606a3c88d61ee48da55d81bdf705504f9d3ec51",
