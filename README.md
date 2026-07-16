@@ -11,7 +11,7 @@ Tomato_Cal 面向作物模型研究者，目标是在 Windows 环境中提供可
 - 当前开发基线是 [产品定义与系统设计](项目重构规划.md)；详细风险和任务见 [P0 科研可信性修复开发计划](docs/P0_科研可信性修复开发计划.md)。
 - P0 已在 `codex/p0-research-credibility` 实施并通过微型数值验证；后续批准的显式 log/处理均值 sigma 也已完成真实 DSSAT/PEST 冒烟，详见 [P0 验证报告](docs/reports/P0_verification_report.md) 与 [Observation Policy 验证记录](docs/reports/observation_policy_verification.md)。已有历史 SA 排名、率定最优参数或不确定性结果仍不得用于论文结论。
 - 科研图表已冻结为“双轨制”：Python 只做 SA/率定运行诊断与论文数据导出，未来可能进入论文的图全部由 R 绘制；完整 Fig. 1–6/Fig. S1–S8 规划见 [科研图表设计与开发计划](docs/科研图表设计与开发计划.md)。
-- P0 防退化加固已完成当前回归轮次。P1-R2 已修复旧 FileX 的 MF2 施肥行错序；P1-R3 修复 `LAIXM` 实测/`LAIXS` 模拟字段混用和 DAP45 果实结构性零值，将正式契约收敛为10 TN/230响应。正式 Morris 已完成：seed `20260812`、`20260826` 均通过全部质量门，跨 seed Spearman=0.9962、Top-15 Jaccard=0.875，达到判停阈值；失败 seed `20260729` 已定位并排除。当前等待审批16参数保守并集或14参数稳定核心进入 Sobol。详见 [P1-R4 正式 Morris 报告](docs/reports/P1_R4_正式Morris与跨seed稳定性.md)。
+- P0 防退化加固已完成当前回归轮次。正式 Morris 已完成并通过跨 seed 稳定性门；推荐的16参数保守并集已经批准和哈希冻结。真实 `N=4` Sobol工程预检72/72成功，0模型失败，230项响应和bootstrap点估计复算均通过；小样本出现35项基础零方差和极端指数，明确不得解释。当前等待审批 `N=64 → 128 → 必要时256` 的正式自适应预算，详见 [P1-R5 Sobol预检报告](docs/reports/P1_R5_Sobol工程预检与正式预算.md)。
 
 ## 产品原则
 
