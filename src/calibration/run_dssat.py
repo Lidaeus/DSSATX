@@ -33,6 +33,20 @@ _PEST_INTERFACE_FILES = (
     "PestTmtGrow.OUT",
 )
 
+# Raw DSSAT daily/summary outputs that the SA pipeline (sa_model.py) reads to
+# build the 164-response contract (daily LAID/LWAD/SWAD/CWAD/HIAD trajectories
+# from PlantGro.OUT, daily CHPDT from FreshWt.OUT, and HWAMS/HIAMS/LAIXS/CWAMS/
+# ADAPS/PDFPS/MDAPS from Evaluate.OUT). The PEST-formatted Pest*.OUT above are
+# summary subsets and do not carry these daily trajectories, so the SA contract
+# cannot be derived from them. These raw files are copied back from the
+# ephemeral iso dir alongside the PEST interface files so SA can read them from
+# the run directory before it is recycled.
+_RAW_DSSAT_OUTPUT_FILES = (
+    "Evaluate.OUT",
+    "PlantGro.OUT",
+    "FreshWt.OUT",
+)
+
 
 def _copy(source: Path, destination: Path) -> None:
     if not source.is_file():
@@ -151,6 +165,12 @@ def _atomic_copy_back(source_dir: Path, dest_dir: Path) -> None:
     Writes to a per-file ``*.tmp`` and ``os.replace``s it into place so PEST
     (and any concurrent reader) never observes a half-written ``Pest*.OUT``.
     Missing files are skipped: the caller's freshness check decides validity.
+
+    The raw DSSAT outputs (Evaluate/PlantGro/FreshWt.OUT) are also copied back
+    (non-atomically — they are read only after the run completes, not by PEST's
+    .ins during the run) because the SA pipeline derives the 164-response
+    contract from the daily trajectories they carry, which the summary
+    Pest*.OUT do not contain.
     """
     for name in _PEST_INTERFACE_FILES:
         source = source_dir / name
@@ -160,6 +180,12 @@ def _atomic_copy_back(source_dir: Path, dest_dir: Path) -> None:
         tmp = dest_dir / f"{name}.tmp"
         shutil.copy2(source, tmp)
         os.replace(tmp, destination)
+    for name in _RAW_DSSAT_OUTPUT_FILES:
+        source = source_dir / name
+        if not source.is_file():
+            continue
+        destination = dest_dir / name
+        shutil.copy2(source, destination)
 
 
 def main() -> int:

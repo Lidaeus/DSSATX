@@ -159,3 +159,31 @@ def test_run_directory_uses_explicit_user_bundle_without_raw_fallback(tmp_path):
     for name in ("XXQL2501.TMX", "XXQL2501.TMA", "XXQL2501.TMT", "XXN92501.WTH"):
         assert (tmp_path / name).read_bytes() == (bundle / name).read_bytes()
     assert (tmp_path / "SOIL.SOL.base").read_bytes() == (bundle / "SOIL.SOL").read_bytes()
+
+
+def test_atomic_copy_back_publishes_raw_dssat_outputs_for_sa(tmp_path):
+    """The SA pipeline (sa_model.py) reads raw PlantGro.OUT/FreshWt.OUT/
+    Evaluate.OUT daily trajectories to build the 164-response contract; the
+    summary Pest*.OUT do not carry them. _atomic_copy_back must therefore copy
+    the raw outputs back from the ephemeral iso dir alongside the PEST
+    interface files, or every SA output silently becomes the -99 sentinel.
+    """
+    from src.calibration.run_dssat import _RAW_DSSAT_OUTPUT_FILES, _atomic_copy_back
+
+    source = tmp_path / "iso_run"
+    source.mkdir()
+    dest = tmp_path / "pest_dir"
+    dest.mkdir()
+    # Simulate the files a real DSSAT run leaves in the iso dir.
+    for name in ("PestEval.OUT", "PestTmtGrow.OUT", "Evaluate.OUT", "PlantGro.OUT", "FreshWt.OUT"):
+        (source / name).write_text(f"{name} content\n", encoding="utf-8")
+
+    _atomic_copy_back(source, dest)
+
+    # PEST interface files are copied back.
+    assert (dest / "PestEval.OUT").read_text() == "PestEval.OUT content\n"
+    # Raw DSSAT outputs the SA contract depends on are copied back too.
+    for name in _RAW_DSSAT_OUTPUT_FILES:
+        assert (dest / name).is_file(), f"{name} must be published for SA consumption"
+        assert (dest / name).read_text() == f"{name} content\n"
+
