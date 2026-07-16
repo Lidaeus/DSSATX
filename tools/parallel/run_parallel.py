@@ -347,6 +347,8 @@ def cmd_finalize(run_dir, case, mode="sen"):
         termination_reason="offline_finalize_verified_complete",
         controller_recovered=True,
         original_manager_pid=current.get("manager_pid"),
+        prior_controller_error=current.get("controller_error", ""),
+        controller_error="",
     )
     print(f"offline_finalize=completed scientific_status={scientific_status}")
     return scientific_status == "validated"

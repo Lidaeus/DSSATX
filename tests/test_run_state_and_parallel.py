@@ -56,4 +56,5 @@ def test_offline_finalize_requires_complete_evidence_and_writes_science_status(t
     assert status["status"] == "completed"
     assert status["scientific_status"] == "validated"
     assert status["termination_reason"] == "offline_finalize_verified_complete"
+    assert status["controller_error"] == ""
     assert (tmp_path / "morris_audit" / "morris_result_quality.json").is_file()

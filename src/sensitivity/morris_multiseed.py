@@ -126,6 +126,7 @@ def analyze_multiseed(
     output_profile: str | Path,
     out_dir: str | Path,
     *,
+    excluded_case_dirs: list[str | Path] | None = None,
     top_k: int = 15,
     min_spearman: float = 0.90,
     min_jaccard: float = 0.80,
@@ -156,6 +157,32 @@ def analyze_multiseed(
                 "seed": seed,
                 "case_dir": str(case_dir),
                 "mio_sha256": sha256_file(case_dir / "sa_sen_morris.mio"),
+            }
+        )
+
+    excluded_records: list[dict[str, Any]] = []
+    for raw_case in excluded_case_dirs or []:
+        case_dir = Path(raw_case).resolve()
+        status = json.loads((case_dir / "run_status.json").read_text(encoding="utf-8"))
+        if status.get("scientific_status") != "failed":
+            raise ValueError(f"Excluded case must have scientific_status=failed: {case_dir}")
+        manifest = _read_flat_manifest(case_dir / "run_manifest.yaml")
+        if manifest.get("run_type") != "sensitivity_formal_case":
+            raise ValueError(f"Excluded case is not formal: {case_dir}")
+        audit = json.loads(
+            (case_dir / "morris_audit" / "morris_run_audit.json").read_text(encoding="utf-8")
+        )
+        summary = audit.get("summary") or {}
+        excluded_records.append(
+            {
+                "seed": int(manifest["random_seed"]),
+                "case_dir": str(case_dir),
+                "scientific_status": "failed",
+                "model_failed_runs": int(summary.get("model_failed_runs", 0)),
+                "runtime_failed_runs": int(summary.get("runtime_failed_runs", 0)),
+                "fully_valid_trajectories": int(summary.get("fully_valid_trajectories", 0)),
+                "expected_trajectories": int(summary.get("expected_trajectories", 0)),
+                "exclusion_reason": "formal_quality_gate_failed",
             }
         )
 
@@ -190,12 +217,42 @@ def analyze_multiseed(
     )
     consensus.insert(0, "consensus_rank", np.arange(1, len(consensus) + 1))
 
+    top_sets = {
+        int(seed): set(group.nsmallest(top_k, "rank")["parameter"])
+        for seed, group in all_rankings.groupby("seed")
+    }
+    stable_core = set.intersection(*top_sets.values())
+    top_union = set.union(*top_sets.values())
+    rank_columns = (
+        all_rankings.pivot(index="parameter", columns="seed", values="rank")
+        .rename(columns=lambda seed: f"rank_seed_{int(seed)}")
+        .reset_index()
+    )
+    group_columns = (
+        all_groups.groupby(["parameter", "response_group"], as_index=False)["group_score"]
+        .mean()
+        .pivot(index="parameter", columns="response_group", values="group_score")
+        .rename(columns=lambda group: f"score_group_{group}")
+        .reset_index()
+    )
+    proposal = (
+        consensus[consensus["parameter"].isin(top_union)]
+        .merge(rank_columns, on="parameter", how="left")
+        .merge(group_columns, on="parameter", how="left")
+        .sort_values(["consensus_rank", "parameter"], kind="stable")
+    )
+    proposal["selection_class"] = proposal["parameter"].map(
+        lambda parameter: "stable_core" if parameter in stable_core else "top_k_boundary_union"
+    )
+    proposal["review_status"] = "pending"
+
     destination = Path(out_dir).resolve()
     destination.mkdir(parents=True, exist_ok=True)
     all_rankings.to_csv(destination / "morris_seed_rankings.csv", index=False, encoding="utf-8-sig")
     all_groups.to_csv(destination / "morris_seed_group_scores.csv", index=False, encoding="utf-8-sig")
     pairs.to_csv(destination / "morris_seed_pairwise_stability.csv", index=False, encoding="utf-8-sig")
     consensus.to_csv(destination / "morris_consensus_ranking.csv", index=False, encoding="utf-8-sig")
+    proposal.to_csv(destination / "morris_topk_proposal.csv", index=False, encoding="utf-8-sig")
     result = {
         "schema_version": 1,
         "run_type": "formal_morris_multiseed_stability",
@@ -209,12 +266,38 @@ def analyze_multiseed(
         "minimum_pairwise_top_k_jaccard": float(pairs["top_k_jaccard"].min()),
         "stable": stable,
         "decision": decision,
+        "top_k_stable_core_count": len(stable_core),
+        "top_k_union_count": len(top_union),
+        "top_k_proposal_review_status": "pending",
         "output_profile": str(Path(output_profile).resolve()),
         "output_profile_sha256": sha256_file(output_profile),
         "cases": case_records,
+        "excluded_cases": excluded_records,
     }
     (destination / "morris_multiseed_stability.json").write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    (destination / "morris_topk_proposal.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "proposal_type": "morris_topk_for_sobol_review",
+                "review_status": "pending",
+                "top_k": top_k,
+                "stable_core_parameters": sorted(stable_core),
+                "boundary_union_parameters": sorted(top_union - stable_core),
+                "proposed_parameter_count": len(top_union),
+                "selection_rule": (
+                    "Union of each validated seed's Top-K; intersection is stable_core and "
+                    "seed-specific boundary members remain pending domain review"
+                ),
+                "source_stability_report": "morris_multiseed_stability.json",
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
     )
     lines = [
         "# Formal Morris cross-seed stability",
@@ -233,6 +316,7 @@ def analyze_multiseed(
 def main() -> int:
     parser = argparse.ArgumentParser(description="Assess formal Morris ranking stability across independent seeds")
     parser.add_argument("--case-dir", action="append", required=True)
+    parser.add_argument("--excluded-case", action="append", default=[])
     parser.add_argument("--output-profile", required=True)
     parser.add_argument("--out-dir", required=True)
     parser.add_argument("--top-k", type=int, default=15)
@@ -243,6 +327,7 @@ def main() -> int:
         args.case_dir,
         args.output_profile,
         args.out_dir,
+        excluded_case_dirs=args.excluded_case,
         top_k=args.top_k,
         min_spearman=args.min_spearman,
         min_jaccard=args.min_jaccard,
