@@ -279,6 +279,79 @@ def cmd_status(run_dir, agents_dir="_agents"):
     print(f"{'='*60}\n")
 
 
+def cmd_finalize(run_dir, case, mode="sen"):
+    """Finalize a completed manager after its parent controller was lost.
+
+    This path never resumes or re-runs the model. It requires terminal evidence
+    for every design point, a final PEST++ summary, and a stopped manager.
+    """
+    run_dir = os.path.abspath(run_dir)
+    if mode != "sen":
+        raise ValueError("Offline finalization is currently supported only for sensitivity runs")
+    manager_pid = _find_manager_pid(run_dir)
+    if _is_pid_alive(manager_pid):
+        raise RuntimeError(f"Refusing to finalize while manager is running: {manager_pid}")
+
+    from src.common.quality import assess_morris, assess_morris_audit, load_morris_summary
+    from src.sensitivity.morris_audit import audit_morris_case, write_morris_audit
+
+    preliminary = audit_morris_case(run_dir, case=case)
+    summary = preliminary["summary"]
+    rec_path = os.path.join(run_dir, f"{case}.rec")
+    rec_text = ""
+    if os.path.isfile(rec_path):
+        with open(rec_path, "r", encoding="utf-8", errors="ignore") as handle:
+            rec_text = handle.read().lower()
+    if int(summary.get("not_finalized_runs", 0)) != 0:
+        raise RuntimeError("Refusing to finalize: design points remain non-terminal")
+    if not bool(summary.get("mio_exists")):
+        raise RuntimeError("Refusing to finalize: final Morris summary is missing")
+    if "pestpp-sen analysis complete" not in rec_text:
+        raise RuntimeError("Refusing to finalize: PEST++ completion marker is missing")
+    if int(summary.get("runtime_failed_runs", 0)) or int(summary.get("unknown_failed_runs", 0)):
+        raise RuntimeError("Refusing to finalize: runtime or unknown failures require recovery")
+
+    current = _read_json(os.path.join(run_dir, "run_status.json")) or {}
+    finished_at = _utc_now()
+    _update_run_status(
+        run_dir,
+        status="completed",
+        scientific_status="pending",
+        finished_at=finished_at,
+        manager_exit_code=0,
+        termination_reason="offline_finalize_verified_complete",
+        controller_recovered=True,
+    )
+    audit = audit_morris_case(run_dir, case=case)
+    audit_dir = os.path.join(run_dir, "morris_audit")
+    write_morris_audit(audit, audit_dir)
+    run_quality = assess_morris_audit(audit, run_id=os.path.basename(run_dir))
+    run_quality.write(audit_dir, stem="morris_run_quality")
+    result_quality = assess_morris(
+        load_morris_summary(os.path.join(run_dir, f"{case}.mio")),
+        run_id=os.path.basename(run_dir),
+    )
+    result_quality.write(audit_dir, stem="morris_result_quality")
+    scientific_status = (
+        "validated"
+        if run_quality.science_validated and result_quality.science_validated
+        else "failed"
+    )
+    _update_run_status(
+        run_dir,
+        status="completed",
+        scientific_status=scientific_status,
+        scientific_status_error="",
+        finished_at=finished_at,
+        manager_exit_code=0,
+        termination_reason="offline_finalize_verified_complete",
+        controller_recovered=True,
+        original_manager_pid=current.get("manager_pid"),
+    )
+    print(f"offline_finalize=completed scientific_status={scientific_status}")
+    return scientific_status == "validated"
+
+
 def cmd_stop(run_dir, agents_dir="_agents", *, force=False):
     """Request a traceable stop; force is reserved for unresponsive jobs."""
     run_dir = os.path.abspath(run_dir)
@@ -652,6 +725,8 @@ def main():
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--status", action="store_true",
                         help="Query run status instead of starting a run")
+    parser.add_argument("--finalize", action="store_true",
+                        help="Finalize an already completed run after controller loss; never re-runs models")
     parser.add_argument("--stop", action="store_true",
                         help="Request a graceful, traceable stop using pest.stp")
     parser.add_argument("--force-stop", action="store_true",
@@ -663,6 +738,9 @@ def main():
 
     if args.status:
         cmd_status(os.path.abspath(args.run_dir), agents_dir=args.agents_dir)
+        return
+    if args.finalize:
+        cmd_finalize(os.path.abspath(args.run_dir), args.case, mode=args.mode)
         return
     if args.stop or args.force_stop:
         cmd_stop(

@@ -25,3 +25,35 @@ def test_graceful_stop_records_intent_without_killing_processes(tmp_path, monkey
     assert status["status"] == "stopping"
     assert status["stop_mode"] == "pest.stp"
     assert status["state_schema_version"] == 2
+
+
+def test_offline_finalize_requires_complete_evidence_and_writes_science_status(tmp_path, monkeypatch):
+    (tmp_path / "sa_sen_morris.sen.par.csv").write_text(
+        "run_id,a,b\n0,0,0\n1,1,0\n2,1,1\n3,0,0\n4,1,0\n5,1,1\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "sa_sen_morris.rmr").write_text(
+        "\n".join(f"00:00:00->run {run_id} processed" for run_id in range(6)),
+        encoding="utf-8",
+    )
+    (tmp_path / "sa_sen_morris.rec").write_text(
+        "pestpp-sen analysis complete\n", encoding="utf-8"
+    )
+    (tmp_path / "sa_sen_morris.mio").write_text(
+        "observation_name,parameter_name,n_samples,sen_mean_abs\n"
+        "tn2_yield_hwams,a,2,0.2\n"
+        "tn2_yield_hwams,b,2,0.1\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "run_status.json").write_text(
+        json.dumps({"status": "running", "manager_pid": 123}), encoding="utf-8"
+    )
+    monkeypatch.setattr(run_parallel, "_find_manager_pid", lambda _run_dir: 123)
+    monkeypatch.setattr(run_parallel, "_is_pid_alive", lambda _pid: False)
+
+    assert run_parallel.cmd_finalize(str(tmp_path), "sa_sen_morris", mode="sen")
+    status = json.loads((tmp_path / "run_status.json").read_text(encoding="utf-8"))
+    assert status["status"] == "completed"
+    assert status["scientific_status"] == "validated"
+    assert status["termination_reason"] == "offline_finalize_verified_complete"
+    assert (tmp_path / "morris_audit" / "morris_result_quality.json").is_file()
