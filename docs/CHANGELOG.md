@@ -2,7 +2,7 @@
 
 ## 2026-07-16
 
-- 新增 P1 运行失败原因长期复盘与复查命令；建立 Git 行尾契约，科研 CSV 固定 CRLF、代码及 YAML/JSON/Markdown 固定 LF，DSSAT 输入按原始字节保存，避免 clean worktree 中审批哈希漂移并兼容既有审批哈希。
+- 新增 P1 运行失败原因长期复盘与复查命令；建立 Git 行尾契约，科研 CSV/JSON 固定 CRLF、代码及 YAML/Markdown 固定 LF，DSSAT 输入按原始字节保存，避免 clean worktree 中审批哈希漂移并兼容既有审批哈希。
 - 完成 P1-R2 失效归因：IC 替换不能消除失败，MF 水平具有决定性影响；进一步确认旧 FileX 的 MF2 施肥行分块/错序改变了 DSSAT 实际执行结果。
 - 新增管理事件因子连续性和日期顺序输入门禁；创建仅重排 MF2 行、事件值不变的 `xxql2501_20260716` 输入包，旧包不得继续正式使用。
 - 输出项目保持10 TN/240项不变，profile ID 升级为 `eggplant_p1_all_treatments_v2` 并绑定新输入包，避免把旧输入身份带入新运行。

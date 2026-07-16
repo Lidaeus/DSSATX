@@ -1,7 +1,8 @@
+.gitattributes text eol=lf
 *.py text eol=lf
 *.md text eol=lf
 *.csv text eol=crlf
-*.json text eol=lf
+*.json text eol=crlf
 *.yaml text eol=lf
 *.yml text eol=lf
 *.R text eol=lf
