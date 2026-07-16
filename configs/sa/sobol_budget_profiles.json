@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "default_profile": "standard",
+  "profiles": {
+    "quick": {
+      "sample_schedule": [32, 64, 128],
+      "recommended_agents": 6,
+      "bootstrap_replicates": 500,
+      "description": "Lower-cost exploratory schedule; conclusions still require all convergence gates."
+    },
+    "standard": {
+      "sample_schedule": [64, 128, 256],
+      "recommended_agents": 6,
+      "bootstrap_replicates": 1000,
+      "description": "Approved P1 adaptive publication-oriented schedule."
+    },
+    "extended": {
+      "sample_schedule": [128, 256, 512],
+      "recommended_agents": 6,
+      "bootstrap_replicates": 2000,
+      "description": "Higher-cost schedule for persistently unstable indices."
+    }
+  },
+  "convergence_thresholds": {
+    "spearman": 0.95,
+    "top_k": 8,
+    "top_k_jaccard": 0.75,
+    "max_top_k_rank_shift": 2.0
+  },
+  "user_controls": {
+    "profile_argument": "--profile",
+    "custom_schedule_argument": "--samples",
+    "custom_schedule_example": "--samples 64,96,192",
+    "rule": "Custom schedules must be strictly increasing integers >=32 and are always recorded in the campaign manifest."
+  }
+}
