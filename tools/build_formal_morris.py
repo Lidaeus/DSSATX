@@ -17,7 +17,16 @@ from src.common.project import git_metadata, sha256_file
 from src.sensitivity.sa_build_sen_case import build_case
 
 
-DEFAULT_SEEDS = [20260715, 20260729, 20260812, 20260826, 20260909]
+DEFAULT_SEEDS = [20260729, 20260812]
+
+
+def validate_seed_plan(seeds: list[int]) -> list[int]:
+    normalized = [int(seed) for seed in seeds]
+    if len(normalized) < 2 or len(normalized) != len(set(normalized)):
+        raise ValueError("Formal Morris requires at least two unique seeds")
+    if 20260715 in normalized:
+        raise ValueError("Seed 20260715 is reserved for failure diagnosis and cannot be formal")
+    return normalized
 
 
 def main() -> int:
@@ -33,8 +42,10 @@ def main() -> int:
     args = parser.parse_args()
     if args.morris_r < 20:
         parser.error("Formal Morris requires r >= 20")
-    if len(args.seeds) < 3 or len(args.seeds) != len(set(args.seeds)):
-        parser.error("Formal Morris requires at least three unique seeds")
+    try:
+        args.seeds = validate_seed_plan(args.seeds)
+    except ValueError as exc:
+        parser.error(str(exc))
     git_info = git_metadata()
     if git_info.get("git_dirty") and not args.allow_dirty:
         parser.error("Refusing formal case build from a dirty worktree; commit and re-run")

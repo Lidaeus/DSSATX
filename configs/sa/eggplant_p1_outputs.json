@@ -24,12 +24,19 @@
   "fruit_time_points": [67, 95, 119],
   "include_treatment_mean": false,
   "observation_count": 230,
+  "response_groups": {
+    "phenology": ["ADAPS", "PDFPS"],
+    "canopy": ["LAIXS", "LAI_AUC", "LAI_PEAK", "LAI_TPEAK", "LAI_END", "LAI_DAP"],
+    "biomass": ["CWAMS", "LEAF_END_LWAD", "STEM_END_SWAD", "AGB_END_CWAD"],
+    "yield_harvest": ["YIELD_HWAMS", "HIAMS", "FRUITD_AUC", "FRUITD_END", "HI_END_HIAD", "FRUITD_DAP"]
+  },
   "design_notes": [
     "All ten water-nitrogen treatments are retained; TN2/TN3 alone cover only irrigation level MI1.",
     "DAP points align with FileT process sampling dates 25120, 25142, 25170 and 25194 relative to planting date 25075.",
     "Redundant treatment means and seven highly correlated fixed-DAP pairs are omitted.",
     "MDAPS is omitted because the reviewed baseline returns the DSSAT missing sentinel.",
     "LAIXS is the simulated maximum LAI; LAIXM is measured and must not be used as a model response.",
-    "FRUITD_DAP045 is omitted because the r=8 preflight found it structurally zero for every treatment and parameter effect."
+    "FRUITD_DAP045 is omitted because the r=8 preflight found it structurally zero for every treatment and parameter effect.",
+    "Formal cross-seed ranking normalizes effects within each response, averages treatments and DAPs within feature families, then gives the four response groups equal weight."
   ]
 }

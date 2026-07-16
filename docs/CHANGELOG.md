@@ -2,6 +2,8 @@
 
 ## 2026-07-16
 
+- 用户批准并冻结 `eggplant_p1_xxql2501_v3_20260716`，冻结 CSV 与已验证 proposal 字节一致且无自动修复；P1 readiness 全部通过。
+- 正式 Morris 改为先构建两个新 seed，显式拒绝历史失败 seed `20260715`；新增跨 seed 稳定性分析，按响应内归一化、特征族和四过程组等权汇总，并自动应用 Spearman/Top-15 Jaccard 判停门槛。
 - r=8 预检发现旧响应契约把 DSSAT 实测 `LAIXM` 误作模拟响应，且 `FRUITD_DAP045` 在整个候选域结构性为零；修复为 `LAIXS`，拆分 LAI/果实过程点并将契约收敛为10 TN/230项。
 - Morris 科研状态新增逐响应非退化门禁；并行运行结束后同时审核轨迹完整性和 `.mio` 有限性/响应覆盖，避免“进程成功、整体非零”掩盖局部无效输出。
 - 新增 P1 运行失败原因长期复盘与复查命令；建立 Git 行尾契约，科研 CSV/JSON 固定 CRLF、代码及 YAML/Markdown 固定 LF，DSSAT 输入按原始字节保存，避免 clean worktree 中审批哈希漂移并兼容既有审批哈希。

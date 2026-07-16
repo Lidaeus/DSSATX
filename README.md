@@ -11,7 +11,7 @@ Tomato_Cal 面向作物模型研究者，目标是在 Windows 环境中提供可
 - 当前开发基线是 [产品定义与系统设计](项目重构规划.md)；详细风险和任务见 [P0 科研可信性修复开发计划](docs/P0_科研可信性修复开发计划.md)。
 - P0 已在 `codex/p0-research-credibility` 实施并通过微型数值验证；后续批准的显式 log/处理均值 sigma 也已完成真实 DSSAT/PEST 冒烟，详见 [P0 验证报告](docs/reports/P0_verification_report.md) 与 [Observation Policy 验证记录](docs/reports/observation_policy_verification.md)。已有历史 SA 排名、率定最优参数或不确定性结果仍不得用于论文结论。
 - 科研图表已冻结为“双轨制”：Python 只做 SA/率定运行诊断与论文数据导出，未来可能进入论文的图全部由 R 绘制；完整 Fig. 1–6/Fig. S1–S8 规划见 [科研图表设计与开发计划](docs/科研图表设计与开发计划.md)。
-- P0 防退化加固已完成当前回归轮次。P1-R2 已修复旧 FileX 的 MF2 施肥行错序；P1-R3 进一步发现 `LAIXM` 实测/`LAIXS` 模拟字段混用和 DAP45 果实结构性零值，将正式候选契约收敛为10 TN/230响应。`XMAGE≥10、SLAREF≥260` v3 candidate 已通过独立 `r=8` 可行性预检，下一步须经用户批准冻结后，按“2个正式 seed 起步、稳定性不足时最多扩展到5个”执行。详见 [P1 科研分析启动计划](docs/P1_科研分析启动计划.md) 与 [P1-R3 预检报告](docs/reports/P1_R3_Morris可行性预检.md)。
+- P0 防退化加固已完成当前回归轮次。P1-R2 已修复旧 FileX 的 MF2 施肥行错序；P1-R3 进一步修复 `LAIXM` 实测/`LAIXS` 模拟字段混用和 DAP45 果实结构性零值，将正式契约收敛为10 TN/230响应。`eggplant_p1_xxql2501_v3_20260716` 已批准冻结，正式 Morris 从 seed `20260729`、`20260812` 各 `r=30` 起步，稳定性不足时最多扩展到5个。详见 [P1 科研分析启动计划](docs/P1_科研分析启动计划.md) 与 [P1-R3 预检报告](docs/reports/P1_R3_Morris可行性预检.md)。
 
 ## 产品原则
 

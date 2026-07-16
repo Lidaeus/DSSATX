@@ -1,13 +1,13 @@
 # P1-R3：Morris 可行性预检与响应契约修复
 
-> 状态：预检通过；v3 边界可提交冻结审批；不得使用本报告生成正式参数排名
+> 状态：预检通过并完成 v3 冻结；不得使用本报告生成正式参数排名
 > 日期：2026-07-16
 
 ## 结论
 
 `eggplant_p1_xxql2501_v3_candidate_20260716` 在新输入包、57 个活跃参数和独立 `r=8` Morris 设计下完成 464/464 个设计点，零模型失败、零运行时失败、8/8 条轨迹完整。响应契约修复后，230/230 项均具有至少一个非零 Morris 效应，最终 `scientific_status=validated`。
 
-该证据支持把 v3 proposal 提交用户审批并冻结。它不提供正式参数排序，也不自动批准两个 `r=30` 正式 seed、Top-K、Sobol 或率定。
+该证据已被用户批准：v3 冻结为 `eggplant_p1_xxql2501_v3_20260716`，10 TN/230响应契约和两个 `r=30` 正式 seed 获准执行。它仍不提供正式参数排序，也不自动批准 Top-K、Sobol 或率定。
 
 ## 两轮预检及门禁发现
 
@@ -65,13 +65,13 @@
 - `morris_result_quality.json`：`14851172590393ca8d70d5fe9c0906ef072b07d51fabbe4df847a138ae305760`
 - `sa_sen_morris.mio`：`d7afc1193812c8145140fe9f4a0297b1edc48b6b335d94bb14baed434fcc671d`
 
-## 下一审批点
+## 审批结果
 
-请用户审核并批准：
+用户已批准：
 
-1. 将 v3 candidate 冻结为正式 bounds ID；
-2. 将10 TN/230响应的 `eggplant_p1_all_treatments_v3` 作为 P1 正式契约；
-3. 批准从新 seed 开始执行两个独立 `r=30` 正式 Morris 案例。
+1. v3 candidate 冻结为 `eggplant_p1_xxql2501_v3_20260716`；
+2. 10 TN/230响应的 `eggplant_p1_all_treatments_v3` 作为 P1 正式契约；
+3. 从新 seed 开始执行两个独立 `r=30` 正式 Morris 案例。
 
 正式运行必须在批准后的 frozen CSV 上重新构建；不得直接把 proposal 或本次预检 `.mio` 用于参数排名。
 

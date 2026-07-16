@@ -15,7 +15,7 @@
 5. [观测误差与权重设计规范](权重设计方案改进提案.md)：目标函数、误差标准差、变换和相关观测的专题规范。
 6. [P0 验证报告](reports/P0_verification_report.md)：前后证据、数值 smoke 和保留限制。
 7. [Observation Policy 验证记录](reports/observation_policy_verification.md)：显式 log 与处理均值 sigma 的实现和真实程序证据。
-8. [P1 科研分析启动计划](P1_科研分析启动计划.md)：已验证输入、待冻结 v3 边界、10 TN/230响应契约和正式 Morris 预算。
+8. [P1 科研分析启动计划](P1_科研分析启动计划.md)：已冻结 v3 边界、10 TN/230响应契约、跨 seed 汇总规则和正式 Morris 预算。
 9. [XXQL2501 输入与 SA 设计审计](reports/XXQL2501_input_and_SA_design_review.md)：新 FileX/SOIL 跨文件检查及 TN/输出科学性判断。
 10. [科研图表设计与开发计划](科研图表设计与开发计划.md)：Python 运行诊断/R 论文图分层、主图/补充图注册表、数据接口和分阶段实现。
 11. [P1-R1 科研运行可靠性与失效诊断](P1_R1_科研运行可靠性与失效诊断.md)：并行运行状态、Morris 轨迹门禁、失败重放和正式运行策略。
@@ -72,4 +72,4 @@
 
 ## 6. 当前审批入口
 
-P1-R3 `r=8` 可行性预检已通过。下一审批点是把 `eggplant_p1_xxql2501_v3_candidate_20260716` 冻结、确认10 TN/230响应契约，并启动两个独立 `r=30` 正式 seed。正式 Morris 的 Top-K proposal、Sobol 和率定仍需分别审批。
+P1-R3 `r=8` 可行性预检已通过，v3、10 TN/230响应契约和两个独立 `r=30` 正式 seed 已批准。下一审批点取决于跨 seed 稳定性：稳定则审核 Morris Top-K proposal，不稳定则按预声明顺序增加 seed。Sobol 和率定仍需分别审批。
