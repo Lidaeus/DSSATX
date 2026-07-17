@@ -23,7 +23,7 @@ from src.sensitivity.output_contract import load_output_contract
 
 
 _TN_RE = re.compile(r"^tn(?P<treatment>\d+)_(?P<feature>.+)$", re.IGNORECASE)
-_DAP_RE = re.compile(r"_dap\d{2,3}$", re.IGNORECASE)
+_DAP_RE = re.compile(r"_dap\d{3}$", re.IGNORECASE)
 _WN_WATER_RE = re.compile(r"^wn_water_(?P<level>n\d+)_(?P<feature>.+)$", re.IGNORECASE)
 _WN_NSLOPE_RE = re.compile(r"^wn_nslope_(?P<water>w\d+)_(?P<feature>.+)$", re.IGNORECASE)
 _WN_INTERACTION_RE = re.compile(r"^wn_interaction_(?P<feature>.+)$", re.IGNORECASE)
