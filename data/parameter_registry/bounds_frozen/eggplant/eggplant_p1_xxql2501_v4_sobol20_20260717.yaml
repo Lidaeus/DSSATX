@@ -1,0 +1,12 @@
+bounds_id: "eggplant_p1_xxql2501_v4_sobol20_20260717"
+crop: "eggplant"
+created_at: "2026-07-17T06:34:37Z"
+approved_at: "2026-07-17T06:34:37Z"
+approved_by: "Ceres Architect"
+review_status: "approved"
+derived_from: "eggplant_p1_xxql2501_v4_sobol20_20260717.csv"
+derived_from_sha256: "2fd75908dc09d197a14fa4370d7468344601a3de61ddaa307406bb90ccea4b17"
+bounds_sha256: "f88075771e2c7d76494df6c2f5269c5cdd4780c3446247166e732476f6cbf237"
+parameter_count: 157
+automatic_repairs: 0
+notes: "v4 Sobol-guided calibration bounds: 20 active params (eggplant_p1_sobol_top20_v4_20260717 ST-ranked both domains), 137 fixed at init. Derived from eggplant_p1_xxql2501_v3_20260716."
