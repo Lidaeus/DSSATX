@@ -61,18 +61,20 @@ def load_posterior_ensemble(
     prefix: str,
     *,
     variance_tol: float = _ZERO_VARIANCE_TOL,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, list[str]]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, list[str], list[str]]:
     """Load the IES prior + posterior parameter ensembles and the bounds.
 
-    Returns ``(prior, posterior, bounds, active_params)`` where ``active_params``
-    is the list of parameter columns that vary in the posterior above
-    ``variance_tol``. Zero-variance (held-constant) parameters are filtered out
-    so correlation/PCA/VIF are not dominated by degenerate columns.
+    Returns ``(prior, posterior, bounds, active_params, all_calibrated_params)``
+    where ``active_params`` are columns varying above ``variance_tol`` (used for
+    correlation/PCA/VIF) and ``all_calibrated_params`` is the full set of
+    adjustable parameters from the PEST control file (including those that
+    collapsed to near-constant in the posterior). Zero-variance parameters are
+    flagged in diagnostics rather than silently dropped, per P2-R0.2.
     """
     run_dir = Path(run_dir)
     prior = _read_par_iteration(run_dir, prefix, 0)
     posterior = _read_latest_par_iteration(run_dir, prefix)
-    bounds = _read_bounds_from_pst(run_dir, prefix, posterior.columns)
+    bounds, all_calibrated = _read_bounds_from_pst(run_dir, prefix, posterior.columns)
 
     numeric_cols = [
         c for c in posterior.columns
@@ -81,12 +83,13 @@ def load_posterior_ensemble(
     variances = posterior[numeric_cols].var(axis=0, ddof=0)
     active = [c for c in numeric_cols if variances.get(c, 0.0) > variance_tol]
     active = sorted(active, key=str.lower)
+    all_calibrated = sorted(all_calibrated, key=str.lower)
     if not active:
         raise ValueError(
             f"No parameters vary in the posterior ensemble above {variance_tol}; "
             "equifinality analysis requires at least one active parameter"
         )
-    return prior, posterior, bounds, active
+    return prior, posterior, bounds, active, all_calibrated
 
 
 def _read_par_iteration(run_dir: Path, prefix: str, iteration: int) -> pd.DataFrame:
@@ -113,31 +116,59 @@ def _read_latest_par_iteration(run_dir: Path, prefix: str) -> pd.DataFrame:
     return df.rename(columns=rename)
 
 
-def _read_bounds_from_pst(run_dir: Path, prefix: str, param_columns) -> pd.DataFrame:
-    """Extract per-parameter lower/upper/init bounds from the PEST control file."""
-    pst_path = run_dir / f"{prefix}.pst"
-    rows: list[dict[str, float]] = []
-    if not pst_path.is_file():
-        return pd.DataFrame(columns=["parameter", "lower", "upper", "init"])
-    try:
-        import pyemu  # local import — heavy dependency
+def _read_bounds_from_pst(run_dir: Path, prefix: str, param_columns) -> tuple[pd.DataFrame, list[str]]:
+    """Extract per-parameter lower/upper/init bounds from the PEST control file.
 
-        pst = pyemu.Pst(str(pst_path))
-        pd_data = pst.parameter_data
-        for name in param_columns:
-            if name == "real_name":
-                continue
-            if name in pd_data.index:
-                row = pd_data.loc[name]
-                rows.append({
-                    "parameter": str(name),
-                    "lower": float(row.get("parlbnd", np.nan)),
-                    "upper": float(row.get("parubnd", np.nan)),
-                    "init": float(row.get("parval1", np.nan)),
-                })
-    except Exception:
-        pass
-    return pd.DataFrame(rows)
+    Returns ``(bounds_df, all_calibrated_params)`` where the second element is
+    the full list of non-fixed (adjustable) parameter names from the PEST
+    control — used to ensure collapsed parameters are flagged, not lost.
+
+    PEST parameter names are case-insensitive in the .pst but the .par.csv
+    writer may emit either case. We match case-insensitively (P2-R0.2).
+
+    If the .pst is missing or unreadable, we conservatively treat ALL numeric
+    posterior columns as calibrated (so none are silently dropped) and leave
+    bounds as NaN (bound-fraction diagnostics will be NaN but present).
+    """
+    pst_path = run_dir / f"{prefix}.pst"
+    numeric_param_names = [
+        str(c).strip().upper() for c in param_columns
+        if c != "real_name"
+    ]
+    rows: list[dict[str, float]] = []
+    all_calibrated: list[str] = []
+    pst_parsed = False
+    if pst_path.is_file():
+        try:
+            import pyemu  # local import — heavy dependency
+
+            pst = pyemu.Pst(str(pst_path))
+            pd_data = pst.parameter_data
+            pst_lookup: dict[str, tuple[str, Any]] = {}
+            for idx in pd_data.index:
+                pst_lookup[str(idx).strip().upper()] = (str(idx), pd_data.loc[idx])
+            for name in numeric_param_names:
+                key = str(name).strip().upper()
+                if key in pst_lookup:
+                    orig, row = pst_lookup[key]
+                    partrans = str(row.get("partrans", "")).strip().lower()
+                    is_adjustable = partrans not in {"fixed", "tied"}
+                    if is_adjustable:
+                        all_calibrated.append(name)
+                    rows.append({
+                        "parameter": name,
+                        "lower": float(row.get("parlbnd", np.nan)),
+                        "upper": float(row.get("parubnd", np.nan)),
+                        "init": float(row.get("parval1", np.nan)),
+                    })
+            pst_parsed = True
+        except Exception:
+            pst_parsed = False
+    if not pst_parsed:
+        # Fallback: all numeric posterior columns are treated as calibrated.
+        all_calibrated = list(numeric_param_names)
+        rows = [{"parameter": n, "lower": np.nan, "upper": np.nan, "init": np.nan} for n in numeric_param_names]
+    return pd.DataFrame(rows), all_calibrated
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -149,13 +180,19 @@ def compute_posterior_diagnostics(
     prior: pd.DataFrame,
     posterior: pd.DataFrame,
     bounds: pd.DataFrame,
+    all_calibrated_params: list[str],
     active_params: list[str],
 ) -> pd.DataFrame:
     """Per-parameter prior/posterior summary, shrinkage, and bound proximity.
 
-    Output columns (科研图表设计 line 121 extension):
-    ``parameter, prior_mean, prior_median, prior_q05, prior_q95, prior_iqr,
-    posterior_mean, posterior_median, posterior_q05, posterior_q95,
+    Covers **all calibrated parameters** (not just active ones), so collapsed
+    parameters are flagged via ``collapsed=True`` rather than silently dropped
+    (P2-R0.2). Correlation/PCA/VIF use only active params; diagnostics cover
+    the full adjustable set.
+
+    Output columns:
+    ``parameter, collapsed, prior_mean, prior_median, prior_q05, prior_q95,
+    prior_iqr, posterior_mean, posterior_median, posterior_q05, posterior_q95,
     posterior_iqr, iqr_shrinkage, var_shrinkage, frac_near_lower,
     frac_near_upper, multimodality_flag``
     """
@@ -164,10 +201,11 @@ def compute_posterior_diagnostics(
         if not bounds.empty and "parameter" in bounds.columns
         else pd.DataFrame()
     )
+    active_set = set(active_params)
     rows: list[dict[str, Any]] = []
-    for p in active_params:
+    for p in all_calibrated_params:
         prior_vals = pd.to_numeric(prior.get(p, pd.Series(dtype=float)), errors="coerce").dropna()
-        post_vals = pd.to_numeric(posterior[p], errors="coerce").dropna()
+        post_vals = pd.to_numeric(posterior.get(p, pd.Series(dtype=float)), errors="coerce").dropna()
         prior_iqr = float(prior_vals.quantile(0.75) - prior_vals.quantile(0.25)) if len(prior_vals) else np.nan
         post_iqr = float(post_vals.quantile(0.75) - post_vals.quantile(0.25)) if len(post_vals) else np.nan
         prior_var = float(prior_vals.var(ddof=0)) if len(prior_vals) > 1 else np.nan
@@ -180,6 +218,7 @@ def compute_posterior_diagnostics(
         frac_ub = float(np.mean(np.abs(post_vals - ub) <= tol)) if np.isfinite(ub) and len(post_vals) else np.nan
         rows.append({
             "parameter": p,
+            "collapsed": p not in active_set,
             "prior_mean": float(prior_vals.mean()) if len(prior_vals) else np.nan,
             "prior_median": float(prior_vals.median()) if len(prior_vals) else np.nan,
             "prior_q05": float(prior_vals.quantile(0.05)) if len(prior_vals) else np.nan,
@@ -427,29 +466,55 @@ def assess_equifinality(
     run_dir: str | Path,
     prefix: str,
 ) -> tuple[QualityReport, dict[str, Any]]:
-    """Assemble a warn-level QualityReport summarising equifinality signals.
+    """Assemble a QualityReport summarising equifinality signals.
 
-    This does NOT reject a run — per plan §5 line 172, automatic equifinality
-    judgement is out of scope for this phase. It records the signals for human
-    review: max |correlation|, max VIF, condition number, PC1 explained
-    variance, functional-equifinality pair count.
+    **Upstream binding (P2-R0.1)**: the equifinality entry inherits the
+    scientific status of the IES run it analyses. If the upstream IES quality
+    report is missing or failed, the equifinality report cannot be
+    ``science_validated`` — it cannot self-promote. The upstream status is read
+    from the run manifest and quality reports in the same run directory.
+
+    Per plan §5 line 172, this does not perform automatic equifinality
+    *rejection* (the equifinality-specific checks are warn-level). But it DOES
+    inherit a hard fail from upstream: if the IES run failed, equifinality is
+    not validated regardless of its own diagnostics.
     """
     run_dir = Path(run_dir)
-    prior, posterior, bounds, active = load_posterior_ensemble(run_dir, prefix)
-    diagnostics = compute_posterior_diagnostics(prior, posterior, bounds, active)
+    upstream_status, upstream_source = _read_upstream_ies_status(run_dir, prefix)
+
+    prior, posterior, bounds, active, all_calibrated = load_posterior_ensemble(run_dir, prefix)
+    diagnostics = compute_posterior_diagnostics(prior, posterior, bounds, all_calibrated, active)
     correlation = compute_correlation_matrix(posterior, active)
     vif_df, condition = compute_vif_condition(posterior, active)
     pca_loadings, pca_metrics = compute_pca(posterior, active)
     phi_df = _load_phi(run_dir, prefix)
-    func_pairs = detect_functional_equifinality(posterior, phi_df, active)
+    # R0.3: renamed to "candidate pairs" — these are NOT yet functional-equifinal
+    # until prediction_distance is computed from deterministic reruns.
+    candidate_pairs = detect_functional_equifinality(posterior, phi_df, active)
 
     max_corr = float(correlation[["pearson", "spearman"]].abs().max().max()) if not correlation.empty else np.nan
     max_vif = float(vif_df["vif"].max()) if not vif_df.empty and "vif" in vif_df.columns else np.nan
 
     report = QualityReport(run_type="equifinality", run_id=run_dir.name)
+    # R0.1: upstream binding — the process_completed check inherits upstream status.
+    upstream_ok = upstream_status in {"validated", "science_validated", "pass"}
     report.add(
-        "process_completed", True, "Posterior ensemble loaded and diagnostics computed",
-        actual={"active_params": len(active), "posterior_realizations": len(posterior)},
+        "upstream_ies_validated",
+        upstream_ok,
+        f"IES upstream quality is validated (source: {upstream_source})",
+        actual=upstream_status,
+        threshold="validated",
+    )
+    report.add(
+        "process_completed",
+        True,
+        "Posterior ensemble loaded and diagnostics computed",
+        actual={
+            "active_params": len(active),
+            "all_calibrated_params": len(all_calibrated),
+            "collapsed_params": len(all_calibrated) - len(active),
+            "posterior_realizations": len(posterior),
+        },
         threshold={"active_params": 1},
     )
     report.add(
@@ -474,10 +539,10 @@ def assess_equifinality(
         warning=True,
     )
     report.add(
-        "equifinality_functional_pairs",
+        "equifinality_candidate_pairs",
         True,
-        "Functional-equifinality candidate pairs (similar Phi, distant params)",
-        actual=len(func_pairs),
+        "Candidate solution pairs (similar Phi, distant params) — not yet functional-equifinal until prediction_distance computed",
+        actual=len(candidate_pairs),
         warning=True,
     )
 
@@ -488,10 +553,43 @@ def assess_equifinality(
         "condition_number": condition,
         "pca_loadings": pca_loadings,
         "pca_metrics": pca_metrics,
-        "functional_pairs": func_pairs,
+        "candidate_pairs": candidate_pairs,
         "active_params": active,
+        "all_calibrated_params": all_calibrated,
+        "upstream_status": upstream_status,
+        "upstream_source": upstream_source,
     }
     return report, artifacts
+
+
+def _read_upstream_ies_status(run_dir: Path, prefix: str) -> tuple[str, str]:
+    """Read the IES run's scientific status from run_status.json or quality reports.
+
+    Returns ``(status, source)`` where source names the file the status came
+    from. Per P2-R0.1, equifinality inherits this status and cannot
+    self-promote above it.
+    """
+    status_path = run_dir / "run_status.json"
+    if status_path.is_file():
+        try:
+            status_data = json.loads(status_path.read_text(encoding="utf-8"))
+            sci = str(status_data.get("scientific_status", "")).strip().lower()
+            if sci:
+                return sci, "run_status.json"
+        except Exception:
+            pass
+    # Fallback: look for a quality report written by the parallel runner.
+    for candidate in ("quality_report.json", "ies_quality.json"):
+        qpath = run_dir / candidate
+        if qpath.is_file():
+            try:
+                qdata = json.loads(qpath.read_text(encoding="utf-8"))
+                if qdata.get("science_validated"):
+                    return "validated", candidate
+                return "failed", candidate
+            except Exception:
+                pass
+    return "unknown", "none"
 
 
 def _load_phi(run_dir: Path, prefix: str) -> pd.DataFrame:
@@ -538,7 +636,8 @@ def write_equifinality_outputs(
     _write(artifacts["correlation"], "parameter_correlation.csv")
     _write(artifacts["vif"], "vif_condition.csv")
     _write(artifacts["pca_loadings"], "pca_loadings.csv")
-    _write(artifacts["functional_pairs"], "functional_equifinality_pairs.csv")
+    # R0.3: renamed — these are candidate pairs, not functional-equifinal yet.
+    _write(artifacts["candidate_pairs"], "candidate_equifinality_pairs.csv")
 
     # Condition number is a scalar — embed in vif CSV as a sidecar metric CSV.
     pd.DataFrame([{
@@ -567,6 +666,9 @@ def write_equifinality_outputs(
         "run_dir": str(run_dir.resolve()),
         "prefix": prefix,
         "active_params": artifacts["active_params"],
+        "all_calibrated_params": artifacts.get("all_calibrated_params", []),
+        "upstream_status": artifacts.get("upstream_status", "unknown"),
+        "upstream_source": artifacts.get("upstream_source", "none"),
         "artifacts": [{"path": p.name, "sha256": sha256_file(p)} for p in written],
     }
     manifest_path = out_dir / "equifinality_manifest.json"
@@ -590,10 +692,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     print(f"Equifinality diagnostics written to {args.out_dir}")
     print(f"Status: {report.status} | science_validated: {report.science_validated}")
-    print(f"Active params: {len(artifacts['active_params'])}")
+    print(f"Upstream IES status: {artifacts.get('upstream_status', 'unknown')} (source: {artifacts.get('upstream_source', 'none')})")
+    print(f"Active params: {len(artifacts['active_params'])} of {len(artifacts.get('all_calibrated_params', []))} calibrated")
     print(f"Condition number: {artifacts['condition_number']:.2f}")
     print(f"Max |correlation|: {artifacts['correlation'][['pearson','spearman']].abs().max().max():.3f}")
-    print(f"Functional-equifinality pairs: {len(artifacts['functional_pairs'])}")
+    print(f"Candidate equifinality pairs: {len(artifacts['candidate_pairs'])} (not yet functional-equifinal)")
     print(manifest)
     return 0
 

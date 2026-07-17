@@ -150,6 +150,7 @@ def export_bundle(
     treatment_metadata_csv: Path | None = None,
     run_manifest_path: Path | None = None,
     quality_report_path: Path | None = None,
+    scenario_type: str | None = None,
     allow_unvalidated_demo: bool = False,
 ) -> Path:
     """Create the only data contract consumed by ``paper/R/make_all.R``."""
@@ -221,11 +222,19 @@ def export_bundle(
         artifacts.append(_write_csv(phi, out_dir / "phi_ensemble.csv"))
         original_sources.append(phi_csv.resolve())
 
+    # R0.5: scenario_type distinguishes calibration-trial figures (Fig 2-5)
+    # from SA figures (Fig 1/S1/S2). Only 'actual_trial_calibration' may feed
+    # calibration figures; 'controlled_counterfactual_sa' feeds SA figures.
+    resolved_scenario_type = scenario_type or (
+        "actual_trial_calibration" if not allow_unvalidated_demo else "demo_layout"
+    )
+
     payload: dict[str, Any] = {
         "schema_version": 2,
         "run_id": run_id,
         "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "data_status": "science_validated" if validated else "legacy_layout_demo",
+        "scenario_type": resolved_scenario_type,
         "renderer_contract": "r_paper_figures_v2",
         "artifacts": [_artifact(path) for path in artifacts],
         "sources": [
@@ -258,6 +267,13 @@ def main(argv: list[str] | None = None) -> int:
         help="quality_report.json from the same run; required for science_validated export",
     )
     parser.add_argument("--out-dir", required=True)
+    parser.add_argument(
+        "--scenario-type",
+        default=None,
+        help="Scenario type tag: 'actual_trial_calibration' for Fig 2-5, "
+        "'controlled_counterfactual_sa' for SA figures. If omitted, defaults "
+        "to 'actual_trial_calibration' for non-demo exports.",
+    )
     parser.add_argument("--allow-unvalidated-demo", action="store_true")
     args = parser.parse_args(argv)
 
@@ -288,6 +304,7 @@ def main(argv: list[str] | None = None) -> int:
             ),
             run_manifest_path=Path(args.run_manifest) if args.run_manifest else None,
             quality_report_path=Path(args.quality_report) if args.quality_report else None,
+            scenario_type=args.scenario_type,
             allow_unvalidated_demo=args.allow_unvalidated_demo,
         )
     except (ValueError, ScientificQualityError) as exc:

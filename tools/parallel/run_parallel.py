@@ -220,6 +220,28 @@ def _assess_completed_sensitivity(run_dir, case):
     return status, ""
 
 
+def _assess_completed_ies(run_dir, case):
+    """Run the IES scientific quality gate after process completion (P2-R0.6).
+
+    Writes per-iteration realization retention, Phi finiteness, parameter
+    update, and failure reasons to ``ies_quality/``. If the gate fails, the
+    scientific_status is 'failed_quality', which blocks downstream posterior
+    and paper export (per P2-R0.6 acceptance).
+    """
+    from src.reporting.quality_gate import assess_ies_run
+
+    report = assess_ies_run(run_dir, case)
+    audit_dir = os.path.join(run_dir, "ies_quality")
+    os.makedirs(audit_dir, exist_ok=True)
+    report.write(audit_dir, stem="ies_run_quality")
+    if report.science_validated:
+        return "validated", ""
+    failed_checks = ", ".join(
+        c.check_id for c in report.checks if c.status == "fail"
+    )
+    return "failed_quality", f"IES quality gate failed: {failed_checks}"
+
+
 def _find_agent_pid(agent_dir):
     """Find agent PID from state/agent.pid or legacy panther_agent.pid."""
     pid = _read_pid(os.path.join(agent_dir, "state", "agent.pid"))
@@ -635,6 +657,18 @@ def cmd_run(args):
             if process_state == "completed" and args.mode == "sen":
                 try:
                     scientific_status, scientific_error = _assess_completed_sensitivity(
+                        run_dir, args.case
+                    )
+                except Exception as exc:
+                    scientific_status = "not_assessed"
+                    scientific_error = str(exc)
+
+            # P2-R0.6: formal IES completion auto-calls the quality assessment.
+            # Writes ies_quality/ with per-round retention, Phi finiteness,
+            # parameter update, and failure reasons. Failure blocks downstream.
+            if process_state == "completed" and args.mode == "ies":
+                try:
+                    scientific_status, scientific_error = _assess_completed_ies(
                         run_dir, args.case
                     )
                 except Exception as exc:
