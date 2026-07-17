@@ -128,6 +128,11 @@ wAppDataLocalProgramsTraeresourcesappoutvsworkbenchcontribterminalcommonscripts*
 workspace/runs/
 workspace/artifacts/
 workspace/trash/
+# Frozen source-tree snapshots used as provenance checkpoints by formal SA
+# runs (e.g. workspace/formal_source_66513df/). These are historical artifacts,
+# not source code; they make the worktree appear dirty and block the formal
+# Morris builder's clean-worktree guard.
+workspace/formal_source_*/
 .mypy_cache/
 .ruff_cache/
 .pytest_cache/
