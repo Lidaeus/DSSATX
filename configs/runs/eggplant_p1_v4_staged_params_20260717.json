@@ -1,0 +1,35 @@
+{
+  "parameter_proposal_id": "eggplant_p1_v4_staged_8params_20260717",
+  "schema_version": 1,
+  "approved_at": "2026-07-17",
+  "approved_by": "user (P2 plan §6 annotation)",
+  "source_sobol_approval": "eggplant_p1_sobol_top20_v4_20260717",
+  "source_morris_report": "docs/reports/P1_v4_W2_stability_report.md",
+  "total_active_params": 8,
+  "stages": {
+    "S1_phenology_canopy": {
+      "active_params": ["EM-FL", "TRIFL"],
+      "primary_observations": "flowering/phenology dates, LAI time-series",
+      "fixed_baseline": "v3 init values for all others",
+      "excluded_and_reason": "TB2, TM2, TO12, TO22: single-season temperature range insufficient to stably identify multiple temperature thresholds"
+    },
+    "S2_nitrogen_vegetative": {
+      "active_params": ["NSTFAC", "RTNO3", "NMOBMX", "NVSMOB"],
+      "primary_observations": "plant nitrogen, biomass, LAI and treatment differences",
+      "fixed_baseline": "S1 representative values for EM-FL/TRIFL, v3 init for all others",
+      "excluded_and_reason": "RTNH4: no independent ammonium-uptake constraint; RWDTH: no direct root/width observation"
+    },
+    "S3_fruit_harvest": {
+      "active_params": ["XFRT", "XFINT"],
+      "primary_observations": "incremental harvest, end-of-season yield",
+      "fixed_baseline": "S1+S2 representative values, v3 init for all others",
+      "excluded_and_reason": "cumulative harvest is diagnostic only, does not re-enter Phi"
+    },
+    "S4_joint": {
+      "active_params": "subset of S1-S3 params that actually updated, showed no anomalous bounds, AND improved validation — at most 6",
+      "primary_observations": "all calibration groups jointly",
+      "rule": "do not add new params based on SA ranking alone; drop params that only improve calibration but not validation"
+    }
+  },
+  "expansion_rule": "Each stage uses the previous stage's representative values as fixed baseline. If a param shows no stable update or only improves calibration without improving validation, it reverts to fixed. Parameter count is never expanded to compensate."
+}

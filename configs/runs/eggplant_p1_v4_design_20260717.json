@@ -1,0 +1,30 @@
+{
+  "design_table_id": "eggplant_p1_v4_design_20260717",
+  "schema_version": 1,
+  "approved_at": "2026-07-17",
+  "approved_by": "user (P2 plan §6 annotation)",
+  "bounds_id": "eggplant_p1_xxql2501_v4_sobol20_20260717",
+  "input_bundle": "xxql2501_20260716",
+  "validation_split_id": "xxql2501_v4_split_20260717",
+  "observation_policy_id": "assumption_based_sigma_v1",
+  "weight_profile_id": "assumption_based_sigma_v1",
+  "random_seed": 20260717,
+  "stages": {
+    "S1": {"reals": 40, "noptmax": 3, "active_params": ["EM-FL", "TRIFL"], "expected_runs_factor": "reals × (params+2) per iteration"},
+    "S2": {"reals": 60, "noptmax": 4, "active_params": ["NSTFAC", "RTNO3", "NMOBMX", "NVSMOB"]},
+    "S3": {"reals": 60, "noptmax": 4, "active_params": ["XFRT", "XFINT"]},
+    "S4": {"reals": 80, "noptmax": 5, "active_params": "≤6 from S1-S3 survivors"}
+  },
+  "stopping_rules": {
+    "primary": "noptmax reached",
+    "secondary": "phiredstp convergence (relative Phi reduction < 1% over 3 iterations)",
+    "retention_floor": "≥90% realization retention; if below, diagnose before adding reals"
+  },
+  "robustness_contrast": {
+    "profile": "assumption_based_sigma_v1",
+    "contrast": "PWAIM group_multiplier 1.25 (incremental harvest up-weighting)",
+    "purpose": "test whether key parameter directions and validation conclusions are stable to harvest-weight perturbation"
+  },
+  "pwtadj1": "off (deferred per plan)",
+  "log_transform": "none this round (no new log variables; only if observation policy explicitly enables)"
+}
