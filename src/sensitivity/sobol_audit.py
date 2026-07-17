@@ -40,7 +40,12 @@ def _finite_frame(frame: pd.DataFrame, excluded: set[str]) -> tuple[int, int]:
     return finite, int(numeric.size)
 
 
-def assess_sobol_case(case_dir: str | Path, case: str = "sa_sen_sobol") -> QualityReport:
+def assess_sobol_case(
+    case_dir: str | Path,
+    case: str = "sa_sen_sobol",
+    *,
+    require_zero_model_failures: bool = True,
+) -> QualityReport:
     root = Path(case_dir).resolve()
     manifest = read_flat_manifest(root / "run_manifest.yaml")
     status_path = root / "run_status.json"
@@ -113,6 +118,7 @@ def assess_sobol_case(case_dir: str | Path, case: str = "sa_sen_sobol") -> Quali
         "Every Sobol design point completed without a model failure",
         actual=int((failed.fillna(1) != 0).sum()),
         threshold=0,
+        warning=not require_zero_model_failures and int((failed.fillna(1) != 0).sum()) > 0,
     )
     finite_outputs, total_outputs = _finite_frame(obs, {"run_id", "failed_flag"})
     scientific_columns = [
