@@ -52,6 +52,53 @@ def _write_csv(frame, path: Path) -> Path:
     return path
 
 
+def _verify_results_manifest(manifest_path: str, args) -> None:
+    """Verify every provided input is a frozen results-manifest member (R0.4).
+
+    The manifest is a JSON object with a ``files`` list of ``{path, sha256}``.
+    Each provided input (comparison, phi, trajectory, treatment_metadata) must
+    resolve to a manifest entry with a matching SHA-256. Prevents mixing data
+    from different runs or using untracked inputs.
+    """
+    path = Path(manifest_path)
+    if not path.is_file():
+        raise ValueError(f"results manifest not found: {path}")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    members = {item["path"]: item["sha256"] for item in (data.get("files") or [])}
+    if not members:
+        raise ValueError(f"results manifest {path} lists no files")
+
+    inputs = [
+        ("comparison", args.comparison_csv),
+        ("phi", args.phi_csv),
+        ("trajectory", args.trajectory_run_dir),
+        ("treatment_metadata", args.treatment_metadata_csv),
+    ]
+    for label, value in inputs:
+        if not value:
+            continue
+        resolved = str(Path(value).resolve())
+        # trajectory_run_dir is a directory — check if any member is under it.
+        if label == "trajectory":
+            matched = any(resolved in str(Path(m).resolve()) or str(Path(m).resolve()).startswith(resolved) for m in members)
+            if not matched:
+                raise ValueError(
+                    f"trajectory run dir {value} is not covered by the results manifest; "
+                    "mixing runs or untracked inputs is not allowed"
+                )
+            continue
+        if resolved not in members:
+            raise ValueError(
+                f"{label} input {value} (resolved {resolved}) is not a member of the "
+                f"results manifest; mixing runs or untracked inputs is not allowed"
+            )
+        actual = _sha256(Path(value))
+        if actual != members[resolved]:
+            raise ValueError(
+                f"{label} input {value} hash mismatch: manifest {members[resolved]} != on-disk {actual}"
+            )
+
+
 def _resolve_upstream_validation(
     *,
     run_id: str,
@@ -274,6 +321,13 @@ def main(argv: list[str] | None = None) -> int:
         "'controlled_counterfactual_sa' for SA figures. If omitted, defaults "
         "to 'actual_trial_calibration' for non-demo exports.",
     )
+    parser.add_argument(
+        "--results-manifest",
+        default=None,
+        help="Frozen results manifest JSON listing allowed input files with "
+        "SHA-256 hashes. If provided, every input (comparison/phi/trajectory/"
+        "treatment_metadata) must be a manifest member with matching hash.",
+    )
     parser.add_argument("--allow-unvalidated-demo", action="store_true")
     args = parser.parse_args(argv)
 
@@ -288,6 +342,15 @@ def main(argv: list[str] | None = None) -> int:
                 "science_validated export requires " + " and ".join(missing)
                 + " (or pass --allow-unvalidated-demo for a labelled layout preview)"
             )
+
+    # R0.4: if a frozen results manifest is provided, every input file must be
+    # a manifest member with matching SHA-256 — prevents mixing runs or using
+    # untracked inputs.
+    if args.results_manifest:
+        try:
+            _verify_results_manifest(args.results_manifest, args)
+        except ValueError as exc:
+            parser.error(str(exc))
 
     try:
         manifest = export_bundle(
