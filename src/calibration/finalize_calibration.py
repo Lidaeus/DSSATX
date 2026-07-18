@@ -26,6 +26,100 @@ from src.reporting.quality_gate import assess_ies_run
 SCIENCE_PROMOTION_ENABLED = False
 
 
+def _sha256(path: Path) -> str | None:
+    """SHA-256 of a file, or None if it does not exist (optional artifacts)."""
+    if not path.is_file():
+        return None
+    import hashlib
+    h = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _write_artifact_manifest(run_dir: Path, case: str, representative: dict[str, str] | None) -> Path:
+    """Write a minimal SHA-256 manifest for the core calibration artifacts.
+
+    The run_manifest already binds inputs/bounds/policy/inheritance and the
+    representative parameter file. This manifest closes the gap on the
+    per-stage scientific artifacts that the run_manifest does not cover: the
+    PST, the final parameter ensemble, the Phi table, the quality report, the
+    member-status table, the finalize payload, and (when present) the
+    representative deterministic-rerun outputs. Only the deterministic-rerun
+    outputs under ``representative_deterministic_rerun/`` are hashed — the
+    parallel ``_agents/`` temp trees are intentionally excluded so this stays a
+    minimal, stable manifest rather than a full run archive.
+    """
+    run_dir = run_dir.resolve()
+    quality_dir = run_dir / "ies_quality"
+    rerun_dir = run_dir / "representative_deterministic_rerun"
+    # Locate the final parameter ensemble: highest iteration N in case.N.par.csv.
+    import re
+    final_iter = -1
+    final_par = None
+    final_obs = None
+    pattern = re.compile(rf"^{re.escape(case)}\.(\d+)\.par\.csv$")
+    if run_dir.is_dir():
+        for entry in run_dir.iterdir():
+            m = pattern.match(entry.name)
+            if m and int(m.group(1)) > final_iter:
+                final_iter = int(m.group(1))
+                final_par = entry
+    if final_iter >= 0:
+        candidate = run_dir / f"{case}.{final_iter}.obs.csv"
+        if candidate.is_file():
+            final_obs = candidate
+    rerun_outputs = []
+    if rerun_dir.is_dir():
+        for entry in sorted(rerun_dir.iterdir()):
+            if entry.is_file() and entry.suffix == ".OUT":
+                rerun_outputs.append(entry)
+    candidates = [
+        ("pst", run_dir / f"{case}.pst"),
+        ("final_parameter_ensemble", final_par),
+        ("final_observation_ensemble", final_obs),
+        ("phi_actual", run_dir / f"{case}.phi.actual.csv"),
+        ("quality_report", quality_dir / "ies_run_quality.json"),
+        ("member_status", quality_dir / f"{case}.member_status.csv"),
+        ("finalize_payload", run_dir / "calibration_finalize" / "calibration_finalize.json"),
+        ("stage_representative_params", run_dir / "calibration_finalize" / "stage_representative_params.csv"),
+    ]
+    artifacts = []
+    for role, path in candidates:
+        if path is None:
+            continue
+        digest = _sha256(path)
+        if digest is None:
+            continue
+        artifacts.append({"role": role, "path": str(path.relative_to(run_dir)), "sha256": digest})
+    for path in rerun_outputs:
+        digest = _sha256(path)
+        if digest:
+            artifacts.append({
+                "role": "representative_deterministic_rerun_output",
+                "path": str(path.relative_to(run_dir)),
+                "sha256": digest,
+            })
+    manifest = {
+        "schema_version": 1,
+        "case": case,
+        "run_dir": str(run_dir),
+        "generated_by": "src.calibration.finalize_calibration._write_artifact_manifest",
+        "scope": (
+            "Minimal SHA-256 manifest for core per-stage calibration artifacts "
+            "(PST, final ensemble, Phi, quality report, member status, finalize "
+            "payload, representative params, representative deterministic-rerun "
+            "outputs). Excludes _agents/ temp trees and manager logs."
+        ),
+        "artifact_count": len(artifacts),
+        "artifacts": artifacts,
+    }
+    out_path = run_dir / "calibration_finalize" / "calibration_artifacts_manifest.json"
+    out_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return out_path
+
+
 def _upsert_manifest_fields(path: Path, fields: dict[str, Any]) -> None:
     """Replace generated scalar fields without leaving stale duplicate keys.
 
@@ -107,6 +201,11 @@ def finalize_calibration(run_dir: str | Path, case: str) -> dict[str, Any]:
     })
     out_dir = run_dir / "calibration_finalize"
     out_dir.mkdir(parents=True, exist_ok=True)
+    artifact_manifest_path = out_dir / "calibration_artifacts_manifest.json"
+    # Persist the manifest path before hashing the finalize payload. The
+    # artifact manifest intentionally does not hash itself, avoiding a
+    # circular dependency while keeping the payload provenance complete.
+    payload["calibration_artifacts_manifest"] = str(artifact_manifest_path)
     (out_dir / "calibration_finalize.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
@@ -134,6 +233,7 @@ def finalize_calibration(run_dir: str | Path, case: str) -> dict[str, Any]:
         "finalized_by": "src.calibration.finalize_calibration",
     })
     status_path.write_text(json.dumps(status, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    _write_artifact_manifest(run_dir, case, representative)
     return payload
 
 

@@ -103,3 +103,25 @@ def test_offline_finalize_routes_sobol_to_sobol_audit(tmp_path, monkeypatch):
     assert (tmp_path / "sobol_audit" / "sobol_run_quality.json").is_file()
     assert (tmp_path / "sobol_audit" / "sobol_audit_manifest.json").is_file()
     assert not (tmp_path / "morris_audit").exists()
+
+
+def test_cmd_run_rejects_resume_with_ies_mode(tmp_path):
+    """--resume --mode ies must fail fast: pestpp-ies rejects the /r recourse
+    option, so resuming an interrupted IES run cannot work. The user must
+    rebuild from a clean case instead (T3.1 review finding)."""
+    import argparse
+    (tmp_path / "case.pst").write_text("* comparison\n", encoding="utf-8")
+    (tmp_path / "case.rns").write_text("stub\n", encoding="utf-8")
+    args = argparse.Namespace(
+        run_dir=str(tmp_path), case="case", mode="ies", resume=True,
+        n_agents=1, agents_dir="_agents", host=None, port=0, wait=False,
+        cleanup=False, dry_run=False, status=False, finalize=False,
+        stop=False, force_stop=False,
+    )
+    try:
+        run_parallel.cmd_run(args)
+    except NotImplementedError as exc:
+        assert "pestpp-ies" in str(exc) and "/r" in str(exc)
+        assert "--resume" in str(exc)
+    else:
+        raise AssertionError("cmd_run should have raised NotImplementedError for --resume --mode ies")

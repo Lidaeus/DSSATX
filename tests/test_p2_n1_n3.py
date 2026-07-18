@@ -37,7 +37,13 @@ DESIGN = Path("configs/runs/eggplant_p1_v4_design_20260717.json")
 
 def test_design_stage_releases_only_declared_parameters_and_calibration_rows():
     spec = load_design_config(DESIGN, "S1")
-    params = [{"name": "EM-FL"}, {"name": "TRIFL"}, {"name": "NSTFAC"}]
+    # Non-collapsed bounds so apply_parameter_stage does not require a
+    # frozen_bounds lookup; this test is about parameter/observation filtering.
+    params = [
+        {"name": "EM-FL", "init": 23.3, "lower": 23.0, "upper": 31.0},
+        {"name": "TRIFL", "init": 0.64, "lower": 0.2, "upper": 0.85},
+        {"name": "NSTFAC", "init": 0.5, "lower": 0.3, "upper": 0.85},
+    ]
     assert [p["name"] for p in apply_parameter_stage(params, spec)] == ["EM-FL", "TRIFL"]
     outputs = [{
         "model_out_path": "PestEval.OUT",
@@ -89,9 +95,12 @@ def test_continuous_harvest_stages_do_not_use_season_end_hwam_or_duplicate_pwam(
     }
     assert set(load_design_config(DESIGN, "S4").stage_config["fixed_params"]) == {"XFRT", "XFINT"}
     s4 = load_design_config(DESIGN, "S4")
-    s4_params = [{"name": name, "init": 1.0} for name in (
-        "EM-FL", "TRIFL", "NSTFAC", "RTNO3", "NMOBMX", "NVSMOB", "XFRT", "XFINT"
-    )]
+    # Non-collapsed bounds so no frozen_bounds lookup is needed here; this
+    # assertion is about which params are released/fixed, not range restoration.
+    s4_params = [
+        {"name": name, "init": 1.0, "lower": 0.5, "upper": 1.5}
+        for name in ("EM-FL", "TRIFL", "NSTFAC", "RTNO3", "NMOBMX", "NVSMOB", "XFRT", "XFINT")
+    ]
     released = {item["name"]: item for item in apply_parameter_stage(s4_params, s4)}
     assert set(released) == {item["name"] for item in s4_params}
     assert all(released[name]["status"] == "fixed" for name in ("XFRT", "XFINT"))
@@ -414,6 +423,48 @@ def test_finalize_manifest_representative_fields_are_upserted(tmp_path):
     assert manifest.count("stage_representative_params_sha256:") == 1
 
 
+def test_finalize_writes_minimal_artifact_hash_manifest(tmp_path):
+    """finalize must emit a SHA-256 manifest for the core per-stage artifacts
+    (PST, final ensemble, Phi, quality report, member status, finalize payload,
+    representative params, and any representative deterministic-rerun outputs),
+    closing the gap the T3.1 review flagged: run_manifest did not bind these.
+    The _agents/ temp tree is intentionally excluded."""
+    (tmp_path / "case.0.par.csv").write_text(",a\n0,1\n1,2\n", encoding="utf-8")
+    (tmp_path / "case.1.par.csv").write_text(",a\n0,1.1\n1,2.1\n", encoding="utf-8")
+    (tmp_path / "case.1.obs.csv").write_text(",y\n0,1\n1,2\n", encoding="utf-8")
+    (tmp_path / "case.phi.actual.csv").write_text("iteration,0,1\n0,1,2\n1,0.5,1.5\n", encoding="utf-8")
+    (tmp_path / "case.pst").write_text("* pst stub\n", encoding="utf-8")
+    (tmp_path / "run_manifest.yaml").write_text(
+        'run_id: "case"\ndesign_stage: "S1"\ndesign_table_id: "design"\napproval_scope: "tooling_development"\n',
+        encoding="utf-8",
+    )
+    # Representative deterministic-rerun outputs (only .OUT files are hashed).
+    rerun = tmp_path / "representative_deterministic_rerun"
+    rerun.mkdir()
+    (rerun / "PestTmtGrow.OUT").write_text("@LAIDS 1.0\n", encoding="utf-8")
+    (rerun / "PestHarvest.OUT").write_text("@PWAIS 2.0\n", encoding="utf-8")
+    payload = finalize_calibration(tmp_path, "case")
+    manifest_path = Path(payload["calibration_artifacts_manifest"])
+    assert manifest_path.is_file()
+    data = json.loads(manifest_path.read_text(encoding="utf-8"))
+    roles = {a["role"] for a in data["artifacts"]}
+    # Core scientific artifacts that run_manifest did not previously bind.
+    assert {"pst", "final_parameter_ensemble", "final_observation_ensemble", "phi_actual",
+            "quality_report", "member_status", "finalize_payload",
+            "stage_representative_params"} <= roles
+    # Deterministic-rerun outputs are included...
+    rerun_artifacts = [a for a in data["artifacts"]
+                       if a["role"] == "representative_deterministic_rerun_output"]
+    assert {Path(a["path"]).name for a in rerun_artifacts} == {"PestTmtGrow.OUT", "PestHarvest.OUT"}
+    # ...and every entry has a 64-char sha256 plus a run_dir-relative path.
+    for artifact in data["artifacts"]:
+        assert len(artifact["sha256"]) == 64
+        assert not Path(artifact["path"]).is_absolute()
+        assert (tmp_path / artifact["path"]).is_file()
+    # No _agents/ path leaks in (the manifest is minimal by design).
+    assert not any("_agents" in a["path"] for a in data["artifacts"])
+
+
 def test_prior_only_profile_allows_no_update_but_requires_variation(tmp_path):
     prefix = "prior"
     pd.DataFrame({"real_name": ["r0", "r1"], "p": [1.0, 2.0]}).to_csv(
@@ -650,12 +701,11 @@ def test_s4_re_releases_parameters_pinned_by_fixed_from(tmp_path):
     for name, val in representative_values.items():
         params.append({"name": name, "init": val, "lower": val, "upper": val, "status": "fixed"})
 
-    # Without frozen_bounds: the historical bug — all stay fixed, npar_adj=0.
-    staged_no_lookup = {p["name"]: p for p in apply_parameter_stage(params, spec)}
-    assert all(staged_no_lookup[n]["status"] == "none" for n in spec.active_params)
-    # ... but lower==upper==init remains collapsed, so IES still cannot move them:
-    for name in spec.active_params:
-        assert staged_no_lookup[name]["lower"] == staged_no_lookup[name]["upper"]
+    # Without frozen_bounds the stage must now fail loudly rather than silently
+    # leave active parameters with collapsed (lower==upper) bounds — that was
+    # the historical silent-degradation path the review flagged.
+    with pytest.raises(ValueError, match="collapsed bounds .* but no frozen bounds lookup"):
+        apply_parameter_stage(params, spec)
 
     # With frozen_bounds: active parameters recover their full search range.
     bounds_lookup = load_frozen_bounds_lookup(
@@ -672,3 +722,52 @@ def test_s4_re_releases_parameters_pinned_by_fixed_from(tmp_path):
     for name in ("XFRT", "XFINT"):
         assert staged[name]["status"] == "fixed"
         assert staged[name]["lower"] == staged[name]["upper"] == staged[name]["init"]
+
+
+def test_apply_parameter_stage_rejects_missing_frozen_bound():
+    """An active parameter with collapsed bounds but absent from the frozen
+    bounds lookup must fail loudly instead of staying numerically fixed
+    (Finding 3 [P2])."""
+    spec = load_design_config(DESIGN, "S4")
+    # All S4 active+fixed params present, but collapsed (post-fixed-from state).
+    params = [
+        {"name": n, "init": v, "lower": v, "upper": v, "status": "fixed"}
+        for n, v in {"EM-FL": 23.3, "TRIFL": 0.64, "NSTFAC": 0.5, "RTNO3": 0.012,
+                     "NMOBMX": 0.09, "NVSMOB": 0.38, "XFRT": 0.99, "XFINT": 0.3}.items()
+    ]
+    # Lookup that omits EM-FL entirely.
+    incomplete = {n: (0.1, 1.0) for n in spec.active_params if n != "EM-FL"}
+    with pytest.raises(ValueError, match="no active entry in the frozen bounds"):
+        apply_parameter_stage(params, spec, frozen_bounds=incomplete)
+
+
+def test_apply_parameter_stage_rejects_out_of_range_inherited_init():
+    """An inherited init outside the restored bounds signals a real
+    config/inheritance conflict; it must fail rather than be silently replaced
+    by the midpoint (Finding 3 [P2])."""
+    spec = load_design_config(DESIGN, "S4")
+    params = [
+        {"name": n, "init": v, "lower": v, "upper": v, "status": "fixed"}
+        for n, v in {"EM-FL": 99.0, "TRIFL": 0.64, "NSTFAC": 0.5, "RTNO3": 0.012,
+                     "NMOBMX": 0.09, "NVSMOB": 0.38, "XFRT": 0.99, "XFINT": 0.3}.items()
+    ]
+    # EM-FL frozen range is [23.0, 31.0]; 99.0 is well outside.
+    bounds_lookup = {"EM-FL": (23.0, 31.0)}
+    bounds_lookup.update({n: (0.1, 1.0) for n in spec.active_params if n != "EM-FL"})
+    with pytest.raises(ValueError, match="inherited init 99.0 is outside the frozen bounds"):
+        apply_parameter_stage(params, spec, frozen_bounds=bounds_lookup)
+
+
+def test_apply_parameter_stage_rejects_non_finite_inherited_init():
+    """A non-finite inherited init (e.g. from a corrupt representative CSV)
+    must fail rather than be silently replaced (Finding 3 [P2])."""
+    spec = load_design_config(DESIGN, "S4")
+    params = [
+        {"name": n, "init": v, "lower": v, "upper": v, "status": "fixed"}
+        for n, v in {"EM-FL": float("nan"), "TRIFL": 0.64, "NSTFAC": 0.5, "RTNO3": 0.012,
+                     "NMOBMX": 0.09, "NVSMOB": 0.38, "XFRT": 0.99, "XFINT": 0.3}.items()
+    ]
+    bounds_lookup = {"EM-FL": (23.0, 31.0)}
+    bounds_lookup.update({n: (0.1, 1.0) for n in spec.active_params if n != "EM-FL"})
+    with pytest.raises(ValueError, match="non-finite inherited init"):
+        apply_parameter_stage(params, spec, frozen_bounds=bounds_lookup)

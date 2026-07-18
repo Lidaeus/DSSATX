@@ -236,19 +236,78 @@ def apply_parameter_stage(
         # ``"active"`` label used in the frozen bounds CSV. A ``--fixed-from``
         # overlay sets ``status="fixed"``; the stage must override that here.
         item["status"] = "none"
-        if frozen_bounds and name in frozen_bounds:
-            lower, upper = frozen_bounds[name]
-            # Keep the inherited init (e.g. upstream representative median)
-            # as the starting point, but restore the full declared search range
-            # so IES can actually move the parameter.
+        if frozen_bounds is not None:
+            if name not in frozen_bounds:
+                raise ValueError(
+                    f"stage {spec.stage} active parameter {name!r} has no active entry "
+                    "in the frozen bounds CSV"
+                )
+            try:
+                frozen_lower, frozen_upper = (float(value) for value in frozen_bounds[name])
+            except (TypeError, ValueError):
+                raise ValueError(
+                    f"stage {spec.stage} active parameter {name!r} has invalid frozen bounds"
+                ) from None
+            if not (
+                math.isfinite(frozen_lower)
+                and math.isfinite(frozen_upper)
+                and frozen_lower < frozen_upper
+            ):
+                raise ValueError(
+                    f"stage {spec.stage} active parameter {name!r} has invalid frozen bounds "
+                    f"[{frozen_lower}, {frozen_upper}]"
+                )
+        try:
+            cur_lower = float(item.get("lower", float("nan")))
+            cur_upper = float(item.get("upper", float("nan")))
+        except (TypeError, ValueError):
+            cur_lower = cur_upper = float("nan")
+        collapsed = not (math.isfinite(cur_lower) and math.isfinite(cur_upper) and cur_lower < cur_upper)
+        if frozen_bounds is not None:
+            lower, upper = frozen_lower, frozen_upper
             item["lower"] = lower
             item["upper"] = upper
-            try:
-                init_val = float(item.get("init", float("nan")))
-            except (TypeError, ValueError):
-                init_val = float("nan")
-            if not math.isfinite(init_val) or init_val < lower or init_val > upper:
-                item["init"] = (lower + upper) / 2.0
+        elif collapsed:
+            # The parameter was pinned by an upstream --fixed-from overlay
+            # (lower==upper==init). Restoring its search range requires the
+            # frozen bounds; without it the parameter would stay numerically
+            # fixed even though the design marks it active. Fail loudly rather
+            # than silently degrade.
+            if frozen_bounds is None:
+                raise ValueError(
+                    f"stage {spec.stage} active parameter {name!r} has collapsed "
+                    "bounds (lower==upper) but no frozen bounds lookup was "
+                    "provided; pass load_frozen_bounds_lookup(...) so the "
+                    "declared search range can be restored"
+                )
+            if name not in frozen_bounds:
+                raise ValueError(
+                    f"stage {spec.stage} active parameter {name!r} has collapsed "
+                    "bounds but no active entry in the frozen bounds CSV; cannot "
+                    "restore its search range"
+                )
+            lower, upper = frozen_bounds[name]
+            item["lower"] = lower
+            item["upper"] = upper
+        else:
+            lower, upper = cur_lower, cur_upper
+        # The init must be finite and inside the (possibly restored) range; an
+        # out-of-range or non-finite value signals a real config/inheritance
+        # conflict and must fail loudly rather than be silently replaced.
+        try:
+            init_val = float(item.get("init", float("nan")))
+        except (TypeError, ValueError):
+            init_val = float("nan")
+        if not math.isfinite(init_val):
+            raise ValueError(
+                f"stage {spec.stage} active parameter {name!r} has non-finite "
+                f"inherited init value {item.get('init')!r}"
+            )
+        if init_val < lower or init_val > upper:
+            raise ValueError(
+                f"stage {spec.stage} active parameter {name!r} inherited init "
+                f"{init_val} is outside the frozen bounds [{lower}, {upper}]"
+            )
         selected.append(item)
     for name in fixed_names:
         item = dict(by_name[name])

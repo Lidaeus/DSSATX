@@ -3533,6 +3533,19 @@ if __name__ == "__main__":
                 raise RuntimeError(
                     f"could not load frozen bounds lookup from {stage_bounds_path}: {exc}"
                 ) from exc
+        if stage_bounds_lookup is None:
+            raise RuntimeError(
+                f"staged {design_spec.stage} build requires a valid frozen bounds lookup; "
+                "provide --bounds-id pointing to a frozen bounds CSV"
+            )
+        missing_stage_bounds = [
+            name for name in design_spec.active_params if name not in stage_bounds_lookup
+        ]
+        if missing_stage_bounds:
+            raise RuntimeError(
+                f"frozen bounds are missing active parameters for {design_spec.stage}: "
+                + ", ".join(missing_stage_bounds)
+            )
         params = apply_parameter_stage(params, design_spec, frozen_bounds=stage_bounds_lookup)
         if stage2_outputs is not None:
             stage2_outputs, design_observation_report = apply_observation_stage(

@@ -58,7 +58,7 @@ S4 首次 IES 在初始化阶段（40 成员刚启动）被外部 kill。尝试 
 - `representative_deterministic_rerun/`（含 `PestTmtGrow.OUT`/`PestHarvest.OUT`/`Evaluate.OUT` 等代表解确定性复跑输出）
 - `manager/` + `_agents/`（PEST++ 运行日志）
 
-所有产物 SHA-256 经 manifest 绑定；运行目录被 .gitignore 忽略（不入库），但本地完整保留供审计。
+**哈希绑定范围说明（T3.1 审查修正）**：`run_manifest.yaml` 绑定的是输入层契约 —— 输入包、冻结 bounds、observation policy、`--fixed-from` 上游继承、观测 ensemble、代表参数文件。它**不**直接绑定 PST、Phi 表、最终参数/模拟 ensemble、质量报告、成员状态表或确定性复跑输出。T3.1 起由 `calibration_finalize/calibration_artifacts_manifest.json` 为这些核心科研产物补上独立 SHA-256 清单（含 PST、末轮 par ensemble、phi.actual.csv、ies_run_quality.json、member_status.csv、finalize 负载、代表参数 CSV、以及 `representative_deterministic_rerun/*.OUT`）；`_agents/` 与 `manager/` 临时日志树刻意排除在外，避免建立复杂归档。运行目录被 .gitignore 忽略（不入库），本地完整保留供审计。
 
 ## 5. 边界遵守
 
@@ -73,7 +73,7 @@ S4 首次 IES 在初始化阶段（40 成员刚启动）被外部 kill。尝试 
 
 按审查 T3 边界，以下只是工程诊断，**不构成科研结论**：
 - S4 多个参数贴边界（TRIFL=0.2 下界、NSTFAC=0.85 上界等）提示当前 bounds/观测/模型结构存在强约束，需要后续科学审核（可能涉及 bounds 扩展、观测权重、模型机制）。
-- 组间 Phi 不平衡（S2 的 CNAM/HWAM 量级 vs LAI 组）需后续审计观测尺度与 σ。
+- 组间 Phi 不平衡需后续审计观测尺度与 σ（**T3.1 审查修正**：原记录误写为 "CNAM/HWAM vs LAI"，但 S2 的观测组里**没有 HWAM**）。S2 末轮主要 Phi 贡献实际来自**叶片生物量和 LAIX**：`lwadm_d25194`≈1257.3、`laixm`≈707.0、`lwadm_d25170`≈537.7，而 `cnamm`≈104.6。仍仅作为工程诊断，不构成科学结论。
 - 所有结果标记 `engineering_validated`，不是 `science_validated`。后验、validation、论文图必须等独立科学审核通过后才能基于这些 ensemble 产生。
 
 ## 7. 下一步

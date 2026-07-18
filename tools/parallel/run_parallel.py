@@ -499,6 +499,16 @@ def cmd_run(args):
         raise FileNotFoundError(run_dir)
 
     _ensure_case_pst(run_dir, args.case)
+    if args.resume and args.mode == "ies":
+        # pestpp-ies rejects the /r recourse option ('/r option not supported by
+        # pestpp-ies'), so --resume cannot recover an interrupted IES run. Fail
+        # fast with an actionable message before spawning agents. True IES
+        # breakpoint recovery is deferred; rebuild from a clean case instead.
+        raise NotImplementedError(
+            "--resume is not supported with --mode ies: pestpp-ies rejects the "
+            "/r recourse option. Rebuild from a clean case with build_pest.py "
+            "and start a fresh run instead."
+        )
     if args.resume and not os.path.isfile(os.path.join(run_dir, f"{args.case}.rns")):
         raise FileNotFoundError(f"Cannot resume without run storage: {args.case}.rns")
     stop_file = os.path.join(run_dir, "pest.stp")
