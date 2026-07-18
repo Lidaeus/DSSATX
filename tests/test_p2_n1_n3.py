@@ -1,3 +1,4 @@
+import hashlib
 import json
 from pathlib import Path
 
@@ -15,12 +16,18 @@ from src.calibration.observation_policy import apply_observation_policy
 from src.calibration.prior_coverage import summarize_prior_coverage
 from src.calibration.stage_representative import write_stage_representative
 from src.calibration.engineering_gate import engineering_status, profile_for_run
+from src.common.quality import (
+    read_flat_run_manifest_field,
+    serialize_manifest_scalar,
+)
 from src.reporting.quality_gate import assess_ies_run
 from tools.package_sa_evidence import package_sa_evidence
 from src.calibration.build_pest import (
     _finalize_ies_contract,
     _fixed_from_provenance,
+    _resolve_upstream_run_dir,
     _write_observation_noise_ensemble,
+    _write_run_manifest,
 )
 
 
@@ -266,7 +273,7 @@ def test_fixed_from_rejects_tampered_representative_hash(tmp_path):
         "approval_scope": "tooling_development", "engineering_status": "engineering_validated",
         "stage_representative": {"sha256": "0" * 64},
     }), encoding="utf-8")
-    with pytest.raises(ValueError, match="representative hash mismatch"):
+    with pytest.raises(ValueError, match="representative file hash .* does not match finalize"):
         _fixed_from_provenance(
             [str(source)], current_stage="S2", design_table_id="design",
             approval_scope="tooling_development"
@@ -435,3 +442,185 @@ def test_sa_evidence_packager_hashes_existing_outputs(tmp_path):
     assert manifest["computation"] == "reused_existing_outputs_no_new_model_runs"
     assert manifest["artifact_count"] == 4
     assert len(manifest["artifacts"][0]["sha256"]) == 64
+
+
+# ---------------------------------------------------------------------------
+# T2.2 regression tests: stage-inheritance path, manifest YAML scalars, and
+# the design↔CLI contract cross-check. These reproduce the five findings from
+# the staged-calibration tooling review and guard against silent regressions.
+# ---------------------------------------------------------------------------
+
+
+def _write_finalise_subdir_layout(
+    run_dir: Path,
+    *,
+    run_id: str = "run_A",
+    design_stage: str = "S1",
+    design_table_id: str = "design",
+    approval_scope: str = "tooling_development",
+    representative_rows: str = "name,value\nEM-FL,20\nTRIFL,0.6\n",
+) -> Path:
+    """Build the real finalize subdir layout produced by write_stage_representative.
+
+    The representative CSV lives at ``<run_dir>/calibration_finalize/
+    stage_representative_params.csv`` while the manifest and finalize json sit
+    one level up — exactly the layout that previously broke
+    ``_fixed_from_provenance`` when it treated ``source.parent`` as the run dir.
+    """
+    finalize_dir = run_dir / "calibration_finalize"
+    finalize_dir.mkdir(parents=True, exist_ok=True)
+    source = finalize_dir / "stage_representative_params.csv"
+    source.write_text(representative_rows, encoding="utf-8")
+    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+    (run_dir / "run_manifest.yaml").write_text(
+        f'run_id: "{run_id}"\n'
+        f'design_stage: "{design_stage}"\n'
+        f'design_table_id: "{design_table_id}"\n'
+        f'approval_scope: "{approval_scope}"\n',
+        encoding="utf-8",
+    )
+    (finalize_dir / "calibration_finalize.json").write_text(json.dumps({
+        "case": run_id,
+        "design_stage": design_stage,
+        "design_table_id": design_table_id,
+        "approval_scope": approval_scope,
+        "engineering_status": "engineering_validated",
+        "science_status": "science_pending",
+        "stage_representative": {"sha256": digest},
+    }), encoding="utf-8")
+    (finalize_dir / "stage_representative_params.json").write_text(json.dumps({
+        "schema_version": 1,
+        "rule": "median_of_final_parameter_ensemble",
+        "case": run_id,
+        "source": "run_A.2.par.csv",
+        "source_sha256": "0" * 64,
+        "iteration": 2,
+        "output": "stage_representative_params.csv",
+        "output_sha256": digest,
+    }), encoding="utf-8")
+    return source
+
+
+def test_fixed_from_locates_run_dir_from_finalize_subdir(tmp_path):
+    """Finding 1 [P0]: the auto-generated representative CSV sits under
+    ``<run_dir>/calibration_finalize/`` and must resolve back to ``<run_dir>``."""
+    run_dir = tmp_path / "s1_run"
+    run_dir.mkdir()
+    source = _write_finalise_subdir_layout(run_dir)
+
+    run_dir_resolved, manifest, finalize, metadata = _resolve_upstream_run_dir(source)
+    assert run_dir_resolved == run_dir.resolve()
+    assert manifest.name == "run_manifest.yaml"
+    assert finalize.name == "calibration_finalize.json"
+    assert metadata.name == "stage_representative_params.json"
+
+    records = _fixed_from_provenance(
+        [str(source)], current_stage="S2", design_table_id="design",
+        approval_scope="tooling_development",
+    )
+    assert records[0]["run_id"] == "run_A"
+    assert records[0]["design_stage"] == "S1"
+    assert records[0]["sha256"] == hashlib.sha256(source.read_bytes()).hexdigest()
+
+
+def test_fixed_from_rejects_unknown_layout(tmp_path):
+    """A representative CSV floating in a directory with no manifest/finalize
+    must fail with a message naming the two supported placements."""
+    floating = tmp_path / "stage_representative_params.csv"
+    floating.write_text("name,value\nEM-FL,20\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="run_manifest.yaml"):
+        _resolve_upstream_run_dir(floating)
+
+
+def test_fixed_from_rejects_three_way_hash_mismatch(tmp_path):
+    """Finding 5 [T2.2 task 4]: if the representative metadata json's
+    ``output_sha256`` disagrees with the finalize hash and the file bytes,
+    the inheritance must fail before any downstream build consumes it."""
+    run_dir = tmp_path / "s1_run"
+    run_dir.mkdir()
+    source = _write_finalise_subdir_layout(run_dir)
+    # Tamper with the metadata json's hash only; finalize and file still agree.
+    metadata_path = run_dir / "calibration_finalize" / "stage_representative_params.json"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    metadata["output_sha256"] = "f" * 64
+    metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="representative hash disagreement"):
+        _fixed_from_provenance(
+            [str(source)], current_stage="S2", design_table_id="design",
+            approval_scope="tooling_development",
+        )
+
+
+def test_manifest_scalar_round_trips_windows_path():
+    """Finding 2 [P1]: a Windows path with backslashes must serialize as a
+    valid YAML scalar and round-trip through the project reader unchanged."""
+    raw = r"D:\Tomato_Cal\workspace\runs\s1_run"
+    line = f"stage_representative_params: {serialize_manifest_scalar(raw)}"
+    assert "'D:\\Tomato_Cal\\workspace\\runs\\s1_run'" in line  # single-quoted, backslashes literal
+    manifest = tmp_path_manifest = Path(__file__).parent / "_scalar_roundtrip_manifest.yaml"
+    try:
+        tmp_path_manifest.write_text(line + "\n", encoding="utf-8")
+        assert read_flat_run_manifest_field(tmp_path_manifest, "stage_representative_params") == raw
+    finally:
+        tmp_path_manifest.unlink(missing_ok=True)
+    # Standard YAML must also accept it (pyyaml is a project dependency via flopy).
+    yaml = pytest.importorskip("yaml")
+    parsed = yaml.safe_load(line)
+    assert parsed["stage_representative_params"] == raw
+
+
+def test_write_run_manifest_emits_valid_yaml_for_windows_paths(tmp_path):
+    """Finding 2 (related): ``_write_run_manifest`` had the same backslash bug
+    as ``_upsert_manifest_fields``. A path-typed value must render as a
+    standard-YAML-parseable scalar."""
+    manifest_path = _write_run_manifest(
+        str(tmp_path),
+        run_id="s1_case",
+        stage_representative_params=r"D:\Tomato_Cal\workspace\s1_run\rep.csv",
+        n_params=2,
+    )
+    yaml = pytest.importorskip("yaml")
+    parsed = yaml.safe_load(Path(manifest_path).read_text(encoding="utf-8"))
+    assert parsed["run_id"] == "s1_case"
+    assert parsed["stage_representative_params"] == r"D:\Tomato_Cal\workspace\s1_run\rep.csv"
+    assert parsed["n_params"] == 2
+    # Project reader must round-trip the path too.
+    assert read_flat_run_manifest_field(manifest_path, "stage_representative_params") == \
+        r"D:\Tomato_Cal\workspace\s1_run\rep.csv"
+
+
+def test_finalize_upsert_manifest_with_windows_path_is_valid_yaml(tmp_path):
+    """Finding 2 end-to-end: finalize upserts the representative path (a
+    Windows absolute path) into the manifest; the result must be readable by
+    both the project reader and a standard YAML parser."""
+    (tmp_path / "case.0.par.csv").write_text(",a\n0,1\n1,2\n", encoding="utf-8")
+    (tmp_path / "case.1.par.csv").write_text(",a\n0,1.1\n1,2.1\n", encoding="utf-8")
+    (tmp_path / "case.1.obs.csv").write_text(",y\n0,1\n1,2\n", encoding="utf-8")
+    (tmp_path / "case.phi.actual.csv").write_text("iteration,0,1\n0,1,2\n1,0.5,1.5\n", encoding="utf-8")
+    manifest = tmp_path / "run_manifest.yaml"
+    manifest.write_text(
+        'run_id: "case"\ndesign_stage: "S1"\ndesign_table_id: "design"\n'
+        'approval_scope: "tooling_development"\n',
+        encoding="utf-8",
+    )
+    finalize_calibration(tmp_path, "case")
+    yaml = pytest.importorskip("yaml")
+    parsed = yaml.safe_load(manifest.read_text(encoding="utf-8"))
+    representative_path = parsed["stage_representative_params"]
+    # On Windows this is a backslash path; on POSIX the temp dir has no
+    # backslashes. Either way the value must equal what the project reader
+    # returns and contain "stage_representative_params.csv".
+    assert representative_path.endswith("stage_representative_params.csv")
+    assert read_flat_run_manifest_field(manifest, "stage_representative_params") == representative_path
+    assert parsed["stage_representative_params_sha256"] == \
+        read_flat_run_manifest_field(manifest, "stage_representative_params_sha256")
+
+
+def test_design_spec_exposes_bounds_input_policy_ids():
+    """Finding 4 [P2]: DesignSpec must surface the declared contract ids so
+    the staged entry can cross-check them against the CLI selection."""
+    spec = load_design_config(DESIGN, "S2")
+    assert spec.bounds_id == "eggplant_p1_xxql2501_v4_sobol20_20260717"
+    assert spec.input_bundle == "xxql2501_20260716"
+    assert spec.observation_policy_id == "assumption_based_sigma_v2"

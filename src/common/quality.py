@@ -164,14 +164,52 @@ def load_quality_report(path: str | Path) -> QualityReport:
     )
 
 
+def serialize_manifest_scalar(value: Any) -> str:
+    """Render a scalar as a flat run_manifest.yaml line value.
+
+    The manifest is a simple flat YAML subset consumed by
+    ``read_flat_run_manifest_field`` and must also parse under a standard YAML
+    reader. Strings are emitted as YAML single-quoted scalars so that Windows
+    path backslashes (``D:\\Tomato_Cal\\...``) remain literal — double-quoted
+    YAML would treat ``\\T`` as an invalid escape and reject the file. Single
+    quotes inside the value are doubled per the YAML rule, and the reader
+    reverses that doubling so the value round-trips losslessly.
+    """
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (int, float)):
+        return str(value)
+    text = str(value)
+    return "'" + text.replace("'", "''") + "'"
+
+
+def _strip_manifest_scalar(value: str) -> str:
+    """Strip the surrounding quote style emitted by ``serialize_manifest_scalar``.
+
+    Single-quoted YAML scalars double internal single quotes (``''`` -> ``'``);
+    double-quoted scalars are accepted for backward compatibility with older
+    manifests but their content is returned verbatim (no escape interpretation,
+    matching the historical reader behavior).
+    """
+    if value.startswith("'") and value.endswith("'") and len(value) >= 2:
+        return value[1:-1].replace("''", "'")
+    if value.startswith('"') and value.endswith('"') and len(value) >= 2:
+        return value[1:-1]
+    return value
+
+
 def read_flat_run_manifest_field(path: str | Path, key: str) -> str | None:
     """Read a single scalar value from a flat ``key: value`` run_manifest.yaml.
 
     The project writes run manifests as a simple flat YAML subset (see
-    ``build_pest._write_run_manifest``): scalars are rendered as
-    ``key: "value"``, ``key: 123``, ``key: true``, or ``key: null``. This parser
-    avoids a YAML dependency by handling only that subset and stripping the
-    surrounding quotes that ``_write_run_manifest`` emits for strings.
+    ``build_pest._write_run_manifest`` and ``finalize_calibration
+    ._upsert_manifest_fields``): scalars are rendered as ``key: 'value'``,
+    ``key: 123``, ``key: true``, or ``key: null``. This parser avoids a YAML
+    dependency by handling only that subset and unquoting the value with
+    ``_strip_manifest_scalar``. Older manifests that used double quotes are
+    still accepted for backward compatibility.
     """
     text = Path(path).read_text(encoding="utf-8", errors="ignore")
     prefix = f"{key}:"
@@ -181,11 +219,7 @@ def read_flat_run_manifest_field(path: str | Path, key: str) -> str | None:
             value = line[len(prefix):].strip()
             if value in {"null", "~", ""}:
                 return None
-            if (value.startswith('"') and value.endswith('"')) or (
-                value.startswith("'") and value.endswith("'")
-            ):
-                return value[1:-1]
-            return value
+            return _strip_manifest_scalar(value)
     return None
 
 

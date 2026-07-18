@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from src.common.quality import read_flat_run_manifest_field
+from src.common.quality import read_flat_run_manifest_field, serialize_manifest_scalar
 from src.calibration.engineering_gate import engineering_status, profile_for_run
 from src.calibration.stage_representative import write_stage_representative
 from src.reporting.quality_gate import assess_ies_run
@@ -26,12 +26,17 @@ from src.reporting.quality_gate import assess_ies_run
 SCIENCE_PROMOTION_ENABLED = False
 
 
-def _upsert_manifest_fields(path: Path, fields: dict[str, str]) -> None:
-    """Replace generated scalar fields without leaving stale duplicate keys."""
+def _upsert_manifest_fields(path: Path, fields: dict[str, Any]) -> None:
+    """Replace generated scalar fields without leaving stale duplicate keys.
+
+    Values are serialized with ``serialize_manifest_scalar`` so that Windows
+    paths (with backslashes) render as YAML single-quoted scalars and remain
+    valid under both the project reader and a standard YAML parser.
+    """
     existing = path.read_text(encoding="utf-8").splitlines() if path.is_file() else []
     keys = set(fields)
     kept = [line for line in existing if not any(line.startswith(f"{key}:") for key in keys)]
-    kept.extend(f'{key}: "{value}"' for key, value in fields.items())
+    kept.extend(f"{key}: {serialize_manifest_scalar(value)}" for key, value in fields.items())
     path.write_text("\n".join(kept).rstrip() + "\n", encoding="utf-8")
 
 

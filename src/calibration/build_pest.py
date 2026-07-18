@@ -47,7 +47,7 @@ from src.common.input_manifest import (
 )
 from src.common.param_registry import assert_valid_frozen_bounds
 from src.common.project import PROJECT_ROOT, WORKSPACE_DIR, git_metadata, resolve_path, sha256_file
-from src.common.quality import read_flat_run_manifest_field
+from src.common.quality import read_flat_run_manifest_field, serialize_manifest_scalar
 
 WORKSPACE = str(WORKSPACE_DIR)
 CUL_BASE_FILE = str(PROJECT_ROOT / "data" / "templates" / "genotype" / "TMGRO048.CUL.base")
@@ -98,7 +98,14 @@ def _get_git_commit():
 
 
 def _write_run_manifest(out_dir, **kwargs):
-    """Write run_manifest.yaml to out_dir using simple YAML-like format."""
+    """Write run_manifest.yaml to out_dir using simple YAML-like format.
+
+    Scalars are serialized with ``serialize_manifest_scalar`` so that Windows
+    paths (with backslashes) render as YAML single-quoted scalars and stay
+    valid under both the project reader and a standard YAML parser. List
+    values keep their historical ``repr()`` rendering for backward
+    compatibility with existing readers.
+    """
     path = os.path.join(out_dir, "run_manifest.yaml")
     with open(path, "w", encoding="utf-8") as f:
         for key, val in kwargs.items():
@@ -106,15 +113,50 @@ def _write_run_manifest(out_dir, **kwargs):
                 f.write(key + ':\n')
                 for item in val:
                     f.write('  - ' + repr(str(item)) + '\n')
-            elif val is None:
-                f.write(key + ': null\n')
-            elif isinstance(val, bool):
-                f.write(key + ': ' + str(val).lower() + '\n')
-            elif isinstance(val, (int, float)):
-                f.write(key + ': ' + str(val) + '\n')
             else:
-                f.write(key + ': "' + str(val) + '"\n')
+                f.write(f"{key}: {serialize_manifest_scalar(val)}\n")
     return path
+
+
+def _resolve_upstream_run_dir(source: Path) -> tuple[Path, Path, Path, Path]:
+    """Locate the run directory, manifest, finalize and representative metadata.
+
+    The stage representative CSV is produced by ``write_stage_representative``
+    at ``<run_dir>/calibration_finalize/stage_representative_params.csv``.
+    Older layouts placed the CSV directly in the run root. Both are accepted so
+    long as ``run_manifest.yaml`` and ``calibration_finalize/calibration_finalize.json``
+    are found relative to the same run directory; any other layout is rejected
+    with an explicit message listing the two supported placements.
+
+    Returns ``(run_dir, manifest_path, finalize_json_path, representative_metadata_json_path)``.
+    The metadata path may not exist on disk for legacy runs; callers must handle
+    ``None``/missing when enforcing the three-way hash contract.
+    """
+    parent = source.parent
+    candidate_run_dir: Path | None = None
+    # Preferred: finalize subdir layout produced by write_stage_representative.
+    if parent.name == "calibration_finalize":
+        grand = parent.parent
+        if (grand / "run_manifest.yaml").is_file() and (parent / "calibration_finalize.json").is_file():
+            candidate_run_dir = grand
+    # Legacy: CSV sitting directly in the run root.
+    if candidate_run_dir is None and (parent / "run_manifest.yaml").is_file():
+        finalize_candidate = parent / "calibration_finalize" / "calibration_finalize.json"
+        if finalize_candidate.is_file():
+            candidate_run_dir = parent
+    if candidate_run_dir is None:
+        raise ValueError(
+            f"--fixed-from {source} must come from a run with run_manifest.yaml and "
+            "calibration_finalize/calibration_finalize.json. Expected the CSV either at "
+            "<run_dir>/calibration_finalize/stage_representative_params.csv (finalize output) "
+            "or directly under <run_dir>/ with the manifest and finalize subdir beside it."
+        )
+    run_dir = candidate_run_dir
+    manifest = run_dir / "run_manifest.yaml"
+    finalize_dir = run_dir / "calibration_finalize"
+    finalize = finalize_dir / "calibration_finalize.json"
+    representative_metadata = finalize_dir / "stage_representative_params.json"
+    return run_dir, manifest, finalize, representative_metadata
 
 
 def _fixed_from_provenance(
@@ -137,14 +179,7 @@ def _fixed_from_provenance(
         source = Path(raw).expanduser().resolve()
         if not source.is_file():
             raise FileNotFoundError(f"--fixed-from file not found: {source}")
-        run_dir = source.parent
-        manifest = run_dir / "run_manifest.yaml"
-        finalize = run_dir / "calibration_finalize" / "calibration_finalize.json"
-        if not manifest.is_file() or not finalize.is_file():
-            raise ValueError(
-                f"--fixed-from {source} must come from a run with run_manifest.yaml "
-                "and calibration_finalize/calibration_finalize.json"
-            )
+        run_dir, manifest, finalize, representative_metadata = _resolve_upstream_run_dir(source)
         try:
             finalize_payload = json.loads(finalize.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
@@ -171,13 +206,34 @@ def _fixed_from_provenance(
                 f"upstream approval_scope {upstream_scope or 'missing'} does not match {approval_scope}"
             )
         expected_representative_hash = str(finalize_payload.get("stage_representative", {}).get("sha256") or "")
-        if current_stage and expected_representative_hash and expected_representative_hash != sha256_file(source):
-            raise ValueError(
-                f"--fixed-from representative hash mismatch for upstream run {run_id}"
-            )
         if current_stage and not expected_representative_hash:
             raise ValueError(
                 f"upstream run {run_id} lacks generated stage representative provenance"
+            )
+        actual_file_hash = sha256_file(source)
+        if current_stage and expected_representative_hash != actual_file_hash:
+            raise ValueError(
+                f"--fixed-from representative file hash {actual_file_hash} does not match "
+                f"finalize stage_representative.sha256 {expected_representative_hash} for upstream run {run_id}"
+            )
+        # Three-way consistency: the manifest-upserted hash, the finalize
+        # stage_representative.sha256 and the representative metadata json
+        # output_sha256 must all describe the same bytes. A divergence means
+        # the finalize artifacts were edited independently after generation.
+        metadata_output_hash = ""
+        if representative_metadata.is_file():
+            try:
+                metadata_payload = json.loads(representative_metadata.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                raise ValueError(
+                    f"invalid upstream representative metadata {representative_metadata}"
+                ) from exc
+            metadata_output_hash = str(metadata_payload.get("output_sha256") or "")
+        if current_stage and metadata_output_hash and metadata_output_hash != actual_file_hash:
+            raise ValueError(
+                f"upstream run {run_id} representative hash disagreement: file="
+                f"{actual_file_hash} finalize={expected_representative_hash} "
+                f"metadata={metadata_output_hash}"
             )
         upstream_design_id = str(read_flat_run_manifest_field(manifest, "design_table_id") or "")
         if current_stage and not upstream_design_id:
@@ -2598,6 +2654,15 @@ if __name__ == "__main__":
             parser.error(
                 "staged calibration requires " + ", ".join(missing_contract)
             )
+        # Cross-check the CLI selection against the design declaration so a run
+        # cannot silently mix a design with another input set. Hash binding in
+        # the manifest only enables after-the-fact tracing; this gate prevents
+        # the misuse before any artifact is written.
+        if design_spec.bounds_id and args.bounds_id != design_spec.bounds_id:
+            parser.error(
+                f"--bounds-id {args.bounds_id!r} does not match design "
+                f"bounds_id {design_spec.bounds_id!r}"
+            )
         if design_spec.stage in {"S2", "S3", "S4"}:
             try:
                 fixed_from_provenance = _fixed_from_provenance(
@@ -2629,9 +2694,25 @@ if __name__ == "__main__":
         # ``parameter_calibration`` as a prohibited use and must hard-fail here;
         # tampered bytes (hash mismatch) or a renamed directory fail the same way.
         try:
-            _input_manifest = verify_calibrated_input_bundle(USER_INPUT_DIR)
+            input_manifest = verify_calibrated_input_bundle(USER_INPUT_DIR)
         except InputManifestError as exc:
             parser.error(f"--input-dir failed manifest verification: {exc}")
+        # Bundle id and observation policy id must agree with the staged
+        # design declaration. The policy id is taken from the CSV filename stem
+        # because policy files do not carry an internal id field.
+        if design_spec is not None and design_spec.input_bundle and \
+                input_manifest.bundle_id != design_spec.input_bundle:
+            parser.error(
+                f"--input-dir bundle id {input_manifest.bundle_id!r} does not match "
+                f"design input_bundle {design_spec.input_bundle!r}"
+            )
+        if design_spec is not None and design_spec.observation_policy_id and \
+                args.observation_policy_csv and \
+                Path(args.observation_policy_csv).stem != design_spec.observation_policy_id:
+            parser.error(
+                f"--observation-policy-csv stem {Path(args.observation_policy_csv).stem!r} "
+                f"does not match design observation_policy_id {design_spec.observation_policy_id!r}"
+            )
 
     if args.apply_normalization:
         parser.error("--apply-normalization is retired because candidate-dependent Min-Max changes the objective")

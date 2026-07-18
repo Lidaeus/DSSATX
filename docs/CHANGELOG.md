@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-07-18
+
+- T2.2 最小集成修复（staged calibration 工具链），对应 T2.1 审查的 5 项发现：
+  - [P0] 修复 `_fixed_from_provenance` 把代表 CSV 父目录当 run_dir 的 bug：新增 `_resolve_upstream_run_dir`，识别 finalize 子目录布局（`<run_dir>/calibration_finalize/stage_representative_params.csv`）与遗留 run 根目录布局两种合法位置。S1→S2 自动代表解继承入口现在可用。
+  - [P1] 统一 manifest 标量序列化：新增 `serialize_manifest_scalar`（YAML 单引号标量，Windows 路径反斜杠保持字面），`_upsert_manifest_fields` 与 `_write_run_manifest` 都改用它，修掉 finalize 追加字段写出非法 YAML（双引号内 `\T` 被当转义）的同源 bug；`_strip_manifest_scalar` 同步升级，单/双引号 manifest 都能无损往返。
+  - [P1] 新增 S1→S2 纯构建集成 smoke（`tests/test_staged_inheritance_smoke.py`）：mock prior-only S1 → finalize 生成中位数代表 → subprocess 调真实 build_pest S2 build，验证 S2 PST 含 6 参数（S1 fixed 钉死在中位数 + S2 active），不启动 DSSAT。
+  - [P2] DesignSpec 暴露 `bounds_id`/`input_bundle`/`observation_policy_id`，staged 入口分两段交叉校验 CLI 实际值与 design 声明一致（bounds id 字符串、bundle id 来自 input_manifest、policy id 来自 CSV 文件名 stem），不一致即 `parser.error`。
+  - 新增 manifest↔finalize↔代表参数三方哈希一致校验，任一不一致即失败并指明三方各自哈希。
+  - [P2] Finding 5（`model_failed` 暂无证据生产者）按审查意见不在本轮扩展，保守归类为 `other_dropped` 已安全。
+- 全测试：187 passed, 2 skipped（基线 179 → +8：7 单元 + 1 集成）。全程 `approval_scope=tooling_development`、`science_pending`，未启动 DSSAT/IES，未触达 validation。证据见 `docs/reports/P2_MVP_T2_2_修复记录_20260718.md`。
+
 ## 2026-07-16
 
 - 用户批准受控水氮 SA v4：新增 `xxql2501_sa_counterfactual_v1_20260716`，以8个核心处理的分层中位数统一全部 FileX IC 区段的 SH2O/SNH4/SNO3，仅保留 TN2–5/TN10–13 批处理；率定包 `xxql2501_20260716` 保持实测处理特异 IC 不变。

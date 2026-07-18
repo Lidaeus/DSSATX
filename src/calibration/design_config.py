@@ -31,6 +31,13 @@ class DesignSpec:
     observation: Mapping[str, Any]
     validation_split_id: str
     approval_scope: str
+    # Declared upstream contract ids. ``build_pest`` cross-checks the CLI
+    # selection (``--bounds-id``, ``--input-dir`` bundle id, and the
+    # ``--observation-policy-csv`` filename stem) against these so that a run
+    # cannot silently mix a design with a different input set.
+    bounds_id: str = ""
+    input_bundle: str = ""
+    observation_policy_id: str = ""
 
     @property
     def calibration_treatments(self) -> set[int]:
@@ -165,6 +172,9 @@ def load_design_config(path: str | Path, stage: str) -> DesignSpec:
         },
         validation_split_id=split_id,
         approval_scope=approval_scope,
+        bounds_id=str(payload.get("bounds_id", "") or "").strip(),
+        input_bundle=str(payload.get("input_bundle", "") or "").strip(),
+        observation_policy_id=str(payload.get("observation_policy_id", "") or "").strip(),
     )
 
 
