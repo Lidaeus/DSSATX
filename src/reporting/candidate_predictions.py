@@ -319,9 +319,20 @@ def _default_dssat_runner(
     batch_name: str,
     harvest_var: str,
 ) -> int:
-    """Production DSSAT runner via the calibration isolation layer."""
+    """Production DSSAT runner via the calibration isolation layer.
+
+    Calls ``src/calibration/run_dssat.py`` by absolute script path (the same
+    pattern ``sa_model.py`` uses) rather than ``-m src.calibration.run_dssat``,
+    because the subprocess runs with ``cwd=work_dir`` (an isolated candidate
+    directory) where the ``src`` package is not importable. ``run_dssat.py``
+    locates PROJECT_ROOT from ``__file__`` and imports no ``src.*`` modules, so
+    a direct script invocation works from any cwd.
+    """
+    runner_path = Path(__file__).resolve().parents[1] / "calibration" / "run_dssat.py"
+    if not runner_path.is_file():
+        raise FileNotFoundError(f"DSSAT calibration entry point not found: {runner_path}")
     cmd = [
-        sys.executable, "-m", "src.calibration.run_dssat",
+        sys.executable, str(runner_path),
         "--param-csv", str(param_csv),
         "--batch", batch_name,
         "--cultivar", "TM0008",
