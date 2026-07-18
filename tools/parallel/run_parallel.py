@@ -227,23 +227,16 @@ def _assess_completed_ies(run_dir, case):
     promote ``scientific_status``; the dedicated finalize_calibration entry
     point performs the science gate after deterministic and validation review.
     """
+    from src.calibration.engineering_gate import engineering_status, profile_for_run
     from src.reporting.quality_gate import assess_ies_run
 
     report = assess_ies_run(run_dir, case)
     audit_dir = os.path.join(run_dir, "ies_quality")
     os.makedirs(audit_dir, exist_ok=True)
     report.write(audit_dir, stem="ies_run_quality")
-    engineering_checks = {
-        "process_completed", "ies_ensemble_size", "ies_unique_realizations",
-        "ies_parameter_finite", "ies_observation_finite", "ies_realization_alignment",
-        "ies_final_realization_alignment", "ies_final_parameter_finite",
-        "ies_iteration_progress", "ies_member_status_table",
-    }
-    failed_checks = ", ".join(
-        c.check_id for c in report.checks
-        if c.check_id in engineering_checks and c.status == "fail"
-    )
-    return ("engineering_validated" if not failed_checks else "engineering_failed"), failed_checks
+    profile = profile_for_run(run_dir, case)
+    status, failures = engineering_status(report, profile)
+    return status, ", ".join(failures)
 
 
 def _find_agent_pid(agent_dir):

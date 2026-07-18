@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import glob
+import json
 import os
 import re
 from pathlib import Path
@@ -38,6 +39,31 @@ def _write_member_status(
     phi_frame: pd.DataFrame | None,
 ) -> Path:
     """Persist a conservative member-state table for engineering diagnosis."""
+    rec_text = ""
+    for rec_path in run_dir.glob(f"{prefix}*.rec"):
+        try:
+            rec_text += rec_path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            pass
+    screened: dict[str, str] = {}
+    for line in rec_text.splitlines():
+        if "dropping par:obs realizations:" not in line.lower():
+            continue
+        payload = re.split(r"dropping\s+par:obs\s+realizations:", line, maxsplit=1, flags=re.IGNORECASE)[1]
+        for match in re.finditer(r"\d+\s*:\s*([^\s,]+)", payload):
+            screened[str(match.group(1))] = "REC: explicit PEST++ realization drop"
+    model_failed: dict[str, str] = {}
+    for evidence_path in (run_dir / "member_failure_evidence.json", run_dir / "agent_failure_evidence.json"):
+        if not evidence_path.is_file():
+            continue
+        try:
+            payload = json.loads(evidence_path.read_text(encoding="utf-8"))
+            entries = payload if isinstance(payload, list) else payload.get("members", [])
+            for item in entries:
+                if isinstance(item, dict) and item.get("real_name") is not None:
+                    model_failed[str(item["real_name"])] = str(item.get("evidence_source") or evidence_path.name)
+        except Exception:
+            continue
     phi_cols = []
     if phi_frame is not None:
         summary = {"iteration", "total_runs", "mean", "standard_deviation", "std", "min", "max", "base"}
@@ -46,19 +72,40 @@ def _write_member_status(
     for real_name in initial.index.astype(str):
         values = pd.to_numeric(phi_frame[real_name], errors="coerce") if phi_frame is not None and real_name in phi_frame else pd.Series(dtype=float)
         finite_phi = int(values.notna().sum())
+        first_seen = ""
+        last_seen = ""
+        if phi_frame is not None and real_name in phi_frame and "iteration" in phi_frame.columns:
+            finite_rows = pd.to_numeric(phi_frame[real_name], errors="coerce").notna()
+            iterations = pd.to_numeric(phi_frame.loc[finite_rows, "iteration"], errors="coerce").dropna()
+            if not iterations.empty:
+                first_seen = str(int(iterations.min()))
+                last_seen = str(int(iterations.max()))
         in_final = real_name in set(final.index.astype(str))
         in_obs = real_name in set(observations.index.astype(str))
         if in_final and in_obs:
             state = "retained"
-        elif finite_phi > 0:
+            reason = "member present in final parameter and observation ensembles"
+            evidence = "parameter/observation ensemble files"
+        elif real_name in screened:
             state = "high_phi_screened"
-        elif not in_obs:
+            reason = "explicit PEST++ high-Phi realization drop"
+            evidence = screened[real_name]
+        elif real_name in model_failed:
             state = "model_failed"
+            reason = "model failure recorded by manager/agent evidence"
+            evidence = model_failed[real_name]
         else:
             state = "other_dropped"
+            reason = "member missing without explicit REC or agent failure evidence"
+            evidence = "no qualifying evidence"
         rows.append({
             "real_name": real_name,
             "state": state,
+            "final_status": state,
+            "reason": reason,
+            "evidence_source": evidence,
+            "first_seen_iteration": first_seen,
+            "last_seen_iteration": last_seen,
             "initial_present": True,
             "final_parameter_present": in_final,
             "final_observation_present": in_obs,

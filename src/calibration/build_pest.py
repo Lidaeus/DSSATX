@@ -117,9 +117,22 @@ def _write_run_manifest(out_dir, **kwargs):
     return path
 
 
-def _fixed_from_provenance(paths: list[str] | None) -> list[dict[str, str]]:
+def _fixed_from_provenance(
+    paths: list[str] | None,
+    *,
+    current_stage: str | None = None,
+    design_table_id: str | None = None,
+    approval_scope: str | None = None,
+) -> list[dict[str, str]]:
     """Bind inherited parameters to an upstream run and its finalize state."""
     records: list[dict[str, str]] = []
+    if current_stage and len(paths or []) != 1:
+        raise ValueError(f"{current_stage} requires exactly one --fixed-from from its immediate predecessor")
+    expected_stage = {
+        "S2": "S1",
+        "S3": "S2",
+        "S4": "S3",
+    }.get(str(current_stage or "").upper())
     for raw in paths or []:
         source = Path(raw).expanduser().resolve()
         if not source.is_file():
@@ -136,7 +149,62 @@ def _fixed_from_provenance(paths: list[str] | None) -> list[dict[str, str]]:
             finalize_payload = json.loads(finalize.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
             raise ValueError(f"invalid upstream finalize artifact: {finalize}") from exc
-        run_id = read_flat_run_manifest_field(manifest, "run_id") or run_dir.name
+        manifest_run_id = read_flat_run_manifest_field(manifest, "run_id")
+        run_id = manifest_run_id or run_dir.name
+        upstream_stage = str(read_flat_run_manifest_field(manifest, "design_stage") or "").upper()
+        upstream_scope = str(read_flat_run_manifest_field(manifest, "approval_scope") or "").lower()
+        finalize_case = str(finalize_payload.get("case") or "")
+        if current_stage and not manifest_run_id:
+            raise ValueError(f"upstream manifest {manifest} lacks run_id")
+        if current_stage and not finalize_case:
+            raise ValueError(f"upstream finalize {finalize} lacks case")
+        if finalize_case and finalize_case != str(run_id):
+            raise ValueError(
+                f"upstream manifest run_id {run_id!r} != finalize case {finalize_case!r}"
+            )
+        if expected_stage and upstream_stage != expected_stage:
+            raise ValueError(
+                f"{current_stage} must inherit {expected_stage}; upstream is {upstream_stage or 'unknown'}"
+            )
+        if approval_scope and upstream_scope != str(approval_scope).lower():
+            raise ValueError(
+                f"upstream approval_scope {upstream_scope or 'missing'} does not match {approval_scope}"
+            )
+        expected_representative_hash = str(finalize_payload.get("stage_representative", {}).get("sha256") or "")
+        if current_stage and expected_representative_hash and expected_representative_hash != sha256_file(source):
+            raise ValueError(
+                f"--fixed-from representative hash mismatch for upstream run {run_id}"
+            )
+        if current_stage and not expected_representative_hash:
+            raise ValueError(
+                f"upstream run {run_id} lacks generated stage representative provenance"
+            )
+        upstream_design_id = str(read_flat_run_manifest_field(manifest, "design_table_id") or "")
+        if current_stage and not upstream_design_id:
+            raise ValueError(f"upstream manifest {manifest} lacks design_table_id")
+        if design_table_id and upstream_design_id != design_table_id:
+            raise ValueError(
+                f"upstream design_table_id {upstream_design_id!r} does not match {design_table_id!r}"
+            )
+        finalize_stage = str(finalize_payload.get("design_stage") or "").upper()
+        finalize_design_id = str(finalize_payload.get("design_table_id") or "")
+        finalize_scope = str(finalize_payload.get("approval_scope") or "").lower()
+        if current_stage and not finalize_stage:
+            raise ValueError(f"upstream finalize {finalize} lacks design_stage")
+        if current_stage and not finalize_design_id:
+            raise ValueError(f"upstream finalize {finalize} lacks design_table_id")
+        if current_stage and finalize_stage != upstream_stage:
+            raise ValueError(
+                f"upstream finalize design_stage {finalize_stage!r} does not match manifest {upstream_stage!r}"
+            )
+        if current_stage and finalize_design_id != upstream_design_id:
+            raise ValueError(
+                "upstream finalize design_table_id does not match manifest design_table_id"
+            )
+        if current_stage and finalize_scope != upstream_scope:
+            raise ValueError(
+                "upstream finalize approval_scope does not match manifest approval_scope"
+            )
         engineering_status = str(finalize_payload.get("engineering_status") or "")
         science_status = str(finalize_payload.get("science_status") or "")
         if engineering_status != "engineering_validated":
@@ -147,6 +215,8 @@ def _fixed_from_provenance(paths: list[str] | None) -> list[dict[str, str]]:
             "path": str(source),
             "sha256": sha256_file(source),
             "run_id": str(run_id),
+            "design_stage": upstream_stage,
+            "design_table_id": upstream_design_id,
             "engineering_status": engineering_status,
             "science_status": science_status,
             "run_manifest": str(manifest),
@@ -2530,7 +2600,12 @@ if __name__ == "__main__":
             )
         if design_spec.stage in {"S2", "S3", "S4"}:
             try:
-                fixed_from_provenance = _fixed_from_provenance(args.fixed_from)
+                fixed_from_provenance = _fixed_from_provenance(
+                    args.fixed_from,
+                    current_stage=design_spec.stage,
+                    design_table_id=design_spec.design_table_id,
+                    approval_scope=design_spec.approval_scope,
+                )
             except (FileNotFoundError, ValueError) as exc:
                 parser.error(str(exc))
 
@@ -3479,8 +3554,8 @@ if __name__ == "__main__":
         validation_treatments=(sorted(design_spec.validation_treatments) if design_spec is not None else []),
         diagnostic_treatments=(sorted(design_spec.diagnostic_treatments) if design_spec is not None else []),
         design_observation_report=design_observation_report,
-        design_diagnostic_outputs=(
-            design_spec.observation.get("diagnostic_outputs", {}) if design_spec is not None else {}
+        design_representative_outputs=(
+            design_spec.observation.get("representative_outputs", {}) if design_spec is not None else {}
         ),
         design_audit_csv=design_audit_path,
         weight_policy_id=(POLICY_VERSION if observation_policies else WEIGHT_POLICY_ID),

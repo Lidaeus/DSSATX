@@ -490,6 +490,13 @@ def assess_ies(
     report.add("ies_simulation_variation", obs_varying > 0, "Simulated observations vary across realizations", actual=obs_varying, threshold=1)
 
     if phi_values is None:
+        report.add(
+            "ies_phi_finite",
+            False,
+            "Phi values were not supplied",
+            actual=0,
+            threshold=1,
+        )
         report.add("ies_phi_variation", False, "Phi values were not supplied")
     else:
         phi_all = pd.to_numeric(pd.Series(np.asarray(phi_values).ravel()), errors="coerce")

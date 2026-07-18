@@ -13,21 +13,10 @@ from pathlib import Path
 from typing import Any
 
 from src.common.quality import read_flat_run_manifest_field
+from src.calibration.engineering_gate import engineering_status, profile_for_run
+from src.calibration.stage_representative import write_stage_representative
 from src.reporting.quality_gate import assess_ies_run
 
-
-ENGINEERING_CHECKS = {
-    "process_completed",
-    "ies_ensemble_size",
-    "ies_unique_realizations",
-    "ies_parameter_finite",
-    "ies_observation_finite",
-    "ies_realization_alignment",
-    "ies_final_realization_alignment",
-    "ies_final_parameter_finite",
-    "ies_iteration_progress",
-    "ies_member_status_table",
-}
 
 # During P2-MVP tooling development there are no machine-generated validation
 # metrics, group-Phi audit artifacts, or deterministic rerun certificates that
@@ -37,9 +26,13 @@ ENGINEERING_CHECKS = {
 SCIENCE_PROMOTION_ENABLED = False
 
 
-def _engineering_status(report: Any) -> tuple[str, list[str]]:
-    failed = [c.check_id for c in report.checks if c.check_id in ENGINEERING_CHECKS and c.status == "fail"]
-    return ("engineering_validated" if not failed else "engineering_failed", failed)
+def _upsert_manifest_fields(path: Path, fields: dict[str, str]) -> None:
+    """Replace generated scalar fields without leaving stale duplicate keys."""
+    existing = path.read_text(encoding="utf-8").splitlines() if path.is_file() else []
+    keys = set(fields)
+    kept = [line for line in existing if not any(line.startswith(f"{key}:") for key in keys)]
+    kept.extend(f'{key}: "{value}"' for key, value in fields.items())
+    path.write_text("\n".join(kept).rstrip() + "\n", encoding="utf-8")
 
 
 def _science_evidence(run_dir: Path) -> tuple[bool, list[str]]:
@@ -77,27 +70,49 @@ def finalize_calibration(run_dir: str | Path, case: str) -> dict[str, Any]:
     quality_dir = run_dir / "ies_quality"
     quality_dir.mkdir(parents=True, exist_ok=True)
     report.write(quality_dir, stem="ies_run_quality")
-    engineering_status, engineering_failures = _engineering_status(report)
-    science_ok, science_failures = _science_evidence(run_dir)
-    science_status = "science_validated" if engineering_status == "engineering_validated" and science_ok else "science_pending"
-    if engineering_status != "engineering_validated":
-        science_status = "science_blocked"
+    representative = write_stage_representative(run_dir, case)
+    profile = profile_for_run(run_dir, case)
+    engineering_status_value, engineering_failures = engineering_status(report, profile)
+    _science_ok, science_failures = _science_evidence(run_dir)
+    # During tooling development both engineering success and failure remain
+    # non-scientific outcomes.  Keep one stable downstream state and expose
+    # the engineering failures separately.
+    science_status = "science_pending"
     payload = {
         "schema_version": 1,
         "case": case,
-        "engineering_status": engineering_status,
+        "engineering_status": engineering_status_value,
         "engineering_failures": engineering_failures,
         "science_status": science_status,
         "science_failures": science_failures,
         "scientific_status": "validated" if science_status == "science_validated" else "not_assessed",
         "quality_report": str(run_dir / "ies_quality" / "ies_run_quality.json"),
         "member_status": str(run_dir / "ies_quality" / f"{case}.member_status.csv"),
+        "engineering_profile": profile,
+        "stage_representative": representative or {},
     }
+    manifest_path = run_dir / "run_manifest.yaml"
+    manifest_stage = read_flat_run_manifest_field(manifest_path, "design_stage") if manifest_path.is_file() else None
+    manifest_design = read_flat_run_manifest_field(manifest_path, "design_table_id") if manifest_path.is_file() else None
+    manifest_scope = read_flat_run_manifest_field(manifest_path, "approval_scope") if manifest_path.is_file() else None
+    payload.update({
+        "design_stage": manifest_stage,
+        "design_table_id": manifest_design,
+        "approval_scope": manifest_scope,
+    })
     out_dir = run_dir / "calibration_finalize"
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "calibration_finalize.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+    if manifest_path.is_file() and representative:
+        _upsert_manifest_fields(manifest_path, {
+            "stage_representative_params": representative["path"],
+            "stage_representative_params_sha256": representative["sha256"],
+            "stage_representative_rule": representative["rule"],
+            "stage_representative_source": representative["source"],
+            "stage_representative_source_sha256": representative["source_sha256"],
+        })
     status_path = run_dir / "run_status.json"
     status = {}
     if status_path.is_file():
@@ -106,7 +121,7 @@ def finalize_calibration(run_dir: str | Path, case: str) -> dict[str, Any]:
         except json.JSONDecodeError:
             status = {}
     status.update({
-        "engineering_status": engineering_status,
+        "engineering_status": engineering_status_value,
         "engineering_status_error": ", ".join(engineering_failures),
         "science_status": science_status,
         "science_status_error": ", ".join(science_failures),

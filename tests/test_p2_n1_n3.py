@@ -13,6 +13,9 @@ from src.calibration.design_config import (
 from src.calibration.finalize_calibration import _science_evidence, finalize_calibration
 from src.calibration.observation_policy import apply_observation_policy
 from src.calibration.prior_coverage import summarize_prior_coverage
+from src.calibration.stage_representative import write_stage_representative
+from src.calibration.engineering_gate import engineering_status, profile_for_run
+from src.reporting.quality_gate import assess_ies_run
 from tools.package_sa_evidence import package_sa_evidence
 from src.calibration.build_pest import (
     _finalize_ies_contract,
@@ -57,7 +60,7 @@ def test_s2_fixed_baseline_parameters_are_not_released_as_active():
     assert staged["NSTFAC"]["status"] == "active"
     assert spec.observation["outputs"]["PestJoint.OUT"] == ["LAIX", "CNAM"]
     assert "PestHarvest.OUT" not in spec.observation["outputs"]
-    assert spec.observation["diagnostic_outputs"]["PestHarvest.OUT"] == ["PWAI", "PWAD"]
+    assert spec.observation["representative_outputs"]["PestHarvest.OUT"] == ["PWAI", "PWAD"]
     assert "HWAM" not in spec.observation["outputs"]["PestJoint.OUT"]
 
 
@@ -70,6 +73,17 @@ def test_continuous_harvest_stages_do_not_use_season_end_hwam_or_duplicate_pwam(
             assert "PestHarvest.OUT" not in outputs
         elif stage == "S3":
             assert outputs["PestHarvest.OUT"] == ["PWAI"]
+    assert set(load_design_config(DESIGN, "S3").stage_config["fixed_params"]) == {
+        "EM-FL", "TRIFL", "NSTFAC", "RTNO3", "NMOBMX", "NVSMOB"
+    }
+    assert set(load_design_config(DESIGN, "S4").stage_config["fixed_params"]) == {"XFRT", "XFINT"}
+    s4 = load_design_config(DESIGN, "S4")
+    s4_params = [{"name": name, "init": 1.0} for name in (
+        "EM-FL", "TRIFL", "NSTFAC", "RTNO3", "NMOBMX", "NVSMOB", "XFRT", "XFINT"
+    )]
+    released = {item["name"]: item for item in apply_parameter_stage(s4_params, s4)}
+    assert set(released) == {item["name"] for item in s4_params}
+    assert all(released[name]["status"] == "fixed" for name in ("XFRT", "XFINT"))
 
 
 def test_observation_noise_contract_is_explicit_and_reproducible(tmp_path):
@@ -194,6 +208,100 @@ def test_fixed_from_requires_upstream_run_and_finalize_provenance(tmp_path):
     assert len(records[0]["sha256"]) == 64
 
 
+def test_fixed_from_rejects_manifest_finalize_case_mismatch(tmp_path):
+    source = tmp_path / "stage_representative_params.csv"
+    source.write_text("name,value\nEM-FL,20\n", encoding="utf-8")
+    (tmp_path / "run_manifest.yaml").write_text(
+        'run_id: "run_A"\ndesign_stage: "S1"\napproval_scope: "tooling_development"\n',
+        encoding="utf-8",
+    )
+    finalize_dir = tmp_path / "calibration_finalize"
+    finalize_dir.mkdir()
+    (finalize_dir / "calibration_finalize.json").write_text(json.dumps({
+        "case": "run_B",
+        "engineering_status": "engineering_validated",
+        "science_status": "science_pending",
+        "stage_representative": {"sha256": "x"},
+    }), encoding="utf-8")
+    with pytest.raises(ValueError, match="run_id.*finalize case"):
+        _fixed_from_provenance(
+            [str(source)], current_stage="S2", approval_scope="tooling_development"
+        )
+
+
+def test_fixed_from_rejects_non_adjacent_stage(tmp_path):
+    source = tmp_path / "stage_representative_params.csv"
+    source.write_text("name,value\nEM-FL,20\n", encoding="utf-8")
+    (tmp_path / "run_manifest.yaml").write_text(
+        'run_id: "run_A"\ndesign_stage: "S1"\ndesign_table_id: "design"\napproval_scope: "tooling_development"\n',
+        encoding="utf-8",
+    )
+    finalize_dir = tmp_path / "calibration_finalize"
+    finalize_dir.mkdir()
+    import hashlib
+    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+    (finalize_dir / "calibration_finalize.json").write_text(json.dumps({
+        "case": "run_A", "design_stage": "S1", "design_table_id": "design",
+        "approval_scope": "tooling_development", "engineering_status": "engineering_validated",
+        "stage_representative": {"sha256": digest},
+    }), encoding="utf-8")
+    with pytest.raises(ValueError, match="S3 must inherit S2"):
+        _fixed_from_provenance(
+            [str(source)], current_stage="S3", design_table_id="design",
+            approval_scope="tooling_development"
+        )
+
+
+def test_fixed_from_rejects_tampered_representative_hash(tmp_path):
+    source = tmp_path / "stage_representative_params.csv"
+    source.write_text("name,value\nEM-FL,20\n", encoding="utf-8")
+    (tmp_path / "run_manifest.yaml").write_text(
+        'run_id: "run_A"\ndesign_stage: "S1"\ndesign_table_id: "design"\napproval_scope: "tooling_development"\n',
+        encoding="utf-8",
+    )
+    finalize_dir = tmp_path / "calibration_finalize"
+    finalize_dir.mkdir()
+    (finalize_dir / "calibration_finalize.json").write_text(json.dumps({
+        "case": "run_A", "design_stage": "S1", "design_table_id": "design",
+        "approval_scope": "tooling_development", "engineering_status": "engineering_validated",
+        "stage_representative": {"sha256": "0" * 64},
+    }), encoding="utf-8")
+    with pytest.raises(ValueError, match="representative hash mismatch"):
+        _fixed_from_provenance(
+            [str(source)], current_stage="S2", design_table_id="design",
+            approval_scope="tooling_development"
+        )
+
+
+def test_member_drop_without_evidence_is_not_inferred_as_failure_or_screening(tmp_path):
+    prefix = "case"
+    pd.DataFrame({"real_name": ["r0", "r1"], "p": [1.0, 2.0]}).to_csv(
+        tmp_path / f"{prefix}.0.par.csv", index=False
+    )
+    pd.DataFrame({"real_name": ["r0"], "p": [1.1]}).to_csv(
+        tmp_path / f"{prefix}.1.par.csv", index=False
+    )
+    pd.DataFrame({"real_name": ["r0"], "o": [3.0]}).to_csv(
+        tmp_path / f"{prefix}.1.obs.csv", index=False
+    )
+    pd.DataFrame({"iteration": [0, 1], "r0": [2.0, 1.0], "r1": [4.0, None]}).to_csv(
+        tmp_path / f"{prefix}.phi.actual.csv", index=False
+    )
+    assess_ies_run(tmp_path, prefix)
+    status = pd.read_csv(tmp_path / "ies_quality" / f"{prefix}.member_status.csv")
+    assert {
+        "real_name", "first_seen_iteration", "last_seen_iteration",
+        "final_status", "reason", "evidence_source",
+    }.issubset(status.columns)
+    assert status.loc[status.real_name == "r1", "final_status"].iloc[0] == "other_dropped"
+    (tmp_path / f"{prefix}.rec").write_text(
+        "...dropping par:obs realizations: 1 : r1 , 2 : r2\n", encoding="utf-8"
+    )
+    assess_ies_run(tmp_path, prefix)
+    status = pd.read_csv(tmp_path / "ies_quality" / f"{prefix}.member_status.csv")
+    assert status.loc[status.real_name == "r1", "final_status"].iloc[0] == "high_phi_screened"
+
+
 def test_explicit_sigma_combines_model_discrepancy_and_floor():
     obs = pd.DataFrame([{
         "obsnme": "x", "obsval": 10.0, "raw_obsval": 10.0, "weight": 1.0,
@@ -249,6 +357,70 @@ def test_science_evidence_booleans_cannot_promote_automatically(tmp_path):
     ok, failures = _science_evidence(tmp_path)
     assert ok is False
     assert failures == ["science_promotion_disabled_until_machine_evidence"]
+
+
+def test_degenerate_formal_ies_cannot_pass_engineering_gate(tmp_path):
+    (tmp_path / "case.0.par.csv").write_text(",a\n0,1\n1,1\n", encoding="utf-8")
+    (tmp_path / "case.1.par.csv").write_text(",a\n0,1\n1,1\n", encoding="utf-8")
+    (tmp_path / "case.1.obs.csv").write_text(",y\n0,1\n1,1\n", encoding="utf-8")
+    (tmp_path / "case.phi.actual.csv").write_text(
+        "iteration,0,1\n0,5,5\n1,5,5\n", encoding="utf-8"
+    )
+    (tmp_path / "case.pst").write_text("* control data\n", encoding="utf-8")
+    payload = finalize_calibration(tmp_path, "case")
+    assert payload["engineering_status"] == "engineering_failed"
+    assert any(
+        item in payload["engineering_failures"]
+        for item in ("ies_prior_variation", "ies_simulation_variation", "ies_phi_variation", "ies_parameter_update")
+    )
+
+
+def test_stage_representative_is_median_and_reproducibly_recorded(tmp_path):
+    pd.DataFrame({"real_name": ["r0", "r1", "r2"], "P": [1.0, 3.0, 5.0]}).to_csv(
+        tmp_path / "case.2.par.csv", index=False
+    )
+    result = write_stage_representative(tmp_path, "case")
+    assert result is not None
+    table = pd.read_csv(tmp_path / "calibration_finalize" / "stage_representative_params.csv")
+    assert table.loc[table.name == "P", "value"].iloc[0] == pytest.approx(3.0)
+    meta = json.loads((tmp_path / "calibration_finalize" / "stage_representative_params.json").read_text())
+    assert meta["rule"] == "median_of_final_parameter_ensemble"
+    assert result["sha256"] == meta["output_sha256"]
+
+
+def test_finalize_manifest_representative_fields_are_upserted(tmp_path):
+    (tmp_path / "case.0.par.csv").write_text(",a\n0,1\n1,2\n", encoding="utf-8")
+    (tmp_path / "case.1.par.csv").write_text(",a\n0,1.1\n1,2.1\n", encoding="utf-8")
+    (tmp_path / "case.1.obs.csv").write_text(",y\n0,1\n1,2\n", encoding="utf-8")
+    (tmp_path / "case.phi.actual.csv").write_text("iteration,0,1\n0,1,2\n1,0.5,1.5\n", encoding="utf-8")
+    (tmp_path / "run_manifest.yaml").write_text(
+        'run_id: "case"\ndesign_stage: "S1"\ndesign_table_id: "design"\napproval_scope: "tooling_development"\n',
+        encoding="utf-8",
+    )
+    finalize_calibration(tmp_path, "case")
+    finalize_calibration(tmp_path, "case")
+    manifest = (tmp_path / "run_manifest.yaml").read_text(encoding="utf-8")
+    assert manifest.count("stage_representative_params_sha256:") == 1
+
+
+def test_prior_only_profile_allows_no_update_but_requires_variation(tmp_path):
+    prefix = "prior"
+    pd.DataFrame({"real_name": ["r0", "r1"], "p": [1.0, 2.0]}).to_csv(
+        tmp_path / f"{prefix}.0.par.csv", index=False
+    )
+    pd.DataFrame({"real_name": ["r0", "r1"], "o": [1.0, 2.0]}).to_csv(
+        tmp_path / f"{prefix}.0.obs.csv", index=False
+    )
+    pd.DataFrame({"iteration": [0], "0": [1.0], "1": [2.0]}).to_csv(
+        tmp_path / f"{prefix}.phi.actual.csv", index=False
+    )
+    pst = pyemu.Pst.from_par_obs_names(["p"], ["o"])
+    pst.control_data.noptmax = 0
+    pst.write(str(tmp_path / f"{prefix}.pst"))
+    report = assess_ies_run(tmp_path, prefix)
+    assert profile_for_run(tmp_path, prefix) == "prior_only"
+    status, failures = engineering_status(report, "prior_only")
+    assert status == "engineering_validated", failures
 
 
 def test_sa_evidence_packager_hashes_existing_outputs(tmp_path):

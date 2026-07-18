@@ -145,9 +145,11 @@ def load_design_config(path: str | Path, stage: str) -> DesignSpec:
         if not isinstance(explicit_observation, Mapping):
             raise ValueError("observation_outputs must be an object")
         observation = explicit_observation
-    diagnostic_outputs = stage_cfg.get("diagnostic_outputs", {})
-    if not isinstance(diagnostic_outputs, Mapping):
-        raise ValueError("diagnostic_outputs must be an object")
+    representative_outputs = stage_cfg.get(
+        "representative_outputs", stage_cfg.get("diagnostic_outputs", {})
+    )
+    if not isinstance(representative_outputs, Mapping):
+        raise ValueError("representative_outputs must be an object")
 
     return DesignSpec(
         path=path,
@@ -158,7 +160,7 @@ def load_design_config(path: str | Path, stage: str) -> DesignSpec:
         treatment_roles=normalized_roles,
         observation={
             "outputs": observation,
-            "diagnostic_outputs": diagnostic_outputs,
+            "representative_outputs": representative_outputs,
             "split_path": str(split_path),
         },
         validation_split_id=split_id,
