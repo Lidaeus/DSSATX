@@ -221,12 +221,11 @@ def _assess_completed_sensitivity(run_dir, case):
 
 
 def _assess_completed_ies(run_dir, case):
-    """Run the IES scientific quality gate after process completion (P2-R0.6).
+    """Run the IES engineering audit after process completion.
 
-    Writes per-iteration realization retention, Phi finiteness, parameter
-    update, and failure reasons to ``ies_quality/``. If the gate fails, the
-    scientific_status is 'failed_quality', which blocks downstream posterior
-    and paper export (per P2-R0.6 acceptance).
+    The automatic audit records operational evidence only.  It must never
+    promote ``scientific_status``; the dedicated finalize_calibration entry
+    point performs the science gate after deterministic and validation review.
     """
     from src.reporting.quality_gate import assess_ies_run
 
@@ -234,12 +233,17 @@ def _assess_completed_ies(run_dir, case):
     audit_dir = os.path.join(run_dir, "ies_quality")
     os.makedirs(audit_dir, exist_ok=True)
     report.write(audit_dir, stem="ies_run_quality")
-    if report.science_validated:
-        return "validated", ""
+    engineering_checks = {
+        "process_completed", "ies_ensemble_size", "ies_unique_realizations",
+        "ies_parameter_finite", "ies_observation_finite", "ies_realization_alignment",
+        "ies_final_realization_alignment", "ies_final_parameter_finite",
+        "ies_iteration_progress",
+    }
     failed_checks = ", ".join(
-        c.check_id for c in report.checks if c.status == "fail"
+        c.check_id for c in report.checks
+        if c.check_id in engineering_checks and c.status == "fail"
     )
-    return "failed_quality", f"IES quality gate failed: {failed_checks}"
+    return ("engineering_validated" if not failed_checks else "engineering_failed"), failed_checks
 
 
 def _find_agent_pid(agent_dir):
@@ -283,6 +287,7 @@ def cmd_status(run_dir, agents_dir="_agents"):
         print(f"  Mode:    {run_status.get('mode', '?')}")
         print(f"  Created: {run_status.get('created_at', '?')}")
         print(f"  Process: {run_status.get('status', '?')}")
+        print(f"  Engineering: {run_status.get('engineering_status', 'not_assessed')}")
         print(f"  Science: {run_status.get('scientific_status', 'not_assessed')}")
 
     # Agent status
@@ -342,6 +347,14 @@ def cmd_finalize(run_dir, case, mode="sen"):
     for every design point, a final PEST++ summary, and a stopped manager.
     """
     run_dir = os.path.abspath(run_dir)
+    if mode == "ies":
+        from src.calibration.finalize_calibration import finalize_calibration
+        manager_pid = _find_manager_pid(run_dir)
+        if _is_pid_alive(manager_pid):
+            raise RuntimeError(f"Refusing to finalize while manager is running: {manager_pid}")
+        payload = finalize_calibration(run_dir, case)
+        print(f"calibration_finalize={payload['science_status']}")
+        return payload["science_status"] == "science_validated"
     if mode != "sen":
         raise ValueError("Offline finalization is currently supported only for sensitivity runs")
     manager_pid = _find_manager_pid(run_dir)
@@ -617,6 +630,7 @@ def cmd_run(args):
             "started_at": now,
             "status": "running",
             "scientific_status": "pending",
+            "engineering_status": "pending",
             "manager_pid": p.pid,
             "attempt": attempt,
             "resumed": bool(args.resume),
@@ -633,6 +647,8 @@ def cmd_run(args):
             )
             scientific_status = "pending" if process_state == "completed" else "not_assessable"
             scientific_error = ""
+            engineering_status = "pending" if process_state == "completed" else "not_assessable"
+            engineering_error = ""
             finished_at = _utc_now()
             # Persist process completion before the scientific audit reads
             # run_status.json. Scientific validity is a separate dimension.
@@ -648,6 +664,7 @@ def cmd_run(args):
                 "finished_at": finished_at,
                 "status": process_state,
                 "scientific_status": scientific_status,
+                "engineering_status": engineering_status,
                 "termination_reason": termination_reason,
                 "manager_pid": p.pid,
                 "manager_exit_code": rc,
@@ -668,12 +685,16 @@ def cmd_run(args):
             # parameter update, and failure reasons. Failure blocks downstream.
             if process_state == "completed" and args.mode == "ies":
                 try:
-                    scientific_status, scientific_error = _assess_completed_ies(
+                    engineering_status, engineering_error = _assess_completed_ies(
                         run_dir, args.case
                     )
-                except Exception as exc:
                     scientific_status = "not_assessed"
-                    scientific_error = str(exc)
+                    scientific_error = "Science gate deferred to finalize_calibration.py"
+                except Exception as exc:
+                    engineering_status = "engineering_not_assessed"
+                    engineering_error = str(exc)
+                    scientific_status = "not_assessed"
+                    scientific_error = "Science gate deferred to finalize_calibration.py"
 
             _write_json(run_status_path, {
                 "state_schema_version": 2,
@@ -688,6 +709,8 @@ def cmd_run(args):
                 "status": process_state,
                 "scientific_status": scientific_status,
                 "scientific_status_error": scientific_error,
+                "engineering_status": engineering_status,
+                "engineering_status_error": engineering_error,
                 "termination_reason": termination_reason,
                 "manager_pid": p.pid,
                 "manager_exit_code": rc,

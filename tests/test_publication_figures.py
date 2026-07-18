@@ -118,7 +118,7 @@ def test_export_cli_requires_demo_opt_in_and_writes_data_only(tmp_path):
 
 
 def _write_passing_upstream_artifacts(run_dir: Path, run_id: str) -> tuple[Path, Path]:
-    """Write a passing run_manifest.yaml and quality_report.json for ``run_id``."""
+    """Write matching manifest, engineering report and finalize authority."""
     manifest = run_dir / "run_manifest.yaml"
     manifest.write_text(
         f'run_id: "{run_id}"\nrun_type: "calibration"\ngit_commit: "abc123"\n',
@@ -138,6 +138,16 @@ def _write_passing_upstream_artifacts(run_dir: Path, run_id: str) -> tuple[Path,
     }
     quality = run_dir / "quality_report.json"
     quality.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    finalize_dir = run_dir / "calibration_finalize"
+    finalize_dir.mkdir(exist_ok=True)
+    (finalize_dir / "calibration_finalize.json").write_text(
+        json.dumps({
+            "case": run_id,
+            "engineering_status": "engineering_validated",
+            "science_status": "science_validated",
+            "scientific_status": "validated",
+        }, indent=2) + "\n", encoding="utf-8"
+    )
     return manifest, quality
 
 

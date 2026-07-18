@@ -469,10 +469,10 @@ def assess_equifinality(
     """Assemble a QualityReport summarising equifinality signals.
 
     **Upstream binding (P2-R0.1)**: the equifinality entry inherits the
-    scientific status of the IES run it analyses. If the upstream IES quality
-    report is missing or failed, the equifinality report cannot be
-    ``science_validated`` — it cannot self-promote. The upstream status is read
-    from the run manifest and quality reports in the same run directory.
+    scientific status of the IES run it analyses. If the authoritative
+    ``calibration_finalize.json`` is missing or not validated, the
+    equifinality report cannot be ``science_validated`` — it cannot
+    self-promote.
 
     Per plan §5 line 172, this does not perform automatic equifinality
     *rejection* (the equifinality-specific checks are warn-level). But it DOES
@@ -495,9 +495,13 @@ def assess_equifinality(
     max_corr = float(correlation[["pearson", "spearman"]].abs().max().max()) if not correlation.empty else np.nan
     max_vif = float(vif_df["vif"].max()) if not vif_df.empty and "vif" in vif_df.columns else np.nan
 
-    report = QualityReport(run_type="equifinality", run_id=run_dir.name)
+    report = QualityReport(
+        run_type="equifinality",
+        run_id=run_dir.name,
+        science_validation_mode="engineering_only",
+    )
     # R0.1: upstream binding — the process_completed check inherits upstream status.
-    upstream_ok = upstream_status in {"validated", "science_validated", "pass"}
+    upstream_ok = upstream_status == "validated"
     report.add(
         "upstream_ies_validated",
         upstream_ok,
@@ -563,33 +567,27 @@ def assess_equifinality(
 
 
 def _read_upstream_ies_status(run_dir: Path, prefix: str) -> tuple[str, str]:
-    """Read the IES run's scientific status from run_status.json or quality reports.
+    """Read the authoritative calibration-finalize status.
 
-    Returns ``(status, source)`` where source names the file the status came
-    from. Per P2-R0.1, equifinality inherits this status and cannot
-    self-promote above it.
+    ``run_status.json`` and engineering quality reports describe execution
+    only.  They are deliberately not accepted as evidence for posterior or
+    equifinality claims; only ``calibration_finalize.json`` can grant the
+    ``science_validated`` state.
     """
-    status_path = run_dir / "run_status.json"
-    if status_path.is_file():
-        try:
-            status_data = json.loads(status_path.read_text(encoding="utf-8"))
-            sci = str(status_data.get("scientific_status", "")).strip().lower()
-            if sci:
-                return sci, "run_status.json"
-        except Exception:
-            pass
-    # Fallback: look for a quality report written by the parallel runner.
-    for candidate in ("quality_report.json", "ies_quality.json"):
-        qpath = run_dir / candidate
-        if qpath.is_file():
-            try:
-                qdata = json.loads(qpath.read_text(encoding="utf-8"))
-                if qdata.get("science_validated"):
-                    return "validated", candidate
-                return "failed", candidate
-            except Exception:
-                pass
-    return "unknown", "none"
+    finalize = run_dir / "calibration_finalize" / "calibration_finalize.json"
+    if not finalize.is_file():
+        return "not_finalized", "none"
+    try:
+        payload = json.loads(finalize.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return "invalid_finalize", str(finalize)
+    if str(payload.get("case") or prefix) != prefix:
+        return "invalid_finalize", str(finalize)
+    if payload.get("science_status") == "science_validated" and payload.get("scientific_status") == "validated":
+        return "validated", str(finalize)
+    if payload.get("engineering_status") == "engineering_failed":
+        return "failed", str(finalize)
+    return "pending", str(finalize)
 
 
 def _load_phi(run_dir: Path, prefix: str) -> pd.DataFrame:

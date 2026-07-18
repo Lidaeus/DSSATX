@@ -148,6 +148,8 @@ FileA/FileT 当前以处理均值作为 DSSAT 观测。重复原始记录应保�
 
 当前茄子数据主要来自单季水氮试验。不能随机拆分同一处理的时序行作为训练/验证，因为这会造成信息泄漏。应按完整处理块留出，并保存 `validation_split` 配置；获得新季节数据后优先采用跨季外部验证。
 
+validation 处理不能参与参数数目、参数组合、权重、停止轮次或 S4 survivor 的选择。正式参数和运行规则冻结后，才首次计算 validation 指标；若据此调整设计，原 validation 必须降级为 tuning，并另找独立验证证据。单季数据无法再划出可靠新集合时，应如实报告内部验证局限，不把调参后的同一处理继续称为独立验证。
+
 ## 5. 后验与异参同效开发规范
 
 后验诊断至少包括：
@@ -206,6 +208,6 @@ FileA/FileT 当前以处理均值作为 DSSAT 观测。重复原始记录应保�
 6. 未经批准不修改原始观测、不替换正式冻结边界、不删除历史结果；
 7. 每个阶段通过用户验收后再进入下一阶段。
 
-当前批准的 P1 frozen 为 `eggplant_p1_xxql2501_v3_20260716`。率定/验证必须使用保留处理实测 IC 的 `xxql2501_20260716`；遗传参数 SA 必须使用统一 SH2O/SNH4/SNO3、仅含核心2×4批处理的 `xxql2501_sa_counterfactual_v1_20260716`。二者禁止混用。当前输出契约为 `eggplant_p1_controlled_wn_v4`，一般遗传影响与水氮响应必须分别排名。旧 `eggplant_p1_sobol_top16_20260716` 只批准了 v3 哈希，不能自动用于 v4；v4 必须重新完成 Morris 与 Top-K 审批。不得静默改写既有 bundle、frozen 或审批 CSV，任何变化必须创建新 ID。
+当前批准的 P1 参数域仍为 `eggplant_p1_xxql2501_v3_20260716`。率定/验证必须使用保留处理实测 IC 的 `xxql2501_20260716`；遗传参数 SA 必须使用统一 SH2O/SNH4/SNO3、仅含核心2×4批处理的 `xxql2501_sa_counterfactual_v1_20260716`。二者禁止混用。当前输出契约为 `eggplant_p1_controlled_wn_v4`，一般遗传影响与水氮响应必须分别排名。v4 Morris 已完成并通过双域稳定性门；v4 Top-K/Sobol 预算和正式率定参数集仍须用户审批。协作者或程序写入的 `review_status: approved`/`approved_by` 不构成用户批准；批准后必须创建新的 ID，不得静默改写既有 bundle、frozen 或审批 CSV。`N=128` Sobol 当前只能标记为单尺度质量通过，第二个有效尺度产生前不得声称跨尺度收敛。
 
 并行 `pestpp-sen` 完成后必须根据 `.pst` 的实际 `gsa_method` 路由审计：Morris检查轨迹/elementary effects，Sobol检查完整Saltelli矩阵、失败标志、响应与参数契约、基础方差及S1/ST文件。Sobol正式结果还必须由原始A/B/混合矩阵复算点估计并产生bootstrap区间；预检案例无论质量门是否通过都不得进入正式排名。

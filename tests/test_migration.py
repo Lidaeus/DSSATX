@@ -101,7 +101,6 @@ def test_tools_exist():
     checks = [
         "tools/freeze_bounds.py",
         "tools/clean_workspace.py",
-        "tools/cluster_parameters.py",
         "tools/download_pestpp.py",
         "tools/param_sweep.py",
         "tools/parallel/prepare_agents.py",

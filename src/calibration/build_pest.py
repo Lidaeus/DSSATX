@@ -3,6 +3,8 @@ import sys
 import os
 import re
 import shutil
+import json
+import math
 from pathlib import Path
 from typing import Dict, Optional, Set
 
@@ -12,6 +14,7 @@ if _BOOTSTRAP_ROOT not in sys.path:
     sys.path.insert(0, _BOOTSTRAP_ROOT)
 
 import pandas as pd
+import numpy as np
 import pyemu
 
 import subprocess
@@ -31,6 +34,12 @@ from src.calibration.observation_policy import (
     apply_observation_policy,
     load_observation_policy,
     write_transform_config,
+)
+from src.calibration.design_config import (
+    apply_observation_stage,
+    apply_parameter_stage,
+    load_design_config,
+    write_design_audit,
 )
 from src.common.input_manifest import (
     InputManifestError,
@@ -145,7 +154,9 @@ def _write_weight_audit(obs_df, out_dir, prefix):
         "transform", "transform_offset", "transform_reference",
         "sim_token", "model_output_file", "weight_policy_id",
     ]
-    path = os.path.join(out_dir, f"{prefix}.weights.csv")
+    # PEST++ writes its own realization-level ``case.weights.csv`` at runtime;
+    # keep the policy audit under a distinct name so it cannot be overwritten.
+    path = os.path.join(out_dir, f"{prefix}.weights.audit.csv")
     audit[[column for column in columns if column in audit]].to_csv(
         path, index=False, encoding="utf-8-sig"
     )
@@ -164,6 +175,116 @@ def _apply_policy_and_prepare_runner(obs_df, policies, out_dir, prefix, model_cm
     extra = str(model_cmd_extra or "").strip()
     transform_arg = f"--observation-transform-config {config_name}"
     return obs_df, f"{extra} {transform_arg}".strip()
+
+
+def _write_observation_noise_ensemble(
+    pst_path,
+    weights_audit_path,
+    out_dir,
+    prefix,
+    n_reals,
+    seed,
+):
+    """Freeze an observation-plus-noise ensemble from the audited sigma values.
+
+    PEST++ otherwise silently falls back to ``no-noise`` when a PST contains
+    only ordinary observation weights.  The project uses ``1/sigma`` weights
+    for the objective, so this explicit file keeps the same ``sigma_eff``
+    available to the IES observation ensemble without conflating it with any
+    group multiplier used for Phi balancing.
+    """
+    pst = pyemu.Pst(str(pst_path))
+    obs = pst.observation_data.copy()
+    obs = obs[pd.to_numeric(obs["weight"], errors="coerce") > 0].copy()
+    if obs.empty:
+        raise ValueError("cannot create observation-noise ensemble without non-zero observations")
+    audit = pd.read_csv(weights_audit_path, encoding="utf-8-sig")
+    if "obsnme" not in audit:
+        raise ValueError("weights audit lacks obsnme; cannot freeze observation noise")
+    audit = audit.drop_duplicates("obsnme").copy()
+    audit["_obs_key"] = audit["obsnme"].astype(str).str.upper()
+    audit = audit.set_index("_obs_key")
+    obs_keys = pd.Index([str(name).upper() for name in obs.index])
+    missing = [name for name, key in zip(obs.index, obs_keys) if key not in audit.index]
+    if missing:
+        raise ValueError(f"weights audit lacks sigma for {len(missing)} observations")
+    sigma = pd.to_numeric(audit.loc[obs_keys, "raw_sigma"], errors="coerce")
+    if sigma.isna().any() or (sigma <= 0).any() or not np.isfinite(sigma.to_numpy()).all():
+        raise ValueError("observation-noise contract requires finite positive raw_sigma for every active observation")
+    observed = pd.to_numeric(obs.loc[:, "obsval"], errors="coerce")
+    if observed.isna().any() or not np.isfinite(observed.to_numpy()).all():
+        raise ValueError("observation-noise contract requires finite obsval for every active observation")
+
+    rng = np.random.default_rng(int(seed))
+    values = observed.to_numpy(dtype=float)[None, :] + rng.normal(
+        loc=0.0,
+        scale=sigma.to_numpy(dtype=float)[None, :],
+        size=(int(n_reals), len(obs)),
+    )
+    frame = pd.DataFrame(values, columns=list(obs.index))
+    frame.insert(0, "real_name", [str(i) for i in range(int(n_reals))])
+    path = Path(out_dir) / f"{prefix}.observation_ensemble.csv"
+    frame.to_csv(path, index=False, float_format="%.12g", encoding="utf-8")
+    metadata = {
+        "schema_version": 1,
+        "run_id": prefix,
+        "n_reals": int(n_reals),
+        "seed": int(seed),
+        "noise_distribution": "independent_normal",
+        "sigma_source": "weights_audit.raw_sigma",
+        "weight_definition": "objective weight remains group_multiplier/raw_sigma; noise uses raw_sigma",
+        "observation_count": int(len(obs)),
+        "observation_names_sha256": sha256_file(path),
+    }
+    metadata_path = Path(out_dir) / f"{prefix}.observation_ensemble.json"
+    metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+    return str(path), str(metadata_path), metadata
+
+
+def _finalize_ies_contract(
+    pst_path,
+    out_dir,
+    prefix,
+    ies_num_reals,
+    random_seed,
+    bad_phi_sigma,
+    observation_noise=True,
+):
+    """Apply explicit IES filtering/noise policy after PST construction."""
+    pst = pyemu.Pst(str(pst_path))
+    # 1e300 is PEST++'s effectively-disabled relative filter.  A finite value
+    # is reserved for an explicitly requested D0 diagnostic comparison.
+    sigma_value = float(bad_phi_sigma)
+    if not math.isfinite(sigma_value) or sigma_value <= 0:
+        raise ValueError("bad_phi_sigma must be a positive finite value; use 1e300 to disable relative screening")
+    pst.pestpp_options["ies_bad_phi_sigma"] = sigma_value
+    noise_path = noise_meta_path = None
+    noise_meta = None
+    if observation_noise:
+        audit_path = Path(out_dir) / f"{prefix}.weights.audit.csv"
+        if not audit_path.exists():
+            # Backward compatibility for pre-contract builds whose policy
+            # audit used the runtime-facing ``.weights.csv`` name.
+            audit_path = Path(out_dir) / f"{prefix}.weights.csv"
+        noise_path, noise_meta_path, noise_meta = _write_observation_noise_ensemble(
+            pst_path,
+            audit_path,
+            out_dir,
+            prefix,
+            ies_num_reals,
+            int(random_seed) + 1000003,
+        )
+        pst.pestpp_options["ies_observation_ensemble"] = os.path.basename(noise_path)
+        pst.pestpp_options["ies_no_noise"] = False
+    pst.write(str(pst_path))
+    return {
+        "bad_phi_sigma": sigma_value,
+        "relative_phi_screening": sigma_value < 1.0e299,
+        "observation_noise": bool(observation_noise),
+        "observation_ensemble": os.path.basename(noise_path) if noise_path else "",
+        "observation_noise_metadata": os.path.basename(noise_meta_path) if noise_meta_path else "",
+        "observation_noise_seed": noise_meta.get("seed") if noise_meta else None,
+    }
 
 ECO_BOUNDS_EGGPLANT = {
     "PL-EM": (3.0, 12.0),
@@ -2208,10 +2329,26 @@ def _load_init_overrides(csv_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", default="tomato_full")
+    parser.add_argument(
+        "--design-config",
+        default=None,
+        help="Approved staged design JSON; required together with --stage for stage-aware calibration",
+    )
+    parser.add_argument(
+        "--stage",
+        default=None,
+        help="Design stage (S1/S2/S3/S4); controls released parameters and Phi observations",
+    )
     parser.add_argument("--prefix", default=None)
     parser.add_argument("--noptmax", type=int, default=5)
     parser.add_argument("--ies-num-reals", type=int, default=50)
     parser.add_argument("--random-seed", type=int, default=20260715)
+    parser.add_argument(
+        "--bad-phi-sigma",
+        type=float,
+        default=None,
+        help="Relative high-Phi screening threshold; staged runs default to disabled (1e300); use 2.0 only for D0 diagnostics",
+    )
     parser.add_argument("--batch", default=os.path.join(WORKSPACE, "DSSBatch.v48"))
     parser.add_argument(
         "--input-dir",
@@ -2323,6 +2460,28 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    if bool(args.design_config) != bool(args.stage):
+        parser.error("--design-config and --stage must be supplied together")
+    design_spec = None
+    if args.design_config:
+        try:
+            design_spec = load_design_config(args.design_config, args.stage)
+        except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
+            parser.error(f"invalid --design-config: {exc}")
+        if (args.mode or "").strip().lower() != "eggplant_stage2":
+            parser.error("--design-config is currently supported only with --mode eggplant_stage2")
+
+    # Formal staged calibration defaults to retaining all finite, successful
+    # realizations. Legacy non-staged modes preserve the historical 2-sigma
+    # behavior unless the caller overrides it explicitly.
+    bad_phi_sigma = (
+        float(args.bad_phi_sigma)
+        if args.bad_phi_sigma is not None
+        else (1.0e300 if design_spec is not None else 2.0)
+    )
+    if not math.isfinite(bad_phi_sigma) or bad_phi_sigma <= 0:
+        parser.error("--bad-phi-sigma must be positive and finite; use 1e300 to disable relative screening")
+
     if args.input_dir:
         USER_INPUT_DIR = str(Path(args.input_dir).expanduser().resolve())
         if not Path(USER_INPUT_DIR).is_dir():
@@ -2414,6 +2573,8 @@ if __name__ == "__main__":
     critical: Set[str] = set()
     group_sigmas: Optional[Dict[str, float]] = None
     extra_allowed: Optional[Set[str]] = None
+    design_observation_report = {}
+    ies_contract = {}
 
     if mode == "eggplant_pheno":
         prefix = args.prefix or "eggplant_pheno"
@@ -3135,6 +3296,18 @@ if __name__ == "__main__":
     if args.fixed_from:
         params = apply_fixed_params_csv(params, args.fixed_from)
 
+    if design_spec is not None:
+        # Apply the approved stage after bounds/review overlays so the PST
+        # cannot silently release parameters outside the design table.
+        params = apply_parameter_stage(params, design_spec)
+        if stage2_outputs is not None:
+            stage2_outputs, design_observation_report = apply_observation_stage(
+                stage2_outputs,
+                design_spec,
+                _parse_batch_entries(args.batch),
+                eval_df=(_try_read_evaluate_out(evaluate_out_path) if os.path.isfile(evaluate_out_path) else None),
+            )
+
     if stage2_outputs is not None:
         create_ins_and_pst_multi(
             params,
@@ -3178,6 +3351,30 @@ if __name__ == "__main__":
             observation_policies=observation_policies,
         )
 
+    # Apply the explicit IES policy after either PST builder has written the
+    # control file. Staged runs always freeze sigma_eff-based observation noise;
+    # a finite --bad-phi-sigma is reserved for the D0 screening comparison.
+    ies_contract = _finalize_ies_contract(
+        os.path.join(out_dir, f"{prefix}.pst"),
+        out_dir=out_dir,
+        prefix=prefix,
+        ies_num_reals=args.ies_num_reals,
+        random_seed=args.random_seed,
+        bad_phi_sigma=bad_phi_sigma,
+        observation_noise=bool(design_spec is not None and observation_policies),
+    )
+
+    design_audit_path = ""
+    if design_spec is not None:
+        design_audit_path = str(
+            write_design_audit(
+                os.path.join(out_dir, f"{prefix}.pst"),
+                design_spec,
+                _parse_batch_entries(args.batch),
+                os.path.join(out_dir, "calibration_design_audit.csv"),
+            )
+        )
+
     # ── Generate run_manifest.yaml (Phase 1) ──
     git_info = git_metadata()
     manifest_path = _write_run_manifest(
@@ -3210,6 +3407,19 @@ if __name__ == "__main__":
         random_seed=args.random_seed,
         harvest_var=harvest_var,
         n_params=len(params),
+        design_config=(str(design_spec.path) if design_spec is not None else ""),
+        design_table_id=(design_spec.design_table_id if design_spec is not None else ""),
+        design_stage=(design_spec.stage if design_spec is not None else ""),
+        active_params=(list(design_spec.active_params) if design_spec is not None else []),
+        validation_split_id=(design_spec.validation_split_id if design_spec is not None else ""),
+        calibration_treatments=(sorted(design_spec.calibration_treatments) if design_spec is not None else []),
+        validation_treatments=(sorted(design_spec.validation_treatments) if design_spec is not None else []),
+        diagnostic_treatments=(sorted(design_spec.diagnostic_treatments) if design_spec is not None else []),
+        design_observation_report=design_observation_report,
+        design_diagnostic_outputs=(
+            design_spec.observation.get("diagnostic_outputs", {}) if design_spec is not None else {}
+        ),
+        design_audit_csv=design_audit_path,
         weight_policy_id=(POLICY_VERSION if observation_policies else WEIGHT_POLICY_ID),
         observation_policy_csv=(
             os.path.abspath(args.observation_policy_csv) if args.observation_policy_csv else ""
@@ -3219,6 +3429,12 @@ if __name__ == "__main__":
             if args.observation_policy_csv and os.path.isfile(args.observation_policy_csv)
             else ""
         ),
+        bad_phi_sigma=ies_contract.get("bad_phi_sigma"),
+        relative_phi_screening=ies_contract.get("relative_phi_screening"),
+        observation_noise_contract=ies_contract.get("observation_noise"),
+        observation_ensemble=ies_contract.get("observation_ensemble", ""),
+        observation_noise_metadata=ies_contract.get("observation_noise_metadata", ""),
+        observation_noise_seed=ies_contract.get("observation_noise_seed"),
         operator=os.environ.get("USERNAME", "unknown"),
         command_line=" ".join(sys.argv),
     )

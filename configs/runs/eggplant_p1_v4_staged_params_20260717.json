@@ -26,9 +26,10 @@
       "excluded_and_reason": "cumulative harvest is diagnostic only, does not re-enter Phi"
     },
     "S4_joint": {
-      "active_params": "subset of S1-S3 params that actually updated, showed no anomalous bounds, AND improved validation — at most 6",
+      "active_params": "approved explicit subset of S1-S3 params (at most 6), frozen before validation is opened",
       "primary_observations": "all calibration groups jointly",
-      "rule": "do not add new params based on SA ranking alone; drop params that only improve calibration but not validation"
+      "rule": "select only from calibration evidence (group Phi, bounds behaviour, deterministic calibration rerun); do not inspect validation until the parameter set is frozen",
+      "validation_visibility": "forbidden_until_frozen"
     }
   },
   "expansion_rule": "Each stage uses the previous stage's representative values as fixed baseline. If a param shows no stable update or only improves calibration without improving validation, it reverts to fixed. Parameter count is never expanded to compensate."

@@ -201,8 +201,14 @@ def apply_observation_policy(
             )
             sigma_source = str(policy.get("sigma_source") or "replicate_mean_model")
         elif explicit_sigma is not None:
-            raw_sigma = explicit_sigma
-            sigma_source = str(policy.get("sigma_source") or "policy_explicit")
+            # An explicit measurement sigma is still an observation-side
+            # uncertainty.  If the policy also declares model discrepancy or
+            # a floor, combine all three on the raw scale; previously those
+            # columns were silently ignored for explicit sigma rows.
+            model_sigma = _optional_float(policy, "model_sigma") or 0.0
+            sigma_floor = _optional_float(policy, "sigma_floor") or 0.0
+            raw_sigma = math.sqrt(explicit_sigma**2 + model_sigma**2 + sigma_floor**2)
+            sigma_source = str(policy.get("sigma_source") or "policy_explicit_model")
         else:
             current_sigma = record.get("sigma")
             if current_sigma is None or pd.isna(current_sigma):

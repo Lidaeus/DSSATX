@@ -1,0 +1,11 @@
+group,transform,offset,reference,sigma,sigma_source,model_sigma,sigma_floor,group_multiplier,n_eff,phi_role,note
+ADAPM,raw,0,1,25.0,assumption,2.0,1.0,1.0,,calibration,Phenology date residual in days
+LAIXM,raw,0,1,0.8,assumption,0.2,0.1,1.0,,calibration,LAI level on physical scale
+LAIDM,raw,0,1,2.0,assumption,0.5,0.2,1.0,,calibration,Leaf area increment/process observation
+LWADM,raw,0,1,150.0,assumption,20.0,10.0,1.0,,calibration,Leaf dry mass process observation
+SWADM,raw,0,1,200.0,assumption,25.0,10.0,1.0,,calibration,Stem dry mass process observation
+PWADM,raw,0,1,250.0,assumption,30.0,20.0,1.0,,calibration,Cumulative harvested dry/fresh matter at each harvest event
+PWAIM,raw,0,1,250.0,assumption,30.0,20.0,1.25,,calibration,Incremental harvest; modest predeclared up-weight
+HWAMM,raw,0,1,50.0,assumption,10.0,5.0,1.0,,diagnostic_only,Season-end aboveground biomass; excluded for continuous-harvest eggplant calibration
+HIAMM,raw,0,1,0.10,assumption,0.02,0.01,1.0,,sensitivity_only,Harvest index diagnostic only; not a calibration target for eggplant
+CNAMM,raw,0,1,25.0,assumption,5.0,2.0,1.0,,calibration,Plant nitrogen amount on the FileA scale (approximately kg N ha-1); not a percentage concentration

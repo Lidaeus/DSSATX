@@ -4,8 +4,9 @@ This module intentionally does not import a plotting library. Python owns data
 validation and conversion; R is the sole renderer for manuscript figures.
 
 Scientific-validation rule: a bundle is ``science_validated`` only when the
-upstream run manifest, the upstream quality report, and every supplied data
-table all agree on the same ``run_id`` and the quality report passes. A
+upstream run manifest, engineering quality report, calibration finalize
+artifact, and every supplied data table all agree on the same ``run_id`` and
+the finalize artifact explicitly grants science validation. A
 ``data_status`` string self-reported inside ``comparison.csv`` is *not*
 sufficient — writing that string into a CSV does not constitute research
 validation. The DEMO path (``--allow-unvalidated-demo``) bypasses this with a
@@ -105,6 +106,7 @@ def _resolve_upstream_validation(
     comparison: pd.DataFrame,
     run_manifest_path: Path | None,
     quality_report_path: Path | None,
+    calibration_finalize_path: Path | None,
     allow_unvalidated_demo: bool,
 ) -> tuple[bool, dict[str, Any]]:
     """Decide ``science_validated`` from upstream artifacts, not the CSV alone.
@@ -120,6 +122,7 @@ def _resolve_upstream_validation(
     provenance: dict[str, Any] = {
         "run_manifest": None,
         "quality_report": None,
+        "calibration_finalize": None,
     }
 
     # Mixed run_id inside the comparison table is always rejected, even in DEMO
@@ -138,10 +141,17 @@ def _resolve_upstream_validation(
     if allow_unvalidated_demo:
         return False, provenance
 
-    if run_manifest_path is None or quality_report_path is None:
+    if calibration_finalize_path is None and quality_report_path is not None:
+        candidates = (
+            quality_report_path.parent / "calibration_finalize.json",
+            quality_report_path.parent / "calibration_finalize" / "calibration_finalize.json",
+        )
+        calibration_finalize_path = next((path for path in candidates if path.is_file()), None)
+
+    if run_manifest_path is None or quality_report_path is None or calibration_finalize_path is None:
         raise ValueError(
-            "science_validated export requires both --run-manifest and "
-            "--quality-report from the same run; a data_status string in the "
+            "science_validated export requires --run-manifest, --quality-report "
+            "and calibration_finalize.json from the same run; a data_status string in the "
             "CSV is not sufficient. Use --allow-unvalidated-demo for a labelled "
             "layout preview."
         )
@@ -164,7 +174,10 @@ def _resolve_upstream_validation(
             f"quality_report run_id {report.run_id!r} != --run-id {run_id!r}; "
             "the quality report must come from the same run"
         )
-    report.require_pass()
+    if report.status == "fail" or not report.process_completed:
+        raise ValueError(
+            "engineering quality report is failed or incomplete; formal paper export is blocked"
+        )
     provenance["quality_report"] = {
         "path": str(quality_report_path),
         "sha256": _sha256(quality_report_path),
@@ -173,9 +186,30 @@ def _resolve_upstream_validation(
         "science_validated": report.science_validated,
     }
 
+    try:
+        finalize = json.loads(calibration_finalize_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"invalid calibration_finalize.json: {calibration_finalize_path}") from exc
+    finalize_case = str(finalize.get("case") or "")
+    if finalize_case and finalize_case != run_id:
+        raise ValueError(
+            f"calibration_finalize case {finalize_case!r} != --run-id {run_id!r}; "
+            "the finalize artifact must come from the same run"
+        )
+    if finalize.get("science_status") != "science_validated" or finalize.get("scientific_status") != "validated":
+        raise ValueError(
+            "calibration_finalize.json does not grant science_validated; "
+            "formal paper export is blocked"
+        )
+    provenance["calibration_finalize"] = {
+        "path": str(calibration_finalize_path),
+        "sha256": _sha256(calibration_finalize_path),
+        "science_status": finalize.get("science_status"),
+        "scientific_status": finalize.get("scientific_status"),
+    }
+
     validated = bool(
-        report.science_validated
-        and report.process_completed
+        report.process_completed
         and self_reported_validated
     )
     if report.science_validated and not self_reported_validated:
@@ -197,6 +231,7 @@ def export_bundle(
     treatment_metadata_csv: Path | None = None,
     run_manifest_path: Path | None = None,
     quality_report_path: Path | None = None,
+    calibration_finalize_path: Path | None = None,
     scenario_type: str | None = None,
     allow_unvalidated_demo: bool = False,
 ) -> Path:
@@ -218,6 +253,7 @@ def export_bundle(
         comparison=comparison,
         run_manifest_path=run_manifest_path,
         quality_report_path=quality_report_path,
+        calibration_finalize_path=calibration_finalize_path,
         allow_unvalidated_demo=allow_unvalidated_demo,
     )
     if not validated and not allow_unvalidated_demo:
@@ -313,6 +349,10 @@ def main(argv: list[str] | None = None) -> int:
         "--quality-report",
         help="quality_report.json from the same run; required for science_validated export",
     )
+    parser.add_argument(
+        "--calibration-finalize",
+        help="calibration_finalize.json from the same run; the sole science-validation authority",
+    )
     parser.add_argument("--out-dir", required=True)
     parser.add_argument(
         "--scenario-type",
@@ -334,7 +374,10 @@ def main(argv: list[str] | None = None) -> int:
     if not args.allow_unvalidated_demo:
         missing = [
             name
-            for name, value in (("--run-manifest", args.run_manifest), ("--quality-report", args.quality_report))
+            for name, value in (
+                ("--run-manifest", args.run_manifest),
+                ("--quality-report", args.quality_report),
+            )
             if not value
         ]
         if missing:
@@ -367,6 +410,9 @@ def main(argv: list[str] | None = None) -> int:
             ),
             run_manifest_path=Path(args.run_manifest) if args.run_manifest else None,
             quality_report_path=Path(args.quality_report) if args.quality_report else None,
+            calibration_finalize_path=(
+                Path(args.calibration_finalize) if args.calibration_finalize else None
+            ),
             scenario_type=args.scenario_type,
             allow_unvalidated_demo=args.allow_unvalidated_demo,
         )

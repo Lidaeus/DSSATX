@@ -9,7 +9,7 @@ Tomato_Cal 面向作物模型研究者，目标是在 Windows 环境中提供可
 - 代码已具备 DSSAT 运行、Morris/Sobol 分析、PEST++ IES 构建与结果整理的基础能力。
 - 历史运行只能证明流程曾执行，不能证明其科研结论有效；P0 质量门现已能主动拒绝这些退化结果。
 - 当前开发基线是 [产品定义与系统设计](项目重构规划.md)；详细风险和任务见 [P0 科研可信性修复开发计划](docs/P0_科研可信性修复开发计划.md)。
-- P0 已在 `codex/p0-research-credibility` 实施并通过微型数值验证；后续批准的显式 log/处理均值 sigma 也已完成真实 DSSAT/PEST 冒烟，详见 [P0 验证报告](docs/reports/P0_verification_report.md) 与 [Observation Policy 验证记录](docs/reports/observation_policy_verification.md)。已有历史 SA 排名、率定最优参数或不确定性结果仍不得用于论文结论。
+- P0/P2 可信性修复已接入当前构建器：S1 已完成工程闭环，S2 已完成观测噪声契约、先验覆盖预检和 no-cull 对照，但尚未科研验证；正式状态只由 `calibration_finalize/calibration_finalize.json` 决定，历史 SA/率定结果仍不得直接用于论文结论。
 - 科研图表已冻结为“双轨制”：Python 只做 SA/率定运行诊断与论文数据导出，未来可能进入论文的图全部由 R 绘制；完整 Fig. 1–6/Fig. S1–S8 规划见 [科研图表设计与开发计划](docs/科研图表设计与开发计划.md)。
 - P0 防退化加固已完成当前回归轮次。正式 Morris 已完成并通过跨 seed 稳定性门；推荐的16参数保守并集已经批准和哈希冻结。真实 `N=4` Sobol工程预检72/72成功，0模型失败，230项响应和bootstrap点估计复算均通过；小样本出现35项基础零方差和极端指数，明确不得解释。当前等待审批 `N=64 → 128 → 必要时256` 的正式自适应预算，详见 [P1-R5 Sobol预检报告](docs/reports/P1_R5_Sobol工程预检与正式预算.md)。
 
@@ -36,7 +36,7 @@ flowchart LR
     H --> I["论文图表与可复现成果包"]
 ```
 
-每个阶段都必须生成 `run_manifest` 和 `quality_report`。只有前一阶段质量门为 `pass`，下一阶段才可开始。
+每个阶段都必须生成 `run_manifest`、工程 `quality_report` 和（率定阶段）`calibration_finalize.json`。只有 finalize 明确授权，结果才可进入后验、验证或正式论文导出。
 
 ## 核心能力边界
 
@@ -48,7 +48,7 @@ flowchart LR
 | 参数率定 | 按物候、冠层/生长、产量等阶段进行 IES，控制维度和过拟合 |
 | 观测与权重 | 明确单位、误差标准差、变换、相关性和用途；PEST 权重语义正确 |
 | 不确定性 | 报告 IES 条件参数集合的近似后验特征，不夸大为严格贝叶斯后验 |
-| 异参同效 | 联合参数分布、相关性、聚类/代表解和预测等效性分析 |
+| 异参同效 | 条件参数集合、Spearman 相关、2–3 对代表解和预测等效性分析 |
 | 科研图表 | 矢量优先、色盲友好、灰度可辨、尺寸和字体可配置、图数一致 |
 
 ## 项目结构
@@ -109,10 +109,11 @@ Rscript paper/R/make_all.R `
   --allow-unvalidated-demo
 ```
 
-持久化 IES 运行必须再执行科学质量门：
+持久化 IES 运行必须先执行工程检查，再执行唯一 finalize 入口：
 
 ```powershell
 python tools/check_run_quality.py --run-dir workspace/runs/<run_id> --prefix <prefix>
+python -m src.calibration.finalize_calibration --run-dir workspace/runs/<run_id> --case <prefix>
 ```
 
 当前正式 `eggplant_v14_20260405` 冻结边界会被预检拒绝，这是预期行为；不得用 `--bounds-review-mode off` 绕过后开展正式计算。

@@ -34,7 +34,7 @@ def assess_ies_run(run_dir: str | Path, prefix: str) -> QualityReport:
     parameter_files = _iteration_files(directory, prefix, "par.csv")
     observation_files = _iteration_files(directory, prefix, "obs.csv")
     if not parameter_files:
-        report = QualityReport(run_type="ies", run_id=prefix)
+        report = QualityReport(run_type="ies", run_id=prefix, science_validation_mode="engineering_only")
         report.add("process_completed", False, "No parameter ensemble files were found")
         return report
 
@@ -47,7 +47,7 @@ def assess_ies_run(run_dir: str | Path, prefix: str) -> QualityReport:
     if observation_path is None and observation_files:
         observation_path = observation_files[max(observation_files)]
     if observation_path is None:
-        report = QualityReport(run_type="ies", run_id=prefix)
+        report = QualityReport(run_type="ies", run_id=prefix, science_validation_mode="engineering_only")
         report.add("process_completed", False, "No simulated-observation ensemble files were found")
         return report
     observations = _read_ensemble(observation_path)
@@ -70,6 +70,7 @@ def assess_ies_run(run_dir: str | Path, prefix: str) -> QualityReport:
         phi_values=phi_values,
         run_id=prefix,
     )
+    report.science_validation_mode = "engineering_only"
     report.add(
         "ies_iteration_progress",
         last_iteration > first_iteration,

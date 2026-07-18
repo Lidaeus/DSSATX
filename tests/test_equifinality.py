@@ -88,10 +88,20 @@ def synthetic_ensemble(tmp_path: Path):
         phi_rows.append(row)
     pd.DataFrame(phi_rows).to_csv(tmp_path / f"{prefix}.phi.actual.csv", index=False)
 
-    # Write run_status.json so upstream binding (R0.1) finds "validated".
+    # The finalize artifact is the sole authority for a validated calibration.
     import json
     (tmp_path / "run_status.json").write_text(
         json.dumps({"status": "completed", "scientific_status": "validated"}), encoding="utf-8"
+    )
+    finalize_dir = tmp_path / "calibration_finalize"
+    finalize_dir.mkdir()
+    (finalize_dir / "calibration_finalize.json").write_text(
+        json.dumps({
+            "case": prefix,
+            "engineering_status": "engineering_validated",
+            "science_status": "science_validated",
+            "scientific_status": "validated",
+        }), encoding="utf-8"
     )
     return tmp_path, prefix
 
@@ -220,6 +230,16 @@ def test_r0_equifinality_not_validated_when_upstream_ies_fails(tmp_path):
     (tmp_path / "run_status.json").write_text(
         json.dumps({"status": "completed", "scientific_status": "failed"}), encoding="utf-8"
     )
+    finalize_dir = tmp_path / "calibration_finalize"
+    finalize_dir.mkdir()
+    (finalize_dir / "calibration_finalize.json").write_text(
+        json.dumps({
+            "case": prefix,
+            "engineering_status": "engineering_failed",
+            "science_status": "science_blocked",
+            "scientific_status": "not_assessed",
+        }), encoding="utf-8"
+    )
     report, artifacts = assess_equifinality(tmp_path, prefix)
     # Upstream is failed → equifinality cannot be science_validated.
     assert artifacts["upstream_status"] == "failed"
@@ -247,4 +267,3 @@ def test_r0_quality_gate_rejects_low_realization_retention(tmp_path):
     # The realization-alignment or retention check should fail.
     failed = [c.check_id for c in report.checks if c.status == "fail"]
     assert any("realization" in f or "alignment" in f for f in failed)
-

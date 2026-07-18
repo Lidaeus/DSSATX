@@ -35,6 +35,10 @@ class QualityReport:
     run_type: str
     run_id: str = ""
     checks: list[QualityCheck] = field(default_factory=list)
+    # Calibration IES reports are engineering audits.  They may contain only
+    # operational checks and must never self-promote to scientific validity;
+    # ``calibration_finalize.json`` is the sole authority for that decision.
+    science_validation_mode: str = "quality_checks"
     generated_at: str = field(
         default_factory=lambda: datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     )
@@ -55,6 +59,8 @@ class QualityReport:
 
     @property
     def science_validated(self) -> bool:
+        if self.science_validation_mode == "engineering_only":
+            return False
         return self.process_completed and self.status == "pass"
 
     def add(
@@ -78,6 +84,7 @@ class QualityReport:
             "generated_at": self.generated_at,
             "process_completed": self.process_completed,
             "science_validated": self.science_validated,
+            "science_validation_mode": self.science_validation_mode,
             "status": self.status,
             "checks": [asdict(check) for check in self.checks],
         }
@@ -152,6 +159,7 @@ def load_quality_report(path: str | Path) -> QualityReport:
         run_type=run_type,
         run_id=run_id,
         checks=checks,
+        science_validation_mode=str(data.get("science_validation_mode") or "quality_checks"),
         generated_at=str(data.get("generated_at") or ""),
     )
 
