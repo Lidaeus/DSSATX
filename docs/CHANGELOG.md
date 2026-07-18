@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-19（T4.2 候选解预测复跑完成）
+
+- T4.2 候选解预测复跑三阶段（A 代码+测试 / B 真实复跑 / C 文档）全部完成。新建 `src/reporting/candidate_predictions.py`（单入口 `build_candidate_prediction_bundle` + CLI）：manifest 链哈希校验 → 候选 realization 提取/参数导出（含 S4 固定的 XFRT/XFINT）→ ≤6 次隔离确定性 DSSAT 复跑（`src/calibration/run_dssat.py` 脚本路径调用）→ 复用 `validation_metrics.build_comparison_from_rerun` → 冻结 prediction distance（A/B 一对一对齐、raw-scale sigma_eff 不含 group_multiplier、RMS 分层、变量+角色双等权、只用 validation/diagnostic）→ 分类（tooling_demo 下只输出 demo_*/incomplete）→ 17 artifacts SHA-256 manifest。从干净 `b263159`（git_dirty=false）重跑：6 realization 全部 returncode=0，3 对候选（4/16、9/20、2/32）全 `demo_prediction_similar`（prediction_distance 0.13/0.016/0.023，远低于 1.0σ 阈值）。
+- 从 `validation_metrics.py` 提取 `build_comparison_from_rerun()` 公共函数，代表解与候选解共用同一 comparison 定义（交接 §6）。
+- 新增 `tests/test_candidate_predictions.py`（12 测试，覆盖交接 §9 全部 11 项 + sigma 手算）：hash 篡改/缺 demo flag/realization 缺失重复非有限/去重/A-B 错配/calibration 排除/手算回归/sigma 缺失非正非 raw/失败 incomplete/demo 禁科学标签/manifest POSIX+哈希复核。全套 211 passed/2 skipped。
+- 修复 `_default_dssat_runner` 调用方式：`-m src.calibration.run_dssat` 在隔离 cwd 下找不到 src 包，改用脚本绝对路径（与 `sa_model.py` 同模式）。
+- 全程 `tooling_demo`/`science_pending`，未读 calibration Phi，未运行新 IES/SA，未改 bounds/sigma/split，未输出科学标签。结果不建立功能异参同效。证据见 `docs/reports/P2_MVP_T4_2_运行审计_20260719.md`。
+
 ## 2026-07-18（T3.1 review 与 T4 最小接口）
 
 - 复核 T3.1：干净 S4 的 16 项核心产物哈希、40/40 成员和工程状态均通过；修正审计记录中末轮 mean Phi，将误写的 `760.956` 更正为文件实值 `791.927`。
