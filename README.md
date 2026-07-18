@@ -109,7 +109,7 @@ Rscript paper/R/make_all.R `
   --allow-unvalidated-demo
 ```
 
-持久化 IES 运行必须先执行工程检查，再执行唯一 finalize 入口：
+持久化 IES 运行先执行工程检查（该命令只判断工程状态，不授权科研有效），再执行唯一 finalize 入口：
 
 ```powershell
 python tools/check_run_quality.py --run-dir workspace/runs/<run_id> --prefix <prefix>

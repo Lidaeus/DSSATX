@@ -10,11 +10,15 @@ from src.calibration.design_config import (
     apply_parameter_stage,
     load_design_config,
 )
-from src.calibration.finalize_calibration import finalize_calibration
+from src.calibration.finalize_calibration import _science_evidence, finalize_calibration
 from src.calibration.observation_policy import apply_observation_policy
 from src.calibration.prior_coverage import summarize_prior_coverage
 from tools.package_sa_evidence import package_sa_evidence
-from src.calibration.build_pest import _finalize_ies_contract, _write_observation_noise_ensemble
+from src.calibration.build_pest import (
+    _finalize_ies_contract,
+    _fixed_from_provenance,
+    _write_observation_noise_ensemble,
+)
 
 
 DESIGN = Path("configs/runs/eggplant_p1_v4_design_20260717.json")
@@ -170,6 +174,26 @@ def test_unknown_treatment_role_is_rejected_before_phi():
         apply_observation_stage(outputs, spec, [{"run": 1, "tn": 2}])
 
 
+def test_fixed_from_requires_upstream_run_and_finalize_provenance(tmp_path):
+    source = tmp_path / "s1_representative_params.csv"
+    source.write_text("name,value\nEM-FL,20\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="run_manifest.yaml"):
+        _fixed_from_provenance([str(source)])
+    (tmp_path / "run_manifest.yaml").write_text(
+        'run_id: "s1_case"\n', encoding="utf-8"
+    )
+    finalize_dir = tmp_path / "calibration_finalize"
+    finalize_dir.mkdir()
+    (finalize_dir / "calibration_finalize.json").write_text(json.dumps({
+        "engineering_status": "engineering_validated",
+        "science_status": "science_pending",
+    }), encoding="utf-8")
+    records = _fixed_from_provenance([str(source)])
+    assert records[0]["run_id"] == "s1_case"
+    assert records[0]["science_status"] == "science_pending"
+    assert len(records[0]["sha256"]) == 64
+
+
 def test_explicit_sigma_combines_model_discrepancy_and_floor():
     obs = pd.DataFrame([{
         "obsnme": "x", "obsval": 10.0, "raw_obsval": 10.0, "weight": 1.0,
@@ -212,7 +236,19 @@ def test_tooling_development_finalize_can_never_promote(tmp_path):
     }), encoding="utf-8")
     payload = finalize_calibration(tmp_path, "case")
     assert payload["science_status"] == "science_pending"
-    assert payload["science_failures"] == ["tooling_development_run"]
+    assert payload["science_failures"] == ["science_promotion_disabled_until_machine_evidence"]
+
+
+def test_science_evidence_booleans_cannot_promote_automatically(tmp_path):
+    (tmp_path / "science_validation_manifest.json").write_text(json.dumps({
+        "group_phi_checked": True,
+        "deterministic_rerun_checked": True,
+        "validation_split_frozen": True,
+        "source_hashes_bound": True,
+    }), encoding="utf-8")
+    ok, failures = _science_evidence(tmp_path)
+    assert ok is False
+    assert failures == ["science_promotion_disabled_until_machine_evidence"]
 
 
 def test_sa_evidence_packager_hashes_existing_outputs(tmp_path):

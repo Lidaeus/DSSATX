@@ -29,6 +29,13 @@ ENGINEERING_CHECKS = {
     "ies_member_status_table",
 }
 
+# During P2-MVP tooling development there are no machine-generated validation
+# metrics, group-Phi audit artifacts, or deterministic rerun certificates that
+# can authorize a scientific claim.  Keep this hard-off until a reviewed
+# implementation replaces the guard; user-provided booleans alone are never
+# sufficient evidence.
+SCIENCE_PROMOTION_ENABLED = False
+
 
 def _engineering_status(report: Any) -> tuple[str, list[str]]:
     failed = [c.check_id for c in report.checks if c.check_id in ENGINEERING_CHECKS and c.status == "fail"]
@@ -42,6 +49,8 @@ def _science_evidence(run_dir: Path) -> tuple[bool, list[str]]:
     review step must write ``science_validation_manifest.json`` with all four
     prerequisites true and the split/design hashes bound to the run.
     """
+    if not SCIENCE_PROMOTION_ENABLED:
+        return False, ["science_promotion_disabled_until_machine_evidence"]
     manifest_path = run_dir / "run_manifest.yaml"
     approval_scope = (
         read_flat_run_manifest_field(manifest_path, "approval_scope")

@@ -47,6 +47,7 @@ from src.common.input_manifest import (
 )
 from src.common.param_registry import assert_valid_frozen_bounds
 from src.common.project import PROJECT_ROOT, WORKSPACE_DIR, git_metadata, resolve_path, sha256_file
+from src.common.quality import read_flat_run_manifest_field
 
 WORKSPACE = str(WORKSPACE_DIR)
 CUL_BASE_FILE = str(PROJECT_ROOT / "data" / "templates" / "genotype" / "TMGRO048.CUL.base")
@@ -114,6 +115,46 @@ def _write_run_manifest(out_dir, **kwargs):
             else:
                 f.write(key + ': "' + str(val) + '"\n')
     return path
+
+
+def _fixed_from_provenance(paths: list[str] | None) -> list[dict[str, str]]:
+    """Bind inherited parameters to an upstream run and its finalize state."""
+    records: list[dict[str, str]] = []
+    for raw in paths or []:
+        source = Path(raw).expanduser().resolve()
+        if not source.is_file():
+            raise FileNotFoundError(f"--fixed-from file not found: {source}")
+        run_dir = source.parent
+        manifest = run_dir / "run_manifest.yaml"
+        finalize = run_dir / "calibration_finalize" / "calibration_finalize.json"
+        if not manifest.is_file() or not finalize.is_file():
+            raise ValueError(
+                f"--fixed-from {source} must come from a run with run_manifest.yaml "
+                "and calibration_finalize/calibration_finalize.json"
+            )
+        try:
+            finalize_payload = json.loads(finalize.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise ValueError(f"invalid upstream finalize artifact: {finalize}") from exc
+        run_id = read_flat_run_manifest_field(manifest, "run_id") or run_dir.name
+        engineering_status = str(finalize_payload.get("engineering_status") or "")
+        science_status = str(finalize_payload.get("science_status") or "")
+        if engineering_status != "engineering_validated":
+            raise ValueError(
+                f"--fixed-from upstream run {run_id} is not engineering_validated: {engineering_status or 'missing'}"
+            )
+        records.append({
+            "path": str(source),
+            "sha256": sha256_file(source),
+            "run_id": str(run_id),
+            "engineering_status": engineering_status,
+            "science_status": science_status,
+            "run_manifest": str(manifest),
+            "run_manifest_sha256": sha256_file(manifest),
+            "finalize": str(finalize),
+            "finalize_sha256": sha256_file(finalize),
+        })
+    return records
 
 
 def _resolve_sigma(group_sigmas, obgnme, obs_col):
@@ -2466,6 +2507,7 @@ if __name__ == "__main__":
     if bool(args.design_config) != bool(args.stage):
         parser.error("--design-config and --stage must be supplied together")
     design_spec = None
+    fixed_from_provenance: list[dict[str, str]] = []
     if args.design_config:
         try:
             design_spec = load_design_config(args.design_config, args.stage)
@@ -2486,6 +2528,11 @@ if __name__ == "__main__":
             parser.error(
                 "staged calibration requires " + ", ".join(missing_contract)
             )
+        if design_spec.stage in {"S2", "S3", "S4"}:
+            try:
+                fixed_from_provenance = _fixed_from_provenance(args.fixed_from)
+            except (FileNotFoundError, ValueError) as exc:
+                parser.error(str(exc))
 
     # Formal staged calibration defaults to retaining all finite, successful
     # realizations. Legacy non-staged modes preserve the historical 2-sigma
@@ -3465,6 +3512,11 @@ if __name__ == "__main__":
             for p in (args.fixed_from or [])
             if Path(p).expanduser().is_file()
         ],
+        fixed_from_upstream_run_ids=[item["run_id"] for item in fixed_from_provenance],
+        fixed_from_upstream_engineering_status=[item["engineering_status"] for item in fixed_from_provenance],
+        fixed_from_upstream_science_status=[item["science_status"] for item in fixed_from_provenance],
+        fixed_from_upstream_manifest_sha256=[item["run_manifest_sha256"] for item in fixed_from_provenance],
+        fixed_from_upstream_finalize_sha256=[item["finalize_sha256"] for item in fixed_from_provenance],
         operator=os.environ.get("USERNAME", "unknown"),
         command_line=" ".join(sys.argv),
     )
