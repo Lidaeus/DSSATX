@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-07-18（T3.1 review 与 T4 最小接口）
+
+- 复核 T3.1：干净 S4 的 16 项核心产物哈希、40/40 成员和工程状态均通过；修正审计记录中末轮 mean Phi，将误写的 `760.956` 更正为文件实值 `791.927`。
+- artifact manifest 路径统一写为 POSIX 相对路径，并新增下游校验器；缺失、重复、越界或 SHA-256 不匹配的产物在 validation/posterior 读取前硬失败。
+- 新增 `src.reporting.validation_metrics`：只从冻结输入包和代表确定性复跑读取数据，按 calibration/validation/diagnostic 完整处理角色输出 canonical `comparison.csv` 与逐角色逐变量 RMSE/MAE/bias；`science_pending` 运行必须显式使用 demo 门。
+- 新增 `src.reporting.posterior_summary`：稳定入口只输出全部可调参数的边际收缩/边界诊断、Spearman 相关和最多 3 对候选解；不把 PCA/VIF/聚类纳入 MVP，不在 prediction distance 缺失时称为功能异参同效。
+
 ## 2026-07-18（T3 staged run）
 
 - T3 staged calibration 四阶段（S1→S2→S3→S4）全部 `engineering_validated`，继承链完整：S1（20/2, ADAP）→ S2（30/2, +4N, LAI/生物量/氮）→ S3（30/2, +XFRT/XFINT, PWAI 采收）→ S4（40/2, 联合 6 参数）。Phi 分别收敛到 0.81/2822/159/792；每阶段生成中位数代表参数、确定性复跑（LAID/PWAI）和完整 manifest/哈希。全程 `approval_scope=tooling_development`、`science_pending`，未读 validation。证据见 `docs/reports/P2_MVP_T3_staged_run_20260718.md`。

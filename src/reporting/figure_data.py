@@ -65,6 +65,9 @@ TREATMENT_METADATA_COLUMNS = [
 
 
 VARIABLE_SPECS: dict[str, dict[str, str]] = {
+    "ADAP": {"label": "Anthesis date", "unit": "days after planting", "domain": "phenology"},
+    "LAIX": {"label": "Maximum leaf area index", "unit": "m² m⁻²", "domain": "canopy"},
+    "CNAM": {"label": "Canopy nitrogen at maturity", "unit": "kg N ha⁻¹", "domain": "nitrogen"},
     "LAID": {"label": "Leaf area index", "unit": "m² m⁻²", "domain": "canopy"},
     "LWAD": {"label": "Leaf dry mass", "unit": "kg ha⁻¹", "domain": "biomass"},
     "SWAD": {"label": "Stem dry mass", "unit": "kg ha⁻¹", "domain": "biomass"},
