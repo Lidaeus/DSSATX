@@ -219,6 +219,40 @@ def _harvest_records(
     return records
 
 
+def build_comparison_from_rerun(
+    rerun_dir: str | Path,
+    *,
+    case: str,
+    data_status: str,
+    roles: dict[int, str],
+    tmt_path: str | Path,
+    entries: list[dict[str, Any]],
+) -> pd.DataFrame:
+    """Build the canonical comparison table from one deterministic-rerun directory.
+
+    Shared by the representative-solution validation bundle and by candidate-
+    solution prediction comparison. Reads Evaluate.OUT / PlantGro.OUT /
+    FreshWt.OUT under ``rerun_dir`` plus the frozen observed ``.TMT`` and batch
+    entries, applies the role map, and returns a validated comparison table.
+    Both callers therefore use the same parsing and alignment definition rather
+    than a second parser implementation.
+    """
+    rerun_dir = Path(rerun_dir)
+    records: list[dict[str, Any]] = []
+    records.extend(_joint_records(
+        rerun_dir / "Evaluate.OUT", case=case, data_status=data_status, roles=roles
+    ))
+    records.extend(_process_records(
+        Path(tmt_path), rerun_dir / "PlantGro.OUT", entries,
+        case=case, data_status=data_status, roles=roles,
+    ))
+    records.extend(_harvest_records(
+        Path(tmt_path), rerun_dir / "FreshWt.OUT", entries,
+        case=case, data_status=data_status, roles=roles,
+    ))
+    return validate_comparison_table(pd.DataFrame(records))
+
+
 def summarize_validation_metrics(comparison: pd.DataFrame) -> pd.DataFrame:
     """Compute metrics only within a role-variable-unit stratum."""
     rows: list[dict[str, Any]] = []
@@ -304,19 +338,10 @@ def build_validation_bundle(
         raise FileNotFoundError(f"frozen observed TMT file not found: {tmt_path}")
     rerun = run_dir / "representative_deterministic_rerun"
     roles = _role_lookup(design)
-    records = []
-    records.extend(_joint_records(
-        rerun / "Evaluate.OUT", case=case, data_status=data_status, roles=roles
-    ))
-    records.extend(_process_records(
-        tmt_path, rerun / "PlantGro.OUT", entries,
-        case=case, data_status=data_status, roles=roles,
-    ))
-    records.extend(_harvest_records(
-        tmt_path, rerun / "FreshWt.OUT", entries,
-        case=case, data_status=data_status, roles=roles,
-    ))
-    comparison = validate_comparison_table(pd.DataFrame(records))
+    comparison = build_comparison_from_rerun(
+        rerun, case=case, data_status=data_status, roles=roles,
+        tmt_path=tmt_path, entries=entries,
+    )
     metrics = summarize_validation_metrics(comparison)
 
     out_dir.mkdir(parents=True, exist_ok=True)
