@@ -95,7 +95,7 @@ def _make_minimal_run_dir(tmp_path: Path, *, case: str = "s4", reals: int = 4) -
     return run_dir
 
 
-def _write_run_manifest(run_dir: Path, *, case: str, input_dir: Path, design_path: Path, split_path: Path, batch_path: Path) -> None:
+def _write_run_manifest(run_dir: Path, *, case: str, input_dir: Path, design_path: Path, split_path: Path, batch_path: Path, policy_path: Path, harvest_var: str = "CHPDT") -> None:
     from src.common.quality import serialize_manifest_scalar
     lines = [
         f"run_id: {serialize_manifest_scalar(case)}",
@@ -109,6 +109,9 @@ def _write_run_manifest(run_dir: Path, *, case: str, input_dir: Path, design_pat
         f"design_config_sha256: {serialize_manifest_scalar(cp.sha256_file(design_path))}",
         f"validation_split_sha256: {serialize_manifest_scalar(cp.sha256_file(split_path))}",
         f"batch_sha256: {serialize_manifest_scalar(cp.sha256_file(batch_path))}",
+        f"observation_policy_csv: {serialize_manifest_scalar(str(policy_path))}",
+        f"observation_policy_sha256: {serialize_manifest_scalar(cp.sha256_file(policy_path))}",
+        f"harvest_var: {serialize_manifest_scalar(harvest_var)}",
     ]
     (run_dir / "run_manifest.yaml").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -132,7 +135,8 @@ def _write_input_bundle(tmp_path: Path) -> Path:
     return bundle
 
 
-def _write_posterior_manifest(posterior_dir: Path, *, case: str, pairs_df: pd.DataFrame) -> Path:
+def _write_posterior_manifest(posterior_dir: Path, *, case: str, pairs_df: pd.DataFrame,
+                              finalize_sha: str, artifact_manifest_sha: str) -> Path:
     posterior_dir.mkdir(parents=True, exist_ok=True)
     pairs_path = posterior_dir / "candidate_pairs.csv"
     pairs_df.to_csv(pairs_path, index=False, encoding="utf-8")
@@ -146,7 +150,11 @@ def _write_posterior_manifest(posterior_dir: Path, *, case: str, pairs_df: pd.Da
     manifest = {
         "schema_version": 1, "run_id": case, "data_status": "tooling_demo",
         "candidate_pair_count": len(pairs_df), "candidate_pair_status": "prediction_distance_pending",
-        "upstream": {}, "artifacts": artifacts,
+        "upstream": {
+            "calibration_finalize_sha256": finalize_sha,
+            "calibration_artifacts_manifest_sha256": artifact_manifest_sha,
+        },
+        "artifacts": artifacts,
     }
     path = posterior_dir / "posterior_results_manifest.json"
     path.write_text(json.dumps(manifest), encoding="utf-8")
@@ -207,11 +215,11 @@ def _build_full_context(tmp_path: Path, *, case: str = "s4", pairs: list[tuple[i
     # to write it again. build_comparison_from_rerun is monkeypatched per-test
     # so the TMT parsing path is not exercised.
 
-    _write_run_manifest(run_dir, case=case, input_dir=input_dir, design_path=design_path,
-                        split_path=split_path, batch_path=batch_path)
-
     policy_path = tmp_path / "policy.csv"
     _write_policy(policy_path)
+
+    _write_run_manifest(run_dir, case=case, input_dir=input_dir, design_path=design_path,
+                        split_path=split_path, batch_path=batch_path, policy_path=policy_path)
 
     if pairs is None:
         pairs = [(0, 1), (2, 3)]
@@ -222,7 +230,12 @@ def _build_full_context(tmp_path: Path, *, case: str = "s4", pairs: list[tuple[i
          "prediction_distance": "", "classification": "candidate_pair_prediction_pending"}
         for i, (a, b) in enumerate(pairs)
     ])
-    posterior_manifest = _write_posterior_manifest(run_dir / "t4_posterior_demo", case=case, pairs_df=pairs_df)
+    finalize_sha = cp.sha256_file(run_dir / "calibration_finalize" / "calibration_finalize.json")
+    artifact_manifest_sha = cp.sha256_file(run_dir / "calibration_finalize" / "calibration_artifacts_manifest.json")
+    posterior_manifest = _write_posterior_manifest(
+        run_dir / "t4_posterior_demo", case=case, pairs_df=pairs_df,
+        finalize_sha=finalize_sha, artifact_manifest_sha=artifact_manifest_sha,
+    )
 
     return {
         "run_dir": run_dir, "case": case, "input_dir": input_dir,
@@ -362,7 +375,7 @@ def test_t42a_sigma_rejects_missing_nonpositive_or_nonraw():
         encoding="utf-8",
     )
     try:
-        with pytest.raises(ValueError, match="non-positive"):
+        with pytest.raises(ValueError, match="invalid sigma=0.0"):
             cp._sigma_eff_map(bad_policy)
     finally:
         bad_policy.unlink()
@@ -538,3 +551,219 @@ def test_t42a_manifest_paths_posix_relative_and_hashes_verifiable(tmp_path, monk
         assert not Path(rel).is_absolute()
         actual = cp.sha256_file(out_dir / rel)
         assert actual == art["sha256"], f"hash mismatch for {rel}"
+
+
+# ---------------------------------------------------------------------------
+# T4.2.1-A contract close-out tests (review P1/P2 findings, 7 items)
+# ---------------------------------------------------------------------------
+
+def test_t421_policy_cli_must_hash_match_frozen(tmp_path, monkeypatch):
+    """[P1] A CLI policy whose hash differs from the S4-frozen one fails; the
+    default (no CLI policy) uses the frozen bytes."""
+    ctx = _build_full_context(tmp_path, pairs=[(0, 1)])
+    comp = _comparison_frame([
+        {"dataset_role": "validation", "variable": "LAIX", "treatment": 5, "simulated": 1.0},
+        {"dataset_role": "diagnostic", "variable": "ADAP", "treatment": 9, "simulated": 1.0},
+    ])
+    monkeypatch.setattr(cp, "build_comparison_from_rerun", lambda rerun_dir, **kw: comp)
+
+    def _runner(**kw):
+        for name in cp.REQUIRED_RERUN_OUTPUTS:
+            (kw["work_dir"] / name).write_text("x\n", encoding="utf-8")
+        return 0
+
+    # Default: no observation_policy_csv -> uses frozen policy, succeeds.
+    out1 = tmp_path / "out_default"
+    cp.build_candidate_prediction_bundle(
+        run_dir=ctx["run_dir"], case=ctx["case"],
+        posterior_manifest=ctx["posterior_manifest"], out_dir=out1,
+        allow_unvalidated_demo=True, dssat_runner=_runner,
+    )
+    assert (out1 / "candidate_prediction_manifest.json").is_file()
+
+    # A different policy file (hash mismatch) must fail before any run.
+    bad_policy = tmp_path / "bad_policy.csv"
+    bad_policy.write_text(
+        "group,transform,offset,reference,sigma,sigma_source,model_sigma,sigma_floor,group_multiplier\n"
+        "ADAPM,raw,0,1,999.0,assumption,2.0,1.0,1.0\n",  # different sigma -> different hash
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="does not match the S4-frozen observation policy hash"):
+        cp.build_candidate_prediction_bundle(
+            run_dir=ctx["run_dir"], case=ctx["case"],
+            posterior_manifest=ctx["posterior_manifest"], out_dir=tmp_path / "out_bad",
+            observation_policy_csv=bad_policy,
+            allow_unvalidated_demo=True, dssat_runner=_runner,
+        )
+
+
+def test_t421_harvest_var_mismatch_rejected(tmp_path, monkeypatch):
+    """[P2] --harvest-var must equal the S4-frozen value."""
+    ctx = _build_full_context(tmp_path, pairs=[(0, 1)])
+    monkeypatch.setattr(cp, "build_comparison_from_rerun", lambda rerun_dir, **kw: _comparison_frame([]))
+
+    def _runner(**kw):
+        return 0
+
+    with pytest.raises(ValueError, match="does not match the S4-frozen"):
+        cp.build_candidate_prediction_bundle(
+            run_dir=ctx["run_dir"], case=ctx["case"],
+            posterior_manifest=ctx["posterior_manifest"], out_dir=tmp_path / "out",
+            harvest_var="FWAG",  # frozen is CHPDT
+            allow_unvalidated_demo=True, dssat_runner=_runner,
+        )
+
+
+def test_t421_posterior_upstream_hash_stale_rejected(tmp_path, monkeypatch):
+    """[P1] A posterior whose recorded finalize/artifact hash disagrees with
+    the current S4 must fail (it belongs to a different calibration)."""
+    ctx = _build_full_context(tmp_path, pairs=[(0, 1)])
+    monkeypatch.setattr(cp, "build_comparison_from_rerun", lambda rerun_dir, **kw: _comparison_frame([]))
+
+    def _runner(**kw):
+        return 0
+
+    # Tamper the posterior manifest's upstream finalize hash.
+    pm = json.loads(ctx["posterior_manifest"].read_text(encoding="utf-8"))
+    pm["upstream"]["calibration_finalize_sha256"] = "f" * 64
+    ctx["posterior_manifest"].write_text(json.dumps(pm), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="posterior upstream calibration_finalize_sha256"):
+        cp.build_candidate_prediction_bundle(
+            run_dir=ctx["run_dir"], case=ctx["case"],
+            posterior_manifest=ctx["posterior_manifest"], out_dir=tmp_path / "out",
+            allow_unvalidated_demo=True, dssat_runner=_runner,
+        )
+
+
+def test_t421_candidate_pairs_schema_strict():
+    """[P2] >3 pairs, >6 unique realizations, non-integer, self-pair, and
+    duplicate pair_id all fail the consumer-side schema gate."""
+    base = {"run_id": "s4", "data_status": "tooling_demo", "phi_a": 1.0, "phi_b": 1.0,
+            "phi_total": 1.0, "parameter_distance": 1.0, "prediction_distance": "",
+            "classification": "candidate_pair_prediction_pending"}
+    # 4 pairs -> too many
+    too_many = pd.DataFrame([dict(base, pair_id=i, real_a=i, real_b=i + 10) for i in range(1, 5)])
+    with pytest.raises(ValueError, match="1-3 pairs"):
+        cp._validate_candidate_pairs_schema(too_many)
+    # A valid 3-pair / 6-unique frame is accepted.
+    ok_six = pd.DataFrame([dict(base, pair_id=1, real_a=0, real_b=1),
+                           dict(base, pair_id=2, real_a=2, real_b=3),
+                           dict(base, pair_id=3, real_a=4, real_b=5)])
+    validated = cp._validate_candidate_pairs_schema(ok_six)
+    assert len(validated) == 3
+    # >6 unique is unreachable with <=3 pairs (max 6), so the pair-count gate
+    # is the effective ceiling; documented here for clarity.
+    # Non-integer realization 4.5 rejected
+    frac = pd.DataFrame([dict(base, pair_id=1, real_a=4.5, real_b=9)])
+    with pytest.raises(ValueError, match="non-negative integer"):
+        cp._validate_candidate_pairs_schema(frac)
+    # Self-pair
+    selfp = pd.DataFrame([dict(base, pair_id=1, real_a=4, real_b=4)])
+    with pytest.raises(ValueError, match="real_a == real_b"):
+        cp._validate_candidate_pairs_schema(selfp)
+    # Duplicate pair_id
+    dup = pd.DataFrame([dict(base, pair_id=1, real_a=0, real_b=1),
+                        dict(base, pair_id=1, real_a=2, real_b=3)])
+    with pytest.raises(ValueError, match="duplicate pair_id"):
+        cp._validate_candidate_pairs_schema(dup)
+
+
+def test_t421_nonempty_out_dir_rejected(tmp_path, monkeypatch):
+    """[P1] A non-empty output directory is refused (no --force), to avoid
+    inheriting stale outputs."""
+    ctx = _build_full_context(tmp_path, pairs=[(0, 1)])
+    out = tmp_path / "out"
+    out.mkdir()
+    (out / "stale.txt").write_text("x", encoding="utf-8")
+    monkeypatch.setattr(cp, "build_comparison_from_rerun", lambda rerun_dir, **kw: _comparison_frame([]))
+
+    def _runner(**kw):
+        return 0
+
+    with pytest.raises(ValueError, match="not empty"):
+        cp.build_candidate_prediction_bundle(
+            run_dir=ctx["run_dir"], case=ctx["case"],
+            posterior_manifest=ctx["posterior_manifest"], out_dir=out,
+            allow_unvalidated_demo=True, dssat_runner=_runner,
+        )
+
+
+def test_t421_nonzero_returncode_with_prestaged_outs_marks_incomplete(tmp_path, monkeypatch):
+    """[P1] A runner that returns non-zero while pre-existing OUT files are
+    present must NOT be mistaken for a successful run. Previously such a case
+    was accepted (missing_outputs=[]). Now the pair is prediction_incomplete."""
+    ctx = _build_full_context(tmp_path, pairs=[(0, 1)])
+
+    def _runner(**kw):
+        # Simulate the review's reproduction: pre-stage stale OUTs, return 1,
+        # write nothing new. The candidate must still be rejected because the
+        # returncode is non-zero, regardless of the stale files.
+        for name in cp.REQUIRED_RERUN_OUTPUTS:
+            (kw["work_dir"] / name).write_text("STALE\n", encoding="utf-8")
+        return 1
+
+    monkeypatch.setattr(cp, "build_comparison_from_rerun", lambda rerun_dir, **kw: _comparison_frame([]))
+    cp.build_candidate_prediction_bundle(
+        run_dir=ctx["run_dir"], case=ctx["case"],
+        posterior_manifest=ctx["posterior_manifest"], out_dir=tmp_path / "out",
+        allow_unvalidated_demo=True, dssat_runner=_runner,
+    )
+    pair_df = pd.read_csv(tmp_path / "out" / "candidate_pair_predictions.csv")
+    assert pair_df["classification"].iloc[0] == "prediction_incomplete"
+    runs = pd.read_csv(tmp_path / "out" / "candidate_runs.csv")
+    assert (runs["returncode"] == 1).all()
+
+
+def test_t421_comparison_includes_both_sides(tmp_path, monkeypatch):
+    """[P1] candidate_comparison.csv must include BOTH A and B realizations
+    with a candidate_side column, not just the A side."""
+    ctx = _build_full_context(tmp_path, pairs=[(0, 1)])
+    comp = _comparison_frame([
+        {"dataset_role": "validation", "variable": "LAIX", "treatment": 5, "simulated": 1.0},
+        {"dataset_role": "diagnostic", "variable": "ADAP", "treatment": 9, "simulated": 1.0},
+    ])
+    monkeypatch.setattr(cp, "build_comparison_from_rerun", lambda rerun_dir, **kw: comp)
+
+    def _runner(**kw):
+        for name in cp.REQUIRED_RERUN_OUTPUTS:
+            (kw["work_dir"] / name).write_text("x\n", encoding="utf-8")
+        return 0
+
+    cp.build_candidate_prediction_bundle(
+        run_dir=ctx["run_dir"], case=ctx["case"],
+        posterior_manifest=ctx["posterior_manifest"], out_dir=tmp_path / "out",
+        allow_unvalidated_demo=True, dssat_runner=_runner,
+    )
+    comp_df = pd.read_csv(tmp_path / "out" / "candidate_comparison.csv")
+    sides = set(comp_df["candidate_side"])
+    assert sides == {"A", "B"}, f"expected both sides, got {sides}"
+    reals = set(comp_df["realization"])
+    assert reals == {0, 1}, f"expected both realizations, got {reals}"
+
+
+def test_t421_candidate_run_manifest_records_argv(tmp_path, monkeypatch):
+    """[P2] Each candidate_run_manifest.json records a reproducible argv with
+    no --cultivar (matches the S4 model command) and the frozen harvest_var."""
+    ctx = _build_full_context(tmp_path, pairs=[(0, 1)])
+    comp = _comparison_frame([
+        {"dataset_role": "validation", "variable": "LAIX", "treatment": 5, "simulated": 1.0},
+        {"dataset_role": "diagnostic", "variable": "ADAP", "treatment": 9, "simulated": 1.0},
+    ])
+    monkeypatch.setattr(cp, "build_comparison_from_rerun", lambda rerun_dir, **kw: comp)
+
+    def _runner(**kw):
+        for name in cp.REQUIRED_RERUN_OUTPUTS:
+            (kw["work_dir"] / name).write_text("x\n", encoding="utf-8")
+        return 0
+
+    cp.build_candidate_prediction_bundle(
+        run_dir=ctx["run_dir"], case=ctx["case"],
+        posterior_manifest=ctx["posterior_manifest"], out_dir=tmp_path / "out",
+        allow_unvalidated_demo=True, dssat_runner=_runner,
+    )
+    run_manifest = json.loads((tmp_path / "out" / "runs" / "real_0" / "candidate_run_manifest.json").read_text())
+    argv = run_manifest["argv"]
+    assert "--harvest-var" in argv and "CHPDT" in argv
+    assert "--cultivar" not in argv  # cultivar inferred from frozen FileX, not hardcoded
+    assert run_manifest["harvest_var"] == "CHPDT"

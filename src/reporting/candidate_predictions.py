@@ -155,9 +155,32 @@ def _load_frozen_context(run_dir: Path, case: str) -> dict[str, Any]:
     tmt_path = input_dir / f"{excode}.TMT"
     if not tmt_path.is_file():
         raise FileNotFoundError(f"frozen observed TMT file not found: {tmt_path}")
+    # Frozen observation policy + harvest var are bound by the S4 run_manifest.
+    # Downstream tools must use these exact bytes, not an arbitrary CLI path,
+    # so that another sigma file cannot silently regenerate a well-formed
+    # prediction-distance manifest.
+    frozen_policy_csv = _manifest_field(run_manifest, "observation_policy_csv")
+    frozen_policy_sha = _manifest_field(run_manifest, "observation_policy_sha256")
+    if not frozen_policy_csv or not frozen_policy_sha:
+        raise ValueError(
+            "S4 run_manifest must record observation_policy_csv and "
+            "observation_policy_sha256 for candidate predictions"
+        )
+    frozen_policy_path = Path(frozen_policy_csv).resolve()
+    if not frozen_policy_path.is_file():
+        raise FileNotFoundError(f"frozen observation policy not found: {frozen_policy_path}")
+    _require_hash(frozen_policy_path, frozen_policy_sha, "frozen observation policy")
+    frozen_harvest_var = _manifest_field(run_manifest, "harvest_var")
+    if not frozen_harvest_var:
+        raise ValueError("S4 run_manifest must record harvest_var for candidate predictions")
     return {
         "run_manifest": run_manifest,
         "finalize": finalize,
+        "finalize_path": finalize_path,
+        "finalize_sha256": sha256_file(finalize_path),
+        "artifact_manifest_sha256": sha256_file(
+            run_dir / "calibration_finalize" / "calibration_artifacts_manifest.json"
+        ),
         "science_validated": science_validated,
         "input_dir": input_dir,
         "input_manifest": input_manifest,
@@ -166,6 +189,9 @@ def _load_frozen_context(run_dir: Path, case: str) -> dict[str, Any]:
         "batch_path": batch_path,
         "entries": entries,
         "tmt_path": tmt_path,
+        "frozen_policy_path": frozen_policy_path,
+        "frozen_policy_sha256": frozen_policy_sha,
+        "frozen_harvest_var": frozen_harvest_var,
     }
 
 
@@ -187,14 +213,77 @@ def _final_ensemble_path(run_dir: Path, case: str) -> Path:
     raise ValueError("calibration artifact manifest has no final_parameter_ensemble entry")
 
 
+def _strict_nonneg_int(value: Any, *, context: str) -> int:
+    """Parse a realization/pair id as a non-negative integer, rejecting floats
+    like 4.5 (which int(float(...)) would silently truncate), negatives, and
+    non-finite values."""
+    if isinstance(value, bool):
+        raise ValueError(f"{context} must be an integer, got bool {value!r}")
+    if isinstance(value, int):
+        n = value
+    elif isinstance(value, float):
+        if not math.isfinite(value) or value < 0 or value != int(value):
+            raise ValueError(f"{context} must be a non-negative integer, got {value!r}")
+        n = int(value)
+    else:
+        text = str(value).strip()
+        try:
+            f = float(text)
+        except (TypeError, ValueError):
+            raise ValueError(f"{context} must be an integer, got {value!r}")
+        if not math.isfinite(f) or f < 0 or f != int(f):
+            raise ValueError(f"{context} must be a non-negative integer, got {value!r}")
+        n = int(f)
+    if n < 0:
+        raise ValueError(f"{context} must be non-negative, got {n}")
+    return n
+
+
+def _validate_candidate_pairs_schema(pairs_df: pd.DataFrame) -> pd.DataFrame:
+    """Strict T4.2 candidate-pair schema gate.
+
+    Enforces: 1-3 pairs, each with a unique pair_id, real_a != real_b, both
+    non-negative integers, and at most 6 unique realizations total. This is a
+    consumer-side guard so a hash-self-consistent but oversized pairs CSV
+    cannot trigger more than the approved <=6 DSSAT reruns.
+    """
+    for col in ("pair_id", "real_a", "real_b"):
+        if col not in pairs_df.columns:
+            raise ValueError(f"candidate_pairs.csv missing required column {col!r}")
+    n_pairs = len(pairs_df)
+    if n_pairs < 1 or n_pairs > 3:
+        raise ValueError(f"candidate_pairs.csv must have 1-3 pairs, got {n_pairs}")
+
+    pair_ids: list[int] = []
+    uniq: list[int] = []
+    for idx, row in pairs_df.iterrows():
+        pid = _strict_nonneg_int(row["pair_id"], context=f"row {idx} pair_id")
+        if pid in pair_ids:
+            raise ValueError(f"duplicate pair_id {pid} in candidate_pairs.csv")
+        pair_ids.append(pid)
+        ra = _strict_nonneg_int(row["real_a"], context=f"pair {pid} real_a")
+        rb = _strict_nonneg_int(row["real_b"], context=f"pair {pid} real_b")
+        if ra == rb:
+            raise ValueError(f"pair {pid} has real_a == real_b ({ra}); self-pairing is not allowed")
+        for rid in (ra, rb):
+            if rid not in uniq:
+                uniq.append(rid)
+    if len(uniq) > 6:
+        raise ValueError(
+            f"candidate_pairs.csv yields {len(uniq)} unique realizations; "
+            "T4.2 allows at most 6"
+        )
+    # Return a normalized copy with int dtypes so downstream code is type-stable.
+    out = pairs_df.copy()
+    out["pair_id"] = pair_ids
+    return out
+
+
 def _unique_realizations(pairs_df: pd.DataFrame) -> list[int]:
     seen: list[int] = []
     for col in ("real_a", "real_b"):
         for value in pairs_df[col].tolist():
-            try:
-                rid = int(value)
-            except (TypeError, ValueError):
-                raise ValueError(f"candidate_pairs column {col!r} has non-integer realization {value!r}")
+            rid = _strict_nonneg_int(value, context=f"column {col!r}")
             if rid not in seen:
                 seen.append(rid)
     return seen
@@ -213,7 +302,18 @@ def _export_candidate_params(
     real_col = next((c for c in ensemble_df.columns if str(c).lower() in {"real_name", "realization"}), None)
     if real_col is None:
         raise ValueError("final parameter ensemble lacks a real_name/realization column")
-    mask = ensemble_df[real_col].apply(lambda v: _to_int_or_none(v)) == realization
+
+    def _row_realization(value: Any) -> int | None:
+        # Lenient match for ensemble row lookup (real_name may be "0"/0/0.0).
+        try:
+            f = float(value)
+        except (TypeError, ValueError):
+            return None
+        if not math.isfinite(f) or f != int(f):
+            return None
+        return int(f)
+
+    mask = ensemble_df[real_col].apply(_row_realization) == realization
     if not mask.any():
         raise ValueError(f"candidate realization {realization} is absent from the final ensemble")
     if mask.sum() > 1:
@@ -242,13 +342,6 @@ def _export_candidate_params(
     return sha256_file(out_path)
 
 
-def _to_int_or_none(value: Any) -> int | None:
-    try:
-        return int(float(value))
-    except (TypeError, ValueError):
-        return None
-
-
 # ---------------------------------------------------------------------------
 # Deterministic DSSAT rerun (isolated; one per unique realization)
 # ---------------------------------------------------------------------------
@@ -257,6 +350,27 @@ REQUIRED_RERUN_OUTPUTS: tuple[str, ...] = (
     "Evaluate.OUT", "PlantGro.OUT", "FreshWt.OUT",
     "PestEval.OUT", "PestTmtGrow.OUT", "PestHarvest.OUT", "PestJoint.OUT", "PestGrow.OUT",
 )
+
+
+def _build_runner_argv(
+    *,
+    param_csv: Path,
+    batch_name: str,
+    harvest_var: str,
+    input_dir: Path,
+) -> list[str]:
+    """Reproducible argv for the isolated DSSAT rerun (no cwd-relative tokens).
+
+    Mirrors the S4 model command: no --cultivar (the cultivar is fixed by the
+    frozen FileX/DSSBatch, and run_dssat.py infers the rest). Paths are
+    absolute so the recorded command reproduces from any cwd.
+    """
+    return [
+        "--param-csv", str(param_csv.resolve()),
+        "--batch", batch_name,
+        "--harvest-var", harvest_var,
+        "--input-dir", str(input_dir.resolve()),
+    ]
 
 
 def _run_candidate_dssat(
@@ -271,27 +385,43 @@ def _run_candidate_dssat(
 ) -> dict[str, Any]:
     """Run one isolated deterministic DSSAT rerun for a candidate realization.
 
-    ``runner`` is injected so unit tests can substitute a synthetic OUT writer
-    without spawning DSSAT. In production it defaults to a subprocess call to
-    ``python -m src.calibration.run_dssat`` with the frozen input dir and the
-    S4-hashed batch file. Returns a run-record dict (returncode, duration,
-    output hashes).
+    The candidate directory must be freshly created and empty: a non-zero
+    returncode that leaves pre-existing OUT files must never be mistaken for a
+    successful run. ``runner`` is injectable so tests substitute a synthetic
+    OUT writer without spawning DSSAT.
     """
+    if run_dir_for_candidate.exists():
+        leftover = [p for p in run_dir_for_candidate.iterdir()]
+        if leftover:
+            raise ValueError(
+                f"candidate run dir {run_dir_for_candidate} is not empty "
+                f"({len(leftover)} entries); refuse to reuse stale outputs"
+            )
     run_dir_for_candidate.mkdir(parents=True, exist_ok=True)
     # Copy the batch file into the isolated candidate dir so DSSAT runs there.
     batch_dst = run_dir_for_candidate / batch_path.name
     if batch_path.resolve() != batch_dst.resolve():
         batch_dst.write_bytes(batch_path.read_bytes())
+    argv = _build_runner_argv(
+        param_csv=param_csv, batch_name=batch_path.name,
+        harvest_var=harvest_var, input_dir=input_dir,
+    )
     started_at = datetime.now(timezone.utc)
     if runner is None:
         runner = _default_dssat_runner
-    returncode = runner(
-        param_csv=param_csv,
-        work_dir=run_dir_for_candidate,
-        input_dir=input_dir,
-        batch_name=batch_path.name,
-        harvest_var=harvest_var,
-    )
+    returncode: int
+    diagnostics: str = ""
+    try:
+        returncode = int(runner(
+            param_csv=param_csv,
+            work_dir=run_dir_for_candidate,
+            input_dir=input_dir,
+            batch_name=batch_path.name,
+            harvest_var=harvest_var,
+        ))
+    except Exception as exc:  # noqa: BLE001 — preserve diagnostics, mark incomplete
+        returncode = 1
+        diagnostics = f"{type(exc).__name__}: {exc}"
     ended_at = datetime.now(timezone.utc)
     out_hashes: dict[str, str] = {}
     missing: list[str] = []
@@ -308,6 +438,8 @@ def _run_candidate_dssat(
         "ended_at": ended_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "missing_outputs": missing,
         "output_hashes": out_hashes,
+        "argv": argv,
+        "diagnostics": diagnostics,
     }
 
 
@@ -326,24 +458,28 @@ def _default_dssat_runner(
     because the subprocess runs with ``cwd=work_dir`` (an isolated candidate
     directory) where the ``src`` package is not importable. ``run_dssat.py``
     locates PROJECT_ROOT from ``__file__`` and imports no ``src.*`` modules, so
-    a direct script invocation works from any cwd.
+    a direct script invocation works from any cwd. No --cultivar flag: the
+    cultivar is fixed by the frozen FileX/DSSBatch, matching the S4 model
+    command. On non-zero exit the runner returns that code (does NOT raise) so
+    the caller can record the failure and mark the pair prediction_incomplete
+    rather than aborting the whole bundle; stderr is parked beside the outputs.
     """
     runner_path = Path(__file__).resolve().parents[1] / "calibration" / "run_dssat.py"
     if not runner_path.is_file():
         raise FileNotFoundError(f"DSSAT calibration entry point not found: {runner_path}")
     cmd = [
         sys.executable, str(runner_path),
-        "--param-csv", str(param_csv),
+        "--param-csv", str(param_csv.resolve()),
         "--batch", batch_name,
-        "--cultivar", "TM0008",
         "--harvest-var", harvest_var,
-        "--input-dir", str(input_dir),
+        "--input-dir", str(input_dir.resolve()),
     ]
     result = subprocess.run(cmd, cwd=str(work_dir), capture_output=True, text=True)
     if result.returncode != 0:
-        raise RuntimeError(
-            f"candidate DSSAT rerun failed (exit {result.returncode})\n"
-            f"stdout:\n{result.stdout[-1500:]}\nstderr:\n{result.stderr[-1500:]}"
+        # Preserve diagnostics in the run dir; the caller records this run as
+        # incomplete and never builds a comparison from these outputs.
+        (work_dir / "_runner_stderr.txt").write_text(
+            result.stderr[-4000:] or "(empty stderr)", encoding="utf-8"
         )
     return int(result.returncode)
 
@@ -375,10 +511,24 @@ def _sigma_eff_map(policy_path: Path) -> dict[str, float]:
             sigma_floor = float(entry["sigma_floor"])
         except (KeyError, TypeError, ValueError):
             raise ValueError(f"observation policy {group!r} is missing finite sigma/model_sigma/sigma_floor")
-        for value in (sigma, model_sigma, sigma_floor):
-            if not math.isfinite(value) or value <= 0.0:
-                raise ValueError(f"observation policy {group!r} has non-positive/non-finite sigma component: {value}")
-        out[variable] = math.sqrt(sigma * sigma + model_sigma * model_sigma + sigma_floor * sigma_floor)
+        # Shared observation-policy semantics: the base sigma must be strictly
+        # positive; model_sigma and sigma_floor are additive components that may
+        # legitimately be zero. The combined sigma_eff must end up finite and
+        # positive so the distance normalization is well-defined.
+        for name, value, allow_zero in (
+            ("sigma", sigma, False),
+            ("model_sigma", model_sigma, True),
+            ("sigma_floor", sigma_floor, True),
+        ):
+            if not math.isfinite(value) or value < 0.0 or (value == 0.0 and not allow_zero):
+                raise ValueError(
+                    f"observation policy {group!r} has invalid {name}={value} "
+                    f"(must be finite, >= 0{'' if allow_zero else ', > 0'})"
+                )
+        sigma_eff = math.sqrt(sigma * sigma + model_sigma * model_sigma + sigma_floor * sigma_floor)
+        if not math.isfinite(sigma_eff) or sigma_eff <= 0.0:
+            raise ValueError(f"observation policy {group!r} yields non-positive/non-finite sigma_eff")
+        out[variable] = sigma_eff
     return out
 
 
@@ -498,18 +648,36 @@ def build_candidate_prediction_bundle(
     posterior_manifest: str | Path,
     out_dir: str | Path,
     *,
-    observation_policy_csv: str | Path,
+    observation_policy_csv: str | Path | None = None,
     allow_unvalidated_demo: bool = False,
-    harvest_var: str = "CHPDT",
+    harvest_var: str | None = None,
     dssat_runner: Callable[..., int] | None = None,
 ) -> Path:
     """Build the candidate-prediction bundle for a frozen posterior contract.
 
     Returns the path to the written ``candidate_prediction_manifest.json``.
+
+    ``observation_policy_csv`` and ``harvest_var`` default to the values frozen
+    in the S4 run_manifest. If supplied explicitly they must hash/equal the
+    frozen values, so a different sigma file or harvest variable cannot
+    silently regenerate a well-formed manifest.
     """
     run_dir = Path(run_dir).resolve()
     out_dir = Path(out_dir).resolve()
     posterior_manifest_path = Path(posterior_manifest).resolve()
+
+    # Refuse to reuse a non-empty output directory: a candidate run must not
+    # inherit stale OUT files from a previous attempt. No --force escape hatch.
+    if out_dir.exists():
+        existing = [p for p in out_dir.iterdir() if p.name != ".gitkeep"]
+        if existing:
+            raise ValueError(
+                f"out_dir {out_dir} is not empty ({len(existing)} entries); "
+                "candidate predictions require a fresh directory to avoid reusing "
+                "stale DSSAT outputs. Remove or rename the existing directory."
+            )
+    else:
+        out_dir.mkdir(parents=True, exist_ok=True)
 
     ctx = _load_frozen_context(run_dir, case)
     posterior = _verify_posterior_manifest(posterior_manifest_path, case)
@@ -523,6 +691,43 @@ def build_candidate_prediction_bundle(
     data_status = "science_validated" if science_validated else "tooling_demo"
     demo = data_status == "tooling_demo"
 
+    # Cross-check the posterior's recorded upstream hashes against the current
+    # S4 finalize/artifact manifest. A posterior from a different S4 run must
+    # not feed candidates into this one.
+    posterior_upstream = posterior.get("upstream") or {}
+    for key, actual in (
+        ("calibration_finalize_sha256", ctx["finalize_sha256"]),
+        ("calibration_artifacts_manifest_sha256", ctx["artifact_manifest_sha256"]),
+    ):
+        expected = str(posterior_upstream.get(key) or "").strip().lower()
+        if expected and expected != actual:
+            raise ValueError(
+                f"posterior upstream {key} {expected!r} does not match current S4 "
+                f"value {actual!r}; the posterior belongs to a different calibration"
+            )
+
+    # Resolve the observation policy: default to the S4-frozen file, and require
+    # any CLI override to have the exact frozen bytes.
+    frozen_policy_path: Path = ctx["frozen_policy_path"]
+    if observation_policy_csv is not None:
+        cli_policy_path = Path(observation_policy_csv).resolve()
+        if sha256_file(cli_policy_path) != ctx["frozen_policy_sha256"]:
+            raise ValueError(
+                f"--observation-policy-csv {cli_policy_path} does not match the "
+                f"S4-frozen observation policy hash {ctx['frozen_policy_sha256']}"
+            )
+        policy_path = cli_policy_path
+    else:
+        policy_path = frozen_policy_path
+
+    # Resolve harvest_var: default to the S4-frozen value, reject mismatches.
+    if harvest_var is not None and harvest_var != ctx["frozen_harvest_var"]:
+        raise ValueError(
+            f"--harvest-var {harvest_var!r} does not match the S4-frozen "
+            f"value {ctx['frozen_harvest_var']!r}"
+        )
+    resolved_harvest_var = ctx["frozen_harvest_var"]
+
     posterior_base = posterior_manifest_path.parent
     pairs_path = posterior_base / "candidate_pairs.csv"
     pairs_entry = next(
@@ -531,13 +736,13 @@ def build_candidate_prediction_bundle(
     if pairs_entry is None:
         raise ValueError("posterior manifest has no candidate_pairs artifact")
     _require_hash(pairs_path, pairs_entry["sha256"], "candidate_pairs")
-    pairs_df = pd.read_csv(pairs_path)
+    pairs_df = _validate_candidate_pairs_schema(pd.read_csv(pairs_path))
 
     ensemble_path = _final_ensemble_path(run_dir, case)
     ensemble_df = pd.read_csv(ensemble_path)
     unique_reals = _unique_realizations(pairs_df)
 
-    sigma_eff_map = _sigma_eff_map(Path(observation_policy_csv))
+    sigma_eff_map = _sigma_eff_map(policy_path)
     design = ctx["design"]
     roles = _role_lookup(design)
     entries = ctx["entries"]
@@ -545,7 +750,6 @@ def build_candidate_prediction_bundle(
     input_dir = ctx["input_dir"]
     batch_path = ctx["batch_path"]
 
-    out_dir.mkdir(parents=True, exist_ok=True)
     param_dir = out_dir / "candidate_parameters"
     runs_dir = out_dir / "runs"
 
@@ -564,18 +768,18 @@ def build_candidate_prediction_bundle(
         run_record = _run_candidate_dssat(
             realization, param_csv, real_run_dir,
             input_dir=input_dir, batch_path=batch_path,
-            harvest_var=harvest_var, runner=dssat_runner,
+            harvest_var=resolved_harvest_var, runner=dssat_runner,
         )
-        run_record["parameter_csv"] = str(param_csv.relative_to(out_dir))
+        run_record["parameter_csv"] = _relative_posix(param_csv, out_dir)
         run_record["parameter_csv_sha256"] = param_sha
-        run_record["final_parameter_ensemble"] = str(ensemble_path.relative_to(run_dir))
+        run_record["final_parameter_ensemble"] = _relative_posix(ensemble_path, run_dir)
         run_record["final_parameter_ensemble_sha256"] = sha256_file(ensemble_path)
         run_record["input_dir"] = str(input_dir)
         run_record["input_manifest_sha256"] = sha256_file(input_dir / "input_manifest.json")
         run_record["batch"] = batch_path.name
         run_record["batch_sha256"] = sha256_file(batch_path)
+        run_record["harvest_var"] = resolved_harvest_var
         run_record["upstream_run_id"] = case
-        run_record["command"] = "src.calibration.run_dssat (isolated)"
         run_record["analysis_git"] = git_metadata()
         candidate_run_manifest_path = real_run_dir / "candidate_run_manifest.json"
         candidate_run_manifest_path.write_text(
@@ -585,12 +789,14 @@ def build_candidate_prediction_bundle(
             "realization": realization,
             "returncode": run_record["returncode"],
             "missing_outputs": ",".join(run_record["missing_outputs"]),
-            "run_dir": str(real_run_dir.relative_to(out_dir)),
-            "run_manifest": str(candidate_run_manifest_path.relative_to(out_dir)),
+            "run_dir": _relative_posix(real_run_dir, out_dir),
+            "run_manifest": _relative_posix(candidate_run_manifest_path, out_dir),
         })
-        # If any required output is missing the run is incomplete; do not build
-        # a comparison from partial outputs.
-        if run_record["missing_outputs"]:
+        # A candidate is usable only if the run succeeded (returncode == 0) AND
+        # every required output is present from this run. A non-zero returncode
+        # with pre-existing OUT files must never be accepted (review P1: such a
+        # case was previously treated as a complete run).
+        if run_record["returncode"] != 0 or run_record["missing_outputs"]:
             continue
         comparison = build_comparison_from_rerun(
             real_run_dir, case=case, data_status=data_status, roles=roles,
@@ -620,11 +826,15 @@ def build_candidate_prediction_bundle(
                 distance_component_rows.extend(components.to_dict("records"))
                 d_val, d_diag, prediction_distance = _aggregate_distance(components)
                 classification = _classify(d_val, d_diag, demo=demo)
-            # Record the aligned comparison rows for this pair (A side).
-            comp_records = comp_a.copy()
-            comp_records["pair_id"] = pair_id
-            comp_records["realization"] = real_a
-            comparison_rows.extend(comp_records.to_dict("records"))
+            # Record BOTH sides of the pair so the frozen comparison table can
+            # support re-drawing either candidate's predictions. Previously only
+            # the A side was written, dropping realizations 16/20/32.
+            for side, comp, real in (("A", comp_a, real_a), ("B", comp_b, real_b)):
+                comp_records = comp.copy()
+                comp_records["pair_id"] = pair_id
+                comp_records["realization"] = real
+                comp_records["candidate_side"] = side
+                comparison_rows.extend(comp_records.to_dict("records"))
         pair_prediction_rows.append({
             "run_id": case,
             "data_status": data_status,
@@ -682,7 +892,7 @@ def build_candidate_prediction_bundle(
         posterior_payload=posterior,
         ensemble_path=ensemble_path,
         ctx=ctx,
-        observation_policy_csv=Path(observation_policy_csv),
+        observation_policy_csv=policy_path,
         split_path=ctx["split_path"],
         unique_reals=unique_reals,
         output_files={
@@ -792,8 +1002,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--case", required=True)
     parser.add_argument("--posterior-manifest", required=True)
     parser.add_argument("--out-dir", required=True)
-    parser.add_argument("--observation-policy-csv", required=True)
-    parser.add_argument("--harvest-var", default="CHPDT")
+    parser.add_argument("--observation-policy-csv", default=None,
+                        help="Defaults to the S4-frozen policy; if given, must hash-match it")
+    parser.add_argument("--harvest-var", default=None,
+                        help="Defaults to the S4-frozen value; if given, must equal it")
     parser.add_argument("--allow-unvalidated-demo", action="store_true")
     args = parser.parse_args(argv)
     manifest_path = build_candidate_prediction_bundle(
