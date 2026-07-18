@@ -30,6 +30,7 @@ class DesignSpec:
     treatment_roles: Mapping[str, tuple[int, ...]]
     observation: Mapping[str, Any]
     validation_split_id: str
+    approval_scope: str
 
     @property
     def calibration_treatments(self) -> set[int]:
@@ -112,26 +113,26 @@ def load_design_config(path: str | Path, stage: str) -> DesignSpec:
         if not isinstance(values, list):
             raise ValueError(f"treatment role {role} must be a list")
         normalized_roles[role] = tuple(int(v) for v in values)
-    if set().union(*[set(v) for v in normalized_roles.values()]) != set(
-        sum((list(v) for v in normalized_roles.values()), [])
-    ):
+    role_values = sum((list(v) for v in normalized_roles.values()), [])
+    if len(role_values) != len(set(role_values)):
         raise ValueError("treatment roles contain duplicate treatment IDs")
+    approval_scope = str(payload.get("approval_scope", "")).strip().lower()
+    if approval_scope not in {"tooling_development", "science_use"}:
+        raise ValueError("design config must declare approval_scope=tooling_development or science_use")
 
     observation = {
         "outputs": {
             "S1": {"PestEval.OUT": ["ADAP"], "PestTmtGrow.OUT": ["LAID"]},
             "S2": {
                 "PestJoint.OUT": ["LAIX", "CNAM"],
-                "PestHarvest.OUT": ["PWAD", "PWAI"],
                 "PestTmtGrow.OUT": ["LAID", "LWAD", "SWAD"],
             },
             "S3": {
-                "PestHarvest.OUT": ["PWAD", "PWAI"],
+                "PestHarvest.OUT": ["PWAI"],
             },
             "S4": {
                 "PestEval.OUT": ["ADAP"],
                 "PestJoint.OUT": ["LAIX", "CNAM"],
-                "PestHarvest.OUT": ["PWAD", "PWAI"],
                 "PestTmtGrow.OUT": ["LAID", "LWAD", "SWAD"],
             },
         }.get(stage_name, {})
@@ -161,6 +162,7 @@ def load_design_config(path: str | Path, stage: str) -> DesignSpec:
             "split_path": str(split_path),
         },
         validation_split_id=split_id,
+        approval_scope=approval_scope,
     )
 
 
@@ -212,9 +214,22 @@ def apply_observation_stage(outputs: list[dict[str, Any]], spec: DesignSpec,
         if df is not None and not df.empty:
             before = len(df)
             if "TN" in df.columns:
-                df = df[df["TN"].astype(int).isin(calibration)].copy()
+                tn_values = pd.to_numeric(df["TN"], errors="coerce")
+                if tn_values.isna().any():
+                    raise ValueError(f"stage {spec.stage} contains rows with unrecognized TN treatment IDs")
+                unknown = set(tn_values.astype(int)) - set(spec.calibration_treatments) - set(spec.validation_treatments) - set(spec.diagnostic_treatments)
+                if unknown:
+                    raise ValueError(f"stage {spec.stage} contains unrecognized treatment IDs: {sorted(unknown)}")
+                df = df[tn_values.astype(int).isin(calibration)].copy()
             elif "@RUN" in df.columns and run_to_tn:
-                df = df[df["@RUN"].astype(int).map(run_to_tn).isin(calibration)].copy()
+                run_values = pd.to_numeric(df["@RUN"], errors="coerce")
+                if run_values.isna().any() or run_values.astype(int).map(run_to_tn).isna().any():
+                    raise ValueError(f"stage {spec.stage} contains rows with unrecognized run/treatment mapping")
+                df = df[run_values.astype(int).map(run_to_tn).isin(calibration)].copy()
+            else:
+                raise ValueError(
+                    f"stage {spec.stage} cannot identify treatment role: output lacks TN or @RUN"
+                )
             item["df"] = df
             report["rows_dropped"] += before - len(df)
         selected.append(item)
@@ -241,6 +256,10 @@ def write_design_audit(pst_path: str | Path, spec: DesignSpec,
             role = "diagnostic"
         else:
             role = "unknown"
+        if role == "unknown":
+            raise ValueError(
+                f"observation {name!r} cannot be assigned calibration/validation/diagnostic role"
+            )
         rows.append({
             "obsnme": str(name), "obgnme": str(row.obgnme), "treatment": tn,
             "role": role, "weight": float(row.weight),

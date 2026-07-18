@@ -52,7 +52,8 @@ def test_s2_fixed_baseline_parameters_are_not_released_as_active():
         assert staged[name]["lower"] == staged[name]["upper"] == staged[name]["init"]
     assert staged["NSTFAC"]["status"] == "active"
     assert spec.observation["outputs"]["PestJoint.OUT"] == ["LAIX", "CNAM"]
-    assert spec.observation["outputs"]["PestHarvest.OUT"] == ["PWAD", "PWAI"]
+    assert "PestHarvest.OUT" not in spec.observation["outputs"]
+    assert spec.observation["diagnostic_outputs"]["PestHarvest.OUT"] == ["PWAI", "PWAD"]
     assert "HWAM" not in spec.observation["outputs"]["PestJoint.OUT"]
 
 
@@ -61,7 +62,10 @@ def test_continuous_harvest_stages_do_not_use_season_end_hwam_or_duplicate_pwam(
         outputs = load_design_config(DESIGN, stage).observation["outputs"]
         assert "HWAM" not in outputs.get("PestJoint.OUT", [])
         assert "PWAM" not in outputs.get("PestJoint.OUT", [])
-        assert outputs["PestHarvest.OUT"] == ["PWAD", "PWAI"]
+        if stage == "S2":
+            assert "PestHarvest.OUT" not in outputs
+        elif stage == "S3":
+            assert outputs["PestHarvest.OUT"] == ["PWAI"]
 
 
 def test_observation_noise_contract_is_explicit_and_reproducible(tmp_path):
@@ -142,6 +146,30 @@ def test_s4_validation_selection_is_rejected(tmp_path):
         load_design_config(path, "S4")
 
 
+def test_treatment_roles_reject_cross_role_overlap(tmp_path):
+    payload = json.loads(DESIGN.read_text(encoding="utf-8"))
+    split_path = Path("configs/runs/xxql2501_v4_validation_split_20260717.json")
+    split = json.loads(split_path.read_text(encoding="utf-8"))
+    split["treatment_roles"]["validation"].append(split["treatment_roles"]["calibration"][0])
+    split_out = tmp_path / "split.json"
+    split_out.write_text(json.dumps(split), encoding="utf-8")
+    payload["validation_split_id"] = "split"
+    path = tmp_path / "design.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ValueError, match="duplicate treatment IDs"):
+        load_design_config(path, "S1")
+
+
+def test_unknown_treatment_role_is_rejected_before_phi():
+    spec = load_design_config(DESIGN, "S1")
+    outputs = [{
+        "model_out_path": "PestEval.OUT",
+        "df": pd.DataFrame({"TN": [2, 999], "ADAP": [1.0, 2.0]}),
+    }]
+    with pytest.raises(ValueError, match="unrecognized treatment IDs"):
+        apply_observation_stage(outputs, spec, [{"run": 1, "tn": 2}])
+
+
 def test_explicit_sigma_combines_model_discrepancy_and_floor():
     obs = pd.DataFrame([{
         "obsnme": "x", "obsval": 10.0, "raw_obsval": 10.0, "weight": 1.0,
@@ -166,6 +194,25 @@ def test_finalize_calibration_does_not_promote_without_science_manifest(tmp_path
     assert quality["science_validation_mode"] == "engineering_only"
     status = json.loads((tmp_path / "run_status.json").read_text(encoding="utf-8"))
     assert status["scientific_status"] == "not_assessed"
+
+
+def test_tooling_development_finalize_can_never_promote(tmp_path):
+    (tmp_path / "case.0.par.csv").write_text(",a\n0,1\n1,2\n", encoding="utf-8")
+    (tmp_path / "case.1.par.csv").write_text(",a\n0,1.1\n1,2.1\n", encoding="utf-8")
+    (tmp_path / "case.1.obs.csv").write_text(",y\n0,1\n1,2\n", encoding="utf-8")
+    (tmp_path / "case.phi.actual.csv").write_text("iteration,0,1\n1,1,2\n", encoding="utf-8")
+    (tmp_path / "run_manifest.yaml").write_text(
+        'approval_scope: "tooling_development"\n', encoding="utf-8"
+    )
+    (tmp_path / "science_validation_manifest.json").write_text(json.dumps({
+        "group_phi_checked": True,
+        "deterministic_rerun_checked": True,
+        "validation_split_frozen": True,
+        "source_hashes_bound": True,
+    }), encoding="utf-8")
+    payload = finalize_calibration(tmp_path, "case")
+    assert payload["science_status"] == "science_pending"
+    assert payload["science_failures"] == ["tooling_development_run"]
 
 
 def test_sa_evidence_packager_hashes_existing_outputs(tmp_path):

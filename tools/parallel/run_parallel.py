@@ -237,7 +237,7 @@ def _assess_completed_ies(run_dir, case):
         "process_completed", "ies_ensemble_size", "ies_unique_realizations",
         "ies_parameter_finite", "ies_observation_finite", "ies_realization_alignment",
         "ies_final_realization_alignment", "ies_final_parameter_finite",
-        "ies_iteration_progress",
+        "ies_iteration_progress", "ies_member_status_table",
     }
     failed_checks = ", ".join(
         c.check_id for c in report.checks

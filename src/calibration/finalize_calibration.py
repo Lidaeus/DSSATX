@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from src.common.quality import read_flat_run_manifest_field
 from src.reporting.quality_gate import assess_ies_run
 
 
@@ -25,6 +26,7 @@ ENGINEERING_CHECKS = {
     "ies_final_realization_alignment",
     "ies_final_parameter_finite",
     "ies_iteration_progress",
+    "ies_member_status_table",
 }
 
 
@@ -40,6 +42,14 @@ def _science_evidence(run_dir: Path) -> tuple[bool, list[str]]:
     review step must write ``science_validation_manifest.json`` with all four
     prerequisites true and the split/design hashes bound to the run.
     """
+    manifest_path = run_dir / "run_manifest.yaml"
+    approval_scope = (
+        read_flat_run_manifest_field(manifest_path, "approval_scope")
+        if manifest_path.is_file()
+        else None
+    )
+    if str(approval_scope or "").strip().lower() == "tooling_development":
+        return False, ["tooling_development_run"]
     path = run_dir / "science_validation_manifest.json"
     if not path.is_file():
         return False, ["science_validation_manifest_missing"]
@@ -72,6 +82,7 @@ def finalize_calibration(run_dir: str | Path, case: str) -> dict[str, Any]:
         "science_failures": science_failures,
         "scientific_status": "validated" if science_status == "science_validated" else "not_assessed",
         "quality_report": str(run_dir / "ies_quality" / "ies_run_quality.json"),
+        "member_status": str(run_dir / "ies_quality" / f"{case}.member_status.csv"),
     }
     out_dir = run_dir / "calibration_finalize"
     out_dir.mkdir(parents=True, exist_ok=True)

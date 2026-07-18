@@ -284,6 +284,9 @@ def _finalize_ies_contract(
         "observation_ensemble": os.path.basename(noise_path) if noise_path else "",
         "observation_noise_metadata": os.path.basename(noise_meta_path) if noise_meta_path else "",
         "observation_noise_seed": noise_meta.get("seed") if noise_meta else None,
+        "observation_ensemble_sha256": (
+            sha256_file(noise_path) if noise_path and os.path.isfile(noise_path) else ""
+        ),
     }
 
 ECO_BOUNDS_EGGPLANT = {
@@ -2470,6 +2473,19 @@ if __name__ == "__main__":
             parser.error(f"invalid --design-config: {exc}")
         if (args.mode or "").strip().lower() != "eggplant_stage2":
             parser.error("--design-config is currently supported only with --mode eggplant_stage2")
+        missing_contract = []
+        if not args.input_dir:
+            missing_contract.append("--input-dir")
+        if not args.bounds_id:
+            missing_contract.append("--bounds-id")
+        if not args.observation_policy_csv:
+            missing_contract.append("--observation-policy-csv")
+        if design_spec.stage in {"S2", "S3", "S4"} and not args.fixed_from:
+            missing_contract.append("--fixed-from (required for S2-S4)")
+        if missing_contract:
+            parser.error(
+                "staged calibration requires " + ", ".join(missing_contract)
+            )
 
     # Formal staged calibration defaults to retaining all finite, successful
     # realizations. Legacy non-staged modes preserve the historical 2-sigma
@@ -3435,6 +3451,20 @@ if __name__ == "__main__":
         observation_ensemble=ies_contract.get("observation_ensemble", ""),
         observation_noise_metadata=ies_contract.get("observation_noise_metadata", ""),
         observation_noise_seed=ies_contract.get("observation_noise_seed"),
+        observation_ensemble_sha256=ies_contract.get("observation_ensemble_sha256", ""),
+        design_config_sha256=(sha256_file(design_spec.path) if design_spec is not None else ""),
+        validation_split_sha256=(
+            sha256_file(design_spec.observation["split_path"])
+            if design_spec is not None and os.path.isfile(design_spec.observation["split_path"])
+            else ""
+        ),
+        approval_scope=(design_spec.approval_scope if design_spec is not None else ""),
+        fixed_from=[str(Path(p).resolve()) for p in (args.fixed_from or [])],
+        fixed_from_sha256=[
+            sha256_file(Path(p).resolve())
+            for p in (args.fixed_from or [])
+            if Path(p).expanduser().is_file()
+        ],
         operator=os.environ.get("USERNAME", "unknown"),
         command_line=" ".join(sys.argv),
     )
