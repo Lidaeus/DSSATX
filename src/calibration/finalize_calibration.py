@@ -92,13 +92,13 @@ def _write_artifact_manifest(run_dir: Path, case: str, representative: dict[str,
         digest = _sha256(path)
         if digest is None:
             continue
-        artifacts.append({"role": role, "path": str(path.relative_to(run_dir)), "sha256": digest})
+        artifacts.append({"role": role, "path": path.relative_to(run_dir).as_posix(), "sha256": digest})
     for path in rerun_outputs:
         digest = _sha256(path)
         if digest:
             artifacts.append({
                 "role": "representative_deterministic_rerun_output",
-                "path": str(path.relative_to(run_dir)),
+                "path": path.relative_to(run_dir).as_posix(),
                 "sha256": digest,
             })
     manifest = {
@@ -118,6 +118,87 @@ def _write_artifact_manifest(run_dir: Path, case: str, representative: dict[str,
     out_path = run_dir / "calibration_finalize" / "calibration_artifacts_manifest.json"
     out_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return out_path
+
+
+def verify_calibration_artifact_manifest(
+    run_dir: str | Path,
+    case: str,
+    *,
+    required_rerun_outputs: set[str] | None = None,
+) -> dict[str, Any]:
+    """Verify finalized core artifacts before a downstream tool reads them.
+
+    Artifact paths are resolved relative to ``run_dir`` instead of trusting
+    the absolute descriptive path in the JSON, so copied run bundles remain
+    verifiable. Missing, duplicate, escaping, or hash-mismatched entries fail.
+    """
+    run_dir = Path(run_dir).resolve()
+    manifest_path = run_dir / "calibration_finalize" / "calibration_artifacts_manifest.json"
+    if not manifest_path.is_file():
+        raise FileNotFoundError(f"calibration artifact manifest not found: {manifest_path}")
+    try:
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"invalid calibration artifact manifest: {manifest_path}") from exc
+    if str(payload.get("case") or "") != case:
+        raise ValueError(
+            f"artifact manifest case {payload.get('case')!r} does not match {case!r}"
+        )
+    artifacts = payload.get("artifacts")
+    if not isinstance(artifacts, list) or payload.get("artifact_count") != len(artifacts):
+        raise ValueError("artifact manifest count does not match its artifact entries")
+    required_roles = {
+        "pst",
+        "final_parameter_ensemble",
+        "final_observation_ensemble",
+        "phi_actual",
+        "quality_report",
+        "member_status",
+        "finalize_payload",
+        "stage_representative_params",
+    }
+    roles: set[str] = set()
+    seen_paths: set[str] = set()
+    rerun_names: set[str] = set()
+    for entry in artifacts:
+        if not isinstance(entry, dict):
+            raise ValueError("artifact manifest entries must be objects")
+        role = str(entry.get("role") or "").strip()
+        relative = str(entry.get("path") or "").strip().replace("\\", "/")
+        expected = str(entry.get("sha256") or "").strip().lower()
+        if not role or not relative or len(expected) != 64:
+            raise ValueError(f"invalid artifact manifest entry: {entry!r}")
+        if relative in seen_paths:
+            raise ValueError(f"duplicate artifact path in manifest: {relative}")
+        seen_paths.add(relative)
+        path = (run_dir / Path(relative)).resolve()
+        try:
+            path.relative_to(run_dir)
+        except ValueError as exc:
+            raise ValueError(f"artifact path escapes run directory: {relative}") from exc
+        actual = _sha256(path)
+        if actual is None:
+            raise FileNotFoundError(f"manifest artifact is missing: {path}")
+        if actual.lower() != expected:
+            raise ValueError(
+                f"artifact hash mismatch for {relative}: expected {expected}, got {actual}"
+            )
+        roles.add(role)
+        if role == "representative_deterministic_rerun_output":
+            rerun_names.add(Path(relative).name)
+    missing_roles = sorted(required_roles - roles)
+    if missing_roles:
+        raise ValueError(
+            "artifact manifest is missing required roles: " + ", ".join(missing_roles)
+        )
+    missing_rerun = sorted((required_rerun_outputs or set()) - rerun_names)
+    if missing_rerun:
+        raise ValueError(
+            "artifact manifest is missing required deterministic rerun outputs: "
+            + ", ".join(missing_rerun)
+            + "; run finalize_calibration.py again after the representative rerun"
+        )
+    return payload
 
 
 def _upsert_manifest_fields(path: Path, fields: dict[str, Any]) -> None:

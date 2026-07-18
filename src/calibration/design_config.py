@@ -273,22 +273,12 @@ def apply_parameter_stage(
             # frozen bounds; without it the parameter would stay numerically
             # fixed even though the design marks it active. Fail loudly rather
             # than silently degrade.
-            if frozen_bounds is None:
-                raise ValueError(
-                    f"stage {spec.stage} active parameter {name!r} has collapsed "
-                    "bounds (lower==upper) but no frozen bounds lookup was "
-                    "provided; pass load_frozen_bounds_lookup(...) so the "
-                    "declared search range can be restored"
-                )
-            if name not in frozen_bounds:
-                raise ValueError(
-                    f"stage {spec.stage} active parameter {name!r} has collapsed "
-                    "bounds but no active entry in the frozen bounds CSV; cannot "
-                    "restore its search range"
-                )
-            lower, upper = frozen_bounds[name]
-            item["lower"] = lower
-            item["upper"] = upper
+            raise ValueError(
+                f"stage {spec.stage} active parameter {name!r} has collapsed "
+                "bounds (lower==upper) but no frozen bounds lookup was "
+                "provided; pass load_frozen_bounds_lookup(...) so the "
+                "declared search range can be restored"
+            )
         else:
             lower, upper = cur_lower, cur_upper
         # The init must be finite and inside the (possibly restored) range; an

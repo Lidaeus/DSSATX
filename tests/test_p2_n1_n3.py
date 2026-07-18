@@ -12,7 +12,11 @@ from src.calibration.design_config import (
     load_design_config,
     load_frozen_bounds_lookup,
 )
-from src.calibration.finalize_calibration import _science_evidence, finalize_calibration
+from src.calibration.finalize_calibration import (
+    _science_evidence,
+    finalize_calibration,
+    verify_calibration_artifact_manifest,
+)
 from src.calibration.observation_policy import apply_observation_policy
 from src.calibration.prior_coverage import summarize_prior_coverage
 from src.calibration.stage_representative import write_stage_representative
@@ -460,9 +464,39 @@ def test_finalize_writes_minimal_artifact_hash_manifest(tmp_path):
     for artifact in data["artifacts"]:
         assert len(artifact["sha256"]) == 64
         assert not Path(artifact["path"]).is_absolute()
+        assert "\\" not in artifact["path"]  # portable JSON paths on Windows too
         assert (tmp_path / artifact["path"]).is_file()
     # No _agents/ path leaks in (the manifest is minimal by design).
     assert not any("_agents" in a["path"] for a in data["artifacts"])
+    verified = verify_calibration_artifact_manifest(tmp_path, "case")
+    assert verified["artifact_count"] == len(verified["artifacts"])
+    with pytest.raises(ValueError, match="missing required deterministic rerun outputs"):
+        verify_calibration_artifact_manifest(
+            tmp_path, "case", required_rerun_outputs={"Evaluate.OUT"}
+        )
+
+
+def test_artifact_manifest_verifier_rejects_tampered_output(tmp_path):
+    """A generated hash list is useful only when downstream tools reject
+    mutated artifacts before reading them."""
+    (tmp_path / "case.0.par.csv").write_text(",a\n0,1\n1,2\n", encoding="utf-8")
+    (tmp_path / "case.1.par.csv").write_text(",a\n0,1.1\n1,2.1\n", encoding="utf-8")
+    (tmp_path / "case.1.obs.csv").write_text(",y\n0,1\n1,2\n", encoding="utf-8")
+    (tmp_path / "case.phi.actual.csv").write_text(
+        "iteration,0,1\n0,1,2\n1,0.5,1.5\n", encoding="utf-8"
+    )
+    (tmp_path / "case.pst").write_text("* pst stub\n", encoding="utf-8")
+    (tmp_path / "run_manifest.yaml").write_text(
+        'run_id: "case"\ndesign_stage: "S1"\ndesign_table_id: "design"\n'
+        'approval_scope: "tooling_development"\n',
+        encoding="utf-8",
+    )
+    finalize_calibration(tmp_path, "case")
+    verify_calibration_artifact_manifest(tmp_path, "case")
+    with (tmp_path / "case.1.par.csv").open("a", encoding="utf-8") as handle:
+        handle.write("2,999\n")
+    with pytest.raises(ValueError, match="artifact hash mismatch"):
+        verify_calibration_artifact_manifest(tmp_path, "case")
 
 
 def test_prior_only_profile_allows_no_update_but_requires_variation(tmp_path):
