@@ -1,7 +1,8 @@
 # P2-MVP T4.2 code review 与 T4.2.1 交接（2026-07-19）
 
+> 状态：**T4.2.1 已完成（A 代码+测试 / C 受控重放+审计）**。运行审计见 `docs/reports/P2_MVP_T4_2_1_运行审计_20260719.md`；代码提交 `3433c29`。从干净 commit 重放到 `t4_candidate_predictions_v2/`（未覆盖 T4.2-B）：6/6 returncode=0，A/B comparison 覆盖全 6 realizations，3 对距离与 T4.2-B 精确一致（0.134508/0.015569/0.022550），manifest git_dirty=false，17 artifacts 哈希全过，219 passed/2 skipped。5 项发现在运行中验证闭合。下一阶段 T4.3 可让 R 消费该冻结 bundle。
 > 审查对象：`bf4d551`、`b263159`、`7f8dbc7` 及 `workspace/runs/t3_1_s4_20260718/t4_candidate_predictions/`
-> 审查结论：**现有 T4.2-B demo 运行证据可复核，但工具复用契约存在 3 项 P1 和 2 项 P2 缺口；暂不批准接入 R 图表。**
+> 审查结论：**现有 T4.2-B demo 运行证据可复核，但工具复用契约存在 3 项 P1 和 2 项 P2 缺口；暂不批准接入 R 图表。**（已由 T4.2.1 修复）
 > 下一阶段：只实施 T4.2.1 最小契约收口，不启动新的 IES、Morris 或 Sobol。
 
 ## 1. 已通过的证据

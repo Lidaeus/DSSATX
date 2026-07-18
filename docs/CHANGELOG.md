@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-07-19（T4.2.1 契约收口完成）
+
+- T4.2.1 候选解预测复跑契约收口（A 代码+测试 / C 受控重放+审计）全部完成，闭合 T4.2 code review 的 5 项发现（3 P1 + 2 P2）。代码提交 `3433c29`。
+- [P1] 冻结证据链闭合：observation policy 与 harvest_var 默认从 S4 run_manifest 解析；CLI 覆盖必须哈希/值匹配冻结值；posterior 上游 `calibration_finalize_sha256`/`calibration_artifacts_manifest_sha256` 与当前 S4 强制比对，不一致即在任何模型调用前失败。
+- [P1] 候选运行完整性：候选目录必须本次新建且空（拒绝复用旧 OUT，无 --force）；候选可用性要求 `returncode==0 AND 无 missing`；非零返回码 + 预存旧 OUT 的场景现标记为 `prediction_incomplete`（不再误判成功）；默认 runner 不再 raise，返回非零码并把 stderr 诊断存入 run dir。
+- [P1] candidate_comparison.csv 现写 A/B 两侧 + `candidate_side` 字段（修复原只含 A 侧、丢失 realization 16/20/32 的 bug）。
+- [P2] 消费端 candidate-pair schema 门：1-3 对、唯一 pair_id、real_a≠real_b、严格非负整数（4.5 拒绝而非截断为 4）、最多 6 唯一 realization。
+- [P2] 执行元数据冻结：去掉 `--cultivar TM0008` 硬编码（与 S4 model command 一致，cultivar 由冻结 FileX 决定）；每个 candidate_run_manifest.json 记录可复现 argv + harvest_var；sigma 分量语义改为基础 sigma>0、附加 model_sigma/sigma_floor≥0（匹配共享 observation-policy 语义）、组合 sigma_eff 有限正。
+- 新增 8 项负向/回归测试（与 5 项发现一一对应 + sigma 散活）：policy CLI 哈希不匹配、harvest_var 不匹配、posterior 上游过期、schema 严格（4 对/4.5/自配对/重复 pair_id）、非空 out_dir 拒绝、非零返回码+预存旧 OUT→incomplete、comparison 含 A/B 两侧、argv 无 --cultivar。
+- T4.2.1-C 受控重放：从干净 `3433c29` 重新生成 posterior demo + 运行 candidate_predictions 到新目录 `t4_candidate_predictions_v2/`（未覆盖 T4.2-B）。6/6 returncode=0，A/B comparison 覆盖全 6 realizations，3 对距离与 T4.2-B 精确一致（0.134508/0.015569/0.022550），manifest git_dirty=false，17 artifacts 哈希逐项复核 0 failures。
+- 全套测试 219 passed/2 skipped（基线 211 → +8）；compileall src+tests 通过。全程 tooling_demo/science_pending，未运行新 IES/SA，未改 bounds/sigma/split。证据见 `docs/reports/P2_MVP_T4_2_1_运行审计_20260719.md`。
+
 ## 2026-07-19（T4.2 候选解预测复跑完成）
 
 - T4.2 候选解预测复跑三阶段（A 代码+测试 / B 真实复跑 / C 文档）全部完成。新建 `src/reporting/candidate_predictions.py`（单入口 `build_candidate_prediction_bundle` + CLI）：manifest 链哈希校验 → 候选 realization 提取/参数导出（含 S4 固定的 XFRT/XFINT）→ ≤6 次隔离确定性 DSSAT 复跑（`src/calibration/run_dssat.py` 脚本路径调用）→ 复用 `validation_metrics.build_comparison_from_rerun` → 冻结 prediction distance（A/B 一对一对齐、raw-scale sigma_eff 不含 group_multiplier、RMS 分层、变量+角色双等权、只用 validation/diagnostic）→ 分类（tooling_demo 下只输出 demo_*/incomplete）→ 17 artifacts SHA-256 manifest。从干净 `b263159`（git_dirty=false）重跑：6 realization 全部 returncode=0，3 对候选（4/16、9/20、2/32）全 `demo_prediction_similar`（prediction_distance 0.13/0.016/0.023，远低于 1.0σ 阈值）。
