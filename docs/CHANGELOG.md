@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-07-18（T3 staged run）
+
+- T3 staged calibration 四阶段（S1→S2→S3→S4）全部 `engineering_validated`，继承链完整：S1（20/2, ADAP）→ S2（30/2, +4N, LAI/生物量/氮）→ S3（30/2, +XFRT/XFINT, PWAI 采收）→ S4（40/2, 联合 6 参数）。Phi 分别收敛到 0.81/2822/159/792；每阶段生成中位数代表参数、确定性复跑（LAID/PWAI）和完整 manifest/哈希。全程 `approval_scope=tooling_development`、`science_pending`，未读 validation。证据见 `docs/reports/P2_MVP_T3_staged_run_20260718.md`。
+- [P0] 修复 S4 active 参数被 `--fixed-from` 钉死的缺陷：`apply_fixed_params_csv` 把 fixed_from 的每个参数设成 `status=fixed` 且 `lower=upper=init`，随后 `apply_parameter_stage` 对 active_params 未恢复状态/bounds，导致 S4 `npar_adj=0` 无法运行（S2/S3 因 active 参数不在 fixed_from CSV 里未暴露）。修复：新增 `load_frozen_bounds_lookup`，`apply_parameter_stage` 新增 `frozen_bounds` 参数，对 active 参数强制 `status="none"` 并从冻结 bounds 恢复 lower/upper，保留代表值为 init。回归测试 `test_s4_re_releases_parameters_pinned_by_fixed_from` 覆盖。
+- 发现 `run_parallel.py --resume` 与 pestpp-ies 不兼容（`/r option not supported by pestpp-ies`）；S4 改为从干净 build 重新启动。该工具层限制不在本轮修复范围。
+
 ## 2026-07-18
 
 - T2.2 最小集成修复（staged calibration 工具链），对应 T2.1 审查的 5 项发现：

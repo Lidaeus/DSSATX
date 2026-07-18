@@ -39,6 +39,7 @@ from src.calibration.design_config import (
     apply_observation_stage,
     apply_parameter_stage,
     load_design_config,
+    load_frozen_bounds_lookup,
     write_design_audit,
 )
 from src.common.input_manifest import (
@@ -3517,8 +3518,22 @@ if __name__ == "__main__":
 
     if design_spec is not None:
         # Apply the approved stage after bounds/review overlays so the PST
-        # cannot silently release parameters outside the design table.
-        params = apply_parameter_stage(params, design_spec)
+        # cannot silently release parameters outside the design table. The
+        # frozen bounds lookup restores the declared search range of active
+        # parameters that an upstream --fixed-from overlay may have collapsed
+        # to a single point (e.g. S4 re-releasing S3-representative parameters).
+        stage_bounds_lookup = None
+        stage_bounds_path = _prevalidated_bounds or (
+            _resolve_bounds_id(args.bounds_id, crop=bounds_crop) if args.bounds_id else None
+        )
+        if stage_bounds_path:
+            try:
+                stage_bounds_lookup = load_frozen_bounds_lookup(stage_bounds_path)
+            except (OSError, ValueError) as exc:
+                raise RuntimeError(
+                    f"could not load frozen bounds lookup from {stage_bounds_path}: {exc}"
+                ) from exc
+        params = apply_parameter_stage(params, design_spec, frozen_bounds=stage_bounds_lookup)
         if stage2_outputs is not None:
             stage2_outputs, design_observation_report = apply_observation_stage(
                 stage2_outputs,

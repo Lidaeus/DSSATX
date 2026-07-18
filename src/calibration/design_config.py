@@ -9,6 +9,7 @@ cannot enter Phi.
 from __future__ import annotations
 
 import json
+import math
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -178,8 +179,46 @@ def load_design_config(path: str | Path, stage: str) -> DesignSpec:
     )
 
 
-def apply_parameter_stage(params: list[dict[str, Any]], spec: DesignSpec) -> list[dict[str, Any]]:
-    """Release only the declared active parameters to PEST++."""
+def load_frozen_bounds_lookup(path: str | Path) -> dict[str, tuple[float, float]]:
+    """Read a frozen bounds CSV into a ``{NAME: (lower, upper)}`` lookup.
+
+    Used by :func:`apply_parameter_stage` to restore the declared search
+    range of active parameters that an upstream ``--fixed-from`` overlay may
+    have collapsed to a single point (e.g. S4 re-releases parameters that S3
+    had pinned to the representative median).
+    """
+    lookup: dict[str, tuple[float, float]] = {}
+    frame = pd.read_csv(path, encoding="utf-8-sig")
+    for _, row in frame.iterrows():
+        name = str(row.get("name", "")).strip().upper()
+        status = str(row.get("status", "")).strip().lower()
+        if not name or status != "active":
+            continue
+        try:
+            lower = float(row["lower"])
+            upper = float(row["upper"])
+        except (KeyError, ValueError, TypeError):
+            continue
+        if lower < upper:
+            lookup[name] = (lower, upper)
+    return lookup
+
+
+def apply_parameter_stage(
+    params: list[dict[str, Any]],
+    spec: DesignSpec,
+    frozen_bounds: Mapping[str, tuple[float, float]] | None = None,
+) -> list[dict[str, Any]]:
+    """Release only the declared active parameters to PEST++.
+
+    ``frozen_bounds`` (from :func:`load_frozen_bounds_lookup`) restores the
+    declared lower/upper of each active parameter. This matters when an
+    upstream ``--fixed-from`` overlay collapsed a parameter to a single point
+    (lower==upper==init): a later stage that re-releases it as active must
+    give it back its full search range while keeping the inherited init value
+    as the starting point. Without this, the parameter would stay numerically
+    fixed even though the design marks it active.
+    """
     by_name = {str(p.get("name", "")).strip().upper(): p for p in params}
     missing = [name for name in spec.active_params if name not in by_name]
     if missing:
@@ -188,7 +227,29 @@ def apply_parameter_stage(params: list[dict[str, Any]], spec: DesignSpec) -> lis
     missing_fixed = [name for name in fixed_names if name not in by_name]
     if missing_fixed:
         raise ValueError(f"stage {spec.stage} fixed baseline parameters are absent from the template: {', '.join(missing_fixed)}")
-    selected = [by_name[name] for name in spec.active_params]
+    selected: list[dict[str, Any]] = []
+    for name in spec.active_params:
+        item = dict(by_name[name])
+        # PST stores the parameter transform in ``partrans`` and the build
+        # copies ``status`` straight into it, so an active parameter must be
+        # marked ``"none"`` (PEST's free-adjustable transform), not the
+        # ``"active"`` label used in the frozen bounds CSV. A ``--fixed-from``
+        # overlay sets ``status="fixed"``; the stage must override that here.
+        item["status"] = "none"
+        if frozen_bounds and name in frozen_bounds:
+            lower, upper = frozen_bounds[name]
+            # Keep the inherited init (e.g. upstream representative median)
+            # as the starting point, but restore the full declared search range
+            # so IES can actually move the parameter.
+            item["lower"] = lower
+            item["upper"] = upper
+            try:
+                init_val = float(item.get("init", float("nan")))
+            except (TypeError, ValueError):
+                init_val = float("nan")
+            if not math.isfinite(init_val) or init_val < lower or init_val > upper:
+                item["init"] = (lower + upper) / 2.0
+        selected.append(item)
     for name in fixed_names:
         item = dict(by_name[name])
         item["lower"] = item["upper"] = item["init"]

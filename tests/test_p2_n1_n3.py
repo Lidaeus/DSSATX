@@ -10,6 +10,7 @@ from src.calibration.design_config import (
     apply_observation_stage,
     apply_parameter_stage,
     load_design_config,
+    load_frozen_bounds_lookup,
 )
 from src.calibration.finalize_calibration import _science_evidence, finalize_calibration
 from src.calibration.observation_policy import apply_observation_policy
@@ -64,7 +65,10 @@ def test_s2_fixed_baseline_parameters_are_not_released_as_active():
     for name in ("EM-FL", "TRIFL"):
         assert staged[name]["status"] == "fixed"
         assert staged[name]["lower"] == staged[name]["upper"] == staged[name]["init"]
-    assert staged["NSTFAC"]["status"] == "active"
+    # Active parameters are marked with PEST's free-adjustable transform "none"
+    # (the build copies `status` into `partrans`), not the "active" label used
+    # in the frozen bounds CSV.
+    assert staged["NSTFAC"]["status"] == "none"
     assert spec.observation["outputs"]["PestJoint.OUT"] == ["LAIX", "CNAM"]
     assert "PestHarvest.OUT" not in spec.observation["outputs"]
     assert spec.observation["representative_outputs"]["PestHarvest.OUT"] == ["PWAI", "PWAD"]
@@ -624,3 +628,47 @@ def test_design_spec_exposes_bounds_input_policy_ids():
     assert spec.bounds_id == "eggplant_p1_xxql2501_v4_sobol20_20260717"
     assert spec.input_bundle == "xxql2501_20260716"
     assert spec.observation_policy_id == "assumption_based_sigma_v2"
+
+
+def test_s4_re_releases_parameters_pinned_by_fixed_from(tmp_path):
+    """S4 inherits the full S3 representative parameter set via --fixed-from,
+    which collapses every inherited parameter to lower==upper==init. The S4
+    design re-releases EM-FL/TRIFL/NSTFAC/RTNO3/NMOBMX/NVSMOB as active while
+    keeping XFRT/XFINT fixed. apply_parameter_stage must restore the declared
+    search range of the active parameters from the frozen bounds; without the
+    frozen_bounds lookup the PST would end up with npar_adj=0 (all fixed) and
+    S4 could not run."""
+    spec = load_design_config(DESIGN, "S4")
+    # Simulate the post-fixed-from state: every parameter collapsed to a point.
+    representative_values = {
+        "EM-FL": 23.2541, "TRIFL": 0.623152,
+        "NSTFAC": 0.85, "RTNO3": 0.031359,
+        "NMOBMX": 0.08, "NVSMOB": 0.37186,
+        "XFRT": 0.9430525, "XFINT": 0.2822495,
+    }
+    params = []
+    for name, val in representative_values.items():
+        params.append({"name": name, "init": val, "lower": val, "upper": val, "status": "fixed"})
+
+    # Without frozen_bounds: the historical bug — all stay fixed, npar_adj=0.
+    staged_no_lookup = {p["name"]: p for p in apply_parameter_stage(params, spec)}
+    assert all(staged_no_lookup[n]["status"] == "none" for n in spec.active_params)
+    # ... but lower==upper==init remains collapsed, so IES still cannot move them:
+    for name in spec.active_params:
+        assert staged_no_lookup[name]["lower"] == staged_no_lookup[name]["upper"]
+
+    # With frozen_bounds: active parameters recover their full search range.
+    bounds_lookup = load_frozen_bounds_lookup(
+        "data/parameter_registry/bounds_frozen/eggplant/eggplant_p1_xxql2501_v4_sobol20_20260717.csv"
+    )
+    staged = {p["name"]: p for p in apply_parameter_stage(params, spec, frozen_bounds=bounds_lookup)}
+    assert set(staged) == {"EM-FL", "TRIFL", "NSTFAC", "RTNO3", "NMOBMX", "NVSMOB", "XFRT", "XFINT"}
+    for name in spec.active_params:
+        assert staged[name]["status"] == "none"
+        assert staged[name]["lower"] < staged[name]["upper"], f"{name} bounds still collapsed"
+        # The inherited representative value stays as the starting point.
+        assert staged[name]["init"] == representative_values[name]
+    # XFRT/XFINT remain pinned at the S3 representative median.
+    for name in ("XFRT", "XFINT"):
+        assert staged[name]["status"] == "fixed"
+        assert staged[name]["lower"] == staged[name]["upper"] == staged[name]["init"]
