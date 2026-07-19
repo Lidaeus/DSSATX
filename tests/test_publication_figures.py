@@ -121,7 +121,11 @@ def _write_passing_upstream_artifacts(run_dir: Path, run_id: str) -> tuple[Path,
     """Write matching manifest, engineering report and finalize authority."""
     manifest = run_dir / "run_manifest.yaml"
     manifest.write_text(
-        f'run_id: "{run_id}"\nrun_type: "calibration"\ngit_commit: "abc123"\n',
+        f'run_id: "{run_id}"\nrun_type: "calibration"\ngit_commit: "abc123"\n'
+        'input_manifest_sha256: "1111111111111111111111111111111111111111111111111111111111111111"\n'
+        'bounds_sha256: "2222222222222222222222222222222222222222222222222222222222222222"\n'
+        'observation_policy_sha256: "3333333333333333333333333333333333333333333333333333333333333333"\n'
+        'validation_split_sha256: "4444444444444444444444444444444444444444444444444444444444444444"\n',
         encoding="utf-8",
     )
     report = {
@@ -197,6 +201,9 @@ def test_validated_bundle_requires_upstream_manifest_and_quality_report(tmp_path
     assert payload["data_status"] == "science_validated"
     assert payload["upstream_validation"]["run_manifest"]["run_id"] == "formal_case"
     assert payload["upstream_validation"]["quality_report"]["science_validated"] is True
+    assert set(payload["upstream_validation"]["frozen_run_inputs"]) == {
+        "input_manifest_sha256", "bounds_sha256", "observation_policy_sha256", "validation_split_sha256",
+    }
 
 
 def test_paper_export_rejects_mixed_run_ids_and_failing_quality_report(tmp_path):
@@ -253,6 +260,26 @@ def test_paper_export_rejects_mixed_run_id_in_comparison_table(tmp_path):
         ])
 
 
+def test_formal_export_rejects_missing_frozen_run_hash(tmp_path):
+    comparison = _validated_comparison_frame(tmp_path, "formal_case")
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    manifest, quality = _write_passing_upstream_artifacts(run_dir, "formal_case")
+    manifest.write_text(
+        "\n".join(line for line in manifest.read_text(encoding="utf-8").splitlines()
+                  if not line.startswith("bounds_sha256:")) + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(SystemExit):
+        main([
+            "--run-id", "formal_case",
+            "--comparison-csv", str(comparison),
+            "--run-manifest", str(manifest),
+            "--quality-report", str(quality),
+            "--out-dir", str(tmp_path / "out"),
+        ])
+
+
 def test_r_is_the_only_paper_renderer():
     root = Path("paper/R")
     expected = {
@@ -285,6 +312,15 @@ def test_t4_demo_figures_use_a_hash_gated_r_only_bundle():
     assert "candidate_pair_predictions.csv" in common
     assert "run_dssat" not in common.lower()
     assert "matplotlib" not in Path("src/reporting/export_posterior_demo_data.py").read_text(encoding="utf-8")
+
+
+def test_formal_calibration_figures_require_frozen_scenario_provenance():
+    common = Path("paper/R/common.R").read_text(encoding="utf-8")
+    entry = Path("paper/R/make_all.R").read_text(encoding="utf-8")
+    assert "require_calibration_scenario" in common
+    assert "actual_trial_calibration" in common
+    assert "frozen_run_inputs" in common
+    assert "require_calibration_scenario(bundle)" in entry
 
 
 def test_make_all_selected_sa_figures_need_no_calibration_trajectory():

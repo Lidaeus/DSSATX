@@ -48,6 +48,30 @@ def _artifact(path: Path) -> dict[str, str]:
     return {"path": path.name, "sha256": _sha256(path)}
 
 
+_FROZEN_RUN_HASH_FIELDS = (
+    "input_manifest_sha256",
+    "bounds_sha256",
+    "observation_policy_sha256",
+    "validation_split_sha256",
+)
+
+
+def _read_frozen_run_provenance(run_manifest_path: Path) -> dict[str, str]:
+    """Read the identity hashes that make a formal calibration result reusable.
+
+    A matching ``run_id`` is not enough: a formal paper bundle must disclose
+    the frozen experiment input, bounds, observation-weight policy, and split.
+    These are scalar hashes deliberately written by the calibration builder.
+    """
+    provenance: dict[str, str] = {}
+    for field in _FROZEN_RUN_HASH_FIELDS:
+        value = read_flat_run_manifest_field(run_manifest_path, field)
+        if value is None or len(value) != 64 or any(char not in "0123456789abcdefABCDEF" for char in value):
+            raise ValueError(f"run_manifest has no valid {field}; formal paper export is blocked")
+        provenance[field] = value.lower()
+    return provenance
+
+
 def _write_csv(frame, path: Path) -> Path:
     frame.to_csv(path, index=False, encoding="utf-8")
     return path
@@ -167,6 +191,7 @@ def _resolve_upstream_validation(
         "sha256": _sha256(run_manifest_path),
         "run_id": manifest_run_id,
     }
+    provenance["frozen_run_inputs"] = _read_frozen_run_provenance(run_manifest_path)
 
     report = load_quality_report(quality_report_path)
     if report.run_id and report.run_id != run_id:

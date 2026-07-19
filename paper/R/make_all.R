@@ -41,6 +41,7 @@ needs_trajectory <- selected("fig4_dynamics") || selected("figs4_all_treatments"
 needs_treatment_metadata <- selected("figs3_residuals") || selected("fig4_dynamics") || selected("figs4_all_treatments")
 
 bundle <- if (is_t4_request) read_t4_demo_bundle(input_dir, isTRUE(args$allow_unvalidated_demo)) else read_paper_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
+if (!is_t4_request) require_calibration_scenario(bundle)
 variables <- split_csv_arg(if (is.null(args$variables)) "LAID,LWAD,SWAD,FRESH_INC" else args$variables)
 process_variables <- split_csv_arg(if (is.null(args$process_variables)) "LAID,LWAD" else args$process_variables)
 treatments <- split_csv_arg(if (is.null(args$treatments)) "2,13" else args$treatments)

@@ -172,6 +172,20 @@ read_paper_bundle <- function(input_dir, allow_demo = FALSE) {
        treatment_metadata = treatment_metadata, is_demo = is_demo)
 }
 
+require_calibration_scenario <- function(bundle) {
+  if (isTRUE(bundle$is_demo)) return(invisible(TRUE))
+  scenario <- bundle$manifest$scenario_type
+  if (!identical(scenario, "actual_trial_calibration")) {
+    stop("Formal calibration figures require scenario_type=actual_trial_calibration", call. = FALSE)
+  }
+  frozen <- bundle$manifest$upstream_validation$frozen_run_inputs
+  required <- c("input_manifest_sha256", "bounds_sha256", "observation_policy_sha256", "validation_split_sha256")
+  if (is.null(frozen) || !all(required %in% names(frozen))) {
+    stop("Formal calibration figures require frozen input/bounds/policy/split provenance", call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
 read_t4_demo_bundle <- function(input_dir, allow_demo = FALSE) {
   manifest_path <- file.path(input_dir, "paper_data_manifest.json")
   if (!file.exists(manifest_path)) stop("Missing paper_data_manifest.json in ", input_dir)

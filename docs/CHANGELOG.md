@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-07-19（T4.4 正式论文包证据链收口）
+
+- 正式 `paper_data_manifest.json` 现在强制携带同一 run manifest 中的 input、bounds、observation policy 和 validation split SHA-256；缺失或格式错误时导出失败。
+- R 对正式率定图强制 `scenario_type=actual_trial_calibration` 与四类冻结 provenance；DEMO 仍只能显式用于布局 QA。
+
 ## 2026-07-19（T4.3 最小 R 图表接入）
 
 - 新增经过哈希、run_id 与 `tooling_demo` 状态绑定的 T4 数据适配器；R 仅消费其冻结 CSV/manifest，绝不读取 DSSAT/PEST++ 临时目录。
