@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-07-19（T4.3 最小 R 图表接入）
+
+- 新增经过哈希、run_id 与 `tooling_demo` 状态绑定的 T4 数据适配器；R 仅消费其冻结 CSV/manifest，绝不读取 DSSAT/PEST++ 临时目录。
+- Fig. S5–S7 已完成 DEMO 核心和真实 R 4.5.2 导出 QA：参数独立尺度的 conditional-ensemble 区间、Spearman 描述矩阵、候选对参数/预测距离。所有输出为 `DEMO_`、有水印且不可作为科研结论；PCA/VIF/t-SNE/聚类不纳入 MVP。
+- 测试：`228 passed, 2 skipped`；图表契约定向测试 `18 passed`。
+
 ## 2026-07-19（T4.2.1-B code review 补丁完成）
 
 - 修复 posterior 上游哈希缺失/格式错误时可绕过冻结链的缺口；两个必需 SHA-256 现必须存在、格式正确且与当前 S4 相等。

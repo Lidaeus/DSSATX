@@ -273,6 +273,20 @@ def test_r_is_the_only_paper_renderer():
     assert "DEMO" in entry
 
 
+def test_t4_demo_figures_use_a_hash_gated_r_only_bundle():
+    """T4 layout QA must not let R inspect DSSAT/PEST++ run artefacts."""
+    entry = Path("paper/R/make_all.R").read_text(encoding="utf-8")
+    common = Path("paper/R/common.R").read_text(encoding="utf-8")
+    assert "read_t4_demo_bundle" in entry
+    for figure_id in ("figs5_posterior", "figs6_spearman", "figs7_equifinality"):
+        assert figure_id in entry
+    assert "cannot be mixed with standard paper figures" in entry
+    assert "t4_posterior_equifinality" in common
+    assert "candidate_pair_predictions.csv" in common
+    assert "run_dssat" not in common.lower()
+    assert "matplotlib" not in Path("src/reporting/export_posterior_demo_data.py").read_text(encoding="utf-8")
+
+
 def test_make_all_selected_sa_figures_need_no_calibration_trajectory():
     """``--figure-ids`` selects a figure subset so SA figures can render from an
     SA data bundle without a calibration trajectory, and vice-versa (plan §7).

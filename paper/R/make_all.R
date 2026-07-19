@@ -9,6 +9,9 @@ source(file.path(script_dir, "fig_selected_dynamics.R"), local = FALSE)
 source(file.path(script_dir, "fig_residual_diagnostics.R"), local = FALSE)
 source(file.path(script_dir, "fig_all_treatment_dynamics.R"), local = FALSE)
 source(file.path(script_dir, "fig_phi_convergence.R"), local = FALSE)
+source(file.path(script_dir, "fig_posterior_demo.R"), local = FALSE)
+source(file.path(script_dir, "fig_spearman_demo.R"), local = FALSE)
+source(file.path(script_dir, "fig_equifinality_demo.R"), local = FALSE)
 
 check_r_dependencies()
 args <- parse_cli_args(commandArgs(trailingOnly = TRUE))
@@ -27,15 +30,48 @@ if (!is.null(args$formats)) profile$formats <- split_csv_arg(args$formats)
 # Default "all" preserves backward-compatible full rendering.
 figure_ids <- if (is.null(args$figure_ids)) "all" else args$figure_ids
 selected <- function(id) figure_ids == "all" || id %in% split_csv_arg(figure_ids)
+is_t4_request <- any(vapply(c("figs5_posterior", "figs6_spearman", "figs7_equifinality"), selected, logical(1)))
+if (is_t4_request) {
+  standard_ids <- c("fig2_phi", "fig3_performance", "figs3_residuals", "fig4_dynamics", "figs4_all_treatments")
+  if (any(vapply(standard_ids, selected, logical(1)))) {
+    stop("T4 demo figures require a dedicated bundle and cannot be mixed with standard paper figures", call. = FALSE)
+  }
+}
 needs_trajectory <- selected("fig4_dynamics") || selected("figs4_all_treatments")
 needs_treatment_metadata <- selected("figs3_residuals") || selected("fig4_dynamics") || selected("figs4_all_treatments")
 
-bundle <- read_paper_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
+bundle <- if (is_t4_request) read_t4_demo_bundle(input_dir, isTRUE(args$allow_unvalidated_demo)) else read_paper_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
 variables <- split_csv_arg(if (is.null(args$variables)) "LAID,LWAD,SWAD,FRESH_INC" else args$variables)
 process_variables <- split_csv_arg(if (is.null(args$process_variables)) "LAID,LWAD" else args$process_variables)
 treatments <- split_csv_arg(if (is.null(args$treatments)) "2,13" else args$treatments)
 stem <- if (bundle$is_demo) "DEMO" else "Fig"
 artifacts <- character()
+
+if (is_t4_request) {
+  if (figure_ids == "all") stop("T4 demo bundles require explicit --figure-ids", call. = FALSE)
+  if (selected("figs5_posterior")) {
+    result <- build_posterior_contraction(bundle$posterior, profile, bundle$is_demo)
+    base <- file.path(out_dir, "DEMO_FigS5_posterior_contraction")
+    artifacts <- c(artifacts, save_figure_set(result$plot, base, profile, profile$double_column_width_mm, result$height_mm))
+    source_path <- paste0(base, ".source.csv"); utils::write.csv(result$source, source_path, row.names = FALSE)
+    artifacts <- c(artifacts, source_path)
+  }
+  if (selected("figs6_spearman")) {
+    result <- build_spearman_structure(bundle$spearman, profile, bundle$is_demo)
+    base <- file.path(out_dir, "DEMO_FigS6_spearman_structure")
+    artifacts <- c(artifacts, save_figure_set(result$plot, base, profile, profile$column_width_mm, result$height_mm))
+    source_path <- paste0(base, ".source.csv"); utils::write.csv(result$source, source_path, row.names = FALSE)
+    artifacts <- c(artifacts, source_path)
+  }
+  if (selected("figs7_equifinality")) {
+    result <- build_candidate_prediction_distance(bundle$pair_predictions, profile, bundle$is_demo)
+    base <- file.path(out_dir, "DEMO_FigS7_candidate_prediction_distance")
+    artifacts <- c(artifacts, save_figure_set(result$plot, base, profile, profile$double_column_width_mm, result$height_mm))
+    source_path <- paste0(base, ".source.csv"); utils::write.csv(result$source, source_path, row.names = FALSE)
+    distance_path <- paste0(base, ".distance_source.csv"); utils::write.csv(result$distance_source, distance_path, row.names = FALSE)
+    artifacts <- c(artifacts, source_path, distance_path)
+  }
+}
 
 if (selected("fig3_performance")) {
   performance <- build_model_performance(bundle$comparison, variables, profile, bundle$is_demo)

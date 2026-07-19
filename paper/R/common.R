@@ -172,6 +172,50 @@ read_paper_bundle <- function(input_dir, allow_demo = FALSE) {
        treatment_metadata = treatment_metadata, is_demo = is_demo)
 }
 
+read_t4_demo_bundle <- function(input_dir, allow_demo = FALSE) {
+  manifest_path <- file.path(input_dir, "paper_data_manifest.json")
+  if (!file.exists(manifest_path)) stop("Missing paper_data_manifest.json in ", input_dir)
+  manifest <- jsonlite::fromJSON(manifest_path, simplifyVector = FALSE)
+  if (!identical(manifest$bundle_type, "t4_posterior_equifinality")) {
+    stop("This renderer requires bundle_type=t4_posterior_equifinality", call. = FALSE)
+  }
+  for (artifact in manifest$artifacts) {
+    artifact_path <- file.path(input_dir, artifact$path)
+    if (!file.exists(artifact_path)) stop("Manifest artifact is missing: ", artifact$path)
+    if (!identical(tolower(sha256_file(artifact_path)), tolower(artifact$sha256))) {
+      stop("Manifest hash mismatch: ", artifact$path)
+    }
+  }
+  is_demo <- !identical(manifest$data_status, "science_validated")
+  if (is_demo && !isTRUE(allow_demo)) {
+    stop("Input is not science_validated; use --allow-unvalidated-demo only for layout QA")
+  }
+  required <- c("posterior_diagnostics.csv", "spearman_correlation.csv", "candidate_pairs.csv",
+                "candidate_pair_predictions.csv")
+  missing <- required[!file.exists(file.path(input_dir, required))]
+  if (length(missing) > 0) stop("T4 bundle missing: ", paste(missing, collapse = ", "))
+  read_csv <- function(name) utils::read.csv(file.path(input_dir, name), stringsAsFactors = FALSE,
+                                              check.names = FALSE)
+  bundle <- list(manifest = manifest, is_demo = is_demo,
+                 posterior = read_csv("posterior_diagnostics.csv"),
+                 spearman = read_csv("spearman_correlation.csv"),
+                 pairs = read_csv("candidate_pairs.csv"),
+                 pair_predictions = read_csv("candidate_pair_predictions.csv"))
+  for (table in bundle[c("posterior", "spearman", "pairs", "pair_predictions")]) {
+    if (!all(c("run_id", "data_status") %in% names(table))) stop("T4 table lacks provenance columns")
+    if (length(unique(table$run_id)) != 1 || unique(table$run_id)[[1]] != manifest$run_id) {
+      stop("T4 table run_id does not match manifest")
+    }
+  }
+  bundle
+}
+
+demo_watermark <- function(is_demo) {
+  if (!isTRUE(is_demo)) return(NULL)
+  ggplot2::annotate("text", x = Inf, y = Inf, label = "DEMO", hjust = 1.15, vjust = 1.5,
+                    colour = "#7A7A7A", alpha = 0.55, fontface = "bold", size = 3)
+}
+
 sha256_record <- function(path) {
   list(path = normalizePath(path, winslash = "/", mustWork = TRUE),
        sha256 = sha256_file(path))
