@@ -52,7 +52,7 @@ PEST++ 只负责提出候选参数和读取残差；DSSAT runner 负责参数注
 
 `workspace/` 只承载运行目录、产物和兼容入口。新业务逻辑不得继续写入一次性 workspace 脚本。
 
-正式实验输入存放在 `data/user/experiments/<bundle_id>/`，通过 `--input-dir` 显式选择。每个包必须含 `input_manifest.json` 和内容哈希；禁止覆盖既有 bundle ID，禁止从 `Workspace` 静默回退。
+正式实验输入存放在 `data/user/experiments/<bundle_id>/`，通过 `--input-dir` 显式选择。每个包必须含 `input_manifest.json` 和内容哈希；禁止覆盖既有 bundle ID，禁止从 `Workspace` 静默回退。FileX/FileA/FileT 分别为 `.TMX/.TMA/.TMT`，CUL/ECO/SPE 基线模板只存放在 `data/templates/genotype/*.base`；完整约定见 [目录与输入资产规范](目录与输入资产规范.md)。
 
 ## 3. 科研质量门禁
 

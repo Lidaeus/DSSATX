@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-07-19（目录清理与输入资产规范）
+
+- 明确 FileX/FileA/FileT 与配套土壤、气象、批处理文件必须放在版本化 `data/user/experiments/<bundle_id>/`；CUL/ECO/SPE 基线模板必须放在 `data/templates/genotype/*.base`，运行副本仅能存在于 `workspace/runs/<run_id>/`。
+- 清理可再生缓存、布局 demo 与旧 workspace 根目录运行输出；保留已审计运行、正式 SA 来源快照和历史归档，避免破坏可追溯证据。
+
 ## 2026-07-19（T4.4 正式论文包证据链收口）
 
 - 正式 `paper_data_manifest.json` 现在强制携带同一 run manifest 中的 input、bounds、observation policy 和 validation split SHA-256；缺失或格式错误时导出失败。
