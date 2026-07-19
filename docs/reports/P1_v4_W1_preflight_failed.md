@@ -139,7 +139,7 @@ DSSATPRO.v48 与 `C:\DSSAT48\Genotype\TMGRO048.CUL` 在每次测试后均已从�
 
 本失败**不修改** v4 SA 输出契约（164 项）、bounds（57 active）或输入包（SA 反事实 v1）。这些契约本身在 W0 已通过基线验证（DSSAT 基线 164/164 项有限、0 个 `-99`），W1 失败不推翻契约设计。
 
-按 `docs/P1_v4_下一阶段协作执行计划.md` §4"集成门与审批边界"，以下事项需要用户审批后才能继续：
+按 `docs/archive/completed_plans/P1_v4_下一阶段协作执行计划.md` §4“集成门与审批边界”，以下事项需要用户审批后才能继续：
 
 1. **DSSAT genotype 读取路径的修复方案**。这是运行环境层问题，可能涉及：
    - 确认 DSSAT v4.8 batch mode（`DSCSM048.EXE B DSSBatch.v48`）实际查找 CUL 的路径规则；

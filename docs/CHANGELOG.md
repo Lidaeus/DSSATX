@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-19（文档体系收口）
+
+- 重写根目录 `README.md`，统一项目定位、当前科研边界、输入位置、敏感性分析、分阶段率定、结果检查和论文图表入口。
+- 新增“项目状态与科研启动清单”和“敏感性分析与率定用户指南”，将分散在阶段计划中的仍有效规则合并为当前用户入口。
+- 将已完成计划、旧设计、迁移材料、历史交接和旧 SA 说明迁入 `docs/archive/`；上游手册与模型背景材料迁入 `docs/reference/`；实施报告保留在 `docs/reports/` 并新增索引。
+- 明确权威顺序：当前产品定义与规范优先，报告只记录证据，归档文档不得作为新运行配置依据。
+- 全套回归为 `229 passed, 2 skipped, 1 failed`；失败揭示 staged builder 在干净 workspace 下仍隐式依赖旧 `Evaluate.OUT`，已记入科研启动清单，留待独立代码修复。
+
 ## 2026-07-19（目录清理与输入资产规范）
 
 - 明确 FileX/FileA/FileT 与配套土壤、气象、批处理文件必须放在版本化 `data/user/experiments/<bundle_id>/`；CUL/ECO/SPE 基线模板必须放在 `data/templates/genotype/*.base`，运行副本仅能存在于 `workspace/runs/<run_id>/`。

@@ -176,5 +176,5 @@ This project uses an **unmixable two-track figure system**. Read `docs/科研图
 ## Docs to read before editing sensitive areas
 
 - **Figures/plotting:** `docs/科研图表设计与开发计划.md` (canonical figure spec, phases V0–V4, next-stage tasks T1–T4), `paper/README.md` (R pipeline contract), `configs/figures/figure_registry.csv` (current per-figure status).
-- Research credibility / SA: `docs/P0_科研可信性修复开发计划.md`, `docs/P1_科研分析启动计划.md`, `docs/参数敏感性分析对比与拓展计划.md`.
+- Research credibility / SA: `docs/项目状态与科研启动清单.md`, `docs/敏感性分析与率定用户指南.md`, `docs/权重设计方案改进提案.md`. Completed plans and superseded proposals are under `docs/archive/` and do not define current behavior.
 - Project design / refactor: `项目重构规划.md`, `docs/DEVELOPER_GUIDE.md`, `docs/CHANGELOG.md`.

@@ -1,132 +1,158 @@
-# Tomato_Cal：DSSAT 参数敏感性分析与率定工具
+# Tomato_Cal
 
-Tomato_Cal 面向作物模型研究者，目标是在 Windows 环境中提供可信、有效且易用的 DSSAT 参数敏感性分析（SA）与 PEST++ 参数率定工作流，并形成可复核、可复现、可用于论文写作的结果和图表。
+Tomato_Cal 是一个面向作物模型研究的 DSSAT 参数敏感性分析与 PEST++ IES 参数率定工具。它当前以茄子试验为主要案例；由于 DSSAT 4.8 没有独立茄子模型，项目使用 Tomato/CRGRO 的 `TMGRO048.CUL/ECO/SPE` 模型文件，并通过版本化输入、冻结参数范围和质量门保证结果可追溯。
 
-本项目当前以茄子试验为主要用例。由于 DSSAT 4.8 没有独立的茄子模型，茄子与番茄共用 `TMGRO048.CUL/ECO/SPE` 和 CRGRO/Tomato 模型实现；参数登记中的 `crop` 字段用于区分作物参数集。
+项目的目标很明确：可靠地完成遗传参数筛选、分阶段率定、留出处理验证、条件参数集合/异参同效分析，并为论文输出可复现数据和 R 图表。它不是通用建模平台，也不会以增加算法数量代替科学审查。
 
 ## 当前状态
 
-- 代码已具备 DSSAT 运行、Morris/Sobol 分析、PEST++ IES 构建与结果整理的基础能力。
-- 历史运行只能证明流程曾执行，不能证明其科研结论有效；P0 质量门现已能主动拒绝这些退化结果。
-- 当前开发基线是 [产品定义与系统设计](项目重构规划.md)；详细风险和任务见 [P0 科研可信性修复开发计划](docs/P0_科研可信性修复开发计划.md)。
-- P0/P2 可信性修复已接入当前构建器：S1 已完成工程闭环，S2 已完成观测噪声契约、先验覆盖预检和 no-cull 对照，但尚未科研验证；正式状态只由 `calibration_finalize/calibration_finalize.json` 决定，历史 SA/率定结果仍不得直接用于论文结论。
-- 科研图表已冻结为“双轨制”：Python 只做 SA/率定运行诊断与论文数据导出，未来可能进入论文的图全部由 R 绘制；完整 Fig. 1–6/Fig. S1–S8 规划见 [科研图表设计与开发计划](docs/科研图表设计与开发计划.md)。
-- P0 防退化加固已完成当前回归轮次。正式 Morris 已完成并通过跨 seed 稳定性门；推荐的16参数保守并集已经批准和哈希冻结。真实 `N=4` Sobol工程预检72/72成功，0模型失败，230项响应和bootstrap点估计复算均通过；小样本出现35项基础零方差和极端指数，明确不得解释。当前等待审批 `N=64 → 128 → 必要时256` 的正式自适应预算，详见 [P1-R5 Sobol预检报告](docs/reports/P1_R5_Sobol工程预检与正式预算.md)。
+- DSSAT 参数注入、隔离运行、Morris/Sobol、分阶段 IES、确定性复跑和结果清单已经打通。
+- S1–S4 工具开发运行已达到 `engineering_validated`，证明工具链可执行；现有运行仍是 `tooling_development / science_pending`，不能直接作为论文结论。
+- 清理旧 workspace 输出后，当前回归发现 staged build 仍隐式读取 `workspace/Evaluate.OUT`；在修复这一干净环境构建缺口前，不应启动新的正式 SA/率定。
+- 正式重新分析前，用户需要重新审核敏感性分析参数范围、参与率定的参数与边界，并为输入包、边界和设计创建新的冻结 ID。
+- Python 只输出运行诊断和论文数据；所有可能进入论文的图由 `paper/R/` 统一绘制。
 
-## 产品原则
+## 环境
 
-1. **科学有效优先于进程成功**：退出码为 0 只表示程序结束；质量门通过才表示结果可解释。
-2. **每一步可追溯**：参数、观测、权重、随机种子、软件版本、命令和质量结论均进入运行清单。
-3. **SA 与率定受控衔接**：SA 只产生候选建议，人工审核并冻结后才能进入率定。
-4. **少而可辨识**：默认只率定有观测支撑且经 SA 筛选的参数；土壤和初始条件默认固定。
-5. **率定与验证分离**：验证按完整处理或独立试验划分，不能随机拆散同一处理的观测行。
-6. **论文产物由数据生成**：指标、图、表和方法说明均可由保存的运行产物重新生成。
-
-## 目标工作流
-
-```mermaid
-flowchart LR
-    A["原始数据与模板"] --> B["预检与基线模拟"]
-    B --> C["Morris 筛选"]
-    C --> D["Top-K Sobol 定量分析"]
-    D --> E["人工审核并冻结参数边界"]
-    E --> F["分阶段 PEST++ IES 率定"]
-    F --> G["留出处理验证与确定性复跑"]
-    G --> H["近似后验与异参同效分析"]
-    H --> I["论文图表与可复现成果包"]
-```
-
-每个阶段都必须生成 `run_manifest`、工程 `quality_report` 和（率定阶段）`calibration_finalize.json`。只有 finalize 明确授权，结果才可进入后验、验证或正式论文导出。
-
-## 核心能力边界
-
-| 能力 | 当前目标 |
-|---|---|
-| 参数治理 | 物理硬边界、基线建议、SA 提案和率定冻结边界分层管理 |
-| 正向模拟 | 隔离运行 DSSAT，校验输出存在、完整、有限且随参数变化 |
-| 敏感性分析 | Morris 初筛，Top-K Sobol 定量分析，包含重复种子和稳定性检查 |
-| 参数率定 | 按物候、冠层/生长、产量等阶段进行 IES，控制维度和过拟合 |
-| 观测与权重 | 明确单位、误差标准差、变换、相关性和用途；PEST 权重语义正确 |
-| 不确定性 | 报告 IES 条件参数集合的近似后验特征，不夸大为严格贝叶斯后验 |
-| 异参同效 | 条件参数集合、Spearman 相关、2–3 对代表解和预测等效性分析 |
-| 科研图表 | 矢量优先、色盲友好、灰度可辨、尺寸和字体可配置、图数一致 |
-
-## 项目结构
-
-```text
-src/
-  common/                 参数登记与共享约束
-  dssat/                  DSSAT 正向运行
-  sensitivity/            Morris/Sobol 工作流
-  calibration/            PEST++ 任务构建与率定
-  reporting/              Python 诊断、指标和 R 论文图数据导出
-paper/R/                  唯一论文成图入口与统一 R 样式
-data/
-  raw/                    只读原始数据
-  user/                   版本化用户 FileX/FileA/FileT/SOIL/气象输入包
-  templates/              DSSAT 基线模板
-  parameter_registry/     参数边界生命周期
-configs/                  可版本控制的运行配置
-workspace/runs/<run_id>/  隔离运行目录和完整证据链
-tests/                    单元、集成与科学烟雾测试
-docs/                     当前规范、开发计划和历史背景材料
-```
-
-## 关键科学约定
-
-- `FL-VS` 固定为 `100.0`；`XFINT` 必须受数值安全边界约束。
-- 参数冻结文件是率定可消费的唯一参数提案；不得自动选取“最新”SA 结果。
-- 正式运行用 `--input-dir` 显式选择版本化用户输入包；当前待审包为 `data/user/experiments/xxql2501_20260716`，旧 `20260715` 包已停用。
-- PEST 目标函数按 `Phi = Σ(w_i × residual_i)^2` 理解。若 `sigma_i` 是观测误差标准差，则基础权重为 `1 / sigma_i`，不是 `1 / sigma_i²`。
-- 默认在原始物理尺度计算残差。任何对数等变换必须预先声明，并同时作用于观测和模拟；禁止用同批观测与候选模拟共同计算动态 Min–Max 范围。
-- FileA/FileT 继续保存处理均值；原始重复另表保存并用于估计均值 sigma，不把同一处理重复作为共享同一个模拟值的独立 PEST 观测。
-- 多次采收优先使用增量观测；累计观测仅作诊断，或在显式处理协方差时进入目标函数。
-- IES 输出称为“条件参数集合”或“近似后验”，并同时报告先验、边界命中、收缩、相关性和预测覆盖。
-
-## 环境与检查
-
-运行与诊断主要依赖 Python 3.13+、`pandas`、`numpy`、`pyemu`、`flopy` 和 `matplotlib`。论文图另需 R 4.3+ 以及 `ggplot2`、`patchwork`、`jsonlite`、`svglite`。PEST++ 二进制位于 `pestpp-5.2.16-win/`，DSSAT 4.8 默认位于 `C:\DSSAT48\`。
-
-依赖与代码级检查：
+- Windows，DSSAT 4.8 默认安装在 `C:\DSSAT48\`
+- Python 3.13+
+- PEST++ 5.2.16（仓库内 `pestpp-5.2.16-win/`）
+- 论文图需要 R 4.3+、`ggplot2`、`patchwork`、`jsonlite`、`svglite`
 
 ```powershell
 python -m pip install -r requirements-dev.txt
 python -m pytest tests -q
-python -m compileall src tests tools
 ```
 
-历史结果仅用于检查图表版式时，必须在数据导出和 R 绘图两端显式生成 DEMO：
+## 准备输入
+
+每次实验使用不可覆盖的输入包：
+
+```text
+data/user/experiments/<bundle_id>/
+  <experiment>.TMX    # FileX
+  <experiment>.TMA    # FileA
+  <experiment>.TMT    # FileT
+  SOIL.SOL
+  <weather>.WTH
+  DSSBatch.v48
+  input_manifest.json
+```
+
+推荐通过导入工具创建新包：
 
 ```powershell
-python -m src.reporting.export_paper_data --run-id eggplant_stage2_v14_full `
-  --legacy-results-dir workspace `
-  --phi-csv workspace/eggplant_stage2_v14_full.phi.actual.csv `
-  --out-dir workspace/runs/figure_demo/paper_data --allow-unvalidated-demo
-
-Rscript paper/R/make_all.R `
-  --input-dir workspace/runs/figure_demo/paper_data `
-  --out-dir workspace/runs/figure_demo/paper_figures `
-  --allow-unvalidated-demo
+python tools/import_experiment_bundle.py `
+  --source-dir <原始文件目录> `
+  --soil <SOIL.SOL> --weather <气象文件> --batch <DSSBatch.v48> `
+  --experiment <试验名> --bundle-id <新bundle_id>
 ```
 
-持久化 IES 运行先执行工程检查（该命令只判断工程状态，不授权科研有效），再执行唯一 finalize 入口：
+遗传模型基线只放在：
+
+```text
+data/templates/genotype/TMGRO048.CUL.base
+data/templates/genotype/TMGRO048.ECO.base
+data/templates/genotype/TMGRO048.SPE.base
+```
+
+运行产生的 `.CUL/.ECO/.SPE` 是沙箱副本，不能回写为基线。详见 [目录与输入资产规范](docs/目录与输入资产规范.md)。
+
+## 基本工作流
+
+### 1. 敏感性分析
+
+1. 创建并审核 SA 参数 proposal；通过 `tools/freeze_bounds.py` 生成新的 frozen bounds。
+2. 为每个 seed 创建独立 case：
 
 ```powershell
-python tools/check_run_quality.py --run-dir workspace/runs/<run_id> --prefix <prefix>
-python -m src.calibration.finalize_calibration --run-dir workspace/runs/<run_id> --case <prefix>
+python src/sensitivity/sa_build_sen_case.py `
+  --param-review <审核后的参数CSV> `
+  --case-dir workspace/runs/<sa_run_id> `
+  --input-dir data/user/experiments/<sa_bundle_id> `
+  --output-profile <输出定义JSON> `
+  --morris-r <轨迹数> --morris-p <水平数> --random-seed <seed> `
+  --run-type sensitivity_formal_case
+
+python tools/parallel/run_parallel.py `
+  --run-dir workspace/runs/<sa_run_id> --case sa_sen_morris `
+  --mode sen --n-agents <并行数> --wait
+
+python src/sensitivity/morris_audit.py `
+  --case-dir workspace/runs/<sa_run_id> --case sa_sen_morris --require-formal
 ```
 
-当前正式 `eggplant_v14_20260405` 冻结边界会被预检拒绝，这是预期行为；不得用 `--bounds-review-mode off` 绕过后开展正式计算。
+Morris 用于筛选；Sobol 只在用户批准的 Top-K、预算和至少两个有效尺度上用于定量与收敛判断。SA 结果不能自动成为率定边界。
+
+### 2. 分阶段遗传参数率定
+
+正式率定只读取 `bounds_frozen`，并显式指定输入包、观测策略和阶段设计：
+
+```powershell
+python src/calibration/build_pest.py `
+  --mode eggplant_stage2 `
+  --design-config configs/runs/<approved_design>.json --stage S1 `
+  --bounds-id <approved_bounds_id> --bounds-crop eggplant `
+  --input-dir data/user/experiments/<bundle_id> `
+  --observation-policy-csv configs/runs/<policy>.csv `
+  --prefix <run_id> --out-dir workspace/runs/<run_id>
+
+python tools/parallel/run_parallel.py `
+  --run-dir workspace/runs/<run_id> --case <run_id> `
+  --mode ies --n-agents <并行数> --wait
+
+python tools/check_run_quality.py `
+  --run-dir workspace/runs/<run_id> --prefix <run_id>
+
+python -m src.calibration.finalize_calibration `
+  --run-dir workspace/runs/<run_id> --case <run_id>
+```
+
+S2–S4 必须从紧邻上游阶段的代表参数继承，并保留 manifest 和哈希。工程质量报告只说明运行完整；只有 `calibration_finalize.json` 能授权 `science_validated`。
+
+### 3. 验证、条件参数集合和论文图
+
+只有正式 finalize 通过后，才能运行 validation、posterior summary、候选解确定性复跑和正式论文导出。未验证数据必须显式使用 demo 开关，输出包含 `DEMO_` 前缀和水印，不能引用为论文图。
+
+```powershell
+python -m src.reporting.export_paper_data --help
+Rscript paper/R/make_all.R --help
+```
+
+详细入口与状态门见 [用户指南](docs/敏感性分析与率定用户指南.md)。
+
+## 关键科学约定
+
+- PEST 权重为 `w = 1 / sigma`，因此 `Phi = Σ(w × residual)²`；禁止把 `1 / sigma²` 写入 weight。
+- FileA/FileT 保留处理均值；原始重复另存长表，用于估计均值误差，不能伪装为多条独立 DSSAT 观测。
+- 默认在原始物理尺度计算残差。log 变换必须同时作用于观测和模拟，并预声明 offset、reference 和 sigma 定义。
+- 增量采收可进入率定；累计采收默认用于诊断，避免相关观测重复计权。
+- calibration、validation、diagnostic 按完整处理划分，不随机拆散同一处理的时序行。
+- IES 输出称为条件参数集合或近似后验；没有预测距离证据时不能宣称功能异参同效。
+
+## 项目结构
+
+```text
+src/common/          公共契约和参数注册
+src/dssat/           DSSAT 隔离运行
+src/sensitivity/     Morris/Sobol
+src/calibration/     PEST++ 构建、运行与 finalize
+src/reporting/       指标、诊断和 R 数据导出
+paper/R/             唯一论文成图入口
+data/                原始输入、模板和参数范围
+configs/             版本化运行配置
+workspace/runs/      隔离运行及证据链（不入 Git）
+docs/                当前规范、用户指南和历史归档
+tests/               单元、集成和科研质量门测试
+```
 
 ## 文档入口
 
-- [文档索引与规范层级](docs/README.md)
-- [产品定义与系统设计](项目重构规划.md)
+- [文档索引](docs/README.md)
+- [项目状态与正式科研启动清单](docs/项目状态与科研启动清单.md)
+- [敏感性分析与率定用户指南](docs/敏感性分析与率定用户指南.md)
 - [开发者指南](docs/DEVELOPER_GUIDE.md)
-- [P0 科研可信性修复开发计划](docs/P0_科研可信性修复开发计划.md)
-- [观测误差与权重设计](docs/权重设计方案改进提案.md)
-- [近一个月可迁移成果整理（输入材料）](docs/近一个月可迁移成果整理.md)
+- [科研图表规范](docs/科研图表设计与开发计划.md)
+- [历史归档](docs/archive/README.md)
 
-## 明确不做
-
-当前不建设通用云平台、可视化拖拽编排、多作物插件市场或复杂权限系统；也不以算法数量作为目标。只有在当前茄子/番茄案例通过科学质量门并稳定复现后，才考虑扩展作物和部署方式。
+发生冲突时，以根 README、文档索引列出的“当前规范”和代码质量门为准；`docs/archive/` 中的参数、边界、命令和科研结论只用于追溯。
