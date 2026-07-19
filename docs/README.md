@@ -44,6 +44,7 @@
 34. [T4.2 候选解预测复跑开发交接](T4_2候选解预测复跑开发交接.md)：候选参数导出、最多 6 次确定性复跑、prediction distance 定义及验收停止点。
 35. [T4.2 code review 与 T4.2.1 交接](reports/P2_MVP_T4_2_code_review与T4_2_1交接_20260719.md)：现有 demo 证据复核、冻结链/运行隔离/comparison 缺口，以及进入 R 图表前的最小收口任务。
 36. [T4.2.1-A/C code review 与 T4.2.1-B 交接](reports/P2_MVP_T4_2_1_A_C_code_review与T4_2_1_B交接_20260719.md)：`_v2` 证据独立复核、posterior 缺失上游哈希的阻塞项、最小审计补丁与不重复运行 DSSAT 的后续安排。
+37. [T4.2.1-B 实施记录](reports/P2_MVP_T4_2_1_B_实施记录_20260719.md)：posterior fail-closed、pair-count 自洽、完整 command、失败诊断哈希和空 comparison schema 收口，以及 T4.3 R demo 接入边界。
 
 发生冲突时，以更高层文档为准；实现细节若与产品设计冲突，应先修订文档并由用户审批。
 

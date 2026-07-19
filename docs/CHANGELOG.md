@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-19（T4.2.1-B code review 补丁完成）
+
+- 修复 posterior 上游哈希缺失/格式错误时可绕过冻结链的缺口；两个必需 SHA-256 现必须存在、格式正确且与当前 S4 相等。
+- 新增 posterior `candidate_pair_count` 与哈希绑定 CSV 行数一致性校验。
+- 统一默认 runner 实际 subprocess 与 candidate run manifest 的完整 argv；非零返回码诊断与 stderr SHA-256 进入两级 manifest 证据链。
+- header-only candidate comparison 补齐 `candidate_side`，成功/失败 bundle 保持同一最小 schema。
+- 提交 `10d3498`；候选模块 `26 passed`，全套 `225 passed, 2 skipped`，compileall 通过。本轮未运行 DSSAT，未改变距离/comparison 定义，已复核的 `_v2` 继续作为 `tooling_demo` 数据。
+
 ## 2026-07-19（T4.2.1 契约收口完成）
 
 - T4.2.1 候选解预测复跑契约收口（A 代码+测试 / C 受控重放+审计）全部完成，闭合 T4.2 code review 的 5 项发现（3 P1 + 2 P2）。代码提交 `3433c29`。
