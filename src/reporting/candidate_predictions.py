@@ -359,13 +359,18 @@ def _build_runner_argv(
     harvest_var: str,
     input_dir: Path,
 ) -> list[str]:
-    """Reproducible argv for the isolated DSSAT rerun (no cwd-relative tokens).
+    """Complete reproducible command for the isolated DSSAT rerun.
 
     Mirrors the S4 model command: no --cultivar (the cultivar is fixed by the
     frozen FileX/DSSBatch, and run_dssat.py infers the rest). Paths are
-    absolute so the recorded command reproduces from any cwd.
+    absolute so the recorded command reproduces from any cwd. The production
+    runner and the candidate run manifest both consume this exact list.
     """
+    runner_path = Path(__file__).resolve().parents[1] / "calibration" / "run_dssat.py"
+    if not runner_path.is_file():
+        raise FileNotFoundError(f"DSSAT calibration entry point not found: {runner_path}")
     return [
+        sys.executable, str(runner_path),
         "--param-csv", str(param_csv.resolve()),
         "--batch", batch_name,
         "--harvest-var", harvest_var,
@@ -431,6 +436,12 @@ def _run_candidate_dssat(
             out_hashes[name] = sha256_file(p)
         else:
             missing.append(name)
+    diagnostic_hashes: dict[str, str] = {}
+    stderr_path = run_dir_for_candidate / "_runner_stderr.txt"
+    if stderr_path.is_file():
+        diagnostic_hashes[stderr_path.name] = sha256_file(stderr_path)
+    if returncode != 0 and not diagnostics:
+        diagnostics = f"runner returned non-zero exit code {returncode}"
     return {
         "realization": realization,
         "returncode": int(returncode),
@@ -440,6 +451,7 @@ def _run_candidate_dssat(
         "output_hashes": out_hashes,
         "argv": argv,
         "diagnostics": diagnostics,
+        "diagnostic_hashes": diagnostic_hashes,
     }
 
 
@@ -464,16 +476,12 @@ def _default_dssat_runner(
     the caller can record the failure and mark the pair prediction_incomplete
     rather than aborting the whole bundle; stderr is parked beside the outputs.
     """
-    runner_path = Path(__file__).resolve().parents[1] / "calibration" / "run_dssat.py"
-    if not runner_path.is_file():
-        raise FileNotFoundError(f"DSSAT calibration entry point not found: {runner_path}")
-    cmd = [
-        sys.executable, str(runner_path),
-        "--param-csv", str(param_csv.resolve()),
-        "--batch", batch_name,
-        "--harvest-var", harvest_var,
-        "--input-dir", str(input_dir.resolve()),
-    ]
+    cmd = _build_runner_argv(
+        param_csv=param_csv,
+        batch_name=batch_name,
+        harvest_var=harvest_var,
+        input_dir=input_dir,
+    )
     result = subprocess.run(cmd, cwd=str(work_dir), capture_output=True, text=True)
     if result.returncode != 0:
         # Preserve diagnostics in the run dir; the caller records this run as
@@ -700,7 +708,12 @@ def build_candidate_prediction_bundle(
         ("calibration_artifacts_manifest_sha256", ctx["artifact_manifest_sha256"]),
     ):
         expected = str(posterior_upstream.get(key) or "").strip().lower()
-        if expected and expected != actual:
+        if len(expected) != 64 or any(ch not in "0123456789abcdef" for ch in expected):
+            raise ValueError(
+                f"posterior upstream {key} is required and must be a 64-character "
+                "lowercase/uppercase hexadecimal SHA-256"
+            )
+        if expected != actual:
             raise ValueError(
                 f"posterior upstream {key} {expected!r} does not match current S4 "
                 f"value {actual!r}; the posterior belongs to a different calibration"
@@ -736,7 +749,17 @@ def build_candidate_prediction_bundle(
     if pairs_entry is None:
         raise ValueError("posterior manifest has no candidate_pairs artifact")
     _require_hash(pairs_path, pairs_entry["sha256"], "candidate_pairs")
-    pairs_df = _validate_candidate_pairs_schema(pd.read_csv(pairs_path))
+    raw_pairs_df = pd.read_csv(pairs_path)
+    declared_pair_count = _strict_nonneg_int(
+        posterior.get("candidate_pair_count"),
+        context="posterior candidate_pair_count",
+    )
+    if declared_pair_count != len(raw_pairs_df):
+        raise ValueError(
+            f"posterior candidate_pair_count={declared_pair_count} does not match "
+            f"candidate_pairs.csv rows={len(raw_pairs_df)}"
+        )
+    pairs_df = _validate_candidate_pairs_schema(raw_pairs_df)
 
     ensemble_path = _final_ensemble_path(run_dir, case)
     ensemble_df = pd.read_csv(ensemble_path)
@@ -871,7 +894,7 @@ def build_candidate_prediction_bundle(
     else:
         # Keep a header-only file so the manifest can still hash it.
         candidate_comparison_path.write_text(
-            "pair_id,realization,dataset_role,variable,treatment,observed,simulated\n",
+            "pair_id,realization,candidate_side,dataset_role,variable,treatment,observed,simulated\n",
             encoding="utf-8",
         )
     if distance_component_rows:
@@ -959,6 +982,14 @@ def _build_manifest(
                 "realization": str(realization),
                 "path": _relative_posix(run_manifest_json, out_dir),
                 "sha256": sha256_file(run_manifest_json),
+            })
+        stderr_path = runs_dir / f"real_{realization}" / "_runner_stderr.txt"
+        if stderr_path.is_file():
+            artifacts.append({
+                "role": "candidate_runner_diagnostic",
+                "realization": str(realization),
+                "path": _relative_posix(stderr_path, out_dir),
+                "sha256": sha256_file(stderr_path),
             })
     run_manifest = ctx["run_manifest"]
     return {

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import math
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -636,6 +637,63 @@ def test_t421_posterior_upstream_hash_stale_rejected(tmp_path, monkeypatch):
         )
 
 
+@pytest.mark.parametrize(
+    ("key", "replacement"),
+    [
+        ("calibration_finalize_sha256", None),
+        ("calibration_artifacts_manifest_sha256", None),
+        ("calibration_finalize_sha256", "not-a-sha256"),
+        ("calibration_artifacts_manifest_sha256", "not-a-sha256"),
+    ],
+)
+def test_t421_posterior_upstream_hash_required_before_runs(
+    tmp_path, key, replacement,
+):
+    """[P1] Missing or malformed posterior upstream hashes fail closed with
+    zero runner calls, rather than bypassing the equality check."""
+    ctx = _build_full_context(tmp_path, pairs=[(0, 1)])
+    pm = json.loads(ctx["posterior_manifest"].read_text(encoding="utf-8"))
+    if replacement is None:
+        pm["upstream"].pop(key)
+    else:
+        pm["upstream"][key] = replacement
+    ctx["posterior_manifest"].write_text(json.dumps(pm), encoding="utf-8")
+    calls = {"n": 0}
+
+    def _runner(**kw):
+        calls["n"] += 1
+        return 0
+
+    with pytest.raises(ValueError, match=f"posterior upstream {key} is required"):
+        cp.build_candidate_prediction_bundle(
+            run_dir=ctx["run_dir"], case=ctx["case"],
+            posterior_manifest=ctx["posterior_manifest"], out_dir=tmp_path / "out",
+            allow_unvalidated_demo=True, dssat_runner=_runner,
+        )
+    assert calls["n"] == 0
+
+
+def test_t421_candidate_pair_count_must_match_csv(tmp_path):
+    """The posterior manifest's declared pair count must match its hashed CSV."""
+    ctx = _build_full_context(tmp_path, pairs=[(0, 1)])
+    pm = json.loads(ctx["posterior_manifest"].read_text(encoding="utf-8"))
+    pm["candidate_pair_count"] = 2
+    ctx["posterior_manifest"].write_text(json.dumps(pm), encoding="utf-8")
+    calls = {"n": 0}
+
+    def _runner(**kw):
+        calls["n"] += 1
+        return 0
+
+    with pytest.raises(ValueError, match="candidate_pair_count=2 does not match"):
+        cp.build_candidate_prediction_bundle(
+            run_dir=ctx["run_dir"], case=ctx["case"],
+            posterior_manifest=ctx["posterior_manifest"], out_dir=tmp_path / "out",
+            allow_unvalidated_demo=True, dssat_runner=_runner,
+        )
+    assert calls["n"] == 0
+
+
 def test_t421_candidate_pairs_schema_strict():
     """[P2] >3 pairs, >6 unique realizations, non-integer, self-pair, and
     duplicate pair_id all fail the consumer-side schema gate."""
@@ -701,6 +759,9 @@ def test_t421_nonzero_returncode_with_prestaged_outs_marks_incomplete(tmp_path, 
         # returncode is non-zero, regardless of the stale files.
         for name in cp.REQUIRED_RERUN_OUTPUTS:
             (kw["work_dir"] / name).write_text("STALE\n", encoding="utf-8")
+        (kw["work_dir"] / "_runner_stderr.txt").write_text(
+            "synthetic failure\n", encoding="utf-8",
+        )
         return 1
 
     monkeypatch.setattr(cp, "build_comparison_from_rerun", lambda rerun_dir, **kw: _comparison_frame([]))
@@ -713,6 +774,24 @@ def test_t421_nonzero_returncode_with_prestaged_outs_marks_incomplete(tmp_path, 
     assert pair_df["classification"].iloc[0] == "prediction_incomplete"
     runs = pd.read_csv(tmp_path / "out" / "candidate_runs.csv")
     assert (runs["returncode"] == 1).all()
+    empty_comparison = pd.read_csv(tmp_path / "out" / "candidate_comparison.csv")
+    assert "candidate_side" in empty_comparison.columns
+    for realization in (0, 1):
+        run_dir = tmp_path / "out" / "runs" / f"real_{realization}"
+        run_manifest = json.loads((run_dir / "candidate_run_manifest.json").read_text())
+        assert run_manifest["diagnostics"] == "runner returned non-zero exit code 1"
+        expected = cp.sha256_file(run_dir / "_runner_stderr.txt")
+        assert run_manifest["diagnostic_hashes"] == {"_runner_stderr.txt": expected}
+    manifest = json.loads(
+        (tmp_path / "out" / "candidate_prediction_manifest.json").read_text()
+    )
+    diagnostics = [
+        item for item in manifest["artifacts"]
+        if item["role"] == "candidate_runner_diagnostic"
+    ]
+    assert {item["realization"] for item in diagnostics} == {"0", "1"}
+    for item in diagnostics:
+        assert cp.sha256_file(tmp_path / "out" / item["path"]) == item["sha256"]
 
 
 def test_t421_comparison_includes_both_sides(tmp_path, monkeypatch):
@@ -764,6 +843,46 @@ def test_t421_candidate_run_manifest_records_argv(tmp_path, monkeypatch):
     )
     run_manifest = json.loads((tmp_path / "out" / "runs" / "real_0" / "candidate_run_manifest.json").read_text())
     argv = run_manifest["argv"]
+    assert argv[0] == sys.executable
+    assert Path(argv[1]).name == "run_dssat.py"
     assert "--harvest-var" in argv and "CHPDT" in argv
     assert "--cultivar" not in argv  # cultivar inferred from frozen FileX, not hardcoded
     assert run_manifest["harvest_var"] == "CHPDT"
+
+
+def test_t421_default_runner_uses_shared_complete_argv(tmp_path, monkeypatch):
+    """The production subprocess and manifest command share one builder."""
+    param_csv = tmp_path / "params.csv"
+    param_csv.write_text("name,value\nEM-FL,23\n", encoding="utf-8")
+    input_dir = tmp_path / "input"
+    input_dir.mkdir()
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    captured: dict[str, Any] = {}
+
+    class _Result:
+        returncode = 0
+        stderr = ""
+
+    def _fake_run(cmd, **kwargs):
+        captured["cmd"] = cmd
+        captured["kwargs"] = kwargs
+        return _Result()
+
+    monkeypatch.setattr(cp.subprocess, "run", _fake_run)
+    expected = cp._build_runner_argv(
+        param_csv=param_csv,
+        batch_name="DSSBatch.v48",
+        harvest_var="CHPDT",
+        input_dir=input_dir,
+    )
+    returncode = cp._default_dssat_runner(
+        param_csv=param_csv,
+        work_dir=work_dir,
+        input_dir=input_dir,
+        batch_name="DSSBatch.v48",
+        harvest_var="CHPDT",
+    )
+    assert returncode == 0
+    assert captured["cmd"] == expected
+    assert captured["kwargs"]["cwd"] == str(work_dir)
