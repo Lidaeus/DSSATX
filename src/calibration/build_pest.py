@@ -1436,6 +1436,127 @@ def _try_read_evaluate_out(evaluate_out_path):
             continue
     raise FileNotFoundError(f"Evaluate.OUT not found/readable. Tried: {tried}")
 
+
+_FILEA_DATE_TO_EVALUATE = {
+    "EDAT": "EDAPM",
+    "ADAT": "ADAPM",
+    "PD1T": "PD1PM",
+    "PDFT": "PDFPM",
+    "MDAT": "MDAPM",
+    "R8AT": "R8APM",
+}
+
+_FILEA_VALUE_TO_EVALUATE = {
+    "HWAM": "HWAMM",
+    "PWAM": "PWAMM",
+    "CWAAM": "CWAAM",
+    "CWAM": "CWAMM",
+    "BWAM": "BWAMM",
+    "H#AM": "H#AMM",
+    "HWUM": "HWUMM",
+    "H#UM": "H#UMM",
+    "HIAM": "HIAMM",
+    "THAM": "THAMM",
+    "LAIX": "LAIXM",
+    "L#SM": "L#SMM",
+    "CHTA": "CHTAM",
+    "CNAA": "CNAAM",
+    "CNAM": "CNAMM",
+    "SNAM": "SNAMM",
+    "GNAM": "GNAMM",
+    "GN%M": "GN%MM",
+    "GL%M": "GL%MM",
+}
+
+
+def _read_filea_rows(filea_path):
+    """Read the treatment-level measured values from a DSSAT FileA."""
+    header = None
+    rows = {}
+    with open(filea_path, "r") as handle:
+        for raw in handle:
+            stripped = raw.strip()
+            if not stripped:
+                continue
+            if stripped.upper().startswith("@TRNO"):
+                header = [token.lstrip("@").upper() for token in stripped.split()]
+                continue
+            if header is None or stripped.startswith(("*", "!", "@")):
+                continue
+            parts = stripped.split()
+            if len(parts) < len(header):
+                parts += ["-99"] * (len(header) - len(parts))
+            record = dict(zip(header, parts[:len(header)]))
+            try:
+                treatment = int(float(record["TRNO"]))
+            except (KeyError, TypeError, ValueError):
+                continue
+            rows[treatment] = record
+    if header is None:
+        raise ValueError(f"FileA is missing an @TRNO header: {filea_path}")
+    return rows
+
+
+def _yyddd_day_difference(start_code, end_code):
+    """Return elapsed days for DSSAT YYDDD/YYYYDDD date codes."""
+    try:
+        start = str(int(float(start_code)))
+        end = str(int(float(end_code)))
+    except (TypeError, ValueError):
+        return -99.0
+    if start.startswith("-") or end.startswith("-"):
+        return -99.0
+    try:
+        start_fmt = "%Y%j" if len(start) == 7 else "%y%j"
+        end_fmt = "%Y%j" if len(end) == 7 else "%y%j"
+        start_dt = datetime.strptime(start.zfill(7 if len(start) == 7 else 5), start_fmt)
+        end_dt = datetime.strptime(end.zfill(7 if len(end) == 7 else 5), end_fmt)
+    except ValueError:
+        return -99.0
+    return float((end_dt - start_dt).days)
+
+
+def _build_evaluate_observations_from_filea(batch_entries):
+    """Build Evaluate-style measured columns solely from versioned FileA files.
+
+    The returned frame contains no simulated evidence from a previous model
+    run.  Candidate simulations are still read later from newly generated
+    tagged ``PestEval.OUT``/``PestJoint.OUT`` files.
+    """
+    filea_cache = {}
+    output_rows = []
+    for entry in batch_entries:
+        filex = entry.get("filex")
+        filex_path = _resolve_filex_path(filex) or (
+            filex if filex and os.path.isabs(filex) else None
+        )
+        if not filex_path or not os.path.isfile(filex_path):
+            raise FileNotFoundError(f"cannot resolve FileX for batch entry: {filex!r}")
+        suffix = Path(filex_path).suffix
+        filea_suffix = f"{suffix[:-1]}A" if suffix else ".TMA"
+        filea_path = str(Path(filex_path).with_suffix(filea_suffix))
+        if not os.path.isfile(filea_path):
+            raise FileNotFoundError(f"versioned FileA not found for {filex_path}: {filea_path}")
+        if filea_path not in filea_cache:
+            filea_cache[filea_path] = _read_filea_rows(filea_path)
+
+        treatment = int(entry.get("tn", -99))
+        measured = filea_cache[filea_path].get(treatment)
+        if measured is None:
+            raise ValueError(f"FileA {filea_path} has no row for treatment {treatment}")
+
+        row = {"@RUN": int(entry["run"]), "TN": treatment}
+        planting_date = measured.get("PDAT", -99)
+        for source, target in _FILEA_DATE_TO_EVALUATE.items():
+            row[target] = _yyddd_day_difference(planting_date, measured.get(source, -99))
+        for source, target in _FILEA_VALUE_TO_EVALUATE.items():
+            try:
+                row[target] = float(measured.get(source, -99))
+            except (TypeError, ValueError):
+                row[target] = -99.0
+        output_rows.append(row)
+    return pd.DataFrame(output_rows)
+
 def _infer_cultivar_from_filex(filex_path):
     if not filex_path or not os.path.exists(filex_path):
         return None
@@ -2215,11 +2336,15 @@ def create_ins_and_pst_multi(
 ):
     out_dir = out_dir or WORKSPACE
     os.makedirs(out_dir, exist_ok=True)
-    try:
-        eval_df = _try_read_evaluate_out(evaluate_out_path)
-    except Exception as e:
-        print(f"Warning: Could not read model output file: {e}.")
-        return
+    eval_df = None
+    if any(out.get("df") is None for out in outputs):
+        try:
+            eval_df = _try_read_evaluate_out(evaluate_out_path)
+        except Exception as e:
+            raise FileNotFoundError(
+                "an output definition lacks an observation dataframe and no "
+                f"Evaluate.OUT is available: {e}"
+            ) from e
 
     param_csv_tpl_path = os.path.join(out_dir, f"{prefix}_params.csv.tpl")
     param_csv_path = os.path.join(out_dir, f"{prefix}_params.csv")
@@ -2767,6 +2892,7 @@ if __name__ == "__main__":
 
     df_override = None
     stage2_outputs = None
+    stage_evaluate_df = None
 
     out_dir = os.path.abspath(args.out_dir) if args.out_dir else WORKSPACE
     os.makedirs(out_dir, exist_ok=True)
@@ -2895,6 +3021,7 @@ if __name__ == "__main__":
         entries = _parse_batch_entries(args.batch)
 
         if not entries:
+            stage_evaluate_df = pd.DataFrame(columns=["@RUN", "TN", "ADAPM", "LAIXM", "CNAMM"])
             df_harvest = pd.DataFrame(columns=["@RUN", "TN", "HNO", "DATE", "PWADM", "PWAIM", "PWADS", "PWAIS"])
             harvest_sigmas = {"PWADM": 1.0}
             df_process = pd.DataFrame(
@@ -2902,6 +3029,7 @@ if __name__ == "__main__":
             )
             process_sigmas = {"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
         else:
+            stage_evaluate_df = _build_evaluate_observations_from_filea(entries)
             filex = entries[0]["filex"]
             filex_path = _resolve_filex_path(filex) or (filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex))
             excode = _infer_excode_from_filex(filex_path)
@@ -3012,6 +3140,7 @@ if __name__ == "__main__":
                 "obs_bases": {"ADAP"},
                 "critical_obs": {"ADAPM"},
                 "group_sigmas": {"ADAPM": float(adapm_sigma) if adapm_sigma is not None else 25.0},
+                "df": stage_evaluate_df,
             },
             {
                 "model_out_path": PEST_JOINT_FILE,
@@ -3027,6 +3156,7 @@ if __name__ == "__main__":
                     "H#AMM": 50.0,
                     "HIAMM": float(args.hiamm_sigma),
                 },
+                "df": stage_evaluate_df,
             },
             {
                 "model_out_path": PEST_HARVEST_FILE,
@@ -3552,7 +3682,7 @@ if __name__ == "__main__":
                 stage2_outputs,
                 design_spec,
                 _parse_batch_entries(args.batch),
-                eval_df=(_try_read_evaluate_out(evaluate_out_path) if os.path.isfile(evaluate_out_path) else None),
+                eval_df=stage_evaluate_df,
             )
 
     if stage2_outputs is not None:

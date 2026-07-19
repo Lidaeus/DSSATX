@@ -8,7 +8,7 @@ Tomato_Cal 是一个面向作物模型研究的 DSSAT 参数敏感性分析与 P
 
 - DSSAT 参数注入、隔离运行、Morris/Sobol、分阶段 IES、确定性复跑和结果清单已经打通。
 - S1–S4 工具开发运行已达到 `engineering_validated`，证明工具链可执行；现有运行仍是 `tooling_development / science_pending`，不能直接作为论文结论。
-- 清理旧 workspace 输出后，当前回归发现 staged build 仍隐式读取 `workspace/Evaluate.OUT`；在修复这一干净环境构建缺口前，不应启动新的正式 SA/率定。
+- staged builder 已可在干净 workspace 中仅依赖版本化 FileA/FileT 构建观测契约，不再读取旧 `workspace/Evaluate.OUT`。
 - 正式重新分析前，用户需要重新审核敏感性分析参数范围、参与率定的参数与边界，并为输入包、边界和设计创建新的冻结 ID。
 - Python 只输出运行诊断和论文数据；所有可能进入论文的图由 `paper/R/` 统一绘制。
 

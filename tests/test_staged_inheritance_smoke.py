@@ -25,6 +25,7 @@ import pandas as pd
 import pyemu
 import pytest
 
+from src.calibration import build_pest as build_pest_module
 from src.calibration.finalize_calibration import finalize_calibration
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -33,7 +34,7 @@ DESIGN = PROJECT_ROOT / "configs" / "runs" / "eggplant_p1_v4_design_20260717.jso
 BOUNDS_ID = "eggplant_p1_xxql2501_v4_sobol20_20260717"
 INPUT_BUNDLE = PROJECT_ROOT / "data" / "user" / "experiments" / "xxql2501_20260716"
 POLICY_CSV = PROJECT_ROOT / "configs" / "runs" / "assumption_based_sigma_v2.csv"
-BATCH = PROJECT_ROOT / "workspace" / "DSSBatch.v48"
+BATCH = INPUT_BUNDLE / "DSSBatch.v48"
 BUILD_PEST = PROJECT_ROOT / "src" / "calibration" / "build_pest.py"
 
 REQUIRED_INPUTS = (DESIGN, INPUT_BUNDLE, POLICY_CSV, BATCH)
@@ -42,6 +43,54 @@ skip_if_inputs_missing = pytest.mark.skipif(
     reason="S1→S2 smoke requires the real xxql2501_20260716 input bundle, "
            "frozen v4-sobol20 bounds, observation policy, batch and design config",
 )
+
+
+@skip_if_inputs_missing
+def test_staged_filea_observations_do_not_contain_prior_simulations():
+    entries = build_pest_module._parse_batch_entries(str(BATCH))
+    previous_input_dir = build_pest_module.USER_INPUT_DIR
+    build_pest_module.USER_INPUT_DIR = str(INPUT_BUNDLE)
+    try:
+        frame = build_pest_module._build_evaluate_observations_from_filea(entries)
+    finally:
+        build_pest_module.USER_INPUT_DIR = previous_input_dir
+
+    treatment_2 = frame.loc[frame["TN"] == 2].iloc[0]
+    assert treatment_2["@RUN"] == 1
+    assert treatment_2["ADAPM"] == pytest.approx(45.0)
+    assert treatment_2["MDAPM"] == pytest.approx(123.0)
+    assert treatment_2["HWAMM"] == pytest.approx(4138.0)
+    assert treatment_2["LAIXM"] == pytest.approx(4.01)
+    assert treatment_2["CNAMM"] == pytest.approx(156.4)
+    assert not any(str(column).endswith("S") for column in frame.columns)
+
+
+def test_multi_builder_with_frozen_observation_frames_never_reads_evaluate(monkeypatch, tmp_path):
+    def _forbid_stale_output(*_args, **_kwargs):
+        raise AssertionError("staged build must not read a prior Evaluate.OUT")
+
+    monkeypatch.setattr(build_pest_module, "_try_read_evaluate_out", _forbid_stale_output)
+    observation_frame = pd.DataFrame(
+        [{"@RUN": 1, "TN": 2, "ADAPM": 45.0}]
+    )
+    build_pest_module.create_ins_and_pst_multi(
+        params=[{
+            "name": "EM-FL", "init": 22.0, "lower": 20.0, "upper": 30.0,
+            "status": "none", "pargp": "cultivar",
+        }],
+        prefix="clean_stage",
+        noptmax=0,
+        ies_num_reals=4,
+        outputs=[{
+            "model_out_path": build_pest_module.PEST_EVAL_FILE,
+            "obs_bases": {"ADAP"},
+            "critical_obs": {"ADAPM"},
+            "group_sigmas": {"ADAPM": 5.0},
+            "df": observation_frame,
+        }],
+        out_dir=str(tmp_path),
+    )
+    assert (tmp_path / "clean_stage.pst").is_file()
 
 
 def _build_mocked_s1_run(run_dir: Path, *, case: str = "smoke") -> Path:

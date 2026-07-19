@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-07-19（staged builder 干净环境修复）
+
+- `eggplant_stage2` 的物候和季末实测值改为直接从版本化 FileA 构建；时序与采收继续从 FileT 构建，不再读取 `workspace/Evaluate.OUT`。
+- 多输出 PST 构建器仅在输出定义缺少观测 DataFrame 时才读取 Evaluate；staged 输出全部携带冻结观测表，旧模拟输出无法影响观测值、权重或结构。
+- staged 继承冒烟改用输入 bundle 内的 `DSSBatch.v48`，新增 FileA 数值转换和“禁止读取旧 Evaluate”回归测试。
+- `compileall` 通过；全套测试 `232 passed, 2 skipped`。
+
 ## 2026-07-19（文档体系收口）
 
 - 重写根目录 `README.md`，统一项目定位、当前科研边界、输入位置、敏感性分析、分阶段率定、结果检查和论文图表入口。

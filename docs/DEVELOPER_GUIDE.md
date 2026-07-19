@@ -54,6 +54,8 @@ PEST++ 只负责提出候选参数和读取残差；DSSAT runner 负责参数注
 
 正式实验输入存放在 `data/user/experiments/<bundle_id>/`，通过 `--input-dir` 显式选择。每个包必须含 `input_manifest.json` 和内容哈希；禁止覆盖既有 bundle ID，禁止从 `Workspace` 静默回退。FileX/FileA/FileT 分别为 `.TMX/.TMA/.TMT`，CUL/ECO/SPE 基线模板只存放在 `data/templates/genotype/*.base`；完整约定见 [目录与输入资产规范](目录与输入资产规范.md)。
 
+staged builder 必须直接从版本化 FileA 生成物候和季末实测列，从 FileT 生成时序与采收实测列。`Evaluate.OUT`、`PestEval.OUT` 和 `PestJoint.OUT` 是候选前向运行的模拟输出，不得作为构建 PST/INS 时的观测来源或结构探测文件。
+
 ## 3. 科研质量门禁
 
 ### 3.1 参数与输入门禁
