@@ -35,6 +35,7 @@ def select_parameters(
     top_k: int = 15,
     minimum_domain_count: int = 2,
     season_specific_score: float = 0.02,
+    allow_unstable_boundary_union: bool = False,
 ) -> tuple[pd.DataFrame, dict[str, dict[str, str]]]:
     counts: Counter[str] = Counter()
     scores: defaultdict[str, list[float]] = defaultdict(list)
@@ -45,13 +46,28 @@ def select_parameters(
         stability_path = directory / "morris_multiseed_stability.json"
         ranking_path = directory / "morris_consensus_ranking.csv"
         stability = json.loads(stability_path.read_text(encoding="utf-8"))
-        if stability.get("ranking_stable") is not True:
+        ranking_stable = stability.get("ranking_stable") is True
+        if not ranking_stable and not allow_unstable_boundary_union:
             raise ValueError(f"{season} Morris ranking is not stable: {stability_path}")
+        if not ranking_stable:
+            spearman = float(stability.get("minimum_pairwise_spearman", 0.0))
+            threshold = float((stability.get("thresholds") or {}).get("spearman", 0.9))
+            if stability.get("case_quality_validated") is not True or spearman < threshold:
+                raise ValueError(f"{season} cannot use boundary union without quality and Spearman gates")
+            proposal = pd.read_csv(directory / "morris_topk_proposal.csv")
         frame = pd.read_csv(ranking_path)
         if set(frame["ranking_domain"].astype(str)) != {"general_genetic", "water_nitrogen_response"}:
             raise ValueError(f"{season} must contain exactly the two registered ranking domains")
         for _, domain in frame.groupby("ranking_domain"):
-            top = domain.nsmallest(top_k, "consensus_rank")
+            domain_name = str(domain["ranking_domain"].iloc[0])
+            domain_stable = bool(
+                (stability.get("domain_stability") or {}).get(domain_name, {}).get("stable", ranking_stable)
+            )
+            top = (
+                domain.nsmallest(top_k, "consensus_rank")
+                if domain_stable
+                else proposal.loc[proposal["ranking_domain"].astype(str) == domain_name]
+            )
             counts.update(top["parameter"].astype(str).str.upper())
             for row in domain.itertuples(index=False):
                 parameter = str(row.parameter).upper()
@@ -61,6 +77,9 @@ def select_parameters(
             "result_dir": str(directory),
             "stability_sha256": sha256_file(stability_path),
             "ranking_sha256": sha256_file(ranking_path),
+            "selection_membership": (
+                "consensus_topk" if ranking_stable else "stable_domains_plus_unstable_domain_topk_union"
+            ),
         }
 
     rows = []
@@ -101,6 +120,11 @@ def main() -> int:
     parser.add_argument("--top-k", type=int, default=15)
     parser.add_argument("--minimum-domain-count", type=int, default=2)
     parser.add_argument("--season-specific-score", type=float, default=0.02)
+    parser.add_argument(
+        "--allow-unstable-boundary-union",
+        action="store_true",
+        help="Use the conservative per-seed Top-K union only for domains that miss Jaccard but pass quality and Spearman",
+    )
     args = parser.parse_args()
 
     results = _assign(args.result, "--result")
@@ -117,6 +141,7 @@ def main() -> int:
         top_k=args.top_k,
         minimum_domain_count=args.minimum_domain_count,
         season_specific_score=args.season_specific_score,
+        allow_unstable_boundary_union=args.allow_unstable_boundary_union,
     )
     csv_path = output / f"{args.approval_id}.csv"
     if csv_path.exists():
@@ -138,7 +163,8 @@ def main() -> int:
             "approved_topk_csv_sha256": csv_hash,
             "selection_rule": (
                 f"top-{args.top_k} in at least {args.minimum_domain_count} of six season-domain rankings; "
-                f"or single-domain safeguard with maximum normalized Morris score >= {args.season_specific_score:g}"
+                f"or single-domain safeguard with maximum normalized Morris score >= {args.season_specific_score:g}; "
+                "domains failing only Top-K Jaccard use the conservative per-seed Top-K union"
             ),
             "source_morris": sources,
             "bounds_id": bounds.stem,

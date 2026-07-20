@@ -53,3 +53,34 @@ def test_selection_refuses_unstable_morris(tmp_path: Path):
     ]
     with pytest.raises(ValueError, match="not stable"):
         select_parameters({"S1": _result(tmp_path / "s1", stable=False, rows=rows)})
+
+
+def test_selection_can_use_quality_checked_boundary_union(tmp_path: Path):
+    directory = _result(tmp_path / "s1", stable=False, rows=[
+        ("general_genetic", "A", 0.1, 1),
+        ("water_nitrogen_response", "B", 0.03, 1),
+        ("water_nitrogen_response", "C", 0.01, 2),
+    ])
+    (directory / "morris_multiseed_stability.json").write_text(json.dumps({
+        "ranking_stable": False,
+        "case_quality_validated": True,
+        "minimum_pairwise_spearman": 0.93,
+        "thresholds": {"spearman": 0.9},
+        "domain_stability": {
+            "general_genetic": {"stable": True},
+            "water_nitrogen_response": {"stable": False},
+        },
+    }), encoding="utf-8")
+    pd.DataFrame({
+        "ranking_domain": ["water_nitrogen_response", "water_nitrogen_response"],
+        "parameter": ["B", "C"],
+    }).to_csv(directory / "morris_topk_proposal.csv", index=False)
+    selected, sources = select_parameters(
+        {"S1": directory},
+        top_k=1,
+        minimum_domain_count=2,
+        season_specific_score=0.02,
+        allow_unstable_boundary_union=True,
+    )
+    assert set(selected["parameter"]) == {"A", "B"}
+    assert "topk_union" in sources["S1"]["selection_membership"]
