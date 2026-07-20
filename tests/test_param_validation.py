@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+import pandas as pd
 
 from collections import Counter
 
@@ -30,6 +31,14 @@ def test_valid_minimal_frozen_bounds(tmp_path):
     )
     assert not [issue for issue in validate_frozen_bounds(str(path)) if issue.severity == "error"]
     assert_valid_frozen_bounds(str(path))
+
+
+def test_active_fl_vs_structural_probe_is_valid(tmp_path):
+    path = _write_bounds(
+        tmp_path / "fl_vs_probe.csv",
+        ["FL-VS,120,100,140,active,ECO_Pheno,ECO,TMGRO048.ECO.base,TM0008,TM0001,both"],
+    )
+    assert not [issue for issue in validate_frozen_bounds(str(path)) if issue.severity == "error"]
 
 
 def test_invalid_ranges_are_rejected_not_repaired(tmp_path):
@@ -95,6 +104,9 @@ def test_physical_safety_envelopes_include_shipped_dssat_baselines():
         "PHTMAX": 61.0,
         "FINREF": 220.0,
         "EVMODC": 0.0,
+        "FL-VS": 120.0,
+        "XFPHT": 60.0,
+        "XFINT": 0.10,
     }
     for name, value in shipped_baselines.items():
         lower, upper = PHYSICAL_BOUNDS[name]
@@ -111,3 +123,24 @@ def test_empty_active_zero_width_and_blank_group_are_rejected(tmp_path):
     )
     codes = {issue.code for issue in validate_frozen_bounds(str(invalid))}
     assert {"ACTIVE_ZERO_WIDTH", "EMPTY_PARAMETER_GROUP"}.issubset(codes)
+
+
+def test_formal_multiseason_candidate_is_reviewable_but_not_frozen():
+    path = Path(
+        "data/parameter_registry/bounds_proposals/eggplant/"
+        "eggplant_formal_multiseason_candidate_v1_20260719.csv"
+    )
+    frame = pd.read_csv(path, encoding="utf-8-sig").set_index("name")
+    assert not [issue for issue in validate_frozen_bounds(str(path)) if issue.severity == "error"]
+    assert float(frame.loc["FL-VS", "init"]) == 120.0
+    assert (float(frame.loc["FL-VS", "lower"]), float(frame.loc["FL-VS", "upper"])) == (100.0, 140.0)
+    assert frame.loc["FRCNOD", "status"] == "fixed"
+    assert frame.loc["FRCNOD", "pargp"] == "SPE_Nodule"
+    assert frame.loc["FRCNOD", "decision_role"] == "nonlegume_excluded"
+    assert float(frame.loc["XMAGE", "upper"]) < float(frame.loc["XFPHT", "lower"])
+    assert set(frame.loc[["TB1", "TB2", "TB3"], "status"]) == {"active"}
+    nuisance = frame[frame["location"].isin(["SOIL", "IC", "INIT"])]
+    assert set(nuisance["status"].str.lower()) <= {"fixed", "disabled"}
+    metadata = path.with_suffix(".yaml").read_text(encoding="utf-8")
+    assert 'review_status: "proposed"' in metadata
+    assert "ready_for_formal_run: false" in metadata

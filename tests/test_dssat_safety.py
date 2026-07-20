@@ -47,6 +47,16 @@ def test_candidate_validation_accepts_shipped_tmgro_baselines():
     assert run_dssat.validate_candidate_parameters(values) == values
 
 
+def test_candidate_validation_accepts_reviewed_indeterminate_and_partition_values():
+    values = {
+        "FL-VS": 120.0,
+        "XMAGE": 30.0,
+        "XFPHT": 60.0,
+        "XFINT": 0.10,
+    }
+    assert run_dssat.validate_candidate_parameters(values) == values
+
+
 def test_fresh_output_guard_rejects_empty_and_stale_files(tmp_path):
     output = tmp_path / "Evaluate.OUT"
     output.write_text("", encoding="utf-8")
@@ -150,7 +160,7 @@ def test_run_directory_preparation_is_local_and_complete(tmp_path):
 
 
 def test_run_directory_uses_explicit_user_bundle_without_raw_fallback(tmp_path):
-    bundle = ROOT / "data" / "user" / "experiments" / "xxql2501_20260716"
+    bundle = ROOT / "data" / "user" / "experiments" / "xxql2501_symbi_n_candidate_20260719"
     batch = prepare_run_directory(
         tmp_path,
         ["--input-dir", str(bundle), "--batch", "DSSBatch.v48"],
@@ -186,4 +196,3 @@ def test_atomic_copy_back_publishes_raw_dssat_outputs_for_sa(tmp_path):
     for name in _RAW_DSSAT_OUTPUT_FILES:
         assert (dest / name).is_file(), f"{name} must be published for SA consumption"
         assert (dest / name).read_text() == f"{name} content\n"
-

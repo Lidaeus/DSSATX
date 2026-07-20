@@ -16,7 +16,34 @@ ROOT = Path(__file__).resolve().parents[1]
 APPROVAL = ROOT / "configs" / "sa" / "approved_topk" / "eggplant_p1_sobol_top16_20260716.json"
 BOUNDS = ROOT / "data" / "parameter_registry" / "bounds_frozen" / "eggplant" / "eggplant_p1_xxql2501_v3_20260716.csv"
 PROFILE = ROOT / "configs" / "sa" / "eggplant_p1_outputs_v3_legacy.json"
-INPUT = ROOT / "data" / "user" / "experiments" / "xxql2501_20260716"
+INPUT = ROOT / "data" / "user" / "experiments" / "xxql2501_symbi_n_candidate_20260719"
+
+
+def _tooling_contract(tmp_path: Path) -> tuple[Path, Path]:
+    """Rebind historical Sobol artifacts for a builder-only regression test.
+
+    This does not create a scientific approval: the files exist only under
+    pytest's temporary directory and are labelled tooling-only.
+    """
+
+    profile = json.loads(PROFILE.read_text(encoding="utf-8"))
+    profile["profile_id"] = "tooling_only_symbi_n_profile"
+    profile["experiment_bundle"] = INPUT.name
+    profile_path = tmp_path / "tooling_profile.json"
+    profile_path.write_text(json.dumps(profile), encoding="utf-8")
+
+    metadata = json.loads(APPROVAL.read_text(encoding="utf-8"))
+    source_csv = APPROVAL.with_name(metadata["approved_topk_csv"])
+    target_csv = tmp_path / source_csv.name
+    target_csv.write_bytes(source_csv.read_bytes())
+    metadata["approval_id"] = "tooling_only_rebound_approval"
+    metadata["input_bundle_id"] = INPUT.name
+    metadata["input_manifest_sha256"] = sha256_file(INPUT / "input_manifest.json")
+    metadata["output_profile_id"] = profile["profile_id"]
+    metadata["output_profile_sha256"] = sha256_file(profile_path)
+    metadata_path = tmp_path / "tooling_approval.json"
+    metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
+    return profile_path, metadata_path
 
 
 def test_approved_sobol_topk_is_hash_locked_and_complete():
@@ -39,13 +66,14 @@ def test_approved_sobol_topk_rejects_changed_csv(tmp_path):
 
 
 def test_build_sobol_preflight_preserves_exact_approved_parameter_set(tmp_path):
+    profile, approval = _tooling_contract(tmp_path)
     case_dir = tmp_path / "sobol_case"
     pst_path = build_sobol_case(
         bounds_csv=BOUNDS,
-        approval_json=APPROVAL,
+        approval_json=approval,
         case_dir=case_dir,
         workspace_dir=ROOT,
-        output_profile=PROFILE,
+        output_profile=profile,
         input_dir=INPUT,
         samples=4,
         random_seed=20261114,
@@ -56,7 +84,7 @@ def test_build_sobol_preflight_preserves_exact_approved_parameter_set(tmp_path):
         for name, row in pst.parameter_data.iterrows()
         if str(row["partrans"]).lower() != "fixed"
     }
-    _, approved, _ = load_approved_topk(APPROVAL)
+    _, approved, _ = load_approved_topk(approval)
     assert adjustable == set(approved["parameter"])
     assert int(pst.pestpp_options["gsa_sobol_samples"]) == 4
     assert str(pst.pestpp_options["gsa_sobol_par_dist"]).lower() == "unif"
@@ -64,7 +92,7 @@ def test_build_sobol_preflight_preserves_exact_approved_parameter_set(tmp_path):
     assert "run_type: sensitivity_sobol_preflight_case" in manifest
     assert "sobol_parameter_count: 16" in manifest
     assert "sobol_expected_model_runs: 72" in manifest
-    assert (case_dir / "sobol_approval.csv").read_bytes() == APPROVAL.with_name(
+    assert (case_dir / "sobol_approval.csv").read_bytes() == approval.with_name(
         "eggplant_p1_sobol_top16_20260716.csv"
     ).read_bytes()
 

@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 
 from src.sensitivity.sobol_convergence import analyze_convergence
+from src.common.project import sha256_file
 from tools.build_formal_sobol import build_campaign, resolve_budget
 
 
@@ -13,7 +14,28 @@ BUDGETS = ROOT / "configs" / "sa" / "sobol_budget_profiles.json"
 APPROVAL = ROOT / "configs" / "sa" / "approved_topk" / "eggplant_p1_sobol_top16_20260716.json"
 BOUNDS = ROOT / "data" / "parameter_registry" / "bounds_frozen" / "eggplant" / "eggplant_p1_xxql2501_v3_20260716.csv"
 PROFILE = ROOT / "configs" / "sa" / "eggplant_p1_outputs_v3_legacy.json"
-INPUT = ROOT / "data" / "user" / "experiments" / "xxql2501_20260716"
+INPUT = ROOT / "data" / "user" / "experiments" / "xxql2501_symbi_n_candidate_20260719"
+
+
+def _tooling_contract(tmp_path: Path) -> tuple[Path, Path]:
+    profile = json.loads(PROFILE.read_text(encoding="utf-8"))
+    profile["profile_id"] = "tooling_only_symbi_n_profile"
+    profile["experiment_bundle"] = INPUT.name
+    profile_path = tmp_path / "tooling_profile.json"
+    profile_path.write_text(json.dumps(profile), encoding="utf-8")
+
+    metadata = json.loads(APPROVAL.read_text(encoding="utf-8"))
+    source_csv = APPROVAL.with_name(metadata["approved_topk_csv"])
+    target_csv = tmp_path / source_csv.name
+    target_csv.write_bytes(source_csv.read_bytes())
+    metadata["approval_id"] = "tooling_only_rebound_approval"
+    metadata["input_bundle_id"] = INPUT.name
+    metadata["input_manifest_sha256"] = sha256_file(INPUT / "input_manifest.json")
+    metadata["output_profile_id"] = profile["profile_id"]
+    metadata["output_profile_sha256"] = sha256_file(profile_path)
+    metadata_path = tmp_path / "tooling_approval.json"
+    metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
+    return profile_path, metadata_path
 
 
 def test_budget_profiles_and_custom_schedule_are_explicit():
@@ -30,11 +52,12 @@ def test_budget_profiles_and_custom_schedule_are_explicit():
 
 
 def test_campaign_manifest_displays_theoretical_scale(tmp_path):
+    profile, approval = _tooling_contract(tmp_path)
     campaign = build_campaign(
         output_root=tmp_path / "campaign",
         bounds=BOUNDS,
-        approval=APPROVAL,
-        output_profile=PROFILE,
+        approval=approval,
+        output_profile=profile,
         input_dir=INPUT,
         profile="standard",
         build_levels=1,

@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import shutil
 
 import pandas as pd
 
@@ -9,8 +10,9 @@ from src.sensitivity.output_contract import load_output_contract, observation_na
 
 
 ROOT = Path(__file__).resolve().parents[1]
-BUNDLE = ROOT / "data" / "user" / "experiments" / "xxql2501_20260716"
-SA_BUNDLE = ROOT / "data" / "user" / "experiments" / "xxql2501_sa_counterfactual_v1_20260716"
+HISTORICAL_BUNDLE = ROOT / "data" / "user" / "experiments" / "xxql2501_20260716"
+BUNDLE = ROOT / "data" / "user" / "experiments" / "xxql2501_symbi_n_candidate_20260719"
+SA_BUNDLE = ROOT / "data" / "user" / "experiments" / "xxql2501_sa_counterfactual_symbi_n_candidate_20260719"
 OLD_BUNDLE = ROOT / "data" / "user" / "experiments" / "xxql2501_20260715"
 FROZEN = ROOT / "data" / "parameter_registry" / "bounds_frozen" / "eggplant" / "eggplant_p1_xxql2501_v2_20260715.csv"
 V3_PROPOSAL = ROOT / "data" / "parameter_registry" / "bounds_proposals" / "eggplant" / "eggplant_p1_xxql2501_v3_candidate_20260716.csv"
@@ -18,7 +20,11 @@ V3_PROPOSAL = ROOT / "data" / "parameter_registry" / "bounds_proposals" / "eggpl
 
 def test_versioned_xxql2501_bundle_passes_cross_file_gates():
     summary, findings = validate_input_bundle(BUNDLE)
-    assert not [item for item in findings if item.severity == "error"]
+    # The versioned bundle correctly sets SYMBI=N (non-legume) and POTAS=N
+    # (CRGRO has no K model). No SYMBI/POTAS errors expected.
+    error_codes = {item.code for item in findings if item.severity == "error"}
+    assert "NONLEGUME_SYMBIOSIS_ENABLED" not in error_codes
+    assert "CRGRO_POTAS_MUST_BE_N" not in error_codes
     warning_codes = {item.code for item in findings if item.severity == "warning"}
     assert {
         "SOIL_HYDRAULIC_CONDUCTIVITY_MISSING",
@@ -28,8 +34,37 @@ def test_versioned_xxql2501_bundle_passes_cross_file_gates():
     assert summary["treatments"] == [2, 3, 4, 5, 9, 10, 11, 12, 13, 14]
     manifest = json.loads((BUNDLE / "input_manifest.json").read_text(encoding="utf-8"))
     assert manifest["science_status"] == "pass_with_warnings"
-    assert manifest["derived_from_bundle"] == "xxql2501_20260715"
+    assert manifest["derived_from_bundle"] == "xxql2501_20260716"
+    assert manifest["derived_from_manifest_sha256"]
     assert manifest["authoritative_coordinates"] == [35.16, 113.8]
+    assert summary["simulation_options"][2]["SYMBI"] == "N"
+
+
+def test_sensitivity_bundle_may_omit_observation_files_but_calibration_may_not(tmp_path):
+    bundle = tmp_path / "simulation_only"
+    shutil.copytree(BUNDLE, bundle)
+    (bundle / "XXQL2501.TMA").unlink()
+    (bundle / "XXQL2501.TMT").unlink()
+
+    summary, findings = validate_input_bundle(bundle, require_observations=False)
+    # Observation files are optional in SA mode; SYMBI=N and POTAS=N pass.
+    assert "OBSERVATION_FILE_MISSING" not in {item.code for item in findings if item.severity == "error"}
+    assert summary["observation_files"] == []
+    assert summary["observations_required"] is False
+
+    _, calibration_findings = validate_input_bundle(bundle)
+    assert [
+        item.code for item in calibration_findings if item.code == "OBSERVATION_FILE_MISSING"
+    ] == ["OBSERVATION_FILE_MISSING", "OBSERVATION_FILE_MISSING"]
+
+
+def test_historical_bundle_rejected_for_legacy_symbiosis_y():
+    # The historical bundle predates the SYMBI=N (non-legume) requirement and
+    # still carries SYMBI=Y from the legacy tomato-model defaults. It is
+    # correctly rejected by the non-legume gate.
+    summary, findings = validate_input_bundle(HISTORICAL_BUNDLE)
+    assert "NONLEGUME_SYMBIOSIS_ENABLED" in {item.code for item in findings if item.severity == "error"}
+    assert summary["simulation_options"][2]["SYMBI"] == "Y"
 
 
 def test_tn2_tn3_do_not_cover_water_nitrogen_design():
@@ -71,6 +106,7 @@ def test_p1_output_contract_is_controlled_factorial_nonredundant_and_observed_ti
 
 def test_sa_counterfactual_bundle_unifies_initial_conditions_but_calibration_bundle_does_not():
     summary, findings = validate_input_bundle(SA_BUNDLE)
+    # The SA bundle correctly sets SYMBI=N (non-legume) and POTAS=N (CRGRO).
     assert not [item for item in findings if item.severity == "error"]
     assert summary["treatments"] == list(CORE_TREATMENTS)
     factors = summary["treatment_factors"]

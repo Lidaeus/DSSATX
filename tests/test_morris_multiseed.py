@@ -1,4 +1,5 @@
 import json
+import hashlib
 from pathlib import Path
 
 import pandas as pd
@@ -20,7 +21,24 @@ def _write_case(
 ) -> Path:
     root.mkdir(parents=True)
     (root / "morris_audit").mkdir()
-    manifest_lines = [f"run_type: sensitivity_formal_case", f"random_seed: {seed}"]
+    runtime = root / "runtime"
+    runtime.mkdir()
+    frozen = runtime / "model.py"
+    frozen.write_text("# frozen runtime\n", encoding="utf-8")
+    frozen_sha = hashlib.sha256(frozen.read_bytes()).hexdigest()
+    runtime_manifest = runtime / "runtime_manifest.json"
+    runtime_manifest.write_text(
+        json.dumps({"schema_version": 1, "files": [{"path": "model.py", "sha256": frozen_sha}]}) + "\n",
+        encoding="utf-8",
+    )
+    runtime_manifest_sha = hashlib.sha256(runtime_manifest.read_bytes()).hexdigest()
+    manifest_lines = [
+        "run_type: sensitivity_formal_case",
+        f"random_seed: {seed}",
+        "git_dirty: false",
+        "runtime_bundle: runtime",
+        f"runtime_manifest_sha256: {runtime_manifest_sha}",
+    ]
     if bounds_sha256:
         manifest_lines.append(f"bounds_sha256: {bounds_sha256}")
     if input_manifest_sha256:
