@@ -22,7 +22,7 @@ def test_formal_case_uses_case_local_hash_checked_runtime(tmp_path):
         / "parameter_registry"
         / "bounds_frozen"
         / "eggplant"
-        / "eggplant_formal_multiseason_candidate_v3_20260720.csv",
+        / "eggplant_formal_multiseason_candidate_v4_20260721.csv",
         case_dir=case_dir,
         workspace_dir=ROOT,
         cultivar="TM0008",

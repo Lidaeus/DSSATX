@@ -1,0 +1,27 @@
+proposal_id: "eggplant_formal_multiseason_candidate_v4_20260721"
+crop: "eggplant"
+created_at: "2026-07-20T16:40:03Z"
+review_status: "proposed"
+ready_for_formal_run: false
+derived_from: "eggplant_formal_multiseason_candidate_v3_20260720.csv"
+derived_from_sha256: "82180a477b3a5c801e84b87f380bddb6c217f6c4e0a72a8bc06f75f260f8cf40"
+experiment_bundle_available: "xxql2601_sa_controlled_tn12_w1_candidate_20260721"
+input_manifest_sha256: "b8de03db0ec9c4f498268dbd29abba77bf023ba13105136c5a383cf8ec354419"
+required_season_design: "two spring seasons plus one autumn season"
+available_audited_season_count: 3
+required_audited_season_count: 3
+proposal_sha256: "74466ef21f24347ea3a684fad7ee08eda8c20ba3fa49ee7b5917a41a7da3c91f"
+parameter_count: 157
+active_parameter_count: 55
+active_temperature_parameter_count: 12
+active_soil_or_ic_count: 0
+soil_policy: "fixed in primary genetic SA; optional narrow nuisance analysis is separate"
+fl_vs_policy: "SA probe 100-140; calibrate only if terminal-growth observations identify the coefficient"
+stage_order_policy: "independent rectangular ranges must guarantee XMAGE < XFPHT"
+temperature_order_policy: "independent rectangular ranges must guarantee TB < TO1 < TO2 < TM"
+references:
+  - "https://www.researchgate.net/publication/269708910_Estimation_of_leaf_number_of_eggplant_using_thermal_time_model"
+  - "https://journals.ashs.org/downloadpdf/journals/hortsci/47/8/article-p1038.pdf"
+  - "https://doi.org/10.1016/j.scienta.2021.110538"
+  - "https://doi.org/10.1007/s11119-023-10087-9"
+notes: "Three audited season bundles are available; proposal still requires explicit review before freezing"

@@ -37,7 +37,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-BOUNDS = "data/parameter_registry/bounds_frozen/eggplant/eggplant_formal_multiseason_candidate_v3_20260720.csv"
+BOUNDS = "data/parameter_registry/bounds_frozen/eggplant/eggplant_formal_multiseason_candidate_v4_20260721.csv"
 SEEDS = [20260729, 20260812, 20260826]
 
 # 首层分析案例；禁止在没有上一层证据的情况下批量预建扩展层。
@@ -48,7 +48,7 @@ ALL_JOBS = [
     ("XXQL2601", 10, "xxql2601_sa_controlled_tn12_w1_candidate_20260721", "xxql2601"),
 ]
 
-OUT_ROOT = PROJECT_ROOT / "workspace" / "runs" / "formal_morris_repro_v2"
+OUT_ROOT = PROJECT_ROOT / "workspace" / "runs" / "formal_morris_repro_v3"
 
 
 def _case_dir(season: str, r: int, seed: int) -> Path:
@@ -176,7 +176,7 @@ def cmd_postprocess():
         if not all(_is_complete(_case_dir(season, r, s)) for s in SEEDS):
             continue
         contract = f"configs/sa/eggplant_formal_{contract_suf}_outputs_20260720.json"
-        out = PROJECT_ROOT / "workspace" / "runs" / "morris_results_repro_v2" / season / f"r{r:02d}"
+        out = PROJECT_ROOT / "workspace" / "runs" / "morris_results_repro_v3" / season / f"r{r:02d}"
         out.mkdir(parents=True, exist_ok=True)
         print(f"  {season} r={r:02d}: 后处理...")
         cmd = [sys.executable, "-m", "src.sensitivity.morris_multiseed",

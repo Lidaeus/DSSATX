@@ -144,3 +144,16 @@ def test_formal_multiseason_candidate_is_reviewable_but_not_frozen():
     metadata = path.with_suffix(".yaml").read_text(encoding="utf-8")
     assert 'review_status: "proposed"' in metadata
     assert "ready_for_formal_run: false" in metadata
+
+
+def test_formal_multiseason_v4_restricts_em_v1_to_forward_valid_domain():
+    path = Path(
+        "data/parameter_registry/bounds_frozen/eggplant/"
+        "eggplant_formal_multiseason_candidate_v4_20260721.csv"
+    )
+    frame = pd.read_csv(path, encoding="utf-8-sig").set_index("name")
+    em_v1 = frame.loc["EM-V1"]
+    assert float(em_v1["init"]) == 39.3
+    assert (float(em_v1["lower"]), float(em_v1["upper"])) == (38.0, 40.0)
+    assert em_v1["status"] == "active"
+    assert em_v1["decision_role"] == "multiseason_phenology_valid_domain"

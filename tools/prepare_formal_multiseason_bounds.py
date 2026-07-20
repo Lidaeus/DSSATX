@@ -34,7 +34,7 @@ TEMPERATURE_RANGES = {
 DYNAMIC_PARTITION_RANGES = {
     "XMAGE": (8.0, 30.0),
     "XFPHT": (35.0, 70.0),
-    "XFINT": (0.10, 0.35),
+    "XFINT": (0.12, 0.35),
 }
 
 
@@ -120,6 +120,20 @@ def build_proposal(source: Path, input_dir: Path, output: Path) -> pd.DataFrame:
 
     _set_active_range(
         frame,
+        "EM-V1",
+        38.0,
+        40.0,
+        initial=39.3,
+        role="multiseason_phenology_valid_domain",
+        evidence=(
+            "The TM0001 template baseline is 39.3. Deterministic three-season forward checks "
+            "showed EM-V1 <=37 produced missing anthesis (ADAPS=-99), while 38-40 retained "
+            "finite anthesis dates; the formal SA domain is restricted to the valid regime"
+        ),
+    )
+
+    _set_active_range(
+        frame,
         "FL-VS",
         100.0,
         140.0,
@@ -179,7 +193,7 @@ def build_proposal(source: Path, input_dir: Path, output: Path) -> pd.DataFrame:
         f'experiment_bundle_available: "{input_dir.name}"',
         f'input_manifest_sha256: "{sha256_file(manifest)}"',
         'required_season_design: "two spring seasons plus one autumn season"',
-        'available_audited_season_count: 1',
+        'available_audited_season_count: 3',
         'required_audited_season_count: 3',
         f'proposal_sha256: "{sha256_file(output)}"',
         f"parameter_count: {len(frame)}",
@@ -195,7 +209,7 @@ def build_proposal(source: Path, input_dir: Path, output: Path) -> pd.DataFrame:
         '  - "https://journals.ashs.org/downloadpdf/journals/hortsci/47/8/article-p1038.pdf"',
         '  - "https://doi.org/10.1016/j.scienta.2021.110538"',
         '  - "https://doi.org/10.1007/s11119-023-10087-9"',
-        'notes: "Proposal only; do not freeze or run until all three season bundles and exact boundaries are reviewed"',
+        'notes: "Three audited season bundles are available; proposal still requires explicit review before freezing"',
         "",
     ]
     output.with_suffix(".yaml").write_text("\n".join(metadata), encoding="utf-8")
