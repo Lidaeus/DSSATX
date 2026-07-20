@@ -22,6 +22,12 @@ from src.calibration.observation_policy import apply_transform_config
 
 # Configuration
 DSSAT_EXE = "DSCSM048.EXE"
+# Optional explicit CSM model code passed to DSCSM048 (e.g. "CRGRO048"). When
+# None, DSSAT infers the model from the $BATCH crop code / DSSATPRO default.
+# Per the DSSAT parallel-run path guide (§4.2), explicitly passing the model is
+# the most robust option and avoids depending on FileX CRMODEL or DSSATPRO
+# defaults that can vary by CWD.
+DSSAT_MODEL = None
 BATCH_FILE = "DSSBatch.v48"
 CUL_BASE_FILE = "TMGRO048.CUL.base"
 CUL_FILE = "TMGRO048.CUL"
@@ -59,8 +65,6 @@ def validate_candidate_parameters(param_dict):
         if name.startswith("SOIL_SLOC_") and not 0.0 <= value <= 10.0:
             raise ValueError(f"Parameter {name}={value:g} outside soil-carbon bounds [0, 10]")
 
-    if "FL-VS" in normalized and normalized["FL-VS"] != 100.0:
-        raise ValueError("FL-VS must remain fixed at 100.0")
     if "XMAGE" in normalized and "XFPHT" in normalized and normalized["XMAGE"] >= normalized["XFPHT"]:
         raise ValueError("Expected XMAGE < XFPHT")
 
@@ -2585,12 +2589,17 @@ def run_model():
         batch_arg = batch_dst_name
         
         start_time = time.time()
-        
+
         # Run DSSAT
-        # Note: DSCSM048.EXE requires the code (B) and batch file as arguments
-        # It must be run in the directory containing the files
+        # Note: DSCSM048.EXE takes an optional model code (e.g. CRGRO048) before
+        # the run-mode code (B) and batch file. It must be run in the directory
+        # containing the files.
+        dssat_args = [exe_path]
+        if DSSAT_MODEL:
+            dssat_args.append(DSSAT_MODEL)
+        dssat_args.extend(["B", batch_arg])
         result = subprocess.run(
-            [exe_path, "B", batch_arg],
+            dssat_args,
             cwd=run_dir,
             input="\n" * 8,
             stdout=subprocess.PIPE,
@@ -2666,12 +2675,16 @@ if __name__ == "__main__":
     parser.add_argument("--batch", default=BATCH_FILE)
     parser.add_argument("--cultivar", default=None)
     parser.add_argument("--harvest-var", default="CHPDT")
+    parser.add_argument("--model", default=None,
+                        help="Explicit CSM model code passed to DSCSM048 (e.g. CRGRO048). "
+                             "When omitted, DSSAT infers the model from $BATCH / DSSATPRO.")
     parser.add_argument("--observation-transform-config", default=None)
     args, _ = parser.parse_known_args()
 
     BATCH_FILE = args.batch
     PARAM_CSV = args.param_csv
     HARVEST_VAR = (args.harvest_var or "CHPDT").strip().upper()
+    DSSAT_MODEL = (args.model or None)
     OBSERVATION_TRANSFORM_CONFIG = args.observation_transform_config
 
     candidate_parameters = _read_param_dict(PARAM_CSV)

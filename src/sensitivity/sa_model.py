@@ -1,5 +1,6 @@
 import argparse
 import csv
+import hashlib
 import json
 import os
 import re
@@ -16,6 +17,24 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.sensitivity.output_contract import load_output_contract, observation_names
+
+
+def _verify_runtime_bundle() -> None:
+    """Reject a formal case whose frozen runtime bytes have changed."""
+    manifest_path = PROJECT_ROOT / "runtime_manifest.json"
+    if not manifest_path.is_file():
+        return
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    for item in payload.get("files", []):
+        relative = Path(str(item.get("path", "")))
+        if relative.is_absolute() or ".." in relative.parts:
+            raise RuntimeError(f"Invalid runtime manifest path: {relative}")
+        path = PROJECT_ROOT / relative
+        if not path.is_file():
+            raise RuntimeError(f"Frozen runtime file is missing: {relative.as_posix()}")
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        if digest != str(item.get("sha256", "")).lower():
+            raise RuntimeError(f"Frozen runtime hash mismatch: {relative.as_posix()}")
 
 
 def _workspace_dir_from_this_file():
@@ -468,7 +487,7 @@ def compute_indicators(
 
             _emit(f"{prefix}_FRUITD_AUC", fruit.get("auc"))
             _emit(f"{prefix}_FRUITD_END", fruit.get("end"))
-            _emit(f"{prefix}_FRUITD_DAP50", _cumulative_dap_fraction(fw, "CHPDT", 0.5))
+            _emit(f"{prefix}_CUMHARVEST_DAP50", _cumulative_dap_fraction(fw, "CHPDT", 0.5))
 
             if pg:
                 last = pg[-1]
@@ -522,6 +541,7 @@ def compute_indicators(
 
 
 def main():
+    _verify_runtime_bundle()
     parser = argparse.ArgumentParser()
     parser.add_argument("--workspace", default=None)
     parser.add_argument("--batch", default=None)

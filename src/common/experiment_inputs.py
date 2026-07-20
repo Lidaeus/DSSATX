@@ -133,12 +133,38 @@ def parse_filex(path: str | Path) -> dict[str, object]:
             )
         except ValueError:
             continue
+
+    simulation_options: dict[int, dict[str, str]] = {}
+    option_header: list[str] = []
+    for raw in filex.read_text(encoding="utf-8", errors="ignore").splitlines():
+        stripped = raw.strip()
+        upper = stripped.upper()
+        if upper.startswith("@N OPTIONS"):
+            option_header = upper.lstrip("@").split()[2:]
+            continue
+        if option_header and upper.startswith("@"):
+            option_header = []
+            continue
+        if not option_header or not stripped or stripped.startswith(("*", "!")):
+            continue
+        parts = stripped.split()
+        if len(parts) < 2 + len(option_header) or parts[1].upper() != "OP":
+            continue
+        try:
+            level = int(float(parts[0]))
+        except ValueError:
+            continue
+        simulation_options[level] = {
+            name: value.upper()
+            for name, value in zip(option_header, parts[2:])
+        }
     return {
         "treatments": treatments,
         "soil_id": soil_id,
         "weather_station": station,
         "soil_depth": soil_depth,
         "initial_conditions": initial,
+        "simulation_options": simulation_options,
     }
 
 
@@ -283,7 +309,18 @@ def parse_weather_site(path: str | Path) -> tuple[float | None, float | None]:
     return None, None
 
 
-def validate_input_bundle(input_dir: str | Path) -> tuple[dict[str, object], list[InputFinding]]:
+def validate_input_bundle(
+    input_dir: str | Path,
+    *,
+    require_observations: bool = True,
+) -> tuple[dict[str, object], list[InputFinding]]:
+    """Validate one DSSAT input bundle.
+
+    FileA/FileT are required for calibration and validation because they are
+    observation evidence.  A sensitivity case is simulation-only, so callers
+    may explicitly set ``require_observations=False`` without weakening the
+    remaining FileX, soil, weather, management, and non-legume gates.
+    """
     root = Path(input_dir).resolve()
     findings: list[InputFinding] = []
     batch = root / "DSSBatch.v48"
@@ -311,13 +348,62 @@ def validate_input_bundle(input_dir: str | Path) -> tuple[dict[str, object], lis
     if missing_initial:
         findings.append(InputFinding("INITIAL_CONDITION_MISSING", "error", f"Treatments lack referenced IC sections: {missing_initial}"))
 
+    options = parsed.get("simulation_options", {})
+    treatments_by_sm: dict[int | None, list[int]] = {}
+    for tn in sorted(batch_treatments):
+        sm_level = parsed["treatments"].get(tn, {}).get("SM")
+        treatments_by_sm.setdefault(sm_level, []).append(tn)
+    for sm_level, treatment_numbers in treatments_by_sm.items():
+        selected = options.get(sm_level)
+        if not selected:
+            findings.append(
+                InputFinding(
+                    "SIMULATION_OPTIONS_MISSING",
+                    "error",
+                    f"Treatments {treatment_numbers} reference missing simulation-control level SM{sm_level}",
+                )
+            )
+            continue
+        # Eggplant is non-legume: SYMBI must be N to disable symbiotic N
+        # fixation. Earlier IPSIM "Potassium model has not been enabled for
+        # CRGRO" errors were traced to a fixed-width column misalignment in
+        # the OPTIONS data row (the POTAS flag landed at the wrong column),
+        # NOT to SYMBI=N. With correct column alignment (POTAS at column 44
+        # = N), SYMBI=N runs cleanly (verified rc=0, 0 IPSIM, 8 eval rows).
+        # FRCNOD is also fixed at 0.05 to exclude nodule allocation.
+        if selected.get("SYMBI") != "N":
+            findings.append(
+                InputFinding(
+                    "NONLEGUME_SYMBIOSIS_ENABLED",
+                    "error",
+                    f"Treatments {treatment_numbers}/SM{sm_level} have SYMBI={selected.get('SYMBI')}; "
+                    "eggplant using the tomato model requires SYMBI=N",
+                )
+            )
+        # CRGRO (tomato) has no potassium model: POTAS must be N. This is the
+        # real IPSIM guard, independent of SYMBI. A misaligned OPTIONS row can
+        # silently place Y at the POTAS column, so check it explicitly.
+        if selected.get("POTAS") != "N":
+            findings.append(
+                InputFinding(
+                    "CRGRO_POTAS_MUST_BE_N",
+                    "error",
+                    f"Treatments {treatment_numbers}/SM{sm_level} have POTAS={selected.get('POTAS')}; "
+                    "CRGRO has no potassium model and aborts with IPSIM unless POTAS=N. "
+                    "Verify the FileX OPTIONS data row is fixed-width aligned (POTAS at column 44).",
+                )
+            )
+
+    observation_files: list[str] = []
     for suffix in (".TMA", ".TMT"):
         companion = root / f"{filex.stem}{suffix}"
         if not companion.is_file():
-            findings.append(InputFinding("OBSERVATION_FILE_MISSING", "error", f"Missing {companion.name}"))
+            if require_observations:
+                findings.append(InputFinding("OBSERVATION_FILE_MISSING", "error", f"Missing {companion.name}"))
             continue
+        observation_files.append(companion.name)
         absent = sorted(batch_treatments - treatment_ids(companion))
-        if absent:
+        if absent and require_observations:
             findings.append(InputFinding("OBSERVATION_TREATMENT_MISSING", "error", f"{companion.name} lacks treatments {absent}"))
 
     soil_file = root / "SOIL.SOL"
@@ -385,6 +471,9 @@ def validate_input_bundle(input_dir: str | Path) -> tuple[dict[str, object], lis
         "treatment_factors": parsed.get("treatments"),
         "soil_profile": profile,
         "initial_conditions": initial,
+        "simulation_options": options,
+        "observation_files": observation_files,
+        "observations_required": bool(require_observations),
     }, findings
 
 

@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import shutil
 import sys
@@ -49,11 +50,94 @@ def _write_indicators_ins(observation_names, ins_path):
     with open(ins_path, "w", encoding="utf-8") as f:
         f.write("pif ~\n")
         for n in observation_names:
-            f.write(f"l1 w !{n}!\n")
+            # pyemu lowercases observation names internally; the .ins markers
+            # must match the .pst observation section case-convention.
+            f.write(f"l1 w !{n.lower()}!\n")
 
 
 def _default_observation_names():
     return observation_names(load_output_contract())
+
+
+def _copy_runtime_file(source, runtime_root, relative_path):
+    source = Path(source)
+    destination = Path(runtime_root) / relative_path
+    if not source.is_file():
+        raise FileNotFoundError(f"Required sensitivity runtime file is missing: {source}")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, destination)
+    return destination
+
+
+def _prepare_runtime_bundle(case_dir, workspace_dir, input_dir, output_profile):
+    """Freeze the forward-model runtime inside a sensitivity case.
+
+    PEST++ copies the whole case to each worker.  Keeping every Python module,
+    model template, user input and output contract below ``runtime/`` makes the
+    model command independent from subsequent edits to the repository.
+    """
+    case_root = Path(case_dir)
+    project_root = Path(workspace_dir)
+    runtime_root = case_root / "runtime"
+    if runtime_root.exists():
+        shutil.rmtree(runtime_root)
+
+    required = (
+        (project_root / "src" / "__init__.py", Path("src/__init__.py")),
+        (project_root / "src" / "sensitivity" / "__init__.py", Path("src/sensitivity/__init__.py")),
+        (project_root / "src" / "sensitivity" / "sa_model.py", Path("src/sensitivity/sa_model.py")),
+        (project_root / "src" / "sensitivity" / "output_contract.py", Path("src/sensitivity/output_contract.py")),
+        (project_root / "src" / "calibration" / "__init__.py", Path("src/calibration/__init__.py")),
+        (project_root / "src" / "calibration" / "run_dssat.py", Path("src/calibration/run_dssat.py")),
+        (project_root / "data" / "templates" / "DSSAT48.INH", Path("data/templates/DSSAT48.INH")),
+        (project_root / "data" / "templates" / "DSSAT48.INP", Path("data/templates/DSSAT48.INP")),
+        (project_root / "data" / "templates" / "DSSATPRO.v48", Path("data/templates/DSSATPRO.v48")),
+    )
+    copied = [_copy_runtime_file(source, runtime_root, relative) for source, relative in required]
+    for filename in ("TMGRO048.CUL.base", "TMGRO048.ECO.base", "TMGRO048.SPE.base"):
+        copied.append(
+            _copy_runtime_file(
+                project_root / "data" / "templates" / "genotype" / filename,
+                runtime_root,
+                Path("data/templates/genotype") / filename,
+            )
+        )
+
+    executable_candidates = (
+        Path(os.environ.get("DSSAT48_HOME", r"C:\DSSAT48")) / "DSCSM048.EXE",
+        project_root / "workspace" / "DSCSM048.EXE",
+    )
+    executable = next((path for path in executable_candidates if path.is_file()), None)
+    if executable is None:
+        raise FileNotFoundError("DSCSM048.EXE is required to freeze a sensitivity runtime")
+    copied.append(
+        _copy_runtime_file(executable, runtime_root, Path("workspace/DSCSM048.EXE"))
+    )
+
+    runtime_input = runtime_root / "input"
+    shutil.copytree(input_dir, runtime_input)
+    copied.extend(path for path in runtime_input.rglob("*") if path.is_file())
+    runtime_profile = _copy_runtime_file(
+        output_profile,
+        runtime_root,
+        Path("config/output_profile.json"),
+    )
+    copied.append(runtime_profile)
+
+    files = [
+        {
+            "path": path.relative_to(runtime_root).as_posix(),
+            "sha256": sha256_file(path),
+            "bytes": path.stat().st_size,
+        }
+        for path in sorted(set(copied))
+    ]
+    manifest_path = runtime_root / "runtime_manifest.json"
+    manifest_path.write_text(
+        json.dumps({"schema_version": 1, "files": files}, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return runtime_root, manifest_path
 
 
 def build_case(
@@ -92,12 +176,24 @@ def build_case(
             verify_manifest_integrity(input_dir)
         except InputManifestError as exc:
             raise ValueError(f"Input bundle manifest verification failed: {exc}") from exc
-        input_summary, input_findings = validate_input_bundle(input_dir)
+        input_summary, input_findings = validate_input_bundle(
+            input_dir,
+            require_observations=False,
+        )
         errors = [item for item in input_findings if item.severity == "error"]
         if errors:
             raise ValueError("Input bundle validation failed: " + "; ".join(item.message for item in errors))
         if set(contract["treatments"]) != set(input_summary["treatments"]):
             raise ValueError("Output contract treatments do not match the selected input bundle")
+        runtime_root, runtime_manifest = _prepare_runtime_bundle(
+            case_dir,
+            workspace_dir,
+            input_dir,
+            contract["path"],
+        )
+    else:
+        runtime_root = None
+        runtime_manifest = None
 
     review_df = pd.read_csv(param_review_csv)
     review_df["name"] = review_df["name"].astype(str).str.strip().str.upper()
@@ -167,19 +263,23 @@ def build_case(
 
     pst.observation_data.loc[:, "weight"] = 1.0
 
-    model_script = os.path.normpath(os.path.join(workspace_dir, "src", "sensitivity", "sa_model.py"))
-    batch_path = (
-        os.path.join(input_dir, "DSSBatch.v48")
-        if input_dir
-        else os.path.join(workspace_dir, "data", "templates", "batch", "DSSBatch.v48")
-    )
+    if runtime_root is not None:
+        model_script = "runtime/src/sensitivity/sa_model.py"
+        batch_path = "runtime/input/DSSBatch.v48"
+        command_input_dir = "runtime/input"
+        command_output_profile = "runtime/config/output_profile.json"
+    else:
+        model_script = os.path.normpath(os.path.join(workspace_dir, "src", "sensitivity", "sa_model.py"))
+        batch_path = os.path.join(workspace_dir, "data", "templates", "batch", "DSSBatch.v48")
+        command_input_dir = None
+        command_output_profile = contract["path"]
     model_cmd = (
         f"python \"{model_script}\" --workspace . --batch \"{batch_path}\" "
         f"--cultivar {cultivar} --param-csv {params_csv_name} --out {out_name} --obs-order sa_obs_order.txt"
     )
-    if input_dir:
-        model_cmd += f' --input-dir "{input_dir}"'
-    model_cmd += f' --output-profile "{contract["path"]}"'
+    if command_input_dir:
+        model_cmd += f' --input-dir "{command_input_dir}"'
+    model_cmd += f' --output-profile "{command_output_profile}"'
     pst.model_command = [model_cmd]
 
     pst.pestpp_options["gsa_morris_r"] = int(morris_r)
@@ -218,10 +318,10 @@ def build_case(
         handle.write(f"input_dir: {input_dir or ''}\n")
         manifest_path = os.path.join(input_dir, "input_manifest.json") if input_dir else ""
         handle.write(f"input_manifest_sha256: {sha256_file(manifest_path) if manifest_path and os.path.isfile(manifest_path) else ''}\n")
-
-    for fp in [model_script]:
-        if os.path.exists(fp):
-            shutil.copy(fp, os.path.join(case_dir, os.path.basename(fp)))
+        handle.write("runtime_bundle: runtime\n" if runtime_root is not None else "runtime_bundle: \n")
+        handle.write(
+            f"runtime_manifest_sha256: {sha256_file(runtime_manifest) if runtime_manifest is not None else ''}\n"
+        )
 
     return pst_path
 

@@ -167,7 +167,10 @@ def build_counterfactual_bundle(
     output = Path(output_dir).resolve()
     if output.exists() and any(output.iterdir()):
         raise FileExistsError(f"Refusing to overwrite non-empty bundle: {output}")
-    source_summary, source_findings = validate_input_bundle(source)
+    source_summary, source_findings = validate_input_bundle(
+        source,
+        require_observations=False,
+    )
     source_errors = [item for item in source_findings if item.severity == "error"]
     if source_errors:
         raise ValueError("Source input bundle does not pass validation")
@@ -200,7 +203,10 @@ def build_counterfactual_bundle(
         newline="\n",
     )
 
-    summary, findings = validate_input_bundle(output)
+    summary, findings = validate_input_bundle(
+        output,
+        require_observations=False,
+    )
     errors = [item for item in findings if item.severity == "error"]
     if errors:
         raise ValueError("Generated counterfactual bundle failed validation")
@@ -228,13 +234,13 @@ def build_counterfactual_bundle(
         "controlled_factors": {
             "common_initial_condition_level": int(common_ic),
             "components": ["SH2O", "SNH4", "SNO3"],
-            "aggregation": "depth-wise median across the eight approved factorial treatments",
+            "aggregation": f"depth-wise median across {len(treatments)} approved factorial treatments",
             "source_treatments": list(treatments),
             "normalized_filex_ic_levels": sorted(int(value) for value in source_summary["initial_conditions"]),
             "profile": profile,
         },
         "varying_management_factors": ["MI", "MF"],
-        "unchanged_from_source": ["weather", "soil profile", "cultivar", "planting", "irrigation schedules", "fertilizer schedules", "observation files"],
+        "unchanged_from_source": ["weather", "soil profile", "cultivar", "planting", "irrigation schedules", "fertilizer schedules"],
         "files": files,
         "summary": summary,
         "findings": findings_as_dicts(findings),
@@ -253,10 +259,22 @@ def main() -> int:
     parser.add_argument("--source-dir", required=True)
     parser.add_argument("--out-dir", required=True)
     parser.add_argument("--common-ic", type=int, default=2)
+    parser.add_argument(
+        "--treatments",
+        default=",".join(str(value) for value in CORE_TREATMENTS),
+        help="Comma-separated treatment numbers retained in the controlled design",
+    )
     args = parser.parse_args()
+    try:
+        treatments = tuple(int(value.strip()) for value in args.treatments.split(",") if value.strip())
+    except ValueError as exc:
+        parser.error(f"Invalid --treatments value: {exc}")
+    if not treatments or len(set(treatments)) != len(treatments):
+        parser.error("--treatments must contain one or more unique integers")
     manifest = build_counterfactual_bundle(
         args.source_dir,
         args.out_dir,
+        treatments=treatments,
         common_ic=args.common_ic,
     )
     print(json.dumps({"bundle_id": manifest["bundle_id"], "science_status": manifest["science_status"]}))

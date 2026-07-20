@@ -16,6 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.common.experiment_inputs import findings_as_dicts, validate_input_bundle
 from src.common.project import sha256_file
+from src.sensitivity.treatment_factor_attribution import normalize_fertilizer_level_rows
 
 
 def _set_weather_coordinates(path: Path, latitude: float, longitude: float) -> None:
@@ -33,8 +34,91 @@ def _set_weather_coordinates(path: Path, latitude: float, longitude: float) -> N
     raise ValueError(f"Cannot find @ INSI weather header in {path}")
 
 
+def _set_simulation_option(path: Path, option: str, value: str) -> int:
+    """Set one FileX simulation option for every OP control row.
+
+    DSSAT parses ``@N OPTIONS`` data rows by **exact fixed-width column
+    position** as given by the header row — the same column the option name
+    starts in. Re-serializing the entire row (even with the same token values)
+    changes spacing and breaks DSSAT's column parser (observed: IPSIM /
+    potassium-model error even when all flags are correct). Therefore we change
+    ONLY the single character at the option column — every other byte of the
+    data row is preserved verbatim, including the original trailing whitespace
+    and line ending.
+    """
+
+    option = option.strip().upper()
+    value = value.strip().upper()
+    if len(value) != 1:
+        raise ValueError(f"FileX simulation option {option} value must be a single token, got {value!r}")
+    raw = path.read_bytes()
+    # Detect native newline
+    newline = b"\r\n" if b"\r\n" in raw else b"\n"
+    newline_str = "\r\n" if b"\r\n" in raw else "\n"
+    lines = raw.split(newline)
+    header_line: bytes | None = None
+    option_col: int | None = None
+    changed = 0
+    for index, line_bytes in enumerate(lines):
+        upper = line_bytes.strip().upper()
+        if upper.startswith(b"@N OPTIONS"):
+            header_line = line_bytes
+            option_col = _find_option_column(header_line, option)
+            if option_col is None:
+                raise ValueError(f"Cannot locate simulation option {option} in OPTIONS header in {path}")
+            continue
+        if header_line is not None and upper.startswith(b"@"):
+            header_line = None
+            option_col = None
+            continue
+        if header_line is None or option_col is None:
+            continue
+        stripped = line_bytes.strip()
+        if not stripped or stripped.startswith((b"*", b"!")):
+            continue
+        parts = stripped.split()
+        if len(parts) < 2 or parts[1].upper() != b"OP":
+            continue
+        if option_col >= len(line_bytes):
+            # Row too short for the column — pad with spaces, then set value.
+            line_bytes = line_bytes.rstrip() + b" " * (option_col - len(line_bytes) + 1)
+        chars = bytearray(line_bytes)
+        chars[option_col] = ord(value)
+        lines[index] = bytes(chars)
+        changed += 1
+    if changed == 0:
+        raise ValueError(f"Cannot find any simulation OPTIONS rows in {path}")
+    # Write back using original bytes with the same native newline.
+    # On Windows, write_text(newline="\n") still produces \r\n in some
+    # codepaths; writing raw bytes avoids all CR translation.
+    path.write_bytes(newline.join(lines) + newline)
+    return changed
+
+
+def _find_option_column(header_line: bytes, option: str) -> int | None:
+    """Return the byte offset of *option* in the OPTIONS header row.
+
+    The option value in the data row occupies the same byte offset.
+    """
+    import re
+
+    for match in re.finditer(re.escape(option.encode()), header_line):
+        return match.start()
+    return None
+
+
+def _set_experiment_details(path: Path, details: str) -> None:
+    """Replace only the FileX experiment-details title line."""
+
+    lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    if not lines or not lines[0].strip().upper().startswith("*EXP.DETAILS:"):
+        raise ValueError(f"Cannot find FileX experiment-details title in {path}")
+    lines[0] = f"*EXP.DETAILS: {details.strip()}"
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Create a versioned FileX/FileA/FileT/SOIL/weather input bundle")
+    parser = argparse.ArgumentParser(description="Create a versioned DSSAT experiment input bundle")
     parser.add_argument("--source-dir", required=True)
     parser.add_argument("--soil", required=True)
     parser.add_argument("--weather", required=True)
@@ -46,6 +130,30 @@ def main() -> int:
     parser.add_argument("--out-root", default=str(PROJECT_ROOT / "data" / "user" / "experiments"))
     parser.add_argument("--derived-from-bundle", default=None)
     parser.add_argument(
+        "--purpose",
+        choices=("calibration", "sensitivity"),
+        default="calibration",
+        help="Calibration requires FileA/FileT; sensitivity is simulation-only",
+    )
+    parser.add_argument(
+        "--experiment-title",
+        default=None,
+        help="Optional corrected text after the FileX *EXP.DETAILS: label",
+    )
+    parser.add_argument(
+        "--normalize-fertilizer-level",
+        type=int,
+        action="append",
+        default=[],
+        help="Make one FileX fertilizer factor level contiguous and chronological",
+    )
+    parser.add_argument(
+        "--symbi",
+        choices=("Y", "N"),
+        default=None,
+        help="Audited FileX SYMBI option applied to every simulation-control level",
+    )
+    parser.add_argument(
         "--correction-note",
         action="append",
         default=[],
@@ -54,11 +162,20 @@ def main() -> int:
     args = parser.parse_args()
 
     source = Path(args.source_dir).resolve()
+    source_manifest_path = source / "input_manifest.json"
+    source_manifest: dict[str, object] = {}
+    if source_manifest_path.is_file():
+        source_manifest = json.loads(source_manifest_path.read_text(encoding="utf-8"))
     destination = Path(args.out_root).resolve() / args.bundle_id
     if destination.exists():
         parser.error(f"Refusing to overwrite existing bundle: {destination}")
     destination.mkdir(parents=True)
-    sources = [source / f"{args.experiment}{suffix}" for suffix in (".TMX", ".TMA", ".TMT")]
+    sources = [source / f"{args.experiment}.TMX"]
+    observation_sources = [source / f"{args.experiment}{suffix}" for suffix in (".TMA", ".TMT")]
+    if args.purpose == "calibration":
+        sources.extend(observation_sources)
+    else:
+        sources.extend(path for path in observation_sources if path.is_file())
     sources.extend([Path(args.soil).resolve(), Path(args.weather).resolve(), Path(args.batch).resolve()])
     for item in sources:
         if not item.is_file():
@@ -82,18 +199,81 @@ def main() -> int:
             }
         )
 
-    summary, findings = validate_input_bundle(destination)
+    if args.symbi is not None:
+        filex_target = destination / f"{args.experiment}.TMX"
+        changed = _set_simulation_option(filex_target, "SYMBI", args.symbi)
+        metadata_corrections.append(
+            {
+                "file": filex_target.name,
+                "field": "simulation control SYMBI",
+                "value": args.symbi,
+                "scope": f"all {changed} FileX OPTIONS control row(s)",
+                "authority": "user decision in project thread",
+            }
+        )
+
+    if args.experiment_title is not None:
+        filex_target = destination / f"{args.experiment}.TMX"
+        _set_experiment_details(filex_target, args.experiment_title)
+        metadata_corrections.append(
+            {
+                "file": filex_target.name,
+                "field": "experiment details title",
+                "value": args.experiment_title,
+                "scope": "metadata only; management and observations unchanged",
+                "authority": "user-provided season identity",
+            }
+        )
+
+    if args.normalize_fertilizer_level:
+        filex_target = destination / f"{args.experiment}.TMX"
+        text = filex_target.read_text(encoding="utf-8", errors="ignore")
+        for level in args.normalize_fertilizer_level:
+            text = normalize_fertilizer_level_rows(text, level, "last")
+        filex_target.write_text(text, encoding="utf-8", newline="\n")
+        metadata_corrections.append(
+            {
+                "file": filex_target.name,
+                "field": "fertilizer factor row order",
+                "value": args.normalize_fertilizer_level,
+                "scope": "row-order normalization only; all fertilizer values retained",
+                "authority": "DSSAT input-order integrity gate",
+            }
+        )
+
+    summary, findings = validate_input_bundle(
+        destination,
+        require_observations=args.purpose == "calibration",
+    )
     files = []
     for item in sorted(path for path in destination.iterdir() if path.is_file()):
         files.append({"name": item.name, "sha256": sha256_file(item), "bytes": item.stat().st_size})
+    authoritative_coordinates = (
+        [args.site_lat, args.site_lon]
+        if args.site_lat is not None
+        else source_manifest.get("authoritative_coordinates")
+    )
     manifest = {
         "bundle_id": args.bundle_id,
         "derived_from_bundle": args.derived_from_bundle,
+        "derived_from_manifest_sha256": (
+            sha256_file(source_manifest_path) if source_manifest_path.is_file() else None
+        ),
         "correction_notes": args.correction_note,
         "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "source_files": [str(path) for path in sources],
-        "authoritative_coordinates": [args.site_lat, args.site_lon] if args.site_lat is not None else None,
+        "authoritative_coordinates": authoritative_coordinates,
         "metadata_corrections": metadata_corrections,
+        "intended_use": (
+            "parameter_calibration_and_validation"
+            if args.purpose == "calibration"
+            else "sensitivity_analysis_only"
+        ),
+        "observation_policy": (
+            "FileA_and_FileT_required"
+            if args.purpose == "calibration"
+            else "simulation_only_FileA_and_FileT_optional"
+        ),
         "files": files,
         "summary": summary,
         "findings": findings_as_dicts(findings),

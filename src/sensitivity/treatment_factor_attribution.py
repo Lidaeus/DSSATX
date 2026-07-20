@@ -185,6 +185,57 @@ def fertilizer_n_dates(text: str, fertilizer_level: int) -> list[int]:
     return dates
 
 
+def fertilizer_n_total_kg_ha(text: str, fertilizer_level: int) -> float:
+    """Total mineral nitrogen (kg N/ha) applied under one FileX fertilizer factor level.
+
+    Sums the ``FAMN`` column across every event row of the requested MF level in
+    the ``*FERTILIZERS (INORGANIC)`` section. The value is the actual seasonal
+    dose — it is NOT rounded, clamped, or matched to a nominal N-level ladder.
+    Per-season FileX schedules differ (XXQL2501 MF1=399, XXQL2502/XXQL2601
+    MF1=360/361 kg N/ha), so the sensitivity output contract must read the
+    derived dose rather than a hardcoded constant.
+
+    Raises ``ValueError`` if the FERTILIZERS section or the FAMN column is
+    absent, or if no rows match the requested level.
+    """
+
+    in_fertilizers = False
+    header: list[str] = []
+    matched_rows = 0
+    total = 0.0
+    for line in text.splitlines():
+        upper = line.strip().upper()
+        if upper.startswith("*FERTILIZERS (INORGANIC)"):
+            in_fertilizers = True
+            continue
+        if in_fertilizers and line.startswith("*"):
+            break
+        if not in_fertilizers:
+            continue
+        if upper.startswith("@F"):
+            header = upper.lstrip("@").split()
+            if "FAMN" not in header:
+                raise ValueError("FileX FERTILIZERS header lacks the FAMN column")
+            continue
+        tokens = line.split()
+        if not header or len(tokens) < len(header):
+            continue
+        try:
+            level = int(tokens[0])
+            nitrogen = float(tokens[header.index("FAMN")])
+        except (ValueError, IndexError):
+            continue
+        if level == int(fertilizer_level):
+            total += nitrogen
+            matched_rows += 1
+    if matched_rows == 0:
+        raise ValueError(
+            f"No FERTILIZERS rows matched MF level {fertilizer_level}; "
+            "check that the level exists in the FileX"
+        )
+    return float(total)
+
+
 def replace_fertilizer_n(
     text: str,
     target_mf: int,

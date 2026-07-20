@@ -9,11 +9,24 @@ PEST run directory (the current working directory) where the ``.ins`` files
 read them.  The ephemeral directory is removed in ``finally`` so that retries,
 manual interruptions, and future in-agent concurrency can never reuse a stale
 ``Evaluate.OUT``/``PlantGro.OUT``/genotype from a previous call.
+
+T1/T4 DSSAT path remedies (propagated from tools/sa/run_three_season_baseline_smoke.py):
+  1. CRD rewrite — DSCSM048.EXE reads DSSATPRO.v48 from its EXE directory;
+     after copying the template DSSATPRO into run_dir we rewrite the CRD line
+     to point at run_dir so DSSAT resolves FileX/genotype/SOIL from run_dir.
+  2. TMD staging — C:\\DSSAT48\\TOMATO holds stale XXQL*.TMX from prior runs
+     that silently shadow the bundle FileX (DSSAT prefers TMD). We stage them
+     aside before the run and restore in finally.
+  3. --model CRGRO048 — explicit model code so DSSAT does not fall back to a
+     default that may differ by CWD.
 """
 
 from __future__ import annotations
 
+import hashlib
 import os
+import re
+import time
 from pathlib import Path
 import shutil
 import subprocess
@@ -23,6 +36,18 @@ import tempfile
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "data"
+
+# Shared DSSAT root (C:\DSSAT48) and the TOMATO directory whose stale XXQL*
+# FileX files shadow the bundle during SA/calibration runs.
+_DSSAT_ROOT = Path(os.environ.get("DSSAT48_HOME", r"C:\DSSAT48"))
+_TMD_DIR = _DSSAT_ROOT / "TOMATO"
+# Stems whose stale TMD copies shadow the three formal-SA experiment bundles.
+_TMD_CONFLICT_STEMS = ["XXQL2501", "XXQL2502", "XXQL2601"]
+_TMD_CONFLICT_SUFFIXES = [".TMX", ".TMA", ".TMT", ".TMX.bak"]
+# Explicit CSM model code for the eggplant-on-tomato-model case. Per the DSSAT
+# parallel-run path guide §4.2, passing the model explicitly is the most robust
+# option and avoids CWD-dependent default-model resolution.
+_DSSAT_MODEL_CODE = "CRGRO048"
 
 # Files the real runner writes into PEST_OUT_DIR and that PEST reads via .ins.
 _PEST_INTERFACE_FILES = (
@@ -102,6 +127,54 @@ def _experiment_names(batch_file: Path) -> set[str]:
     return names
 
 
+def _to_dssatpro_path(p: Path) -> str:
+    """Format a path the way DSSAT's DSSATPRO expects: 'D: \\path\\rest'."""
+    s = os.path.abspath(str(p))
+    drive, rest = os.path.splitdrive(s)
+    rest = rest.replace("/", "\\")
+    if not rest.startswith("\\"):
+        rest = "\\" + rest
+    return f"{drive} {rest}"
+
+
+def _write_local_dssatpro(run_dir: Path) -> Path:
+    """Write DSSATPRO.v48 into run_dir with CRD and TMD pointing to run_dir.
+
+    TMD/SLD/WED stay at the shared install (except TMD is overridden here to
+    point to run_dir so DSSAT resolves FileX/genotype from run_dir without
+    colliding or shadowing from C:\\DSSAT48\\TOMATO).
+    """
+    templates = DATA_DIR / "templates"
+    lines = (templates / "DSSATPRO.v48").read_text(encoding="utf-8", errors="ignore").splitlines(keepends=True)
+    crd_line = f"CRD {_to_dssatpro_path(run_dir)}\n"
+    tmd_line = f"TMD {_to_dssatpro_path(run_dir)}\n"
+    out = []
+    wrote_crd = False
+    wrote_tmd = False
+    for ln in lines:
+        if ln.strip().startswith("CRD "):
+            out.append(crd_line)
+            wrote_crd = True
+        elif ln.strip().startswith("TMD "):
+            out.append(tmd_line)
+            wrote_tmd = True
+        else:
+            out.append(ln)
+    if not wrote_crd:
+        for i, ln in enumerate(out):
+            if ln.strip() == "":
+                out.insert(i + 1, crd_line)
+                break
+    if not wrote_tmd:
+        for i, ln in enumerate(out):
+            if ln.strip() == "":
+                out.insert(i + 1, tmd_line)
+                break
+    dst = run_dir / "DSSATPRO.v48"
+    dst.write_text("".join(out), encoding="utf-8")
+    return dst
+
+
 def prepare_run_directory(run_dir: Path, args: list[str]) -> Path:
     """Populate one run directory with immutable inputs required by DSSAT."""
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -118,12 +191,13 @@ def prepare_run_directory(run_dir: Path, args: list[str]) -> Path:
     _copy(soil_source, run_dir / "SOIL.SOL")
 
     templates = DATA_DIR / "templates"
-    for filename in ("DSSATPRO.v48", "DSSAT48.INH", "DSSAT48.INP"):
+    for filename in ("DSSAT48.INH", "DSSAT48.INP"):
         _copy(templates / filename, run_dir / filename)
+    _write_local_dssatpro(run_dir)
 
     exe_candidates = [
-        Path(os.environ.get("DSSAT48_HOME", r"C:\DSSAT48")) / "DSCSM048.EXE",
         PROJECT_ROOT / "workspace" / "DSCSM048.EXE",
+        Path(os.environ.get("DSSAT48_HOME", r"C:\DSSAT48")) / "DSCSM048.EXE",
     ]
     executable = next((path for path in exe_candidates if path.is_file()), None)
     if executable is None:
@@ -139,6 +213,34 @@ def prepare_run_directory(run_dir: Path, args: list[str]) -> Path:
             raise FileNotFoundError(f"Experiment referenced by batch is missing: {stem}")
         for source in model_files:
             _copy(source, run_dir / source.name)
+
+    # Rewrite absolute FileX paths to bare names using the same fixed-width-aware
+    # logic as src/dssat/run_dssat._write_local_batch, so the batch column
+    # alignment is preserved and DSSAT resolves FileX from CWD.
+    batch_lines = batch_file.read_text(encoding="utf-8", errors="ignore").splitlines(keepends=True)
+    out_lines = []
+    for line in batch_lines:
+        s = line.strip()
+        if not s or s.startswith(("$", "!", "@", "*")):
+            out_lines.append(line)
+            continue
+        m = re.match(r"^(\s*)(\S+)(.*)$", line.rstrip("\n"))
+        if not m:
+            out_lines.append(line)
+            continue
+        prefix = m.group(1)
+        old_tok = m.group(2)
+        rest = m.group(3)
+        if Path(old_tok).suffix.upper() != ".TMX":
+            out_lines.append(line)
+            continue
+        new_tok = Path(old_tok).name
+        if len(new_tok) < len(old_tok):
+            new_tok = new_tok.ljust(len(old_tok))
+        elif len(new_tok) > len(old_tok):
+            new_tok = new_tok[:len(old_tok)]
+        out_lines.append(prefix + new_tok + rest + "\n")
+    batch_file.write_text("".join(out_lines), encoding="utf-8")
 
     weather = input_dir if input_dir else DATA_DIR / "raw" / "weather"
     weather_files = list(weather.glob("*.WTH"))
@@ -233,6 +335,8 @@ def main() -> int:
                 localized_args.append(value)
         if "--batch" not in localized_args and not any(value.startswith("--batch=") for value in localized_args):
             localized_args.extend(["--batch", batch_file.name])
+        if "--model" not in localized_args and not any(value.startswith("--model=") for value in localized_args):
+            localized_args.extend(["--model", _DSSAT_MODEL_CODE])
 
         env = os.environ.copy()
         # All outputs stay inside the ephemeral run_dir; only the PEST interface
