@@ -48,7 +48,7 @@ ALL_JOBS = [
     ("XXQL2601", 10, "xxql2601_sa_controlled_tn12_w1_candidate_20260721", "xxql2601"),
 ]
 
-OUT_ROOT = PROJECT_ROOT / "workspace" / "runs" / "formal_morris_repro_v3"
+OUT_ROOT = PROJECT_ROOT / "workspace" / "runs" / "formal_morris_repro_v4"
 
 
 def _case_dir(season: str, r: int, seed: int) -> Path:
@@ -176,7 +176,7 @@ def cmd_postprocess():
         if not all(_is_complete(_case_dir(season, r, s)) for s in SEEDS):
             continue
         contract = f"configs/sa/eggplant_formal_{contract_suf}_outputs_20260720.json"
-        out = PROJECT_ROOT / "workspace" / "runs" / "morris_results_repro_v3" / season / f"r{r:02d}"
+        out = PROJECT_ROOT / "workspace" / "runs" / "morris_results_repro_v4" / season / f"r{r:02d}"
         out.mkdir(parents=True, exist_ok=True)
         print(f"  {season} r={r:02d}: 后处理...")
         cmd = [sys.executable, "-m", "src.sensitivity.morris_multiseed",
