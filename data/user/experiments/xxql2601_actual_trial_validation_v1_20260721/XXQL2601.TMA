@@ -1,0 +1,25 @@
+*EXP.DATA (A): 2026 SPRING EGGPLANT
+
+! Generated only from measured data in the named season folder.
+! TRNO = DSSAT treatment number; TN1-TN12 map one-to-one to plots 1-12.
+! Values are treatment/plot means; within-plot replicates were averaged.
+! Missing numeric values = -99; dates = YYDDD.
+! HWAHF/HWAH are final cumulative fresh/dry harvested fruit yields.
+! Fresh yield is a per-harvest measurement and is cumulatively summed by plot.
+! Fruit DM fraction = 1 - measured half-fruit moisture fraction in the quality workbook.
+! Each harvest uses the nearest plot-level quality measurement date.
+! Standing-fruit biomass indicators are omitted because of sampling error.
+
+@TRNO  HWAH HWAHF  LAIX  LWAM  SNAM  HDAT
+     1  2992 52737 1.744  1323   -99 26182
+     2  3762 65155 1.935  1684   -99 26182
+     3  3489 59170 1.564  1314   -99 26182
+     4  2995 52921 1.704  1720   -99 26182
+     5  3400 59510 1.356  1658   -99 26182
+     6  2948 48222 1.255  1071   -99 26182
+     7  2666 47275 1.587  1566   -99 26182
+     8  2876 49426 1.637  1571   -99 26182
+     9  2765 48770 1.177  1027   -99 26182
+    10  3368 53337 1.112  1013   -99 26182
+    11  2999 50483 1.365  1295   -99 26182
+    12  3020 48459 1.426  1367   -99 26182

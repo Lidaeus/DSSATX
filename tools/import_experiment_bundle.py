@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
 import shutil
@@ -14,7 +15,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.common.experiment_inputs import findings_as_dicts, validate_input_bundle
+from src.common.experiment_inputs import findings_as_dicts, parse_filex, validate_input_bundle
 from src.common.project import sha256_file
 from src.sensitivity.treatment_factor_attribution import normalize_fertilizer_level_rows
 
@@ -117,6 +118,59 @@ def _set_experiment_details(path: Path, details: str) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _section_text(path: Path, heading: str) -> str:
+    lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    start = next(
+        (i for i, line in enumerate(lines) if line.strip().upper().startswith(heading.upper())),
+        None,
+    )
+    if start is None:
+        raise ValueError(f"Cannot find {heading} in {path}")
+    end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("*")), len(lines))
+    return "\n".join(line.rstrip() for line in lines[start:end]).strip()
+
+
+def _assert_actual_trial_preserved(candidate: Path, reference: Path) -> dict[str, object]:
+    """Reject formal bundles that pool measured IC or soil-analysis inputs."""
+    candidate_parsed = parse_filex(candidate)
+    reference_parsed = parse_filex(reference)
+    if candidate_parsed["initial_conditions"] != reference_parsed["initial_conditions"]:
+        raise ValueError("Formal bundle changes treatment-specific *INITIAL CONDITIONS")
+    candidate_treatments = candidate_parsed["treatments"]
+    reference_treatments = reference_parsed["treatments"]
+    if set(candidate_treatments) != set(reference_treatments):
+        raise ValueError("Formal bundle treatment IDs differ from the actual-trial reference")
+    for treatment in sorted(reference_treatments):
+        for factor in ("IC", "SA", "MI", "MF"):
+            before = reference_treatments[treatment].get(factor)
+            after = candidate_treatments[treatment].get(factor)
+            if before != after:
+                raise ValueError(f"Formal bundle changes TN{treatment} {factor}: {before} -> {after}")
+    treatment_count = len(candidate_treatments)
+    ic_count = len({values.get("IC") for values in candidate_treatments.values()})
+    sa_count = len({values.get("SA") for values in candidate_treatments.values()})
+    if ic_count != treatment_count or sa_count != treatment_count:
+        raise ValueError(
+            "Formal bundle must retain one measured IC and SA level per treatment; "
+            f"treatments={treatment_count}, IC={ic_count}, SA={sa_count}"
+        )
+    section_hashes: dict[str, str] = {}
+    for heading in ("*SOIL ANALYSIS", "*INITIAL CONDITIONS"):
+        candidate_text = _section_text(candidate, heading)
+        reference_text = _section_text(reference, heading)
+        if candidate_text != reference_text:
+            raise ValueError(f"Formal bundle changes measured {heading} data")
+        section_hashes[heading] = hashlib.sha256(candidate_text.encode("utf-8")).hexdigest()
+    return {
+        "reference_filex": str(reference),
+        "reference_filex_sha256": sha256_file(reference),
+        "treatment_count": treatment_count,
+        "treatment_specific_ic_count": ic_count,
+        "treatment_specific_sa_count": sa_count,
+        "section_sha256": section_hashes,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Create a versioned DSSAT experiment input bundle")
     parser.add_argument("--source-dir", required=True)
@@ -125,15 +179,31 @@ def main() -> int:
     parser.add_argument("--batch", required=True)
     parser.add_argument("--experiment", required=True, help="File stem, for example XXQL2501")
     parser.add_argument("--bundle-id", required=True)
+    parser.add_argument(
+        "--observation-source-dir",
+        default=None,
+        help="Optional directory supplying FileA/FileT while FileX comes from --source-dir",
+    )
     parser.add_argument("--site-lat", type=float, default=None)
     parser.add_argument("--site-lon", type=float, default=None)
     parser.add_argument("--out-root", default=str(PROJECT_ROOT / "data" / "user" / "experiments"))
     parser.add_argument("--derived-from-bundle", default=None)
     parser.add_argument(
         "--purpose",
-        choices=("calibration", "sensitivity"),
+        choices=("calibration", "sensitivity", "source"),
         default="calibration",
-        help="Calibration requires FileA/FileT; sensitivity is simulation-only",
+        help="Calibration requires FileA/FileT; sensitivity is simulation-only; source is actual-trial staging",
+    )
+    parser.add_argument(
+        "--scenario-role",
+        choices=("calibration", "validation"),
+        default=None,
+        help="Formal actual-trial role; validation bundles prohibit parameter calibration",
+    )
+    parser.add_argument(
+        "--actual-trial-reference-filex",
+        default=None,
+        help="Reference FileX whose treatment-specific IC/SA/MI/MF must be preserved",
     )
     parser.add_argument(
         "--experiment-title",
@@ -162,6 +232,7 @@ def main() -> int:
     args = parser.parse_args()
 
     source = Path(args.source_dir).resolve()
+    observation_source = Path(args.observation_source_dir).resolve() if args.observation_source_dir else source
     source_manifest_path = source / "input_manifest.json"
     source_manifest: dict[str, object] = {}
     if source_manifest_path.is_file():
@@ -171,7 +242,7 @@ def main() -> int:
         parser.error(f"Refusing to overwrite existing bundle: {destination}")
     destination.mkdir(parents=True)
     sources = [source / f"{args.experiment}.TMX"]
-    observation_sources = [source / f"{args.experiment}{suffix}" for suffix in (".TMA", ".TMT")]
+    observation_sources = [observation_source / f"{args.experiment}{suffix}" for suffix in (".TMA", ".TMT")]
     if args.purpose == "calibration":
         sources.extend(observation_sources)
     else:
@@ -241,6 +312,17 @@ def main() -> int:
             }
         )
 
+    actual_trial_preservation = None
+    if args.actual_trial_reference_filex is not None:
+        if args.purpose != "calibration" or args.scenario_role is None:
+            parser.error("--actual-trial-reference-filex requires calibration purpose and scenario role")
+        reference_filex = Path(args.actual_trial_reference_filex).resolve()
+        if not reference_filex.is_file():
+            parser.error(f"Actual-trial reference FileX missing: {reference_filex}")
+        actual_trial_preservation = _assert_actual_trial_preserved(
+            destination / f"{args.experiment}.TMX", reference_filex
+        )
+
     summary, findings = validate_input_bundle(
         destination,
         require_observations=args.purpose == "calibration",
@@ -265,13 +347,38 @@ def main() -> int:
         "authoritative_coordinates": authoritative_coordinates,
         "metadata_corrections": metadata_corrections,
         "intended_use": (
-            "parameter_calibration_and_validation"
+            "independent_validation_against_observed_treatment_initial_conditions"
+            if args.scenario_role == "validation"
+            else "actual_trial_parameter_calibration"
+            if args.scenario_role == "calibration"
+            else "parameter_calibration_and_validation"
             if args.purpose == "calibration"
+            else "actual_trial_source_candidate"
+            if args.purpose == "source"
             else "sensitivity_analysis_only"
         ),
+        "prohibited_use": ["parameter_calibration"] if args.scenario_role == "validation" else [],
+        "scenario_type": "actual_trial_calibration" if args.scenario_role else None,
+        "scenario_role": args.scenario_role,
+        "observation_source_dir": str(observation_source),
+        "treatment_plot_mapping": (
+            "TN1-TN12 map one-to-one to plots 1-12; confirmed by user 2026-07-21"
+            if args.scenario_role
+            else None
+        ),
+        "initial_condition_policy": (
+            "observed_treatment_specific_no_counterfactual_pooling" if actual_trial_preservation else None
+        ),
+        "soil_analysis_policy": (
+            "observed_treatment_specific_no_counterfactual_pooling" if actual_trial_preservation else None
+        ),
+        "counterfactual_transformations": [] if actual_trial_preservation else None,
+        "actual_trial_preservation": actual_trial_preservation,
         "observation_policy": (
             "FileA_and_FileT_required"
             if args.purpose == "calibration"
+            else "FileA_and_FileT_optional_actual_trial_source"
+            if args.purpose == "source"
             else "simulation_only_FileA_and_FileT_optional"
         ),
         "files": files,

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-07-21（实际试验率定/验证输入包）
+
+- 将 XXQL2502、XXQL2601 原 FileX 的 `SYMBI` 由 Y 改为非豆科适用的 N，保持 DSSAT OPTIONS 固定宽度；两季原始目录补齐 SOIL.SOL。
+- 用户确认 plot 1–12 与 TN1–TN12 一一对应；FileA/FileT 标题和注释改为标准 DSSAT treatment-number 语义，不改观测数值。
+- 输入导入工具新增独立 observation source、calibration/validation 角色和 actual-trial 保留门；正式包必须逐字保留 `*SOIL ANALYSIS`、`*INITIAL CONDITIONS` 及逐处理 IC/SA/MI/MF，拒绝受控 SA 的统一初始条件。
+- 生成 XXQL2502 actual-trial calibration 包和 XXQL2601 independent-validation 包；validation manifest 禁止 parameter calibration。两包完整性与观测审计通过，仅保留深层 SSKS/土壤质地缺失及植株氮观测范围等已披露警告。
+
 ## 2026-07-21（T7 v2 参数率定设计与基础代码）
 
 - 将主率定选择规则改为：排除模型定义不适用的 `PM06` 后，分别在 general-genetic 与 water-nitrogen-response 域累计至 90%，再取 17 参数并集；新增可复现、默认拒绝 `science_pending` 的 proposal-only 选择器。

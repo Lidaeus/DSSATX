@@ -29,7 +29,7 @@ def test_reporting_derives_incremental_harvest_when_only_cumulative_is_recorded(
     assert [row["OBS_FRESH_INC"] for row in first] == [6059.0, 5436.0, 6720.0]
 
 
-def test_xxql2502_observation_values_match_filea_but_raw_bundle_is_not_formal_ready():
+def test_xxql2502_observation_values_match_filea_and_repaired_raw_bundle_is_safe():
     report, _ = audit_observation_bundle(
         ROOT / "data" / "user" / "experiments" / "XXQL2502"
     )
@@ -38,8 +38,10 @@ def test_xxql2502_observation_values_match_filea_but_raw_bundle_is_not_formal_re
     assert "CUMULATIVE_HARVEST_DECREASES" not in codes
     assert "FILEA_DERIVED_DUPLICATES" in codes
     assert "ORGAN_N_WITHOUT_TOTAL_PLANT_N" in codes
-    assert "NONLEGUME_SYMBIOSIS_ENABLED" in codes
-    assert report["safe_for_direct_formal_use"] is False
+    assert "NONLEGUME_SYMBIOSIS_ENABLED" not in codes
+    assert "SOIL_PROFILE_MISSING" not in codes
+    assert "TRNO_DECLARED_AS_PLOT_NUMBER" not in codes
+    assert report["safe_for_direct_formal_use"] is True
 
 
 def test_xxql2601_flags_no_plant_n_and_filex_event_order_problem():

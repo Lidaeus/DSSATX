@@ -499,7 +499,7 @@ Quncy, FL
 @N GENERAL     NYERS NREPS START SDATE RSEED SNAME.................... SMODEL
  2 GE              1     1     S 26068  2150 Number 2 SImulation
 @N OPTIONS     WATER NITRO SYMBI PHOSP POTAS DISES  CHEM  TILL   CO2
- 2 OP              Y     Y     Y     N     N     N     Y     N     M
+ 2 OP              Y     Y     N     N     N     N     Y     N     M
 @N METHODS     WTHER INCON LIGHT EVAPO INFIL PHOTO HYDRO NSWIT MESOM MESEV MESOL
  2 ME              M     M     E     R     S     L     R     1     P     R     2
 @N MANAGEMENT  PLANT IRRIG FERTI RESID HARVS

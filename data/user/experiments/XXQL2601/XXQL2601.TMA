@@ -1,7 +1,8 @@
-*EXP. DATA (A): 2026 SPRING EGGPLANT; TRNO=PLOT NUMBER
+*EXP.DATA (A): 2026 SPRING EGGPLANT
 
 ! Generated only from measured data in the named season folder.
-! TRNO = plot number; within-plot replicates were averaged.
+! TRNO = DSSAT treatment number; TN1-TN12 map one-to-one to plots 1-12.
+! Values are treatment/plot means; within-plot replicates were averaged.
 ! Missing numeric values = -99; dates = YYDDD.
 ! HWAHF/HWAH are final cumulative fresh/dry harvested fruit yields.
 ! Fresh yield is a per-harvest measurement and is cumulatively summed by plot.

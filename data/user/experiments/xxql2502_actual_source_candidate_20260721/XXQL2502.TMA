@@ -1,0 +1,27 @@
+*EXP.DATA (A): 2025 AUTUMN EGGPLANT
+
+! Generated only from measured data in the named season folder.
+! TRNO = DSSAT treatment number; TN1-TN12 map one-to-one to plots 1-12.
+! Values are treatment/plot means; within-plot replicates were averaged.
+! Missing numeric values = -99; dates = YYDDD.
+! HWAHF/HWAH are final cumulative fresh/dry harvested fruit yields.
+! Fresh yield is a per-harvest measurement and is cumulatively summed by plot.
+! Dry harvested yield uses the nearest measured plot fruit DM fraction (mean).
+! Fruit DM samples below the dry-weight threshold are excluded before aggregation.
+! Remaining DM fractions are screened within measurement date using Tukey 1.5*IQR fences.
+! Two user-identified fruit DM outliers are always excluded.
+! Standing-fruit biomass and N indicators are omitted because of sampling error.
+
+@TRNO  HWAH HWAHF  LAIX  LWAM  SNAM  HDAT
+     1  1461 18215 2.606  1831  37.6 26005
+     2  1507 18989 2.910  2056  41.5 26005
+     3  1248 15449 2.587  1687  37.6 26005
+     4  1435 17459 1.898  1190  29.9 26005
+     5  1587 18840 2.439  1629  38.3 26005
+     6  1501 18459 2.086  1409  30.1 26005
+     7  1252 15032 1.941  1394  29.0 26005
+     8  1566 17140 2.371  1596  35.4 26005
+     9  1100 12706 2.023  1261  23.3 26005
+    10  1518 18125 2.505  1330  28.5 26005
+    11  1367 16169 2.324  1801  34.1 26005
+    12  1365 16973 2.488  1926  30.7 26005
