@@ -1,0 +1,12 @@
+bounds_id: "eggplant_formal_multiseason_candidate_v1_20260719"
+crop: "eggplant"
+created_at: "2026-07-20T02:41:08Z"
+approved_at: "2026-07-20T02:41:08Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_formal_multiseason_candidate_v1_20260719.csv"
+derived_from_sha256: "1b3436bdfcbbbd099260730f782dfb1b4a4b258a5d43d6806a469f99b4f37118"
+bounds_sha256: "df4cb8f05ec3708f3b81a0ae310375d392ce911a43fbd4dea20bcfbb231e893a"
+parameter_count: 157
+automatic_repairs: 0
+notes: "Formal multi-season sensitivity analysis bounds candidate v1"

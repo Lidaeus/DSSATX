@@ -12,6 +12,7 @@ source(file.path(script_dir, "fig_phi_convergence.R"), local = FALSE)
 source(file.path(script_dir, "fig_posterior_demo.R"), local = FALSE)
 source(file.path(script_dir, "fig_spearman_demo.R"), local = FALSE)
 source(file.path(script_dir, "fig_equifinality_demo.R"), local = FALSE)
+source(file.path(script_dir, "fig_sa_morris.R"), local = FALSE)
 
 check_r_dependencies()
 args <- parse_cli_args(commandArgs(trailingOnly = TRUE))
@@ -30,23 +31,71 @@ if (!is.null(args$formats)) profile$formats <- split_csv_arg(args$formats)
 # Default "all" preserves backward-compatible full rendering.
 figure_ids <- if (is.null(args$figure_ids)) "all" else args$figure_ids
 selected <- function(id) figure_ids == "all" || id %in% split_csv_arg(figure_ids)
-is_t4_request <- any(vapply(c("figs5_posterior", "figs6_spearman", "figs7_equifinality"), selected, logical(1)))
+requested_ids <- if (figure_ids == "all") character() else split_csv_arg(figure_ids)
+is_t4_request <- any(requested_ids %in% c("figs5_posterior", "figs6_spearman", "figs7_equifinality"))
+is_sa_request <- any(requested_ids %in% c("fig1_sa", "figs1_sa_stability"))
+if (is_t4_request && is_sa_request) {
+  stop("SA and T4 demo figures require separate frozen bundles", call. = FALSE)
+}
 if (is_t4_request) {
   standard_ids <- c("fig2_phi", "fig3_performance", "figs3_residuals", "fig4_dynamics", "figs4_all_treatments")
   if (any(vapply(standard_ids, selected, logical(1)))) {
     stop("T4 demo figures require a dedicated bundle and cannot be mixed with standard paper figures", call. = FALSE)
   }
 }
+if (is_sa_request) {
+  standard_ids <- c("fig2_phi", "fig3_performance", "figs3_residuals", "fig4_dynamics", "figs4_all_treatments")
+  if (any(requested_ids %in% standard_ids)) {
+    stop("SA figures require a dedicated bundle and cannot be mixed with calibration figures", call. = FALSE)
+  }
+}
 needs_trajectory <- selected("fig4_dynamics") || selected("figs4_all_treatments")
 needs_treatment_metadata <- selected("figs3_residuals") || selected("fig4_dynamics") || selected("figs4_all_treatments")
 
-bundle <- if (is_t4_request) read_t4_demo_bundle(input_dir, isTRUE(args$allow_unvalidated_demo)) else read_paper_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
-if (!is_t4_request) require_calibration_scenario(bundle)
+bundle <- if (is_t4_request) {
+  read_t4_demo_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
+} else if (is_sa_request) {
+  read_sa_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
+} else {
+  read_paper_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
+}
+if (!is_t4_request && !is_sa_request) require_calibration_scenario(bundle)
 variables <- split_csv_arg(if (is.null(args$variables)) "LAID,LWAD,SWAD,FRESH_INC" else args$variables)
 process_variables <- split_csv_arg(if (is.null(args$process_variables)) "LAID,LWAD" else args$process_variables)
 treatments <- split_csv_arg(if (is.null(args$treatments)) "2,13" else args$treatments)
 stem <- if (bundle$is_demo) "DEMO" else "Fig"
 artifacts <- character()
+
+if (is_sa_request) {
+  if (selected("fig1_sa")) {
+    result <- build_morris_main(
+      bundle$rankings, bundle$group_summary, bundle$focus, profile, bundle$is_demo
+    )
+    base <- file.path(out_dir, if (bundle$is_demo) "DEMO_Fig1_sa_morris" else "Fig1_sa_morris")
+    artifacts <- c(artifacts, save_figure_set(
+      result$plot, base, profile, profile$double_column_width_mm, result$height_mm
+    ))
+    ranking_source <- paste0(base, ".ranking_source.csv")
+    group_source <- paste0(base, ".group_source.csv")
+    utils::write.csv(result$ranking_source, ranking_source, row.names = FALSE, fileEncoding = "UTF-8")
+    utils::write.csv(result$group_source, group_source, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, ranking_source, group_source)
+  }
+  if (selected("figs1_sa_stability")) {
+    result <- build_morris_stability(
+      bundle$seed_rankings, bundle$stability, bundle$focus, profile, bundle$is_demo
+    )
+    base <- file.path(out_dir, if (bundle$is_demo) "DEMO_FigS1_sa_stability" else "FigS1_sa_stability")
+    artifacts <- c(artifacts, save_figure_set(
+      result$plot, base, profile, profile$double_column_width_mm, result$height_mm
+    ))
+    rank_source <- paste0(base, ".rank_source.csv")
+    stability_source <- paste0(base, ".stability_source.csv")
+    utils::write.csv(result$rank_source, rank_source, row.names = FALSE, fileEncoding = "UTF-8")
+    utils::write.csv(result$stability_source, stability_source, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, rank_source, stability_source)
+  }
+}
 
 if (is_t4_request) {
   if (figure_ids == "all") stop("T4 demo bundles require explicit --figure-ids", call. = FALSE)
@@ -237,7 +286,7 @@ manifest <- list(
   profile_id = profile$profile_id,
   profile = sha256_record(profile_path),
   run_id = bundle$manifest$run_id,
-  data_status = if (bundle$is_demo) "legacy_layout_demo" else "science_validated",
+  data_status = if (is_sa_request) bundle$manifest$data_status else if (bundle$is_demo) "legacy_layout_demo" else "science_validated",
   input_manifest = sha256_record(file.path(input_dir, "paper_data_manifest.json")),
   artifacts = lapply(artifacts, sha256_record)
 )

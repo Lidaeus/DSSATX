@@ -65,7 +65,8 @@ staged builder 必须直接从版本化 FileA 生成物候和季末实测列，�
 - `lower <= init <= upper`；
 - fixed 参数满足 `lower == init == upper`；
 - 参数位于 `PHYSICAL_BOUNDS` 内；
-- `FL-VS == 100`、`XFINT` 位于安全区间；
+- 参数位于数值安全包络，同时科研候选域来自获批 proposal/frozen；`FL-VS` 不再硬编码为 100；
+- `XMAGE < XFPHT` 及 `TB < TO1 < TO2 < TM` 必须由参数域保证，不能依赖采样后裁剪；
 - 各阶段温度基点满足项目定义的顺序关系；
 - 参数 location、目标文件、品种、生态型和层号可唯一定位；
 - 校准只能读取 `bounds_frozen`，不能直接消费 SA proposal；
@@ -210,6 +211,6 @@ validation 处理不能参与参数数目、参数组合、权重、停止轮次
 6. 未经批准不修改原始观测、不替换正式冻结边界、不删除历史结果；
 7. 每个阶段通过用户验收后再进入下一阶段。
 
-当前批准的 P1 参数域仍为 `eggplant_p1_xxql2501_v3_20260716`。率定/验证必须使用保留处理实测 IC 的 `xxql2501_20260716`；遗传参数 SA 必须使用统一 SH2O/SNH4/SNO3、仅含核心2×4批处理的 `xxql2501_sa_counterfactual_v1_20260716`。二者禁止混用。当前输出契约为 `eggplant_p1_controlled_wn_v4`，一般遗传影响与水氮响应必须分别排名。v4 Morris 已完成并通过双域稳定性门；v4 Top-K/Sobol 预算和正式率定参数集仍须用户审批。协作者或程序写入的 `review_status: approved`/`approved_by` 不构成用户批准；批准后必须创建新的 ID，不得静默改写既有 bundle、frozen 或审批 CSV。`N=128` Sobol 当前只能标记为单尺度质量通过，第二个有效尺度产生前不得声称跨尺度收敛。
+历史 P1 工程证据仍绑定 `eggplant_p1_xxql2501_v3_20260716`、`xxql2501_20260716` 和 `xxql2501_sa_counterfactual_v1_20260716`，不得把其哈希或结果迁移到新正式试验。新多季候选为 `eggplant_formal_multiseason_candidate_v1_20260719`，实际候选输入为 `xxql2501_symbi_n_candidate_20260719`，SA 专用反事实输入为 `xxql2501_sa_counterfactual_symbi_n_candidate_20260719`；该候选仍是 `proposed/ready_for_formal_run=false`，第二季春季和秋季输入齐全并经用户批准后才能创建新的 frozen ID。实际输入与 SA 反事实输入继续禁止混用。协作者或程序写入的 `review_status: approved`/`approved_by` 不构成用户批准；不得静默改写既有 bundle、frozen 或审批 CSV。
 
 并行 `pestpp-sen` 完成后必须根据 `.pst` 的实际 `gsa_method` 路由审计：Morris检查轨迹/elementary effects，Sobol检查完整Saltelli矩阵、失败标志、响应与参数契约、基础方差及S1/ST文件。Sobol正式结果还必须由原始A/B/混合矩阵复算点估计并产生bootstrap区间；预检案例无论质量门是否通过都不得进入正式排名。

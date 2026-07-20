@@ -1,0 +1,44 @@
+[
+  {
+    "exp": "XXQL2501",
+    "bundle": "xxql2501_sa_controlled_candidate_20260720",
+    "filex": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2501_sa_controlled_candidate_20260720\\XXQL2501.TMX",
+    "before_sha256": "dbaefbbff389972022ed6bdd17edbce5a51e4e2ee66116f63f3eccc9c8c81dc2",
+    "before_options_row": " 2 OP          Y     Y     N     N     N     N      Y     N      M",
+    "reason": "SYMBI=Y repair: A/B testing proved DSSAT CRGRO (tomato) aborts with IPSIM 'Potassium model has not been enabled for CRGRO' whenever SYMBI=N. The handoff's SYMBI=N (eggplant non-legume) decision is reversed for the tomato-model-on-eggplant case; actual N fixation is disabled by fixing FRCNOD=0.05, not by SYMBI. _set_simulation_option(SYMBI=Y) both sets the value and (re)confirms the fixed-width OPTIONS row alignment.",
+    "timestamp_utc": "2026-07-19T18:11:29.965186Z",
+    "rows_changed": 1,
+    "after_sha256": "b62bd3ed525009833aee9964d7dee873de06c9def6de4fa464998010f83740c2",
+    "after_options_row": " 2 OP          Y     Y     Y     N     N     N      Y     N      M",
+    "manifest_updated": true,
+    "manifest_sha256": "1db09e67865df8fb0889b3c14fa76c38fff5c06eb6175e4c756a0b8512a4dd4c"
+  },
+  {
+    "exp": "XXQL2502",
+    "bundle": "xxql2502_sa_controlled_candidate_20260720",
+    "filex": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2502_sa_controlled_candidate_20260720\\XXQL2502.TMX",
+    "before_sha256": "dcc33fae8d7fd5007ae98b1acfa68727ee3e3d9572fadb7795eb16fc66529a58",
+    "before_options_row": " 2 OP          Y     Y     N     N     N     N      Y     N      M",
+    "reason": "SYMBI=Y repair: A/B testing proved DSSAT CRGRO (tomato) aborts with IPSIM 'Potassium model has not been enabled for CRGRO' whenever SYMBI=N. The handoff's SYMBI=N (eggplant non-legume) decision is reversed for the tomato-model-on-eggplant case; actual N fixation is disabled by fixing FRCNOD=0.05, not by SYMBI. _set_simulation_option(SYMBI=Y) both sets the value and (re)confirms the fixed-width OPTIONS row alignment.",
+    "timestamp_utc": "2026-07-19T18:11:29.969662Z",
+    "rows_changed": 1,
+    "after_sha256": "88dac1d40ff2a9d3f1a73df9d5ca1966e91a04c7c3929911ae258fe63a48e4ca",
+    "after_options_row": " 2 OP          Y     Y     Y     N     N     N      Y     N      M",
+    "manifest_updated": true,
+    "manifest_sha256": "0c19681dba836d9d2c7814e192d31a9f2b483517287ad8d208b7fa6a3992294b"
+  },
+  {
+    "exp": "XXQL2601",
+    "bundle": "xxql2601_sa_controlled_candidate_20260720",
+    "filex": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2601_sa_controlled_candidate_20260720\\XXQL2601.TMX",
+    "before_sha256": "c0d360d1c5789bf25a1825c6d9dd5d79c7d8b3c377bcc03fd31f84839aef170b",
+    "before_options_row": " 2 OP          Y     Y     N     N     N     N      Y     N      M",
+    "reason": "SYMBI=Y repair: A/B testing proved DSSAT CRGRO (tomato) aborts with IPSIM 'Potassium model has not been enabled for CRGRO' whenever SYMBI=N. The handoff's SYMBI=N (eggplant non-legume) decision is reversed for the tomato-model-on-eggplant case; actual N fixation is disabled by fixing FRCNOD=0.05, not by SYMBI. _set_simulation_option(SYMBI=Y) both sets the value and (re)confirms the fixed-width OPTIONS row alignment.",
+    "timestamp_utc": "2026-07-19T18:11:29.972193Z",
+    "rows_changed": 1,
+    "after_sha256": "32457d27622a171c08c347d1b5e998c9badc6fec51ca4d06cb55051a8481e301",
+    "after_options_row": " 2 OP          Y     Y     Y     N     N     N      Y     N      M",
+    "manifest_updated": true,
+    "manifest_sha256": "dd7dc4c007e9db06f7e7ce0c5bf98aa1097329148b1787a8780271cada9de267"
+  }
+]

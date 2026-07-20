@@ -46,7 +46,7 @@ from src.common.input_manifest import (
     InputManifestError,
     verify_calibrated_input_bundle,
 )
-from src.common.param_registry import assert_valid_frozen_bounds
+from src.common.param_registry import DEFAULT_BOUNDS, assert_valid_frozen_bounds
 from src.common.project import PROJECT_ROOT, WORKSPACE_DIR, git_metadata, resolve_path, sha256_file
 from src.common.quality import read_flat_run_manifest_field, serialize_manifest_scalar
 
@@ -458,38 +458,21 @@ def _finalize_ies_contract(
     }
 
 ECO_BOUNDS_EGGPLANT = {
-    "PL-EM": (3.0, 12.0),
-    "EM-V1": (10.0, 40.0),
-    "V1-JU": (0.0, 0.0),
-    "JU-R0": (2.0, 20.0),
-    "FL-VS": (100.0, 100.0),
-    "TRIFL": (0.20, 0.80),
-    "RWDTH": (0.70, 1.60),
-    "RHGHT": (0.70, 2.00),
-    "OPTBI": (0.0, 20.0),
-    "SLOBI": (-0.50, 0.0),
-    "XMAGE": (5.0, 30.0),
-    "XFPHT": (5.0, 40.0),
-    "XFINT": (0.12, 0.50),
+    name: DEFAULT_BOUNDS[name]
+    for name in (
+        "PL-EM", "EM-V1", "V1-JU", "JU-R0", "FL-VS", "TRIFL",
+        "RWDTH", "RHGHT", "OPTBI", "SLOBI", "XMAGE", "XFPHT", "XFINT",
+    )
 }
 
 SPE_TEMP_BOUNDS_EGGPLANT = {
-    "TB": (8.0, 12.0),
-    "TO1": (22.0, 28.0),
-    "TO2": (27.0, 32.0),
-    "TM": (33.0, 40.0),
-    "TB1": (8.0, 12.0),
-    "TO11": (22.0, 28.0),
-    "TO21": (27.0, 32.0),
-    "TM1": (33.0, 40.0),
-    "TB2": (8.0, 12.0),
-    "TO12": (22.0, 28.0),
-    "TO22": (27.0, 32.0),
-    "TM2": (33.0, 40.0),
-    "TB3": (8.0, 12.0),
-    "TO13": (22.0, 28.0),
-    "TO23": (27.0, 32.0),
-    "TM3": (33.0, 40.0),
+    name: DEFAULT_BOUNDS[name]
+    for name in (
+        "TB", "TO1", "TO2", "TM",
+        "TB1", "TO11", "TO21", "TM1",
+        "TB2", "TO12", "TO22", "TM2",
+        "TB3", "TO13", "TO23", "TM3",
+    )
 }
 
 

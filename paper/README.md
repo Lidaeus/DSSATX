@@ -71,3 +71,31 @@ Rscript paper/R/make_all.R `
 残差补充图按 `dataset_role` 分开输出，残差定义为模拟值减观测值；全处理补充图
 按变量分页生成 5×2 小多图。历史布局数据只产生 `DEMO_` 文件，正式 Fig. S3/S4
 必须由通过科研质量门的数据包生成。
+
+## Morris 敏感性分析图
+
+敏感性分析使用独立的冻结数据包，不与率定/验证图的数据包混用。Python 只校验并冻结每季的
+`morris_consensus_ranking.csv`、`morris_seed_rankings.csv`、
+`morris_seed_group_scores.csv`、`morris_seed_pairwise_stability.csv` 和稳定性 JSON；
+R 只读取冻结后的 CSV 与哈希清单。
+
+```powershell
+python -m src.reporting.export_sa_paper_data `
+  --run-id morris_3season_20260720 `
+  --results-root workspace/runs/morris_results `
+  --season XXQL2501 --season XXQL2502 --season XXQL2601 `
+  --focus-config configs/figures/sa_focus_parameters.csv `
+  --out-dir workspace/runs/morris_results/paper_data `
+  --allow-unvalidated-demo
+
+Rscript paper/R/make_all.R `
+  --input-dir workspace/runs/morris_results/paper_data `
+  --out-dir workspace/runs/morris_results/paper_figures `
+  --figure-ids fig1_sa,figs1_sa_stability `
+  --allow-unvalidated-demo
+```
+
+Fig. 1 分别展示一般遗传域和水氮响应域的跨季层级归一化 Morris 得分，并用过程组热图解释
+参数主要影响物候、冠层、生物量、采收或水氮响应。Fig. S1 展示逐 seed 排名以及 Spearman
+和 Top-15 Jaccard 门槛。两个域不得合并成一个无条件的总排名。当前任一季/域未通过门槛时，
+导出器只允许显式生成带 `DEMO_` 前缀与水印的 `science_pending` 图。

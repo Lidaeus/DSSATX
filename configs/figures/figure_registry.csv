@@ -1,11 +1,11 @@
 figure_id,location,scientific_question,required_data,current_status,implementation
-Fig1,main,Which parameters robustly control each process?,Morris multi-seed stability and approved Sobol indices,pending_P1,planned
+Fig1,main,Which parameters robustly control each process?,Multi-season Morris domain rankings and process-group effects,r_demo_current_evidence,paper/R/fig_sa_morris.R
 Fig2,main,Did calibration update the ensemble without one group dominating?,Phi ensemble history and group Phi by iteration,r_core_partial,paper/R/fig_phi_convergence.R
 Fig3,main,How accurately does the model reproduce calibration and validation observations?,Tidy observed-simulated table with dataset_role,r_core_implemented,paper/R/fig_model_performance.R
 Fig4,main,Does the model reproduce treatment-specific temporal and harvest dynamics?,Observed pairs plus daily DSSAT trajectories explicit water-nitrogen metadata and audited uncertainty,r_core_implemented_demo_qa,paper/R/fig_selected_dynamics.R
 Fig5,main,Which parameter combinations are identifiable or equifinal?,Prior/posterior ensembles bounds Phi and deterministic representative reruns,pending_P4,planned
 Fig6,main,What do calibrated predictions imply for water-nitrogen management?,Validated scenario ensemble with uncertainty,pending_P5,planned
-FigS1,supplement,Morris rank stability and output-specific effects?,Per-seed ranks mu-star sigma and valid trajectory counts,pending_P1,planned
+FigS1,supplement,Are Morris rankings stable across independent seeds?,Per-seed ranks pairwise Spearman and Top-15 Jaccard,r_demo_current_evidence,paper/R/fig_sa_morris.R
 FigS2,supplement,Are Sobol indices converged?,S1 ST confidence intervals and sample-size convergence,pending_P1,planned
 FigS3,supplement,Are residual patterns acceptable?,Role-specific raw residuals vs fitted and DAP plus standardized QQ diagnostics,r_core_implemented_demo_qa,paper/R/fig_residual_diagnostics.R
 FigS4,supplement,Are all treatments reproduced and how does continuous cumulative harvest appear?,Per-variable all-treatment trajectories plus event-line and monotone smooth cumulative alternatives,r_core_implemented_demo_qa,paper/R/fig_all_treatment_dynamics.R

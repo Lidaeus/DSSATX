@@ -1,0 +1,12 @@
+bounds_id: "eggplant_formal_multiseason_candidate_v2_20260720"
+crop: "eggplant"
+created_at: "2026-07-20T02:50:26Z"
+approved_at: "2026-07-20T02:50:26Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_formal_multiseason_candidate_v2_20260720.csv"
+derived_from_sha256: "6d1f94c0cf2a13d70d12f03ef188df5917f4ae1eef648f96a696009c71ecccef"
+bounds_sha256: "7b8dae0ff5a08e465aa609bed8d4ecc69e5d9d352a3d2be5303a9b3bc6caf51c"
+parameter_count: 157
+automatic_repairs: 0
+notes: "adjusted KCAN lower bound to 0.51 to prevent DSSAT exit code 73 floating divide by zero crash"

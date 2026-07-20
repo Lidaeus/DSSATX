@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-07-20（三季正式敏感性分析输入与交接）
+
+- 将 XXQL2501、XXQL2502、XXQL2601 导入版本化 sensitivity source bundle；三季统一 `SYMBI=Y`（作为 CRGRO048 兼容运行要求），修正 XXQL2502 季节标题，并在不改变施肥值的前提下规范 XXQL2601 MF2 行序。
+- 为三季生成共同 `MI1/MI3 × MF1–MF4` 八处理受控 SA FileX；季内 IC 按深度中位数统一，原始用户目录保持不变。
+- 输入校验增加显式 simulation-only 模式：FileA/FileT 对 SA 可选，对率定/验证仍为硬门；SA builder 与反事实输入生成器使用该模式。
+- 汇总 2025 春秋植株 NPK；主 55 参数域不变，新增叶/茎/shell `PRO*` 独立 SA-B 候选范围，root `PRORT*` 因无根样继续固定。
+- 新增三季设计 v2 与实施交接；正式运行仍须通过 baseline、输出契约和 bounds freeze 门。
+
+## 2026-07-19（正式多季遗传 SA 参数域候选）
+
+- 建立两春一秋候选设计：同域同 seed 逐季 Morris、逐季质控后汇总；推荐一春一秋率定、另一春整季验证，待三季输入齐全后冻结。
+- 分阶段温度候选域更新为 `TB*=8–12`、`TO1*=20–27.5`、`TO2*=28–33`、`TM*=34–45 °C`；`FL-VS` 改为初值 120、SA 范围 100–140，并增加率定可辨识性条件。
+- 修复动态分配参数矛盾：候选 `XMAGE=8–30`、`XFPHT=35–70`、`XFINT=0.10–0.35`，数值安全包络与科研建议范围分离。
+- `FRCNOD` 归入根瘤参数组并固定排除；FileX 输入审计新增非豆科 `SYMBI=Y` 兼容性校验门禁，导入工具支持可追溯修正并继承来源 manifest。
+- 主遗传 SA 中固定实测 SOIL/IC；测量偏差仅进入单独、窄范围且由测量误差驱动的环境稳健性分析。
+- 新候选 bounds 仍为 `proposed/ready_for_formal_run=false`；仓库尚缺第二季春季和秋季输入，未启动正式 DSSAT/SA/IES。
+- 全套回归 `236 passed, 2 skipped`，`compileall` 通过。
+
 ## 2026-07-19（staged builder 干净环境修复）
 
 - `eggplant_stage2` 的物候和季末实测值改为直接从版本化 FileA 构建；时序与采收继续从 FileT 构建，不再读取 `workspace/Evaluate.OUT`。

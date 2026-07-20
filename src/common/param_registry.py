@@ -42,8 +42,9 @@ REGISTRY_COLUMNS = [
 
 
 # ── 物理硬边界字典 ────────────────────────────────────────────
-# 来源：DSSAT 数值稳定性约束、文件格式约束、文献值。
-# 这些边界是绝对安全范围，任何候选边界不得超出。
+# 来源：DSSAT 数值稳定性约束、文件格式约束和已验证的模型基线。
+# 这些只是数值安全包络，不是推荐率定范围；科研工作范围见
+# DEFAULT_BOUNDS 或经人工审核的 bounds proposal。
 
 PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     # --- CUL ---
@@ -68,15 +69,22 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     "EM-V1":  (10.0,  40.0),
     "V1-JU":  (0.0,   30.0),
     "JU-R0":  (2.0,   20.0),
-    "FL-VS":  (100.0, 100.0),   # 固定常数
+    # Photothermal time from first flower to the last main-stem leaf.
+    # Indeterminate crops may legitimately use values above 100; whether the
+    # coefficient is identifiable is a separate scientific decision.
+    "FL-VS":  (0.0,  300.0),
     "TRIFL":  (0.10,   1.00),
     "RWDTH":  (0.50,   2.00),
     "RHGHT":  (0.50,   3.00),
     "OPTBI":  (0.0,   20.0),
     "SLOBI":  (-0.50,  0.0),
-    "XMAGE":  (5.0,   30.0),
-    "XFPHT":  (5.0,   40.0),
-    "XFINT":  (0.12,   0.50),
+    # Dynamic fruit-partitioning safety envelopes.  The shipped strawberry
+    # ecotypes and this project's DFAULT ecotype use XFPHT around 60, so 40
+    # cannot be treated as a physical upper limit.  XMAGE < XFPHT is enforced
+    # separately for every candidate.
+    "XMAGE":  (1.0,   60.0),
+    "XFPHT":  (5.0,  120.0),
+    "XFINT":  (0.0,    1.0),
     # --- SPE temperature ---
     "TB":     (4.0,   15.0),
     "TO1":    (18.0,  32.0),
@@ -110,7 +118,7 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     "FRSTMF":  (0.0,  1.0),
     "FRLFF":   (0.0,  1.0),
     "ATOP":    (0.0, 10.0),
-    "FRCNOD":  (0.0,  1.0),
+    "FRCNOD":  (0.0,  1.0),  # nodule allocation; fixed/excluded for eggplant
     # --- SOIL surface hydro ---
     "SOIL_SALB": (0.01, 0.50),
     "SOIL_SLDR": (0.05, 2.50),
@@ -127,32 +135,37 @@ DEFAULT_BOUNDS: dict[str, tuple[float, float]] = {
     "EM-V1":  (10.0, 40.0),
     "V1-JU":  (0.0,   0.0),
     "JU-R0":  (2.0,  20.0),
-    "FL-VS":  (100.0, 100.0),
+    # Structural sensitivity probe for indeterminate eggplant.  Calibration is
+    # allowed only when last-leaf/terminal-growth observations identify it.
+    "FL-VS":  (100.0, 140.0),
     "TRIFL":  (0.20,  0.80),
     "RWDTH":  (0.70,  1.60),
     "RHGHT":  (0.70,  2.00),
     "OPTBI":  (0.0,  20.0),
     "SLOBI":  (-0.50, 0.0),
-    "XMAGE":  (5.0,  30.0),
-    "XFPHT":  (5.0,  40.0),
-    "XFINT":  (0.10,  1.20),
+    # Rectangular ranges deliberately guarantee upper(XMAGE) < lower(XFPHT).
+    # They cover the modified tomato baseline (XFPHT=38.8), the project
+    # DFAULT value (60), and the DSSAT strawberry reference (58--62).
+    "XMAGE":  (8.0,  30.0),
+    "XFPHT":  (35.0, 70.0),
+    "XFINT":  (0.10,  0.35),
     # --- SPE temperature ---
     "TB":     (8.0,  12.0),
-    "TO1":    (22.0, 28.0),
-    "TO2":    (27.0, 32.0),
-    "TM":     (33.0, 40.0),
+    "TO1":    (20.0, 27.5),
+    "TO2":    (28.0, 33.0),
+    "TM":     (34.0, 45.0),
     "TB1":    (8.0,  12.0),
-    "TO11":   (22.0, 28.0),
-    "TO21":   (27.0, 32.0),
-    "TM1":    (33.0, 40.0),
+    "TO11":   (20.0, 27.5),
+    "TO21":   (28.0, 33.0),
+    "TM1":    (34.0, 45.0),
     "TB2":    (8.0,  12.0),
-    "TO12":   (22.0, 28.0),
-    "TO22":   (27.0, 32.0),
-    "TM2":    (33.0, 40.0),
+    "TO12":   (20.0, 27.5),
+    "TO22":   (28.0, 33.0),
+    "TM2":    (34.0, 45.0),
     "TB3":    (8.0,  12.0),
-    "TO13":   (22.0, 28.0),
-    "TO23":   (27.0, 32.0),
-    "TM3":    (33.0, 40.0),
+    "TO13":   (20.0, 27.5),
+    "TO23":   (28.0, 33.0),
+    "TM3":    (34.0, 45.0),
     # --- SOIL surface ---
     "SOIL_SALB": (0.05, 0.35),
     "SOIL_SLDR": (0.10, 2.00),
@@ -194,7 +207,9 @@ def infer_parameter_group(name: str, location: str) -> str:
     if loc == "SPE":
         if n in {"PARMAX", "PHTMAX", "KCAN", "KC_SLOPE"}:
             return "SPE_Photo"
-        if n in {"WTFSD", "PORPT", "FRSTMF", "FRLFF", "ATOP", "FRCNOD"}:
+        if n == "FRCNOD":
+            return "SPE_Nodule"
+        if n in {"WTFSD", "PORPT", "FRSTMF", "FRLFF", "ATOP"}:
             return "SPE_RtWat"
         if n in {"FINREF", "SLAREF", "SIZREF", "VSSINK", "EVMODC"}:
             return "SPE_SrcSnk"
@@ -458,9 +473,6 @@ def validate_frozen_bounds(path: str) -> list[ValidationIssue]:
                             name,
                         )
                     )
-            if name == "FL-VS" and not (init == lower == upper == 100.0):
-                issues.append(ValidationIssue("FL_VS_NOT_FIXED", "FL-VS must be fixed at 100.0", name))
-
             parsed[name] = {**values, "status": status, "location": location}
 
         if status == "active" and location in {"SOIL", "IC", "INIT"}:

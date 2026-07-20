@@ -1,7 +1,14 @@
 
 import sys
+from pathlib import Path
 
 import pandas as pd
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.common.param_registry import compute_default_bounds
 
 # Define file paths
 sti_csv_path = r"c:\DSSAT48\Tomato_Cal\Workspace\Sensitivity_Analyze\SA_Project_Output\sen_case\sa_sen_sobol.sobol.sti.csv"
@@ -80,48 +87,12 @@ def get_loc(name):
         return 'SOIL'
     return param_locs.get(n, 'UNKNOWN')
 
-# Define bounds logic (simplified version of _default_bounds)
+# Legacy interpretation helper: use the same central fallback logic as the
+# builders.  Formal reporting should consume the frozen bounds recorded in the
+# run manifest rather than infer ranges here.
 def get_bounds(name, init, loc):
-    n = name.upper()
-    if loc == 'SOIL':
-        if n == 'SOIL_SALB':
-            return 0.05, 0.35
-        # ... simplified ...
-        return 0, 0
-    
-    if n == 'XFRT':
-        return 0.6, 1.2 # Manual override or check logic
-    
-    # Using the logic from sa_generate_param_review_csv.py
-    eco_bounds = {
-        "PL-EM": (3.0, 12.0), "EM-V1": (10.0, 40.0), "JU-R0": (2.0, 20.0),
-        "TRIFL": (0.20, 0.80), "RWDTH": (0.70, 1.60), "RHGHT": (0.70, 2.00),
-        "XMAGE": (5.0, 30.0), "XFPHT": (5.0, 40.0), "XFINT": (0.10, 1.20)
-    }
-    if n in eco_bounds:
-        return eco_bounds[n]
-    
-    temp_bounds = {
-        "TB1": (8.0, 12.0), "TO11": (22.0, 28.0), "TO22": (27.0, 32.0), "TM2": (33.0, 40.0),
-        "TB2": (8.0, 12.0), "TO12": (22.0, 28.0), "TB3": (8.0, 12.0), "TO13": (22.0, 28.0),
-        "TM3": (33.0, 40.0)
-    }
-    if n in temp_bounds:
-        return temp_bounds[n]
-    
-    if n == 'VSSINK':
-        return max(0.2, 0.5 * init), max(0.2 + 0.2, 2.0 * init)
-        
-    if loc == 'CUL':
-        return init * 0.75, init * 1.25 # Default for CUL
-        
-    if loc == 'SPE':
-         # Default
-         if 0 < init <= 1.0:
-             return max(0.0, init * 0.7), min(1.0, init * 1.3)
-         return init * 0.75, init * 1.25
-         
-    return init * 0.75, init * 1.25
+    lower, upper, _ = compute_default_bounds(name, init, loc)
+    return lower, upper
 
 # Generate Markdown Table
 print("| 排名 | 参数名 | 模块 | 初始值 | 建议范围 (Min-Max) | 敏感性指数 (Total Order Mean) | 关键影响指标 |")

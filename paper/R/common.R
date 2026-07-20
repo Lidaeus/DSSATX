@@ -224,6 +224,69 @@ read_t4_demo_bundle <- function(input_dir, allow_demo = FALSE) {
   bundle
 }
 
+read_sa_bundle <- function(input_dir, allow_demo = FALSE) {
+  manifest_path <- file.path(input_dir, "paper_data_manifest.json")
+  if (!file.exists(manifest_path)) stop("Missing paper_data_manifest.json in ", input_dir)
+  manifest <- jsonlite::fromJSON(manifest_path, simplifyVector = FALSE)
+  if (!identical(manifest$bundle_type, "morris_sa_evidence")) {
+    stop("SA figures require bundle_type=morris_sa_evidence", call. = FALSE)
+  }
+  required <- c(
+    "morris_season_rankings.csv", "morris_cross_season_summary.csv",
+    "morris_seed_rankings.csv", "morris_group_scores.csv",
+    "morris_group_summary.csv", "morris_pairwise_stability.csv",
+    "morris_focus_parameters.csv"
+  )
+  listed <- vapply(manifest$artifacts, function(artifact) artifact$path, character(1))
+  missing_manifest <- setdiff(required, listed)
+  if (length(missing_manifest) > 0) {
+    stop("SA manifest does not bind required artifacts: ", paste(missing_manifest, collapse = ", "))
+  }
+  for (artifact in manifest$artifacts) {
+    if (!identical(basename(artifact$path), artifact$path)) {
+      stop("SA manifest artifact path must be a local filename: ", artifact$path)
+    }
+    artifact_path <- file.path(input_dir, artifact$path)
+    if (!file.exists(artifact_path)) stop("Manifest artifact is missing: ", artifact$path)
+    if (!identical(tolower(sha256_file(artifact_path)), tolower(artifact$sha256))) {
+      stop("Manifest hash mismatch: ", artifact$path)
+    }
+  }
+  is_demo <- !identical(manifest$data_status, "science_validated")
+  if (is_demo && !isTRUE(allow_demo)) {
+    stop("SA input is not science_validated; use --allow-unvalidated-demo only for current-evidence/layout QA")
+  }
+  missing <- required[!file.exists(file.path(input_dir, required))]
+  if (length(missing) > 0) stop("SA bundle missing: ", paste(missing, collapse = ", "))
+  read_csv <- function(name) utils::read.csv(
+    file.path(input_dir, name), stringsAsFactors = FALSE, check.names = FALSE
+  )
+  bundle <- list(
+    manifest = manifest,
+    is_demo = is_demo,
+    rankings = read_csv("morris_season_rankings.csv"),
+    summary = read_csv("morris_cross_season_summary.csv"),
+    seed_rankings = read_csv("morris_seed_rankings.csv"),
+    group_scores = read_csv("morris_group_scores.csv"),
+    group_summary = read_csv("morris_group_summary.csv"),
+    stability = read_csv("morris_pairwise_stability.csv"),
+    focus = read_csv("morris_focus_parameters.csv")
+  )
+  for (table in bundle[c("rankings", "summary", "seed_rankings", "group_scores",
+                          "group_summary", "stability", "focus")]) {
+    if (!all(c("run_id", "data_status") %in% names(table)) || nrow(table) == 0) {
+      stop("SA table lacks provenance columns or is empty")
+    }
+    if (length(unique(table$run_id)) != 1 || unique(table$run_id)[[1]] != manifest$run_id) {
+      stop("SA table run_id does not match manifest")
+    }
+    if (length(unique(table$data_status)) != 1 || unique(table$data_status)[[1]] != manifest$data_status) {
+      stop("SA table data_status does not match manifest")
+    }
+  }
+  bundle
+}
+
 demo_watermark <- function(is_demo) {
   if (!isTRUE(is_demo)) return(NULL)
   ggplot2::annotate("text", x = Inf, y = Inf, label = "DEMO", hjust = 1.15, vjust = 1.5,

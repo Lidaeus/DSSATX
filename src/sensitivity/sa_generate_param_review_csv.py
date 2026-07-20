@@ -5,6 +5,8 @@ from dataclasses import dataclass
 
 import pandas as pd
 
+from src.common.param_registry import compute_default_bounds
+
 
 @dataclass(frozen=True)
 class Paths:
@@ -62,109 +64,7 @@ def _parse_float(s):
 
 
 def _default_bounds(name, init, location):
-    n = str(name).strip().upper()
-    if init is None:
-        return None, None, "fixed"
-
-    loc = str(location).strip().upper()
-    if loc == "SOIL":
-        if n == "SOIL_SALB":
-            return 0.05, 0.35, "active"
-        if n == "SOIL_SLDR":
-            return 0.10, 2.00, "active"
-        if n == "SOIL_SLRO":
-            return 40.0, 95.0, "active"
-        if n.startswith("SOIL_SLLL"):
-            lb = max(0.01, float(init) * 0.8)
-            ub = min(0.80, float(init) * 1.2)
-            return lb, ub, "active" if lb != ub else "fixed"
-        if n.startswith("SOIL_SDUL"):
-            lb = max(0.01, float(init) * 0.8)
-            ub = min(0.80, float(init) * 1.2)
-            return lb, ub, "active" if lb != ub else "fixed"
-        if n.startswith("SOIL_SSAT"):
-            lb = max(0.01, float(init) * 0.85)
-            ub = min(0.80, float(init) * 1.15)
-            return lb, ub, "active" if lb != ub else "fixed"
-        if n.startswith("SOIL_SBDM"):
-            lb = max(0.5, float(init) * 0.9)
-            ub = min(2.2, float(init) * 1.1)
-            return lb, ub, "active" if lb != ub else "fixed"
-        if n.startswith("SOIL_SLOC"):
-            lb = max(0.0, float(init) * 0.7)
-            ub = min(10.0, float(init) * 1.3)
-            return lb, ub, "active" if lb != ub else "fixed"
-
-    if loc == "IC" or n.startswith("IC_SH2O"):
-        lb = max(0.01, float(init) * 0.7)
-        ub = min(0.80, float(init) * 1.3)
-        return lb, ub, "active" if lb != ub else "fixed"
-
-    eco_bounds = {
-        "PL-EM": (3.0, 12.0),
-        "EM-V1": (10.0, 40.0),
-        "V1-JU": (0.0, 0.0),
-        "JU-R0": (2.0, 20.0),
-        "FL-VS": (100.0, 100.0),
-        "TRIFL": (0.20, 0.80),
-        "RWDTH": (0.70, 1.60),
-        "RHGHT": (0.70, 2.00),
-        "OPTBI": (0.0, 20.0),
-        "SLOBI": (-0.50, 0.0),
-        "XMAGE": (5.0, 30.0),
-        "XFPHT": (5.0, 40.0),
-        "XFINT": (0.10, 1.20),
-    }
-    if n in eco_bounds:
-        lb, ub = eco_bounds[n]
-        status = "active" if lb != ub else "fixed"
-        return lb, ub, status
-
-    temp_bounds = {
-        "TB": (8.0, 12.0),
-        "TO1": (22.0, 28.0),
-        "TO2": (27.0, 32.0),
-        "TM": (33.0, 40.0),
-        "TB1": (8.0, 12.0),
-        "TO11": (22.0, 28.0),
-        "TO21": (27.0, 32.0),
-        "TM1": (33.0, 40.0),
-        "TB2": (8.0, 12.0),
-        "TO12": (22.0, 28.0),
-        "TO22": (27.0, 32.0),
-        "TM2": (33.0, 40.0),
-        "TB3": (8.0, 12.0),
-        "TO13": (22.0, 28.0),
-        "TO23": (27.0, 32.0),
-        "TM3": (33.0, 40.0),
-    }
-    if n in temp_bounds:
-        return temp_bounds[n][0], temp_bounds[n][1], "active"
-
-    if n == "VSSINK":
-        lb = max(0.2, 0.5 * float(init))
-        ub = max(lb + 0.2, 2.0 * float(init))
-        return lb, ub, "active"
-
-    if n == "KC_SLOPE":
-        lb = max(0.0, float(init) - 0.10)
-        ub = float(init) + 0.10
-        return lb, ub, "active"
-
-    if abs(float(init)) < 1e-12:
-        return float(init), float(init), "fixed"
-
-    if 0.0 < float(init) <= 1.0:
-        lb = max(0.0, float(init) * 0.7)
-        ub = min(1.0, float(init) * 1.3)
-        status = "active" if lb != ub else "fixed"
-        return lb, ub, status
-
-    lb = float(init) * 0.75
-    ub = float(init) * 1.25
-    if lb > ub:
-        lb, ub = ub, lb
-    return lb, ub, "active"
+    return compute_default_bounds(name, init, location)
 
 
 def _infer_pargp(name, location):
@@ -190,7 +90,9 @@ def _infer_pargp(name, location):
     if loc == "SPE":
         if n in {"PARMAX", "PHTMAX", "KCAN", "KC_SLOPE"}:
             return "SPE_Photosynthesis"
-        if n in {"WTFSD", "PORPT", "FRSTMF", "FRLFF", "ATOP", "FRCNOD"}:
+        if n == "FRCNOD":
+            return "SPE_Nodule"
+        if n in {"WTFSD", "PORPT", "FRSTMF", "FRLFF", "ATOP"}:
             return "SPE_RootWater"
         if n in {"FINREF", "SLAREF", "SIZREF", "VSSINK", "EVMODC"}:
             return "SPE_SourceSink"
