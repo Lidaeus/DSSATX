@@ -1,0 +1,9 @@
+{
+    "water_triplet": "Ensure SLLL < SDUL < SSAT when multiplying",
+    "temp_order_1": "Ensure TB1 < TO11 < TO21 < TM1",
+    "temp_order_2": "Ensure TB2 < TO12 < TO22 < TM2",
+    "temp_order_3": "Ensure TB3 < TO13 < TO23 < TM3",
+    "positive_rel_25": "Value > 0, bounds +-25%",
+    "rel_20": "Bounds +-20%",
+    "rel_30": "Bounds +-30%"
+}

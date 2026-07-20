@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-07-20T16:24:47Z",
+  "proposal_only": true,
+  "automatic_bounds_change": false,
+  "threshold": 0.9,
+  "selection_rule": "per_domain_minimum_cumulative_then_union",
+  "required_domains": [
+    "general_genetic",
+    "water_nitrogen_response"
+  ],
+  "excluded_parameters": [
+    "PM06"
+  ],
+  "source": {
+    "path": "D:\\Tomato_Cal\\workspace\\runs\\morris_results\\paper_data\\morris_cross_season_summary.csv",
+    "sha256": "e15b933ff821682e7b754b0b172acb6bf9b3eab7f2012bdc61b13abea3a2e4a4"
+  },
+  "source_data_status": [
+    "science_pending"
+  ],
+  "union_parameter_count": 17,
+  "artifacts": [
+    {
+      "path": "calibration_parameter_candidates.csv",
+      "sha256": "dd051ca03718b174991e2f39ee13505729719429cd01e975ad8a27950e37982f"
+    },
+    {
+      "path": "domain_coverage.csv",
+      "sha256": "1fec296eb40a58a10ee6e0f1ef18901af20ecdfd35d0ec72022e5690cffca7bf"
+    }
+  ],
+  "limitations": "A 90% sensitivity contribution rule controls screening coverage, not parameter identifiability. Literature, observation support, bounds, and equifinality diagnostics remain mandatory before bounds are frozen."
+}

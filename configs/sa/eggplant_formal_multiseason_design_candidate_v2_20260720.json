@@ -9,7 +9,7 @@
   "common_factorial_design": {
     "water_levels": [1, 3],
     "nitrogen_levels": [1, 2, 3, 4],
-    "treatment_count_per_season": "7_or_8_after_duplicate_management_combination_removal",
+    "treatment_count_per_season": 8,
     "initial_condition_policy": "depth-wise within-season median assigned to every retained treatment"
   },
   "seasons": [
@@ -32,9 +32,9 @@
     {
       "experiment": "XXQL2601",
       "season": "2026_spring",
-      "source_bundle": "xxql2601_sa_source_candidate_20260720",
-      "controlled_bundle": "xxql2601_sa_controlled_7t_candidate_20260720",
-      "treatments": [1, 3, 4, 6, 7, 9, 10],
+      "source_bundle": "xxql2601_sa_source_tn12_w1_candidate_20260721",
+      "controlled_bundle": "xxql2601_sa_controlled_tn12_w1_candidate_20260721",
+      "treatments": [1, 3, 4, 6, 7, 9, 10, 12],
       "future_role": "whole_season_validation_candidate"
     }
   ],
@@ -54,7 +54,7 @@
   "formal_execution_allowed": false,
   "remaining_gates": [
     "commit the reviewed source, frozen bounds, input bundles and output contracts in a clean worktree",
-    "the revised XXQL2601 seven-treatment bundle passes deterministic DSSAT baseline smoke",
+    "the corrected XXQL2601 TN12=W1 eight-treatment bundle passes deterministic DSSAT baseline smoke",
     "build one frozen-runtime case and verify its runtime manifest before launching the r=10 campaign"
   ]
 }

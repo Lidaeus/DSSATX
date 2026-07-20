@@ -133,6 +133,16 @@ workspace/trash/
 # not source code; they make the worktree appear dirty and block the formal
 # Morris builder's clean-worktree guard.
 workspace/formal_source_*/
+# Superseded local experiment derivatives retained only for forensic comparison.
+# Formal configs use the versioned SYMBI=N bundles instead.
+data/user/experiments/*_crgro_y_v2/
+data/user/experiments/_bundle_repair_symbi_y_*.json
+data/user/experiments/xxql2501_sa_counterfactual_symbi_n_candidate_20260719/
+data/user/experiments/xxql2501_symbi_n_candidate_20260719/
+data/user/experiments/xxql2601_sa_controlled_candidate_20260720/
+data/user/experiments/xxql2601_sa_controlled_7t_candidate_20260720/
+data/user/experiments/xxql2601_sa_source_candidate_20260720/
+workspace/audits/
 .mypy_cache/
 .ruff_cache/
 .pytest_cache/

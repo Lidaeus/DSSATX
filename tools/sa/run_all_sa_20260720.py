@@ -45,7 +45,7 @@ ALL_JOBS = [
     # (season, r, bundle_name, contract_suffix)
     ("XXQL2501", 10, "xxql2501_sa_controlled_candidate_20260720", "xxql2501"),
     ("XXQL2502", 10, "xxql2502_sa_controlled_candidate_20260720", "xxql2502"),
-    ("XXQL2601", 10, "xxql2601_sa_controlled_7t_candidate_20260720", "xxql2601"),
+    ("XXQL2601", 10, "xxql2601_sa_controlled_tn12_w1_candidate_20260721", "xxql2601"),
 ]
 
 OUT_ROOT = PROJECT_ROOT / "workspace" / "runs" / "formal_morris_repro_v1"

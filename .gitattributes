@@ -8,9 +8,12 @@
 *.R text eol=lf
 
 # DSSAT inputs are provenance-bearing bytes. Never rewrite their line endings.
-*.TMX -text
-*.TMA -text
-*.TMT -text
-*.SOL -text
-*.WTH -text
-*.v48 -text
+*.TMX -text whitespace=-blank-at-eol,-blank-at-eof
+*.TMA -text whitespace=-blank-at-eol,-blank-at-eof
+*.TMT -text whitespace=-blank-at-eol,-blank-at-eof
+*.CUL -text whitespace=-blank-at-eol,-blank-at-eof
+*.ECO -text whitespace=-blank-at-eol,-blank-at-eof
+*.SPE -text whitespace=-blank-at-eol,-blank-at-eof
+*.SOL -text whitespace=-blank-at-eol,-blank-at-eof
+*.WTH -text whitespace=-blank-at-eol,-blank-at-eof
+*.v48 -text whitespace=-blank-at-eol,-blank-at-eof

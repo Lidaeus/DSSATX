@@ -41,7 +41,7 @@ SEASONS = {
     },
     "XXQL2601": {
         "contract": "configs/sa/eggplant_formal_xxql2601_outputs_20260720.json",
-        "bundle": "data/user/experiments/xxql2601_sa_controlled_7t_candidate_20260720",
+        "bundle": "data/user/experiments/xxql2601_sa_controlled_tn12_w1_candidate_20260721",
     },
 }
 

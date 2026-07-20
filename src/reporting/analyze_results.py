@@ -207,7 +207,15 @@ def _read_tmt_harvest_obs(tmt_path):
 
             if e["CHPDT"] != -99.0:
                 obs_dry_cum = float(e["CHPDT"])
-                obs_dry_inc = float(e["HPODW"]) if e["HPODW"] != -99.0 else -99.0
+                # FileT commonly stores cumulative harvested dry weight only.
+                # Keep reporting consistent with build_pest/run_dssat by
+                # deriving the event increment from consecutive cumulative
+                # observations when HPODW is absent.
+                obs_dry_inc = (
+                    float(e["HPODW"])
+                    if e["HPODW"] != -99.0
+                    else float(obs_dry_cum - dry_cum)
+                )
                 dry_cum = obs_dry_cum
             else:
                 if e["HPODW"] != -99.0:
@@ -222,7 +230,11 @@ def _read_tmt_harvest_obs(tmt_path):
 
             if e["CHFPW"] != -99.0:
                 obs_fresh_cum = float(e["CHFPW"])
-                obs_fresh_inc = float(e["HFPOW"]) if e["HFPOW"] != -99.0 else -99.0
+                obs_fresh_inc = (
+                    float(e["HFPOW"])
+                    if e["HFPOW"] != -99.0
+                    else float(obs_fresh_cum - fresh_cum)
+                )
                 fresh_cum = obs_fresh_cum
             else:
                 inc = 0.0 if e["HFPOW"] == -99.0 else e["HFPOW"]

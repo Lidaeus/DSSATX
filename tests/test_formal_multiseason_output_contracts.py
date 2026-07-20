@@ -5,8 +5,8 @@ Covers the handoff T2 requirements:
   * "统一 DAP 45/67/95/119" — lai_time_points identical across all three.
   * "处理映射从显式配置读取" — each contract's treatments match its bundle batch.
   * "相同指标名在三季含义一致" — features / response_groups / ranking_domains identical.
-  * "非伪重复" — XXQL2601's duplicate TN12 is excluded from the derived bundle;
-    no MDAPS / MEAN_* in observation names.
+  * "完整析因" — XXQL2601 TN12 is the user-corrected W1/N0 treatment, completing
+    the 2-water × 4-nitrogen design; no MDAPS / MEAN_* in observation names.
   * N-rates are derived from FileX, not hardcoded — the frozen doses match a
     fresh fertilizer_n_total_kg_ha call on the bundle FileX.
 """
@@ -41,8 +41,8 @@ CONTRACTS = {
     },
     "XXQL2601": {
         "json": SA_CONFIGS / "eggplant_formal_xxql2601_outputs_20260720.json",
-        "bundle": ROOT / "data" / "user" / "experiments" / "xxql2601_sa_controlled_7t_candidate_20260720",
-        "treatments": [1, 3, 4, 6, 7, 9, 10],
+        "bundle": ROOT / "data" / "user" / "experiments" / "xxql2601_sa_controlled_tn12_w1_candidate_20260721",
+        "treatments": [1, 3, 4, 6, 7, 9, 10, 12],
         "expected_n_mf1": 361.0,
     },
 }
@@ -133,40 +133,19 @@ def test_season_specific_n_ladder_reflected_in_contract(loaded_contracts):
         assert expected in n3_doses, f"{exp}: MF1 dose {expected} not in contract nitrogen_series"
 
 
-def test_xxql2601_unbalanced_factorial_documents_excluded_duplicate(loaded_contracts):
+def test_xxql2601_tn12_correction_completes_factorial(loaded_contracts):
     contract = loaded_contracts["XXQL2601"]
     notes = contract["water_nitrogen_design"].get("_notes", {})
 
-    # N0 (MF4) lacks a W1 treatment in XXQL2601 — water_pairs must omit N0.
-    assert "N0" not in contract["water_nitrogen_design"]["water_pairs"], (
-        "XXQL2601 N0 water_pair must be omitted (W1 MF4 absent in retained set)"
-    )
-    # The omission is explicitly documented.
-    omissions = notes.get("water_pairs_omissions", [])
-    assert any("N0" in note and "W1" in note for note in omissions), (
-        f"XXQL2601 must document the N0/W1 omission; got {omissions}"
-    )
-
-    # TN9 and TN12 are both W3/MF4. The derived bundle retains TN9 and excludes
-    # TN12 before both base and WN observations are generated.
-    wn_tns = set()
-    for pair in contract["water_nitrogen_design"]["water_pairs"].values():
-        wn_tns.update(pair)
-    for w in ("W3", "W1"):
-        for row in contract["water_nitrogen_design"]["nitrogen_series"][w]:
-            wn_tns.add(int(row["treatment"]))
-    # Exactly one of {9, 12} appears in the WN structures.
-    assert len({9, 12} & wn_tns) == 1, (
-        f"Exactly one of TN9/TN12 must appear in XXQL2601 WN structures; got {wn_tns}"
-    )
-    dup_notes = notes.get("dropped_duplicate_wn_assignments", [])
-    assert dup_notes, "XXQL2601 must document the TN9/TN12 duplicate handling"
-
+    assert contract["water_nitrogen_design"]["water_pairs"]["N0"] == [9, 12]
+    w1 = contract["water_nitrogen_design"]["nitrogen_series"]["W1"]
+    assert {int(row["treatment"]): float(row["n_kg_ha"]) for row in w1}[12] == 0.0
+    assert notes.get("water_pairs_omissions") == []
+    assert notes.get("dropped_duplicate_wn_assignments") == []
+    assert any("TN12 is W1/N0" in note for note in notes.get("input_corrections", []))
     names = observation_names(contract)
-    assert any(n.startswith("TN9_") for n in names), (
-        "TN9 must contribute per-treatment base observations"
-    )
-    assert not any(n.startswith("TN12_") for n in names)
+    assert any(n.startswith("TN9_") for n in names)
+    assert any(n.startswith("TN12_") for n in names)
 
 
 def test_all_formal_bundles_use_approved_nonlegume_options():
@@ -185,17 +164,10 @@ def test_no_mdaps_or_mean_in_observation_names(loaded_contracts):
         assert not any(n.startswith("MEAN_") for n in names), f"{exp}: MEAN_* observations must not be emitted"
 
 
-def test_observation_counts_are_consistent_with_factorial_balance(loaded_contracts):
-    """XXQL2501/XXQL2502 are balanced 2x4 (full WN design); XXQL2601 loses one
-    N level from water_pairs, so its observation count is lower."""
+def test_observation_counts_are_consistent_across_balanced_factorials(loaded_contracts):
+    """All three seasons now implement the same complete 2x4 WN design."""
     c2501 = len(observation_names(loaded_contracts["XXQL2501"]))
     c2502 = len(observation_names(loaded_contracts["XXQL2502"]))
     c2601 = len(observation_names(loaded_contracts["XXQL2601"]))
-    # The two balanced seasons have the same count.
-    assert c2501 == c2502
-    # 2601 has one fewer water_pairs level (N0 omitted) -> fewer WN_WATER_* /
-    # WN_NSLOPE_* / WN_INTERACTION_* names. Each lost level removes:
-    #   1 WATER + 2 NSLOPE (W3,W1) + 1 INTERACTION = 4 names per contrast feature.
-    # The WN_NSLOPE_W1 for N0 is also gone because W1 has no N0 treatment.
-    assert c2601 < c2501, "XXQL2601 must have fewer observations than the balanced seasons"
+    assert c2501 == c2502 == c2601
     print(f"\nobservation counts: 2501={c2501}, 2502={c2502}, 2601={c2601}")

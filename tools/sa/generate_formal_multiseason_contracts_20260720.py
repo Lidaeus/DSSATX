@@ -5,7 +5,8 @@ the per-MF N rate (kg N/ha) via fertilizer_n_total_kg_ha, and writes one
 output-contract JSON per season to configs/sa/. The three contracts share the
 same features / time points / response_groups / ranking_domains so the same
 metric name means the same thing across seasons (handoff T2 requirement).
-XXQL2601's unbalanced N0/W1 factorial is documented explicitly.
+XXQL2601 uses the user-corrected TN12=W1/N0 assignment, giving the same
+complete 2-water × 4-nitrogen factorial as the other seasons.
 """
 
 from __future__ import annotations
@@ -22,15 +23,15 @@ from src.common.experiment_inputs import parse_filex
 from src.sensitivity.treatment_factor_attribution import fertilizer_n_total_kg_ha
 
 SEASONS = [
-    {"exp": "XXQL2501", "bundle": "xxql2501_sa_controlled_crgro_y_v2", "season": "2025_spring"},
-    {"exp": "XXQL2502", "bundle": "xxql2502_sa_controlled_crgro_y_v2", "season": "2025_autumn"},
-    {"exp": "XXQL2601", "bundle": "xxql2601_sa_controlled_crgro_y_v2", "season": "2026_spring"},
+    {"exp": "XXQL2501", "bundle": "xxql2501_sa_controlled_candidate_20260720", "season": "2025_spring"},
+    {"exp": "XXQL2502", "bundle": "xxql2502_sa_controlled_candidate_20260720", "season": "2025_autumn"},
+    {"exp": "XXQL2601", "bundle": "xxql2601_sa_controlled_tn12_w1_candidate_20260721", "season": "2026_spring"},
 ]
 
 RETAINED = {
     "XXQL2501": [2, 3, 4, 5, 10, 11, 12, 13],
     "XXQL2502": [1, 3, 4, 6, 7, 9, 10, 12],
-    "XXQL2601": [1, 3, 4, 6, 7, 9, 10],
+    "XXQL2601": [1, 3, 4, 6, 7, 9, 10, 12],
 }
 
 # MI -> W label mapping used by derive_water_nitrogen_responses (hardcoded
@@ -73,8 +74,7 @@ def build_water_nitrogen_design(parsed_filex: dict, filex_text: str, exp: str) -
     water_pairs keyed by N-class (N3/N2/N1/N0): each value is [W3_tn, W1_tn].
     nitrogen_series keyed by W arm (W3/W1): each a list of {treatment, n_kg_ha}.
     DSSAT's WN-contract validator requires exactly the keys {"W3","W1"} and
-    unique n_kg_ha doses per series; duplicate-dose treatments are dropped with
-    a documented note (XXQL2601 TN9+TN12 both W3/MF4=N0).
+    unique n_kg_ha doses per series.
     """
 
     treatments = parsed_filex["treatments"]
@@ -88,11 +88,6 @@ def build_water_nitrogen_design(parsed_filex: dict, filex_text: str, exp: str) -
     # a retained treatment.
     by_wn: dict[tuple[str, str], int] = {}
     duplicate_wn_assignments: list[str] = []
-    if exp == "XXQL2601":
-        duplicate_wn_assignments.append(
-            "XXQL2601 TN12: duplicate (W, N-class)=(W3, N0) with TN9. TN12 has been excluded from the "
-            "retained treatments at the bundle level to prevent pseudo-replication and double-weighting."
-        )
     n_rate_by_mf: dict[int, float] = {}
     for mf in (1, 2, 3, 4):
         n_rate_by_mf[mf] = fertilizer_n_total_kg_ha(filex_text, mf)
@@ -191,7 +186,11 @@ def build_contract(season_entry: dict) -> dict:
     wn_design = build_water_nitrogen_design(parsed, filex_text, exp)
 
     contract = {
-        "profile_id": f"eggplant_formal_{exp.lower()}_outputs_v1_20260720",
+        "profile_id": (
+            "eggplant_formal_xxql2601_outputs_v2_20260721"
+            if exp == "XXQL2601"
+            else f"eggplant_formal_{exp.lower()}_outputs_v1_20260720"
+        ),
         "experiment_bundle": bundle,
         "season": season_entry["season"],
         "experiment": exp,
@@ -215,6 +214,15 @@ def build_contract(season_entry: dict) -> dict:
             "(2501: 8-141; 2502: DAP 0-147; 2601: 2-131).",
         ],
     }
+    if exp == "XXQL2601":
+        contract["water_nitrogen_design"]["_notes"]["input_corrections"] = [
+            "User correction 2026-07-21: TN12 is W1/N0 (MI=1, MF=4), not W3/N0. "
+            "The corrected design is a complete 2 water x 4 nitrogen factorial."
+        ]
+        contract["design_notes"].append(
+            "TN12 irrigation was corrected by the user on 2026-07-21 from MI=3 to MI=1; "
+            "XXQL2601 now provides the complete W1/W3 by N0/N1/N2/N3 factorial."
+        )
 
     # Season-specific notes for known structural issues.
     notes = wn_design.get("_notes", {})

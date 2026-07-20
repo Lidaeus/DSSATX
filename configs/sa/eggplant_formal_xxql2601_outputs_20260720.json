@@ -1,6 +1,6 @@
 {
-  "profile_id": "eggplant_formal_xxql2601_outputs_v1_20260720",
-  "experiment_bundle": "xxql2601_sa_controlled_7t_candidate_20260720",
+  "profile_id": "eggplant_formal_xxql2601_outputs_v2_20260721",
+  "experiment_bundle": "xxql2601_sa_controlled_tn12_w1_candidate_20260721",
   "season": "2026_spring",
   "experiment": "XXQL2601",
   "treatments": [
@@ -10,7 +10,8 @@
     6,
     7,
     9,
-    10
+    10,
+    12
   ],
   "features": [
     "YIELD_HWAMS",
@@ -109,6 +110,10 @@
       "N1": [
         7,
         10
+      ],
+      "N0": [
+        9,
+        12
       ]
     },
     "nitrogen_series": {
@@ -132,6 +137,10 @@
       ],
       "W1": [
         {
+          "treatment": 12,
+          "n_kg_ha": 0.0
+        },
+        {
           "treatment": 10,
           "n_kg_ha": 120.0
         },
@@ -146,12 +155,8 @@
       ]
     },
     "_notes": {
-      "water_pairs_omissions": [
-        "N0: W1 absent in XXQL2601 retained set; W1-vs-W3 contrast at this N level is not estimable (W3=9, W1=None)"
-      ],
-      "dropped_duplicate_wn_assignments": [
-        "XXQL2601 TN12: duplicate (W, N-class)=(W3, N0) with TN9. TN12 has been excluded from the retained treatments at the bundle level to prevent pseudo-replication and double-weighting."
-      ],
+      "water_pairs_omissions": [],
+      "dropped_duplicate_wn_assignments": [],
       "dropped_duplicate_dose_treatments": [],
       "mf_to_nclass": {
         "1": "N3",
@@ -162,7 +167,10 @@
       "mi_to_w": {
         "1": "W1",
         "3": "W3"
-      }
+      },
+      "input_corrections": [
+        "User correction 2026-07-21: TN12 is W1/N0 (MI=1, MF=4), not W3/N0. The corrected design is a complete 2 water x 4 nitrogen factorial."
+      ]
     }
   },
   "design_notes": [
@@ -171,6 +179,6 @@
     "MDAPS is omitted because the uncalibrated baseline returns the DSSAT -99 missing sentinel.",
     "Nitrogen doses (n_kg_ha) are derived from this season's FileX *FERTILIZERS (INORGANIC) FAMN column via fertilizer_n_total_kg_ha, NOT from a hardcoded ladder; the three seasons differ (2501: 399/271/130/0; 2502: 360/240/120/0; 2601: 361/240/120/0 kg N/ha).",
     "LAI DAP points 45/67/95/119 lie inside every season's PlantGro DAP window (2501: 8-141; 2502: DAP 0-147; 2601: 2-131).",
-    "W1-vs-W3 contrast omissions: N0: W1 absent in XXQL2601 retained set; W1-vs-W3 contrast at this N level is not estimable (W3=9, W1=None)"
+    "TN12 irrigation was corrected by the user on 2026-07-21 from MI=3 to MI=1; XXQL2601 now provides the complete W1/W3 by N0/N1/N2/N3 factorial."
   ]
 }

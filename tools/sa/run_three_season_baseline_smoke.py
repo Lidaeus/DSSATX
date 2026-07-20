@@ -50,7 +50,7 @@ if str(PROJECT_ROOT) not in sys.path:
 SEASONS = [
     {"exp": "XXQL2501", "bundle": "xxql2501_sa_controlled_candidate_20260720", "weather": "XXLI2502.WTH"},
     {"exp": "XXQL2502", "bundle": "xxql2502_sa_controlled_candidate_20260720", "weather": "XXLI2502.WTH"},
-    {"exp": "XXQL2601", "bundle": "xxql2601_sa_controlled_7t_candidate_20260720", "weather": "XXQL2601.WTH"},
+    {"exp": "XXQL2601", "bundle": "xxql2601_sa_controlled_tn12_w1_candidate_20260721", "weather": "XXQL2601.WTH"},
 ]
 
 DSSAT_ROOT = Path(r"C:\DSSAT48")
