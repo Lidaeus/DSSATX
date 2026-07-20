@@ -1,8 +1,16 @@
 # Changelog
 
+## 2026-07-21（T7 v2 参数率定设计与基础代码）
+
+- 将主率定选择规则改为：排除模型定义不适用的 `PM06` 后，分别在 general-genetic 与 water-nitrogen-response 域累计至 90%，再取 17 参数并集；新增可复现、默认拒绝 `science_pending` 的 proposal-only 选择器。
+- 审计 XXQL2502/XXQL2601 FileA/FileT：累计采收单调且 FileA 派生量与 FileT 一致；识别原始输入目录缺 SOIL.SOL、`SYMBI=Y`、XXQL2601 肥料事件行序，以及 TRNO plot→treatment 映射待确认等正式运行阻塞项。
+- 修复报告解析器在 FileT 仅提供 CHPDT/CHFPW 时未生成增量采收的问题，统一用相邻累计值差分并增加回归测试。
+- 新增只读异参同效约束审查器：根据边界堆积、坍缩、强 Spearman 补偿和功能性异参同效候选生成 review proposal；永不自动修改 frozen bounds。
+- T7 主设计更新为 17 参数、P/C/N 分块工程诊断和 240-real 全新联合先验；XXQL2501+XXQL2502 联合率定、XXQL2601 独立验证的正式运行仍受输入、sigma、边界和资源审批门控制。
+
 ## 2026-07-20（三季正式敏感性分析输入与交接）
 
-- 将 XXQL2501、XXQL2502、XXQL2601 导入版本化 sensitivity source bundle；三季统一 `SYMBI=Y`（作为 CRGRO048 兼容运行要求），修正 XXQL2502 季节标题，并在不改变施肥值的前提下规范 XXQL2601 MF2 行序。
+- 将 XXQL2501、XXQL2502、XXQL2601 导入版本化 sensitivity source bundle；早期曾误用 `SYMBI=Y`，现已由 2026-07-21 修复统一替换为非豆科政策 `SYMBI=N、POTAS=N`。同时修正 XXQL2502 季节标题，在不改变施肥值的前提下规范 XXQL2601 MF2 行序，并按用户确认将 XXQL2601 TN12 更正为 W1/N0。
 - 为三季生成共同 `MI1/MI3 × MF1–MF4` 八处理受控 SA FileX；季内 IC 按深度中位数统一，原始用户目录保持不变。
 - 输入校验增加显式 simulation-only 模式：FileA/FileT 对 SA 可选，对率定/验证仍为硬门；SA builder 与反事实输入生成器使用该模式。
 - 汇总 2025 春秋植株 NPK；主 55 参数域不变，新增叶/茎/shell `PRO*` 独立 SA-B 候选范围，root `PRORT*` 因无根样继续固定。
