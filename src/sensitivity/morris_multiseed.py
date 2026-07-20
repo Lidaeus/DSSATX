@@ -39,6 +39,27 @@ def _read_flat_manifest(path: Path) -> dict[str, str]:
     return values
 
 
+def _verify_frozen_runtime(case_dir: Path, manifest: dict[str, str]) -> None:
+    if manifest.get("git_dirty", "").lower() != "false":
+        raise ValueError(f"Formal Morris case was not built from a clean worktree: {case_dir}")
+    relative = manifest.get("runtime_bundle", "")
+    expected = manifest.get("runtime_manifest_sha256", "").lower()
+    if not relative or len(expected) != 64:
+        raise ValueError(f"Formal Morris case lacks a frozen runtime manifest: {case_dir}")
+    runtime_root = case_dir / relative
+    runtime_manifest = runtime_root / "runtime_manifest.json"
+    if not runtime_manifest.is_file() or sha256_file(runtime_manifest) != expected:
+        raise ValueError(f"Frozen runtime manifest hash mismatch: {case_dir}")
+    payload = json.loads(runtime_manifest.read_text(encoding="utf-8"))
+    for item in payload.get("files", []):
+        item_path = Path(str(item.get("path", "")))
+        if item_path.is_absolute() or ".." in item_path.parts:
+            raise ValueError(f"Invalid frozen runtime path in {case_dir}: {item_path}")
+        artifact = runtime_root / item_path
+        if not artifact.is_file() or sha256_file(artifact) != str(item.get("sha256", "")).lower():
+            raise ValueError(f"Frozen runtime artifact hash mismatch: {artifact}")
+
+
 def _require_validated_case(case_dir: Path) -> dict[str, Any]:
     status = json.loads((case_dir / "run_status.json").read_text(encoding="utf-8"))
     if status.get("status") != "completed" or status.get("scientific_status") != "validated":
@@ -50,6 +71,7 @@ def _require_validated_case(case_dir: Path) -> dict[str, Any]:
     manifest = _read_flat_manifest(case_dir / "run_manifest.yaml")
     if manifest.get("run_type") != "sensitivity_formal_case":
         raise ValueError(f"Refusing non-formal Morris case: {case_dir}")
+    _verify_frozen_runtime(case_dir, manifest)
     return {
         "seed": int(manifest["random_seed"]),
         "manifest": manifest,

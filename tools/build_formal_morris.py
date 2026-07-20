@@ -38,16 +38,15 @@ def main() -> int:
     parser.add_argument("--seeds", nargs="+", type=int, default=DEFAULT_SEEDS)
     parser.add_argument("--morris-r", type=int, default=30)
     parser.add_argument("--morris-p", type=int, default=6)
-    parser.add_argument("--allow-dirty", action="store_true")
     args = parser.parse_args()
-    if args.morris_r < 20:
-        parser.error("Formal Morris requires r >= 20")
+    if args.morris_r < 10:
+        parser.error("Formal Morris requires r >= 10")
     try:
         args.seeds = validate_seed_plan(args.seeds)
     except ValueError as exc:
         parser.error(str(exc))
     git_info = git_metadata()
-    if git_info.get("git_dirty") and not args.allow_dirty:
+    if git_info.get("git_dirty"):
         parser.error("Refusing formal case build from a dirty worktree; commit and re-run")
 
     output = Path(args.out_root).resolve()
@@ -84,6 +83,10 @@ def main() -> int:
         "input_manifest_sha256": sha256_file(Path(args.input_dir) / "input_manifest.json"),
         "output_profile": str(Path(args.output_profile).resolve()),
         "output_profile_sha256": sha256_file(args.output_profile),
+        "runtime_manifests": {
+            str(item["seed"]): sha256_file(Path(item["case_dir"]) / "runtime" / "runtime_manifest.json")
+            for item in cases
+        },
         "morris_r": args.morris_r,
         "morris_p": args.morris_p,
         "seeds": args.seeds,

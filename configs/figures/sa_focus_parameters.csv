@@ -1,0 +1,8 @@
+display_order,parameter,primary_domain,process_label
+1,TRIFL,general_genetic,Main-stem leaf appearance
+2,RTNO3,water_nitrogen_response,Root nitrate uptake
+3,XFRT,general_genetic,Fruit partitioning
+4,EM-FL,general_genetic,Emergence to flowering
+5,EM-V1,general_genetic,Emergence to first true leaf
+6,LFMAX,general_genetic,Maximum leaf photosynthesis
+7,NMOBMX,water_nitrogen_response,Maximum nitrogen mobilization
