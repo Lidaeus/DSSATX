@@ -47,6 +47,12 @@ def test_formal_case_uses_case_local_hash_checked_runtime(tmp_path):
     manifest_path = runtime / "runtime_manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest["files"]
+    frozen_paths = {item["path"] for item in manifest["files"]}
+    assert {
+        "src/dssat/run_dssat.py",
+        "src/common/param_registry.py",
+        "src/calibration/observation_policy.py",
+    }.issubset(frozen_paths)
     for item in manifest["files"]:
         assert sha256_file(runtime / item["path"]) == item["sha256"]
 
