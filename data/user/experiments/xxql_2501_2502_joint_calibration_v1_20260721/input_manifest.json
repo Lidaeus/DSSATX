@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "bundle_id": "xxql_2501_2502_joint_calibration_v1_20260721",
+  "created_at": "2026-07-21T09:44:11.889185Z",
+  "scenario_type": "joint_multiseason_calibration",
+  "scenario_role": "calibration",
+  "intended_use": "joint_parameter_calibration_XXQL2501_XXQL2502",
+  "prohibited_use": [
+    "sensitivity_analysis_only_input",
+    "parameter_calibration_with_sealed_validation_season"
+  ],
+  "calibration_seasons": [
+    "XXQL2501",
+    "XXQL2502"
+  ],
+  "validation_season_sealed": "XXQL2601",
+  "validation_bundle_sealed": "xxql2601_actual_trial_validation_v1_20260721",
+  "initial_condition_policy": "observed_treatment_specific_no_counterfactual_pooling",
+  "soil_analysis_policy": "observed_treatment_specific_no_counterfactual_pooling",
+  "counterfactual_transformations": [],
+  "treatment_roles": {
+    "XXQL2501": {
+      "calibration": [
+        2,
+        3,
+        4,
+        5,
+        10,
+        11,
+        12,
+        13
+      ],
+      "diagnostic": [
+        9,
+        14
+      ]
+    },
+    "XXQL2502": {
+      "calibration": [
+        3,
+        4,
+        7,
+        9,
+        1,
+        6,
+        10,
+        12
+      ],
+      "diagnostic": [
+        2,
+        5,
+        8,
+        11
+      ]
+    }
+  },
+  "treatment_selection_rule": "T7 §4.2: XXQL2501 high/low water x 4 nitrogen levels; XXQL2502 explicit MI/MF high/low water x 4 nitrogen levels. Treatments are keyed by experiment_code+treatment, not by TN alone, so XXQL2501 TN3 and XXQL2502 TN3 are distinct design points.",
+  "source_bundles": [
+    {
+      "season": "XXQL2501",
+      "bundle_id": "xxql2501_20260716",
+      "path": "data/user/experiments/xxql2501_20260716"
+    },
+    {
+      "season": "XXQL2502",
+      "bundle_id": "xxql2502_actual_trial_calibration_v1_20260721",
+      "path": "data/user/experiments/xxql2502_actual_trial_calibration_v1_20260721"
+    }
+  ],
+  "batch_rows": [
+    {
+      "run": 1,
+      "filex": "XXQL2501.TMX",
+      "tn": 2,
+      "season": "XXQL2501"
+    },
+    {
+      "run": 2,
+      "filex": "XXQL2501.TMX",
+      "tn": 3,
+      "season": "XXQL2501"
+    },
+    {
+      "run": 3,
+      "filex": "XXQL2501.TMX",
+      "tn": 4,
+      "season": "XXQL2501"
+    },
+    {
+      "run": 4,
+      "filex": "XXQL2501.TMX",
+      "tn": 5,
+      "season": "XXQL2501"
+    },
+    {
+      "run": 5,
+      "filex": "XXQL2501.TMX",
+      "tn": 10,
+      "season": "XXQL2501"
+    },
+    {
+      "run": 6,
+      "filex": "XXQL2501.TMX",
+      "tn": 11,
+      "season": "XXQL2501"
+    },
+    {
+      "run": 7,
+      "filex": "XXQL2501.TMX",
+      "tn": 12,
+      "season": "XXQL2501"
+    },
+    {
+      "run": 8,
+      "filex": "XXQL2501.TMX",
+      "tn": 13,
+      "season": "XXQL2501"
+    },
+    {
+      "run": 9,
+      "filex": "XXQL2502.TMX",
+      "tn": 3,
+      "season": "XXQL2502"
+    },
+    {
+      "run": 10,
+      "filex": "XXQL2502.TMX",
+      "tn": 4,
+      "season": "XXQL2502"
+    },
+    {
+      "run": 11,
+      "filex": "XXQL2502.TMX",
+      "tn": 7,
+      "season": "XXQL2502"
+    },
+    {
+      "run": 12,
+      "filex": "XXQL2502.TMX",
+      "tn": 9,
+      "season": "XXQL2502"
+    },
+    {
+      "run": 13,
+      "filex": "XXQL2502.TMX",
+      "tn": 1,
+      "season": "XXQL2502"
+    },
+    {
+      "run": 14,
+      "filex": "XXQL2502.TMX",
+      "tn": 6,
+      "season": "XXQL2502"
+    },
+    {
+      "run": 15,
+      "filex": "XXQL2502.TMX",
+      "tn": 10,
+      "season": "XXQL2502"
+    },
+    {
+      "run": 16,
+      "filex": "XXQL2502.TMX",
+      "tn": 12,
+      "season": "XXQL2502"
+    }
+  ],
+  "files": [
+    {
+      "name": "XXQL2501.TMX",
+      "sha256": "51ca1b6ab5c1e0c57c0310422f53e1cd5a35b4b9cb44472a6026f323f18bead4",
+      "bytes": 18194,
+      "source_season": "XXQL2501",
+      "source_bundle": "xxql2501_20260716",
+      "source_path": "data/user/experiments/xxql2501_20260716/XXQL2501.TMX"
+    },
+    {
+      "name": "XXQL2501.TMA",
+      "sha256": "4acc8a90e9a13b2fc4778b72b48986655ea5e5d612906ce1525b8b3afc255a81",
+      "bytes": 804,
+      "source_season": "XXQL2501",
+      "source_bundle": "xxql2501_20260716",
+      "source_path": "data/user/experiments/xxql2501_20260716/XXQL2501.TMA"
+    },
+    {
+      "name": "XXQL2501.TMT",
+      "sha256": "e9d1d1f4b70024a07873c0de1bb51a124647e1756eff4217fe0acf95f7612aea",
+      "bytes": 20929,
+      "source_season": "XXQL2501",
+      "source_bundle": "xxql2501_20260716",
+      "source_path": "data/user/experiments/xxql2501_20260716/XXQL2501.TMT"
+    },
+    {
+      "name": "XXN92501.WTH",
+      "sha256": "bfe43660a32f99b867a84877c53391290341310872db1ab420028d6356df3195",
+      "bytes": 8015,
+      "source_season": "XXQL2501",
+      "source_bundle": "xxql2501_20260716",
+      "source_path": "data/user/experiments/xxql2501_20260716/XXN92501.WTH"
+    },
+    {
+      "name": "XXQL2502.TMX",
+      "sha256": "49aec43edd83c0289f9ab2d195d8614148f0fe54e06c5e01d693d79e56b0f22e",
+      "bytes": 19261,
+      "source_season": "XXQL2502",
+      "source_bundle": "xxql2502_actual_trial_calibration_v1_20260721",
+      "source_path": "data/user/experiments/xxql2502_actual_trial_calibration_v1_20260721/XXQL2502.TMX"
+    },
+    {
+      "name": "XXQL2502.TMA",
+      "sha256": "1d4b86075e54fcad89ea3015c6678b849ab9f788ec5da500aaed3f98ac53da8f",
+      "bytes": 1393,
+      "source_season": "XXQL2502",
+      "source_bundle": "xxql2502_actual_trial_calibration_v1_20260721",
+      "source_path": "data/user/experiments/xxql2502_actual_trial_calibration_v1_20260721/XXQL2502.TMA"
+    },
+    {
+      "name": "XXQL2502.TMT",
+      "sha256": "9618246c421508078d9b23cef1a9fe55908634dbc221023461acf4f20350b07a",
+      "bytes": 5537,
+      "source_season": "XXQL2502",
+      "source_bundle": "xxql2502_actual_trial_calibration_v1_20260721",
+      "source_path": "data/user/experiments/xxql2502_actual_trial_calibration_v1_20260721/XXQL2502.TMT"
+    },
+    {
+      "name": "XXLI2502.WTH",
+      "sha256": "d273b9b73c6efbca4703e896aefee1921efa18a8ee1a2cfea03e6f339cdc1b6a",
+      "bytes": 22171,
+      "source_season": "XXQL2502",
+      "source_bundle": "xxql2502_actual_trial_calibration_v1_20260721",
+      "source_path": "data/user/experiments/xxql2502_actual_trial_calibration_v1_20260721/XXLI2502.WTH"
+    },
+    {
+      "name": "SOIL.SOL",
+      "sha256": "a986374f5ca95eaa3d65ed58162c3cb038450c57128b883b5e0fb22629600c67",
+      "bytes": 162881,
+      "source_season": "shared",
+      "source_bundle": "xxql2501_20260716 + xxql2502_actual_trial_calibration_v1_20260721 (byte-identical)",
+      "source_path": "data/user/experiments/xxql2501_20260716/SOIL.SOL"
+    },
+    {
+      "name": "DSSBatch.v48",
+      "sha256": "6d3ea48d60e634a463e6b7ba209b8e5495db6f7a9d6486b6464e6b7040118e7d",
+      "bytes": 2457,
+      "source_season": "joint",
+      "source_bundle": "generated by tools/calibration/build_t7_joint_bundle_20260721.py",
+      "source_path": "generated"
+    }
+  ],
+  "notes": [
+    "SOIL.SOL is byte-identical across both source bundles (sha256 recorded once).",
+    "DSSBatch.v48 is generated fresh for the joint case; it is not inherited from either source bundle.",
+    "Treatments excluded from the calibration subset remain in the source bundles for diagnostic replay but do not enter the joint batch and therefore cannot receive non-zero PEST weights."
+  ]
+}

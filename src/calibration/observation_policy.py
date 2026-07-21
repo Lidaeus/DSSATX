@@ -151,7 +151,14 @@ def _optional_float(policy: Mapping[str, Any], name: str) -> float | None:
 def _resolve_policy(group: str, policies: Mapping[str, Mapping[str, Any]]) -> Mapping[str, Any]:
     exact = str(group).strip().upper()
     root = _GROUP_SUFFIX.sub("", exact)
-    return policies.get(exact) or policies.get(root) or {}
+    if policies.get(exact) or policies.get(root):
+        return policies.get(exact) or policies.get(root) or {}
+    # Multi-season groups are namespaced (for example 25SP_LAIDM_D2025101)
+    # so group-Phi can be audited by season.  Policy CSVs remain compatible
+    # with ordinary FileA/FileT variable names.
+    unscoped = exact.split("_", 1)[1] if "_" in exact else exact
+    unscoped_root = _GROUP_SUFFIX.sub("", unscoped)
+    return policies.get(unscoped) or policies.get(unscoped_root) or {}
 
 
 def apply_observation_policy(
@@ -181,6 +188,9 @@ def apply_observation_policy(
         multiplier = 1.0 if multiplier is None else multiplier
         if multiplier <= 0:
             raise ValueError("group_multiplier must be positive")
+        phi_role = str(policy.get("phi_role") or "calibration").strip().lower()
+        if phi_role not in {"calibration", "diagnostic_only", "sensitivity_only"}:
+            raise ValueError(f"unsupported phi_role for {record['obgnme']}: {phi_role!r}")
 
         explicit_sigma = _optional_float(policy, "sigma")
         replicate_sd = _optional_float(policy, "replicate_sd")
@@ -232,7 +242,11 @@ def apply_observation_policy(
             raw_obs, raw_sigma, transform, offset=offset
         )
         base_weight = 1.0 / effective_sigma
-        final_weight = 0.0 if is_missing else base_weight * multiplier
+        final_weight = (
+            base_weight * multiplier
+            if not is_missing and phi_role == "calibration"
+            else 0.0
+        )
 
         record.update(
             {
@@ -244,6 +258,7 @@ def apply_observation_policy(
                 "base_weight": base_weight,
                 "group_multiplier": multiplier,
                 "weight": final_weight,
+                "phi_role": phi_role,
                 "transform": transform,
                 "transform_offset": offset,
                 "transform_reference": reference,

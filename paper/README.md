@@ -81,16 +81,18 @@ R 只读取冻结后的 CSV 与哈希清单。
 
 ```powershell
 python -m src.reporting.export_sa_paper_data `
-  --run-id morris_3season_20260720 `
-  --results-root workspace/runs/morris_results `
-  --season XXQL2501 --season XXQL2502 --season XXQL2601 `
+  --run-id formal_morris_v4_20260721 `
+  --results-root workspace/runs/morris_results_repro_v4 `
+  --season XXQL2501=XXQL2501/r10 `
+  --season XXQL2502=XXQL2502/r20 `
+  --season XXQL2601=XXQL2601/r10 `
   --focus-config configs/figures/sa_focus_parameters.csv `
-  --out-dir workspace/runs/morris_results/paper_data `
+  --out-dir workspace/runs/morris_results_repro_v4/paper_data_v4 `
   --allow-unvalidated-demo
 
 Rscript paper/R/make_all.R `
-  --input-dir workspace/runs/morris_results/paper_data `
-  --out-dir workspace/runs/morris_results/paper_figures `
+  --input-dir workspace/runs/morris_results_repro_v4/paper_data_v4 `
+  --out-dir workspace/runs/morris_results_repro_v4/paper_figures_v4 `
   --figure-ids fig1_sa,figs1_sa_stability `
   --allow-unvalidated-demo
 ```
@@ -99,3 +101,23 @@ Fig. 1 分别展示一般遗传域和水氮响应域的跨季层级归一化 Mor
 参数主要影响物候、冠层、生物量、采收或水氮响应。Fig. S1 展示逐 seed 排名以及 Spearman
 和 Top-15 Jaccard 门槛。两个域不得合并成一个无条件的总排名。当前任一季/域未通过门槛时，
 导出器只允许显式生成带 `DEMO_` 前缀与水印的 `science_pending` 图。
+
+## Sobol 样本规模与收敛图
+
+Sobol 使用独立于 Morris 和率定的冻结数据包。当前 XXQL2501 的 N=64→N=128 比较未通过预注册的排名收敛门，因此 Fig. S2 的职责是报告样本规模敏感性和数值不确定性，而非报告精确 S1/ST 名次或交互贡献。
+
+```powershell
+python -m src.reporting.export_sobol_paper_data `
+  --run-id formal_sobol_xxql2501_n64_n128_20260721 `
+  --convergence-dir workspace/runs/sobol_formal_v1/XXQL2501/convergence_n0064_n0128_repaired_20260721 `
+  --out-dir workspace/runs/sobol_formal_v1/XXQL2501/paper_data_n64_n128 `
+  --allow-unvalidated-demo
+
+Rscript paper/R/make_all.R `
+  --input-dir workspace/runs/sobol_formal_v1/XXQL2501/paper_data_n64_n128 `
+  --out-dir workspace/runs/sobol_formal_v1/XXQL2501/paper_figures_n64_n128 `
+  --figure-ids figs2_sobol_convergence `
+  --allow-unvalidated-demo
+```
+
+`fig1_sa`/`figs1_sa_stability` 与 `figs2_sobol_convergence` 必须分开渲染：它们消费不同的冻结证据包，避免 Sobol 的未收敛状态被 Morris 图隐式掩盖。

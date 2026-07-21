@@ -1,0 +1,15 @@
+proposal_id: "eggplant_t7_formal_v5_20260721"
+crop: "eggplant"
+created_at: "2026-07-21T07:42:24Z"
+review_status: "proposed"
+ready_for_formal_run: false
+derived_from_bounds: "eggplant_formal_multiseason_candidate_v4_20260721.csv"
+derived_from_bounds_sha256: "74466ef21f24347ea3a684fad7ee08eda8c20ba3fa49ee7b5917a41a7da3c91f"
+selection_csv: "calibration_parameter_candidates.csv"
+selection_sha256: "63146bdc5be65f079af3a92f06aa21d7e50a9d197dafc8d9eaf7608fcefd69c7"
+selection_evidence_status: "science_pending"
+proposal_sha256: "1fad015e1094755e3618c2410b78a8b517a99bec41ca94e04c39f2993795eac6"
+parameter_count: 157
+active_parameter_count: 17
+automatic_bound_changes: 0
+notes: "Selected ranges are inherited unchanged; non-selected active rows are fixed at source init; user review required before freeze"

@@ -13,6 +13,7 @@ source(file.path(script_dir, "fig_posterior_demo.R"), local = FALSE)
 source(file.path(script_dir, "fig_spearman_demo.R"), local = FALSE)
 source(file.path(script_dir, "fig_equifinality_demo.R"), local = FALSE)
 source(file.path(script_dir, "fig_sa_morris.R"), local = FALSE)
+source(file.path(script_dir, "fig_sa_sobol.R"), local = FALSE)
 
 check_r_dependencies()
 args <- parse_cli_args(commandArgs(trailingOnly = TRUE))
@@ -34,8 +35,9 @@ selected <- function(id) figure_ids == "all" || id %in% split_csv_arg(figure_ids
 requested_ids <- if (figure_ids == "all") character() else split_csv_arg(figure_ids)
 is_t4_request <- any(requested_ids %in% c("figs5_posterior", "figs6_spearman", "figs7_equifinality"))
 is_sa_request <- any(requested_ids %in% c("fig1_sa", "figs1_sa_stability"))
-if (is_t4_request && is_sa_request) {
-  stop("SA and T4 demo figures require separate frozen bundles", call. = FALSE)
+is_sobol_request <- any(requested_ids %in% c("figs2_sobol_convergence"))
+if (sum(c(is_t4_request, is_sa_request, is_sobol_request)) > 1) {
+  stop("Morris SA, Sobol SA, and T4 figures require separate frozen bundles", call. = FALSE)
 }
 if (is_t4_request) {
   standard_ids <- c("fig2_phi", "fig3_performance", "figs3_residuals", "fig4_dynamics", "figs4_all_treatments")
@@ -49,6 +51,12 @@ if (is_sa_request) {
     stop("SA figures require a dedicated bundle and cannot be mixed with calibration figures", call. = FALSE)
   }
 }
+if (is_sobol_request) {
+  standard_ids <- c("fig2_phi", "fig3_performance", "figs3_residuals", "fig4_dynamics", "figs4_all_treatments")
+  if (any(requested_ids %in% standard_ids)) {
+    stop("Sobol figures require a dedicated bundle and cannot be mixed with calibration figures", call. = FALSE)
+  }
+}
 needs_trajectory <- selected("fig4_dynamics") || selected("figs4_all_treatments")
 needs_treatment_metadata <- selected("figs3_residuals") || selected("fig4_dynamics") || selected("figs4_all_treatments")
 
@@ -56,10 +64,12 @@ bundle <- if (is_t4_request) {
   read_t4_demo_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
 } else if (is_sa_request) {
   read_sa_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
+} else if (is_sobol_request) {
+  read_sobol_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
 } else {
   read_paper_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
 }
-if (!is_t4_request && !is_sa_request) require_calibration_scenario(bundle)
+if (!is_t4_request && !is_sa_request && !is_sobol_request) require_calibration_scenario(bundle)
 variables <- split_csv_arg(if (is.null(args$variables)) "LAID,LWAD,SWAD,FRESH_INC" else args$variables)
 process_variables <- split_csv_arg(if (is.null(args$process_variables)) "LAID,LWAD" else args$process_variables)
 treatments <- split_csv_arg(if (is.null(args$treatments)) "2,13" else args$treatments)
@@ -95,6 +105,20 @@ if (is_sa_request) {
     utils::write.csv(result$stability_source, stability_source, row.names = FALSE, fileEncoding = "UTF-8")
     artifacts <- c(artifacts, rank_source, stability_source)
   }
+}
+
+if (is_sobol_request && selected("figs2_sobol_convergence")) {
+  result <- build_sobol_convergence(bundle$rankings, bundle$metrics, bundle$run_scale, profile, bundle$is_demo)
+  base <- file.path(out_dir, if (bundle$is_demo) "DEMO_FigS2_sobol_convergence" else "FigS2_sobol_convergence")
+  artifacts <- c(artifacts, save_figure_set(result$plot, base, profile,
+                                             profile$double_column_width_mm, result$height_mm))
+  ranking_source <- paste0(base, ".ranking_source.csv")
+  metrics_source <- paste0(base, ".metrics_source.csv")
+  run_scale_source <- paste0(base, ".run_scale_source.csv")
+  utils::write.csv(result$ranking_source, ranking_source, row.names = FALSE, fileEncoding = "UTF-8")
+  utils::write.csv(result$metrics_source, metrics_source, row.names = FALSE, fileEncoding = "UTF-8")
+  utils::write.csv(result$run_scale_source, run_scale_source, row.names = FALSE, fileEncoding = "UTF-8")
+  artifacts <- c(artifacts, ranking_source, metrics_source, run_scale_source)
 }
 
 if (is_t4_request) {
@@ -286,7 +310,7 @@ manifest <- list(
   profile_id = profile$profile_id,
   profile = sha256_record(profile_path),
   run_id = bundle$manifest$run_id,
-  data_status = if (is_sa_request) bundle$manifest$data_status else if (bundle$is_demo) "legacy_layout_demo" else "science_validated",
+  data_status = if (is_sa_request || is_sobol_request) bundle$manifest$data_status else if (bundle$is_demo) "legacy_layout_demo" else "science_validated",
   input_manifest = sha256_record(file.path(input_dir, "paper_data_manifest.json")),
   artifacts = lapply(artifacts, sha256_record)
 )

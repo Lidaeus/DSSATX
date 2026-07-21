@@ -123,7 +123,7 @@ build_morris_main <- function(rankings, group_summary, focus, profile, is_demo =
       tag_levels = "a",
       title = "Multi-season Morris screening identifies dominant process controls",
       subtitle = if (isTRUE(is_demo)) {
-        "Current evidence: water-nitrogen rankings in XXQL2502 and XXQL2601 require additional seeds"
+        "Current evidence: the XXQL2502 water-nitrogen Top-15 boundary remains seed-sensitive"
       } else NULL,
       caption = if (isTRUE(is_demo)) "DEMO - science pending; current Morris evidence is not yet citable" else NULL,
       theme = ggplot2::theme(

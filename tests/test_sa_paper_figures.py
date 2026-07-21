@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 
 from src.reporting.export_sa_paper_data import export_sa_bundle
+from src.reporting.export_sobol_paper_data import export_sobol_bundle
 
 
 PARAMETERS = ["TRIFL", "RTNO3", "XFRT", "LFMAX"]
@@ -163,3 +164,67 @@ def test_sa_paper_figures_are_r_only_and_domain_separated() -> None:
     assert "Spearman rho" in figure
     assert "Jaccard index" in figure
     assert "mu-star" not in figure.lower()
+
+
+def _write_sobol_convergence(directory: Path, *, science_validated: bool = False) -> None:
+    directory.mkdir(parents=True)
+    rankings = []
+    groups = []
+    for sample in (64, 128):
+        for domain in DOMAINS:
+            for rank, parameter in enumerate(PARAMETERS, 1):
+                rankings.append({"base_samples": sample, "ranking_domain": domain, "parameter": parameter,
+                                 "score": 1 / rank, "rank": rank})
+                groups.append({"base_samples": sample, "ranking_domain": domain, "response_group": "phenology",
+                               "parameter": parameter, "group_score": 1 / rank})
+    pd.DataFrame(rankings).to_csv(directory / "sobol_scale_rankings.csv", index=False)
+    pd.DataFrame(groups).to_csv(directory / "sobol_scale_group_scores.csv", index=False)
+    pd.DataFrame([{"samples_a": 64, "samples_b": 128, "ranking_domains": "[]", "passes": science_validated}]).to_csv(
+        directory / "sobol_convergence_comparisons.csv", index=False
+    )
+    pd.DataFrame([
+        {"base_samples": 64, "parameter_count": 4, "theoretical_model_runs": 320,
+         "actual_model_runs": 320},
+        {"base_samples": 128, "parameter_count": 4, "theoretical_model_runs": 640,
+         "actual_model_runs": 640},
+    ]).to_csv(directory / "sobol_run_scale.csv", index=False)
+    report = {
+        "run_type": "formal_sobol_convergence", "science_validated": science_validated, "samples": [64, 128],
+        "thresholds": {"spearman": 0.95, "top_k": 8, "top_k_jaccard": 0.75, "max_top_k_rank_shift": 2},
+        "comparisons": [{"samples_a": 64, "samples_b": 128, "ranking_domains": [
+            {"ranking_domain": domain, "spearman": 0.8, "top_k": 8,
+             "top_k_jaccard": 0.5, "max_top_k_rank_shift": 4, "passes": science_validated}
+            for domain in DOMAINS
+        ]}],
+    }
+    (directory / "sobol_convergence.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+
+
+def test_sobol_export_requires_demo_opt_in_and_freezes_convergence_metrics(tmp_path: Path) -> None:
+    convergence = tmp_path / "convergence"
+    _write_sobol_convergence(convergence)
+    with pytest.raises(ValueError, match="allow-unvalidated-demo"):
+        export_sobol_bundle(run_id="sobol", convergence_dir=convergence, out_dir=tmp_path / "out")
+    manifest_path = export_sobol_bundle(
+        run_id="sobol", convergence_dir=convergence, out_dir=tmp_path / "out",
+        allow_unvalidated_demo=True,
+    )
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert payload["bundle_type"] == "sobol_convergence_evidence"
+    assert payload["data_status"] == "science_pending"
+    metrics = pd.read_csv(tmp_path / "out" / "sobol_convergence_metrics.csv")
+    assert set(metrics["ranking_domain"]) == set(DOMAINS)
+    assert set(metrics["data_status"]) == {"science_pending"}
+
+
+def test_sobol_paper_figure_is_r_only_and_transparent_about_convergence() -> None:
+    exporter = Path("src/reporting/export_sobol_paper_data.py").read_text(encoding="utf-8")
+    figure = Path("paper/R/fig_sa_sobol.R").read_text(encoding="utf-8")
+    entry = Path("paper/R/make_all.R").read_text(encoding="utf-8")
+    common = Path("paper/R/common.R").read_text(encoding="utf-8")
+    assert "matplotlib" not in exporter
+    assert "sobol_convergence_evidence" in common
+    assert "read_sobol_bundle" in entry
+    assert 'selected("figs2_sobol_convergence")' in entry
+    assert "convergence thresholds not met" in figure
+    assert "Top-8 membership changes" in figure

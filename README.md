@@ -9,7 +9,7 @@ Tomato_Cal 是一个面向作物模型研究的 DSSAT 参数敏感性分析与 P
 - DSSAT 参数注入、隔离运行、Morris/Sobol、分阶段 IES、确定性复跑和结果清单已经打通。
 - S1–S4 工具开发运行已达到 `engineering_validated`，证明工具链可执行；现有运行仍是 `tooling_development / science_pending`，不能直接作为论文结论。
 - staged builder 已可在干净 workspace 中仅依赖版本化 FileA/FileT 构建观测契约，不再读取旧 `workspace/Evaluate.OUT`。
-- 两春一秋的 Morris 筛选已完成三 seed 汇总：一般遗传域三季稳定，XXQL2502/XXQL2601 的水氮域仍需增加预设 seed。当前论文图链可生成明确标记的 `science_pending / DEMO_` 图，尚不能作为正式论文结论；详见 [Morris 论文图表实施记录](docs/reports/P1_Morris论文图表实施记录_20260720.md)。
+- 两春一秋的 Morris 筛选已完成三 seed 汇总：XXQL2501 和 XXQL2601 的两个域稳定，XXQL2502 的一般遗传域稳定，而水氮域的 Top-15 边界仍有种子敏感性。当前论文图链据此生成明确标记的 `science_pending / DEMO_` 图；Sobol 的 XXQL2501 N64→N128 收敛门未通过，只作为补充的数值不确定性记录。详见 [敏感性分析论文写作参考](docs/论文材料与方法_正式遗传参数敏感性分析.md)。
 - Python 只输出运行诊断和论文数据；所有可能进入论文的图由 `paper/R/` 统一绘制。
 
 ## 环境

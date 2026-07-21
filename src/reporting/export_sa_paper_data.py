@@ -72,7 +72,7 @@ def _finite_nonnegative(frame: pd.DataFrame, columns: list[str], source: Path) -
         frame[column] = values
 
 
-def _load_season(season_dir: Path, season_order: int) -> dict[str, Any]:
+def _load_season(season_dir: Path, season_order: int, season_label: str | None = None) -> dict[str, Any]:
     missing = [name for name in REQUIRED_FILES.values() if not (season_dir / name).is_file()]
     if missing:
         raise ValueError(f"Morris season {season_dir.name} is missing: {missing}")
@@ -168,7 +168,10 @@ def _load_season(season_dir: Path, season_order: int) -> dict[str, Any]:
     elif not output_profile_hash or sha256_file(output_profile) != output_profile_hash:
         source_chain_issues.append("output_profile_hash")
 
-    season = season_dir.name
+    # A season label is deliberately independent of the final component of the
+    # result directory.  Formal Morris runs are stored below e.g. XXQL2502/r20,
+    # while the scientific season remains XXQL2502.
+    season = season_label or season_dir.name
     for frame in (consensus, seed_ranks, groups, pairs):
         frame.insert(0, "season_order", season_order)
         frame.insert(0, "season", season)
@@ -236,14 +239,34 @@ def export_sa_bundle(
 ) -> Path:
     """Validate and freeze the current multi-season Morris evidence."""
     results_root = results_root.resolve()
-    season_names = seasons or sorted(
+    season_specs = seasons or sorted(
         path.name
         for path in results_root.iterdir()
         if path.is_dir() and (path / REQUIRED_FILES["stability_report"]).is_file()
     )
-    if len(season_names) < 2 or len(set(season_names)) != len(season_names):
+    if len(season_specs) < 2:
         raise ValueError("SA paper evidence requires at least two unique seasons")
-    loaded = [_load_season(results_root / season, index + 1) for index, season in enumerate(season_names)]
+    resolved_seasons: list[tuple[str, Path]] = []
+    for spec in season_specs:
+        # --season LABEL=RELATIVE_OR_ABSOLUTE_DIRECTORY supports the formal
+        # nested result layout without introducing a copied/staged data tree.
+        label, separator, location = spec.partition("=")
+        if separator:
+            if not label or not location:
+                raise ValueError(f"invalid season mapping: {spec!r}")
+            season_dir = Path(location)
+            if not season_dir.is_absolute():
+                season_dir = results_root / season_dir
+        else:
+            label, season_dir = spec, results_root / spec
+        resolved_seasons.append((label, season_dir))
+    labels = [label for label, _ in resolved_seasons]
+    if len(set(labels)) != len(labels):
+        raise ValueError("SA paper evidence requires unique season labels")
+    loaded = [
+        _load_season(directory, index + 1, label)
+        for index, (label, directory) in enumerate(resolved_seasons)
+    ]
     parameter_sets = [set(item["consensus"]["parameter"]) for item in loaded]
     if any(values != parameter_sets[0] for values in parameter_sets[1:]):
         raise ValueError("Morris seasons do not contain identical parameter sets")
@@ -320,7 +343,7 @@ def export_sa_bundle(
         "data_status": data_status,
         "scenario_type": "multi_season_morris_sensitivity",
         "renderer_contract": "r_paper_figures_v2",
-        "seasons": season_names,
+        "seasons": labels,
         "ranking_domains": list(DOMAIN_LABELS),
         "domain_status": domain_status,
         "source_chain_status": source_chain_status,

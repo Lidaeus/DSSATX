@@ -1,0 +1,22 @@
+{
+  "management_design_id": "eggplant_greenhouse_drip_demo_v1",
+  "production_system": "greenhouse_drip_eggplant",
+  "rainfall_considered": false,
+  "stages": [
+    {"name": "establishment", "start_date": 25069, "end_date": 25106},
+    {"name": "canopy_expansion", "start_date": 25107, "end_date": 25141},
+    {"name": "flowering_early_harvest", "start_date": 25142, "end_date": 25171},
+    {"name": "peak_late_harvest", "start_date": 25172, "end_date": 25220}
+  ],
+  "constraints": {
+    "irrigation_event_max_mm": 60.0,
+    "irrigation_min_interval_days": 1,
+    "nitrogen_cutoff_date": 25171
+  },
+  "demo_search_bounds": {
+    "irrigation_mm": [283.1, 481.4],
+    "nitrogen_kg_ha": [0.0, 399.0],
+    "stage_share_floor": 0.1,
+    "nitrogen_late_stage_share": 0.0
+  }
+}

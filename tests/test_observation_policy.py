@@ -108,3 +108,20 @@ def test_log_policy_requires_auditable_raw_sigma():
     )
     with pytest.raises(ValueError, match="auditable raw sigma"):
         apply_observation_policy(obs, {"LWADM": {"transform": "log"}})
+
+
+def test_multiseason_group_uses_unscoped_policy_and_diagnostic_is_zero_weight():
+    obs = pd.DataFrame([{
+        "obsnme": "25SP_HWAMS_R1",
+        "obsval": 100.0,
+        "weight": 1.0,
+        "obgnme": "25SP_HWAMM",
+        "sigma": 50.0,
+        "sim_token": "HWAMS",
+        "model_output_file": "PestJoint.OUT",
+    }])
+    transformed, _ = apply_observation_policy(obs, {
+        "HWAMM": {"sigma": "50", "phi_role": "diagnostic_only"}
+    })
+    assert transformed.iloc[0]["phi_role"] == "diagnostic_only"
+    assert transformed.iloc[0]["weight"] == 0.0

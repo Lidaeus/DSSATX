@@ -2,6 +2,7 @@ import argparse
 import sys
 import os
 import re
+import csv
 import shutil
 import json
 import math
@@ -35,6 +36,8 @@ from src.calibration.observation_policy import (
     load_observation_policy,
     write_transform_config,
 )
+from src.calibration.build_pest_multiseason import build_multiseason_stage2
+from src.calibration.multiseason_design import MultiSeasonDesign
 from src.calibration.design_config import (
     apply_observation_stage,
     apply_parameter_stage,
@@ -320,7 +323,7 @@ def _write_weight_audit(obs_df, out_dir, prefix):
         "obsnme", "obgnme", "raw_obsval", "obsval", "raw_sigma", "sigma",
         "sigma_source", "base_weight", "group_multiplier", "weight",
         "transform", "transform_offset", "transform_reference",
-        "sim_token", "model_output_file", "weight_policy_id",
+        "sim_token", "model_output_file", "weight_policy_id", "phi_role",
     ]
     # PEST++ writes its own realization-level ``case.weights.csv`` at runtime;
     # keep the policy audit under a distinct name so it cannot be overwritten.
@@ -927,6 +930,31 @@ def _infer_excode_from_filex(filex_path):
     if "." in base:
         base = base.rsplit(".", 1)[0]
     return base or None
+
+
+def _collect_tmt_events_per_run(entries):
+    """Return ``(events_by_run, points_by_run)`` keyed by ``@RUN``."""
+    events_by_run = {}
+    points_by_run = {}
+    tmt_cache = {}
+    for entry in entries:
+        run_no = int(entry["run"])
+        tn = int(entry.get("tn", -99))
+        filex = entry.get("filex")
+        filex_path = (
+            _resolve_filex_path(filex)
+            or (filex if filex and os.path.isabs(filex) else None)
+        )
+        if not filex_path:
+            raise FileNotFoundError(f"cannot resolve FileX for batch entry run={run_no}: {filex!r}")
+        if filex_path not in tmt_cache:
+            excode = _infer_excode_from_filex(filex_path)
+            tmt_path = os.path.join(os.path.dirname(os.path.abspath(filex_path)), f"{excode}.TMT") if excode else None
+            tmt_cache[filex_path] = (_read_tmt_harvest_events(tmt_path), _read_tmt_process_points(tmt_path))
+        events_by_tn, points_by_tn = tmt_cache[filex_path]
+        events_by_run[run_no] = list(events_by_tn.get(tn, []))
+        points_by_run[run_no] = list(points_by_tn.get(tn, []))
+    return events_by_run, points_by_run
 
 
 def _infer_ecotype_from_cul_base(target_cultivar):
@@ -2019,6 +2047,10 @@ def create_ins_and_pst(
         else:
             run_no = int(row["RUN"])
 
+        season_prefix = ""
+        if "season" in row.index and pd.notna(row.get("season")):
+            season_prefix = re.sub(r"[^A-Za-z0-9]", "", str(row["season"])).upper()
+
         suffix = ""
         if "HNO" in row.index:
             try:
@@ -2048,7 +2080,8 @@ def create_ins_and_pst(
 
         last_idx = -1
         for obs_col, sim_col, val in valid_obs:
-            obs_name = f"{sim_col}_R{run_no}{suffix}"
+            name_prefix = f"{season_prefix}_" if season_prefix else ""
+            obs_name = f"{name_prefix}{sim_col}_R{run_no}{suffix}"
             if is_tagged_output:
                 current_ins_line += f"@{sim_col}@ w !{obs_name}! "
             else:
@@ -2060,8 +2093,9 @@ def create_ins_and_pst(
                 current_ins_line += "w " * skips
                 current_ins_line += f"!{obs_name}! "
 
-            obgnme = f"{obs_col}{suffix}" if suffix else obs_col
-            sigma = _resolve_sigma(group_sigmas, obgnme, obs_col)
+            base_group = f"{obs_col}{suffix}" if suffix else obs_col
+            obgnme = f"{name_prefix}{base_group}"
+            sigma = _resolve_sigma(group_sigmas, base_group, obs_col)
             if val == -99:
                 weight = 0.0
             else:
@@ -2208,6 +2242,10 @@ def _build_ins_and_obs(df, obs_bases, critical_obs, model_out_path, group_sigmas
         else:
             run_no = int(row["RUN"])
 
+        season_prefix = ""
+        if "season" in row.index and pd.notna(row.get("season")):
+            season_prefix = re.sub(r"[^A-Za-z0-9]", "", str(row["season"])).upper()
+
         suffix = ""
         if "HNO" in row.index:
             try:
@@ -2237,7 +2275,8 @@ def _build_ins_and_obs(df, obs_bases, critical_obs, model_out_path, group_sigmas
 
         last_idx = -1
         for obs_col, sim_col, val in valid_obs:
-            obs_name = f"{sim_col}_R{run_no}{suffix}"
+            name_prefix = f"{season_prefix}_" if season_prefix else ""
+            obs_name = f"{name_prefix}{sim_col}_R{run_no}{suffix}"
             if is_tagged_output:
                 current_ins_line += f"@{sim_col}@ w !{obs_name}! "
             else:
@@ -2249,8 +2288,9 @@ def _build_ins_and_obs(df, obs_bases, critical_obs, model_out_path, group_sigmas
                 current_ins_line += "w " * skips
                 current_ins_line += f"!{obs_name}! "
 
-            obgnme = f"{obs_col}{suffix}" if suffix else obs_col
-            sigma = _resolve_sigma(group_sigmas, obgnme, obs_col)
+            base_group = f"{obs_col}{suffix}" if suffix else obs_col
+            obgnme = f"{name_prefix}{base_group}"
+            sigma = _resolve_sigma(group_sigmas, base_group, obs_col)
             if val == -99:
                 weight = 0.0
             else:
@@ -2737,6 +2777,12 @@ if __name__ == "__main__":
         default=None,
         help="Audited group policy for transform, treatment-mean sigma, and group multiplier",
     )
+    parser.add_argument(
+        "--multiseason-design",
+        type=str,
+        default=None,
+        help="T8 multi-season design JSON for joint calibration",
+    )
     args = parser.parse_args()
 
     if bool(args.design_config) != bool(args.stage):
@@ -2905,6 +2951,8 @@ if __name__ == "__main__":
     design_observation_report = {}
     ies_contract = {}
 
+    multiseason_mode = False
+
     if mode == "eggplant_pheno":
         prefix = args.prefix or "eggplant_pheno"
         allowed = {"CSDL", "PPSEN", "EM-FL", "FL-SH", "FL-SD", "SD-PM", "FL-LF"}
@@ -3001,6 +3049,11 @@ if __name__ == "__main__":
         if not bool(args.include_n_uptake):
             extra_allowed = {p for p in extra_allowed if p not in {"RTNO3", "RTNH4", "RTEXF"}}
 
+        if args.multiseason_design:
+            multiseason_mode = True
+            stage2_outputs = []  # placeholder — real build happens after params ready
+            entries = []
+
         entries = _parse_batch_entries(args.batch)
 
         if not entries:
@@ -3013,13 +3066,7 @@ if __name__ == "__main__":
             process_sigmas = {"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
         else:
             stage_evaluate_df = _build_evaluate_observations_from_filea(entries)
-            filex = entries[0]["filex"]
-            filex_path = _resolve_filex_path(filex) or (filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex))
-            excode = _infer_excode_from_filex(filex_path)
-            tmt_path = os.path.join(os.path.dirname(os.path.abspath(filex_path)), f"{excode}.TMT") if excode else None
-
-            events_by_tn = _read_tmt_harvest_events(tmt_path)
-            points_by_tn = _read_tmt_process_points(tmt_path)
+            events_by_run, points_by_run = _collect_tmt_events_per_run(entries)
 
             harvest_rows = []
             process_rows = []
@@ -3028,7 +3075,7 @@ if __name__ == "__main__":
                 run_no = int(e["run"])
                 tn = int(e.get("tn", -99))
 
-                for ev in events_by_tn.get(tn, []):
+                for ev in events_by_run.get(run_no, []):
                     obs_cum = ev.get("dry_cum", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_cum", -99.0)
                     obs_inc = ev.get("dry_inc", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_inc", -99.0)
                     harvest_rows.append(
@@ -3044,7 +3091,7 @@ if __name__ == "__main__":
                         }
                     )
 
-                for p in points_by_tn.get(tn, []):
+                for p in points_by_run.get(run_no, []):
                     process_rows.append(
                         {
                             "@RUN": run_no,
@@ -3180,7 +3227,7 @@ if __name__ == "__main__":
             for e in entries:
                 run_no = int(e["run"])
                 tn = int(e.get("tn", -99))
-                for ev in events_by_tn.get(tn, []):
+                for ev in events_by_run.get(run_no, []):
                     obs_cum = ev.get("dry_cum", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_cum", -99.0)
                     obs_inc = ev.get("dry_inc", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_inc", -99.0)
                     rows.append({
@@ -3266,13 +3313,7 @@ if __name__ == "__main__":
             )
             process_sigmas = {"L#SDM": 0.6, "LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
         else:
-            filex = entries[0]["filex"]
-            filex_path = _resolve_filex_path(filex) or (filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex))
-            excode = _infer_excode_from_filex(filex_path)
-            tmt_path = os.path.join(os.path.dirname(os.path.abspath(filex_path)), f"{excode}.TMT") if excode else None
-
-            events_by_tn = _read_tmt_harvest_events(tmt_path)
-            points_by_tn = _read_tmt_process_points(tmt_path)
+            events_by_run, points_by_run = _collect_tmt_events_per_run(entries)
 
             harvest_rows = []
             process_rows = []
@@ -3281,7 +3322,7 @@ if __name__ == "__main__":
                 run_no = int(e["run"])
                 tn = int(e.get("tn", -99))
 
-                for ev in events_by_tn.get(tn, []):
+                for ev in events_by_run.get(run_no, []):
                     obs_cum = ev.get("dry_cum", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_cum", -99.0)
                     obs_inc = ev.get("dry_inc", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_inc", -99.0)
                     harvest_rows.append(
@@ -3297,7 +3338,7 @@ if __name__ == "__main__":
                         }
                     )
 
-                for p in points_by_tn.get(tn, []):
+                for p in points_by_run.get(run_no, []):
                     process_rows.append(
                         {
                             "@RUN": run_no,
@@ -3428,7 +3469,7 @@ if __name__ == "__main__":
             for e in entries:
                 run_no = int(e["run"])
                 tn = int(e.get("tn", -99))
-                for p in points_by_tn.get(tn, []):
+                for p in points_by_run.get(run_no, []):
                     rows.append(
                         {
                             "@RUN": run_no,
@@ -3669,6 +3710,32 @@ if __name__ == "__main__":
             )
 
     if stage2_outputs is not None:
+        if multiseason_mode:
+            ctx = {
+                "_parse_batch_entries": _parse_batch_entries,
+                "_build_evaluate_observations_from_filea": _build_evaluate_observations_from_filea,
+                "_read_tmt_harvest_events": _read_tmt_harvest_events,
+                "_read_tmt_process_points": _read_tmt_process_points,
+                "_resolve_filex_path": _resolve_filex_path,
+                "_infer_excode_from_filex": _infer_excode_from_filex,
+                "PEST_EVAL_FILE": PEST_EVAL_FILE,
+                "PEST_JOINT_FILE": PEST_JOINT_FILE,
+                "PEST_HARVEST_FILE": PEST_HARVEST_FILE,
+                "PEST_TMTGROW_FILE": PEST_TMTGROW_FILE,
+                "create_ins_and_pst_multi": create_ins_and_pst_multi,
+                "_write_run_manifest": _write_run_manifest,
+                "_finalize_ies_contract": _finalize_ies_contract,
+                "bad_phi_sigma": bad_phi_sigma,
+                "observation_policies": observation_policies,
+            }
+            # Per-season builder needs USER_INPUT_DIR to resolve FileX.
+            # Set it once here so the builder only imports the shared module.
+            import src.calibration.build_pest as _bp
+            ctx["_bp_module"] = _bp
+            _bp.USER_INPUT_DIR = str(Path(args.multiseason_design).parent)  # fallback
+            build_multiseason_stage2(args, prefix, allowed, extra_allowed, params, model_cmd_extra, ctx)
+            raise SystemExit(0)
+
         create_ins_and_pst_multi(
             params,
             prefix=prefix,
