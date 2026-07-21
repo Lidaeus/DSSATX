@@ -180,19 +180,24 @@ def assess_sobol_case(
             if float(base_values.var(ddof=0)) <= 1e-12:
                 zero_variance_outputs.append(str(column))
     is_preflight = manifest.get("run_type") == "sensitivity_sobol_preflight_case"
+    varying_response_count = len(scientific_columns) - len(zero_variance_outputs)
     report.add(
         "sobol_base_response_variance",
-        base_samples > 0 and (is_preflight or not zero_variance_outputs),
+        base_samples > 0 and (is_preflight or varying_response_count > 0),
         (
             "Preflight records zero-variance base responses but does not interpret indices"
             if is_preflight
-            else "Every formal Sobol response varies across the two base sample matrices"
+            else "Formal Sobol records structurally zero-variance responses for explicit exclusion"
         ),
         actual={
             "zero_variance_count": len(zero_variance_outputs),
             "zero_variance_outputs": zero_variance_outputs,
+            "varying_response_count": varying_response_count,
         },
-        threshold={"zero_variance_count": "record_only_in_preflight" if is_preflight else 0},
+        threshold={
+            "zero_variance_count": "record_only_in_preflight" if is_preflight else "exclude_from_interpretation",
+            "minimum_varying_response_count": 0 if is_preflight else 1,
+        },
     )
 
     par_columns = [column for column in par.columns if str(column).strip().lower() != "run_id"]

@@ -179,6 +179,45 @@ def test_sobol_audit_accepts_valid_derived_contrast_equal_to_minus99(tmp_path):
     assert check.actual["valid_derived_exact_minus99"] == 1
 
 
+def test_sobol_audit_records_one_structural_zero_response_without_failing_case(tmp_path):
+    case = tmp_path / "one_structural_zero"
+    _write_synthetic_sobol_case(case)
+    manifest = case / "run_manifest.yaml"
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8").replace(
+            "sensitivity_sobol_preflight_case", "sensitivity_sobol_formal_case"
+        ),
+        encoding="utf-8",
+    )
+    observations = pd.read_csv(case / "sa_sen_sobol.sobol.obs.csv")
+    observations["yield"] = 0.0
+    observations.to_csv(case / "sa_sen_sobol.sobol.obs.csv", index=False)
+    report = assess_sobol_case(case)
+    check = next(item for item in report.checks if item.check_id == "sobol_base_response_variance")
+    assert check.status == "pass"
+    assert check.actual["zero_variance_outputs"] == ["yield"]
+    assert check.actual["varying_response_count"] == 1
+
+
+def test_sobol_audit_rejects_all_structurally_zero_responses(tmp_path):
+    case = tmp_path / "all_structural_zero"
+    _write_synthetic_sobol_case(case)
+    manifest = case / "run_manifest.yaml"
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8").replace(
+            "sensitivity_sobol_preflight_case", "sensitivity_sobol_formal_case"
+        ),
+        encoding="utf-8",
+    )
+    observations = pd.read_csv(case / "sa_sen_sobol.sobol.obs.csv")
+    observations[["yield", "lai"]] = 0.0
+    observations.to_csv(case / "sa_sen_sobol.sobol.obs.csv", index=False)
+    report = assess_sobol_case(case)
+    check = next(item for item in report.checks if item.check_id == "sobol_base_response_variance")
+    assert check.status == "fail"
+    assert check.actual["varying_response_count"] == 0
+
+
 def test_sobol_bootstrap_reproduces_pestpp_point_estimators(tmp_path):
     case = tmp_path / "bootstrap"
     case.mkdir()
