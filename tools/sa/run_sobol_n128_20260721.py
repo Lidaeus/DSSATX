@@ -54,11 +54,13 @@ def _case_dir(season: str, samples: int = SAMPLES) -> Path:
     return RUN_ROOT / season / f"n{samples:04d}_seed_{SEED}"
 
 
-def _run(command: list[str]) -> None:
+def _run(command: list[str], *, allowed_returncodes: set[int] | None = None) -> int:
     print("+", subprocess.list2cmdline(command), flush=True)
     result = subprocess.run(command, cwd=ROOT, check=False)
-    if result.returncode != 0:
+    allowed = {0} if allowed_returncodes is None else set(allowed_returncodes)
+    if result.returncode not in allowed:
         raise RuntimeError(f"Command failed with exit code {result.returncode}: {subprocess.list2cmdline(command)}")
+    return int(result.returncode)
 
 
 def _load_json(path: Path) -> dict:
@@ -214,7 +216,7 @@ def postprocess(replicates: int) -> None:
         if not _complete(case_dir):
             raise ValueError(f"Cannot postprocess incomplete case: {case_dir}")
         _run([sys.executable, "-m", "src.sensitivity.sobol_audit", "--case-dir", str(case_dir)])
-        _run(
+        convergence_rc = _run(
             [
                 sys.executable,
                 "-m",
@@ -257,8 +259,11 @@ def postprocess(replicates: int) -> None:
                 str(RUN_ROOT / season / "formal_sobol_campaign.json"),
                 "--out-dir",
                 str(RUN_ROOT / season / "convergence_n0064_n0128"),
-            ]
+            ],
+            allowed_returncodes={0, 2},
         )
+        outcome = "converged" if convergence_rc == 0 else "next level required"
+        print(f"[CONVERGENCE] {season}: {outcome}")
 
 
 def status() -> None:

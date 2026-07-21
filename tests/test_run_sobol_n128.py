@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import sys
 
-from tools.sa.run_sobol_n128_20260721 import SAMPLES, _append_campaign_case
+from tools.sa.run_sobol_n128_20260721 import SAMPLES, _append_campaign_case, _run
 
 
 def test_append_campaign_adds_only_preregistered_n128_once(tmp_path: Path):
@@ -42,3 +43,10 @@ def test_append_campaign_adds_only_preregistered_n128_once(tmp_path: Path):
     assert [item["base_samples"] for item in campaign["cases"]] == [64, 128]
     assert campaign["cases"][1]["expected_model_runs"] == 3200
     assert campaign["expected_initial_model_runs"] == 4800
+
+
+def test_convergence_not_yet_reached_return_code_can_be_recorded():
+    assert _run(
+        [sys.executable, "-c", "raise SystemExit(2)"],
+        allowed_returncodes={0, 2},
+    ) == 2
