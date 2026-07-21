@@ -159,6 +159,26 @@ def test_sobol_audit_rejects_dssat_missing_sentinel(tmp_path):
     assert next(check for check in report.checks if check.check_id == "sobol_outputs_finite").status == "fail"
 
 
+def test_sobol_audit_accepts_valid_derived_contrast_equal_to_minus99(tmp_path):
+    case = tmp_path / "valid_derived_minus99"
+    _write_synthetic_sobol_case(case)
+    derived = "wn_water_n3_fruitd_end"
+    observations = pd.read_csv(case / "sa_sen_sobol.sobol.obs.csv").rename(columns={"yield": derived})
+    observations.loc[0, derived] = -99.0
+    observations.to_csv(case / "sa_sen_sobol.sobol.obs.csv", index=False)
+    for suffix in ("si", "sti"):
+        path = case / f"sa_sen_sobol.sobol.{suffix}.csv"
+        indices = pd.read_csv(path)
+        indices.loc[indices["output"] == "yield", "output"] = derived
+        indices.to_csv(path, index=False)
+    (case / "sa_obs_order.txt").write_text(f"{derived}\nLAI\n", encoding="utf-8")
+    report = assess_sobol_case(case)
+    assert report.science_validated
+    check = next(item for item in report.checks if item.check_id == "sobol_outputs_finite")
+    assert check.actual["missing_sentinels"] == 0
+    assert check.actual["valid_derived_exact_minus99"] == 1
+
+
 def test_sobol_bootstrap_reproduces_pestpp_point_estimators(tmp_path):
     case = tmp_path / "bootstrap"
     case.mkdir()

@@ -40,6 +40,22 @@ def _finite_frame(frame: pd.DataFrame, excluded: set[str]) -> tuple[int, int]:
     return finite, int(numeric.size)
 
 
+def _missing_sentinel_counts(values: pd.DataFrame) -> tuple[int, int]:
+    """Count DSSAT sentinels without rejecting a valid derived contrast of -99.
+
+    Every ``wn_*`` response is derived from treatment-level responses that are
+    also present in the output contract.  Missing source data are therefore
+    caught in the corresponding ``tn*`` column, while a derived difference or
+    slope may legitimately equal exactly -99.
+    """
+
+    derived = [column for column in values if str(column).strip().lower().startswith("wn_")]
+    source = [column for column in values if column not in derived]
+    missing = int((values[source] == -99.0).sum().sum()) if source else 0
+    derived_exact = int((values[derived] == -99.0).sum().sum()) if derived else 0
+    return missing, derived_exact
+
+
 def assess_sobol_case(
     case_dir: str | Path,
     case: str = "sa_sen_sobol",
@@ -129,12 +145,17 @@ def assess_sobol_case(
         if scientific_columns
         else pd.DataFrame()
     )
-    missing_sentinels = int((scientific_values == -99.0).sum().sum())
+    missing_sentinels, derived_exact_minus99 = _missing_sentinel_counts(scientific_values)
     report.add(
         "sobol_outputs_finite",
         total_outputs > 0 and finite_outputs == total_outputs and missing_sentinels == 0,
         "All simulated Sobol responses are finite and contain no DSSAT missing sentinels",
-        actual={"finite": finite_outputs, "total": total_outputs, "missing_sentinels": missing_sentinels},
+        actual={
+            "finite": finite_outputs,
+            "total": total_outputs,
+            "missing_sentinels": missing_sentinels,
+            "valid_derived_exact_minus99": derived_exact_minus99,
+        },
         threshold={"finite": total_outputs, "missing_sentinels": 0},
     )
     observed_output_count = max(len(obs.columns) - 2, 0)
