@@ -53,8 +53,9 @@ def _rank_case(
     frame["parameter"] = frame["parameter"].astype(str).str.upper()
     frame["ST"] = pd.to_numeric(frame["ST"], errors="coerce")
     estimable = frame["estimable"].astype(str).str.lower().isin({"true", "1"})
-    if not bool(estimable.all()) or not np.isfinite(frame["ST"]).all() or bool((frame["ST"] < 0).any()):
-        raise ValueError(f"Formal Sobol ST values must all be estimable, finite and non-negative: {case_dir}")
+    frame = frame.loc[estimable].copy()
+    if frame.empty or not np.isfinite(frame["ST"]).all() or bool((frame["ST"] < 0).any()):
+        raise ValueError(f"Formal Sobol estimable ST values must be finite and non-negative: {case_dir}")
     metadata = frame["observation"].map(_feature_metadata)
     frame["treatment"] = [item[0] for item in metadata]
     frame["feature_family"] = [item[1] for item in metadata]
