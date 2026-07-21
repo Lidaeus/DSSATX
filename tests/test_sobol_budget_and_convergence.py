@@ -235,6 +235,7 @@ def test_sobol_convergence_preserves_two_ranking_domains(tmp_path):
         encoding="utf-8",
     )
     result = analyze_convergence([case64, case128], profile, campaign_path, tmp_path / "out", top_k=1)
+    assert result["parameter_count"] == 2
 
     # 1. Both ranking domains appear and are kept separate in every comparison,
     #    and both converge (spearman/jaccard at ~1.0).

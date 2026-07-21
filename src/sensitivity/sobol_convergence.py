@@ -150,7 +150,9 @@ def analyze_convergence(
         rankings.append(ranking)
         groups.append(group_scores)
         approval_ids.add(manifest.get("sobol_approval_id", ""))
-        parameter_sets.add(tuple(sorted(ranking["parameter"])))
+        # A parameter occurs once per ranking domain.  Count the unique
+        # scientific parameter set, not parameter-domain rows.
+        parameter_sets.add(tuple(sorted(set(ranking["parameter"]))))
         actual_runs = len(pd.read_csv(case_dir / "sa_sen_sobol.sobol.obs.csv"))
         scales.append(
             {
