@@ -233,7 +233,7 @@ def test_sobol_bootstrap_reproduces_pestpp_point_estimators(tmp_path):
     parameters.to_csv(case / "sa_sen_sobol.sobol.par.csv", index=False)
     values = parameters["p1"] + 2.0 * parameters["p2"] + 0.1 * parameters["p1"] * parameters["p2"]
     outputs = pd.DataFrame(
-        {"run_id": parameters["run_id"], "failed_flag": 0, "yield": values}
+        {"run_id": parameters["run_id"], "failed_flag": 0, "yield": values, "structural_zero": 0.0}
     )
     outputs.to_csv(case / "sa_sen_sobol.sobol.obs.csv", index=False)
     raw = values.to_numpy(dtype=float)
@@ -246,15 +246,23 @@ def test_sobol_bootstrap_reproduces_pestpp_point_estimators(tmp_path):
         hybrid = raw[(index + 2) * samples : (index + 3) * samples]
         s1_values.append(float(np.mean(bv * (hybrid - av)) / variance))
         st_values.append(float(0.5 * np.mean((av - hybrid) ** 2) / variance))
-    pd.DataFrame({"output": ["yield"], "p1": [s1_values[0]], "p2": [s1_values[1]]}).to_csv(
+    pd.DataFrame({
+        "output": ["yield", "structural_zero"],
+        "p1": [s1_values[0], 0.0],
+        "p2": [s1_values[1], 0.0],
+    }).to_csv(
         case / "sa_sen_sobol.sobol.si.csv", index=False
     )
-    pd.DataFrame({"output": ["yield"], "p1": [st_values[0]], "p2": [st_values[1]]}).to_csv(
+    pd.DataFrame({
+        "output": ["yield", "structural_zero"],
+        "p1": [st_values[0], 0.0],
+        "p2": [st_values[1], 0.0],
+    }).to_csv(
         case / "sa_sen_sobol.sobol.sti.csv", index=False
     )
     (case / "sa_sen_sobol.pst").write_text("++gsa_method(sobol)\n", encoding="utf-8")
     (case / "run_manifest.yaml").write_text(
-        "run_type: sensitivity_sobol_preflight_case\n"
+        "run_type: sensitivity_sobol_formal_case\n"
         "sobol_samples: 8\n"
         "sobol_parameter_count: 2\n"
         "sobol_expected_model_runs: 32\n",
@@ -263,6 +271,7 @@ def test_sobol_bootstrap_reproduces_pestpp_point_estimators(tmp_path):
     report = bootstrap_sobol(case, case / "bootstrap_audit", replicates=50, bootstrap_seed=123)
     assert report.science_validated
     result = pd.read_csv(case / "bootstrap_audit" / "sobol_bootstrap_indices.csv")
-    assert len(result) == 2
-    assert result["estimable"].all()
-    assert result["ST_ci_high"].notna().all()
+    assert len(result) == 4
+    assert result.loc[result["observation"] == "yield", "estimable"].all()
+    assert not result.loc[result["observation"] == "structural_zero", "estimable"].any()
+    assert result.loc[result["estimable"], "ST_ci_high"].notna().all()
