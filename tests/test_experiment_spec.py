@@ -271,6 +271,84 @@ class TestPrepareExperimentRun:
 
 
 # ---------------------------------------------------------------------------
+# Contract enforcement: additional edge cases
+# ---------------------------------------------------------------------------
+
+class TestContractEnforcementExtras:
+    """Edge cases for already-implemented validation logic that was previously
+    untested.  Each case maps to a specific guard in experiment_spec.py."""
+
+    def test_bounds_proposals_path_rejected(self, tmp_path):
+        """bounds_id resolving under bounds_proposals/ must be rejected
+        (prevents bypassing the freeze-approval step)."""
+        proposals_dir = tmp_path / "bounds_proposals" / "eggplant"
+        proposals_dir.mkdir(parents=True)
+        fake_csv = proposals_dir / "fake.csv"
+        fake_csv.write_text(
+            "name,init,lower,upper,status\nTB2,8.6,6.0,14.0,active\n",
+            encoding="utf-8",
+        )
+        spec_path = _write_spec(tmp_path, _base_spec_dict(bounds_id=str(fake_csv)))
+        with pytest.raises(ExperimentSpecError, match="bounds_proposals"):
+            ExperimentSpec.load(spec_path)
+
+    def test_frozen_bounds_missing_declared_param(self, tmp_path):
+        """Declared param absent from frozen CSV must be rejected even when
+        the active count matches."""
+        bounds_csv = tmp_path / "mini_bounds.csv"
+        bounds_csv.write_text(
+            "name,init,lower,upper,status\n"
+            "TB2,8.6,6.0,14.0,active\n"
+            "TB3,11.0,6.0,14.0,active\n",
+            encoding="utf-8",
+        )
+        param_set = _write_param_set(tmp_path, ["TB2", "TB4"], declared_count=2)
+        spec_path = _write_spec(tmp_path, _base_spec_dict(
+            bounds_id=str(bounds_csv),
+            parameter_set=str(param_set),
+        ))
+        with pytest.raises(ExperimentSpecError, match="absent from frozen bounds"):
+            ExperimentSpec.load(spec_path)
+
+    def test_parameter_set_duplicate_names(self, tmp_path):
+        """Duplicate parameter names (case-insensitive) must be rejected."""
+        param_set = _write_param_set(tmp_path, ["TB2", "tb2"], declared_count=2)
+        spec_path = _write_spec(tmp_path, _base_spec_dict(parameter_set=str(param_set)))
+        with pytest.raises(ExperimentSpecError, match="duplicate parameter"):
+            ExperimentSpec.load(spec_path)
+
+    def test_season_inputs_empty_rejected(self, tmp_path):
+        spec_path = _write_spec(tmp_path, _base_spec_dict(season_inputs=[]))
+        with pytest.raises(ExperimentSpecError, match="season_inputs must be a non-empty list"):
+            ExperimentSpec.load(spec_path)
+
+    def test_execution_negative_ies_reals(self, tmp_path):
+        spec_path = _write_spec(tmp_path, _base_spec_dict(
+            execution={"ies_num_reals": 0, "noptmax": 0, "seed": 1}
+        ))
+        with pytest.raises(ExperimentSpecError, match="ies_num_reals must be >= 1"):
+            ExperimentSpec.load(spec_path)
+
+    def test_execution_negative_noptmax(self, tmp_path):
+        spec_path = _write_spec(tmp_path, _base_spec_dict(
+            execution={"ies_num_reals": 1, "noptmax": -1, "seed": 1}
+        ))
+        with pytest.raises(ExperimentSpecError, match="noptmax must be >= 0"):
+            ExperimentSpec.load(spec_path)
+
+    def test_seasonal_target_season_missing(self, tmp_path):
+        """offset target_season not in season_inputs must be rejected."""
+        offsets = [
+            {"parameter": "TB2", "transform": "additive", "range": [0, 1],
+             "physiological_basis": "test", "frozen_reason": "test",
+             "target_season": "26SP"}
+        ]
+        spec_path = _write_spec_with_seasonal(tmp_path, {"offsets": offsets})
+        with pytest.raises(ExperimentSpecError, match="not in season_inputs"):
+            ExperimentSpec.load(spec_path)
+
+
+# ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
@@ -330,3 +408,40 @@ def _write_spec_with_seasonal(tmp_path: Path, seasonal: dict) -> Path:
         "representative_rule": "final_ensemble_median",
         "evaluation_profile": "article_rawscale_v1",
     })
+
+
+def _base_spec_dict(**overrides) -> dict:
+    """Return a minimal valid spec dict (single 25SP season, highdim55 + T9
+    bounds), with overrides applied for negative-test construction."""
+    base = {
+        "experiment_id": "test_contract",
+        "scientific_role": "test",
+        "season_inputs": [
+            {"season_id": "25SP", "role": "calibration",
+             "input_manifest": "data/user/experiments/xxql2501_20260716/input_manifest.json",
+             "sha256": "5b7deac1502a5005cb46a1c2767a11d0567e13c094544f2faef3b9fdb950cb1b"},
+        ],
+        "parameter_set": "configs/experiments/parameter_sets/highdim55_dryonly_v1.json",
+        "bounds_id": "eggplant_t9_highdim_v1_20260722",
+        "observation_profile": "configs/experiments/observation_profiles/direct_chpdt_log_v1.json",
+        "execution": {"ies_num_reals": 1, "noptmax": 0, "seed": 1},
+        "representative_rule": "final_ensemble_median",
+        "evaluation_profile": "article_rawscale_v1",
+    }
+    base.update(overrides)
+    return base
+
+
+def _write_param_set(tmp_path: Path, params: list[str], *, declared_count: int) -> Path:
+    """Write a minimal parameter-set JSON for negative testing."""
+    path = tmp_path / "test_param_set.json"
+    path.write_text(json.dumps({
+        "set_id": "test_set",
+        "parameters": params,
+        "declared_count": declared_count,
+        "source_file": "test_source",
+        "source_sha256": "0" * 64,
+        "applicable_observations": "CHPDT",
+        "approval_note": "synthetic test parameter set",
+    }), encoding="utf-8")
+    return path
