@@ -22,6 +22,7 @@ from src.calibration.experiment_spec import (
     ExperimentSpecError,
     FORBIDDEN_PHI_TARGETS,
     REQUIRED_PHI_TARGET,
+    validate_matrix_consistency,
 )
 from src.calibration.experiment_runner import prepare_experiment_run
 
@@ -346,6 +347,59 @@ class TestContractEnforcementExtras:
         spec_path = _write_spec_with_seasonal(tmp_path, {"offsets": offsets})
         with pytest.raises(ExperimentSpecError, match="not in season_inputs"):
             ExperimentSpec.load(spec_path)
+
+
+# ---------------------------------------------------------------------------
+# Matrix-level consistency
+# ---------------------------------------------------------------------------
+
+class TestMatrixConsistency:
+    """Validate that comparison-group members share data/weights/seed/scale."""
+
+    def test_current_matrix_passes(self):
+        """Current matrix should have no consistency violations among
+        loadable comparison-group members (E03/E05 are templates, skipped)."""
+        matrix = PROJECT_ROOT / "configs" / "experiments" / "eggplant_article_calibration_matrix_v1.json"
+        violations = validate_matrix_consistency(matrix)
+        assert violations == []
+
+    def test_detects_seed_mismatch(self, tmp_path):
+        """Two loadable specs with different seeds must be flagged."""
+        dir_a = tmp_path / "a"
+        dir_b = tmp_path / "b"
+        dir_a.mkdir()
+        dir_b.mkdir()
+        spec_a = _write_spec(dir_a, _base_spec_dict(
+            execution={"ies_num_reals": 1, "noptmax": 0, "seed": 1}
+        ))
+        spec_b = _write_spec(dir_b, _base_spec_dict(
+            execution={"ies_num_reals": 1, "noptmax": 0, "seed": 2}
+        ))
+        matrix = tmp_path / "matrix.json"
+        matrix.write_text(json.dumps({
+            "experiments": {"A": str(spec_a), "B": str(spec_b)},
+            "comparison_groups": {
+                "test_group": {"members": ["A", "B"]}
+            }
+        }), encoding="utf-8")
+        violations = validate_matrix_consistency(matrix)
+        assert any("seed" in v for v in violations)
+
+    def test_template_specs_skipped_silently(self, tmp_path):
+        """A group member that fails contract validation is skipped, not
+        counted as a violation."""
+        valid_spec = _write_spec(tmp_path, _base_spec_dict())
+        # Point B at a nonexistent file — simulate a template that can't load
+        matrix = tmp_path / "matrix.json"
+        matrix.write_text(json.dumps({
+            "experiments": {"A": str(valid_spec), "B": str(tmp_path / "missing.json")},
+            "comparison_groups": {
+                "test_group": {"members": ["A", "B"]}
+            }
+        }), encoding="utf-8")
+        violations = validate_matrix_consistency(matrix)
+        # B fails to load → only A loaded → len(loaded) < 2 → no comparison
+        assert violations == []
 
 
 # ---------------------------------------------------------------------------

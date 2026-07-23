@@ -22,5 +22,12 @@
     "E06": "configs/experiments/specs/E06_pool3season.json"
   },
   "execution_order": ["E00", "E01", "E02", "E03", "E04", "E05", "E06", "E07"],
+  "comparison_groups": {
+    "25sp_25fa_shared": {
+      "members": ["E03", "E04", "E05"],
+      "required_consistent": ["seed", "ies_num_reals", "noptmax", "observation_profile_sha256", "season_input_manifest_sha256"],
+      "rationale": "23 vs 55 parameter and autumn-offset comparison must share data/weights/seed/scale (article contract §3)"
+    }
+  },
   "note": "E02/E03 require bounds from E01 approval. E05 requires autumn_offsets profile approval after E04. E06 requires structure freeze. E07 requires new season/location data."
 }

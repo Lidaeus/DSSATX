@@ -591,3 +591,99 @@ def _require_keys(obj: dict[str, Any], label: str, *keys: str) -> None:
     for k in keys:
         if k not in obj:
             raise ExperimentSpecError(f"{label} is missing required key: {k!r}")
+
+
+# ---------------------------------------------------------------------------
+# Matrix-level consistency
+# ---------------------------------------------------------------------------
+
+def validate_matrix_consistency(matrix_json: str | Path) -> list[str]:
+    """Validate that experiments in each comparison group share identical
+    execution settings, observation profile, and season input manifests.
+
+    The article contract (§3) requires that 23-parameter, 55-parameter, and
+    autumn-offset comparisons keep data, weights, seed, and run scale
+    identical — otherwise a Phi difference cannot be attributed to the
+    parameter dimensionality alone.
+
+    Template specs that fail to load (e.g. E02/E03 before E01 bounds
+    approval) are silently skipped; they are validated separately by
+    :meth:`ExperimentSpec.load`.
+
+    Parameters
+    ----------
+    matrix_json
+        Path to the article calibration matrix JSON.
+
+    Returns
+    -------
+    list[str]
+        Violation messages.  Empty if every loadable comparison group is
+        internally consistent.
+    """
+    matrix_path = _resolve_path(matrix_json)
+    with matrix_path.open("r", encoding="utf-8") as fh:
+        matrix = json.load(fh)
+
+    groups = matrix.get("comparison_groups", {})
+    if not groups:
+        return []
+
+    experiments: dict[str, str] = matrix.get("experiments", {})
+    violations: list[str] = []
+
+    for group_id, group_def in groups.items():
+        members: list[str] = group_def.get("members", [])
+        if len(members) < 2:
+            continue
+
+        # Load member specs, skipping template specs that fail contract
+        # validation (e.g. E03/E05 before E01 produces 23-active bounds).
+        loaded: list[tuple[str, ExperimentSpec]] = []
+        for exp_id in members:
+            spec_path = experiments.get(exp_id)
+            if not spec_path:
+                violations.append(
+                    f"Group '{group_id}': member '{exp_id}' not in matrix.experiments"
+                )
+                continue
+            try:
+                loaded.append((exp_id, ExperimentSpec.load(spec_path)))
+            except (ExperimentSpecError, FileNotFoundError):
+                continue  # Template spec — validated separately on load
+
+        if len(loaded) < 2:
+            continue  # Not enough loadable members to compare
+
+        baseline_id, baseline = loaded[0]
+        for exp_id, spec in loaded[1:]:
+            if spec.execution.seed != baseline.execution.seed:
+                violations.append(
+                    f"Group '{group_id}': {exp_id} seed={spec.execution.seed} "
+                    f"!= {baseline_id} seed={baseline.execution.seed}"
+                )
+            if spec.execution.ies_num_reals != baseline.execution.ies_num_reals:
+                violations.append(
+                    f"Group '{group_id}': {exp_id} ies_num_reals="
+                    f"{spec.execution.ies_num_reals} != {baseline_id} "
+                    f"{baseline.execution.ies_num_reals}"
+                )
+            if spec.execution.noptmax != baseline.execution.noptmax:
+                violations.append(
+                    f"Group '{group_id}': {exp_id} noptmax={spec.execution.noptmax} "
+                    f"!= {baseline_id} {baseline.execution.noptmax}"
+                )
+            if spec.observation_profile.sha256 != baseline.observation_profile.sha256:
+                violations.append(
+                    f"Group '{group_id}': {exp_id} observation_profile SHA "
+                    f"!= {baseline_id} (must share weights/transform)"
+                )
+            spec_shas = {s.input_manifest_sha256 for s in spec.season_inputs}
+            base_shas = {s.input_manifest_sha256 for s in baseline.season_inputs}
+            if spec_shas != base_shas:
+                violations.append(
+                    f"Group '{group_id}': {exp_id} season input manifests "
+                    f"!= {baseline_id} (must share data)"
+                )
+
+    return violations
