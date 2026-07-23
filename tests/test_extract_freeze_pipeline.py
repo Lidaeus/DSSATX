@@ -339,3 +339,209 @@ class TestReversedInitPosterior:
             f"Reversed-init posterior produced {len(errors)} error-level issues: "
             + "; ".join(str(e) for e in errors[:5])
         )
+
+
+# ---------------------------------------------------------------------------
+# Mixed active/fixed temperature group
+# ---------------------------------------------------------------------------
+
+class TestMixedActiveFixedGroup:
+    """Temperature groups where some members are active (posterior-derived)
+    and others are fixed (immutable base-bounds values).
+
+    The extract tool must enforce ordering against fixed members — they act
+    as immutable boundary constraints.  If an active member's posterior
+    range overlaps with a fixed neighbour, only the active member is
+    adjusted; the fixed member is never modified.
+    """
+
+    @pytest.fixture
+    def mixed_base_bounds(self, tmp_path: Path) -> Path:
+        """4-row base bounds: TB2/TO12 active, TO22/TM2 fixed.
+
+        Fixed TO22=30.0 acts as the upper boundary for TO12's range.
+        """
+        rows = [
+            {"name": "TB2",  "init": "10.0", "lower": "6.0",  "upper": "14.0",
+             "status": "active", "pargp": "SPE_TempStages", "location": "SPE",
+             "file": "TMGRO048.SPE", "cultivar": "TM0008", "ecotype": "TM0001",
+             "mode": "both"},
+            {"name": "TO12", "init": "22.0", "lower": "19.0", "upper": "25.0",
+             "status": "active", "pargp": "SPE_TempStages", "location": "SPE",
+             "file": "TMGRO048.SPE", "cultivar": "TM0008", "ecotype": "TM0001",
+             "mode": "both"},
+            {"name": "TO22", "init": "30.0", "lower": "30.0", "upper": "30.0",
+             "status": "fixed", "pargp": "SPE_TempStages", "location": "SPE",
+             "file": "TMGRO048.SPE", "cultivar": "TM0008", "ecotype": "TM0001",
+             "mode": "both"},
+            {"name": "TM2",  "init": "40.0", "lower": "40.0", "upper": "40.0",
+             "status": "fixed", "pargp": "SPE_TempStages", "location": "SPE",
+             "file": "TMGRO048.SPE", "cultivar": "TM0008", "ecotype": "TM0001",
+             "mode": "both"},
+        ]
+        path = tmp_path / "mixed_base.csv"
+        with path.open("w", encoding="utf-8-sig", newline="") as fh:
+            writer = csv.DictWriter(fh, fieldnames=FIELDNAMES)
+            writer.writeheader()
+            writer.writerows(rows)
+        return path
+
+    @pytest.fixture
+    def mixed_param_set(self, tmp_path: Path) -> Path:
+        """2-parameter set: only TB2 and TO12 are active targets."""
+        path = tmp_path / "mixed_set.json"
+        path.write_text(json.dumps({
+            "set_id": "test_mixed2",
+            "parameters": ["TB2", "TO12"],
+            "declared_count": 2,
+            "source_file": "test", "source_sha256": "0" * 64,
+            "applicable_observations": "CHPDT", "approval_note": "test",
+        }), encoding="utf-8")
+        return path
+
+    def test_active_overlapping_fixed_produces_freezable_proposal(
+        self, mixed_base_bounds, mixed_param_set, tmp_path
+    ):
+        """TO12 posterior (24-32) overlaps fixed TO22 (30.0).
+
+        The extract tool must shrink TO12.upper below 30.0 without
+        modifying TO22's fixed value.
+        """
+        rng = np.random.default_rng(789)
+        posterior = _write_posterior(tmp_path / "posterior.csv", {
+            "tb2":  rng.uniform(8.0, 12.0, size=200),
+            "to12": rng.uniform(24.0, 32.0, size=200),  # p95 ~31.6 > 30.0
+        })
+        proposal = extract_bounds_proposal(
+            posterior, mixed_param_set, mixed_base_bounds,
+            out_csv=tmp_path / "proposal.csv",
+        )
+        issues = assert_valid_frozen_bounds(proposal)
+        errors = [i for i in issues if i.severity == "error"]
+        assert errors == [], (
+            f"Mixed group produced {len(errors)} errors: "
+            + "; ".join(str(e) for e in errors[:5])
+        )
+
+        # Verify the fixed member was NOT modified.
+        rows = _read_csv(proposal)
+        to22 = _row_by_name(rows, "TO22")
+        assert to22["status"] == "fixed"
+        assert to22["lower"] == "30.0"
+        assert to22["upper"] == "30.0"
+
+        # Verify TO12.upper was shrunk below 30.0.
+        to12 = _row_by_name(rows, "TO12")
+        assert float(to12["upper"]) < 30.0
+
+
+# ---------------------------------------------------------------------------
+# Real project artifacts: sobol23 + T9 frozen bounds
+# ---------------------------------------------------------------------------
+
+class TestRealArtifactsSobol23T9:
+    """End-to-end test using the real project artifacts:
+
+    * ``configs/experiments/parameter_sets/sobol23_dryonly_v1.json``
+    * ``data/parameter_registry/bounds_frozen/eggplant/eggplant_t9_highdim_v1_20260722.csv``
+
+    Verifies the extract→freeze bridge works with 23 target parameters
+    across 63 total rows, including 3 complete temperature groups.
+    """
+
+    SOBOL23_SET = PROJECT_ROOT / "configs" / "experiments" / "parameter_sets" / "sobol23_dryonly_v1.json"
+    T9_BOUNDS = (
+        PROJECT_ROOT
+        / "data" / "parameter_registry" / "bounds_frozen" / "eggplant"
+        / "eggplant_t9_highdim_v1_20260722.csv"
+    )
+
+    @pytest.fixture
+    def synthetic_sobol23_posterior(self, tmp_path: Path) -> Path:
+        """A synthetic posterior with all 23 sobol parameters.
+
+        Temperature parameters are well-behaved (no overlap) so the proposal
+        passes validation without temperature adjustments.  Other parameters
+        use narrow ranges centred on the T9 init values.
+        """
+        with open(self.SOBOL23_SET, "r", encoding="utf-8") as fh:
+            pset = json.load(fh)
+        params = [str(p).strip().upper() for p in pset["parameters"]]
+
+        # Read T9 init values to centre the synthetic posterior.
+        t9_inits: dict[str, float] = {}
+        with open(self.T9_BOUNDS, "r", encoding="utf-8-sig", newline="") as fh:
+            for row in csv.DictReader(fh):
+                name = str(row.get("name", "")).strip().upper()
+                try:
+                    t9_inits[name] = float(row["init"])
+                except (ValueError, KeyError):
+                    continue
+
+        rng = np.random.default_rng(20260724)
+        columns: dict[str, np.ndarray] = {}
+        for p in params:
+            centre = t9_inits.get(p, 1.0)
+            # Narrow posterior: ±5% of the centre value, well within T9 bounds.
+            spread = max(abs(centre) * 0.05, 0.01)
+            columns[p.lower()] = rng.uniform(
+                centre - spread, centre + spread, size=100
+            )
+        return _write_posterior(tmp_path / "sobol23_posterior.csv", columns)
+
+    def test_real_sobol23_t9_proposal_passes_validation(
+        self, synthetic_sobol23_posterior, tmp_path
+    ):
+        """The proposal from a well-behaved sobol23 posterior over T9 base
+        bounds must pass ``assert_valid_frozen_bounds``."""
+        if not self.SOBOL23_SET.is_file() or not self.T9_BOUNDS.is_file():
+            pytest.skip("Real project artifacts not available")
+
+        proposal = extract_bounds_proposal(
+            synthetic_sobol23_posterior,
+            self.SOBOL23_SET,
+            self.T9_BOUNDS,
+            out_csv=tmp_path / "proposal.csv",
+        )
+        issues = assert_valid_frozen_bounds(proposal)
+        errors = [i for i in issues if i.severity == "error"]
+        assert errors == [], (
+            f"Real sobol23+T9 proposal has {len(errors)} errors: "
+            + "; ".join(str(e) for e in errors[:5])
+        )
+
+    def test_real_sobol23_t9_freeze_succeeds(
+        self, synthetic_sobol23_posterior, tmp_path
+    ):
+        """End-to-end: sobol23 posterior → extract → freeze must succeed."""
+        if not self.SOBOL23_SET.is_file() or not self.T9_BOUNDS.is_file():
+            pytest.skip("Real project artifacts not available")
+
+        proposal = extract_bounds_proposal(
+            synthetic_sobol23_posterior,
+            self.SOBOL23_SET,
+            self.T9_BOUNDS,
+            out_csv=tmp_path / "proposal.csv",
+        )
+
+        frozen_dir = tmp_path / "frozen"
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(PROJECT_ROOT / "tools" / "freeze_bounds.py"),
+                "--proposal", str(proposal),
+                "--crop", "eggplant",
+                "--bounds-id", "test_sobol23_from_t9",
+                "--out-dir", str(frozen_dir),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, (
+            f"freeze_bounds.py failed on real artifacts:\n{result.stderr}"
+        )
+
+        # Verify the frozen CSV has exactly 23 active parameters.
+        rows = _read_csv(frozen_dir / "test_sobol23_from_t9.csv")
+        active = [r for r in rows if r["status"].lower() == "active"]
+        assert len(active) == 23

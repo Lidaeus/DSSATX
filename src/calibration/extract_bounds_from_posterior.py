@@ -190,18 +190,22 @@ def _enforce_temperature_ordering(
     Independent per-parameter quantile extraction can produce:
 
     * **Range overlap** — ``left.upper >= right.lower`` for an adjacent
-      temperature pair.  Fixed by splitting the overlap at its midpoint.
+      temperature pair.  Fixed by splitting the overlap at its midpoint
+      (both active) or shrinking only the active side (mixed active/fixed).
     * **Init reversal** — ``left.init >= right.init``.  Fixed by falling back
-      to the already-approved base-bounds init for the violating pair.
+      to the already-approved base-bounds init for the violating active
+      member(s).
 
-    If a midpoint split produces a degenerate range (``lower >= upper``), the
-    entire pair falls back to its base-bounds values.  All adjustments are
-    logged as warnings so the human reviewer can inspect them before
-    approving the proposal via ``freeze_bounds.py``.
+    If an adjustment produces a degenerate range (``lower >= upper``), the
+    active member falls back to its base-bounds values.  Fixed members are
+    never modified — they are immutable constraints inherited from the
+    already-approved base bounds.  All adjustments are logged as warnings so
+    the human reviewer can inspect them before approving the proposal via
+    ``freeze_bounds.py``.
 
-    Only complete, fully-active groups are adjusted.  Groups with missing or
-    fixed members are skipped — ``assert_valid_frozen_bounds`` also skips
-    incomplete groups, so no constraint is violated.
+    Only complete groups (all 4 names present) are adjusted.  Mixed
+    active/fixed groups are handled: active members are adjusted against
+    their fixed neighbours, which act as immutable boundary constraints.
     """
     base_by_name: dict[str, dict] = {
         str(r.get("name", "")).strip().upper(): r for r in base_rows
@@ -213,33 +217,47 @@ def _enforce_temperature_ordering(
     for group in _TEMPERATURE_GROUPS:
         members = [by_name.get(n) for n in group]
         if any(m is None for m in members):
-            continue
-        if any(str(m.get("status", "")).lower() != "active" for m in members):
-            continue
+            continue  # Incomplete group — validator also skips these
 
-        # --- Range pass: fix overlapping ranges via midpoint split ----------
+        def _is_active(row: dict) -> bool:
+            return str(row.get("status", "")).lower() == "active"
+
+        # --- Range pass: fix overlapping ranges -----------------------------
         for left, right in zip(members, members[1:]):
             lu = float(left["upper"])
             rl = float(right["lower"])
             if lu < rl:
                 continue  # Already ordered
 
-            # Split at the midpoint with a small gap so that left.upper <
-            # right.lower (the validator uses strict ``>=`` comparison).
+            left_active = _is_active(left)
+            right_active = _is_active(right)
+            if not left_active and not right_active:
+                continue  # Both fixed — immutable, base bounds guarantee order
+
             midpoint = (lu + rl) / 2.0
             gap = max(abs(midpoint) * 1e-4, 1e-4)
-            left["upper"] = _fmt(midpoint - gap)
-            right["lower"] = _fmt(midpoint + gap)
+
+            if left_active and right_active:
+                # Symmetric split: both sides move toward the midpoint.
+                left["upper"] = _fmt(midpoint - gap)
+                right["lower"] = _fmt(midpoint + gap)
+            elif left_active:
+                # Right is fixed — only shrink left's upper below right.lower.
+                left["upper"] = _fmt(rl - gap)
+            else:
+                # Left is fixed — only raise right's lower above left.upper.
+                right["lower"] = _fmt(lu + gap)
+
             logger.warning(
                 "Temperature range overlap: %s.upper=%g >= %s.lower=%g; "
-                "split at midpoint=%g (gap=%g)",
+                "adjusted (midpoint=%g, gap=%g)",
                 left["name"], lu, right["name"], rl, midpoint, gap,
             )
 
-            # Degenerate range after split → fall back to base for this pair.
-            if float(left["lower"]) >= float(left["upper"]):
+            # Degenerate range after adjustment → fall back to base.
+            if left_active and float(left["lower"]) >= float(left["upper"]):
                 _restore_from_base(left, base_by_name)
-            if float(right["lower"]) >= float(right["upper"]):
+            if right_active and float(right["lower"]) >= float(right["upper"]):
                 _restore_from_base(right, base_by_name)
 
         # --- Init pass: fix reversed inits via base fallback ----------------
@@ -249,16 +267,25 @@ def _enforce_temperature_ordering(
             if li < ri:
                 continue  # Already ordered
 
+            left_active = _is_active(left)
+            right_active = _is_active(right)
+            if not left_active and not right_active:
+                continue  # Both fixed — base bounds guarantee order
+
             logger.warning(
                 "Temperature init reversal: %s.init=%g >= %s.init=%g; "
-                "falling back to base bounds init for this pair",
+                "falling back to base bounds for active member(s)",
                 left["name"], li, right["name"], ri,
             )
-            _restore_from_base(left, base_by_name)
-            _restore_from_base(right, base_by_name)
+            if left_active:
+                _restore_from_base(left, base_by_name)
+            if right_active:
+                _restore_from_base(right, base_by_name)
 
         # --- Clamp pass: ensure init ∈ [lower, upper] after adjustments ------
         for member in members:
+            if not _is_active(member):
+                continue  # Fixed members have init == lower == upper
             init = float(member["init"])
             lo = float(member["lower"])
             hi = float(member["upper"])
