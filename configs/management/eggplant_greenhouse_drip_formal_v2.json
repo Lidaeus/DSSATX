@@ -1,0 +1,96 @@
+{
+  "design_id": "eggplant_greenhouse_drip_formal_v2",
+  "status": "formal_design_ready_parameter_pending",
+  "production_system": "greenhouse_drip_eggplant",
+  "crop_model": "DSSAT_4.8_CROPGRO_Tomato",
+  "surrogate_model": false,
+  "rainfall_as_management_input": false,
+  "policy_transfer": "one_common_policy_across_both_spring_weather_years",
+  "seasons": [
+    {
+      "season_id": "XXQL2501_2025_spring",
+      "year": 2025,
+      "role": "robust_optimization_and_actual_replay",
+      "weather_file": "data/user/experiments/xxql2501_20260716/XXN92501.WTH",
+      "actual_input_bundle": "data/user/experiments/xxql2501_20260716",
+      "planting_date": 25075,
+      "last_harvest_date": 25220,
+      "template_treatment": 2
+    },
+    {
+      "season_id": "XXQL2601_2026_spring",
+      "year": 2026,
+      "role": "robust_optimization_and_independent_actual_replay",
+      "weather_file": "data/user/experiments/xxql2601_actual_trial_validation_v1_20260721/XXQL2601.WTH",
+      "actual_input_bundle": "data/user/experiments/xxql2601_actual_trial_validation_v1_20260721",
+      "planting_date": 26069,
+      "last_harvest_date": 26198,
+      "template_treatment": 1
+    }
+  ],
+  "stage_policy": {
+    "basis": "normalized_days_after_planting",
+    "stages": [
+      {"name": "establishment", "dap_start": 0, "dap_end": 28},
+      {"name": "canopy_expansion", "dap_start": 29, "dap_end": 63},
+      {"name": "flowering_early_harvest", "dap_start": 64, "dap_end": 96},
+      {"name": "peak_late_harvest", "dap_start": 97, "dap_end": 145}
+    ]
+  },
+  "decision_variables": {
+    "seasonal_irrigation_mm": [240.0, 500.0],
+    "irrigation_stage_shares": {"count": 4, "minimum_each": 0.08, "sum": 1.0},
+    "seasonal_nitrogen_kg_ha": [0.0, 320.0],
+    "nitrogen_stage_shares": {"count": 4, "minimum_first_three": 0.05, "fixed_last": 0.0, "sum": 1.0},
+    "irrigation_trigger_fraction_available_water": {
+      "status": "phase_2_after_sequential_runner_validation",
+      "bounds_by_stage": [[0.45, 0.75], [0.50, 0.80], [0.55, 0.85], [0.50, 0.80]]
+    }
+  },
+  "hard_constraints": {
+    "irrigation_event_max_mm": 45.0,
+    "irrigation_min_interval_days": 1,
+    "nitrogen_after_dap": 96,
+    "nitrogen_after_cutoff_kg_ha": 0.0,
+    "yield_floor_fraction_of_year_specific_reference": 0.9,
+    "failed_dssat_run_is_infeasible": true
+  },
+  "objectives": [
+    {"name": "mean_fresh_yield", "direction": "maximize", "source": "final_CHFPW"},
+    {"name": "worst_year_fresh_yield", "direction": "maximize", "source": "min_year_final_CHFPW"},
+    {"name": "seasonal_irrigation_mm", "direction": "minimize", "source": "management_ledger"},
+    {"name": "seasonal_nitrogen_kg_ha", "direction": "minimize", "source": "management_ledger"}
+  ],
+  "secondary_indicators": [
+    "interannual_yield_gap_fraction",
+    "irrigation_water_productivity",
+    "partial_factor_productivity_of_nitrogen"
+  ],
+  "environmental_endpoint_policy": {
+    "nitrate_leaching": "required_secondary_endpoint_after_DSSAT_output_extraction_is_audited",
+    "not_permitted": "invent_or_proxy_nitrate_leaching_from_fertilizer_rate"
+  },
+  "optimizer": {
+    "algorithm": "NSGA-III",
+    "direct_dssat_only": true,
+    "initial_design": "maximin_LHS",
+    "initial_candidates": 128,
+    "population_size": 64,
+    "generations": 30,
+    "independent_seeds": [20260723, 20260806],
+    "convergence_checks": ["hypervolume_plateau", "pareto_rank_stability", "seedwise_front_overlap"]
+  },
+  "selection": {
+    "primary_rule": "knee_point_on_normalized_feasible_pareto_front",
+    "report_required_anchors": ["yield", "worst_year_yield", "water_saving", "nitrogen_saving", "knee"],
+    "dominance_tolerance_fraction": 0.01
+  },
+  "science_gates": [
+    "parameter_set_frozen_and_independently_validated",
+    "both_spring_weather_files_cover_planting_through_last_harvest",
+    "all_candidates_use_identical_genotype_and_policy_definition",
+    "actual_2025_and_2026_replay_reported_separately",
+    "two_optimizer_seeds_pass_convergence_checks",
+    "selected_policies_receive_local_sensitivity_analysis"
+  ]
+}

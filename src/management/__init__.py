@@ -1,5 +1,15 @@
 """Direct DSSAT water--nitrogen management optimisation for greenhouse eggplant."""
 
-# Keep package import side-effect free so ``python -m src.management.report``
-# does not preload its target module.
-__all__: list[str] = []
+from .formal_design import (
+    FormalManagementDesign,
+    SpringSeason,
+    aggregate_policy_evidence,
+    load_formal_design,
+)
+
+__all__ = [
+    "FormalManagementDesign",
+    "SpringSeason",
+    "aggregate_policy_evidence",
+    "load_formal_design",
+]
