@@ -20,11 +20,28 @@ from __future__ import annotations
 
 import csv
 import json
+import logging
 from pathlib import Path
 
 import pandas as pd
 
 from src.common.param_registry import PHYSICAL_BOUNDS, clamp_to_physical
+
+
+logger = logging.getLogger(__name__)
+
+
+# Temperature parameter groups that must satisfy strict cardinal ordering:
+# TB < TO1 < TO2 < TM.  ``assert_valid_frozen_bounds`` enforces both init
+# ordering and non-overlapping ranges for every complete group.  Independent
+# per-parameter quantile extraction can violate this, so the extract tool
+# must enforce the constraint before emitting the proposal.
+_TEMPERATURE_GROUPS: tuple[tuple[str, str, str, str], ...] = (
+    ("TB", "TO1", "TO2", "TM"),
+    ("TB1", "TO11", "TO21", "TM1"),
+    ("TB2", "TO12", "TO22", "TM2"),
+    ("TB3", "TO13", "TO23", "TM3"),
+)
 
 
 def extract_bounds_proposal(
@@ -139,6 +156,13 @@ def extract_bounds_proposal(
             new_row["upper"] = init_val
         proposal_rows.append(new_row)
 
+    # -- enforce temperature ordering ---------------------------------------
+    # Independent per-parameter quantiles can produce overlapping ranges or
+    # reversed init medians within a temperature group (TB < TO1 < TO2 < TM).
+    # ``assert_valid_frozen_bounds`` rejects such proposals, so the extract
+    # tool must enforce the constraint here to keep the proposal freezable.
+    _enforce_temperature_ordering(proposal_rows, base_rows)
+
     # -- write proposal -----------------------------------------------------
     if out_csv is None:
         base = Path(base_bounds_csv)
@@ -155,6 +179,104 @@ def extract_bounds_proposal(
 def _fmt(val: float) -> str:
     """Format a float for CSV output (6 significant digits)."""
     return f"{val:.6g}"
+
+
+def _enforce_temperature_ordering(
+    proposal_rows: list[dict],
+    base_rows: list[dict],
+) -> None:
+    """Enforce TB < TO1 < TO2 < TM ordering on init and range values in-place.
+
+    Independent per-parameter quantile extraction can produce:
+
+    * **Range overlap** — ``left.upper >= right.lower`` for an adjacent
+      temperature pair.  Fixed by splitting the overlap at its midpoint.
+    * **Init reversal** — ``left.init >= right.init``.  Fixed by falling back
+      to the already-approved base-bounds init for the violating pair.
+
+    If a midpoint split produces a degenerate range (``lower >= upper``), the
+    entire pair falls back to its base-bounds values.  All adjustments are
+    logged as warnings so the human reviewer can inspect them before
+    approving the proposal via ``freeze_bounds.py``.
+
+    Only complete, fully-active groups are adjusted.  Groups with missing or
+    fixed members are skipped — ``assert_valid_frozen_bounds`` also skips
+    incomplete groups, so no constraint is violated.
+    """
+    base_by_name: dict[str, dict] = {
+        str(r.get("name", "")).strip().upper(): r for r in base_rows
+    }
+    by_name: dict[str, dict] = {
+        str(r.get("name", "")).strip().upper(): r for r in proposal_rows
+    }
+
+    for group in _TEMPERATURE_GROUPS:
+        members = [by_name.get(n) for n in group]
+        if any(m is None for m in members):
+            continue
+        if any(str(m.get("status", "")).lower() != "active" for m in members):
+            continue
+
+        # --- Range pass: fix overlapping ranges via midpoint split ----------
+        for left, right in zip(members, members[1:]):
+            lu = float(left["upper"])
+            rl = float(right["lower"])
+            if lu < rl:
+                continue  # Already ordered
+
+            # Split at the midpoint with a small gap so that left.upper <
+            # right.lower (the validator uses strict ``>=`` comparison).
+            midpoint = (lu + rl) / 2.0
+            gap = max(abs(midpoint) * 1e-4, 1e-4)
+            left["upper"] = _fmt(midpoint - gap)
+            right["lower"] = _fmt(midpoint + gap)
+            logger.warning(
+                "Temperature range overlap: %s.upper=%g >= %s.lower=%g; "
+                "split at midpoint=%g (gap=%g)",
+                left["name"], lu, right["name"], rl, midpoint, gap,
+            )
+
+            # Degenerate range after split → fall back to base for this pair.
+            if float(left["lower"]) >= float(left["upper"]):
+                _restore_from_base(left, base_by_name)
+            if float(right["lower"]) >= float(right["upper"]):
+                _restore_from_base(right, base_by_name)
+
+        # --- Init pass: fix reversed inits via base fallback ----------------
+        for left, right in zip(members, members[1:]):
+            li = float(left["init"])
+            ri = float(right["init"])
+            if li < ri:
+                continue  # Already ordered
+
+            logger.warning(
+                "Temperature init reversal: %s.init=%g >= %s.init=%g; "
+                "falling back to base bounds init for this pair",
+                left["name"], li, right["name"], ri,
+            )
+            _restore_from_base(left, base_by_name)
+            _restore_from_base(right, base_by_name)
+
+        # --- Clamp pass: ensure init ∈ [lower, upper] after adjustments ------
+        for member in members:
+            init = float(member["init"])
+            lo = float(member["lower"])
+            hi = float(member["upper"])
+            if init < lo:
+                member["init"] = member["lower"]
+            elif init > hi:
+                member["init"] = member["upper"]
+
+
+def _restore_from_base(row: dict, base_by_name: dict[str, dict]) -> None:
+    """Restore init/lower/upper for *row* from the base bounds template."""
+    name = str(row.get("name", "")).strip().upper()
+    base = base_by_name.get(name)
+    if not base:
+        return
+    for key in ("init", "lower", "upper"):
+        if key in base:
+            row[key] = base[key]
 
 
 def main(argv: list[str] | None = None) -> int:
