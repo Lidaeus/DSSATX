@@ -1,0 +1,11 @@
+{
+  "profile_id": "direct_chpdt_log_v1",
+  "active_phi_targets": ["CHPDT"],
+  "diagnostic_targets": ["CHFPW", "LAID", "LWAD", "SWAD", "LAIX", "CNAM"],
+  "forbidden_targets": ["PWAD", "PWAI", "HWAM"],
+  "transform": "ln(y+1)",
+  "offset": 1.0,
+  "reference": 1.0,
+  "description": "Article-contract observation profile: only CHPDT (cumulative dry fruit weight) enters formal Phi, transformed via ln(y+1). CHFPW (cumulative fresh fruit weight) is diagnostic-only for DMC/fresh-dry ratio interpretation. LAID/LWAD/SWAD are process diagnostics. PWAD, PWAI, HWAM are explicitly forbidden — their observation definitions do not match continuous-harvest eggplant. Original FileA/FileT values are always preserved on the physical scale; the transform applies only to the values copied into PestHarvest.OUT and the PEST control file.",
+  "forbidden_rationale": "PWAD/PWAI are single-harvest partition variables incompatible with continuous-harvest eggplant. HWAM is an indeterminate-crop at-harvest aggregate that cannot represent incremental CHPDT. Using any of these as Phi targets would conflate harvest-structure errors with genetic-parameter errors."
+}

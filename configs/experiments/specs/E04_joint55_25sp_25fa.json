@@ -1,0 +1,26 @@
+{
+  "experiment_id": "E04_joint55_25sp_25fa",
+  "scientific_role": "model_comparison",
+  "season_inputs": [
+    {
+      "season_id": "25SP",
+      "role": "calibration",
+      "input_manifest": "data/user/experiments/xxql2501_20260716/input_manifest.json",
+      "sha256": "5b7deac1502a5005cb46a1c2767a11d0567e13c094544f2faef3b9fdb950cb1b"
+    },
+    {
+      "season_id": "25FA",
+      "role": "calibration",
+      "input_manifest": "data/user/experiments/xxql2502_actual_trial_calibration_v1_20260721/input_manifest.json",
+      "sha256": "b8ba5e8a83d3012e4684d9c2d84e15b2782817460ccf41cec2a533d362922856"
+    }
+  ],
+  "parameter_set": "configs/experiments/parameter_sets/highdim55_dryonly_v1.json",
+  "bounds_id": "eggplant_t9_highdim_v1_20260722",
+  "observation_profile": "configs/experiments/observation_profiles/direct_chpdt_log_v1.json",
+  "multiseason_design": "configs/runs/eggplant_t10_dryonly_joint_25sp_25fa_v1.json",
+  "seasonal_parameterization": null,
+  "execution": {"ies_num_reals": 200, "noptmax": 4, "seed": 20260723, "min_retention_rate": 0.95},
+  "representative_rule": "final_ensemble_median",
+  "evaluation_profile": "article_rawscale_v1"
+}

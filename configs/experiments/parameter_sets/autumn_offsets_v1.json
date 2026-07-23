@@ -1,0 +1,9 @@
+{
+  "set_id": "autumn_offsets_v1",
+  "parameters": [],
+  "declared_count": 0,
+  "source_file": "",
+  "source_sha256": "",
+  "applicable_observations": "CHPDT (cumulative dry fruit weight, ln(y+1) scale)",
+  "approval_note": "EMPTY — E05 autumn offsets must be non-empty and approved before running. Each candidate must have: (1) systematic evidence in two-season residuals, (2) clear physiological mechanism, (3) posterior difference not solely from boundary pile-up, (4) pre-registered offset range and shrinkage rule. Maximum 3 offsets. DMC offset is forbidden under CHPDT-only contract. Candidate names must be frozen after E04, not added adaptively during fitting."
+}

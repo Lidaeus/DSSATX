@@ -1,0 +1,21 @@
+{
+  "experiment_id": "E02_single23_25fa",
+  "scientific_role": "single_season_diagnostic",
+  "_note": "TEMPLATE: bounds_id must be replaced with E01-approved 23-active frozen bounds before this spec can load.",
+  "season_inputs": [
+    {
+      "season_id": "25FA",
+      "role": "calibration",
+      "input_manifest": "data/user/experiments/xxql2502_actual_trial_calibration_v1_20260721/input_manifest.json",
+      "sha256": "b8ba5e8a83d3012e4684d9c2d84e15b2782817460ccf41cec2a533d362922856"
+    }
+  ],
+  "parameter_set": "configs/experiments/parameter_sets/sobol23_dryonly_v1.json",
+  "bounds_id": "eggplant_t9_highdim_v1_20260722",
+  "observation_profile": "configs/experiments/observation_profiles/direct_chpdt_log_v1.json",
+  "multiseason_design": "configs/runs/eggplant_t10_dryonly_diagnostic_25fa_v1.json",
+  "seasonal_parameterization": null,
+  "execution": {"ies_num_reals": 200, "noptmax": 4, "seed": 20260723, "min_retention_rate": 0.95},
+  "representative_rule": "final_ensemble_median",
+  "evaluation_profile": "article_rawscale_v1"
+}

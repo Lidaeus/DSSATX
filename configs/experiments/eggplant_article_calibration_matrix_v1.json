@@ -1,0 +1,26 @@
+{
+  "matrix_id": "eggplant_article_calibration_matrix_v1",
+  "schema_version": 1,
+  "created_at": "2026-07-23",
+  "description": "Article calibration experiment matrix per docs/参数率定试验矩阵与论文逻辑_v1_20260723.md. Each experiment is an independently auditable unit with SHA-256-pinned inputs.",
+  "parameter_sets": {
+    "sobol23": "configs/experiments/parameter_sets/sobol23_dryonly_v1.json",
+    "full55": "configs/experiments/parameter_sets/highdim55_dryonly_v1.json",
+    "autumn_offsets": "configs/experiments/parameter_sets/autumn_offsets_v1.json"
+  },
+  "observation_profile": "configs/experiments/observation_profiles/direct_chpdt_log_v1.json",
+  "experiments": {
+    "E00": "configs/experiments/specs/E00_input_audit.json",
+    "E01_25SP_Y": "configs/experiments/specs/E01_pre_calibration_25sp_yield.json",
+    "E01_25FA_Y": "configs/experiments/specs/E01_pre_calibration_25fa_yield.json",
+    "E02_25SP": "configs/experiments/specs/E02_single23_25sp.json",
+    "E02_25FA": "configs/experiments/specs/E02_single23_25fa.json",
+    "E02_26SP": "configs/experiments/specs/E02_single23_26sp.json",
+    "E03": "configs/experiments/specs/E03_joint23_25sp_25fa.json",
+    "E04": "configs/experiments/specs/E04_joint55_25sp_25fa.json",
+    "E05": "configs/experiments/specs/E05_autumn_offsets.json",
+    "E06": "configs/experiments/specs/E06_pool3season.json"
+  },
+  "execution_order": ["E00", "E01", "E02", "E03", "E04", "E05", "E06", "E07"],
+  "note": "E02/E03 require bounds from E01 approval. E05 requires autumn_offsets profile approval after E04. E06 requires structure freeze. E07 requires new season/location data."
+}
