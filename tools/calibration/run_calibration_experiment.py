@@ -32,7 +32,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.calibration.experiment_runner import prepare_experiment_run, build_args_from_spec
+from src.calibration.experiment_runner import prepare_experiment_run, run_build
 from src.calibration.experiment_spec import ExperimentSpecError
 
 
@@ -102,19 +102,18 @@ def main() -> int:
     if args.smoke:
         print("  [SMOKE MODE] 20 reals / 1 update")
 
-    # Step 2: Build PST (delegate to existing builder)
-    # NOTE: Full PST build requires P0-C (global state removal) to be complete.
-    # For now, we prepare the args and report readiness.
-    print(f"\n[2/3] Preparing builder arguments...")
+    # Step 2: Build PST (delegate to existing builder via subprocess)
+    print(f"\n[2/3] Building PST via build_pest.py...")
     try:
-        build_args = build_args_from_spec(result.spec, result.run_dir)
-        print(f"  mode: {build_args.mode}")
-        print(f"  prefix: {build_args.prefix}")
-        print(f"  multiseason_design: {build_args.multiseason_design}")
-        print(f"  bounds_id: {build_args.bounds_id}")
+        run_build(result.spec, result.run_dir, prefix=result.experiment_id)
     except ValueError as exc:
         print(f"FAILED: {exc}", file=sys.stderr)
         return 3
+    pst_path = result.run_dir / f"{result.experiment_id}.pst"
+    if pst_path.is_file():
+        print(f"  PST generated: {pst_path}")
+    else:
+        print(f"  WARNING: expected PST not found at {pst_path}", file=sys.stderr)
 
     # Step 3: Execute (optional)
     if args.execute:
@@ -125,7 +124,9 @@ def main() -> int:
         # TODO: After P0-C, delegate to run_parallel.py with the prepared args
         return 0
     else:
-        print(f"\n[3/3] Build-only mode. Receipt written to {result.receipt_path}")
+        print(f"\n[3/3] Build-only mode complete.")
+        print(f"  Receipt: {result.receipt_path}")
+        print(f"  PST: {pst_path}")
         print("  To execute: add --execute flag (requires P0-C completion)")
 
     return 0
