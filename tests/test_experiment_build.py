@@ -20,7 +20,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.calibration.experiment_runner import prepare_experiment_run, run_build
+from src.calibration.experiment_runner import prepare_experiment_run, run_build, run_execute
 
 SPECS_DIR = PROJECT_ROOT / "configs" / "experiments" / "specs"
 
@@ -71,3 +71,16 @@ def test_e00_pst_parameter_count_matches_spec(e00_run):
     receipt = json.loads(e00_run.receipt_path.read_text(encoding="utf-8"))
     assert pst.npar_adj == receipt["bounds"]["active_count"]
     assert pst.npar_adj == receipt["parameter_set"]["declared_count"]
+
+
+def test_run_execute_raises_on_missing_pst(tmp_path):
+    """run_execute must raise FileNotFoundError when no PST exists yet.
+
+    This guards the --execute CLI path: the user must build first.
+    """
+    result = prepare_experiment_run(
+        spec_path=SPECS_DIR / "E00_input_audit.json",
+        run_dir=tmp_path / "e00_no_pst",
+    )
+    with pytest.raises(FileNotFoundError, match="PST not found"):
+        run_execute(result.spec, result.run_dir, prefix=result.experiment_id)

@@ -9,21 +9,22 @@ Usage::
         --run-dir workspace/runs/E04_smoke \\
         --smoke
 
-    # Full execution (after P0-C removes global state)
+    # Full execution (build + PEST++ IES)
     python tools/calibration/run_calibration_experiment.py \\
         --spec configs/experiments/specs/E04_joint55_25sp_25fa.json \\
         --run-dir workspace/runs/E04_formal \\
-        --execute
+        --execute --n-agents 6
 
 This entry point does **not** modify global state or call legacy modes.
-It delegates to :mod:`src.calibration.experiment_runner` for spec validation
-and receipt generation, then to the existing builder for PST generation.
+It delegates to :mod:`src.calibration.experiment_runner` for spec validation,
+receipt generation, PST building, and (optionally) PEST++ execution.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -32,7 +33,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.calibration.experiment_runner import prepare_experiment_run, run_build
+from src.calibration.experiment_runner import prepare_experiment_run, run_build, run_execute
 from src.calibration.experiment_spec import ExperimentSpecError
 
 
@@ -58,7 +59,13 @@ def main() -> int:
     parser.add_argument(
         "--execute",
         action="store_true",
-        help="After building, launch PEST++ execution (requires P0-C completion).",
+        help="After building, launch PEST++ (IES) execution via run_parallel.py.",
+    )
+    parser.add_argument(
+        "--n-agents",
+        type=int,
+        default=0,
+        help="Number of parallel agents for PEST++ execution (0 = auto).",
     )
     parser.add_argument(
         "--build-only",
@@ -117,17 +124,30 @@ def main() -> int:
 
     # Step 3: Execute (optional)
     if args.execute:
-        print(f"\n[3/3] Launching PEST++ execution...")
-        print("  NOTE: Full execution requires P0-C (global state removal).")
-        print("  The existing run_parallel.py / run_multiseason.py can be")
-        print("  invoked with the prepared run_dir once P0-C is complete.")
-        # TODO: After P0-C, delegate to run_parallel.py with the prepared args
-        return 0
+        print(f"\n[3/3] Launching PEST++ (IES) execution...")
+        print(f"  run_dir: {result.run_dir}")
+        print(f"  case: {result.experiment_id}")
+        print(f"  n_agents: {args.n_agents}")
+        try:
+            run_execute(
+                result.spec, result.run_dir,
+                prefix=result.experiment_id,
+                n_agents=args.n_agents,
+            )
+        except FileNotFoundError as exc:
+            print(f"FAILED: {exc}", file=sys.stderr)
+            return 4
+        except subprocess.CalledProcessError as exc:
+            print(f"FAILED: PEST++ execution error: {exc}", file=sys.stderr)
+            return exc.returncode or 5
+        print(f"\n  Execution complete.")
+        print(f"  Receipt: {result.receipt_path}")
+        print(f"  PST: {pst_path}")
     else:
         print(f"\n[3/3] Build-only mode complete.")
         print(f"  Receipt: {result.receipt_path}")
         print(f"  PST: {pst_path}")
-        print("  To execute: add --execute flag (requires P0-C completion)")
+        print("  To execute: add --execute flag")
 
     return 0
 

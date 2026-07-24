@@ -23,12 +23,7 @@ from datetime import datetime, timezone
 
 from src.calibration.weight_scheme import (
     WEIGHT_POLICY_ID,
-    normalize_and_weight,
-    compute_cv_based_sigma,
-    compute_balanced_weights,
-    build_observation_weights,
     weight_from_sigma,
-    VARIABLE_TREATMENT,
 )
 from src.calibration.observation_policy import (
     POLICY_VERSION,
@@ -36,7 +31,8 @@ from src.calibration.observation_policy import (
     load_observation_policy,
     write_transform_config,
 )
-from src.calibration.build_pest_multiseason import build_multiseason_stage2
+# build_pest_multiseason is imported lazily inside the multiseason branch to
+# avoid a circular import (build_pest_multiseason now imports from build_pest).
 from src.calibration.multiseason_design import MultiSeasonDesign
 from src.calibration.design_config import (
     apply_observation_stage,
@@ -465,6 +461,7 @@ ECO_BOUNDS_EGGPLANT = {
     for name in (
         "PL-EM", "EM-V1", "V1-JU", "JU-R0", "FL-VS", "TRIFL",
         "RWDTH", "RHGHT", "OPTBI", "SLOBI", "XMAGE", "XFPHT", "XFINT",
+        "LNGSH", "PM06", "PM09",
     )
 }
 
@@ -489,6 +486,22 @@ SPE_DIRECT_BOUNDS_EGGPLANT = {
     "NMOBMX": (0.15, 0.40),
     "NVSMOB": (0.20, 0.50),
     "NRCVR": (0.05, 0.30),
+    # High-dim T9 species parameters read from the comma-separated SPE lines.
+    # These default ranges are overwritten by the frozen bounds-id at build
+    # time; they exist so parse_extra_params can discover the parameters.
+    "PARMAX": (30.0, 55.0),
+    "PHTMAX": (45.0, 80.0),
+    "KCAN": (0.45, 0.90),
+    "FINREF": (160.0, 280.0),
+    "SLAREF": (250.0, 350.0),
+    "SIZREF": (250.0, 350.0),
+    "WTFSD": (0.40, 0.70),
+    "PORPT": (0.10, 0.30),
+    "FRSTMF": (0.30, 0.70),
+    "FRLFF": (0.20, 0.50),
+    "ATOP": (0.50, 1.10),
+    "FRCNOD": (0.03, 0.07),
+    "EVMODC": (0.0, 0.0),
 }
 
 
@@ -1086,6 +1099,9 @@ def _read_spe_direct_init_values():
             nums = [m.group(0) for m in number_re.finditer(line)]
             if len(nums) >= 4:
                 try:
+                    out["PARMAX"] = float(nums[0])
+                    out["PHTMAX"] = float(nums[1])
+                    out["KCAN"] = float(nums[2])
                     out["KC_SLOPE"] = float(nums[3])
                 except Exception:
                     pass
@@ -1105,11 +1121,27 @@ def _read_spe_direct_init_values():
                     out["NSTFAC"] = float(nums[-1])
                 except Exception:
                     pass
+        if "WTFSD,PORPT" in u and "FRCNOD" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 6:
+                try:
+                    out["WTFSD"] = float(nums[0])
+                    out["PORPT"] = float(nums[1])
+                    out["FRSTMF"] = float(nums[2])
+                    out["FRLFF"] = float(nums[3])
+                    out["ATOP"] = float(nums[4])
+                    out["FRCNOD"] = float(nums[5])
+                except Exception:
+                    pass
         if "FINREF,SLAREF" in u and "VSSINK" in u:
             nums = [m.group(0) for m in number_re.finditer(line)]
-            if len(nums) >= 4:
+            if len(nums) >= 5:
                 try:
+                    out["FINREF"] = float(nums[0])
+                    out["SLAREF"] = float(nums[1])
+                    out["SIZREF"] = float(nums[2])
                     out["VSSINK"] = float(nums[3])
+                    out["EVMODC"] = float(nums[4])
                 except Exception:
                     pass
         if "RTNO3,RTNH4" in u and "RTEXF" in u:
@@ -1258,6 +1290,10 @@ def _read_tmt_harvest_events(tmt_path):
                 {
                     "hno": idx,
                     "date": int(e["date"]),
+                    # T10: preserve original CHFPW/CHPDT cumulative values for
+                    # direct harvest calibration (no differencing).
+                    "chfpw": float(e["chfpw"]) if e["chfpw"] != -99.0 else -99.0,
+                    "chpdt": float(e["chpdt"]) if e["chpdt"] != -99.0 else -99.0,
                     "dry_cum": float(dry_cum)
                     if e["chpdt"] != -99.0 or e.get("hpodw", -99.0) != -99.0 or e.get("pwad", -99.0) != -99.0
                     else -99.0,
@@ -1527,18 +1563,22 @@ def _yyddd_day_difference(start_code, end_code):
     return float((end_dt - start_dt).days)
 
 
-def _build_evaluate_observations_from_filea(batch_entries):
+def _build_evaluate_observations_from_filea(batch_entries, input_dir=None):
     """Build Evaluate-style measured columns solely from versioned FileA files.
 
     The returned frame contains no simulated evidence from a previous model
     run.  Candidate simulations are still read later from newly generated
     tagged ``PestEval.OUT``/``PestJoint.OUT`` files.
+
+    *input_dir* is forwarded to ``_resolve_filex_path`` so the multiseason
+    builder can scope FileX resolution per season without mutating the
+    module-level ``USER_INPUT_DIR`` global.
     """
     filea_cache = {}
     output_rows = []
     for entry in batch_entries:
         filex = entry.get("filex")
-        filex_path = _resolve_filex_path(filex) or (
+        filex_path = _resolve_filex_path(filex, input_dir=input_dir) or (
             filex if filex and os.path.isabs(filex) else None
         )
         if not filex_path or not os.path.isfile(filex_path):
@@ -1632,7 +1672,14 @@ def _infer_cultivar_from_filex(filex_path):
     return None
 
 
-def _resolve_filex_path(filex):
+def _resolve_filex_path(filex, input_dir=None):
+    """Resolve a FileX path.
+
+    When *input_dir* is provided it takes precedence over the module-level
+    ``USER_INPUT_DIR`` global, eliminating cross-season global mutation in the
+    multiseason builder.  The single-season ``__main__`` path continues to
+    pass ``input_dir=None`` and relies on the global.
+    """
     if not filex:
         return None
     p = str(filex).strip()
@@ -1642,8 +1689,9 @@ def _resolve_filex_path(filex):
         return os.path.abspath(p)
     if os.path.isabs(p):
         return None
+    dir_ = input_dir or USER_INPUT_DIR
     candidates = [
-        Path(USER_INPUT_DIR) / p if USER_INPUT_DIR else Path("__no_user_input__"),
+        Path(dir_) / p if dir_ else Path("__no_user_input__"),
         PROJECT_ROOT / "data" / "raw" / "experiments" / p,
         Path(WORKSPACE) / p,
     ]
@@ -1693,9 +1741,10 @@ def _infer_soil_id_from_filex(filex_path):
     return None
 
 
-def _soil_source_path():
-    if USER_INPUT_DIR:
-        user_soil = Path(USER_INPUT_DIR) / "SOIL.SOL"
+def _soil_source_path(input_dir=None):
+    dir_ = input_dir or USER_INPUT_DIR
+    if dir_:
+        user_soil = Path(dir_) / "SOIL.SOL"
         if user_soil.is_file():
             return str(user_soil)
     return SOIL_BASE_FILE if os.path.exists(SOIL_BASE_FILE) else SOIL_FILE
@@ -1889,7 +1938,7 @@ def _build_ic_sh2o_params(sh2o_vals, soil_layers, delta=None, frac=None):
         )
     return params
 
-def parse_cul_params(target_cultivar, allowed_params=None):
+def parse_cul_params(target_cultivar, allowed_params=None, *, allow_all_flagged=False):
     with open(CUL_BASE_FILE, 'r') as f:
         lines = f.readlines()
 
@@ -1939,7 +1988,7 @@ def parse_cul_params(target_cultivar, allowed_params=None):
         if allowed_params is not None and name not in allowed_params:
             continue
         flag = calib_flags[i]
-        if flag not in ['P', 'G']:
+        if flag not in ['P', 'G'] and not allow_all_flagged:
             continue
         p_min = float(min_vals[i])
         p_max = float(max_vals[i])
@@ -2010,7 +2059,11 @@ def create_ins_and_pst(
     ins_path = os.path.join(out_dir, f"{prefix}_{os.path.basename(model_out_path)}.ins")
     pst_path = os.path.join(out_dir, f"{prefix}.pst")
 
-    obs_cols = [c for c in df.columns if isinstance(c, str) and c.endswith('M')]
+    _assert_no_hwam_calibration_target(obs_bases)
+    obs_cols = [
+        c for c in df.columns
+        if isinstance(c, str) and c.endswith('M') and c.upper() != "HWAMM"
+    ]
     sim_cols = [c[:-1] + 'S' for c in obs_cols]
 
     if obs_bases is not None:
@@ -2139,24 +2192,12 @@ def create_ins_and_pst(
 
     obs_df = pd.DataFrame(obs_data)
 
-    if weight_scheme == "improved" and not obs_df.empty:
-        noptmax0_df = None
-        if noptmax0_sims is not None and os.path.exists(noptmax0_sims):
-            try:
-                noptmax0_df = pd.read_csv(noptmax0_sims)
-            except Exception:
-                pass
-        sim_baseline_df = noptmax0_df
-
-        obs_df = pd.DataFrame(build_observation_weights(
-            obs_data,
-            df_override=df_override,
-            sim_baseline=sim_baseline_df,
-            apply_normalization=apply_normalization,
-            apply_log_transform=apply_log_transform,
-            apply_pwtadj1=apply_pwtadj1,
-            cv_based_sigma=cv_based_sigma,
-        ))
+    # P0-A: the retired ``weight_scheme=improved`` double-weighting block was
+    # removed here.  observation_policy (applied next) is the single source of
+    # weights and transforms; build_observation_weights would have silently
+    # overwritten its audited output.  ``weight_scheme`` is retained on the
+    # signature for backward compatibility but only raw/legacy reach this point
+    # (improved is rejected in main() for stage2/joint modes).
 
     obs_df, model_cmd_extra = _apply_policy_and_prepare_runner(
         obs_df, observation_policies, out_dir, prefix, model_cmd_extra
@@ -2214,8 +2255,27 @@ def _is_tagged_output(model_out_path):
     }
 
 
+def _assert_no_hwam_calibration_target(obs_bases):
+    """Reject season-end HWAM as a calibration observation.
+
+    DSSAT's season-end HWAM bookkeeping is not representative of an
+    indeterminate crop with repeated harvest removal.  The runner may still
+    emit HWAMS for diagnostics, but builders must never put it in a PST.
+    """
+    requested = {str(item).strip().upper() for item in (obs_bases or set())}
+    if "HWAM" in requested:
+        raise ValueError(
+            "HWAM is diagnostic-only for continuous-harvest eggplant and "
+            "cannot be used as a calibration observation"
+        )
+
+
 def _build_ins_and_obs(df, obs_bases, critical_obs, model_out_path, group_sigmas):
-    obs_cols = [c for c in df.columns if isinstance(c, str) and c.endswith('M')]
+    _assert_no_hwam_calibration_target(obs_bases)
+    obs_cols = [
+        c for c in df.columns
+        if isinstance(c, str) and c.endswith('M') and c.upper() != "HWAMM"
+    ]
     sim_cols = [c[:-1] + 'S' for c in obs_cols]
 
     if obs_bases is not None:
@@ -2418,24 +2478,9 @@ def create_ins_and_pst_multi(
 
     obs_df = pd.DataFrame(obs_data_all)
 
-    if weight_scheme == "improved" and not obs_df.empty:
-        noptmax0_df = None
-        if noptmax0_sims is not None and os.path.exists(noptmax0_sims):
-            try:
-                noptmax0_df = pd.read_csv(noptmax0_sims)
-            except Exception:
-                pass
-        sim_baseline_df = noptmax0_df
-
-        obs_df = pd.DataFrame(build_observation_weights(
-            obs_data_all,
-            df_override=None,
-            sim_baseline=sim_baseline_df,
-            apply_normalization=apply_normalization,
-            apply_log_transform=apply_log_transform,
-            apply_pwtadj1=apply_pwtadj1,
-            cv_based_sigma=cv_based_sigma,
-        ))
+    # P0-A: retired ``weight_scheme=improved`` block removed (see note in
+    # create_ins_and_pst); observation_policy is the single weight/transform
+    # entry for the article contract.
 
     obs_df, model_cmd_extra = _apply_policy_and_prepare_runner(
         obs_df, observation_policies, out_dir, prefix, model_cmd_extra
@@ -2723,7 +2768,6 @@ if __name__ == "__main__":
         action="store_false",
     )
     parser.set_defaults(include_n_uptake=True)
-    parser.add_argument("--hwamm-sigma", type=float, default=50.0)
     parser.add_argument("--pwamm-sigma", type=float, default=20.0)
     parser.add_argument("--laixm-sigma", type=float, default=0.8)
     parser.add_argument("--laidm-sigma-factor", type=float, default=1.0)
@@ -2919,6 +2963,22 @@ if __name__ == "__main__":
     ecotype = _infer_ecotype_from_cul_base(cultivar) or "TM0001"
     evaluate_out_path = _evaluate_out_path_from_batch(args.batch)
 
+    # P0-A: the retired ``weight_scheme=improved`` double-weighting path must
+    # not run in the article-contract modes.  ``observation_policy`` is the
+    # single source of weights and transforms for stage2/joint calibration;
+    # ``improved`` would silently overwrite its audited output.  The raw/legacy
+    # values remain valid (raw = observation_policy only; legacy = builder
+    # default weights later overwritten by observation_policy).
+    _ws = (getattr(args, "weight_scheme", "raw") or "raw").strip().lower()
+    if _ws == "improved" and mode in ("eggplant_stage2", "eggplant_joint"):
+        raise SystemExit(
+            "weight_scheme='improved' is retired for the article contract (mode "
+            f"'{mode}'). observation_policy is the single weight/transform entry; "
+            "use --weight-scheme raw (or omit it). The improved path's "
+            "compute_balanced_weights/pwtadj1 logic remains available in "
+            "weight_scheme.py for hand-calc Phi regressions only."
+        )
+
     df_override = None
     stage2_outputs = None
     stage_evaluate_df = None
@@ -2966,11 +3026,10 @@ if __name__ == "__main__":
     elif mode == "eggplant_growth":
         prefix = args.prefix or "eggplant_growth"
         allowed = {"SLAVR", "SIZLF", "LFMAX", "XFRT", "WTPSD", "SFDUR", "SDPDV", "PODUR"}
-        obs_bases = {"HWAM", "LAIX", "CNAM"}
+        obs_bases = {"LAIX", "CNAM"}
         critical = set()
         model_out_path = PEST_GROW_FILE
         group_sigmas = {
-            "HWAMM": 500.0,
             "LAIXM": 0.8,
             "CNAMM": 25.0,
         }
@@ -2978,11 +3037,10 @@ if __name__ == "__main__":
     elif mode == "eggplant_joint":
         prefix = args.prefix or "eggplant_joint"
         allowed = {"SLAVR", "SIZLF", "LFMAX", "XFRT", "WTPSD", "SFDUR", "SDPDV", "PODUR"}
-        obs_bases = {"HWAM", "LAIX", "CNAM", "CHTA", "CNAA", "PWAM", "H#AM", "HIAM"}
+        obs_bases = {"LAIX", "CNAM", "CHTA", "CNAA", "PWAM", "H#AM", "HIAM"}
         critical = set()
         model_out_path = PEST_JOINT_FILE
         group_sigmas = {
-            "HWAMM": float(args.hwamm_sigma),
             "PWAMM": float(args.pwamm_sigma),
             "LAIXM": float(args.laixm_sigma),
             "CNAMM": float(args.cnamm_sigma),
@@ -3053,10 +3111,52 @@ if __name__ == "__main__":
             multiseason_mode = True
             stage2_outputs = []  # placeholder — real build happens after params ready
             entries = []
+            # High-dim support: when a frozen bounds-id is supplied, expand the
+            # CUL ``allowed`` and ECO/SPE ``extra_allowed`` whitelists to include
+            # every active parameter declared in the frozen bounds. Without this,
+            # newly-activated parameters (e.g. T9's 55-active set vs the legacy
+            # ~47 whitelist) are invisible to parse_cul_params/parse_extra_params
+            # and silently dropped, yielding a smaller PST than the frozen design.
+            if args.bounds_id:
+                _hd_crop = args.bounds_crop or ("eggplant" if "eggplant" in mode else "tomato")
+                _hd_path = _resolve_bounds_id(args.bounds_id, crop=_hd_crop)
+                if _hd_path:
+                    import csv as _csv_hd
+                    with open(_hd_path, encoding="utf-8-sig", newline="") as _hd_f:
+                        _hd_declared = {
+                            str(r["name"]).strip().upper()
+                            for r in _csv_hd.DictReader(_hd_f)
+                            if str(r.get("name", "")).strip()
+                        }
+                    # Frozen bounds are an executable contract: fixed entries
+                    # must also be injected, not merely active entries exposed
+                    # to PEST.  Otherwise a frozen value can silently remain at
+                    # an unrelated template default.
+                    allowed = set(allowed) | _hd_declared
+                    extra_allowed = set(extra_allowed) | _hd_declared
 
         entries = _parse_batch_entries(args.batch)
 
-        if not entries:
+        # The design-driven builder below owns FileX/FileA/FileT resolution
+        # for every declared season.  Do not also parse ``args.batch`` here:
+        # an autumn bundle legitimately contains historical absolute FileX
+        # paths (for example C:\\DSSAT48\\TOMATO\\XXQL2502.TMX), while the
+        # design contract deliberately resolves the same basename inside the
+        # immutable season bundle.  The old branch was harmless only when a
+        # joint case happened to pass the spring batch as its CLI entry point.
+        if multiseason_mode:
+            # ``stage2_outputs`` below is a legacy single-season placeholder
+            # that the design-driven branch replaces before creating the PST.
+            # Define empty values here so that placeholder construction cannot
+            # accidentally dereference legacy FileX-derived state.
+            stage_evaluate_df = pd.DataFrame(columns=["@RUN", "TN", "ADAPM", "LAIXM", "CNAMM"])
+            df_harvest = pd.DataFrame(columns=["@RUN", "TN", "HNO", "DATE", "PWADM", "PWAIM", "PWADS", "PWAIS"])
+            harvest_sigmas = {"PWADM": 1.0}
+            df_process = pd.DataFrame(
+                columns=["@RUN", "TN", "DATE", "LAIDM", "LWADM", "SWADM", "LAIDS", "LWADS", "SWADS"]
+            )
+            process_sigmas = {"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
+        elif not entries:
             stage_evaluate_df = pd.DataFrame(columns=["@RUN", "TN", "ADAPM", "LAIXM", "CNAMM"])
             df_harvest = pd.DataFrame(columns=["@RUN", "TN", "HNO", "DATE", "PWADM", "PWAIM", "PWADS", "PWAIS"])
             harvest_sigmas = {"PWADM": 1.0}
@@ -3174,10 +3274,9 @@ if __name__ == "__main__":
             },
             {
                 "model_out_path": PEST_JOINT_FILE,
-                "obs_bases": {"HWAM", "LAIX", "CNAM", "CHTA", "CNAA", "PWAM", "H#AM", "HIAM"},
+                "obs_bases": {"LAIX", "CNAM", "CHTA", "CNAA", "PWAM", "H#AM", "HIAM"},
                 "critical_obs": set(),
                 "group_sigmas": {
-                    "HWAMM": float(args.hwamm_sigma),
                     "PWAMM": float(args.pwamm_sigma),
                     "LAIXM": float(args.laixm_sigma),
                     "CNAMM": float(args.cnamm_sigma),
@@ -3532,7 +3631,7 @@ if __name__ == "__main__":
         group_sigmas = None
         extra_allowed = None
 
-    params = parse_cul_params(cultivar, allowed_params=allowed)
+    params = parse_cul_params(cultivar, allowed_params=allowed, allow_all_flagged=multiseason_mode and bool(args.bounds_id))
 
     if extra_allowed is not None:
         eco_init = _read_eco_init_values(ecotype)
@@ -3711,29 +3810,13 @@ if __name__ == "__main__":
 
     if stage2_outputs is not None:
         if multiseason_mode:
-            ctx = {
-                "_parse_batch_entries": _parse_batch_entries,
-                "_build_evaluate_observations_from_filea": _build_evaluate_observations_from_filea,
-                "_read_tmt_harvest_events": _read_tmt_harvest_events,
-                "_read_tmt_process_points": _read_tmt_process_points,
-                "_resolve_filex_path": _resolve_filex_path,
-                "_infer_excode_from_filex": _infer_excode_from_filex,
-                "PEST_EVAL_FILE": PEST_EVAL_FILE,
-                "PEST_JOINT_FILE": PEST_JOINT_FILE,
-                "PEST_HARVEST_FILE": PEST_HARVEST_FILE,
-                "PEST_TMTGROW_FILE": PEST_TMTGROW_FILE,
-                "create_ins_and_pst_multi": create_ins_and_pst_multi,
-                "_write_run_manifest": _write_run_manifest,
-                "_finalize_ies_contract": _finalize_ies_contract,
-                "bad_phi_sigma": bad_phi_sigma,
-                "observation_policies": observation_policies,
-            }
-            # Per-season builder needs USER_INPUT_DIR to resolve FileX.
-            # Set it once here so the builder only imports the shared module.
-            import src.calibration.build_pest as _bp
-            ctx["_bp_module"] = _bp
-            _bp.USER_INPUT_DIR = str(Path(args.multiseason_design).parent)  # fallback
-            build_multiseason_stage2(args, prefix, allowed, extra_allowed, params, model_cmd_extra, ctx)
+            # Lazy import to avoid circular dependency (build_pest_multiseason
+            # imports from build_pest at module level).
+            from src.calibration.build_pest_multiseason import build_multiseason_stage2
+            build_multiseason_stage2(
+                args, prefix, allowed, extra_allowed, params, model_cmd_extra,
+                observation_policies=observation_policies,
+            )
             raise SystemExit(0)
 
         create_ins_and_pst_multi(

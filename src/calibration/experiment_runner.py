@@ -204,6 +204,48 @@ def run_build(
     return run_dir
 
 
+def run_execute(
+    spec: ExperimentSpec,
+    run_dir: Path,
+    *,
+    prefix: str | None = None,
+    n_agents: int = 0,
+    wait: bool = True,
+    check: bool = True,
+) -> int:
+    """Launch PEST++ (IES) execution for a built experiment.
+
+    Shells out to ``tools/parallel/run_parallel.py`` with the prepared run
+    directory.  P0-C unlocked this path by eliminating the cross-season
+    ``USER_INPUT_DIR`` global mutation that previously made the multiseason
+    builder non-reentrant.
+
+    Returns the subprocess exit code (0 = success).
+    """
+    pfx = prefix or spec.experiment_id
+    pst_path = run_dir / f"{pfx}.pst"
+    if not pst_path.is_file():
+        raise FileNotFoundError(
+            f"PST not found: {pst_path}.  Run with --build-only first."
+        )
+
+    cmd = [
+        sys.executable,
+        str(PROJECT_ROOT / "tools" / "parallel" / "run_parallel.py"),
+        "--run-dir", str(run_dir),
+        "--case", pfx,
+        "--mode", "ies",
+        "--n-agents", str(n_agents),
+    ]
+    if wait:
+        cmd.append("--wait")
+    else:
+        cmd.append("--no-wait")
+    print("+ " + subprocess.list2cmdline(cmd), flush=True)
+    result = subprocess.run(cmd, cwd=str(PROJECT_ROOT), check=check)
+    return result.returncode
+
+
 def _resolve_observation_policy_csv(spec: ExperimentSpec) -> Path:
     """Resolve the observation-policy CSV the builder must consume.
 

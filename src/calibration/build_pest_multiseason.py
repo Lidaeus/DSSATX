@@ -1,34 +1,82 @@
 """T8 multi-season observation builder for ``build_pest.py``.
 
-This module is imported by ``build_pest.py`` when ``--multiseason-design``
-is supplied.  It handles per-season FileA/FileT/TMT reading, observation
-merging with global-run numbering, and PST generation via the existing
-``create_ins_and_pst_multi``.
+This module is imported lazily by ``build_pest.py`` when
+``--multiseason-design`` is supplied.  It handles per-season FileA/FileT/TMT
+reading, observation merging with global-run numbering, and PST generation
+via the existing ``create_ins_and_pst_multi``.
 
-It is deliberately kept separate so that single-season ``build_pest.py``
-changes do not risk cascading merge conflicts or indentation drift in a
-file that is already ~4000 lines.
+P0-C refactor: the previous ``ctx`` dict injection (13 symbols) and
+``USER_INPUT_DIR`` module-global mutation have been eliminated.  Functions
+and constants are now imported directly from ``build_pest``, and per-season
+state is carried by :class:`SeasonContext` instead of mutating the global.
 """
 
 from __future__ import annotations
 
 import csv
 import os
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import pandas as pd
 import pyemu
 
+from src.calibration.build_pest import (
+    PEST_EVAL_FILE,
+    PEST_HARVEST_FILE,
+    PEST_JOINT_FILE,
+    PEST_TMTGROW_FILE,
+    _build_evaluate_observations_from_filea,
+    _finalize_ies_contract,
+    _infer_excode_from_filex,
+    _parse_batch_entries,
+    _read_tmt_harvest_events,
+    _read_tmt_process_points,
+    _resolve_filex_path,
+    _write_run_manifest,
+    create_ins_and_pst_multi,
+)
 from src.calibration.multiseason_design import MultiSeasonDesign
+from src.calibration.observation_policy import load_observation_policy
+from src.calibration.seasonal_parameters import (
+    seasonal_offset_params_from_frozen_bounds,
+    validate_projected_physical_bounds,
+)
 from src.common.project import PROJECT_ROOT
 
-# Re-export from parent module so the multi-season branch can reach them.
-# These are set by build_pest before calling _build_multiseason_stage2.
-_PARENT_NAMESPACE: dict = {}
+
+@dataclass
+class SeasonContext:
+    """Per-season state that was previously carried by ``USER_INPUT_DIR``.
+
+    Replacing the module-global mutation with an explicit dataclass makes the
+    multiseason builder reentrant: each season's FileX/SOIL resolution is
+    scoped to its own ``input_dir``, with no risk of a stale global leaking
+    into the next season's lookups.
+    """
+
+    season_id: str
+    input_dir: Path
+    experiment_code: str
+    treatments: list[int] = field(default_factory=list)
 
 
-def _tmt_events_per_run(entries, _resolve_filex_path, _infer_excode, _read_harvest, _read_process):
-    """Cross-FileX TMT resolver (mirrors build_pest._collect_tmt_events_per_run)."""
+def _design_observation_policies(design, explicit_policies=None):
+    """Use the design-declared policy unless the CLI supplied one explicitly."""
+    if explicit_policies:
+        return explicit_policies
+    policy_path = Path(design.observation_policy)
+    if not policy_path.is_absolute():
+        policy_path = (PROJECT_ROOT / policy_path).resolve()
+    return load_observation_policy(policy_path)
+
+
+def _tmt_events_per_run(entries, input_dir=None):
+    """Cross-FileX TMT resolver (mirrors build_pest._collect_tmt_events_per_run).
+
+    *input_dir* is passed explicitly to ``_resolve_filex_path`` so per-season
+    FileX resolution is scoped to the season bundle — no global mutation.
+    """
     events_by_run: dict[int, list] = {}
     points_by_run: dict[int, list] = {}
     tmt_cache = {}
@@ -38,61 +86,64 @@ def _tmt_events_per_run(entries, _resolve_filex_path, _infer_excode, _read_harve
         tn = int(entry.get("tn", -99))
         filex = entry.get("filex")
         filex_path = (
-            _resolve_filex_path(filex)
+            _resolve_filex_path(filex, input_dir=input_dir)
             or (filex if filex and os.path.isabs(filex) else None)
         )
         if not filex_path:
             raise FileNotFoundError(f"cannot resolve FileX for run {run_no}: {filex!r}")
         if filex_path not in tmt_cache:
-            excode = _infer_excode(filex_path)
+            excode = _infer_excode_from_filex(filex_path)
             tmt_path = os.path.join(
                 os.path.dirname(os.path.abspath(filex_path)), f"{excode}.TMT"
             ) if excode else None
-            tmt_cache[filex_path] = (_read_harvest(tmt_path), _read_process(tmt_path))
+            tmt_cache[filex_path] = (_read_tmt_harvest_events(tmt_path), _read_tmt_process_points(tmt_path))
         ev_by_tn, pt_by_tn = tmt_cache[filex_path]
         events_by_run[run_no] = list(ev_by_tn.get(tn, []))
         points_by_run[run_no] = list(pt_by_tn.get(tn, []))
     return events_by_run, points_by_run
 
 
-def build_multiseason_stage2(args, prefix, allowed, extra_allowed, params, model_cmd_extra, ctx: dict):
+def build_multiseason_stage2(
+    args, prefix, allowed, extra_allowed, params, model_cmd_extra,
+    *,
+    observation_policies=None,
+):
     """Build stage2 observations for multi-season joint calibration (T8 §4-§7).
 
-    Parameters
-    ----------
-    ctx : dict
-        Namespace providing functions from the parent ``build_pest`` module:
-        ``_parse_batch_entries``, ``_build_evaluate_observations_from_filea``,
-        ``_read_tmt_harvest_events``, ``_read_tmt_process_points``,
-        ``_resolve_filex_path``, ``_infer_excode_from_filex``,
-        ``PEST_EVAL_FILE``, ``PEST_JOINT_FILE``, ``PEST_HARVEST_FILE``,
-        ``PEST_TMTGROW_FILE``, ``create_ins_and_pst_multi``,
-        ``_write_run_manifest``, ``observation_policies``.
+    P0-C: the previous ``ctx`` dict (13 injected symbols) has been replaced
+    by direct imports from ``build_pest``.  Per-season state is carried by
+    :class:`SeasonContext` — no ``USER_INPUT_DIR`` global mutation.
     """
-    _parse_batch = ctx["_parse_batch_entries"]
-    _build_eval = ctx["_build_evaluate_observations_from_filea"]
-    _read_harvest = ctx["_read_tmt_harvest_events"]
-    _read_process = ctx["_read_tmt_process_points"]
-    _resolve_fx = ctx["_resolve_filex_path"]
-    _infer_excode = ctx["_infer_excode_from_filex"]
-    PEST_EVAL = ctx["PEST_EVAL_FILE"]
-    PEST_JOINT = ctx["PEST_JOINT_FILE"]
-    PEST_HARVEST = ctx["PEST_HARVEST_FILE"]
-    PEST_TMTGROW = ctx["PEST_TMTGROW_FILE"]
-    create_pst = ctx["create_ins_and_pst_multi"]
-    write_manifest = ctx["_write_run_manifest"]
-    observation_policies = ctx.get("observation_policies")
-
     design_path = Path(args.multiseason_design).expanduser().resolve()
     if not design_path.is_file():
         raise FileNotFoundError(f"Multi-season design not found: {design_path}")
     design = MultiSeasonDesign.load(design_path)
+    observation_policies = _design_observation_policies(design, observation_policies)
     seasons = design.calibration_seasons
-    if len(seasons) < 2:
+    if len(seasons) < 2 and not design.diagnostic_single_season:
         raise ValueError("Multi-season calibration requires at least 2 calibration seasons")
 
     out_dir = Path(args.out_dir).expanduser().resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    # PEST has no knowledge of a derived autumn value.  Declare the small
+    # offset vector as first-class PEST parameters, but source its bounds only
+    # from the approved frozen file.  The runner will remove these PEST-only
+    # names and inject the projected physical values season by season.
+    if design.seasonal_parameterization is not None:
+        bounds_id = str(getattr(args, "bounds_id", "") or "").strip()
+        bounds_crop = str(getattr(args, "bounds_crop", "eggplant") or "eggplant").strip()
+        if not bounds_id:
+            raise ValueError("seasonal offsets require an explicit frozen --bounds-id")
+        bounds_path = (
+            PROJECT_ROOT / "data" / "parameter_registry" / "bounds_frozen" / bounds_crop / f"{bounds_id}.csv"
+        )
+        if not bounds_path.is_file():
+            raise FileNotFoundError(f"seasonal-offset frozen bounds not found: {bounds_path}")
+        params = list(params) + seasonal_offset_params_from_frozen_bounds(
+            design.seasonal_parameterization, bounds_path
+        )
+        validate_projected_physical_bounds(params, design.seasonal_parameterization)
 
     global_run = 0
     run_mapping_rows = []
@@ -102,41 +153,37 @@ def build_multiseason_stage2(args, prefix, allowed, extra_allowed, params, model
 
     for season in seasons:
         bundle = season.bundle_absolute
-        # Point USER_INPUT_DIR to this season's bundle.  Since build_pest.py
-        # runs as __main__, its module-level functions (like _resolve_filex_path)
-        # resolve USER_INPUT_DIR from __main__'s namespace, NOT from the
-        # imported ``src.calibration.build_pest`` module.  We set both so
-        # that both single-season (imported) and __main__-based lookups work.
-        import sys
-        main_mod = sys.modules.get("__main__")
-        if main_mod is not None and hasattr(main_mod, "USER_INPUT_DIR"):
-            main_mod.USER_INPUT_DIR = str(bundle)
-        bp_mod = ctx.get("_bp_module")
-        if bp_mod is not None:
-            bp_mod.USER_INPUT_DIR = str(bundle)
-        
-        batch_file = bundle / "DSSBatch.v48"
+        # SeasonContext replaces USER_INPUT_DIR global mutation.  Per-season
+        # FileX/SOIL resolution is scoped to the season bundle.
+        sctx = SeasonContext(
+            season_id=season.season_id,
+            input_dir=bundle,
+            experiment_code=season.experiment_code,
+            treatments=list(season.treatments),
+        )
+
+        batch_file = sctx.input_dir / "DSSBatch.v48"
         if not batch_file.is_file():
-            raise FileNotFoundError(f"Season {season.season_id}: DSSBatch.v48 missing")
-        entries = _parse_batch(str(batch_file))
+            raise FileNotFoundError(f"Season {sctx.season_id}: DSSBatch.v48 missing")
+        entries = _parse_batch_entries(str(batch_file))
         # Rewrite absolute FileX paths to bare names so _resolve_filex_path
-        # looks them up in USER_INPUT_DIR (the season bundle).  The XXQL2502
-        # batch ships with C:\DSSAT48\TOMATO\... absolute paths.
+        # looks them up in the season bundle (passed as input_dir).  The
+        # XXQL2502 batch ships with C:\DSSAT48\TOMATO\... absolute paths.
         for e in entries:
             raw = e.get("filex", "")
             if raw and os.path.isabs(str(raw)):
                 e["filex"] = os.path.basename(str(raw))
-        
+
         by_tn = {int(e.get("tn", -99)): e for e in entries}
-        missing_tns = [tn for tn in season.treatments if tn not in by_tn]
+        missing_tns = [tn for tn in sctx.treatments if tn not in by_tn]
         if missing_tns:
             raise ValueError(
-                f"Season {season.season_id}: treatments absent from batch: {missing_tns}"
+                f"Season {sctx.season_id}: treatments absent from batch: {missing_tns}"
             )
         # DSSAT RUN is batch-row order.  The runtime writes a selected batch in
         # the design order, so the builder must use the identical local RUN map.
         entries = []
-        for local_run, tn in enumerate(season.treatments, 1):
+        for local_run, tn in enumerate(sctx.treatments, 1):
             entry = dict(by_tn[tn])
             entry["run"] = local_run
             entries.append(entry)
@@ -148,13 +195,13 @@ def build_multiseason_stage2(args, prefix, allowed, extra_allowed, params, model
             tn = int(e.get("tn", -99))
             local_to_global[lr] = global_run
             run_mapping_rows.append({
-                "global_run": global_run, "season_id": season.season_id,
-                "experiment_code": season.experiment_code,
+                "global_run": global_run, "season_id": sctx.season_id,
+                "experiment_code": sctx.experiment_code,
                 "treatment": tn, "local_run": lr,
             })
 
-        sid = season.season_id
-        eval_df = _build_eval(entries)
+        sid = sctx.season_id
+        eval_df = _build_evaluate_observations_from_filea(entries, input_dir=str(sctx.input_dir))
         for _, row_ in eval_df.iterrows():
             lr = int(row_.get("@RUN", row_.get("RUN", 0)))
             gr = local_to_global.get(lr, lr)
@@ -166,21 +213,25 @@ def build_multiseason_stage2(args, prefix, allowed, extra_allowed, params, model
             all_eval_rows.append(record)
 
         events_by_run, points_by_run = _tmt_events_per_run(
-            entries, _resolve_fx, _infer_excode, _read_harvest, _read_process
+            entries, input_dir=str(sctx.input_dir)
         )
         for e in entries:
             lr = int(e["run"])
             gr = local_to_global.get(lr, lr)
             tn = int(e.get("tn", -99))
             for ev in events_by_run.get(lr, []):
-                hv = getattr(args, "harvest_var", "CHPDT")
-                obs_cum = ev.get("dry_cum", -99.0) if hv == "CHPDT" else ev.get("fresh_cum", -99.0)
-                obs_inc = ev.get("dry_inc", -99.0) if hv == "CHPDT" else ev.get("fresh_inc", -99.0)
+                # T10 direct harvest contract: read CHFPW and CHPDT as direct
+                # cumulative series from FileT — no differencing, no PWAD/PWAI.
+                # Both fresh and dry cumulative enter Phi after the shared
+                # observation-policy transform. PWAD/PWAI are not formal
+                # observations in T10.
+                chfpw_val = float(ev.get("chfpw", -99.0))
+                chpdt_val = float(ev.get("chpdt", -99.0))
                 all_harvest_rows.append({
                     "@RUN": gr, "TN": tn, "HNO": int(ev["hno"]),
                     "DATE": int(ev["date"]),
-                    "PWADM": float(obs_cum), "PWAIM": float(obs_inc),
-                    "PWADS": -99.0, "PWAIS": -99.0, "season": sid,
+                    "CHFPWM": chfpw_val, "CHPDTM": chpdt_val,
+                    "CHFPWS": -99.0, "CHPDTS": -99.0, "season": sid,
                 })
             for p in points_by_run.get(lr, []):
                 all_process_rows.append({
@@ -201,10 +252,10 @@ def build_multiseason_stage2(args, prefix, allowed, extra_allowed, params, model
         cv = float(getattr(args, "pwadm_cv", 0.08))
         sf = float(getattr(args, "pwadm_sigma_factor", 1.0))
         for hno, g in df_harvest.groupby("HNO"):
-            med_cum = float(g["PWADM"].median())
-            med_inc = float(g["PWAIM"].median())
-            harvest_sigmas[f"PWADM_H{int(hno)}"] = float((s0**2 + (cv * abs(med_cum))**2)**0.5 * sf)
-            harvest_sigmas[f"PWAIM_H{int(hno)}"] = float((s0**2 + (cv * abs(med_inc))**2)**0.5 * sf)
+            # T10 direct harvest: CHFPW and CHPDT get their own sigma keys.
+            for var in ("CHFPWM", "CHPDTM"):
+                med = float(g[var].median()) if var in g.columns else 0.0
+                harvest_sigmas[f"{var}_H{int(hno)}"] = float((s0**2 + (cv * abs(med))**2)**0.5 * sf)
 
     process_sigmas = {}
     if not df_process.empty:
@@ -230,16 +281,15 @@ def build_multiseason_stage2(args, prefix, allowed, extra_allowed, params, model
 
     stage2_outputs = [
         {
-            "model_out_path": PEST_EVAL, "obs_bases": {"ADAP"},
+            "model_out_path": PEST_EVAL_FILE, "obs_bases": {"ADAP"},
             "critical_obs": {"ADAPM"},
             "group_sigmas": {"ADAPM": float(adapm_sigma)}, "df": df_eval,
         },
         {
-            "model_out_path": PEST_JOINT,
-            "obs_bases": {"HWAM", "LAIX", "CNAM", "CHTA", "CNAA", "PWAM", "H#AM", "HIAM"},
+            "model_out_path": PEST_JOINT_FILE,
+            "obs_bases": {"LAIX", "CNAM", "CHTA", "CNAA", "PWAM", "H#AM", "HIAM"},
             "critical_obs": set(),
             "group_sigmas": {
-                "HWAMM": float(getattr(args, "hwamm_sigma", 50.0)),
                 "PWAMM": float(getattr(args, "pwamm_sigma", 20.0)),
                 "LAIXM": float(getattr(args, "laixm_sigma", 0.8)),
                 "CNAMM": float(getattr(args, "cnamm_sigma", 25.0)),
@@ -249,11 +299,11 @@ def build_multiseason_stage2(args, prefix, allowed, extra_allowed, params, model
             "df": df_eval,
         },
         {
-            "model_out_path": PEST_HARVEST, "obs_bases": {"PWAD", "PWAI"},
+            "model_out_path": PEST_HARVEST_FILE, "obs_bases": {"CHFPW", "CHPDT"},
             "critical_obs": set(), "group_sigmas": harvest_sigmas, "df": df_harvest,
         },
         {
-            "model_out_path": PEST_TMTGROW, "obs_bases": {"LAID", "LWAD", "SWAD"},
+            "model_out_path": PEST_TMTGROW_FILE, "obs_bases": {"LAID", "LWAD", "SWAD"},
             "critical_obs": set(), "group_sigmas": process_sigmas, "df": df_process,
         },
     ]
@@ -263,11 +313,11 @@ def build_multiseason_stage2(args, prefix, allowed, extra_allowed, params, model
     print(f"run_mapping ({len(run_mapping_rows)} runs) -> {run_map_path}")
 
     model_cmd_extra = f"--batch DSSBatch.v48 --harvest-var {getattr(args, 'harvest_var', 'CHPDT')}"
-    create_pst(
+    create_ins_and_pst_multi(
         params, prefix,
         noptmax=int(args.noptmax), ies_num_reals=int(args.ies_num_reals),
         random_seed=int(args.random_seed),
-        outputs=stage2_outputs, evaluate_out_path=PEST_EVAL,
+        outputs=stage2_outputs, evaluate_out_path=PEST_EVAL_FILE,
         model_cmd_extra=model_cmd_extra, out_dir=str(out_dir),
         weight_scheme=str(getattr(args, "weight_scheme", "raw")),
         observation_policies=observation_policies,
@@ -278,36 +328,38 @@ def build_multiseason_stage2(args, prefix, allowed, extra_allowed, params, model
         pst = pyemu.Pst(str(pst_path))
         sched = str(PROJECT_ROOT / "src" / "calibration" / "run_multiseason.py").replace("\\", "/")
         design_path_fwd = str(design_path).replace("\\", "/")
+        transform_path = out_dir / f"{prefix}.observation_transforms.json"
+        transform_arg = (
+            f" --observation-transform-config {transform_path.name}"
+            if transform_path.is_file() else ""
+        )
         pst.model_command = [
             f'python "{sched}" --design "{design_path_fwd}" --param-csv {prefix}_params.csv'
             f' --harvest-var {getattr(args, "harvest_var", "CHPDT")}'
-            f' --prefix {prefix}'
+            f' --prefix {prefix}{transform_arg}'
         ]
         pst.write(str(pst_path))
 
     # ── Apply T8 weight formula (§7.2) ──────────────────────────────────
-    _apply_t8_weights(out_dir, prefix, design.group_policy)
+    _apply_t8_weights(out_dir, prefix, design.group_policy, run_mapping_rows)
 
     # ── Write observation_registry.csv ───────────────────────────────────
     _write_obs_registry(out_dir, prefix, run_mapping_rows)
 
     # ── Write group_weight_audit.csv ─────────────────────────────────────
-    _write_group_weight_audit(out_dir, prefix, design.group_policy)
+    _write_group_weight_audit(out_dir, prefix, design.group_policy, run_mapping_rows)
 
-    finalize_ies = ctx.get("_finalize_ies_contract")
-    ies_contract = {}
-    if finalize_ies is not None:
-        ies_contract = finalize_ies(
-            pst_path,
-            out_dir=str(out_dir),
-            prefix=prefix,
-            ies_num_reals=int(args.ies_num_reals),
-            random_seed=int(args.random_seed),
-            bad_phi_sigma=float(ctx.get("bad_phi_sigma", 1.0e300)),
-            observation_noise=bool(observation_policies),
-        )
+    ies_contract = _finalize_ies_contract(
+        pst_path,
+        out_dir=str(out_dir),
+        prefix=prefix,
+        ies_num_reals=int(args.ies_num_reals),
+        random_seed=int(args.random_seed),
+        bad_phi_sigma=float(getattr(args, "bad_phi_sigma", 1.0e300)),
+        observation_noise=bool(observation_policies),
+    )
 
-    write_manifest(
+    _write_run_manifest(
         str(out_dir), run_id=prefix, run_type="multiseason_calibration",
         crop="eggplant", mode="eggplant_stage2_multiseason",
         design_config=str(design_path), design_id=design.design_id,
@@ -335,9 +387,13 @@ def _family_for_group(group):
     family_map = {
         "ADAPM": "PHENO", "ADAPS": "PHENO",
         "LAIXM": "CANOPY", "LAIDM": "CANOPY", "LAIXS": "CANOPY",
-        "LWADM": "BIOMASS", "SWADM": "BIOMASS", "CNAMM": "BIOMASS",
-        "HWAMM": "BIOMASS", "HIAMM": "BIOMASS", "CWAMS": "BIOMASS",
+        "LWADM": "BIOMASS", "SWADM": "BIOMASS",
+        "CNAMM": "PLANT_N",
+        "HIAMM": "BIOMASS", "CWAMS": "BIOMASS",
         "PWADM": "CUMULATIVE_HARVEST", "PWAIM": "INCREMENTAL_HARVEST",
+        # T10 direct harvest variables (log-transformed cumulative series).
+        "CHFPWM": "HARVEST_FRESH", "CHFPWS": "HARVEST_FRESH",
+        "CHPDTM": "HARVEST_DRY", "CHPDTS": "HARVEST_DRY",
     }
     for key, family in family_map.items():
         if root.startswith(key):
@@ -359,7 +415,20 @@ def _load_group_budgets(policy_path):
     return budgets
 
 
-def _apply_t8_weights(out_dir, prefix, group_policy):
+def _season_for_obsnme(obsnme, run_seasons):
+    """Return the calibration season encoded by an ``*_R<global_run>`` name."""
+    import re
+
+    match = re.search(r"_R(\d+)(?:_|$)", str(obsnme), flags=re.IGNORECASE)
+    if match is None:
+        raise ValueError(f"cannot assign observation to a season: {obsnme!r}")
+    season = run_seasons.get(int(match.group(1)))
+    if season is None:
+        raise ValueError(f"observation run is absent from run mapping: {obsnme!r}")
+    return season
+
+
+def _apply_t8_weights(out_dir, prefix, group_policy, run_mapping_rows):
     """Rewrite PST weights using T8 §7.2 formula: weight = (1/sigma) × sqrt(budget/n_g)."""
     import csv, math
 
@@ -370,20 +439,25 @@ def _apply_t8_weights(out_dir, prefix, group_policy):
 
     budgets = _load_group_budgets(group_policy)
 
-    # Count non-zero-weight observations per group
-    group_n = {}
+    run_seasons = {int(row["global_run"]): str(row["season_id"]) for row in run_mapping_rows}
+    # One budget applies to a scientific family within a season. Harvest HNO
+    # and process DATE groups must not each receive the full family budget.
+    bucket_n = {}
+    obs_bucket = {}
     with weights_path.open("r", encoding="utf-8-sig", newline="") as f:
         for row in csv.DictReader(f):
+            obsnme = (row.get("obsnme") or row.get("\ufeffobsnme") or "").strip().lower()
             grp = (row.get("obgnme") or "").strip().lower()
             if float(row.get("weight", 0)) > 0:
-                group_n[grp] = group_n.get(grp, 0) + 1
+                bucket = (_season_for_obsnme(obsnme, run_seasons), _family_for_group(grp))
+                obs_bucket[obsnme] = bucket
+                bucket_n[bucket] = bucket_n.get(bucket, 0) + 1
 
-    # Compute per-group multipliers
-    group_mult = {}
-    for grp, n in group_n.items():
-        family = _family_for_group(grp)
+    bucket_mult = {}
+    for bucket, n in bucket_n.items():
+        _, family = bucket
         budget = budgets[family]
-        group_mult[grp] = math.sqrt(budget / max(n, 1))
+        bucket_mult[bucket] = math.sqrt(budget / max(n, 1))
 
     # Rewrite PST observation weights
     pst = pyemu.Pst(str(pst_path))
@@ -401,9 +475,8 @@ def _apply_t8_weights(out_dir, prefix, group_policy):
     new_weights = []
     for obsnme in obs.obsnme:
         sigma = sigmas.get(obsnme.strip().lower(), 1.0)
-        grp = str(obs.loc[obs.obsnme == obsnme, "obgnme"].iloc[0]).strip().lower() if obsnme in obs.obsnme.values else ""
-        mult = group_mult.get(grp, 1.0)
         key = obsnme.strip().lower()
+        mult = bucket_mult.get(obs_bucket.get(key), 1.0)
         new_weights.append(mult / sigma if active.get(key, False) and sigma > 0 else 0.0)
 
     obs["weight"] = new_weights
@@ -414,11 +487,9 @@ def _apply_t8_weights(out_dir, prefix, group_policy):
     audit_key = audit["obsnme"].astype(str).str.lower()
     pst_weights = dict(zip(obs["obsnme"].astype(str).str.lower(), obs["weight"].astype(float)))
     audit["weight"] = [pst_weights.get(key, value) for key, value in zip(audit_key, audit["weight"])]
-    audit["group_multiplier"] = [
-        group_mult.get(str(group).strip().lower(), 1.0) for group in audit["obgnme"]
-    ]
+    audit["group_multiplier"] = [bucket_mult.get(obs_bucket.get(key), 1.0) for key in audit_key]
     audit.to_csv(weights_path, index=False, encoding="utf-8-sig")
-    print(f"T8 weights applied ({len(group_mult)} groups × budget) -> {pst_path}")
+    print(f"T10 weights applied ({len(bucket_mult)} family-season budgets) -> {pst_path}")
 
 
 def _write_obs_registry(out_dir, prefix, run_mapping_rows):
@@ -470,7 +541,7 @@ def _write_obs_registry(out_dir, prefix, run_mapping_rows):
     print(f"observation_registry ({len(rows_out)} obs) -> {registry_path}")
 
 
-def _write_group_weight_audit(out_dir, prefix, group_policy):
+def _write_group_weight_audit(out_dir, prefix, group_policy, run_mapping_rows):
     """Write group_weight_audit.csv with T8 phi budgets."""
     import csv, math
 
@@ -478,42 +549,43 @@ def _write_group_weight_audit(out_dir, prefix, group_policy):
     if not weights_path.is_file():
         return
 
-    # Compute per-group stats from weights audit
+    run_seasons = {int(row["global_run"]): str(row["season_id"]) for row in run_mapping_rows}
+    # Compute the exact family-season partitions used by _apply_t8_weights.
     groups = {}
     with weights_path.open("r", encoding="utf-8-sig", newline="") as f:
         for row in csv.DictReader(f):
-            grp = row.get("obgnme", "")
-            if grp not in groups:
-                groups[grp] = {"n_obs": 0, "weights": [], "sigmas": []}
+            obsnme = (row.get("obsnme") or row.get("\ufeffobsnme") or "").strip()
+            bucket = (_season_for_obsnme(obsnme, run_seasons), _family_for_group(row.get("obgnme", "")))
+            if bucket not in groups:
+                groups[bucket] = {"n_obs": 0, "weights": [], "sigmas": []}
             w = float(row.get("weight", 0))
             s = float(row.get("sigma", 1))
             if w > 0:
-                groups[grp]["n_obs"] += 1
-                groups[grp]["weights"].append(w)
-                groups[grp]["sigmas"].append(s)
+                groups[bucket]["n_obs"] += 1
+                groups[bucket]["weights"].append(w)
+                groups[bucket]["sigmas"].append(s)
 
     budgets = _load_group_budgets(group_policy)
 
     audit_path = out_dir / f"{prefix}_group_weight_audit.csv"
     with audit_path.open("w", encoding="utf-8-sig", newline="") as f_out:
         writer = csv.DictWriter(f_out, fieldnames=[
-            "group", "variable_family", "phi_budget", "n_obs",
+            "group", "season_id", "variable_family", "phi_budget", "n_obs",
             "mean_sigma_eff", "mean_weight", "weight_multiplier",
             "sigma_source", "note"
         ])
         writer.writeheader()
-        for grp in sorted(groups):
-            g = groups[grp]
-            # Determine family from group name root (strip _H{N} and _D{DATE} suffixes)
-            family = _family_for_group(grp)
+        for season, family in sorted(groups):
+            g = groups[(season, family)]
             budget = budgets[family]
             mean_s = sum(g["sigmas"]) / max(len(g["sigmas"]), 1)
             mean_w = sum(g["weights"]) / max(len(g["weights"]), 1)
-            # T8 weight formula: weight = (1/sigma) * sqrt(budget / n_obs)
+            # T10 family-season allocation: weight = (1/sigma) * sqrt(budget / n_obs)
             expected_mult = math.sqrt(budget / max(g["n_obs"], 1))
             actual_mult = mean_w * mean_s  # since weight = mult / sigma
             writer.writerow({
-                "group": grp,
+                "group": f"{season}:{family}",
+                "season_id": season,
                 "variable_family": family,
                 "phi_budget": budget,
                 "n_obs": g["n_obs"],
