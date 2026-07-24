@@ -545,3 +545,95 @@ class TestRealArtifactsSobol23T9:
         rows = _read_csv(frozen_dir / "test_sobol23_from_t9.csv")
         active = [r for r in rows if r["status"].lower() == "active"]
         assert len(active) == 23
+
+
+# ---------------------------------------------------------------------------
+# CLI validation: --out writes proposal, then validates freezability
+# ---------------------------------------------------------------------------
+
+class TestCLIPostWriteValidation:
+    """The extract CLI must validate the proposal is freezable immediately
+    after writing it, so the user gets early feedback instead of discovering
+    issues at the freeze_bounds.py step.
+    """
+
+    def _run_cli(self, posterior: Path, pset: Path, base: Path, out: Path) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            [
+                sys.executable, "-m",
+                "src.calibration.extract_bounds_from_posterior",
+                "--posterior", str(posterior),
+                "--parameter-set", str(pset),
+                "--base-bounds", str(base),
+                "--out", str(out),
+            ],
+            capture_output=True,
+            text=True,
+            cwd=str(PROJECT_ROOT),
+        )
+
+    def test_cli_exits_zero_on_freezable_proposal(self, tmp_path):
+        """A well-behaved posterior must produce exit code 0 with
+        'Validation: PASS' in stdout."""
+        rng = np.random.default_rng(42)
+        posterior = _write_posterior(tmp_path / "post.csv", {
+            "tb2":  rng.uniform(8.0, 12.0, size=100),
+            "to12": rng.uniform(22.0, 24.0, size=100),
+            "to22": rng.uniform(28.0, 30.0, size=100),
+            "tm2":  rng.uniform(38.0, 42.0, size=100),
+        })
+        base = _make_base_bounds(tmp_path / "base.csv")
+        pset = _make_param_set(tmp_path / "pset.json")
+        out = tmp_path / "proposal.csv"
+
+        result = self._run_cli(posterior, pset, base, out)
+        assert result.returncode == 0, result.stderr
+        assert "Validation: PASS" in result.stdout
+        assert out.is_file()
+
+    def test_cli_exits_one_on_stage_init_violation(self, tmp_path):
+        """If the posterior produces XMAGE.median > XFPHT.median (stage init
+        reversal), the proposal fails STAGE_INIT_ORDER validation and the
+        CLI must exit 1.
+
+        The extract tool enforces temperature ordering but not stage
+        ordering (XMAGE < XFPHT); this test verifies the CLI's post-write
+        validation catches the issue early.
+        """
+        # Base bounds: XMAGE and XFPHT, both active and well-ordered.
+        rows = [
+            {"name": "XMAGE", "init": "13.5", "lower": "8.0", "upper": "30.0",
+             "status": "active", "pargp": "ECO_Phenology", "location": "ECO",
+             "file": "TMGRO048.ECO", "cultivar": "TM0008", "ecotype": "TM0001",
+             "mode": "both"},
+            {"name": "XFPHT", "init": "38.8", "lower": "35.0", "upper": "70.0",
+             "status": "active", "pargp": "ECO_Phenology", "location": "ECO",
+             "file": "TMGRO048.ECO", "cultivar": "TM0008", "ecotype": "TM0001",
+             "mode": "both"},
+        ]
+        base = tmp_path / "stage_base.csv"
+        with base.open("w", encoding="utf-8-sig", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=FIELDNAMES)
+            w.writeheader()
+            w.writerows(rows)
+
+        pset = tmp_path / "pset.json"
+        pset.write_text(json.dumps({
+            "set_id": "test_stage2", "parameters": ["XMAGE", "XFPHT"],
+            "declared_count": 2, "source_file": "t", "source_sha256": "0" * 64,
+            "applicable_observations": "CHPDT", "approval_note": "t",
+        }), encoding="utf-8")
+
+        # Posterior: XMAGE median ~30 > XFPHT median ~25 (reversed).
+        rng = np.random.default_rng(999)
+        posterior = _write_posterior(tmp_path / "post.csv", {
+            "xmage": rng.uniform(25.0, 35.0, size=100),
+            "xfpht": rng.uniform(20.0, 30.0, size=100),
+        })
+        out = tmp_path / "proposal.csv"
+
+        result = self._run_cli(posterior, pset, base, out)
+        assert result.returncode == 1
+        assert "Validation: FAIL" in result.stderr
+        # The proposal file should still exist for manual inspection.
+        assert out.is_file()

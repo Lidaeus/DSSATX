@@ -21,6 +21,7 @@ from __future__ import annotations
 import csv
 import json
 import logging
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -338,10 +339,34 @@ def main(argv: list[str] | None = None) -> int:
         out_csv=args.out,
     )
 
-    active = sum(1 for r in csv.DictReader(open(out, encoding="utf-8-sig"))
-                 if r.get("status", "").lower() == "active")
+    active = 0
+    with open(out, "r", encoding="utf-8-sig", newline="") as fh:
+        for r in csv.DictReader(fh):
+            if r.get("status", "").lower() == "active":
+                active += 1
+
     print(f"Bounds proposal written: {out}")
     print(f"  active parameters: {active}")
+
+    # Validate the proposal is freezable so the user gets early, actionable
+    # feedback instead of discovering issues at the freeze_bounds.py step.
+    from src.common.param_registry import assert_valid_frozen_bounds
+
+    try:
+        issues = assert_valid_frozen_bounds(out)
+        warnings = [i for i in issues if i.severity == "warning"]
+        if warnings:
+            print(f"  warnings ({len(warnings)}):")
+            for w in warnings[:10]:
+                print(f"    {w}")
+        print(f"  Validation: PASS (freezable)")
+    except ValueError as exc:
+        print(f"  Validation: FAIL — proposal is NOT freezable", file=sys.stderr)
+        print(f"  {exc}", file=sys.stderr)
+        print(f"  The proposal file is still at {out} for manual inspection.",
+              file=sys.stderr)
+        return 1
+
     print(f"  NOTE: This is a proposal, not a frozen bounds file.")
     print(f"  Promote via: python tools/freeze_bounds.py "
           f"--proposal {out} --crop eggplant --bounds-id <id>")
