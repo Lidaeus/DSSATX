@@ -384,14 +384,19 @@ def read_phi_ensemble(path: str | Path) -> pd.DataFrame:
 
 
 def performance_metrics(frame: pd.DataFrame) -> dict[str, float | int]:
+    # Delegate to the single source of truth (src.reporting.metrics).  The
+    # legacy keys n/rmse/mae/bias are preserved for backward compatibility;
+    # callers may also read the richer MBE/NSE/MSE_s/MSE_u fields.
+    from src.reporting.metrics import compute_metrics
+
     observed = frame["observed"].to_numpy(dtype=float)
     simulated = frame["simulated"].to_numpy(dtype=float)
-    residual = simulated - observed
+    m = compute_metrics(observed, simulated)
     return {
-        "n": int(len(frame)),
-        "rmse": float(np.sqrt(np.mean(np.square(residual)))),
-        "mae": float(np.mean(np.abs(residual))),
-        "bias": float(np.mean(residual)),
+        "n": int(m["n"]),
+        "rmse": float(m["RMSE"]),
+        "mae": float(m["MAE"]),
+        "bias": float(m["MBE"]),
     }
 
 
