@@ -2021,6 +2021,81 @@ def create_param_csv(params, param_csv_path):
         for p in params:
             f.write(f"{p['name']},{p['init']}\n")
 
+
+def _compute_harvest_sigmas(df_harvest, args):
+    """Compute per-harvest-event sigmas for PWADM (cum) and PWAIM (inc).
+
+    Shared by ``eggplant_stage2``, ``eggplant_harvest``, and ``eggplant_v13``
+    modes.  Replaces three near-identical ~24-line blocks (Code Review O2).
+
+    sigma = (sigma0² + (cv * |median|)²)^0.5 * sigma_factor * early_scale
+    """
+    sigmas: dict[str, float] = {"PWADM": 1.0}
+    if df_harvest.empty:
+        return sigmas
+    early_hno_max = int(args.harvest_early_hno_max)
+    early_weight_factor = float(args.harvest_early_weight_factor)
+    early_apply_to = str(args.harvest_early_apply_to).strip().lower()
+    early_scale = 1.0
+    if early_weight_factor > 0:
+        early_scale = float(early_weight_factor) ** -0.5
+
+    sigma0 = float(args.pwadm_sigma0)
+    cv = float(args.pwadm_cv)
+    sigma_factor = float(args.pwadm_sigma_factor)
+
+    for hno, g in df_harvest.groupby("HNO"):
+        med_cum = float(g["PWADM"].median())
+        sigma_cum = (sigma0 ** 2 + (cv * abs(med_cum)) ** 2) ** 0.5 * sigma_factor
+        if early_hno_max > 0 and int(hno) <= early_hno_max and early_apply_to in {"cum", "both"}:
+            sigma_cum *= early_scale
+        sigmas[f"PWADM_H{int(hno)}"] = float(sigma_cum)
+
+        med_inc = float(g["PWAIM"].median())
+        sigma_inc = (sigma0 ** 2 + (cv * abs(med_inc)) ** 2) ** 0.5 * sigma_factor
+        if early_hno_max > 0 and int(hno) <= early_hno_max and early_apply_to in {"inc", "both"}:
+            sigma_inc *= early_scale
+        sigmas[f"PWAIM_H{int(hno)}"] = float(sigma_inc)
+    return sigmas
+
+
+def _compute_process_sigmas(
+    df_process,
+    var_specs: list[tuple[str, float, float]],
+    defaults: dict[str, float],
+    sigma_factors: dict[str, float] | None = None,
+):
+    """Compute per-date process-point sigmas.
+
+    Shared by ``eggplant_stage2``, ``eggplant_v13``, and ``eggplant_process``
+    modes.  Replaces three near-identical ~15-line blocks (Code Review O3).
+
+    sigma = (sigma0² + (cv * |median|)²)^0.5 * sigma_factors.get(var, 1.0)
+
+    *var_specs* is a list of ``(var_name, sigma0, cv)`` tuples.
+    *defaults* provides the fallback sigma for each variable (e.g. ``{"LAIDM": 2.0}``).
+    *sigma_factors* optionally multiplies both defaults and per-date sigmas
+    (used by ``eggplant_stage2``; ``None`` for ``eggplant_v13``/``eggplant_process``).
+    """
+    factors = sigma_factors or {}
+    sigmas: dict[str, float] = {
+        var: default_val * factors.get(var, 1.0)
+        for var, default_val in defaults.items()
+    }
+    if df_process.empty:
+        return sigmas
+    for var, sigma0, cv in var_specs:
+        g = df_process[df_process[var] != -99.0]
+        if g.empty:
+            continue
+        factor = factors.get(var, 1.0)
+        for date, gg in g.groupby("DATE"):
+            med = float(gg[var].median())
+            sigma = (sigma0 ** 2 + (cv * abs(med)) ** 2) ** 0.5 * factor
+            sigmas[f"{var}_D{int(date)}"] = float(sigma)
+    return sigmas
+
+
 def create_ins_and_pst(
     params,
     prefix,
@@ -2060,118 +2135,17 @@ def create_ins_and_pst(
     pst_path = os.path.join(out_dir, f"{prefix}.pst")
 
     _assert_no_hwam_calibration_target(obs_bases)
-    obs_cols = [
-        c for c in df.columns
-        if isinstance(c, str) and c.endswith('M') and c.upper() != "HWAMM"
-    ]
-    sim_cols = [c[:-1] + 'S' for c in obs_cols]
 
-    if obs_bases is not None:
-        filtered = []
-        for o, s in zip(obs_cols, sim_cols):
-            if o[:-1] in obs_bases:
-                filtered.append((o, s))
-        obs_cols = [o for o, _ in filtered]
-        sim_cols = [s for _, s in filtered]
-
-    critical_obs = set(critical_obs or [])
-
-    def get_pest_offset(col_idx):
-        return 0
-
-    obs_data = []
-    model_out_norm = os.path.normcase(os.path.abspath(model_out_path))
-    is_tagged_output = model_out_norm in {
-        os.path.normcase(os.path.abspath(PEST_EVAL_FILE)),
-        os.path.normcase(os.path.abspath(PEST_GROW_FILE)),
-        os.path.normcase(os.path.abspath(PEST_JOINT_FILE)),
-        os.path.normcase(os.path.abspath(PEST_HARVEST_FILE)),
-        os.path.normcase(os.path.abspath(PEST_TMTGROW_FILE)),
-    }
-    if is_tagged_output:
-        ins_lines = ["pif @"]
-    else:
-        ins_lines = ["pif @", "l3"]
-
-    col_names = df.columns.tolist()
-    for _, row in df.iterrows():
-        if "@RUN" in row.index:
-            run_no = int(row['@RUN'])
-        else:
-            run_no = int(row["RUN"])
-
-        season_prefix = ""
-        if "season" in row.index and pd.notna(row.get("season")):
-            season_prefix = re.sub(r"[^A-Za-z0-9]", "", str(row["season"])).upper()
-
-        suffix = ""
-        if "HNO" in row.index:
-            try:
-                suffix = f"_H{int(row['HNO'])}"
-            except Exception:
-                suffix = ""
-        elif "DATE" in row.index:
-            try:
-                suffix = f"_D{int(row['DATE'])}"
-            except Exception:
-                suffix = ""
-
-        current_ins_line = "l1 "
-
-        valid_obs = []
-        for obs_col, sim_col in zip(obs_cols, sim_cols):
-            val = row[obs_col]
-            if val != -99 or obs_col in critical_obs:
-                valid_obs.append((obs_col, sim_col, val))
-
-        if not valid_obs:
-            ins_lines.append(current_ins_line)
-            continue
-
-        if not is_tagged_output:
-            valid_obs.sort(key=lambda x: col_names.index(x[1]))
-
-        last_idx = -1
-        for obs_col, sim_col, val in valid_obs:
-            name_prefix = f"{season_prefix}_" if season_prefix else ""
-            obs_name = f"{name_prefix}{sim_col}_R{run_no}{suffix}"
-            if is_tagged_output:
-                current_ins_line += f"@{sim_col}@ w !{obs_name}! "
-            else:
-                col_idx = col_names.index(sim_col)
-                target_idx = col_idx + get_pest_offset(col_idx)
-                skips = target_idx - last_idx - 1
-                if skips < 0:
-                    skips = 0
-                current_ins_line += "w " * skips
-                current_ins_line += f"!{obs_name}! "
-
-            base_group = f"{obs_col}{suffix}" if suffix else obs_col
-            obgnme = f"{name_prefix}{base_group}"
-            sigma = _resolve_sigma(group_sigmas, base_group, obs_col)
-            if val == -99:
-                weight = 0.0
-            else:
-                weight = 1.0 if sigma is None else weight_from_sigma(sigma)
-
-            obs_data.append({
-                "obsnme": obs_name,
-                "obsval": val if val != -99 else 0,
-                "raw_obsval": val,
-                "weight": weight,
-                "obgnme": obgnme,
-                "sigma": sigma,
-                "base_weight": weight,
-                "group_multiplier": 1.0,
-                "transform": "raw",
-                "sim_token": sim_col,
-                "model_output_file": os.path.basename(model_out_path),
-                "weight_policy_id": WEIGHT_POLICY_ID,
-            })
-            if not is_tagged_output:
-                last_idx = target_idx
-
-        ins_lines.append(current_ins_line)
+    # O1 dedup: delegate INS/obs building to the shared _build_ins_and_obs
+    # helper (previously ~110 lines inlined here, duplicating the extracted
+    # function that create_ins_and_pst_multi already uses).
+    obs_data, ins_lines = _build_ins_and_obs(
+        df=df,
+        obs_bases=obs_bases,
+        critical_obs=critical_obs,
+        model_out_path=model_out_path,
+        group_sigmas=group_sigmas,
+    )
 
     with open(ins_path, 'w') as f:
         f.write("\n".join(ins_lines))
@@ -2207,22 +2181,9 @@ def create_ins_and_pst(
 
     pst = pyemu.Pst.from_par_obs_names(par_df.parnme, obs_df.obsnme if not obs_df.empty else [])
 
-    par_df_indexed = par_df.set_index('parnme')
-    for col in ['parval1', 'parlbnd', 'parubnd', 'pargp', 'partrans']:
-        pst.parameter_data.loc[par_df.parnme, col] = par_df_indexed[col].values
-
-    fixed_pars = par_df[par_df['parlbnd'] == par_df['parubnd']]['parnme']
-    if not fixed_pars.empty:
-        pst.parameter_data.loc[fixed_pars, 'partrans'] = 'fixed'
-
-    zero_pars = par_df[(par_df['parval1'] == 0) & (par_df['parlbnd'] != par_df['parubnd'])]['parnme']
-    if not zero_pars.empty:
-        pst.parameter_data.loc[zero_pars, 'partrans'] = 'none'
-
-    if not obs_df.empty:
-        pst.observation_data.loc[obs_df.obsnme, 'obsval'] = obs_df.set_index('obsnme')['obsval']
-        pst.observation_data.loc[obs_df.obsnme, 'obgnme'] = obs_df.set_index('obsnme')['obgnme']
-        pst.observation_data.loc[obs_df.obsnme, 'weight'] = obs_df.set_index('obsnme')['weight']
+    # O1 dedup: delegate PST population to the shared _populate_pst_from_par_obs
+    # helper (previously ~16 lines inlined here).
+    _populate_pst_from_par_obs(pst, par_df, obs_df)
 
     pst.control_data.noptmax = noptmax
     pst.pestpp_options["ies_num_reals"] = ies_num_reals
@@ -2979,6 +2940,22 @@ if __name__ == "__main__":
             "weight_scheme.py for hand-calc Phi regressions only."
         )
 
+    # P0-E.3: legacy modes with undefined/obsolete variables are deprecated.
+    # They are not extended or repaired; the article contract enters only via
+    # eggplant_stage2 (and the joint multiseason path).  A deprecation warning
+    # is emitted so historical reproduction runs still work, but the new
+    # experiment entry point (experiment_runner.run_build) hard-rejects them.
+    _DEPRECATED_MODES = {"eggplant_harvest", "eggplant_process", "eggplant_v13"}
+    if mode in _DEPRECATED_MODES:
+        import warnings as _warnings
+        _warnings.warn(
+            f"Mode '{mode}' is DEPRECATED: it contains undefined/obsolete harvest "
+            f"variables and is not maintained. Use 'eggplant_stage2' for the "
+            f"article contract. Historical reproduction may break without notice.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
     df_override = None
     stage2_outputs = None
     stage_evaluate_df = None
@@ -3209,60 +3186,21 @@ if __name__ == "__main__":
             df_harvest = pd.DataFrame(harvest_rows)
             df_process = pd.DataFrame(process_rows)
 
-            harvest_sigmas = {"PWADM": 1.0}
-            if not df_harvest.empty:
-                early_hno_max = int(args.harvest_early_hno_max)
-                early_weight_factor = float(args.harvest_early_weight_factor)
-                early_apply_to = str(args.harvest_early_apply_to).strip().lower()
-                early_scale = 1.0
-                if early_weight_factor > 0:
-                    early_scale = float(early_weight_factor) ** -0.5
-                for hno, g in df_harvest.groupby("HNO"):
-                    sigma0 = float(args.pwadm_sigma0)
-                    cv = float(args.pwadm_cv)
-                    sigma_factor = float(args.pwadm_sigma_factor)
-
-                    med_cum = float(g["PWADM"].median())
-                    sigma_cum = (sigma0**2 + (cv * abs(med_cum)) ** 2) ** 0.5
-                    sigma_cum = sigma_cum * sigma_factor
-                    if early_hno_max > 0 and int(hno) <= early_hno_max and early_apply_to in {"cum", "both"}:
-                        sigma_cum = sigma_cum * early_scale
-                    harvest_sigmas[f"PWADM_H{int(hno)}"] = float(sigma_cum)
-
-                    med_inc = float(g["PWAIM"].median())
-                    sigma_inc = (sigma0**2 + (cv * abs(med_inc)) ** 2) ** 0.5
-                    sigma_inc = sigma_inc * sigma_factor
-                    if early_hno_max > 0 and int(hno) <= early_hno_max and early_apply_to in {"inc", "both"}:
-                        sigma_inc = sigma_inc * early_scale
-                    harvest_sigmas[f"PWAIM_H{int(hno)}"] = float(sigma_inc)
-
-            laidm_sigma_factor = float(args.laidm_sigma_factor)
-            lwadm_sigma_factor = float(args.lwadm_sigma_factor)
-            swadm_sigma_factor = float(args.swadm_sigma_factor)
-            process_sigmas = {
-                "LAIDM": 2.0 * laidm_sigma_factor,
-                "LWADM": 150.0 * lwadm_sigma_factor,
-                "SWADM": 200.0 * swadm_sigma_factor,
-            }
-            if not df_process.empty:
-                for var, sigma0, cv in [
+            harvest_sigmas = _compute_harvest_sigmas(df_harvest, args)
+            process_sigmas = _compute_process_sigmas(
+                df_process,
+                var_specs=[
                     ("LAIDM", 1.6, 0.50),
                     ("LWADM", 80.0, 0.25),
                     ("SWADM", 100.0, 0.25),
-                ]:
-                    g = df_process[df_process[var] != -99.0]
-                    if g.empty:
-                        continue
-                    for date, gg in g.groupby("DATE"):
-                        med = float(gg[var].median())
-                        sigma = (sigma0**2 + (cv * abs(med)) ** 2) ** 0.5
-                        if var == "LAIDM":
-                            sigma = sigma * laidm_sigma_factor
-                        elif var == "LWADM":
-                            sigma = sigma * lwadm_sigma_factor
-                        elif var == "SWADM":
-                            sigma = sigma * swadm_sigma_factor
-                        process_sigmas[f"{var}_D{int(date)}"] = float(sigma)
+                ],
+                defaults={"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0},
+                sigma_factors={
+                    "LAIDM": float(args.laidm_sigma_factor),
+                    "LWADM": float(args.lwadm_sigma_factor),
+                    "SWADM": float(args.swadm_sigma_factor),
+                },
+            )
 
         stage2_outputs = [
             {
@@ -3341,33 +3279,7 @@ if __name__ == "__main__":
                     })
 
             df_override = pd.DataFrame(rows)
-            if df_override.empty:
-                group_sigmas = {"PWADM": 1.0}
-            else:
-                group_sigmas = {"PWADM": 1.0}
-                early_hno_max = int(args.harvest_early_hno_max)
-                early_weight_factor = float(args.harvest_early_weight_factor)
-                early_apply_to = str(args.harvest_early_apply_to).strip().lower()
-                early_scale = 1.0
-                if early_weight_factor > 0:
-                    early_scale = float(early_weight_factor) ** -0.5
-                for hno, g in df_override.groupby("HNO"):
-                    sigma0 = float(args.pwadm_sigma0)
-                    cv = float(args.pwadm_cv)
-                    sigma_factor = float(args.pwadm_sigma_factor)
-                    med_cum = float(g["PWADM"].median())
-                    sigma_cum = (sigma0 ** 2 + (cv * abs(med_cum)) ** 2) ** 0.5
-                    sigma_cum = sigma_cum * sigma_factor
-                    if early_hno_max > 0 and int(hno) <= early_hno_max and early_apply_to in {"cum", "both"}:
-                        sigma_cum = sigma_cum * early_scale
-                    group_sigmas[f"PWADM_H{int(hno)}"] = float(sigma_cum)
-
-                    med_inc = float(g["PWAIM"].median())
-                    sigma_inc = (sigma0 ** 2 + (cv * abs(med_inc)) ** 2) ** 0.5
-                    sigma_inc = sigma_inc * sigma_factor
-                    if early_hno_max > 0 and int(hno) <= early_hno_max and early_apply_to in {"inc", "both"}:
-                        sigma_inc = sigma_inc * early_scale
-                    group_sigmas[f"PWAIM_H{int(hno)}"] = float(sigma_inc)
+            group_sigmas = _compute_harvest_sigmas(df_override, args)
         extra_allowed = {"XMAGE", "FL-VS", "TRIFL"}
     elif mode == "eggplant_v13":
         prefix = args.prefix or "eggplant_v13"
@@ -3455,52 +3367,19 @@ if __name__ == "__main__":
                     )
 
             df_harvest = pd.DataFrame(harvest_rows)
-            if df_harvest.empty:
-                harvest_sigmas = {"PWADM": 1.0}
-            else:
-                harvest_sigmas = {"PWADM": 1.0}
-                early_hno_max = int(args.harvest_early_hno_max)
-                early_weight_factor = float(args.harvest_early_weight_factor)
-                early_apply_to = str(args.harvest_early_apply_to).strip().lower()
-                early_scale = 1.0
-                if early_weight_factor > 0:
-                    early_scale = float(early_weight_factor) ** -0.5
-
-                for hno, g in df_harvest.groupby("HNO"):
-                    sigma0 = float(args.pwadm_sigma0)
-                    cv = float(args.pwadm_cv)
-                    sigma_factor = float(args.pwadm_sigma_factor)
-
-                    med_cum = float(g["PWADM"].median())
-                    sigma_cum = (sigma0**2 + (cv * abs(med_cum)) ** 2) ** 0.5
-                    sigma_cum = sigma_cum * sigma_factor
-                    if early_hno_max > 0 and int(hno) <= early_hno_max and early_apply_to in {"cum", "both"}:
-                        sigma_cum = sigma_cum * early_scale
-                    harvest_sigmas[f"PWADM_H{int(hno)}"] = float(sigma_cum)
-
-                    med_inc = float(g["PWAIM"].median())
-                    sigma_inc = (sigma0**2 + (cv * abs(med_inc)) ** 2) ** 0.5
-                    sigma_inc = sigma_inc * sigma_factor
-                    if early_hno_max > 0 and int(hno) <= early_hno_max and early_apply_to in {"inc", "both"}:
-                        sigma_inc = sigma_inc * early_scale
-                    harvest_sigmas[f"PWAIM_H{int(hno)}"] = float(sigma_inc)
+            harvest_sigmas = _compute_harvest_sigmas(df_harvest, args)
 
             df_process = pd.DataFrame(process_rows)
-            process_sigmas = {"L#SDM": 0.6, "LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
-            if not df_process.empty:
-                for var, sigma0, cv in [
+            process_sigmas = _compute_process_sigmas(
+                df_process,
+                var_specs=[
                     ("L#SDM", 0.5, 0.15),
                     ("LAIDM", 1.6, 0.50),
                     ("LWADM", 80.0, 0.25),
                     ("SWADM", 100.0, 0.25),
-                ]:
-                    g = df_process[df_process[var] != -99.0]
-                    if g.empty:
-                        continue
-                    for date, gg in g.groupby("DATE"):
-                        med = float(gg[var].median())
-                        sigma = (sigma0**2 + (cv * abs(med)) ** 2) ** 0.5
-                        process_sigmas[f"{var}_D{int(date)}"] = float(sigma)
+                ],
+                defaults={"L#SDM": 0.6, "LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0},
+            )
 
         stage2_outputs = [
             {
@@ -3584,20 +3463,15 @@ if __name__ == "__main__":
                     )
 
             df_override = pd.DataFrame(rows)
-            group_sigmas = {"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
-            if not df_override.empty:
-                for var, sigma0, cv in [
+            group_sigmas = _compute_process_sigmas(
+                df_override,
+                var_specs=[
                     ("LAIDM", 1.6, 0.50),
                     ("LWADM", 80.0, 0.25),
                     ("SWADM", 100.0, 0.25),
-                ]:
-                    g = df_override[df_override[var] != -99.0]
-                    if g.empty:
-                        continue
-                    for date, gg in g.groupby("DATE"):
-                        med = float(gg[var].median())
-                        sigma = (sigma0 ** 2 + (cv * abs(med)) ** 2) ** 0.5
-                        group_sigmas[f"{var}_D{int(date)}"] = float(sigma)
+                ],
+                defaults={"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0},
+            )
         extra_allowed = None
     elif mode == "eggplant_spe_temp":
         prefix = args.prefix or "eggplant_spe_temp"
