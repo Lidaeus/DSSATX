@@ -34,7 +34,7 @@ figure_ids <- if (is.null(args$figure_ids)) "all" else args$figure_ids
 selected <- function(id) figure_ids == "all" || id %in% split_csv_arg(figure_ids)
 requested_ids <- if (figure_ids == "all") character() else split_csv_arg(figure_ids)
 is_t4_request <- any(requested_ids %in% c("figs5_posterior", "figs6_spearman", "figs7_equifinality"))
-is_sa_request <- any(requested_ids %in% c("fig1_sa", "figs1_sa_stability"))
+is_sa_request <- any(requested_ids %in% c("fig1_sa", "figs1_sa_stability", "figs1b_sa_effects"))
 is_sobol_request <- any(requested_ids %in% c("figs2_sobol_convergence"))
 if (sum(c(is_t4_request, is_sa_request, is_sobol_request)) > 1) {
   stop("Morris SA, Sobol SA, and T4 figures require separate frozen bundles", call. = FALSE)
@@ -105,11 +105,44 @@ if (is_sa_request) {
     utils::write.csv(result$stability_source, stability_source, row.names = FALSE, fileEncoding = "UTF-8")
     artifacts <- c(artifacts, rank_source, stability_source)
   }
+  # W4 (plan §5.3): response-level mu*-sigma small multiples.  This is the
+  # second evidence class of Fig.S1, requiring the W2 morris_response_effects.csv.
+  # Fail fast when the figure is explicitly requested but the bundle lacks the
+  # effects table — a silent skip would let the command succeed with no output.
+  if (selected("figs1b_sa_effects")) {
+    if (!isTRUE(bundle$has_effects)) {
+      stop("figs1b_sa_effects was requested but the bundle does not carry ",
+           "morris_response_effects.csv. Rebuild the bundle with the W2 exporter.",
+           call. = FALSE)
+    }
+    result <- build_morris_response_effects(
+      bundle$effects, bundle$focus, profile, bundle$is_demo
+    )
+    base <- file.path(out_dir, if (bundle$is_demo) "DEMO_FigS1b_sa_effects" else "FigS1b_sa_effects")
+    artifacts <- c(artifacts, save_figure_set(
+      result$plot, base, profile, profile$double_column_width_mm, result$height_mm
+    ))
+    effects_source <- paste0(base, ".effects_source.csv")
+    utils::write.csv(result$effects_source, effects_source, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, effects_source)
+  }
 }
 
 if (is_sobol_request && selected("figs2_sobol_convergence")) {
-  result <- build_sobol_convergence(bundle$rankings, bundle$metrics, bundle$run_scale, profile, bundle$is_demo)
-  base <- file.path(out_dir, if (bundle$is_demo) "DEMO_FigS2_sobol_convergence" else "FigS2_sobol_convergence")
+  result <- if (isTRUE(bundle$is_multiseason)) {
+    if (isTRUE(bundle$has_effects)) {
+      build_sobol_multiseason_effects(bundle$rankings, bundle$metrics, bundle$run_scale,
+                                      bundle$summary, bundle$effects, bundle$response_scales,
+                                      profile, bundle$is_demo)
+    } else {
+      build_sobol_multiseason_convergence(bundle$rankings, bundle$metrics, bundle$run_scale,
+                                          bundle$summary, profile, bundle$is_demo)
+    }
+  } else {
+    build_sobol_convergence(bundle$rankings, bundle$metrics, bundle$run_scale, profile, bundle$is_demo)
+  }
+  figure_stem <- if (isTRUE(bundle$has_effects)) "FigS2_sobol_effects" else "FigS2_sobol_convergence"
+  base <- file.path(out_dir, if (bundle$is_demo) paste0("DEMO_", figure_stem) else figure_stem)
   artifacts <- c(artifacts, save_figure_set(result$plot, base, profile,
                                              profile$double_column_width_mm, result$height_mm))
   ranking_source <- paste0(base, ".ranking_source.csv")
@@ -119,6 +152,18 @@ if (is_sobol_request && selected("figs2_sobol_convergence")) {
   utils::write.csv(result$metrics_source, metrics_source, row.names = FALSE, fileEncoding = "UTF-8")
   utils::write.csv(result$run_scale_source, run_scale_source, row.names = FALSE, fileEncoding = "UTF-8")
   artifacts <- c(artifacts, ranking_source, metrics_source, run_scale_source)
+  if (!is.null(result$summary_source)) {
+    summary_source <- paste0(base, ".summary_source.csv")
+    utils::write.csv(result$summary_source, summary_source, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, summary_source)
+  }
+  if (!is.null(result$effects_source)) {
+    effects_source <- paste0(base, ".effects_source.csv")
+    response_scales_source <- paste0(base, ".response_scales_source.csv")
+    utils::write.csv(result$effects_source, effects_source, row.names = FALSE, fileEncoding = "UTF-8")
+    utils::write.csv(result$response_scales_source, response_scales_source, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, effects_source, response_scales_source)
+  }
 }
 
 if (is_t4_request) {

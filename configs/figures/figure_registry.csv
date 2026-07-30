@@ -6,7 +6,8 @@ Fig4,main,Does the model reproduce treatment-specific temporal and harvest dynam
 Fig5,main,Which parameter combinations are identifiable or equifinal?,Prior/posterior ensembles bounds Phi and deterministic representative reruns,pending_P4,planned
 Fig6,main,What do calibrated predictions imply for water-nitrogen management?,Validated scenario ensemble with uncertainty,pending_P5,planned
 FigS1,supplement,Are Morris rankings stable across independent seeds?,Per-seed ranks pairwise Spearman and Top-15 Jaccard,r_demo_current_evidence,paper/R/fig_sa_morris.R
-FigS2,supplement,Does the current Sobol budget support stable quantitative ranks?,N64-to-N128 rank movement and prespecified convergence diagnostics,r_demo_current_evidence,paper/R/fig_sa_sobol.R
+FigS1b,supplement,What is the response-level Morris elementary-effects geometry (mu* vs sigma)?,Response-level mu*-sigma small multiples for core physiology-chain responses with Top-5 emphasis and two-domain colour,r_demo_current_evidence,paper/R/fig_sa_morris.R
+FigS2,supplement,Which parameters act directly or through interaction-involving effects, and is the evidence numerically supported?,S1 versus ST with paired-bootstrap intervals plus N128-to-N256 season-specific evidence gates,r_demo_current_evidence,paper/R/fig_sa_sobol.R
 FigS3,supplement,Are residual patterns acceptable?,Role-specific raw residuals vs fitted and DAP plus standardized QQ diagnostics,r_core_implemented_demo_qa,paper/R/fig_residual_diagnostics.R
 FigS4,supplement,Are all treatments reproduced and how does continuous cumulative harvest appear?,Per-variable all-treatment trajectories plus event-line and monotone smooth cumulative alternatives,r_core_implemented_demo_qa,paper/R/fig_all_treatment_dynamics.R
 FigS5,supplement,How much did each parameter contract and hit bounds?,Frozen posterior diagnostics,r_core_implemented_demo_qa,paper/R/fig_posterior_demo.R

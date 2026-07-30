@@ -239,3 +239,153 @@ build_morris_stability <- function(seed_rankings, stability, focus, profile, is_
     )
   list(plot = plot, rank_source = ranks, stability_source = stability, height_mm = 155)
 }
+
+# ---------------------------------------------------------------------------
+# W4 (plan §5.3): response-level mu*-sigma small multiples.
+#
+# Consumes morris_response_effects.csv (the W2 export) and renders one panel
+# per fixed core response with x = mu*, y = sigma.  Strict scientific rules
+# (plan §5.3):
+#   * no undefined "four-quadrant threshold" lines are drawn;
+#   * a large sigma is labelled "nonlinearity and/or interaction involvement",
+#     never "strong interaction";
+#   * colour distinguishes at most two scientific domains; the two ranking
+#     domains are never merged into one panel;
+#   * grey-scale readable: the top-5 parameters per panel are labelled and
+#     emphasised, the rest are a low-saturation background.
+# ---------------------------------------------------------------------------
+
+build_morris_response_effects <- function(effects, focus, profile, is_demo = FALSE,
+                                          top_k = 5, core_response_ids = NULL) {
+  # P0 fix: the effects table now carries OBSERVATION-level Morris statistics
+  # (exact, from .mio), not a fake treatment-mean aggregate.  The figure plots
+  # the legitimate observation-level mu*/sigma, with the dimensionless
+  # within-family share on x for cross-treatment comparability.  The caption
+  # states this honestly.  See export_morris_response_effects.py docstring.
+  validate_sa_columns(
+    effects,
+    c("season", "seed", "ranking_domain", "response_group", "response_id",
+      "response_label", "parameter", "mu_star", "sigma",
+      "mu_star_share_within_family", "aggregation_level"),
+    "morris_response_effects.csv"
+  )
+  effects$mu_star <- as.numeric(effects$mu_star)
+  effects$sigma <- as.numeric(effects$sigma)
+  effects$family_share <- as.numeric(effects$mu_star_share_within_family)
+
+  # Default core responses: the four general-genetic physiology-chain anchors.
+  if (is.null(core_response_ids)) {
+    core_response_ids <- c("MEAN_ADAPS", "MEAN_LAI_AUC", "MEAN_AGB_END_CWAD",
+                           "MEAN_FRUITD_END")
+  }
+  core <- effects[effects$response_id %in% core_response_ids, , drop = FALSE]
+  if (nrow(core) == 0) stop("No core responses in morris_response_effects.csv")
+
+  # Collapse the per-observation rows to one point per (response_family,
+  # parameter): use the dimensionless family share (x) and the mean of the
+  # observation-level sigma (y).  This is legitimate: the share is already
+  # normalised, and sigma is summarised as a descriptive central tendency of
+  # the observation-level spread (caption discloses this).
+  agg <- stats::aggregate(
+    cbind(family_share, sigma) ~ response_id + response_label + ranking_domain + parameter,
+    data = core, FUN = mean, na.rm = TRUE
+  )
+
+  domain_colours <- c(
+    "general_genetic" = "#0072B2",
+    "water_nitrogen_response" = "#D55E00"
+  )
+
+  # Per-panel top-k by family share: emphasised + labelled; rest = background.
+  agg$emphasis <- FALSE
+  agg$label_text <- NA_character_
+  for (rid in unique(agg$response_id)) {
+    rows <- which(agg$response_id == rid)
+    order_idx <- rows[order(agg$family_share[rows], decreasing = TRUE)]
+    top_idx <- utils::head(order_idx, top_k)
+    agg$emphasis[top_idx] <- TRUE
+    agg$label_text[top_idx] <- agg$parameter[top_idx]
+  }
+
+  agg$response_label <- factor(agg$response_label, levels = unique(
+    agg$response_label[match(core_response_ids, agg$response_id)]
+  ))
+
+  # Build the plot WITHOUT wrapping an already-faceted ggplot in patchwork
+  # (the prior wrap_plots(list(plot)) duplicated the four panels).  A single
+  # faceted ggplot is returned directly with labs() for the title.
+  plot <- ggplot2::ggplot(agg) +
+    ggplot2::geom_point(
+      data = agg[!agg$emphasis, , drop = FALSE],
+      ggplot2::aes(family_share, sigma), colour = "#D9D9D9", size = 1.1, alpha = 0.85
+    ) +
+    ggplot2::geom_point(
+      data = agg[agg$emphasis, , drop = FALSE],
+      ggplot2::aes(family_share, sigma, colour = ranking_domain), size = 1.9, stroke = 0.5
+    ) +
+    ggrepel_if_available(
+      data = agg[agg$emphasis, , drop = FALSE],
+      ggplot2::aes(family_share, sigma, label = label_text, colour = ranking_domain),
+      size = 2.0, max.overlaps = 20, segment.size = 0.25, segment.alpha = 0.6,
+      min.segment.length = 0, seed = 20260729
+    ) +
+    ggplot2::scale_colour_manual(
+      values = domain_colours,
+      labels = c("general_genetic" = "General genetic",
+                 "water_nitrogen_response" = "Water-nitrogen"),
+      name = NULL
+    ) +
+    ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0.03, 0.18))) +
+    ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0.04, 0.18))) +
+    ggplot2::facet_wrap(~response_label, scales = "free", ncol = 2) +
+    ggplot2::labs(
+      title = "Morris effects across core response families",
+      subtitle = paste0("Top-", top_k,
+                        " parameters per response are labelled; grey points show the remainder."),
+      caption = if (isTRUE(is_demo)) {
+        paste(
+          "DEMO - science pending. Points summarize exact observation-level statistics from .mio across treatments and seasons.",
+          "High sigma indicates nonlinearity and/or interaction involvement, not a specific parameter pair.",
+          "Importance is conditional on the sampled ranges and scenarios.",
+          sep = "\n"
+        )
+      } else {
+        paste(
+          "Points summarize exact observation-level statistics from .mio across treatments and seasons.",
+          "High sigma indicates nonlinearity and/or interaction involvement, not a specific parameter pair.",
+          "Importance is conditional on the sampled ranges and scenarios.",
+          sep = "\n"
+        )
+      },
+      x = "Mean within-observation mu* share",
+      y = "Mean observation-level sigma"
+    ) +
+    theme_q1(profile) +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(face = "bold", size = profile$font_size_pt + 1),
+      plot.subtitle = ggplot2::element_text(colour = "#4D4D4D", size = profile$font_size_pt),
+      plot.caption = ggplot2::element_text(colour = "#666666", size = 5, hjust = 1),
+      strip.background = ggplot2::element_rect(fill = "#F2F2F2", colour = NA),
+      strip.text = ggplot2::element_text(face = "bold", size = profile$font_size_pt - 0.5),
+      legend.position = "bottom",
+      panel.spacing = ggplot2::unit(2.5, "pt")
+    )
+
+  list(plot = plot, effects_source = agg, height_mm = 130)
+}
+
+# ggrepel is preferred for non-overlapping labels but is optional: if it is not
+# installed, fall back to plain geom_text so the figure still renders.  The
+# paper profile does not list ggrepel as a hard dependency (common.R checks
+# only ggplot2/patchwork/jsonlite/svglite).  Returns a ggplot layer added via
+# `+`, so the builder calls `plot + ggrepel_if_available(...)`.
+ggrepel_if_available <- function(data, mapping, ..., max.overlaps = 20, seed = 20260729) {
+  if (requireNamespace("ggrepel", quietly = TRUE)) {
+    # Use the ggrepel namespace explicitly — geom_text_repel is not exported
+    # by ggplot2, and the function may not be on the search path.
+    layer_fun <- utils::getFromNamespace("geom_text_repel", "ggrepel")
+    layer_fun(data = data, mapping = mapping, ..., max.overlaps = max.overlaps, seed = seed)
+  } else {
+    ggplot2::geom_text(data = data, mapping = mapping, check_overlap = FALSE, ...)
+  }
+}

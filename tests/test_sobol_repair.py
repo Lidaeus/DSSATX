@@ -99,6 +99,38 @@ def test_repair_case_replays_twice_and_keeps_source_immutable(tmp_path: Path, mo
     assert hashlib.sha256((source / "sa_sen_sobol.sobol.obs.csv").read_bytes()).hexdigest() == source_obs_hash
 
 
+def test_repair_maps_replay_values_by_observation_name(tmp_path: Path, monkeypatch):
+    source = _synthetic_source(tmp_path)
+    outputs_path = source / "sa_sen_sobol.sobol.obs.csv"
+    outputs = pd.read_csv(outputs_path)
+    outputs = outputs[["run_id", "failed_flag", "structural_zero", "yield"]]
+    outputs.to_csv(outputs_path, index=False)
+    bad_si, bad_st = sobol_repair.recompute_indices(
+        pd.read_csv(source / "sa_sen_sobol.sobol.par.csv"), outputs, samples=2
+    )
+    bad_si.to_csv(source / "sa_sen_sobol.sobol.si.csv", index=False)
+    bad_st.to_csv(source / "sa_sen_sobol.sobol.sti.csv", index=False)
+
+    def fake_replay(_source: Path, _replay_dir: Path, _row: pd.Series):
+        # Replay vector follows sa_obs_order.txt: yield, structural_zero.
+        return np.array([6.0, 5.0]), {
+            "returncode": 0,
+            "parameter_sha256": "parameter",
+            "response_sha256": "same-response",
+            "stdout_sha256": "stdout",
+            "stderr_sha256": "stderr",
+            "response_count": 2,
+        }
+
+    monkeypatch.setattr(sobol_repair, "_execute_replay", fake_replay)
+    destination = tmp_path / "derived"
+    sobol_repair.repair_case(source, destination)
+
+    repaired = pd.read_csv(destination / "sa_sen_sobol.sobol.obs.csv")
+    assert repaired.loc[4, "yield"] == 6.0
+    assert repaired.loc[4, "structural_zero"] == 5.0
+
+
 def test_repair_rejects_nonidentical_repeats(tmp_path: Path, monkeypatch):
     source = _synthetic_source(tmp_path)
     counter = iter((1.0, 2.0))

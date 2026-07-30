@@ -57,6 +57,35 @@ def _read_response(path: Path, names: list[str]) -> np.ndarray:
     return vector
 
 
+def _align_replay_vector(
+    vector: np.ndarray,
+    observation_order: list[str],
+    response_columns: list[str],
+) -> np.ndarray:
+    """Return replay values in the PEST++ response-table column order.
+
+    ``SA_Indicators.OUT`` is written in ``sa_obs_order.txt`` order, while
+    PEST++ is free to write the response CSV columns in another order.  A
+    positional assignment would therefore attach valid values to the wrong
+    observations.
+    """
+    order_keys = [name.casefold() for name in observation_order]
+    response_keys = [name.casefold() for name in response_columns]
+    if len(order_keys) != len(set(order_keys)):
+        raise ValueError("sa_obs_order.txt contains duplicate observation names")
+    if len(response_keys) != len(set(response_keys)):
+        raise ValueError("Sobol response table contains duplicate observation names")
+    if set(order_keys) != set(response_keys):
+        missing = sorted(set(response_keys) - set(order_keys))
+        extra = sorted(set(order_keys) - set(response_keys))
+        raise ValueError(
+            "Replay observation contract does not match the Sobol response table; "
+            f"missing={missing[:8]}, extra={extra[:8]}"
+        )
+    by_name = dict(zip(order_keys, np.asarray(vector, dtype=float), strict=True))
+    return np.asarray([by_name[name] for name in response_keys], dtype=float)
+
+
 def _execute_replay(source: Path, replay_dir: Path, parameter_row: pd.Series) -> tuple[np.ndarray, dict[str, Any]]:
     replay_dir.mkdir(parents=True, exist_ok=False)
     runtime = source / "runtime"
@@ -177,6 +206,11 @@ def repair_case(source_dir: str | Path, derived_dir: str | Path) -> dict[str, An
     replay_records: list[dict[str, Any]] = []
     repaired_outputs = outputs.copy()
     response_names = list(outputs.columns[2:])
+    observation_order = [
+        line.strip()
+        for line in (source / "sa_obs_order.txt").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
     for run_id in failed:
         match = parameters.loc[parameters["run_id"].astype(int) == run_id]
         if len(match) != 1:
@@ -190,7 +224,8 @@ def repair_case(source_dir: str | Path, derived_dir: str | Path) -> dict[str, An
         if attempts[0]["response_sha256"] != attempts[1]["response_sha256"] or not np.array_equal(vectors[0], vectors[1]):
             raise ValueError(f"Repeated outputs are not identical for run {run_id}")
         row_index = repaired_outputs.index[repaired_outputs["run_id"].astype(int) == run_id]
-        repaired_outputs.loc[row_index, response_names] = vectors[0]
+        aligned_vector = _align_replay_vector(vectors[0], observation_order, response_names)
+        repaired_outputs.loc[row_index, response_names] = aligned_vector
         repaired_outputs.loc[row_index, "failed_flag"] = 0
         replay_records.append({
             "run_id": run_id,
@@ -247,6 +282,7 @@ def repair_case(source_dir: str | Path, derived_dir: str | Path) -> dict[str, An
         },
         "failed_run_ids": failed,
         "replay_count_per_member": 2,
+        "response_alignment": "case_insensitive_observation_name",
         "replays": replay_records,
         "derived_hashes": {
             name: sha256_file(destination / name)

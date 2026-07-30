@@ -102,20 +102,23 @@ Fig. 1 分别展示一般遗传域和水氮响应域的跨季层级归一化 Mor
 和 Top-15 Jaccard 门槛。两个域不得合并成一个无条件的总排名。当前任一季/域未通过门槛时，
 导出器只允许显式生成带 `DEMO_` 前缀与水印的 `science_pending` 图。
 
-## Sobol 样本规模与收敛图
+## Sobol 效应分解与数值证据图
 
-Sobol 使用独立于 Morris 和率定的冻结数据包。当前 XXQL2501 的 N=64→N=128 比较未通过预注册的排名收敛门，因此 Fig. S2 的职责是报告样本规模敏感性和数值不确定性，而非报告精确 S1/ST 名次或交互贡献。
+Sobol 使用独立于 Morris 和率定的冻结数据包。当前三季扩规模审查中，仅 XXQL2502 的 N=128→N=256 比较通过全部预设门；XXQL2601 未通过最大名次变化门，XXQL2501 未通过 bootstrap 有效重采样门。Fig. S2 因而只对 XXQL2502 展示固定标量响应的 S1、ST、paired-bootstrap 区间和 ST-S1 交互余量，同时保留三季证据状态与收敛指标。ST-S1 不是具体参数对的二阶交互，也不得在季节间直接合并。
 
 ```powershell
-python -m src.reporting.export_sobol_paper_data `
-  --run-id formal_sobol_xxql2501_n64_n128_20260721 `
-  --convergence-dir workspace/runs/sobol_formal_v1/XXQL2501/convergence_n0064_n0128_repaired_20260721 `
-  --out-dir workspace/runs/sobol_formal_v1/XXQL2501/paper_data_n64_n128 `
-  --allow-unvalidated-demo
+python -m src.reporting.export_sobol_stability_paper_data `
+  --run-id sobol_multiseason_effects_v4_20260722 `
+  --convergence-season XXQL2502=workspace/runs/sobol_stability_rerun_v1/XXQL2502/convergence_n0128_n0256_repaired_v2_20260722 `
+  --convergence-season XXQL2601=workspace/runs/sobol_stability_rerun_v1/XXQL2601/convergence_n0128_n0256_repaired_v2_20260722 `
+  --bootstrap-gate-season XXQL2501=workspace/runs/sobol_stability_rerun_v1/XXQL2501/n0256_seed_20260729/sobol_bootstrap/sobol_bootstrap_quality.json `
+  --effect-season XXQL2502 `
+  --effect-case workspace/runs/sobol_stability_rerun_v1/XXQL2502/n0256_seed_20260729_repaired_v2_20260722 `
+  --out-dir workspace/runs/sobol_stability_rerun_v1/paper_data_multiseason_v4_20260722
 
 Rscript paper/R/make_all.R `
-  --input-dir workspace/runs/sobol_formal_v1/XXQL2501/paper_data_n64_n128 `
-  --out-dir workspace/runs/sobol_formal_v1/XXQL2501/paper_figures_n64_n128 `
+  --input-dir workspace/runs/sobol_stability_rerun_v1/paper_data_multiseason_v4_20260722 `
+  --out-dir workspace/runs/sobol_stability_rerun_v1/paper_figures_multiseason_v4_20260722 `
   --figure-ids figs2_sobol_convergence `
   --allow-unvalidated-demo
 ```

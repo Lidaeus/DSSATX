@@ -272,16 +272,36 @@ read_sa_bundle <- function(input_dir, allow_demo = FALSE) {
     stability = read_csv("morris_pairwise_stability.csv"),
     focus = read_csv("morris_focus_parameters.csv")
   )
-  for (table in bundle[c("rankings", "summary", "seed_rankings", "group_scores",
-                          "group_summary", "stability", "focus")]) {
+  # W4 (plan §5.3): the response-level mu*-sigma table is optional.  When the
+  # bundle carries it (via a sibling morris_response_effects.csv bound in the
+  # manifest), it enables the response-effects small-multiples panel.
+  effects_name <- "morris_response_effects.csv"
+  if (effects_name %in% listed) {
+    bundle$effects <- read_csv(effects_name)
+    bundle$has_effects <- TRUE
+  } else {
+    bundle$effects <- NULL
+    bundle$has_effects <- FALSE
+  }
+  provenance_tables <- c("rankings", "summary", "seed_rankings", "group_scores",
+                         "group_summary", "stability", "focus")
+  # P1#2: the optional effects table must pass the same provenance check when
+  # present, so a mismatched run_id/data_status cannot slip into the figure.
+  if (isTRUE(bundle$has_effects) && !is.null(bundle$effects)) {
+    provenance_tables <- c(provenance_tables, "effects")
+  }
+  for (name in provenance_tables) {
+    table <- bundle[[name]]
     if (!all(c("run_id", "data_status") %in% names(table)) || nrow(table) == 0) {
-      stop("SA table lacks provenance columns or is empty")
+      stop("SA table '", name, "' lacks provenance columns or is empty")
     }
     if (length(unique(table$run_id)) != 1 || unique(table$run_id)[[1]] != manifest$run_id) {
-      stop("SA table run_id does not match manifest")
+      stop("SA table '", name, "' run_id does not match manifest (got ",
+           unique(table$run_id)[[1]], ", expected ", manifest$run_id, ")")
     }
     if (length(unique(table$data_status)) != 1 || unique(table$data_status)[[1]] != manifest$data_status) {
-      stop("SA table data_status does not match manifest")
+      stop("SA table '", name, "' data_status does not match manifest (got ",
+           unique(table$data_status)[[1]], ", expected ", manifest$data_status, ")")
     }
   }
   bundle
@@ -291,13 +311,20 @@ read_sobol_bundle <- function(input_dir, allow_demo = FALSE) {
   manifest_path <- file.path(input_dir, "paper_data_manifest.json")
   if (!file.exists(manifest_path)) stop("Missing paper_data_manifest.json in ", input_dir)
   manifest <- jsonlite::fromJSON(manifest_path, simplifyVector = FALSE)
-  if (!identical(manifest$bundle_type, "sobol_convergence_evidence")) {
-    stop("Sobol figures require bundle_type=sobol_convergence_evidence", call. = FALSE)
+  allowed_types <- c("sobol_convergence_evidence", "sobol_multiseason_stability_evidence")
+  if (!manifest$bundle_type %in% allowed_types) {
+    stop("Sobol figures require a supported Sobol evidence bundle", call. = FALSE)
   }
-  required <- c("sobol_scale_rankings.csv", "sobol_scale_group_scores.csv",
-                "sobol_convergence_comparisons.csv", "sobol_convergence_metrics.csv",
-                "sobol_run_scale.csv", "sobol_convergence.json")
+  is_multiseason <- identical(manifest$bundle_type, "sobol_multiseason_stability_evidence")
   listed <- vapply(manifest$artifacts, function(artifact) artifact$path, character(1))
+  has_effects <- all(c("sobol_effect_decomposition.csv", "sobol_response_scales.csv") %in% listed)
+  required <- if (is_multiseason) {
+    c("sobol_scale_rankings.csv", "sobol_convergence_metrics.csv", "sobol_run_scale.csv", "sobol_stability_summary.csv")
+  } else {
+    c("sobol_scale_rankings.csv", "sobol_scale_group_scores.csv",
+      "sobol_convergence_comparisons.csv", "sobol_convergence_metrics.csv",
+      "sobol_run_scale.csv", "sobol_convergence.json")
+  }
   missing_manifest <- setdiff(required, listed)
   if (length(missing_manifest) > 0) {
     stop("Sobol manifest does not bind required artifacts: ", paste(missing_manifest, collapse = ", "))
@@ -322,17 +349,34 @@ read_sobol_bundle <- function(input_dir, allow_demo = FALSE) {
     manifest = manifest, is_demo = is_demo,
     rankings = read_csv("sobol_scale_rankings.csv"),
     metrics = read_csv("sobol_convergence_metrics.csv"),
-    run_scale = read_csv("sobol_run_scale.csv")
+    run_scale = read_csv("sobol_run_scale.csv"),
+    summary = if (is_multiseason) read_csv("sobol_stability_summary.csv") else NULL,
+    effects = if (has_effects) read_csv("sobol_effect_decomposition.csv") else NULL,
+    response_scales = if (has_effects) read_csv("sobol_response_scales.csv") else NULL,
+    is_multiseason = is_multiseason,
+    has_effects = has_effects
   )
-  for (table in bundle[c("rankings", "metrics", "run_scale")]) {
+  # P1#2: validate provenance on every present table, including the optional
+  # summary / effects / response_scales.  The base tables (rankings, metrics,
+  # run_scale) are always present; the others are present only when the bundle
+  # carries the effect decomposition.  Every present table must carry matching
+  # run_id/data_status and be non-empty.
+  sobol_tables <- c("rankings", "metrics", "run_scale")
+  if (!is.null(bundle$summary)) sobol_tables <- c(sobol_tables, "summary")
+  if (isTRUE(has_effects)) sobol_tables <- c(sobol_tables, "effects", "response_scales")
+  for (name in sobol_tables) {
+    table <- bundle[[name]]
+    if (is.null(table)) next
     if (!all(c("run_id", "data_status") %in% names(table)) || nrow(table) == 0) {
-      stop("Sobol table lacks provenance columns or is empty")
+      stop("Sobol table '", name, "' lacks provenance columns or is empty")
     }
     if (length(unique(table$run_id)) != 1 || unique(table$run_id)[[1]] != manifest$run_id) {
-      stop("Sobol table run_id does not match manifest")
+      stop("Sobol table '", name, "' run_id does not match manifest (got ",
+           unique(table$run_id)[[1]], ", expected ", manifest$run_id, ")")
     }
     if (length(unique(table$data_status)) != 1 || unique(table$data_status)[[1]] != manifest$data_status) {
-      stop("Sobol table data_status does not match manifest")
+      stop("Sobol table '", name, "' data_status does not match manifest (got ",
+           unique(table$data_status)[[1]], ", expected ", manifest$data_status, ")")
     }
   }
   bundle

@@ -153,11 +153,6 @@ def build_morris(plan: dict[str, Any], *, dry_run: bool) -> None:
     config = plan["morris"]
     case_root = resolve(config["case_root"])
     manifest = case_root / "formal_morris_manifest.json"
-    if manifest.exists():
-        print(f"[SKIP] Morris r={config['morris_r']} already built: {case_root}")
-        return
-    if case_root.exists() and any(case_root.iterdir()):
-        raise FileExistsError(f"Refusing non-empty Morris rerun directory without manifest: {case_root}")
     command = [
         sys.executable, str(ROOT / "tools" / "build_formal_morris.py"),
         "--bounds", str(resolve(config["bounds"])),
@@ -168,6 +163,16 @@ def build_morris(plan: dict[str, Any], *, dry_run: bool) -> None:
         "--morris-r", str(config["morris_r"]),
         "--morris-p", str(config["morris_p"]),
     ]
+    # A dry run is a declarative preview of the approved plan, not a status
+    # command.  It must print the build command even after the case exists.
+    if dry_run:
+        run(command, dry_run=True)
+        return
+    if manifest.exists():
+        print(f"[SKIP] Morris r={config['morris_r']} already built: {case_root}")
+        return
+    if case_root.exists() and any(case_root.iterdir()):
+        raise FileExistsError(f"Refusing non-empty Morris rerun directory without manifest: {case_root}")
     run(command, dry_run=dry_run)
 
 
