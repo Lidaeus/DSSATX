@@ -22,6 +22,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -35,6 +36,63 @@ GENOTYPE_DIR = ROOT / "data/templates/genotype"
 
 def case_name(arm: str, pool: str, stage: str) -> str:
     return f"e02_glm_{arm}_{pool}_{stage}_official_{DATE_TAG}"
+
+
+def _sha256_file(path: Path) -> str:
+    import hashlib
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _verify_reusable_design(run_dir: Path, args, noptmax: int) -> None:
+    """Refuse to reuse a same-named run dir whose design does not match.
+
+    Code-review 20260818 P1: an existing directory was silently reused even
+    after the selected-pool definition changed, so a stale 23-parameter task
+    ran under a 'selected' label.  Reuse now requires pool, arm, stage,
+    noptmax, derinc scale and (for selected pools) the parameter-set hash to
+    match the on-disk ``glm_design.json`` / ``selected_parameters.csv``.
+    """
+    design_path = run_dir / "glm_design.json"
+    if not design_path.is_file():
+        raise SystemExit(
+            f"existing run dir lacks glm_design.json; refusing blind reuse: {run_dir}")
+    design = json.loads(design_path.read_text(encoding="utf-8"))
+    mismatches = []
+    if design.get("pool") != args.pool:
+        mismatches.append(f"pool {design.get('pool')} != {args.pool}")
+    if design.get("objective_arm") != args.objective_arm:
+        mismatches.append(f"arm {design.get('objective_arm')} != {args.objective_arm}")
+    if design.get("stage") != args.stage:
+        mismatches.append(f"stage {design.get('stage')} != {args.stage}")
+    if int(design.get("noptmax", -1)) != int(noptmax):
+        mismatches.append(f"noptmax {design.get('noptmax')} != {noptmax}")
+    if abs(float(design.get("derinc_scale", 1.0)) - float(args.derinc_scale)) > 1e-12:
+        mismatches.append(f"derinc_scale {design.get('derinc_scale')} != {args.derinc_scale}")
+    if args.pool == "selected":
+        selected_csv = run_dir / "selected_parameters.csv"
+        if not selected_csv.is_file():
+            mismatches.append("selected_parameters.csv missing")
+        else:
+            source = Path(args.selected_set_csv) if args.selected_set_csv else _default_selected_csv()
+            if _sha256_file(selected_csv) != _sha256_file(source):
+                mismatches.append(
+                    f"selected_parameters.csv differs from {source}; the pool "
+                    "definition changed since this run dir was built")
+    if mismatches:
+        raise SystemExit(
+            "existing run dir does not match the requested design — refusing to "
+            "reuse (stale task from before a code/pool fix would silently run "
+            "otherwise):\n  " + "\n  ".join(mismatches) +
+            f"\nMove or archive {run_dir} and launch again to rebuild.")
+
+
+def _default_selected_csv() -> Path:
+    from tools.calibration.prepare_ies_to_glm_20260818 import DEFAULT_SELECTED_SET_CSV
+    return DEFAULT_SELECTED_SET_CSV
 
 
 def _active_processes() -> list[str]:
@@ -76,6 +134,10 @@ def main() -> int:
     parser.add_argument("--background", action="store_true")
     parser.add_argument("--audit", action="store_true",
                         help="after a successful --wait run, execute WP3 Jacobian audit + WP5 screening")
+    parser.add_argument("--derinc-scale", type=float, default=1.0,
+                        help="passed through to the builder (0.5/2.0 spot checks)")
+    parser.add_argument("--selected-set-csv", type=Path, default=None,
+                        help="passed through to the builder for --pool selected")
     args = parser.parse_args()
 
     if args.wait and args.background:
@@ -93,13 +155,18 @@ def main() -> int:
     case = case_name(args.objective_arm, args.pool, args.stage)
     run_dir = ROOT / "workspace/runs" / case
     if not run_dir.is_dir():
-        rc = _run([sys.executable, "tools/calibration/prepare_ies_to_glm_20260818.py",
-                   "--pool", args.pool, "--objective-arm", args.objective_arm,
-                   "--stage", args.stage, "--noptmax", str(noptmax)])
+        build_cmd = [sys.executable, "tools/calibration/prepare_ies_to_glm_20260818.py",
+                     "--pool", args.pool, "--objective-arm", args.objective_arm,
+                     "--stage", args.stage, "--noptmax", str(noptmax),
+                     "--derinc-scale", str(args.derinc_scale)]
+        if args.selected_set_csv is not None:
+            build_cmd += ["--selected-set-csv", str(args.selected_set_csv)]
+        rc = _run(build_cmd)
         if rc != 0:
             return rc
     else:
-        print(f"[launch] existing run dir reused: {run_dir}")
+        _verify_reusable_design(run_dir, args, noptmax)
+        print(f"[launch] existing run dir reused (design verified): {run_dir}")
 
     parallel = [sys.executable, "tools/parallel/run_parallel.py",
                 "--run-dir", str(run_dir), "--case", case,

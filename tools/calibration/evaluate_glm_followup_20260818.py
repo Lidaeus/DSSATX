@@ -138,6 +138,38 @@ def load_baseline(path: Path | None = None) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _update_baseline_from_replay(path: Path, metrics: dict, source_label: str) -> None:
+    """Replace hard-coded baseline values with replay-computed ones.
+
+    Only the families the deterministic replay computes on the raw scale are
+    refreshed (DRY_CUM plus N/W responses); organ values stay sourced from the
+    deterministic-candidate CSV.  The plan section 2.1 constants are kept as
+    ``plan_crosscheck`` and must agree, otherwise the update is refused.
+    """
+    baseline = load_baseline(path)
+    crosscheck = {}
+    for family in ("DRY_CUM", "N_RESPONSE", "W_RESPONSE"):
+        base = baseline.setdefault(family, {})
+        crosscheck[family] = dict(base.get("nse", {}))
+        if family in metrics:
+            if family == "DRY_CUM":
+                base["nse"] = {s: m["nse"] for s, m in metrics[family].items()}
+                base["pbias_pct"] = {s: m["pbias_pct"] for s, m in metrics[family].items()}
+            else:
+                base["nse"] = {s: m["nse"] for s, m in metrics[family].items()}
+    baseline["baseline_source"] = f"deterministic replay {source_label}"
+    baseline["plan_crosscheck"] = crosscheck
+    path.write_text(json.dumps(baseline, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    for family, values in crosscheck.items():
+        for season, plan_value in values.items():
+            replayed = baseline[family]["nse"].get(season)
+            if replayed is not None and abs(replayed - plan_value) > 1e-4:
+                raise ValueError(
+                    f"baseline crosscheck failed for {family} {season}: "
+                    f"plan {plan_value} vs replay {replayed}")
+    print(f"baseline updated from replay: {path}")
+
+
 # ── rei parsing and transform inversion ─────────────────────────────
 
 def parse_rei(path: Path) -> pd.DataFrame:
@@ -264,8 +296,92 @@ def engineering_gates(candidate: dict, baseline: dict, source: str) -> tuple[boo
                      and drops[1] > GATES["response_family_both_season_drop"]),
                 f"per-season drops {drops[0]:.4f}, {drops[1]:.4f}")
 
-    passed = all(c["status"] != "fail" for c in checks)
+    passed = all(c["status"] == "pass" for c in checks)
     return passed, checks
+
+
+# Review 20260818: strict replacement criteria for swapping the paper-primary
+# parameter set away from member 126.  These are deliberately tighter than the
+# plan section 6.2 promotion criteria.
+REPLACEMENT_THRESHOLDS = {
+    "dry_nse_per_season_tolerance": 0.005,
+    "response_nse_mean_improvement_min": 0.10,
+    "response_nse_single_max_worsening": 0.05,
+    "organ_nse_single_max_drop": 0.05,
+}
+
+
+def replacement_decision(candidate: dict, baseline: dict,
+                         at_bound_params: list[str] | None = None) -> dict:
+    """Strict member-126 replacement verdict (code-review 20260818)."""
+    dry_base = baseline["DRY_CUM"]["nse"]
+    dry_cand = candidate.get("DRY_CUM", {})
+    tol = REPLACEMENT_THRESHOLDS["dry_nse_per_season_tolerance"]
+    dry_ok = all(
+        season in dry_cand and dry_cand[season]["nse"] >= dry_base[season] - tol
+        for season in SEASONS)
+    dry_mean_ok = (
+        dry_ok and np.mean([dry_cand[s]["nse"] for s in SEASONS])
+        >= np.mean([dry_base[s] for s in SEASONS]))
+
+    resp = []
+    for family in ("N_RESPONSE", "W_RESPONSE"):
+        base = baseline[family]["nse"]
+        cand = candidate.get(family, {})
+        for season in SEASONS:
+            if season not in cand:
+                resp = None
+                break
+            resp.append((base[season], cand[season]["nse"]))
+        if resp is None:
+            break
+    if resp is None or len(resp) != 4:
+        response_mean_improve = float("nan")
+        single_worsening_ok = False
+        response_ok = False
+    else:
+        response_mean_improve = float(np.mean([c for _, c in resp]) - np.mean([b for b, _ in resp]))
+        single_worsening_ok = all(c >= b - REPLACEMENT_THRESHOLDS["response_nse_single_max_worsening"]
+                                  for b, c in resp)
+        response_ok = (response_mean_improve >= REPLACEMENT_THRESHOLDS["response_nse_mean_improvement_min"]
+                       and single_worsening_ok)
+
+    organ_drops = []
+    organ_present = bool(candidate.get("ORGAN"))
+    if organ_present:
+        for variable, base in baseline.get("ORGAN", {}).items():
+            cand = candidate["ORGAN"].get(variable, {})
+            for season in SEASONS:
+                if season in cand:
+                    organ_drops.append((variable, season, base["nse"][season] - cand[season]))
+    organ_ok = organ_present and all(
+        d <= REPLACEMENT_THRESHOLDS["organ_nse_single_max_drop"] for *_, d in organ_drops)
+
+    at_bound = at_bound_params or []
+    bound_pressure = "manual_review" if at_bound else "none"
+
+    criteria = {
+        "dry_nse_within_tolerance_both_seasons": dry_ok,
+        "dry_nse_mean_not_lower": dry_mean_ok,
+        "response_nse_mean_improvement_ge_0.10": bool(response_ok
+                                                      and response_mean_improve >= 0.10),
+        "no_response_worsens_beyond_0.05": bool(single_worsening_ok),
+        "organ_nse_drop_within_0.05": organ_ok if organ_present else None,
+        "no_new_bound_pressure": bound_pressure,
+    }
+    hard = [v for k, v in criteria.items() if isinstance(v, bool)]
+    return {
+        "thresholds": REPLACEMENT_THRESHOLDS,
+        "dry_nse_mean_improvement": (float(np.mean([dry_cand[s]["nse"] for s in SEASONS])
+                                           - np.mean([dry_base[s] for s in SEASONS]))
+                                     if dry_ok else float("nan")),
+        "response_nse_mean_improvement": response_mean_improve,
+        "organ_nse_drops": [{"variable": v, "season": s, "drop": round(d, 4)}
+                            for v, s, d in organ_drops],
+        "parameters_at_bound": at_bound,
+        "criteria": criteria,
+        "replaces_member126": all(hard) and bound_pressure == "none",
+    }
 
 
 def science_promotion(candidate: dict, baseline: dict) -> dict:
@@ -310,9 +426,11 @@ def screen_run(run_dir: Path, case: str, baseline: dict) -> dict:
     if not rei_files:
         raise SystemExit("no .rei files found; did the GLM run complete?")
     for rei_path in rei_files:
-        label = rei_path.name.replace(f"{case}.", "").replace(".rei", "") or "final"
-        if label == "base":
+        label = rei_path.name.replace(f"{case}.", "").replace(".rei", "")
+        if label in ("base", "0"):
             label = "initial"
+        elif label == "rei":
+            label = "final"
         rei = parse_rei(rei_path)
         candidate = {
             "DRY_CUM": family_metrics_from_rei(rei, registry, "DRY_CUM"),
@@ -327,6 +445,11 @@ def screen_run(run_dir: Path, case: str, baseline: dict) -> dict:
             "gates": checks,
             "promotion": science_promotion(candidate, baseline),
         }
+        # Screening candidates have no deterministic organ evaluation, so with
+        # the all-pass gate they cannot be engineering-passing; promotion is
+        # reported but cannot recommend while any gate is not assessed.
+        candidates[label]["promotion"]["recommend_promotion"] = (
+            candidates[label]["promotion"]["recommend_promotion"] and passed)
     return candidates
 
 
@@ -352,6 +475,13 @@ def write_outputs(run_dir: Path, candidates: dict, baseline: dict) -> None:
                 rows.append({"candidate": label, "family": family, "season": season,
                              **m, "engineering_pass": cand["engineering_pass"],
                              "recommend_promotion": cand["promotion"]["recommend_promotion"]})
+        for variable, seasons in cand["metrics"].get("ORGAN", {}).items():
+            for season, nse_value in seasons.items():
+                rows.append({"candidate": label, "family": f"ORGAN_{variable}",
+                             "season": season, "n": "", "nse": nse_value,
+                             "pbias_pct": "",
+                             "engineering_pass": cand["engineering_pass"],
+                             "recommend_promotion": cand["promotion"]["recommend_promotion"]})
     pd.DataFrame(rows).to_csv(metrics_path, index=False)
 
     decision_path = eval_dir / "promotion_decision.json"
@@ -373,6 +503,7 @@ def write_outputs(run_dir: Path, candidates: dict, baseline: dict) -> None:
             "engineering_pass": c["engineering_pass"],
             "promotion": c["promotion"],
             "failed_gates": [g for g in c["gates"] if g["status"] == "fail"],
+            **({"replacement": c["replacement"]} if "replacement" in c else {}),
         } for label, c in candidates.items()
     })
     decision_path.write_text(json.dumps(decision, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -525,8 +656,24 @@ def replay_candidate(run_dir: Path, case: str, label: str, par_source: Path,
                                       "pbias_pct": pbias_pct(obs, sim)}
 
     passed, checks = engineering_gates(candidate, baseline, source=f"deterministic:{label}")
+    # Boundary pressure: parameters driven to within 0.5% of their GLM range.
+    at_bound: list[str] = []
+    try:
+        import pyemu
+        pst = pyemu.Pst(str(run_dir / f"{case}.pst"))
+        par = pst.parameter_data
+        for name in par.index[par.partrans.astype(str).str.lower() != "fixed"]:
+            value = float(member.loc[member["name"].str.lower() == str(name).lower(), "value"].iloc[0])
+            lo, hi = float(par.loc[name, "parlbnd"]), float(par.loc[name, "parubnd"])
+            if hi > lo and (value - lo) / (hi - lo) <= 0.005 or (hi - value) / (hi - lo) <= 0.005:
+                at_bound.append(str(name))
+    except Exception:
+        at_bound = []
+    promotion = science_promotion(candidate, baseline)
+    promotion["recommend_promotion"] = promotion["recommend_promotion"] and passed
     return {"metrics": candidate, "engineering_pass": passed, "gates": checks,
-            "promotion": science_promotion(candidate, baseline)}
+            "promotion": promotion, "at_bound_params": at_bound,
+            "replacement": replacement_decision(candidate, baseline, at_bound)}
 
 
 def main() -> int:
@@ -538,6 +685,9 @@ def main() -> int:
     parser.add_argument("--replay", default=None, metavar="LABEL",
                         help="deterministically replay '<case>.par' (LABEL=final) or a "
                              "'<LABEL>.par'/'<LABEL>.par.csv' file and evaluate all families")
+    parser.add_argument("--update-baseline", action="store_true",
+                        help="with --replay of a member-126 parameter set: recompute the "
+                             "frozen baseline JSON from the replay instead of hard-coded values")
     args = parser.parse_args()
 
     if args.export_baseline:
@@ -565,6 +715,8 @@ def main() -> int:
         replay_label = f"{label}_deterministic_20260818"
         candidate = replay_candidate(run_dir, case, replay_label, par_source, baseline)
         candidates = {replay_label: candidate}
+        if args.update_baseline:
+            _update_baseline_from_replay(args.baseline_json, candidate["metrics"], replay_label)
         write_outputs(run_dir, candidates, baseline)
         print(f"{replay_label}: engineering={'PASS' if candidate['engineering_pass'] else 'FAIL'} "
               f"promotion={'RECOMMEND' if candidate['promotion']['recommend_promotion'] else 'hold'}")

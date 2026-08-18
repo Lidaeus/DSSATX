@@ -39,6 +39,9 @@ if str(ROOT) not in sys.path:
 EIGTHRESH = 1.0e-6          # PEST++ default singular-value cutoff
 CORRELATION_DROP = 0.98     # above this the lower-CSS member of a pair is dropped
 MIN_CSS_FRACTION = 0.01     # keep parameters with CSS >= 1% of the maximum CSS
+# Vector-stability thresholds (pairwise across derivative step sizes).
+STABILITY_MIN_COSINE = 0.70
+STABILITY_MIN_SIGN_AGREEMENT = 0.80
 
 
 def family_of(obgnme: str) -> str:
@@ -109,81 +112,156 @@ def column_correlations(jacobian: pd.DataFrame, weights: pd.Series) -> pd.DataFr
     return corr
 
 
-def singular_values(jacobian: pd.DataFrame, weights: pd.Series) -> tuple[pd.DataFrame, dict]:
+def singular_values(jacobian: pd.DataFrame, weights: pd.Series,
+                    ranges: pd.Series | None = None) -> tuple[pd.DataFrame, dict]:
+    """SVD spectrum of the weighted Jacobian, range-scaled for unit invariance.
+
+    Raw weighted Jacobians mix parameter units, so singular values, effective
+    rank and condition number depend on the unit system.  The primary spectrum
+    uses ``WJ @ diag(upper - lower)``; the raw spectrum is reported alongside
+    for traceability only.
+    """
     common = [o for o in jacobian.index if o in weights.index]
     wj = jacobian.loc[common].to_numpy(float) * weights.loc[common].to_numpy(float)[:, None]
-    s = np.linalg.svd(wj, compute_uv=False)
-    if s.size == 0 or s[0] <= 0:
-        return pd.DataFrame(columns=["index", "singular_value", "ratio_to_max"]), {
-            "effective_rank": 0, "condition_number": float("inf")}
-    ratios = s / s[0]
-    keep = ratios > EIGTHRESH
-    effective_rank = int(keep.sum())
+    if ranges is not None:
+        scale = ranges.loc[jacobian.columns].to_numpy(float)
+        scaled = wj * scale[None, :]
+    else:
+        scaled = wj
+
+    def spectrum(matrix: np.ndarray) -> tuple[np.ndarray, dict]:
+        s = np.linalg.svd(matrix, compute_uv=False)
+        if s.size == 0 or s[0] <= 0:
+            return s, {"effective_rank": 0, "condition_number": float("inf"),
+                       "min_singular_value": 0.0, "max_singular_value": 0.0}
+        ratios = s / s[0]
+        keep = ratios > EIGTHRESH
+        effective_rank = int(keep.sum())
+        summary = {
+            "effective_rank": effective_rank,
+            "condition_number": float(s[0] / s[keep][-1]) if effective_rank else float("inf"),
+            "min_singular_value": float(s[-1]),
+            "max_singular_value": float(s[0]),
+        }
+        return s, summary
+
+    s_scaled, summary_scaled = spectrum(scaled)
+    _, summary_raw = spectrum(wj)
     summary = {
         "eigthresh": EIGTHRESH,
-        "n_singular_values": int(s.size),
-        "effective_rank": effective_rank,
-        "condition_number": float(s[0] / s[keep][-1]) if effective_rank else float("inf"),
-        "min_singular_value": float(s[-1]),
-        "max_singular_value": float(s[0]),
+        "n_singular_values": int(s_scaled.size),
+        "scaling": "weighted_jacobian_times_parameter_ranges",
+        **{f"range_scaled_{k}": v for k, v in summary_scaled.items()},
+        **{f"raw_{k}": v for k, v in summary_raw.items()},
+        # Back-compat aliases: the primary rank/condition numbers are the
+        # range-scaled ones.
+        "effective_rank": summary_scaled["effective_rank"],
+        "condition_number": summary_scaled["condition_number"],
     }
+    if s_scaled.size == 0:
+        frame = pd.DataFrame(columns=["index", "singular_value", "ratio_to_max"])
+        return frame, summary
+    ratios = s_scaled / s_scaled[0]
     frame = pd.DataFrame({
-        "index": np.arange(1, s.size + 1),
-        "singular_value": s,
+        "index": np.arange(1, s_scaled.size + 1),
+        "singular_value": s_scaled,
         "ratio_to_max": ratios,
-        "above_eigthresh": keep,
+        "above_eigthresh": ratios > EIGTHRESH,
     })
     return frame, summary
 
 
-def step_stability(jacobians: dict[str, pd.DataFrame], weights: pd.Series) -> pd.DataFrame:
-    """Derivative-step stability across step sizes (plan section 8 spot check).
+def _derivative_columns(jacobian: pd.DataFrame, weights: pd.Series) -> dict[str, np.ndarray]:
+    common = [o for o in jacobian.index if o in weights.index]
+    wj = jacobian.loc[common].to_numpy(float) * weights.loc[common].to_numpy(float)[:, None]
+    return {name: wj[:, i] for i, name in enumerate(jacobian.columns)}
 
-    A parameter is ``stable`` when the sign of its composite sensitivity is
-    consistent across steps.  Magnitude ratios are reported separately:
-    DSSAT's daily output discretisation makes CSS magnitude inherently
-    step-dependent, so a large ratio is recorded as information for the
-    formal-run DERINC choice rather than an automatic exclusion.
+
+def _vector_agreement(a: np.ndarray, b: np.ndarray) -> dict[str, float]:
+    """Pairwise directional agreement metrics for two derivative columns."""
+    na, nb = float(np.linalg.norm(a)), float(np.linalg.norm(b))
+    if na == 0.0 and nb == 0.0:
+        return {"cosine": 1.0, "sign_agreement": 1.0, "norm_ratio": 1.0, "both_zero": 1.0}
+    if na == 0.0 or nb == 0.0:
+        return {"cosine": 0.0, "sign_agreement": 0.0, "norm_ratio": float("inf"), "both_zero": 0.0}
+    dot = float(np.dot(a, b))
+    cosine = dot / (na * nb)
+    active = (a != 0.0) | (b != 0.0)
+    agreement = float(np.mean(np.sign(a[active]) == np.sign(b[active]))) if active.any() else 1.0
+    return {"cosine": cosine, "sign_agreement": agreement,
+            "norm_ratio": max(na, nb) / min(na, nb), "both_zero": 0.0}
+
+
+def step_stability(jacobians: dict[str, pd.DataFrame], weights: pd.Series,
+                   families: pd.Series | None = None) -> pd.DataFrame:
+    """Vector-level derivative stability across step sizes.
+
+    Compares each parameter's full weighted derivative column between every
+    pair of step sizes using cosine similarity, per-observation sign-agreement
+    and the norm ratio.  A non-negative CSS summary cannot detect direction
+    flips; this can.  ``stable`` requires every pair to satisfy
+    ``STABILITY_MIN_COSINE`` and ``STABILITY_MIN_SIGN_AGREEMENT``.
     """
-    css = {}
-    for label, jac in jacobians.items():
-        common = [o for o in jac.index if o in weights.index]
-        wj = jac.loc[common].to_numpy(float) * weights.loc[common].to_numpy(float)[:, None]
-        css[label] = {name: float(np.sqrt(np.square(wj[:, i]).sum()))
-                      for i, name in enumerate(jac.columns)}
+    columns = {label: _derivative_columns(jac, weights) for label, jac in jacobians.items()}
+    labels = sorted(columns.keys())
+    scopes: dict[str, np.ndarray | None] = {"": None}
+    if families is not None:
+        for family in ("DRY_CUM", "N_RESPONSE", "W_RESPONSE"):
+            mask = families.astype(str).isin([family]).to_numpy()
+            scopes[f"_{family.lower()}"] = mask if mask.any() else None
+
+    params = sorted(set().union(*[set(c) for c in columns.values()]))
     rows = []
-    params = sorted(set().union(*[set(c) for c in css.values()]))
     for p in params:
-        values = {label: css[label].get(p) for label in css}
-        finite = [v for v in values.values() if v is not None and np.isfinite(v)]
-        if len(finite) < 2:
-            rows.append({"parameter": p, **values,
-                         "n_steps": len(finite), "stable": None,
-                         "magnitude_ratio": "",
+        present = {label: columns[label].get(p) for label in labels if p in columns[label]}
+        if len(present) < 2:
+            rows.append({"parameter": p, "n_steps": len(present), "stable": None,
+                         "min_cosine": "", "min_sign_agreement": "", "max_norm_ratio": "",
                          "note": "single step size available; stability unverified"})
             continue
-        signs = np.sign([v if v != 0 else 1 for v in finite])
-        nz = [abs(v) for v in finite if v != 0]
-        ratio = float(max(nz) / min(nz)) if len(nz) >= 2 and min(nz) > 0 else None
-        stable = bool((signs == signs[0]).all())
-        note = ("sign-consistent across step sizes"
-                + (f"; CSS magnitude ratio {ratio:.1f}x (step-dependent, informational)"
-                   if ratio else "; zero sensitivity in at least one step"))
-        rows.append({"parameter": p, **values, "n_steps": len(finite),
-                     "stable": stable, "magnitude_ratio": ratio, "note": note})
+        pair_results = []
+        keys = sorted(present.keys())
+        for i in range(len(keys)):
+            for j in range(i + 1, len(keys)):
+                pair_results.append((keys[i], keys[j], _vector_agreement(present[keys[i]], present[keys[j]])))
+        min_cos = min(r["cosine"] for *_, r in pair_results)
+        min_sign = min(r["sign_agreement"] for *_, r in pair_results)
+        max_ratio = max(r["norm_ratio"] for *_, r in pair_results)
+        stable = bool(min_cos >= STABILITY_MIN_COSINE and min_sign >= STABILITY_MIN_SIGN_AGREEMENT)
+        row = {"parameter": p, "n_steps": len(present), "stable": stable,
+               "min_cosine": round(min_cos, 4), "min_sign_agreement": round(min_sign, 4),
+               "max_norm_ratio": round(max_ratio, 4) if np.isfinite(max_ratio) else "inf",
+               "note": ("" if stable else
+                        f"direction unstable: min cosine {min_cos:.2f}, "
+                        f"min sign agreement {min_sign:.2f}")}
+        for suffix, mask in scopes.items():
+            if mask is None:
+                continue
+            sub = {label: vec[mask] for label, vec in present.items()}
+            pairs = [_vector_agreement(sub[a], sub[b])
+                     for i, a in enumerate(sorted(sub)) for b in sorted(sub)[i + 1:]]
+            row[f"min_cosine{suffix}"] = round(min(r["cosine"] for r in pairs), 4)
+            row[f"min_sign_agreement{suffix}"] = round(min(r["sign_agreement"] for r in pairs), 4)
+        rows.append(row)
     return pd.DataFrame(rows)
 
 
 def recommend_formal_set(sensitivity: pd.DataFrame, correlation: pd.DataFrame,
                          stability: pd.DataFrame, max_params: int) -> pd.DataFrame:
-    """Rank by scaled CSS, drop collinear partners and unverified derivatives."""
+    """Rank by scaled CSS, drop collinear partners and direction-unstable derivatives.
+
+    Parameters whose derivative direction is unstable across step sizes, or
+    that were only differentiated at a single step size (unverified), are
+    excluded from the formal recommendation.
+    """
     all_scope = sensitivity[sensitivity["scope"] == "ALL"].set_index("parameter")
     top = all_scope.sort_values("css_scaled", ascending=False)
     css_max = float(top["css_scaled"].max())
     floor = css_max * MIN_CSS_FRACTION
-    stable_map = {}
-    if not stability.empty and "stable" in stability:
+    if "stable" in stability.columns and not stability.empty:
         stable_map = dict(zip(stability["parameter"], stability["stable"]))
+    else:
+        stable_map = {}
 
     kept: list[str] = []
     dropped: list[tuple[str, str, float]] = []
@@ -191,8 +269,13 @@ def recommend_formal_set(sensitivity: pd.DataFrame, correlation: pd.DataFrame,
         if float(row["css_scaled"]) < floor:
             dropped.append((name, "css_below_1pct_of_max", float(row["css_scaled"])))
             continue
-        if stable_map.get(name) is False:
-            dropped.append((name, "unstable_derivative_step", float(row["css_scaled"])))
+        verdict = stable_map.get(name, None)
+        if verdict is False:
+            dropped.append((name, "derivative_direction_unstable", float(row["css_scaled"])))
+            continue
+        if verdict is None:
+            dropped.append((name, "derivative_stability_unverified_single_step",
+                            float(row["css_scaled"])))
             continue
         collinear = None
         for other in kept:
@@ -210,7 +293,7 @@ def recommend_formal_set(sensitivity: pd.DataFrame, correlation: pd.DataFrame,
         "rank": range(1, len(kept) + 1),
         "parameter": kept,
         "css_scaled": [float(all_scope.loc[k, "css_scaled"]) for k in kept],
-        "derivative_step_stable": [bool(stable_map.get(k, None)) if stable_map.get(k) is not None else None for k in kept],
+        "derivative_step_stable": [bool(stable_map.get(k)) for k in kept],
     })
     return frame
 
@@ -254,14 +337,14 @@ def main() -> int:
     correlation = column_correlations(jacobian, weights)
     correlation.to_csv(out_dir / "jacobian_column_correlation.csv")
 
-    sv_frame, sv_summary = singular_values(jacobian, weights)
+    sv_frame, sv_summary = singular_values(jacobian, weights, ranges)
     sv_frame.to_csv(out_dir / "jacobian_singular_values.csv", index=False)
 
     jacobians = {"default": jacobian}
     for item in args.jcb or []:
         path, _, label = item.partition(":")
         jacobians[label or Path(path).stem] = load_jacobian(Path(path))[0]
-    stability = step_stability(jacobians, weights)
+    stability = step_stability(jacobians, weights, families)
     stability.to_csv(out_dir / "derivative_step_stability.csv", index=False)
 
     recommended = recommend_formal_set(sensitivity, correlation, stability,
@@ -282,6 +365,8 @@ def main() -> int:
             "eigthresh": EIGTHRESH,
             "correlation_drop": CORRELATION_DROP,
             "min_css_fraction": MIN_CSS_FRACTION,
+            "stability_min_cosine": STABILITY_MIN_COSINE,
+            "stability_min_sign_agreement": STABILITY_MIN_SIGN_AGREEMENT,
         },
         "n_recommended_formal_params": int(len(recommended)),
         "step_sizes_compared": sorted(jacobians.keys()),

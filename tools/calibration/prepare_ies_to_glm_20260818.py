@@ -465,6 +465,8 @@ def build_glm_case(
         "stage": stage,
         "dssat": "official_v4.8",
         "derinc_rule": "1% of GLM range per parameter (absolute), switch to one-sided at bounds",
+        "derinc_scale": float(derinc_scale),
+        "selected_set_source": str(selected_set_csv) if pool == "selected" and selected_set_csv else "default_pilot_recommendation",
         "removed_ies_options": removed_options,
         "bundle_hash_updates": hash_updates,
         "seasons": design["seasons"],

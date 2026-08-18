@@ -189,6 +189,100 @@ def test_arm_lambda_table_matches_plan():
     assert ARM_RESPONSE_LAMBDAS["C"] == {"N_RESPONSE": 0.5, "W_RESPONSE": 0.25}
 
 
+# ── code-review 20260818 regressions ───────────────────────────────
+
+def test_step_stability_detects_direction_flip():
+    from tools.calibration.analyze_glm_jacobian_20260818 import step_stability
+    import pandas as pd
+    a = pd.DataFrame({"p": [1.0, 2.0, -1.0], "q": [0.5, 0.5, 0.5]})
+    flipped = pd.DataFrame({"p": [-1.0, -2.2, 1.1], "q": [0.6, 0.4, 0.5]})
+    weights = pd.Series([1.0, 1.0, 1.0], index=list(range(3)))
+    a.index = weights.index
+    flipped.index = weights.index
+    out = step_stability({"s1": a, "s2": flipped}, weights)
+    p = out[out["parameter"] == "p"].iloc[0]
+    q = out[out["parameter"] == "q"].iloc[0]
+    assert p["stable"] is False or bool(p["stable"]) is False
+    assert bool(q["stable"]) is True
+    assert float(p["min_cosine"]) < 0
+
+
+def test_step_stability_single_step_is_unverified():
+    from tools.calibration.analyze_glm_jacobian_20260818 import step_stability
+    import pandas as pd
+    a = pd.DataFrame({"p": [1.0, 2.0]}, index=[0, 1])
+    weights = pd.Series([1.0, 1.0], index=[0, 1])
+    out = step_stability({"only": a}, weights)
+    assert out.iloc[0]["stable"] is None
+
+
+def test_singular_values_are_unit_invariant():
+    from tools.calibration.analyze_glm_jacobian_20260818 import singular_values
+    import pandas as pd
+    jac = pd.DataFrame({"p": [1.0, 2.0], "q": [0.5, -1.0]}, index=["o1", "o2"])
+    weights = pd.Series([1.0, 1.0], index=["o1", "o2"])
+    ranges = pd.Series({"p": 2.0, "q": 4.0})
+    _, base = singular_values(jac, weights, ranges)
+    # Express p in units 10x larger: numeric values shrink 10x (range /10) and
+    # the derivative column grows 10x, leaving every range-scaled entry — and
+    # therefore the spectrum — unchanged.
+    jac2 = jac.copy()
+    jac2["p"] = jac2["p"] * 10.0
+    ranges2 = ranges.copy()
+    ranges2["p"] = ranges2["p"] / 10.0
+    _, rescaled = singular_values(jac2, weights, ranges2)
+    assert base["effective_rank"] == rescaled["effective_rank"]
+    assert base["condition_number"] == pytest.approx(rescaled["condition_number"], rel=1e-9)
+
+
+def test_not_assessed_gate_blocks_engineering_pass():
+    from tools.calibration.evaluate_glm_followup_20260818 import engineering_gates
+    baseline = {
+        "DRY_CUM": {"nse": {"25SP": 0.9, "26SP": 0.8}, "pbias_pct": {}},
+        "N_RESPONSE": {"nse": {"25SP": -1.0, "26SP": -3.0}},
+        "W_RESPONSE": {"nse": {"25SP": -1.5, "26SP": -1.4}},
+        "ORGAN": {"LAID": {"nse": {"25SP": 0.8, "26SP": 0.2}}},
+    }
+    candidate = {"DRY_CUM": {"25SP": {"nse": 0.91, "pbias_pct": 1.0},
+                             "26SP": {"nse": 0.81, "pbias_pct": 2.0}},
+                 "N_RESPONSE": {"25SP": {"nse": -0.9}, "26SP": {"nse": -2.9}},
+                 "W_RESPONSE": {"25SP": {"nse": -1.4}, "26SP": {"nse": -1.3}}}
+    passed, checks = engineering_gates(candidate, baseline, source="unit")
+    assert passed is False
+    assert any(c["status"] == "not_assessed" for c in checks)
+
+
+def test_replacement_decision_requires_all_hard_criteria():
+    from tools.calibration.evaluate_glm_followup_20260818 import replacement_decision
+    baseline = {
+        "DRY_CUM": {"nse": {"25SP": 0.905, "26SP": 0.877}},
+        "N_RESPONSE": {"nse": {"25SP": -0.9, "26SP": -3.5}},
+        "W_RESPONSE": {"nse": {"25SP": -1.6, "26SP": -1.4}},
+        "ORGAN": {"LAID": {"nse": {"25SP": 0.8, "26SP": 0.2}},
+                  "LWAD": {"nse": {"25SP": 0.8, "26SP": 0.6}},
+                  "SWAD": {"nse": {"25SP": 0.9, "26SP": 0.8}}},
+    }
+    strong = {"DRY_CUM": {"25SP": {"nse": 0.91}, "26SP": {"nse": 0.88}},
+              "N_RESPONSE": {"25SP": {"nse": -0.5}, "26SP": {"nse": -3.0}},
+              "W_RESPONSE": {"25SP": {"nse": -1.0}, "26SP": {"nse": -1.0}},
+              "ORGAN": {"LAID": {"25SP": 0.85, "26SP": 0.3},
+                        "LWAD": {"25SP": 0.82, "26SP": 0.62},
+                        "SWAD": {"25SP": 0.91, "26SP": 0.81}}}
+    decision = replacement_decision(strong, baseline, at_bound_params=[])
+    assert decision["replaces_member126"] is True
+    weak = {"DRY_CUM": {"25SP": {"nse": 0.90}, "26SP": {"nse": 0.86}},
+            "N_RESPONSE": {"25SP": {"nse": -1.2}, "26SP": {"nse": -3.4}},
+            "W_RESPONSE": {"25SP": {"nse": -1.0}, "26SP": {"nse": -1.0}},
+            "ORGAN": {"LAID": {"25SP": 0.85, "26SP": 0.3},
+                      "LWAD": {"25SP": 0.82, "26SP": 0.62},
+                      "SWAD": {"25SP": 0.91, "26SP": 0.81}}}
+    decision2 = replacement_decision(weak, baseline, at_bound_params=[])
+    assert decision2["replaces_member126"] is False
+    decision3 = replacement_decision(strong, baseline, at_bound_params=["porpt"])
+    assert decision3["criteria"]["no_new_bound_pressure"] == "manual_review"
+    assert decision3["replaces_member126"] is False
+
+
 # ── integration against the formal IES baseline ─────────────────────
 
 pytestmark_integration = pytest.mark.skipif(
