@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "date": "2026-08-18",
+  "report": "docs/源数据质量审查_生长指标_20260818.md",
+  "decision": "方案A：不修改任何测量值；仅执行卫生修正与记录",
+  "edits": {
+    "data/user/ref/DSSAT文件/2025春/2025春作物生长指标集.xlsx": {
+      "action": "deleted 84 placeholder rows (dates 2025-06-09/2025-06-21, all measurement columns empty); rows 252->168",
+      "sha256_before": "dc9af4e6250f4f71f7d770393477c790ded0f174ea17d9e3e220175ca3ffb3c4",
+      "sha256_after": "cfc2c0c101b51d448adcd32b26a1cf02c7154e4a837b4e49f41ef0a8d3a354ff",
+      "value_fingerprint_check": "all remaining rows byte-identical to pre-edit (verified in-session)"
+    },
+    "data/user/ref/DSSAT文件/2026春/2026春生长指标集.xlsx": {
+      "action": "sheet[0602] inserted leading 取样日期 column (20260602, from sheet name); added QA说明 sheet",
+      "sha256_before": "b7205945e999d9eb8e16212d96e0ec7b10029723c319a0c3646beacce2f4c8ef",
+      "sha256_after": "b24bdaf74a3bdd288df75a99c3776682a3662b4559e85cfc8d93c84820325f40",
+      "value_check": "all data sheets verified identical against git HEAD via shared-column comparison"
+    }
+  },
+  "findings_summary": {
+    "non_monotonic_cause": "末期打老叶管理事件 + 自然衰老（非日期混淆；株高/茎干重两季严格单调证伪对调假说）",
+    "replicate_outliers": "CV 25-35%，行位置绑定的系统性异质性；稳健真实下降：25SP小区2(叶+LAI)、26SP小区7/8/12(叶)；离群放大：25SP小区3、26SP小区2/5；噪声内：26SP小区4、25SP小区13/14、全部茎干重",
+    "sigma_pipeline": "观测 sigma 已用 replicate_sd 传入率定（末期 ±20-24%），无需额外改动",
+    "protocol_notes": "26SP 0717 总叶鲜重 = 叶鲜重 + 小叶鲜重；干鲜比与其他日期不可直接比较"
+  },
+  "impact_on_frozen_results": "零影响：未改动任何测量值；现行 bundle/率定结果无需重算",
+  "bundle_log_note": "未来 bundle 重建时 generator_log 应引用本记录与修订后源文件哈希"
+}
