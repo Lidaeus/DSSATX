@@ -292,12 +292,15 @@ pytestmark_integration = pytest.mark.skipif(
 
 @pytestmark_integration
 def test_default_selected_set_exists_and_valid():
+    import pandas as pd
     assert DEFAULT_SELECTED_SET_CSV.is_file()
-    pool = load_selected_pool(DEFAULT_SELECTED_SET_CSV) if DEFAULT_SELECTED_SET_CSV.stat().st_size > 40 else []
+    frame = pd.read_csv(DEFAULT_SELECTED_SET_CSV)
     # After the 20260818 vector-stability audit the recommendation may be
     # empty (no parameter passed direction stability); the historical 9-param
     # CSS-based set is only valid as a record of the superseded criterion.
-    assert len(pool) <= 18
+    if len(frame) > 0:
+        pool = load_selected_pool(DEFAULT_SELECTED_SET_CSV)
+        assert 1 <= len(pool) <= 18
 
 
 @pytest.fixture(scope="module")
