@@ -184,23 +184,23 @@ def family_metrics_from_rei(
         raise ValueError(family)
     out = {}
     for season in SEASONS:
-        rows = registry[mask & registry["season_id"].astype(str).eq(season)]
+        rows = registry[mask & registry["season_id"].astype(str).eq(season)].copy()
         if rows.empty:
             continue
-        names = rows["obsnme"].astype(str).str.lower().tolist()
-        sub = rei[rei["obsnme"].isin(names)]
+        rows["obsnme"] = rows["obsnme"].astype(str).str.lower()
+        rows = rows.sort_values("obsnme")
+        names = rows["obsnme"].tolist()
+        idx = rows.set_index("obsnme")
+        sub = rei[rei["obsnme"].isin(names)].set_index("obsnme").loc[names]
         if len(sub) != len(names):
             raise ValueError(f"{family} {season}: rei covers {len(sub)}/{len(names)} observations")
-        obs = np.array([invert_transform(m, t, o, r) for m, t, o, r in zip(
-            sub["measured"], rows.set_index("obsnme").loc[names, "transform"].str.lower(),
-            pd.to_numeric(rows.set_index("obsnme").loc[names, "transform_offset"], errors="coerce").fillna(0.0),
-            pd.to_numeric(rows.set_index("obsnme").loc[names, "transform_reference"], errors="coerce").fillna(1.0),
-        )])
-        sim = np.array([invert_transform(m, t, o, r) for m, t, o, r in zip(
-            sub["modelled"], rows.set_index("obsnme").loc[names, "transform"].str.lower(),
-            pd.to_numeric(rows.set_index("obsnme").loc[names, "transform_offset"], errors="coerce").fillna(0.0),
-            pd.to_numeric(rows.set_index("obsnme").loc[names, "transform_reference"], errors="coerce").fillna(1.0),
-        )])
+        transforms = idx["transform"].astype(str).str.lower()
+        offsets = pd.to_numeric(idx["transform_offset"], errors="coerce").fillna(0.0)
+        references = pd.to_numeric(idx["transform_reference"], errors="coerce").fillna(1.0)
+        obs = np.array([invert_transform(m, t, o, r) for m, t, o, r in
+                        zip(sub["measured"], transforms, offsets, references)])
+        sim = np.array([invert_transform(m, t, o, r) for m, t, o, r in
+                        zip(sub["modelled"], transforms, offsets, references)])
         out[season] = {"n": len(names), "nse": nse(obs, sim), "pbias_pct": pbias_pct(obs, sim)}
     return out
 

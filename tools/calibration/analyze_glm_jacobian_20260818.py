@@ -57,7 +57,7 @@ def family_of(obgnme: str) -> str:
 
 def load_jacobian(path: Path) -> tuple[pd.DataFrame, pd.Series]:
     """Return (jacobian DataFrame [obs x par], observation weights Series)."""
-    jco = pyemu.Jco(str(path))
+    jco = pyemu.Jco.from_binary(str(path))
     frame = jco.to_dataframe()
     weights = (frame.index.get_level_values(0)
                if isinstance(frame.index, pd.MultiIndex) else pd.Series(index=frame.index))

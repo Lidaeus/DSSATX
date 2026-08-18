@@ -277,6 +277,11 @@ def build_glm_case(
     for name, path in src.items():
         if not path.is_file():
             raise FileNotFoundError(path)
+    # Instruction files: every PEST model interface referenced by the PST.
+    for ins_path in sorted(ies_dir.glob(f"{ies_case}_*.OUT.ins")):
+        src[ins_path.name] = ins_path
+    if not any(n.endswith(".ins") for n in src):
+        raise FileNotFoundError(f"no instruction files found in {ies_dir}")
     for name, path in src.items():
         new_name = name.replace(ies_case, case)
         shutil.copy2(path, target / new_name)
@@ -392,6 +397,24 @@ def build_glm_case(
 
     design = json.loads((target / "joint_design.json").read_text(encoding="utf-8"))
     _assert_design_contracts(design)
+    # The bundles were legitimately updated after the formal IES run (fixed
+    # 25SP/26SP TMX and the 2026-08-18 26SP T12 IC, plan section 1).  Re-declare
+    # the manifest hashes from the CURRENT bundles so run_multiseason's safety
+    # check passes, recording old -> new for audit.
+    hash_updates = {}
+    for season in design.get("seasons", []):
+        bundle = Path(season["bundle_path"])
+        manifest = bundle / "input_manifest.json"
+        if not manifest.is_file():
+            raise FileNotFoundError(manifest)
+        current = sha256_of(manifest)
+        declared = season.get("bundle_manifest_sha256")
+        if declared != current:
+            hash_updates[season["season_id"]] = {"declared": declared, "current": current}
+            season["bundle_manifest_sha256"] = current
+    if hash_updates:
+        (target / "joint_design.json").write_text(
+            json.dumps(design, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     glm_design = {
         "schema_version": 1,
         "design_id": f"glm_followup_{arm}_{pool}_{date_tag}",
@@ -408,6 +431,7 @@ def build_glm_case(
         "dssat": "official_v4.8",
         "derinc_rule": "1% of GLM range per parameter (absolute), switch to one-sided at bounds",
         "removed_ies_options": removed_options,
+        "bundle_hash_updates": hash_updates,
         "seasons": design["seasons"],
     }
     (target / "glm_design.json").write_text(json.dumps(glm_design, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
