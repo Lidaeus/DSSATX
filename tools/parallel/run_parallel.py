@@ -726,15 +726,17 @@ def cmd_run(args):
         raise FileNotFoundError(run_dir)
 
     _ensure_case_pst(run_dir, args.case)
-    if args.resume and args.mode == "ies":
+    if args.resume and args.mode in ("ies", "glm"):
         # pestpp-ies rejects the /r recourse option ('/r option not supported by
         # pestpp-ies'), so --resume cannot recover an interrupted IES run. Fail
         # fast with an actionable message before spawning agents. True IES
         # breakpoint recovery is deferred; rebuild from a clean case instead.
+        # GLM resume is rejected until actually verified against pestpp-glm
+        # restart semantics; do not pretend recovery works.
         raise NotImplementedError(
-            "--resume is not supported with --mode ies: pestpp-ies rejects the "
-            "/r recourse option. Rebuild from a clean case with build_pest.py "
-            "and start a fresh run instead."
+            f"--resume is not supported with --mode {args.mode}: pestpp-{args.mode} "
+            "rejects or has unverified /r recourse support. Rebuild from a clean "
+            "case with the GLM builder and start a fresh run instead."
         )
     if args.resume and not os.path.isfile(os.path.join(run_dir, f"{args.case}.rns")):
         raise FileNotFoundError(f"Cannot resume without run storage: {args.case}.rns")
@@ -754,7 +756,7 @@ def cmd_run(args):
     host = args.host or socket.gethostname()
 
     repo_root = _repo_root_from_this_file()
-    exe_name = "pestpp-ies.exe" if args.mode == "ies" else "pestpp-sen.exe"
+    exe_name = {"ies": "pestpp-ies.exe", "glm": "pestpp-glm.exe"}.get(args.mode, "pestpp-sen.exe")
     exe_path = os.path.join(repo_root, "pestpp-5.2.16-win", "bin", exe_name)
     if not os.path.exists(exe_path):
         raise FileNotFoundError(exe_path)
@@ -1041,6 +1043,18 @@ def cmd_run(args):
                     scientific_status = "not_assessed"
                     scientific_error = "Science gate deferred to finalize_calibration.py"
 
+            # GLM follow-up runs: the IES ensemble gate does not apply.  Mark
+            # engineering assessment as deferred; WP5 (evaluate_glm_followup)
+            # writes glm_quality/engineering_quality.json post-hoc.
+            if process_state == "completed" and args.mode == "glm":
+                engineering_status = "engineering_not_assessed"
+                engineering_error = (
+                    "GLM engineering assessment deferred to "
+                    "tools/calibration/evaluate_glm_followup_20260818.py"
+                )
+                scientific_status = "not_assessed"
+                scientific_error = "Science gate deferred to GLM evaluator"
+
             _write_json(run_status_path, {
                 "state_schema_version": 2,
                 "run_dir": run_dir,
@@ -1128,7 +1142,7 @@ def main():
     )
     parser.add_argument("--run-dir", required=True)
     parser.add_argument("--case", required=True)
-    parser.add_argument("--mode", choices=["ies", "sen"], default="ies")
+    parser.add_argument("--mode", choices=["ies", "sen", "glm"], default="ies")
     parser.add_argument("--n-agents", type=int, default=0)
     parser.add_argument("--agents-dir", default="_agents")
     parser.add_argument("--host", default=None)
