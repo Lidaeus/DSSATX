@@ -46,12 +46,15 @@ STABILITY_MIN_SIGN_AGREEMENT = 0.80
 
 def family_of(obgnme: str) -> str:
     """Map a PEST observation group to an objective family for aggregation."""
-    g = str(obgnme).upper()
+    g = str(obgnme).strip().upper()
     if "NRESP" in g:
         return "N_RESPONSE"
     if "WRESP" in g:
         return "W_RESPONSE"
-    if "CHPDTS" in g or "CHPDTM" in g:
+    # The formal dry-NSE PST assigns all cumulative-dry observations (CHPDTS
+    # terminal + CHPDTS_T intermediate, both seasons) to the single 'drynse'
+    # group; legacy per-harvest group names are also accepted.
+    if g == "DRYNSE" or "CHPDTS" in g or "CHPDTM" in g:
         return "DRY_CUM"
     if any(tok in g for tok in ("LAID", "LWAD", "SWAD", "CHTD")):
         return "ORGAN"
