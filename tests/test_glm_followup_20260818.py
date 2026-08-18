@@ -28,12 +28,14 @@ if str(ROOT) not in sys.path:
 from tools.calibration.prepare_ies_to_glm_20260818 import (
     APPROVED_TOPK_CSV,
     ARM_RESPONSE_LAMBDAS,
+    DEFAULT_SELECTED_SET_CSV,
     IES_CASE,
     IES_DIR,
     apply_response_nse_weights,
     build_glm_case,
     compute_posterior_bounds,
     load_approved_pool,
+    load_selected_pool,
     nse_uniform_weight,
 )
 
@@ -64,6 +66,30 @@ def test_pool_names_are_lowercase_normalized():
 def test_pool_rejects_oversized_k():
     with pytest.raises(ValueError):
         load_approved_pool(APPROVED_TOPK_CSV, 24)
+
+
+# ── selected pool (WP3 recommendation) ──────────────────────────────
+
+def test_selected_pool_reads_recommendation_csv(tmp_path):
+    csv = tmp_path / "sel.csv"
+    csv.write_text("rank,parameter,css_scaled\n1,pm06,10\n2,xfint,9\n", encoding="utf-8")
+    assert load_selected_pool(csv) == ["pm06", "xfint"]
+
+
+def test_selected_pool_rejects_over_cap(tmp_path):
+    csv = tmp_path / "sel.csv"
+    names = ",".join(f"p{i}" for i in range(19))
+    csv.write_text("rank,parameter\n1," + "\n1,".join([]) + "\n" +
+                   "".join(f"{i},p{i}\n" for i in range(19)), encoding="utf-8")
+    with pytest.raises(ValueError, match="caps formal"):
+        load_selected_pool(csv)
+
+
+def test_selected_pool_rejects_duplicates(tmp_path):
+    csv = tmp_path / "sel.csv"
+    csv.write_text("rank,parameter\n1,pm06\n2,pm06\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="duplicate"):
+        load_selected_pool(csv)
 
 
 # ── posterior bounds (plan section 4.2) ─────────────────────────────
@@ -168,6 +194,15 @@ def test_arm_lambda_table_matches_plan():
 pytestmark_integration = pytest.mark.skipif(
     not (IES_DIR / f"{IES_CASE}.pst").is_file(), reason="formal IES baseline not present"
 )
+
+
+@pytestmark_integration
+def test_default_selected_set_exists_and_valid():
+    assert DEFAULT_SELECTED_SET_CSV.is_file()
+    pool = load_selected_pool(DEFAULT_SELECTED_SET_CSV)
+    assert 1 <= len(pool) <= 18
+    assert pool == ["pm06", "xfint", "trifl", "frlff", "rtno3", "nmobmx",
+                    "nvsmob", "frstmf", "rtnh4"]
 
 
 @pytest.fixture(scope="module")

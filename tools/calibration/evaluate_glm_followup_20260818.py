@@ -336,40 +336,63 @@ def write_outputs(run_dir: Path, candidates: dict, baseline: dict) -> None:
     quality_dir = run_dir / "glm_quality"
     quality_dir.mkdir(exist_ok=True)
 
+    # Merge with any previously written candidates so screening (.rei) and
+    # deterministic replay results coexist in one table instead of the latest
+    # call overwriting the others.
     rows = []
+    metrics_path = eval_dir / "candidate_metrics.csv"
+    if metrics_path.is_file():
+        existing = pd.read_csv(metrics_path)
+        keep = existing[~existing["candidate"].isin(candidates.keys())]
+        if not keep.empty:
+            rows = keep.to_dict(orient="records")
     for label, cand in candidates.items():
         for family in ("DRY_CUM", "N_RESPONSE", "W_RESPONSE"):
             for season, m in cand["metrics"].get(family, {}).items():
                 rows.append({"candidate": label, "family": family, "season": season,
                              **m, "engineering_pass": cand["engineering_pass"],
                              "recommend_promotion": cand["promotion"]["recommend_promotion"]})
-    pd.DataFrame(rows).to_csv(eval_dir / "candidate_metrics.csv", index=False)
+    pd.DataFrame(rows).to_csv(metrics_path, index=False)
 
+    decision_path = eval_dir / "promotion_decision.json"
     decision = {
         "schema_version": 1,
         "case": run_dir.name,
         "baseline_member": baseline.get("member"),
-        "candidates": {
-            label: {
-                "engineering_pass": c["engineering_pass"],
-                "promotion": c["promotion"],
-                "failed_gates": [g for g in c["gates"] if g["status"] == "fail"],
-            } for label, c in candidates.items()
-        },
+        "candidates": {},
         "note": "candidate organ gates require --replay deterministic evaluation",
     }
-    (eval_dir / "promotion_decision.json").write_text(
-        json.dumps(decision, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if decision_path.is_file():
+        try:
+            previous = json.loads(decision_path.read_text(encoding="utf-8"))
+            decision["candidates"].update(previous.get("candidates", {}))
+        except (OSError, json.JSONDecodeError):
+            pass
+    decision["candidates"].update({
+        label: {
+            "engineering_pass": c["engineering_pass"],
+            "promotion": c["promotion"],
+            "failed_gates": [g for g in c["gates"] if g["status"] == "fail"],
+        } for label, c in candidates.items()
+    })
+    decision_path.write_text(json.dumps(decision, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+    quality_path = quality_dir / "engineering_quality.json"
     quality = {
         "schema_version": 1,
         "case": run_dir.name,
         "assessment": "glm_followup_engineering",
-        "candidates": {label: {"engineering_pass": c["engineering_pass"],
-                               "gates": c["gates"]} for label, c in candidates.items()},
+        "candidates": {},
     }
-    (quality_dir / "engineering_quality.json").write_text(
-        json.dumps(quality, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if quality_path.is_file():
+        try:
+            previous = json.loads(quality_path.read_text(encoding="utf-8"))
+            quality["candidates"].update(previous.get("candidates", {}))
+        except (OSError, json.JSONDecodeError):
+            pass
+    quality["candidates"].update({label: {"engineering_pass": c["engineering_pass"],
+                                           "gates": c["gates"]} for label, c in candidates.items()})
+    quality_path.write_text(json.dumps(quality, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"outputs: {eval_dir} and {quality_dir}")
 
 

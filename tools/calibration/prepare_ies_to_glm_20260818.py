@@ -91,6 +91,30 @@ def load_approved_pool(csv_path: Path, k: int) -> list[str]:
     return pool
 
 
+DEFAULT_SELECTED_SET_CSV = ROOT / ("workspace/runs/e02_glm_A_top15_pilot_official_20260818/"
+                                   "glm_quality/recommended_formal_parameter_set.csv")
+
+
+def load_selected_pool(csv_path: Path, max_params: int = 18) -> list[str]:
+    """Read the locally-validated parameter set from a WP3 recommendation CSV.
+
+    Plan section 7 stage 3 caps the formal set at 15 (18 with sufficient
+    top-23 rank); loading more than ``max_params`` rows is rejected.
+    """
+    frame = pd.read_csv(csv_path, encoding="utf-8-sig")
+    if "parameter" not in frame.columns:
+        raise ValueError(f"selected-set CSV lacks a 'parameter' column: {csv_path}")
+    pool = [str(n).strip().lower() for n in frame["parameter"].tolist() if str(n).strip()]
+    if not pool:
+        raise ValueError(f"selected-set CSV is empty: {csv_path}")
+    if len(set(pool)) != len(pool):
+        raise ValueError("duplicate parameter names in selected set")
+    if len(pool) > max_params:
+        raise ValueError(
+            f"selected set has {len(pool)} parameters; plan section 7 caps formal at {max_params}")
+    return pool
+
+
 def physical_bounds_for(name: str) -> tuple[float | None, float | None]:
     entry = PHYSICAL_BOUNDS.get(name) or PHYSICAL_BOUNDS.get(name.upper())
     if entry is None:
@@ -259,19 +283,25 @@ def build_glm_case(
     date_tag: str = DATE_TAG,
     initial_member: str = INITIAL_MEMBER,
     derinc_scale: float = 1.0,
+    selected_set_csv: Path | None = None,
 ) -> Path:
     """Create the GLM run directory.  Refuses to overwrite existing output.
 
     ``derinc_scale`` multiplies the default 1%-of-GLM-range increment (plan
-    section 8 spot checks use 0.5 and 2.0).
+    section 8 spot checks use 0.5 and 2.0).  ``--pool selected`` reads the
+    locally-validated set from ``selected_set_csv`` (default: the WP3
+    recommendation written by the top-15 A-arm pilot audit).
     """
     if pool not in ("top15", "top23", "selected"):
         raise ValueError(f"unsupported pool: {pool}")
     if arm not in ARM_RESPONSE_LAMBDAS:
         raise ValueError(f"unsupported arm: {arm}")
 
-    k = 15 if pool == "top15" else 23
-    selected = load_approved_pool(APPROVED_TOPK_CSV, k)
+    if pool == "selected":
+        selected = load_selected_pool(selected_set_csv or DEFAULT_SELECTED_SET_CSV)
+    else:
+        k = 15 if pool == "top15" else 23
+        selected = load_approved_pool(APPROVED_TOPK_CSV, k)
     case = f"e02_glm_{arm}_{pool}_{stage}_official_{date_tag}"
     target = ROOT / "workspace/runs" / case
     if target.exists():
@@ -533,9 +563,12 @@ def main() -> int:
     parser.add_argument("--initial-member", default=INITIAL_MEMBER)
     parser.add_argument("--derinc-scale", type=float, default=1.0,
                         help="multiplier on the 1%%-of-range DERINC (0.5/2.0 spot checks)")
+    parser.add_argument("--selected-set-csv", type=Path, default=None,
+                        help="parameter CSV for --pool selected (default: WP3 pilot recommendation)")
     args = parser.parse_args()
     build_glm_case(args.pool, args.objective_arm, args.stage, args.noptmax,
-                   initial_member=args.initial_member, derinc_scale=args.derinc_scale)
+                   initial_member=args.initial_member, derinc_scale=args.derinc_scale,
+                   selected_set_csv=args.selected_set_csv)
     return 0
 
 
