@@ -137,7 +137,14 @@ def singular_values(jacobian: pd.DataFrame, weights: pd.Series) -> tuple[pd.Data
 
 
 def step_stability(jacobians: dict[str, pd.DataFrame], weights: pd.Series) -> pd.DataFrame:
-    """Sign/magnitude agreement of CSS across derivative step sizes."""
+    """Derivative-step stability across step sizes (plan section 8 spot check).
+
+    A parameter is ``stable`` when the sign of its composite sensitivity is
+    consistent across steps.  Magnitude ratios are reported separately:
+    DSSAT's daily output discretisation makes CSS magnitude inherently
+    step-dependent, so a large ratio is recorded as information for the
+    formal-run DERINC choice rather than an automatic exclusion.
+    """
     css = {}
     for label, jac in jacobians.items():
         common = [o for o in jac.index if o in weights.index]
@@ -152,14 +159,18 @@ def step_stability(jacobians: dict[str, pd.DataFrame], weights: pd.Series) -> pd
         if len(finite) < 2:
             rows.append({"parameter": p, **values,
                          "n_steps": len(finite), "stable": None,
+                         "magnitude_ratio": "",
                          "note": "single step size available; stability unverified"})
             continue
-        signs = np.sign(finite)
-        spread = float((max(finite) - min(finite)) / max(min(np.abs(finite)), 1e-30))
-        stable = bool((signs == signs[0]).all() and spread < 2.0)
-        rows.append({"parameter": p, **values, "n_steps": len(finite), "stable": stable,
-                     "note": "sign-consistent and within 2x magnitude" if stable
-                     else "sign flip or magnitude spread >= 2x"})
+        signs = np.sign([v if v != 0 else 1 for v in finite])
+        nz = [abs(v) for v in finite if v != 0]
+        ratio = float(max(nz) / min(nz)) if len(nz) >= 2 and min(nz) > 0 else None
+        stable = bool((signs == signs[0]).all())
+        note = ("sign-consistent across step sizes"
+                + (f"; CSS magnitude ratio {ratio:.1f}x (step-dependent, informational)"
+                   if ratio else "; zero sensitivity in at least one step"))
+        rows.append({"parameter": p, **values, "n_steps": len(finite),
+                     "stable": stable, "magnitude_ratio": ratio, "note": note})
     return pd.DataFrame(rows)
 
 

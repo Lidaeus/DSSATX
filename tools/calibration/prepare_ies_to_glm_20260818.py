@@ -258,8 +258,13 @@ def build_glm_case(
     ies_case: str = IES_CASE,
     date_tag: str = DATE_TAG,
     initial_member: str = INITIAL_MEMBER,
+    derinc_scale: float = 1.0,
 ) -> Path:
-    """Create the GLM run directory.  Refuses to overwrite existing output."""
+    """Create the GLM run directory.  Refuses to overwrite existing output.
+
+    ``derinc_scale`` multiplies the default 1%-of-GLM-range increment (plan
+    section 8 spot checks use 0.5 and 2.0).
+    """
     if pool not in ("top15", "top23", "selected"):
         raise ValueError(f"unsupported pool: {pool}")
     if arm not in ARM_RESPONSE_LAMBDAS:
@@ -329,7 +334,7 @@ def build_glm_case(
         par.loc[name, "parubnd"] = result["glm_hi"]
         group = f"glm_{order:02d}_{name.replace('-', '_')}"
         par.loc[name, "pargp"] = group
-        derinc = 0.01 * (result["glm_hi"] - result["glm_lo"])
+        derinc = derinc_scale * 0.01 * (result["glm_hi"] - result["glm_lo"])
         glm_groups[group] = {"derinc": derinc, "derinclb": 0.5 * derinc}
         bounds_audit.append({
             "order": order, "parameter": name, "group": group,
@@ -526,9 +531,11 @@ def main() -> int:
     parser.add_argument("--stage", choices=["pilot", "formal"], default="pilot")
     parser.add_argument("--noptmax", type=int, default=1)
     parser.add_argument("--initial-member", default=INITIAL_MEMBER)
+    parser.add_argument("--derinc-scale", type=float, default=1.0,
+                        help="multiplier on the 1%%-of-range DERINC (0.5/2.0 spot checks)")
     args = parser.parse_args()
     build_glm_case(args.pool, args.objective_arm, args.stage, args.noptmax,
-                   initial_member=args.initial_member)
+                   initial_member=args.initial_member, derinc_scale=args.derinc_scale)
     return 0
 
 
