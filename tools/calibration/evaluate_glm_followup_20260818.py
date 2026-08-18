@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import shutil
 import subprocess
 import sys
@@ -374,19 +375,22 @@ def write_outputs(run_dir: Path, candidates: dict, baseline: dict) -> None:
 
 # ── deterministic replay (plan section 7 stage 4) ───────────────────
 
-def _parse_response_out(path: Path, token: str) -> dict[str, float]:
-    """Parse ``@<TOKEN>@ value`` pairs from Pest{N,W}Response.OUT lines."""
-    values: dict[str, float] = {}
+def _parse_response_out(path: Path, token: str) -> dict[tuple[int, int], float]:
+    """Parse ``RUN n TN t @HNO@ h DATE d @<TOKEN>@ v`` into {(run, hno): value}.
+
+    Keyed by the global RUN number because treatment numbers repeat across
+    seasons (e.g. TN 4 exists in both 25SP and 26SP); the observation
+    registry carries the matching ``global_run`` for every response obs.
+    """
+    values: dict[tuple[int, int], float] = {}
     if not path.is_file():
         return values
+    pattern = re.compile(
+        rf"RUN\s+(\d+)\s+TN\s+(\d+)\s+@HNO@\s+(\d+).*?@{token}@\s+([-+0-9.eE]+)")
     for line in path.read_text(errors="ignore").splitlines():
-        if f"@{token}@" not in line:
-            continue
-        parts = line.split()
-        for i, part in enumerate(parts):
-            if part == f"@{token}@" and i + 1 < len(parts):
-                key = " ".join(parts[:parts.index("@")]) or f"line{len(values)}"
-                values[str(len(values))] = float(parts[i + 1])
+        match = pattern.search(line)
+        if match:
+            values[(int(match.group(1)), int(match.group(3)))] = float(match.group(4))
     return values
 
 
@@ -408,22 +412,43 @@ def replay_candidate(run_dir: Path, case: str, label: str, par_source: Path,
     det_dir = run_dir / "deterministic_candidates" / label
     det_dir.mkdir(parents=True, exist_ok=True)
     params_csv = det_dir / f"{label}_params.csv"
-    member = pd.read_csv(par_source)
-    if "real_name" in member.columns:
-        member = member.drop(columns=["real_name"])
-    member.columns = [str(c).upper() if str(c).upper() != "REALIZATION" else "NAME" for c in member.columns]
-    if "NAME" not in member.columns:
-        member = member.rename(columns={member.columns[0]: "NAME"})
+    # Accept both CSV layouts (name,value) and classic PEST .par files
+    # ("single point" header + whitespace name value scale offset).
+    if par_source.suffix.lower() == ".par":
+        lines = par_source.read_text(encoding="utf-8", errors="ignore").splitlines()
+        member = pd.DataFrame(
+            [{"name": p[0], "value": float(p[1])}
+             for line in lines[1:] if len((p := line.split())) >= 2])
+    else:
+        member = pd.read_csv(par_source)
+        member = member.loc[:, ~member.columns.str.lower().isin(("real_name", "realization"))]
+        member.columns = [{"name": "name", "value": "value"}.get(str(c).lower(), str(c))
+                          for c in member.columns]
+    if "name" not in member.columns or "value" not in member.columns:
+        raise ValueError(f"unrecognized parameter file layout: {par_source}")
+    member["name"] = member["name"].astype(str).str.upper()
     member.to_csv(params_csv, index=False)
 
     design = json.loads((run_dir / "joint_design.json").read_text(encoding="utf-8"))
-    subprocess.run([
-        sys.executable, str(ROOT / "src/calibration/run_multiseason.py"),
-        "--design", str(run_dir / "joint_design.json"),
-        "--param-csv", str(params_csv),
-        "--prefix", label, "--harvest-var", "CHPDT",
-        "--keep-nitrogen-outputs",
-    ], cwd=det_dir, check=True)
+    # The GLM follow-up contract mandates the official DSSAT v4.8
+    # (plan section 1).  The workspace exe may hold a collaborator's custom
+    # variant, so swap to the official build for the replay and restore it in
+    # finally — exactly like the launcher does for pilot/formal runs.
+    official_exe = ROOT / "DSCSM048.EXE"
+    workspace_exe = ROOT / "workspace/DSCSM048.EXE"
+    exe_backup = det_dir / "_workspace_exe_replay_backup"
+    shutil.copy2(workspace_exe, exe_backup)
+    shutil.copy2(official_exe, workspace_exe)
+    try:
+        subprocess.run([
+            sys.executable, str(ROOT / "src/calibration/run_multiseason.py"),
+            "--design", str(run_dir / "joint_design.json"),
+            "--param-csv", str(params_csv),
+            "--prefix", label, "--harvest-var", "CHPDT",
+            "--keep-nitrogen-outputs",
+        ], cwd=det_dir, check=True)
+    finally:
+        exe_backup.replace(workspace_exe)
 
     registry = pd.read_csv(run_dir / f"{case}_observation_registry.csv", encoding="utf-8-sig")
     candidate: dict = {"DRY_CUM": {}, "N_RESPONSE": {}, "W_RESPONSE": {}, "ORGAN": {}}
@@ -453,23 +478,27 @@ def replay_candidate(run_dir: Path, case: str, label: str, par_source: Path,
             "pbias_pct": pbias_pct(sub["OBS_DRY_CUM"].to_numpy(float), sub["SIM_DRY_CUM"].to_numpy(float)),
         }
 
-        for family, out_name, token in (("N_RESPONSE", "PestNResponse.OUT", "NRESPM"),
-                                        ("W_RESPONSE", "PestWResponse.OUT", "WRESPM")):
+        for family, out_name in (("N_RESPONSE", "PestNResponse.OUT"),
+                                 ("W_RESPONSE", "PestWResponse.OUT")):
+            token = "NRESPS" if family == "N_RESPONSE" else "WRESPS"
             rows = registry[registry["season_id"].astype(str).eq(sid)
                             & registry["obgnme"].astype(str).str.upper().str.contains(
-                                "NRESP" if family == "N_RESPONSE" else "WRESP", na=False)]
+                                "NRESP" if family == "N_RESPONSE" else "WRESP", na=False)].copy()
             if rows.empty:
                 continue
-            sim_values = _parse_response_out(det_dir / "_seasons" / sid / out_name, token) \
-                or _parse_response_out(det_dir / out_name, token)
-            obs = rows.sort_values("obsnme")["raw_obsval"].to_numpy(float)
-            if len(sim_values) != len(obs):
-                candidate[family][sid] = {"n": len(obs), "nse": float("nan"),
+            sim_values = (_parse_response_out(det_dir / "_seasons" / sid / out_name, token)
+                          or _parse_response_out(det_dir / out_name, token))
+            harvest = rows["obgnme"].astype(str).str.extract(r"_H(\d+)$", expand=False).astype(int)
+            pairs = list(zip(rows["global_run"].astype(int), harvest))
+            missing = [p for p in pairs if p not in sim_values]
+            if missing:
+                candidate[family][sid] = {"n": len(rows), "nse": float("nan"),
                                           "pbias_pct": float("nan"),
-                                          "warning": f"response sim values {len(sim_values)} != obs {len(obs)}"}
+                                          "warning": f"response sim missing {len(missing)}/{len(rows)} (tn,hno) pairs"}
                 continue
-            sim = np.array(list(sim_values.values()), float)
-            candidate[family][sid] = {"n": len(obs), "nse": nse(obs, sim),
+            obs = rows["raw_obsval"].to_numpy(float)
+            sim = np.array([sim_values[p] for p in pairs], float)
+            candidate[family][sid] = {"n": len(rows), "nse": nse(obs, sim),
                                       "pbias_pct": pbias_pct(obs, sim)}
 
     passed, checks = engineering_gates(candidate, baseline, source=f"deterministic:{label}")
@@ -494,7 +523,7 @@ def main() -> int:
 
     if args.run_dir is None:
         raise SystemExit("--run-dir required (or --export-baseline)")
-    run_dir: Path = args.run_dir
+    run_dir: Path = args.run_dir.resolve()
     case = args.case or next((p.stem for p in run_dir.glob("*.pst")), None)
     if case is None:
         raise SystemExit("no PST found; pass --case")
