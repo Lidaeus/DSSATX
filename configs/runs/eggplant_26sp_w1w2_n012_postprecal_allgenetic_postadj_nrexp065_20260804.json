@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "design_id": "eggplant_26sp_w1w2_n012_postprecal_allgenetic_postadj_nrexp065_20260804",
+  "diagnostic_single_season": true,
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "genetic_only_all_reviewed_nonsoil_parameters_posterior_edge_adjusted",
+  "observation_policy": "configs/runs/e02_plantn_chpdtlog_noadap_no_nresponse_v1.csv",
+  "group_policy": "configs/runs/t10_plantn_harvestdry250_no_nresponse_v1.csv",
+  "status": "approved_formal_calibration_design",
+  "purpose": "formal 26SP W1/W2 N0/N1/N2 calibration with posterior-edge-adjusted all-genetic bounds",
+  "crop": "eggplant",
+  "model": "CROPGRO-Tomato TMGRO048",
+  "observations_required_for_sensitivity": false,
+  "observations_required_for_calibration": true,
+  "common_factorial_design": {
+    "water_levels": [1, 2],
+    "nitrogen_levels": [0, 1, 2],
+    "treatment_count_per_season": 6,
+    "initial_condition_policy": "actual-trial bundle controlled initial conditions"
+  },
+  "seasons": [
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729",
+      "role": "calibration",
+      "season": "2026_spring",
+      "source_bundle": "xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729",
+      "controlled_bundle": "xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729",
+      "treatments": [5, 6, 8, 10, 11, 12],
+      "treatment_mapping": {
+        "W1N0": 12,
+        "W1N1": 10,
+        "W1N2": 6,
+        "W2N0": 11,
+        "W2N1": 8,
+        "W2N2": 5
+      }
+    }
+  ],
+  "environment_policy": "actual-trial FileX/FileA/FileT/SOIL and weather fixed by versioned bundle",
+  "simulation_options_policy": "SYMBI=N and POTAS=N",
+  "analysis": {
+    "calibration": "formal posterior-edge-adjusted all-genetic IES rerun",
+    "initial_ensemble_method": "sobol",
+    "n_reals": 200,
+    "noptmax": 4,
+    "autumn_included": false,
+    "custom_dssat_executable": "windows/windows_nresp_20260803/dscsm048_nresp.exe",
+    "bounds_id": "eggplant_26sp_w1w2_n012_postprecal_allgenetic_postadj_nrexp065_20260804",
+    "comparison_baseline": "eggplant_26sp_w1w2_n012_postprecal_allgenetic_20260804"
+  }
+}

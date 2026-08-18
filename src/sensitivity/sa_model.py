@@ -412,6 +412,12 @@ def compute_indicators(
         ]
         if input_dir:
             cmd.extend(["--input-dir", os.path.abspath(input_dir)])
+        if any(str(feature).upper() in {"LEAF_N_END", "STEM_N_END", "ROOT_N_END", "FRUIT_N_END"}
+               for feature in contract.get("features", [])):
+            # run_dssat.py keeps PlantN.OUT transient by default.  Organ-N
+            # sensitivity contracts explicitly opt into copying it back so
+            # the response parser can consume audited nitrogen concentrations.
+            cmd.append("--keep-nitrogen-outputs")
         proc = subprocess.run(cmd, cwd=run_dir, capture_output=True, text=True)
         dssat_ok = proc.returncode == 0
         if not dssat_ok:
@@ -424,7 +430,11 @@ def compute_indicators(
         plantgro = (
             _parse_dssat_out_by_run(os.path.join(run_dir, "PlantGro.OUT"), ["LAID", "LWAD", "SWAD", "CWAD", "HIAD"]) if dssat_ok else {}
         )
-        freshwt = _parse_dssat_out_by_run(os.path.join(run_dir, "FreshWt.OUT"), ["CHPDT"]) if dssat_ok else {}
+        freshwt = _parse_dssat_out_by_run(os.path.join(run_dir, "FreshWt.OUT"), ["CHPDT", "CHFPW", "PDMCD"]) if dssat_ok else {}
+        plantn = _parse_dssat_out_by_run(
+            os.path.join(run_dir, "PlantN.OUT"),
+            ["LN%D", "SN%D", "RN%D", "FRN%D", "CNAD", "GNAD", "VNAD"],
+        ) if dssat_ok else {}
 
         run_to_tn = {}
         for r in eval_rows:
@@ -476,6 +486,7 @@ def compute_indicators(
 
             pg = plantgro.get(run_no, [])
             fw = freshwt.get(run_no, [])
+            pn = plantn.get(run_no, [])
 
             lai = _curve_features(pg, "LAID")
             fruit = _curve_features(fw, "CHPDT")
@@ -489,12 +500,43 @@ def compute_indicators(
             _emit(f"{prefix}_FRUITD_END", fruit.get("end"))
             _emit(f"{prefix}_CUMHARVEST_DAP50", _cumulative_dap_fraction(fw, "CHPDT", 0.5))
 
+            # Fruit water content: PDMCD is DSSAT's dynamic dry-matter
+            # concentration (fraction), so water content = 1 - PDMCD.
+            # Also derive from CHPDT/CHFPW as an independent cross-check.
+            fwc_curve = _curve_features(fw, "PDMCD")
+            pdmcd_end = fwc_curve.get("end")
+            _emit(f"{prefix}_FWC_END", (1.0 - pdmcd_end) if pdmcd_end is not None else None)
+            pdmcd_peak = fwc_curve.get("peak")
+            pdmcd_min = min((row["PDMCD"] for row in fw if "PDMCD" in row), default=None)
+            _emit(f"{prefix}_FWC_PEAK", (1.0 - pdmcd_min) if pdmcd_min is not None else None)
+            _emit(f"{prefix}_PDMCD_END", pdmcd_end)
+            _emit(f"{prefix}_PDMCD_PEAK", pdmcd_peak)
+            # Cross-check: water content from CHPDT/CHFPW at harvest.
+            chfpw_curve = _curve_features(fw, "CHFPW")
+            chfpw_end = chfpw_curve.get("end")
+            chpdt_end = fruit.get("end")
+            if chfpw_end is not None and chpdt_end is not None and chfpw_end > 0:
+                _emit(f"{prefix}_FWC_FROM_RATIO_END", 1.0 - chpdt_end / chfpw_end)
+            else:
+                _emit(f"{prefix}_FWC_FROM_RATIO_END", None)
+
             if pg:
                 last = pg[-1]
                 _emit(f"{prefix}_LEAF_END_LWAD", last.get("LWAD"))
                 _emit(f"{prefix}_STEM_END_SWAD", last.get("SWAD"))
                 _emit(f"{prefix}_AGB_END_CWAD", last.get("CWAD"))
                 _emit(f"{prefix}_HI_END_HIAD", last.get("HIAD"))
+
+            if pn:
+                # PlantN.OUT is the organ-N response source.  CNAD/GNAD/VNAD
+                # are retained only as diagnostics; shell is never inferred
+                # from whole-fruit nitrogen. FRN%D is whole-fruit N
+                # concentration and is deliberately labelled as such.
+                last_n = pn[-1]
+                _emit(f"{prefix}_LEAF_N_END", last_n.get("LN%D"))
+                _emit(f"{prefix}_STEM_N_END", last_n.get("SN%D"))
+                _emit(f"{prefix}_ROOT_N_END", last_n.get("RN%D"))
+                _emit(f"{prefix}_FRUIT_N_END", last_n.get("FRN%D"))
 
             for tp in lai_time_points:
                 _emit(f"{prefix}_LAI_DAP{tp:03d}", _series_value_on_or_before(pg, tp, "LAID"))
@@ -534,10 +576,12 @@ def compute_indicators(
                 json.dump(context, handle, ensure_ascii=False, indent=2)
         raise
     finally:
-        try:
-            shutil.rmtree(run_dir, ignore_errors=True)
-        except Exception:
-            pass
+        keep_all = os.environ.get("DSSAT_KEEP_RUNS", "").strip().lower() in {"1", "true", "yes", "on"}
+        if not keep_all:
+            try:
+                shutil.rmtree(run_dir, ignore_errors=True)
+            except Exception:
+                pass
 
 
 def main():

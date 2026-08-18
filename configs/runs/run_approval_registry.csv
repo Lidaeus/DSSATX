@@ -1,0 +1,2 @@
+run_id,status,engineering_status,best_member,best_phi,n_parameters_adjustable,final_ensemble_sha256,observation_registry_sha256,mark_reason,marked_at,marked_by,note
+e02_v2_rawdiff_terminal_nresp01_soil02_nresp_108par_150x4_20260806,completed,engineering_validated,139,418.71,101,516edb55b3bf580eb175cfbcd5026c87f41b2d206c47a71002df275c7fd83853,f676c706e9ac4a567d3efbc5ce687bcecd4db23c74425ecbeff028b61507950d,论文基线：rawdiff_terminal新方案+全organ_n 108/101+NREXP/NRMIN可调(0.1-1.0/0.1-0.8),2026-08-07,Ceres Architect (user),DMFR修正前观测构建；修正后观测重建批次将另行标记

@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_v2_spring_wn_canopy_soil_20260802"
+crop: "eggplant"
+created_at: "2026-08-02T03:09:47Z"
+approved_at: "2026-08-02T03:09:47Z"
+approved_by: "Codex"
+review_status: "approved"
+derived_from: "eggplant_e02_v2_spring_wn_canopy_soil_20260802.csv"
+derived_from_sha256: "88bf361fa7b4e47b41abf7747e7ee45d939912dd34d134fd9182e3f5a0822a74"
+bounds_sha256: "d7f96fde1d893859db2e9142215749a18ab2be8c499333d469be30593d4d330c"
+parameter_count: 113
+automatic_repairs: 0
+notes: "E02 V2 spring-only canopy/yield/N-response precalibration; Morris ranges plus layermeanic/soil hydraulic ranges; 25FA excluded"

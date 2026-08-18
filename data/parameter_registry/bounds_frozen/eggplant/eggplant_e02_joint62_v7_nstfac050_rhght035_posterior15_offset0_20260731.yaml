@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_joint62_v7_nstfac050_rhght035_posterior15_offset0_20260731"
+crop: "eggplant"
+created_at: "2026-07-31T03:27:36Z"
+approved_at: "2026-07-31T03:27:36Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_joint62_v7_nstfac050_rhght035_posterior15_offset0_20260731.csv"
+derived_from_sha256: "b7bd59c03ee30a96b2893af59880a966b47d09a5d0ccdd8fe5c5d8e2da79590d"
+bounds_sha256: "b7bd59c03ee30a96b2893af59880a966b47d09a5d0ccdd8fe5c5d8e2da79590d"
+parameter_count: 72
+automatic_repairs: 0
+notes: "Derived from e02_joint62_three_season_nstfac050_rhght035_150x5_20260730_062543 final posterior q05-q95 envelope, expanded by 15 percent total width; seasonal offsets remain zero-centered"

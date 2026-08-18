@@ -1,0 +1,34 @@
+{
+  "season_id": "26SP",
+  "excode": "XXQL2601",
+  "generator": "tools/experiments/build_trial_observations_v2_20260726.py",
+  "generator_sha256": "60e0a9d7c71486995ae74b74279d86b22bdbaa1c82518c49eb6cf4793079767a",
+  "spec_compliance": "docs/三季FileA_FileT与不确定性适配计划_v1_20260726.md",
+  "source_files": {
+    "data\\user\\ref\\DSSAT文件\\2026春\\2026春产量集.xlsx": "c070c7b4c503f13348e5f607c0a4bfdce348d77fdcade91353bf57bde955b32f",
+    "data\\user\\ref\\DSSAT文件\\2026春\\2026春生长指标集.xlsx": "b7205945e999d9eb8e16212d96e0ec7b10029723c319a0c3646beacce2f4c8ef",
+    "data\\user\\ref\\DSSAT文件\\2026春\\2026春品质指标集.xlsx": "34ef0c4a6cec8515335896da8e08e22545081bdf8f00e1ae0ef2661df8f105a0"
+  },
+  "qa_metrics": {
+    "plots": 12,
+    "growth_dates": 4,
+    "harvest_dates": 5,
+    "total_observations": 432,
+    "density": 27000.0
+  },
+  "source_notes": [
+    "Fresh yield = mean of 小区产量; SD = independent replicate 产量.",
+    "Growth data merged from 4 sheets (0502/0629/0717/0602); sheet name used as fallback date for 0629/0602.",
+    "Fruit DM fraction = 1 - measured fruit moisture fraction (2026春品质指标集.半果含水率).",
+    "Each harvest uses the nearest plot-level moisture measurement date (no max interval).",
+    "Strict FileA/FileT fill rule per docs/三季FileA_FileT与不确定性适配计划_v1_20260726.md."
+  ],
+  "output_files": [
+    "XXQL2601.TMA",
+    "XXQL2601.TMT",
+    "observation_uncertainty.csv",
+    "fruit_quality_match_audit.csv",
+    "FileA_values.csv",
+    "FileT_values.csv"
+  ]
+}

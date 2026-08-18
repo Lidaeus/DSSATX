@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "archived_at": "2026-08-04T00:00:00",
+  "source_manifest": "D:\\Tomato_Cal\\workspace\\runs\\_history\\20260804\\archive_manifest_20260804.json",
+  "figures": [
+    {
+      "category": "calibration",
+      "source": "D:\\Tomato_Cal\\figures\\diagnostics\\e02_25fa_temp12_100x4_20260802",
+      "destination": "D:\\Tomato_Cal\\figures\\diagnostics\\_history\\20260804\\calibration\\e02_25fa_temp12_100x4_20260802",
+      "last_write_time": "2026-08-02T11:37:24.828877",
+      "action": "move"
+    },
+    {
+      "category": "calibration",
+      "source": "D:\\Tomato_Cal\\figures\\diagnostics\\e02_joint62_posterior_soil_100x4_20260802",
+      "destination": "D:\\Tomato_Cal\\figures\\diagnostics\\_history\\20260804\\calibration\\e02_joint62_posterior_soil_100x4_20260802",
+      "last_write_time": "2026-08-02T11:53:47.269544",
+      "action": "move"
+    },
+    {
+      "category": "calibration",
+      "source": "D:\\Tomato_Cal\\figures\\diagnostics\\e02_joint62_posterior_soil_no_pdap_chtd_nresponse_100x4_20260802",
+      "destination": "D:\\Tomato_Cal\\figures\\diagnostics\\_history\\20260804\\calibration\\e02_joint62_posterior_soil_no_pdap_chtd_nresponse_100x4_20260802",
+      "last_write_time": "2026-08-02T11:43:35.342464",
+      "action": "move"
+    },
+    {
+      "category": "calibration",
+      "source": "D:\\Tomato_Cal\\figures\\diagnostics\\e02_joint62_posterior_soil_wnresponse_200x5_20260802",
+      "destination": "D:\\Tomato_Cal\\figures\\diagnostics\\_history\\20260804\\calibration\\e02_joint62_posterior_soil_wnresponse_200x5_20260802",
+      "last_write_time": "2026-08-02T11:50:46.421658",
+      "action": "move"
+    },
+    {
+      "category": "calibration",
+      "source": "D:\\Tomato_Cal\\figures\\diagnostics\\e02_joint62_softn_response_95pct_dmc5_formal_200x5_20260802",
+      "destination": "D:\\Tomato_Cal\\figures\\diagnostics\\_history\\20260804\\calibration\\e02_joint62_softn_response_95pct_dmc5_formal_200x5_20260802",
+      "last_write_time": "2026-08-02T17:28:22.436162",
+      "action": "move"
+    },
+    {
+      "category": "calibration",
+      "source": "D:\\Tomato_Cal\\figures\\diagnostics\\e02_springpair_wnresponse_100x4_20260802",
+      "destination": "D:\\Tomato_Cal\\figures\\diagnostics\\_history\\20260804\\calibration\\e02_springpair_wnresponse_100x4_20260802",
+      "last_write_time": "2026-08-02T11:31:16.913695",
+      "action": "move"
+    },
+    {
+      "category": "calibration",
+      "source": "D:\\Tomato_Cal\\figures\\diagnostics\\e02_v2_formal25sp_nreleased_200x5_20260802_best127",
+      "destination": "D:\\Tomato_Cal\\figures\\diagnostics\\_history\\20260804\\calibration\\e02_v2_formal25sp_nreleased_200x5_20260802_best127",
+      "last_write_time": "2026-08-02T21:27:11.270960",
+      "action": "move"
+    },
+    {
+      "category": "calibration",
+      "source": "D:\\Tomato_Cal\\figures\\diagnostics\\e02_v2_formal25sp_state_terminal_n2response_200x5_20260802_best2",
+      "destination": "D:\\Tomato_Cal\\figures\\diagnostics\\_history\\20260804\\calibration\\e02_v2_formal25sp_state_terminal_n2response_200x5_20260802_best2",
+      "last_write_time": "2026-08-02T21:27:11.205795",
+      "action": "move"
+    },
+    {
+      "category": "calibration",
+      "source": "D:\\Tomato_Cal\\figures\\diagnostics\\e02_v2_joint25sp26sp_nosoil_nresp_200x4_loopback_20260802_best5",
+      "destination": "D:\\Tomato_Cal\\figures\\diagnostics\\_history\\20260804\\calibration\\e02_v2_joint25sp26sp_nosoil_nresp_200x4_loopback_20260802_best5",
+      "last_write_time": "2026-08-02T23:41:32.525249",
+      "action": "move"
+    }
+  ]
+}

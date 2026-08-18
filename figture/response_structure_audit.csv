@@ -1,0 +1,3 @@
+season,response,n_treatments,observed_sd,simulated_sd,spread_ratio_sim_over_obs,observed_range,simulated_range,mean_bias_sim_minus_obs
+25SP,LAID,6,0.5373303143008652,2.3022739773247376,4.284653063582105,1.263,6.026,-0.7379999999999999
+25SP,DRY_CUM,6,324.15083937368826,1233.6830905868817,3.8058920130225684,826.0,2635.6,-897.8666666666667

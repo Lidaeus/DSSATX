@@ -1,0 +1,22 @@
+﻿season_id,parameter,shared_value,offset_name,offset_value,offset_applied,transform,season_value,rationale
+25SP,LFMAX,1.24741,DLFMAX_AUT,0.0722208,False,log_multiplier,1.24741,documented autumn effective maximum leaf photosynthetic-capacity adjustment
+25SP,SLAVR,295.068,DSLAVR_AUT,0.0205746,False,log_multiplier,295.068,documented autumn effective specific-leaf-area adjustment
+25SP,XFRT,0.94474,DXFRT_AUT,-0.00397878,False,logit_additive,0.9447399999999999,documented autumn effective fruit dry-matter partitioning adjustment
+25SP,SFDUR,14.3322,DSFDUR_AUT,-0.0442829,False,log_multiplier,14.3322,documented autumn effective fruit-growth-duration adjustment
+25SP,TB1,9.50705,DTB1_AUT,-0.347528,False,additive,9.50705,documented autumn vegetative-stage base-temperature adjustment
+25SP,TB2,7.5324,DTB2_AUT,-0.753296,False,additive,7.5324,documented autumn early-reproductive-stage base-temperature adjustment
+25SP,TB3,9.3297,DTB3_AUT,0.340239,False,additive,9.3297,documented autumn late-reproductive-stage base-temperature adjustment
+25FA,LFMAX,1.24741,DLFMAX_AUT,0.0722208,True,log_multiplier,1.3408318457280377,documented autumn effective maximum leaf photosynthetic-capacity adjustment
+25FA,SLAVR,295.068,DSLAVR_AUT,0.0205746,True,log_multiplier,301.20178983380697,documented autumn effective specific-leaf-area adjustment
+25FA,XFRT,0.94474,DXFRT_AUT,-0.00397878,True,logit_additive,0.9445319145513772,documented autumn effective fruit dry-matter partitioning adjustment
+25FA,SFDUR,14.3322,DSFDUR_AUT,-0.0442829,True,log_multiplier,13.711376012292344,documented autumn effective fruit-growth-duration adjustment
+25FA,TB1,9.50705,DTB1_AUT,-0.347528,True,additive,9.159521999999999,documented autumn vegetative-stage base-temperature adjustment
+25FA,TB2,7.5324,DTB2_AUT,-0.753296,True,additive,6.779104,documented autumn early-reproductive-stage base-temperature adjustment
+25FA,TB3,9.3297,DTB3_AUT,0.340239,True,additive,9.669939000000001,documented autumn late-reproductive-stage base-temperature adjustment
+26SP,LFMAX,1.24741,DLFMAX_AUT,0.0722208,False,log_multiplier,1.24741,documented autumn effective maximum leaf photosynthetic-capacity adjustment
+26SP,SLAVR,295.068,DSLAVR_AUT,0.0205746,False,log_multiplier,295.068,documented autumn effective specific-leaf-area adjustment
+26SP,XFRT,0.94474,DXFRT_AUT,-0.00397878,False,logit_additive,0.9447399999999999,documented autumn effective fruit dry-matter partitioning adjustment
+26SP,SFDUR,14.3322,DSFDUR_AUT,-0.0442829,False,log_multiplier,14.3322,documented autumn effective fruit-growth-duration adjustment
+26SP,TB1,9.50705,DTB1_AUT,-0.347528,False,additive,9.50705,documented autumn vegetative-stage base-temperature adjustment
+26SP,TB2,7.5324,DTB2_AUT,-0.753296,False,additive,7.5324,documented autumn early-reproductive-stage base-temperature adjustment
+26SP,TB3,9.3297,DTB3_AUT,0.340239,False,additive,9.3297,documented autumn late-reproductive-stage base-temperature adjustment

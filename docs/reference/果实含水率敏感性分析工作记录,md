@@ -1,0 +1,141 @@
+我需要先记录 E1 的结果，然后设计果实含水率 SA。让我先检查一下 DSSAT 模型文件，看看哪些候选参数存在以及果实含水率是如何计算的，然后再设计 SA。
+
+太棒了——探索工作非常彻底，且修正了几个误解。关键发现如下：
+
+1. **PDMCD 并非恒定值**——它是基于生理荚果年龄的动态日常输出。水分含量 = `1 - CHPDT/CHFPW` = `1 - PDMCD`。
+2. **SA pipeline 目前仅读取 CHPDT**（`sa_model.py:427`）——必须扩展以包含 CHFPW。
+3. **TURFAC/SWFAC 是模型输出，而非输入**——仅其响应曲线（多值数组）存在于 .SPE 文件中。
+4. **影响果实水分的关键参数**：XMAGE（主导因素，ECO 文件）、THRSH（CUL 文件）、XFRT、PODUR、SFDUR、PM09、LNGSH——外加一些 .SPE 文件中的组分参数（PCARSD, SDPROS, XMPAGE）。
+
+让我记录下 E1 的结果，然后设计并执行果实水分含量（fruit-water-content）的 SA。
+
+现在让我来设计并执行 `fruit-water-content` SA。探索确认我需要：
+1. 扩展 `sa_model.py` 以读取 CHFPW + PDMCD
+2. 添加 `fruit-water-content` 响应
+3. 包含新的候选参数（XMAGE, THRSH, PM09, LNGSH, 以及一些 .SPE 成分参数）
+
+让我先验证哪些参数存在于模板中并检查它们的当前值，然后构建 SA。
+
+来自 `eggplant_stage2_v14_improved` 的 FreshWt.OUT 可能没有 fruit data（运行方式不同）。让我从 SA preflight run 中获取一个，该运行使用了正确的 CHPDT harvest variable。
+
+预检代理目录已被清理。让我检查一下实际的 SA 预检结果 FreshWt —— 文件位于运行根目录下，而不是代理目录下。
+
+之前的 FreshWt.OUT 文件已被清理。让我快速进行一次 DSSAT 运行以生成包含 CHFPW 数据的 FreshWt.OUT，然后验证水含量推导。
+
+DSSAT.exe 正在等待键盘输入。让我换用能处理此问题的 SA 模型路径。
+
+SA 模型运行完成，但 FreshWt 位于临时运行目录中，已被清理。我改为使用 failure-artifact 路径来保留它。
+
+运行成功了（没有触发失败 artifact）。临时运行目录中的 FreshWt.OUT 已被正常清理。我换一种方法试试——临时修改 sa_model，使其不进行清理，或者通过 calibration runner 直接运行 DSSAT（它可以在 cwd 下保留输出）。
+
+临时目录已保留，但 FreshWt 可能位于嵌套的 iso 目录中。让我找到任何 FreshWt.OUT。
+
+CHPDT 到处都是 0——此 FreshWt 来自 TN2，这是一个早期收获的处理方法，可能还没有累积干物质。让我检查一下 CHFPW/PDMCD 的值，以及实际的果实数据是什么样的。
+
+我可以看到 `FreshWt.OUT` 中有 `PDMCD` 数据（0.0→0.1），但在早期 DAP 时 `CHPDT` 和 `CHFPW` 为 0 —— 这是收获前的数据。收获列（`CHPDT`、`CHFPW`）是在果实成熟且被收获后才会被填充。`PDMCD` 从第一天起就是动态的（基于 `PAGED` 的 0.0→0.1）。让我检查一下这个文件后续的收获数据。
+
+本次 TN2 运行中没有收获事件。这是因为 FreshWt 文件来自一次 DSSAT 运行，其中的果实从未达到收获成熟度（可能是由于参数固定或处理条件导致）。但关键见解很明确：**PDMCD 是主要的水分含量指标**，它根据荚果年龄动态变化。让我检查一下 `PDMCD` 本身作为 SA 响应是否有变化，以及 `CHFPW` 是否能从非零的 `PDMCD`/`CHPDT` 行中得出。
+
+让我进行水果水分 SA 设计。方法是：
+1. 扩展 `sa_model.py` 以读取 `CHFPW` + `PDMCD` 并计算 `water_content = 1 - PDMCD`
+2. 添加一个新的 SA 输出配置文件，包含水果水分响应
+3. 包含相关的候选参数（现有的 57 个 + XMAGE、THRSH、PM09、LNGSH）
+
+让我先清理并更新待办事项，然后实施。
+
+现在让我来实现果实含水率的 SA。首先，检查 `.SPE`/`.ECO`/`.CUL` 模板中存在哪些新参数以及它们的值，然后验证哪些已经在 `param_registry.py` 中。
+
+好 — XMAGE, THRSH, PM09, PM06, LNGSH 都已经在 registry 中了。.SPE 参数 (PCARSD, SDPROS, SDPRO, SDLIP, XMPAGE) 不在 registry 中，需要添加。让我检查一下 .SPE 文件中这些参数的具体值。
+
+现在我已获取所有信息：
+- `PCARSD` = 0.560 (果实中的碳水化合物比例，第 26 行)
+- `SDPROS` = 0.324 (果实/种子蛋白质，第 25 行)
+- `XMPAGE` = 100 (最大荚果年龄，第 83 行)
+- `DSWBAR` = 15.0 (第 84 行)
+
+这些是 `.SPE` 参数。让我现在来实现果实含水率 SA。计划如下：
+
+1. 扩展 `sa_model.py` 以读取 CHFPW + PDMCD，并计算 `FWC_END` (最终含水率) 和 `FWC_PEAK` 响应。
+2. 为新的 `.SPE` 参数创建一个新的边界建议。
+3. 创建果实含水率 SA 输出配置文件。
+4. 构建 + 运行 Morris SA。
+
+让我从 `sa_model.py` 的扩展开始。
+
+现在在现有的 FRUITD 特征之后添加果实水分含量特征的计算。让我找一下合适的插入点。
+
+现在我需要将新的 `.SPE` 参数添加到边界建议中，并创建果实水分含量的 SA 输出配置文件。我先来创建新的 `.SPE` 参数的边界建议。
+
+现在创建一个针对 fruit-water-content 的 SA 输出配置文件，将 FWC 响应添加到现有的 164 个响应中。
+
+现在我需要验证输出契约是否能与我的新响应正常加载。让我测试一下 `load_output_contract` 和 `observation_names`。
+
+第 34 行有一个 JSON 语法错误。让我检查一下——很可能是 `water_nitrogen_design` 部分包含未加引号的键或尾随逗号。
+
+第34行：JSON键 `5: 0` 需要加引号 (`"5": 0`)。我来修复一下。
+
+合约验证器拒绝了 `MDAPS`。原有的 v4 配置文件也没有 `MDAPS`。让我检查一下——我可能错误地添加了它。原始配置的 `phenology` 组是 `["ADAPS", "PDFPS", "MDAPS"]`，但等等，探索过程显示 v4 中 phenology 是 `["ADAPS", "PDFPS"]`。让我检查一下原始配置。
+
+我错误地添加了 MDAPS 和 ADAPM。让我修复 FWC 配置文件，使其与原始配置匹配并增加 FWC 响应。
+
+WN 设计验证器期望 `nitrogen_series` 包含 W3 和 W1 条目。我来检查一下原始的 v4 profile 结构。
+
+我明白了——WN design 使用了 `water_pairs`（按氮水平）和 `nitrogen_series`（每个水分水平对应一个处理列表）。让我修复一下 FWC 配置，使其符合此结构。
+
+配置文件已加载。声明了 204 个但实际有 220 个 —— 让我修正一下计数。观察结果包括：8 个处理 × (5 个 LAI_DAP + 16 个特征 = 21) = 168 个常规 + 4 个 WN 特征 × 7 个对比 = 28 + 4 个 MEAN 组 = 196……让我计算一下准确的数量并更新声明的计数。
+
+包含 220 个观测值：192 个处理 × 24 个特征 + 28 个 WN 衍生数据。现在让我来构建并运行 FWC Morris SA。首先冻结边界，然后构建案例。
+
+现在使用 FWC 配置文件和边界构建 Morris SA 案例。
+
+FileX 中处理 2-13 的 SM2 具有 SYMBI=Y，但 eggplant/tomato 需要 SYMBI=N。这是校准 bundle 的 FileX 问题。等等——这以前是正常的（v4 预检使用了相同的 bundle）。让我检查一下——这可能是 `validate_input_bundle` 捕获到了之前未检查的内容。让我核实一下 SA counterfactual bundle 是否仍然通过完整性检查。
+
+这是一个新的验证检查。让我检查一下这是否是最近添加到 `experiment_inputs.py` 中的内容，因为我之前的 SA 运行没有遇到这个问题。
+
+此 SYMBI 检查是在我之前的 SA 运行后添加的（之前的 v4 preflight 可以正常运行）。SA counterfactual bundle 的 FileX 中 SYMBI=Y。此检查是正确的（茄子不是豆科植物，共生固氮应该关闭）。bundle 需要修复。但根据计划，“不修改原始实测 FileA/FileT/FileX 来适配图表或敏感性分析”。
+
+然而，这是一个 **数据质量错误**，而不是外观上的调整 —— SYMBI=Y 意味着模型正在为一种非豆科植物模拟共生固氮。bundle 中的 FileX (XXQL2501.TMX) 的 SM2 部分中包含 SYMBI=Y。让我检查一下这是否是可以通过 input-manifest 或 counterfactual 生成器修复的问题。
+
+实际上，之前的 SA preflight 运行正常（464/464，science_validated）。这意味着要么是 SYMBI 检查是新的（在我运行后添加的），要么是 counterfactual bundle 发生了变化。让我检查一下 git，看看这个检查是什么时候添加的。
+
+我明白了 —— `experiment_inputs.py` 文件在 commit `604c1b8` 中被修改过，添加了 SYMBI 检查（这是一个较新的 commit，可能来自分支上的另一个会话）。该检查是正确的，但 SA counterfactual bundle 是在添加此检查之前生成的。bundle 中的 FileX 包含 SYMBI=Y。
+
+由于之前的 SA preflight 使用此 bundle 运行正常（DSSAT 接受了它），且计划要求不修改原始文件，因此正确的做法是：SA counterfactual bundle 需要重新生成，并将 SYMBI 设为 N。但鉴于这是一个由 `counterfactual_inputs.py` 生成的派生文件（而非原始测量数据），因此它是可以修复的。
+
+我来修复 `counterfactual_inputs.py` 生成器，将 SYMBI 设置为 N 并重新生成 bundle。其实，更简单的修复方法是直接修复生成器的输出。让我检查一下 FileX 的 OPTIONS 部分以了解列结构。
+
+`Counterfactual_inputs.py` 不处理 SYMBI —— 它只是复制了 FileX。SYMBI=Y 存在于源 bundle 的 FileX 中。我先通过 patching 直接修复 SA bundle 中的 FileX（这是可以接受的，因为 SA counterfactual bundle 是一个衍生/生成的产物，而不是原始数据）。我来查找一下 SM2 OPTIONS 行中的 SYMBI 列。
+
+我明白了——`SYMBI` 列在第 27 位，而第 401 行（`SM2` 数据）在该位置有一个空格，这被解析为 `SYMBI` 列为空或缺失。验证器检查 `selected.get("SYMBI") != "N"` ——如果该列为空或 'Y'，它就会失败。查看第 401 行：`2 OP  Y  Y  Y  N  N  N  Y  N  M`——这些列是 `WATER=Y, NITRO=Y, SYMBI=Y, PHOSP=N, POTAS=N`。所以 `SYMBI=Y`（第 3 个 `Y`）。
+
+等等，但是列解析可能对齐方式不同。标题显示 `WATER NITRO SYMBI PHOSP POTAS`，而数据行有 `Y Y Y N N`。所以 `SYMBI=Y`。这确实是错的，应该改为 `N`。
+
+让我修复 `SA` bundle 的 `FileX`，将 `SYMBI` 从 `Y` 改为 `N` 并更新清单哈希（`manifest hash`）。
+
+`SYMBI` 列（第 27 位）在数据行中是一个空格。验证器可能正在以不同的方式进行解析——也许它查找的是第一个非空格字符，或者列边界有所偏移。让我检查一下 `validate_input_bundle` 是如何解析 `SYMBI` 字段的。
+
+我明白了 — 解析器使用了 `parts = stripped.split()`，它按空格进行拆分。头部 `@N OPTIONS WATER NITRO SYMBI PHOSP POTAS DISES CHEM TILL CO2` 会拆分为 `['WATER','NITRO','SYMBI','PHOSP','POTAS','DISES','CHEM','TILL','CO2']`。数据行 `2 OP Y Y Y N N N Y N M` 会拆分为 `['2','OP','Y','Y','Y','N','N','N','Y','N','M']`。因此 `parts[2:] = ['Y','Y','Y','N','N','N','Y','N','M']`。与头部进行 zip 操作：`WATER=Y, NITRO=Y, SYMBI=Y, PHOSP=N, POTAS=N, DISES=N, CHEM=Y, TILL=N, CO2=M`。因此 **SYMBI=Y**（第三个 Y）。
+
+数据行确实包含 SYMBI=Y。之前的 SA 预检查运行正常，是因为这个检查当时还不存在。现在我需要将 SA bundle 的 FileX 中的 SM2 OPTIONS 从 SYMBI=Y 修改为 SYMBI=N。由于 SA counterfactual bundle 是一个生成的产物（而非原始测量数据），这是正确的修复方法。
+
+等等——我刚才重建这一行时使用了不同的间距，这破坏了固定宽度（fixed-width）的格式。DSSAT 的 FileX 是列对齐的。让我仔细检查一下原始格式并妥善修复它。
+
+`SYMBI` 现在是 `N`。但间距发生了变化，这可能会破坏 DSSAT 的列对齐。让我检查一下原始的格式间距是否重要——查看 FileX 规范，`OPTIONS` 部分使用的是 `@N` 类型的头部和空格分隔的值，而不是严格的固定宽度。解析器使用的是 `.split()`，这是与空格无关的（whitespace-agnostic）。让我通过检查 `DSSAT` 是否能接受它来验证修复是否有效——重新运行验证。
+
+验证现在通过了（0 个错误），但清单的 SHA-256 已过期（预期之内——我修改了文件）。我需要重新生成清单以反映修复后的文件。让我正确地更新清单的 SHA-256。
+
+完整性检查现已通过。让我验证一下 DSSAT 是否能使用修复后的 SYMBI=N 顺利进行单次运行，然后构建 FWC SA 案例。
+
+构建成功：23 个活动参数，220 个观测值。现在让我验证一次模型运行是否会产生非空的 FWC 数据，然后再启动完整的预检查。
+
+`SA_Indicators.OUT` 文件未写入——模型运行可能失败了。我来检查一下实际输出。
+
+临时运行目录的 `_iso_runs` 子目录下有 `_iso_runs` ——这意味着 `src/calibration/run_dssat.py` 正在创建其自己的隔离层，且该隔离目录为空（DSSAT 未生成任何输出）。这很可能是因为我在 `FileX` 选项行中进行的 `SYMBI` 间距修改破坏了 DSSAT 的固定宽度解析，从而导致了模型失败。
+
+让我通过更仔细地检查原始格式并进行适当的固定宽度替换来验证这一点。
+
+`_iso_runs` 目录为空——DSSAT 运行失败，没有产生任何输出。我之前对 `FileX` 中 `OPTIONS` 行的修改破坏了格式。让我查看一下该行的确切原始格式，并进行正确的固定宽度替换。
+
+问题在于，我重建该行时使用了 `'  '.join(f'  {p:<4s}'...)`，这改变了 DSSAT 所期望的列对齐方式。DSSAT `OPTIONS` 数据使用了特定的固定宽度格式，其中每个标志占据特定的列范围。让我从 `git` 恢复原始的 `FileX`，并仅对 `SYMBI` 字符进行最小限度的单字符替换。
+
+FileX 在 git 中未进行版本控制（`data/user/experiments/` 目录未被跟踪）。让我从输入清单的 `source_files` 中恢复它，或者直接修复格式。让我查看当前（已损坏）的行，并将其重建为原始的固定宽度格式。

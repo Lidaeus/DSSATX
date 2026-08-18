@@ -1,0 +1,32 @@
+{
+  "experiment_id": "E02_joint54_25sp_25fa_20260729",
+  "scientific_role": "joint_calibration",
+  "_note": "Shared 54-parameter joint calibration using moisture-corrected 25SP and 25FA; FL-VS fixed at 100; both seasons PAGE=25 and SPRL=-99; 25SP ADAP=21 d.",
+  "season_inputs": [
+    {
+      "season_id": "25SP",
+      "role": "calibration",
+      "input_manifest": "data/user/experiments/xxql2501_actual_trial_calibration_v2_20260726/input_manifest.json",
+      "sha256": "647a95b23062019f1fb76b6f88085e32b7dc3f5490c9d6faf0f20881ca2e3d95"
+    },
+    {
+      "season_id": "25FA",
+      "role": "calibration",
+      "input_manifest": "data/user/experiments/xxql2502_actual_trial_calibration_v2_20260726/input_manifest.json",
+      "sha256": "c0e35cba5a4dec707a15b9aad9be2d021220e055584f735d72a516d53d23c6f0"
+    }
+  ],
+  "parameter_set": "configs/experiments/parameter_sets/highdim54_joint_v2_20260729.json",
+  "bounds_id": "eggplant_e02_joint54_v2_20260729",
+  "observation_profile": "configs/experiments/observation_profiles/e02_fit_first_multitarget_dryharvest_v1.json",
+  "multiseason_design": "configs/runs/eggplant_e02_joint54_25sp_25fa_v2_20260729.json",
+  "seasonal_parameterization": null,
+  "execution": {
+    "ies_num_reals": 300,
+    "noptmax": 6,
+    "seed": 20260729,
+    "min_retention_rate": 0.95
+  },
+  "representative_rule": "final_ensemble_median",
+  "evaluation_profile": "article_rawscale_v1"
+}

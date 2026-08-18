@@ -27,7 +27,12 @@
     "LEAF_END_LWAD",
     "STEM_END_SWAD",
     "AGB_END_CWAD"
+    ,"LEAF_N_END"
+    ,"STEM_N_END"
+    ,"ROOT_N_END"
+    ,"FRUIT_N_END"
   ],
+  "allow_degenerate_features": ["FRUIT_N_END"],
   "lai_time_points": [
     45,
     67,
@@ -53,6 +58,12 @@
       "LEAF_END_LWAD",
       "STEM_END_SWAD",
       "AGB_END_CWAD"
+    ],
+    "organ_n": [
+      "LEAF_N_END",
+      "STEM_N_END",
+      "ROOT_N_END",
+      "FRUIT_N_END"
     ],
     "yield_harvest": [
       "YIELD_HWAMS",
@@ -83,6 +94,7 @@
       "phenology",
       "canopy",
       "biomass",
+      "organ_n",
       "yield_harvest"
     ],
     "water_nitrogen_response": [

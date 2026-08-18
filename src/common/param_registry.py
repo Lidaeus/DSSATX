@@ -48,6 +48,8 @@ REGISTRY_COLUMNS = [
 
 PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     # --- CUL ---
+    "CSDL":   (0.0,   24.0),
+    "PPSEN":  (0.0,    1.0),
     "EM-FL":  (10.0,  80.0),
     "FL-SH":  (1.0,   20.0),
     "FL-SD":  (1.0,   30.0),
@@ -64,18 +66,31 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     "SDPDV":  (0.5,  500.0),
     "PODUR":  (5.0,   80.0),
     "THRSH":  (0.0,   99.0),
+    # Structural timing probes.  They remain continuous DSSAT fields in the
+    # CUL file; the SA proposal uses a narrow local domain around 400 d.
+    "SDPRO":  (0.0,    1.0),
+    "SDLIP":  (0.0,    1.0),
     # --- ECO ---
     "PL-EM":  (3.0,   12.0),
     "EM-V1":  (10.0,  40.0),
     "V1-JU":  (0.0,   30.0),
     "JU-R0":  (2.0,   20.0),
+    "LNGSH":  (1.0,  200.0),
+    "PM06":   (0.0,    1.0),
+    "PM09":   (0.0,    1.0),
     # Photothermal time from first flower to the last main-stem leaf.
     # Indeterminate crops may legitimately use values above 100; whether the
     # coefficient is identifiable is a separate scientific decision.
     "FL-VS":  (0.0,  300.0),
     "TRIFL":  (0.10,   1.00),
     "RWDTH":  (0.50,   2.00),
-    "RHGHT":  (0.50,   3.00),
+    # RHGHT is a relative multiplier on the species-file standard canopy-height
+    # curve (YVSHT), not an absolute height in metres.  Joint E02 runs first
+    # justified relaxing the historical 0.50 floor to 0.35; later review
+    # concluded there is no clear finite positive physical lower bound beyond
+    # keeping the multiplier non-negative.  Calibration ranges may still choose
+    # a stricter working floor for identifiability.
+    "RHGHT":  (0.0,    3.00),
     "OPTBI":  (0.0,   20.0),
     "SLOBI":  (-0.50,  0.0),
     # Dynamic fruit-partitioning safety envelopes.  The shipped strawberry
@@ -112,17 +127,93 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     "SIZREF":  (50.0, 1000.0),
     "VSSINK":  (0.2,   50.0),
     "EVMODC":  (0.0,    3.0),
+    # --- SPE composition / seed-shell growth ---
+    "SDPROS":  (0.0,    1.0),
+    "PCARSD":  (0.0,    1.0),
+    "XMPAGE":  (1.0,  300.0),
     # --- SPE root-water ---
     "WTFSD":   (0.0,  1.0),
     "PORPT":   (0.0,  1.0),
     "FRSTMF":  (0.0,  1.0),
     "FRLFF":   (0.0,  1.0),
     "ATOP":    (0.0, 10.0),
-    "FRCNOD":  (0.0,  1.0),  # nodule allocation; fixed/excluded for eggplant
+    "FRCNOD":  (0.0,  1.0),  # narrow SA probe despite non-legume status
+    # --- SPE root-N / N-stress ---
+    # DSSAT TMGRO048.SPE stores these as small root-length-normalized
+    # nitrogen uptake-rate scalars (template value 0.012), not centimetres.
+    # Keep the hard numerical domain aligned with the documented SPE scale;
+    # calibration-specific bounds remain in frozen bounds CSVs.
+    "RTNO3":   (0.0,  0.05),
+    "RTNH4":   (0.0,  0.05),
+    "RTEXF":   (0.0,  1.0),
+    "NSTFAC":  (0.0,  1.0),
+    "NMOBMX":  (0.0,  1.0),
+    "NVSMOB":  (0.0,  1.0),
+    "NRCVR":   (0.0,  1.0),
+    # A4 effective-concentration N-uptake response parameters.
+    # NUPCMN floor stays 0.0: the a3_20260805 build hard-rejects negative
+    # values (STOP 99, "Error key: NUPTAK") even though the formula
+    # C*=max(C-NUPCMN,0) is mathematically well-defined for negatives.
+    "NUPK50":  (0.0, 1000.0),
+    "NUPQ":    (0.1,  5.0),
+    "NUPCMN":  (0.0, 1000.0),
+    "NUPAV":   (0.0,    1.0),
+    # --- SPE parameter extension modules (docs/reference/参数拓展方案参考.MD) ---
+    # Leaf senescence
+    "SENRTE":  (0.0, 10.0),
+    "SENDAY":  (0.0,  1.0),
+    # Fruit set
+    "SETMAX":  (0.0,  1.0),
+    "RFLWAB":  (0.0,  1.0),
+    # Fruit growth
+    "SHLAG":   (0.0,  1.0),
+    "SRMAX":   (0.0,  1.0),
+    # Leaf area SLA modifiers
+    "SLAMAX":  (50.0, 2000.0),
+    "SLAMIN":  (50.0, 1000.0),
+    "TURSLA":  (0.0,  10.0),
+    "NSLA":    (0.0,  10.0),
+    # Vegetative partition
+    "FRLFMX":  (0.0,  1.0),
+    # Photosynthesis
+    "PGEFF":   (0.001, 0.5),
+    "KDIF":    (0.0,  3.0),
+    "LFANGB":  (0.0, 10.0),
+    # Nitrogen
+    "LNREF":   (0.5, 15.0),
+    "NSLOPE":  (-1.0, 5.0),
+    # Water stress
+    "DSWBAR":  (1.0, 100.0),
+    "XFRMAX":  (0.0,  1.0),
+    # Root uptake
+    "PORMIN":  (0.0,  0.5),
+    "RTDEPI":  (1.0,  50.0),
+    "RWUMX":   (0.001, 1.0),
+    # Carbon reserve
+    "CMOBMX":  (0.0,  1.0),
+    "CADSTF":  (0.0,  1.0),
+    "CADPR1":  (0.0,  1.0),
+    # Organ protein
+    "PROLFI":  (0.0,  1.0),
+    "PROLFG":  (0.0,  1.0),
+    "PROLFF":  (0.0,  1.0),
+    "PROSTI":  (0.0,  1.0),
+    "PROSTG":  (0.0,  1.0),
+    "PROSTF":  (0.0,  1.0),
+    "PRORTI":  (0.0,  1.0),
+    "PRORTG":  (0.0,  1.0),
+    "PRORTF":  (0.0,  1.0),
+    "PROSHI":  (0.0,  1.0),
+    "PROSHG":  (0.0,  1.0),
+    "PROSHF":  (0.0,  1.0),
     # --- SOIL surface hydro ---
     "SOIL_SALB": (0.01, 0.50),
     "SOIL_SLDR": (0.05, 2.50),
     "SOIL_SLRO": (20.0, 99.0),
+    # DSSAT SLPF is the soil-profile fertility/productivity multiplier.  It is
+    # not a measured mineral-N concentration; it is calibrated here as the
+    # explicit soil fertility index requested for the N-response subspace.
+    "SOIL_SLPF": (0.0, 1.0),
 }
 
 
@@ -149,6 +240,19 @@ DEFAULT_BOUNDS: dict[str, tuple[float, float]] = {
     "XMAGE":  (8.0,  30.0),
     "XFPHT":  (35.0, 70.0),
     "XFINT":  (0.10,  0.35),
+    # ECO phenology durations (T9 high-dim active set).
+    "LNGSH":  (25.0, 50.0),
+    "PM06":   (0.35, 0.75),
+    "PM09":   (0.60, 1.00),
+    # Fruit dry/fresh conversion and composition probes used by the fruit-water
+    # SA branch. THRSH remains part of the CUL default domain via generic
+    # fallback/frozen bounds, while these SPE-only additions need explicit
+    # defaults so proposal generation stays aligned with reviewed templates.
+    "SDPRO":  (0.20, 0.45),
+    "SDLIP":  (0.02, 0.08),
+    "SDPROS": (0.20, 0.45),
+    "PCARSD": (0.40, 0.70),
+    "XMPAGE": (60.0, 150.0),
     # --- SPE temperature ---
     "TB":     (8.0,  12.0),
     "TO1":    (20.0, 27.5),
@@ -170,6 +274,49 @@ DEFAULT_BOUNDS: dict[str, tuple[float, float]] = {
     "SOIL_SALB": (0.05, 0.35),
     "SOIL_SLDR": (0.10, 2.00),
     "SOIL_SLRO": (40.0, 95.0),
+    # --- SPE parameter extension defaults (docs/reference/参数拓展方案参考.MD) ---
+    "SENRTE":  (0.5, 2.0),
+    "SENDAY":  (0.01, 0.05),
+    "SETMAX":  (0.1, 0.5),
+    "RFLWAB":  (0.05, 0.5),
+    "SHLAG":   (0.05, 0.3),
+    "SRMAX":   (0.1, 0.5),
+    "SLAMAX":  (400.0, 900.0),
+    "SLAMIN":  (200.0, 500.0),
+    "TURSLA":  (0.5, 2.0),
+    "NSLA":    (0.5, 1.5),
+    "FRLFMX":  (0.5, 0.9),
+    "PGEFF":   (0.03, 0.07),
+    "KDIF":    (0.5, 1.0),
+    "LFANGB":  (1.0, 3.0),
+    "LNREF":   (3.0, 6.0),
+    "NSLOPE":  (0.1, 0.5),
+    "DSWBAR":  (10.0, 30.0),
+    "XFRMAX":  (0.0, 0.5),
+    "PORMIN":  (0.02, 0.06),
+    "RTDEPI":  (10.0, 20.0),
+    "RWUMX":   (0.02, 0.06),
+    "CMOBMX":  (0.01, 0.05),
+    "CADSTF":  (0.3, 0.9),
+    "CADPR1":  (0.1, 0.5),
+    "PROLFI":  (0.2, 0.35),
+    "PROLFG":  (0.15, 0.3),
+    "PROLFF":  (0.05, 0.15),
+    "PROSTI":  (0.145, 0.220),
+    "PROSTG":  (0.090, 0.140),
+    "PROSTF":  (0.040, 0.080),
+    "PRORTI":  (0.1296, 0.1584),
+    "PRORTG":  (0.1071, 0.1309),
+    "PRORTF":  (0.0540, 0.0660),
+    "PROSHI":  (0.189, 0.231),
+    "PROSHG":  (0.135, 0.165),
+    "PROSHF":  (0.099, 0.121),
+    # A4 first-round working domain; NUPQ is intentionally fixed at 1.0 in
+    # the initial calibration proposal per the A4 method note.
+    "NUPK50":  (1.0, 40.0),
+    "NUPQ":    (0.50, 1.50),
+    "NUPCMN":  (0.0, 2.0),
+    "NUPAV":   (0.50, 1.00),
 }
 
 
@@ -209,6 +356,10 @@ def infer_parameter_group(name: str, location: str) -> str:
             return "SPE_Photo"
         if n == "FRCNOD":
             return "SPE_Nodule"
+        if n in {"SDPRO", "SDLIP", "SDPROS", "PCARSD"}:
+            return "SPE_Compo"
+        if n == "XMPAGE":
+            return "SPE_SeedSh"
         if n in {"WTFSD", "PORPT", "FRSTMF", "FRLFF", "ATOP"}:
             return "SPE_RtWat"
         if n in {"FINREF", "SLAREF", "SIZREF", "VSSINK", "EVMODC"}:
@@ -416,7 +567,9 @@ def validate_frozen_bounds(path: str) -> list[ValidationIssue]:
             issues.append(ValidationIssue("INVALID_STATUS", f"Unsupported status {status!r}", name))
         if not parameter_group:
             issues.append(ValidationIssue("EMPTY_PARAMETER_GROUP", "pargp is required", name))
-        allowed_locations = {"CUL", "ECO", "SPE", "SOIL", "IC", "INIT"}
+        # ``DERIVED`` is PEST-side only: it projects a seasonal parameter and
+        # is never written directly into a DSSAT input file.
+        allowed_locations = {"CUL", "ECO", "SPE", "SOIL", "IC", "INIT", "DERIVED"}
         if location not in allowed_locations:
             issues.append(ValidationIssue("INVALID_LOCATION", f"Unsupported location {location!r}", name))
         if not target_file:
@@ -427,6 +580,14 @@ def validate_frozen_bounds(path: str) -> list[ValidationIssue]:
             issues.append(ValidationIssue("FILE_LOCATION_MISMATCH", f"SOIL parameter targets {target_file!r}", name))
         elif location in {"IC", "INIT"} and Path(target_file).suffix.upper() not in {".TMX", ".TMA", ".TMT"}:
             issues.append(ValidationIssue("FILE_LOCATION_MISMATCH", f"IC parameter targets {target_file!r}", name))
+        elif location == "DERIVED" and target_file.lower() != "seasonal_offsets.json":
+            issues.append(
+                ValidationIssue(
+                    "FILE_LOCATION_MISMATCH",
+                    "DERIVED parameters must target 'seasonal_offsets.json'",
+                    name,
+                )
+            )
 
         values: dict[str, float] = {}
         for key in ("init", "lower", "upper"):

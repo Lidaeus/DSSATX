@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "design_id": "eggplant_e02_joint61_25sp26sp_layermeanic_n012_no_nresponse_v1_20260801",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "64 shared crop/process parameters from eggplant_e02_wnstress_fourcorner_layermeanic_v1_20260801; FL-VS fixed at 100",
+  "observation_policy": "configs/runs/e02_plantn_chpdtlog_noadap_no_nresponse_v1.csv",
+  "group_policy": "configs/runs/t10_plantn_harvestdry250_no_nresponse_v1.csv",
+  "initial_condition_policy": "season-wise layer means of SH2O/SNH4/SNO3 from validated FileX bundles",
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_layermean_ic_valid_n012_v1_20260801",
+      "bundle_manifest_sha256": "767904430a07626bcdf94ef1aefd5ffaff6b9ac50fdddaf7fd600b1353422977",
+      "role": "calibration",
+      "treatments": [3, 4, 5, 9, 11, 12, 13, 14]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_layermean_ic_valid_n012_v1_20260801",
+      "bundle_manifest_sha256": "64a0174acc4ee57ba707b18e30b1724a5d6cbb32fa1d75cba6953abb1fa89a49",
+      "role": "calibration",
+      "treatments": [4, 5, 6, 7, 8, 9, 10, 11, 12]
+    }
+  ],
+  "t10_scheme": {
+    "purpose": "Joint spring calibration using layer-mean validated initial conditions and N0-N2 observations only",
+    "harvest_contract": "ln(y+1) cumulative dry CHPDT plus ln(y+1) incremental dry HPODW",
+    "active_crop_targets": ["PDAP", "LAIX", "LAID", "LWAD", "SWAD", "SNAM", "LNAM", "CHPDT", "HPODW"],
+    "active_process_targets": ["SOIL_WATER"],
+    "shared_active_parameters": 64,
+    "fixed_project_invariants": {"FL-VS": 100.0, "ADAP": "excluded from Phi and parameter update", "MDAP": "diagnostic-only"},
+    "treatment_policy": "All available treatments with N0, N1 or N2 are calibration data; N3 treatments are excluded",
+    "nitrogen_response_objective": "disabled; no derived NRESP observations or water-nitrogen response budget",
+    "initial_ensemble": "Sobol sequence",
+    "formal_scale": "200 realizations x 4 IES iterations"
+  }
+}

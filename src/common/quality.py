@@ -273,6 +273,7 @@ def assess_morris(
     score_column: str = "score",
     observation_column: str = "obs",
     tolerance: float = 1e-12,
+    allowed_degenerate_features: Iterable[str] | None = None,
 ) -> QualityReport:
     """Reject empty, non-finite, or all-zero Morris results."""
     report = QualityReport(run_type="morris", run_id=run_id)
@@ -309,13 +310,23 @@ def assess_morris(
             for name, group in grouped
             if not bool((group[np.isfinite(group)].abs() > tolerance).any())
         ]
+        allowed = {str(item).upper() for item in (allowed_degenerate_features or ())}
+        unexpected = []
+        for name in degenerate_outputs:
+            feature = str(name)
+            # Observation names are commonly ``tn<id>_<FEATURE>``.  Keep the
+            # fallback as the full name so callers can also allow exact names.
+            feature_name = feature.split("_", 1)[1].upper() if "_" in feature else feature.upper()
+            if feature.upper() not in allowed and feature_name not in allowed:
+                unexpected.append(name)
         report.add(
             "morris_output_non_degenerate",
-            not degenerate_outputs,
+            not unexpected,
             "Every declared response has at least one materially non-zero Morris effect",
             actual={
                 "degenerate_count": len(degenerate_outputs),
                 "degenerate_outputs": degenerate_outputs,
+                "allowed_degenerate_outputs": [name for name in degenerate_outputs if name not in unexpected],
             },
             threshold={"degenerate_count": 0},
         )
@@ -467,6 +478,7 @@ def assess_ies(
     run_id: str = "",
     tolerance: float = 1e-12,
     max_invalid_fraction: float = 0.0,
+    max_phi_invalid_fraction: float = 0.0,
     max_realization_loss_fraction: float = 0.10,
     min_realizations: int = 2,
 ) -> QualityReport:
@@ -535,12 +547,13 @@ def assess_ies(
     else:
         phi_all = pd.to_numeric(pd.Series(np.asarray(phi_values).ravel()), errors="coerce")
         phi = phi_all[np.isfinite(phi_all)]
+        phi_invalid_fraction = 1.0 - (len(phi) / max(len(phi_all), 1))
         report.add(
             "ies_phi_finite",
-            len(phi) == len(phi_all) and len(phi) > 0,
-            "All supplied Phi values are finite",
-            actual=len(phi),
-            threshold=len(phi_all),
+            len(phi) > 0 and phi_invalid_fraction <= max_phi_invalid_fraction,
+            "Non-finite Phi slots remain below the configured model-failure allowance",
+            actual=phi_invalid_fraction,
+            threshold=max_phi_invalid_fraction,
         )
         spread = float(phi.max() - phi.min()) if len(phi) else 0.0
         scale = max(float(phi.abs().mean()), 1.0) if len(phi) else 1.0

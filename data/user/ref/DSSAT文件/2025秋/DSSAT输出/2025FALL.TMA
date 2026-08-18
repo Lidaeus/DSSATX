@@ -1,0 +1,21 @@
+*EXP.DATA (A): 2025 FALL EGGPLANT; TRNO=PLOT NUMBER
+
+! Full reference column structure (matches XXQL2501.TMA).
+! PDAT/ADAT/MDAT/HIAM are -99 (phenology/harvest-index not measured).
+! HWAM = final cumulative DRY fruit yield (kg/ha).
+! LWAM/SWAM = last observed leaf/stem dry weight (kg/ha).
+! LAIX = seasonal max LAI. CNAM = last observed canopy N (kg/ha).
+
+@TRNO  PDAT  ADAT  MDAT  HDAT  HWAM  LWAM  SWAM  LAIX  HIAM  CNAM
+     1   -99   -99   -99 26005  1460  1075   880 1.850   -99  81.5
+     2   -99   -99   -99 26005  1562  1135   974 1.981   -99  84.4
+     3   -99   -99   -99 26005  1247   892   841 1.642   -99  64.9
+     4   -99   -99   -99 26005  1406   743   752 1.399   -99  55.9
+     5   -99   -99   -99 26005  1606   927   916 1.715   -99  67.4
+     6   -99   -99   -99 26005  1657   903   839 1.594   -99  69.2
+     7   -99   -99   -99 26005  1323   820   759 1.396   -99  57.4
+     8   -99   -99   -99 26005  1614   893   902 1.543   -99  60.4
+     9   -99   -99   -99 26005  1102   746   712 1.358   -99  46.6
+    10   -99   -99   -99 26005  1640   831   817 1.751   -99  57.2
+    11   -99   -99   -99 26005  1366   972   883 1.627   -99  64.2
+    12   -99   -99   -99 26005  1328  1080   998 1.928   -99  74.3

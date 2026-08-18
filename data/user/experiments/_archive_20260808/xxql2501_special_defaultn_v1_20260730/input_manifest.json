@@ -1,0 +1,1005 @@
+{
+  "bundle_id": "xxql2501_special_defaultn_v1_20260730",
+  "derived_from_bundle": "xxql2501_actual_trial_calibration_v8_adap34_plantn_slpf_moisturefix_20260729",
+  "derived_from_manifest_sha256": "f0c59a5e48127b62d77da13f1e5db154ac3b13f03b496b3586ee7514192e39fe",
+  "spec_compliance": [
+    "docs/三季FileA_FileT与不确定性适配计划_v1_20260726.md",
+    "docs/土壤水分进入Phi与土壤参数预筛方案_v1_20260726.md"
+  ],
+  "created_at": "2026-07-29T17:56:44.760927+00:00",
+  "season_id": "25SP",
+  "excode": "XXQL2501",
+  "intended_use": "special_three_season_default_initial_n_parameter_calibration",
+  "scenario_type": "special_default_initial_mineral_n_calibration",
+  "scenario_role": "calibration",
+  "observation_policy": "FileA_FileT_strict_fill_plus_SOIL_WATER_group",
+  "treatment_plot_mapping": "TN 2,3,4,5,9,10,11,12,13,14 map to plots 2-5,9-14; TN 1,6,7,8 excluded",
+  "treatment_exclusion": {
+    "excluded_tn": [
+      1,
+      6,
+      7,
+      8
+    ],
+    "included_tn": [
+      2,
+      3,
+      4,
+      5,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "reason": "缺少实际 FileX 管理/初始条件定义",
+    "audit_file": "treatment_exclusion_audit.csv"
+  },
+  "initial_condition_policy": "counterfactual_uniform_default_mineral_n_sno3_1_snh4_0.5",
+  "soil_analysis_policy": "observed_treatment_specific_no_counterfactual_pooling",
+  "actual_trial_preservation": {
+    "reference_filex": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2501\\XXQL2501.TMX",
+    "reference_filex_sha256": "5c7a56ffa9e8515b1afa2e93c98632ea7b29fdf220918f1e9ec3c27a14013ed1",
+    "v1_bundle_manifest_id": null,
+    "v1_bundle_manifest_sha256": null,
+    "filex_retention_proof": "TMX byte-for-byte copied from authoritative data/user/experiments/XXQL*; SOIL.SOL/WTH/DSSBatch.v48 sources and SHAs are recorded"
+  },
+  "filex_fix_status": "authoritative FileX copied from data/user/experiments/XXQL2501; 25SP treatment exclusion audited",
+  "source_workbooks": {
+    "trial_observations": {
+      "D:\\Tomato_Cal\\workspace\\staging_25sp_moisturefix_v2_20260729\\2025春\\2025春产量数据集.xlsx": "4a61ec04518f5469cef2b660d42cef65cc45c81ac37fe2449e9133fa4f886690",
+      "D:\\Tomato_Cal\\workspace\\staging_25sp_moisturefix_v2_20260729\\2025春\\2025春作物生长指标集.xlsx": "897fa53d1fc2cba6c0e9c9881d0fcc471d6f7e103925dc3584216fbee8f1aa16",
+      "D:\\Tomato_Cal\\workspace\\staging_25sp_moisturefix_v2_20260729\\2025春\\2025年春季茄子植株样氮磷钾测定.xlsx": "10d637dd8793a0e14847cd6689579ea092bc47a015cba60b0c811650e7fdf4aa"
+    },
+    "soil_water": {
+      "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春土壤数据集.xlsx": "fa42d4bf875ec98666b13bb46d7b0e6d34f68b2b5c336bad678a5138ea7d1599"
+    }
+  },
+  "generators": {
+    "trial_observations": {
+      "script": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "sha256": "20631274c8a5e6d66b37c228e70c31079e62c080332e245be4005bcaecc066ca"
+    },
+    "soil_water_observations": {
+      "script": "tools/experiments/build_soil_water_observations.py",
+      "sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6"
+    }
+  },
+  "trial_observation_qa": {
+    "plots": 10,
+    "growth_dates": 4,
+    "harvest_dates": 11,
+    "total_observations": 568,
+    "excluded_tn": [
+      1,
+      6,
+      7,
+      8
+    ],
+    "density": 27000.0
+  },
+  "soil_water_qa": {
+    "plots": 10,
+    "dates": 3,
+    "depths": 5,
+    "total_observations": 150,
+    "phi_observations": 100,
+    "initial_condition_observations": 50,
+    "soil_id": "IBTM910017",
+    "dssat_layer_bottoms_cm": [
+      5.0,
+      15.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0,
+      60.0,
+      70.0,
+      80.0,
+      100.0,
+      122.0,
+      145.0,
+      175.0,
+      203.0
+    ]
+  },
+  "soil_water_warnings": [],
+  "files": [
+    {
+      "name": "XXQL2501.TMX",
+      "sha256": "86abc337990d889cb21a84d770a5b599d1121b1ad268feabfbe01861ff098994",
+      "bytes": 21840,
+      "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2501\\XXQL2501.TMX",
+      "derived_transformation": "uniform_default_initial_mineral_n"
+    },
+    {
+      "name": "SOIL.SOL",
+      "sha256": "a986374f5ca95eaa3d65ed58162c3cb038450c57128b883b5e0fb22629600c67",
+      "bytes": 162881,
+      "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2502\\SOIL.SOL",
+      "copied_from_note": "SOIL.SOL shared across seasons; sourced from XXQL2502 bundle"
+    },
+    {
+      "name": "XXLI2502.WTH",
+      "sha256": "d273b9b73c6efbca4703e896aefee1921efa18a8ee1a2cfea03e6f339cdc1b6a",
+      "bytes": 22171,
+      "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2501\\XXLI2502.WTH"
+    },
+    {
+      "name": "DSSBatch.v48",
+      "sha256": "edec425563fe92bac21d9b494870f4b8e20bca10c3a6b46dc2a3fa62d3d49928",
+      "bytes": 1698,
+      "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2501\\DSSBatch.v48"
+    },
+    {
+      "name": "XXQL2501.TMA",
+      "sha256": "8ec82d8ab7b310e40f4b1041fea49e4476fd9cfe86623e6c867183e8c5b5c439",
+      "bytes": 1386,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\XXQL2501.TMA"
+    },
+    {
+      "name": "XXQL2501.TMT",
+      "sha256": "c812053bbf40dfdced3ad2c5ce0db2a422ce4f00c0a1542b02890250ca4ea2c9",
+      "bytes": 16775,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\XXQL2501.TMT"
+    },
+    {
+      "name": "observation_uncertainty.csv",
+      "sha256": "138ded9ae316353eced06a501bf7bc6450843ec73b4d15ab036667252130e631",
+      "bytes": 102303,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\observation_uncertainty.csv"
+    },
+    {
+      "name": "fruit_quality_match_audit.csv",
+      "sha256": "bd3d0c76c1c09db5ce55c3f9a8e828bcc2ac3b6c19c85cef3b938ac6c85398ee",
+      "bytes": 19167,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\fruit_quality_match_audit.csv"
+    },
+    {
+      "name": "trial_generator_log.json",
+      "sha256": "250fb2378c263e735617a5d7afc15820477315324fc278aaa42eddef93b55941",
+      "bytes": 2021,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "763c5f22965bab1d12d49311939f25dc8d27dac06de141de3d41d3d74610d6a3",
+      "source_v2_dir": "D:\\Tomato_Cal\\workspace\\staging_25sp_moisturefix_v2_20260729\\2025春\\DSSAT输出_v2\\generator_log.json"
+    },
+    {
+      "name": "treatment_exclusion_audit.csv",
+      "sha256": "6d92ecf19626932d10e427429569959bc58bc504f23d5959f44661c08f5d6e29",
+      "bytes": 235,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\treatment_exclusion_audit.csv"
+    },
+    {
+      "name": "soil_water_observations.csv",
+      "sha256": "7ecf97c7b9899cd2b89b164ca5b932d82a236b1b6f2ac9b5658253acd0e4ecb2",
+      "bytes": 34787,
+      "generated_by": "tools/experiments/build_soil_water_observations.py",
+      "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\soil_water_observations.csv"
+    },
+    {
+      "name": "soil_water_layer_mapping.csv",
+      "sha256": "8d8f63f69f9a19d0f8fac64172e0394850133b32151a86f7a36352b8295a5ca7",
+      "bytes": 602,
+      "generated_by": "tools/experiments/build_soil_water_observations.py",
+      "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\soil_water_layer_mapping.csv"
+    },
+    {
+      "name": "soil_water_match_audit.csv",
+      "sha256": "65f8c867383bdbd1cae7bbbc2c1088cfdc74096bb1687946523d3c38cbff40ea",
+      "bytes": 18382,
+      "generated_by": "tools/experiments/build_soil_water_observations.py",
+      "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\soil_water_match_audit.csv"
+    },
+    {
+      "name": "soil_water_generator_log.json",
+      "sha256": "7c8ea8e297a09a22231362ccb255ffea2f36e2059f7715849cb5a34ca2b197bf",
+      "bytes": 1083,
+      "generated_by": "tools/experiments/build_soil_water_observations.py",
+      "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\soil_water_generator_log.json"
+    },
+    {
+      "name": "FileA_values.csv",
+      "sha256": "aebe11fef5b9fad437a0710d2e7a62699c7113ac2b76ea0148ecd6683449f9a3",
+      "bytes": 1876,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\FileA_values.csv"
+    },
+    {
+      "name": "FileT_values.csv",
+      "sha256": "d4de75e2c2e16b4d5f1b2e76dc84f85230af3adb03027a6d497a030c86c4829a",
+      "bytes": 11059,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\FileT_values.csv"
+    },
+    {
+      "name": "generator_log.json",
+      "sha256": "00b5eb37876a94ffaad15b2178182875c5654b1d55fcc12d8e4dd89191d71228",
+      "bytes": 1886,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\generator_log.json"
+    }
+  ],
+  "files_by_role": {
+    "copied_inputs": [
+      {
+        "name": "XXQL2501.TMX",
+        "sha256": "86abc337990d889cb21a84d770a5b599d1121b1ad268feabfbe01861ff098994",
+        "bytes": 21840,
+        "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2501\\XXQL2501.TMX",
+        "derived_transformation": "uniform_default_initial_mineral_n"
+      },
+      {
+        "name": "SOIL.SOL",
+        "sha256": "a986374f5ca95eaa3d65ed58162c3cb038450c57128b883b5e0fb22629600c67",
+        "bytes": 162881,
+        "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2502\\SOIL.SOL",
+        "copied_from_note": "SOIL.SOL shared across seasons; sourced from XXQL2502 bundle"
+      },
+      {
+        "name": "XXLI2502.WTH",
+        "sha256": "d273b9b73c6efbca4703e896aefee1921efa18a8ee1a2cfea03e6f339cdc1b6a",
+        "bytes": 22171,
+        "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2501\\XXLI2502.WTH"
+      },
+      {
+        "name": "DSSBatch.v48",
+        "sha256": "edec425563fe92bac21d9b494870f4b8e20bca10c3a6b46dc2a3fa62d3d49928",
+        "bytes": 1698,
+        "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2501\\DSSBatch.v48"
+      }
+    ],
+    "generated_trial": [
+      {
+        "name": "XXQL2501.TMA",
+        "sha256": "8ec82d8ab7b310e40f4b1041fea49e4476fd9cfe86623e6c867183e8c5b5c439",
+        "bytes": 1386,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\XXQL2501.TMA"
+      },
+      {
+        "name": "XXQL2501.TMT",
+        "sha256": "c812053bbf40dfdced3ad2c5ce0db2a422ce4f00c0a1542b02890250ca4ea2c9",
+        "bytes": 16775,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\XXQL2501.TMT"
+      },
+      {
+        "name": "observation_uncertainty.csv",
+        "sha256": "138ded9ae316353eced06a501bf7bc6450843ec73b4d15ab036667252130e631",
+        "bytes": 102303,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\observation_uncertainty.csv"
+      },
+      {
+        "name": "fruit_quality_match_audit.csv",
+        "sha256": "bd3d0c76c1c09db5ce55c3f9a8e828bcc2ac3b6c19c85cef3b938ac6c85398ee",
+        "bytes": 19167,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\fruit_quality_match_audit.csv"
+      },
+      {
+        "name": "trial_generator_log.json",
+        "sha256": "250fb2378c263e735617a5d7afc15820477315324fc278aaa42eddef93b55941",
+        "bytes": 2021,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "763c5f22965bab1d12d49311939f25dc8d27dac06de141de3d41d3d74610d6a3",
+        "source_v2_dir": "D:\\Tomato_Cal\\workspace\\staging_25sp_moisturefix_v2_20260729\\2025春\\DSSAT输出_v2\\generator_log.json"
+      },
+      {
+        "name": "treatment_exclusion_audit.csv",
+        "sha256": "6d92ecf19626932d10e427429569959bc58bc504f23d5959f44661c08f5d6e29",
+        "bytes": 235,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\treatment_exclusion_audit.csv"
+      },
+      {
+        "name": "FileA_values.csv",
+        "sha256": "aebe11fef5b9fad437a0710d2e7a62699c7113ac2b76ea0148ecd6683449f9a3",
+        "bytes": 1876,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\FileA_values.csv"
+      },
+      {
+        "name": "FileT_values.csv",
+        "sha256": "d4de75e2c2e16b4d5f1b2e76dc84f85230af3adb03027a6d497a030c86c4829a",
+        "bytes": 11059,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\FileT_values.csv"
+      },
+      {
+        "name": "generator_log.json",
+        "sha256": "00b5eb37876a94ffaad15b2178182875c5654b1d55fcc12d8e4dd89191d71228",
+        "bytes": 1886,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\generator_log.json"
+      }
+    ],
+    "generated_soil": [
+      {
+        "name": "soil_water_observations.csv",
+        "sha256": "7ecf97c7b9899cd2b89b164ca5b932d82a236b1b6f2ac9b5658253acd0e4ecb2",
+        "bytes": 34787,
+        "generated_by": "tools/experiments/build_soil_water_observations.py",
+        "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\soil_water_observations.csv"
+      },
+      {
+        "name": "soil_water_layer_mapping.csv",
+        "sha256": "8d8f63f69f9a19d0f8fac64172e0394850133b32151a86f7a36352b8295a5ca7",
+        "bytes": 602,
+        "generated_by": "tools/experiments/build_soil_water_observations.py",
+        "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\soil_water_layer_mapping.csv"
+      },
+      {
+        "name": "soil_water_match_audit.csv",
+        "sha256": "65f8c867383bdbd1cae7bbbc2c1088cfdc74096bb1687946523d3c38cbff40ea",
+        "bytes": 18382,
+        "generated_by": "tools/experiments/build_soil_water_observations.py",
+        "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\soil_water_match_audit.csv"
+      },
+      {
+        "name": "soil_water_generator_log.json",
+        "sha256": "7c8ea8e297a09a22231362ccb255ffea2f36e2059f7715849cb5a34ca2b197bf",
+        "bytes": 1083,
+        "generated_by": "tools/experiments/build_soil_water_observations.py",
+        "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\soil_water_generator_log.json"
+      }
+    ]
+  },
+  "summary": {
+    "total_files": 17,
+    "copied_from_v1_count": 4,
+    "generated_trial_count": 9,
+    "generated_soil_count": 4
+  },
+  "data_corrections": [
+    {
+      "correction_id": "fixed_fruit_moisture_95pct_dmc5pct_v2_20260802",
+      "moisture_fraction": 0.95,
+      "dry_matter_fraction": 0.05,
+      "variance_rule": "DMFR/DMC variance=0; dry variance=DMFR^2*fresh variance",
+      "scope": "FileA/FileT, CHPDT/HPODW, observation uncertainty and harvest audit",
+      "source_generator": "tools/experiments/build_trial_observations_v2_20260726.py"
+    },
+    {
+      "correction_id": "dmfr_anomalous_replicate_removal_20260807",
+      "scope": "25SP XXQL2501 fruit dry-weight conversion",
+      "change": "Removed anomalous fruit-moisture replicates (deviation > 0.05 from (TRNO,date) median): TN13 rep3 moisture=0.7848, TN5 rep2 moisture=0.8936. TN13 DMFR 9.31%->3.21%, TN5 6.35%->4.20%.",
+      "generator_sha256": "20631274c8a5e6d66b37c228e70c31079e62c080332e245be4005bcaecc066ca"
+    },
+    {
+      "correction_id": "canonical_tmx_ic_fixed_width_20260818",
+      "scope": "INITIAL CONDITIONS ICBL/SH2O/SNH4/SNO3 header and records only",
+      "change": "Removed surplus blank records and rewrote the header and rows as DSSAT widths 2/6/6/6/6; numeric changes limited to width-safe rounding.",
+      "repair_audit": "D:\\Tomato_Cal\\workspace\\reports\\tmx_ic_format_repair_20260818\\tmx_ic_repair_rows.csv"
+    }
+  ],
+  "counterfactual_transformations": [
+    {
+      "transformation_id": "uniform_default_initial_mineral_n_v1_20260730",
+      "section": "*INITIAL CONDITIONS",
+      "fields": {
+        "SNO3": 1.0,
+        "SNH4": 0.5
+      },
+      "scope": "all initial-condition treatments and all declared layers",
+      "unchanged": [
+        "ICDAT",
+        "SH2O",
+        "*SOIL ANALYSIS",
+        "fertilizer management",
+        "irrigation management",
+        "weather",
+        "SOIL.SOL",
+        "observations"
+      ],
+      "row_count": 70
+    }
+  ],
+  "initial_mineral_n_audit": {
+    "filex": "XXQL2501.TMX",
+    "row_count": 70,
+    "ic_count": 14,
+    "depths_cm": [
+      20,
+      40,
+      60,
+      80,
+      100
+    ],
+    "SNO3": 1.0,
+    "SNH4": 0.5,
+    "source_filex_sha256": "5c7a56ffa9e8515b1afa2e93c98632ea7b29fdf220918f1e9ec3c27a14013ed1",
+    "rows": [
+      {
+        "ic": 2,
+        "depth_cm": 20,
+        "old_snh4": 1.5,
+        "old_sno3": 33.7,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 2,
+        "depth_cm": 40,
+        "old_snh4": 1.0,
+        "old_sno3": 13.8,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 2,
+        "depth_cm": 60,
+        "old_snh4": 1.6,
+        "old_sno3": 10.6,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 2,
+        "depth_cm": 80,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 2,
+        "depth_cm": 100,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 3,
+        "depth_cm": 20,
+        "old_snh4": 1.7,
+        "old_sno3": 26.8,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 3,
+        "depth_cm": 40,
+        "old_snh4": 1.0,
+        "old_sno3": 13.3,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 3,
+        "depth_cm": 60,
+        "old_snh4": 1.0,
+        "old_sno3": 9.4,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 3,
+        "depth_cm": 80,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 3,
+        "depth_cm": 100,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 4,
+        "depth_cm": 20,
+        "old_snh4": 1.3,
+        "old_sno3": 17.5,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 4,
+        "depth_cm": 40,
+        "old_snh4": 0.9,
+        "old_sno3": 12.3,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 4,
+        "depth_cm": 60,
+        "old_snh4": 0.7,
+        "old_sno3": 8.6,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 4,
+        "depth_cm": 80,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 4,
+        "depth_cm": 100,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 5,
+        "depth_cm": 20,
+        "old_snh4": 1.3,
+        "old_sno3": 19.9,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 5,
+        "depth_cm": 40,
+        "old_snh4": 0.8,
+        "old_sno3": 11.6,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 5,
+        "depth_cm": 60,
+        "old_snh4": 0.6,
+        "old_sno3": 4.2,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 5,
+        "depth_cm": 80,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 5,
+        "depth_cm": 100,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 6,
+        "depth_cm": 20,
+        "old_snh4": 1.1,
+        "old_sno3": 35.2,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 6,
+        "depth_cm": 40,
+        "old_snh4": 1.1,
+        "old_sno3": 11.4,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 6,
+        "depth_cm": 60,
+        "old_snh4": 0.6,
+        "old_sno3": 4.5,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 6,
+        "depth_cm": 80,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 6,
+        "depth_cm": 100,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 7,
+        "depth_cm": 20,
+        "old_snh4": 1.8,
+        "old_sno3": 43.5,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 7,
+        "depth_cm": 40,
+        "old_snh4": 1.2,
+        "old_sno3": 36.6,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 7,
+        "depth_cm": 60,
+        "old_snh4": 1.2,
+        "old_sno3": 14.8,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 7,
+        "depth_cm": 80,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 7,
+        "depth_cm": 100,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 8,
+        "depth_cm": 20,
+        "old_snh4": 1.3,
+        "old_sno3": 41.7,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 8,
+        "depth_cm": 40,
+        "old_snh4": 2.9,
+        "old_sno3": 21.2,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 8,
+        "depth_cm": 60,
+        "old_snh4": 0.7,
+        "old_sno3": 10.5,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 8,
+        "depth_cm": 80,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 8,
+        "depth_cm": 100,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 9,
+        "depth_cm": 20,
+        "old_snh4": 3.9,
+        "old_sno3": 26.3,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 9,
+        "depth_cm": 40,
+        "old_snh4": 1.5,
+        "old_sno3": 18.6,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 9,
+        "depth_cm": 60,
+        "old_snh4": 1.5,
+        "old_sno3": 13.1,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 9,
+        "depth_cm": 80,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 9,
+        "depth_cm": 100,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 10,
+        "depth_cm": 20,
+        "old_snh4": 2.0,
+        "old_sno3": 34.6,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 10,
+        "depth_cm": 40,
+        "old_snh4": 0.7,
+        "old_sno3": 15.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 10,
+        "depth_cm": 60,
+        "old_snh4": 1.4,
+        "old_sno3": 2.4,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 10,
+        "depth_cm": 80,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 10,
+        "depth_cm": 100,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 11,
+        "depth_cm": 20,
+        "old_snh4": 1.5,
+        "old_sno3": 46.6,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 11,
+        "depth_cm": 40,
+        "old_snh4": 0.6,
+        "old_sno3": 12.7,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 11,
+        "depth_cm": 60,
+        "old_snh4": 1.1,
+        "old_sno3": 3.6,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 11,
+        "depth_cm": 80,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 11,
+        "depth_cm": 100,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 12,
+        "depth_cm": 20,
+        "old_snh4": 2.8,
+        "old_sno3": 51.6,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 12,
+        "depth_cm": 40,
+        "old_snh4": 1.4,
+        "old_sno3": 30.2,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 12,
+        "depth_cm": 60,
+        "old_snh4": 0.6,
+        "old_sno3": 3.3,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 12,
+        "depth_cm": 80,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 12,
+        "depth_cm": 100,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 13,
+        "depth_cm": 20,
+        "old_snh4": 0.9,
+        "old_sno3": 44.4,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 13,
+        "depth_cm": 40,
+        "old_snh4": 0.7,
+        "old_sno3": 10.3,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 13,
+        "depth_cm": 60,
+        "old_snh4": 0.7,
+        "old_sno3": 4.1,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 13,
+        "depth_cm": 80,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 13,
+        "depth_cm": 100,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 14,
+        "depth_cm": 20,
+        "old_snh4": 0.9,
+        "old_sno3": 44.4,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 14,
+        "depth_cm": 40,
+        "old_snh4": 0.7,
+        "old_sno3": 10.3,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 14,
+        "depth_cm": 60,
+        "old_snh4": 0.7,
+        "old_sno3": 4.1,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 14,
+        "depth_cm": 80,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 14,
+        "depth_cm": 100,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 15,
+        "depth_cm": 20,
+        "old_snh4": 0.9,
+        "old_sno3": 196.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 15,
+        "depth_cm": 40,
+        "old_snh4": 0.7,
+        "old_sno3": 45.5,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 15,
+        "depth_cm": 60,
+        "old_snh4": 0.7,
+        "old_sno3": 18.2,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 15,
+        "depth_cm": 80,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      },
+      {
+        "ic": 15,
+        "depth_cm": 100,
+        "old_snh4": 0.5,
+        "old_sno3": 1.0,
+        "new_snh4": 0.5,
+        "new_sno3": 1.0
+      }
+    ]
+  }
+}

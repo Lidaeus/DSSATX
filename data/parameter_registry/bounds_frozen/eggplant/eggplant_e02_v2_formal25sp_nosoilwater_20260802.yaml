@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_v2_formal25sp_nosoilwater_20260802"
+crop: "eggplant"
+created_at: "2026-08-02T07:48:09Z"
+approved_at: "2026-08-02T07:48:09Z"
+approved_by: "Codex"
+review_status: "approved"
+derived_from: "eggplant_e02_v2_formal25sp_nosoilwater_20260802.csv"
+derived_from_sha256: "72c8574580969402caf89a3ab424c538b028d7cdc71c51cfc088d5535cc881ab"
+bounds_sha256: "2063a81c9048df6f36f011c434ab506d7a04dd3afb80690e41c0d9a969294c3d"
+parameter_count: 113
+automatic_repairs: 0
+notes: "Posterior-guided 25SP E02 V2 rerun with SOIL_WATER removed from Phi"

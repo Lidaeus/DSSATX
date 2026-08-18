@@ -1,0 +1,10 @@
+{
+  "artifact_type": "bound_hits_report_three_runs_20260810",
+  "runs": {
+    "v2": "e02_v2_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260808",
+    "official": "e02_official_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260809",
+    "a3": "e02_a3_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260810"
+  },
+  "rel_tolerance": 0.005,
+  "note": "hit fraction = share of 200 realizations within 0.5% of bound width; hard pin = >=90%"
+}

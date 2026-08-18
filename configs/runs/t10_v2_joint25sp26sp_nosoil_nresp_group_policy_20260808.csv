@@ -1,0 +1,12 @@
+group,phi_budget,note
+PHENO,0.10,Phenology diagnostics only
+CANOPY,1.00,LAID process plus LAIX maximum
+BIOMASS,1.00,LWAD plus SWAD
+PLANT_N,1.00,SNAM plus LNAM
+HARVEST_FRESH,1.25,Fresh harvest diagnostic-only
+HARVEST_DRY_TOTAL,0.875,Cumulative CHPDT (split from original 1.75 HARVEST_DRY)
+HARVEST_DRY_INCREMENT,0.875,Incremental HPODW (split from original 1.75 HARVEST_DRY)
+N_RESPONSE,0.75,Reserved budget intentionally inactive
+CUMULATIVE_HARVEST,1.00,Legacy PWAD diagnostic-only fallback
+INCREMENTAL_HARVEST,1.00,Legacy PWAI diagnostic-only fallback
+SOIL_WATER,1.00,Reserved budget intentionally inactive

@@ -208,18 +208,15 @@ def analyze_multiseed(
     ranking_domains = contract.get("ranking_domains")
     if ranking_domains is not None and not isinstance(ranking_domains, dict):
         raise ValueError("ranking_domains must be an object")
-    # The formal P1 contract declares the full observation set (164) and both
-    # ranking domains. When a contract carries an observation_count we are in a
-    # formal run and enforce that both domains are present and exactly named:
-    # a consensus over a different domain set silently changes the scientific
-    # meaning. Synthetic unit-test profiles (no observation_count) are left to
-    # declare whatever domains they exercise.
+    # Formal contracts must at minimum preserve the original two scientific
+    # domains. Extended profiles may add extra domains (e.g. dedicated fruit
+    # water-content rankings), but they must not drop the legacy pair.
     expected_observation_count = contract.get("observation_count")
     if expected_observation_count is not None:
         required_domains = {"general_genetic", "water_nitrogen_response"}
-        if ranking_domains is None or set(ranking_domains) != required_domains:
+        if ranking_domains is None or not required_domains.issubset(set(ranking_domains)):
             raise ValueError(
-                "Formal P1 ranking requires exactly the two ranking domains "
+                "Formal Morris ranking requires at least the baseline ranking domains "
                 f"{sorted(required_domains)}; got {sorted((ranking_domains or {}).keys())}"
             )
     rankings: list[pd.DataFrame] = []

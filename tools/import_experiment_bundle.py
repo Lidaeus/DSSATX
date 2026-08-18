@@ -15,7 +15,14 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.common.experiment_inputs import findings_as_dicts, parse_filex, validate_input_bundle
+from src.common.experiment_inputs import (
+    filex_harvest_dates,
+    findings_as_dicts,
+    management_alignment_findings,
+    parse_filex,
+    replace_filex_management_sections,
+    validate_input_bundle,
+)
 from src.common.project import sha256_file
 from src.sensitivity.treatment_factor_attribution import normalize_fertilizer_level_rows
 
@@ -171,6 +178,52 @@ def _assert_actual_trial_preserved(candidate: Path, reference: Path) -> dict[str
     }
 
 
+def _trim_estimated_harvest_observations(bundle: Path, experiment: str, cutoff: int) -> list[dict[str, object]]:
+    """Remove FileT events and invalidate FileA yields after the FileX cutoff."""
+
+    corrections: list[dict[str, object]] = []
+    tmt = bundle / f"{experiment}.TMT"
+    if tmt.is_file():
+        lines = tmt.read_text(encoding="utf-8", errors="ignore").splitlines()
+        kept: list[str] = []
+        removed = 0
+        for line in lines:
+            fields = line.split()
+            if fields and fields[0].lstrip("+-").isdigit() and len(fields) >= 2:
+                try:
+                    if int(float(fields[1])) > cutoff:
+                        removed += 1
+                        continue
+                except ValueError:
+                    pass
+            kept.append(line)
+        if removed:
+            tmt.write_text("\n".join(kept) + "\n", encoding="utf-8", newline="\n")
+            corrections.append({"file": tmt.name, "field": "harvest event date", "removed_rows": removed, "cutoff": cutoff})
+
+    tma = bundle / f"{experiment}.TMA"
+    if tma.is_file():
+        lines = tma.read_text(encoding="utf-8", errors="ignore").splitlines()
+        changed = 0
+        rewritten: list[str] = []
+        for line in lines:
+            fields = line.split()
+            if fields and fields[0].lstrip("+-").isdigit() and len(fields) >= 6:
+                try:
+                    if int(float(fields[4])) > cutoff:
+                        fields[4] = str(cutoff)
+                        fields[5] = "-99"
+                        line = " ".join(fields)
+                        changed += 1
+                except ValueError:
+                    pass
+            rewritten.append(line)
+        if changed:
+            tma.write_text("\n".join(rewritten) + "\n", encoding="utf-8", newline="\n")
+            corrections.append({"file": tma.name, "field": "HDAT/HWAM", "changed_rows": changed, "cutoff": cutoff})
+    return corrections
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Create a versioned DSSAT experiment input bundle")
     parser.add_argument("--source-dir", required=True)
@@ -218,6 +271,11 @@ def main() -> int:
         help="Make one FileX fertilizer factor level contiguous and chronological",
     )
     parser.add_argument(
+        "--management-reference-filex",
+        default=None,
+        help="Reference FileX whose fertilizer/harvest sections are copied into the imported bundle",
+    )
+    parser.add_argument(
         "--symbi",
         choices=("Y", "N"),
         default=None,
@@ -255,6 +313,35 @@ def main() -> int:
         shutil.copy2(item, destination / target_name)
 
     metadata_corrections = []
+    management_reference = None
+    if args.management_reference_filex:
+        management_reference = Path(args.management_reference_filex).resolve()
+    elif args.experiment.upper() == "XXQL2501":
+        default_management_reference = PROJECT_ROOT / "data" / "user" / "ref" / "XXQL2501.TMX"
+        if default_management_reference.is_file():
+            management_reference = default_management_reference
+    if management_reference is not None:
+        if not management_reference.is_file():
+            parser.error(f"Management reference FileX missing: {management_reference}")
+        filex_target = destination / f"{args.experiment}.TMX"
+        replace_filex_management_sections(filex_target, management_reference)
+        metadata_corrections.append(
+            {
+                "file": filex_target.name,
+                "field": "fertilizer and harvest management sections",
+                "value": "copied from authoritative reference",
+                "reference_filex": str(management_reference),
+                "reference_filex_sha256": sha256_file(management_reference),
+                "scope": "*FERTILIZERS (INORGANIC) and *HARVEST DETAILS only",
+                "authority": "corrected XXQL2501.TMX",
+            }
+        )
+        harvest_dates = filex_harvest_dates(filex_target)
+        if not harvest_dates:
+            parser.error(f"Management reference has no harvest dates: {filex_target}")
+        metadata_corrections.extend(
+            _trim_estimated_harvest_observations(destination, args.experiment, max(harvest_dates))
+        )
     if (args.site_lat is None) != (args.site_lon is None):
         parser.error("--site-lat and --site-lon must be provided together")
     if args.site_lat is not None and args.site_lon is not None:
@@ -311,6 +398,13 @@ def main() -> int:
                 "authority": "DSSAT input-order integrity gate",
             }
         )
+
+    if management_reference is not None:
+        alignment_findings = management_alignment_findings(
+            destination / f"{args.experiment}.TMX", management_reference
+        )
+        if alignment_findings:
+            raise ValueError("Imported FileX failed management-reference alignment")
 
     actual_trial_preservation = None
     if args.actual_trial_reference_filex is not None:
@@ -374,6 +468,10 @@ def main() -> int:
         ),
         "counterfactual_transformations": [] if actual_trial_preservation else None,
         "actual_trial_preservation": actual_trial_preservation,
+        "management_reference_filex": str(management_reference) if management_reference else None,
+        "management_reference_filex_sha256": (
+            sha256_file(management_reference) if management_reference else None
+        ),
         "observation_policy": (
             "FileA_and_FileT_required"
             if args.purpose == "calibration"

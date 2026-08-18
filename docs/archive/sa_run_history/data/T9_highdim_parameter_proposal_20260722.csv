@@ -1,0 +1,65 @@
+name,init,lower,upper,status,pargp,file,proposal_role,legacy_value,t8_best53_value,legacy_transfer_policy,proposal_note
+LFMAX,1.27,0.9,1.5,active,CUL_Growth,TMGRO048.CUL.base,shared_crop_highdim,1.27,1.27115,diagnostic_seed_only,T8 boundary pile-up; widen within process-safe envelope and add compensating process parameters
+SIZLF,297.1,240.0,380.0,active,CUL_Growth,TMGRO048.CUL.base,shared_crop_highdim,320.622,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+SLAVR,293.0,220.0,340.0,active,CUL_Growth,TMGRO048.CUL.base,shared_crop_highdim,282.97,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+CSDL,12.33,12.33,12.33,fixed,CUL_Photoperiod,TMGRO048.CUL.base,fixed_structural_or_irrelevant,,12.33,not_used,Retain fixed status; not identified by current observations
+PPSEN,0.0,0.0,0.0,fixed,CUL_Photoperiod,TMGRO048.CUL.base,fixed_structural_or_irrelevant,,0.0,not_used,Retain fixed status; not identified by current observations
+THRSH,8.5,8.5,8.5,fixed,CUL_HarvestPartition,TMGRO048.CUL.base,fixed_structural_or_irrelevant,8.5,,not_used,Retain fixed status; not identified by current observations
+WTPSD,0.004,0.004,0.004,fixed,CUL_HarvestPartition,TMGRO048.CUL.base,fixed_structural_or_irrelevant,0.004,0.004,not_used,Retain fixed status; not identified by current observations
+XFRT,0.99,0.7,1.0,active,CUL_HarvestPartition,TMGRO048.CUL.base,shared_crop_highdim,0.986485,0.99,diagnostic_seed_only,T8 boundary pile-up; widen within process-safe envelope and add compensating process parameters
+EM-FL,23.3,23.0,42.0,active,CUL_PhenologyHarvest,TMGRO048.CUL.base,shared_crop_highdim,26.3177,23.0,diagnostic_seed_only,T8 boundary pile-up; widen within process-safe envelope and add compensating process parameters
+FL-LF,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,TMGRO048.CUL.base,fixed_structural_or_irrelevant,329.827,400.0,not_used,Retain fixed status; not identified by current observations
+FL-SD,8.1,5.0,25.0,active,CUL_PhenologyHarvest,TMGRO048.CUL.base,shared_crop_highdim,7.0,7.0,diagnostic_seed_only,T8 boundary pile-up; widen within process-safe envelope and add compensating process parameters
+FL-SH,2.0,1.0,6.0,active,CUL_PhenologyHarvest,TMGRO048.CUL.base,shared_crop_highdim,3.28054,2.0,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+PODUR,33.0,25.0,60.0,active,CUL_PhenologyHarvest,TMGRO048.CUL.base,shared_crop_highdim,30.0,33.0,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+SD-PM,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,TMGRO048.CUL.base,fixed_structural_or_irrelevant,376.007,400.0,not_used,Retain fixed status; not identified by current observations
+SDPDV,111.4,80.0,300.0,active,CUL_PhenologyHarvest,TMGRO048.CUL.base,shared_crop_highdim,100.0,111.4,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+SFDUR,11.7,8.0,30.0,active,CUL_PhenologyHarvest,TMGRO048.CUL.base,shared_crop_highdim,27.0,11.7,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+RHGHT,1.7,0.8,2.2,active,ECO_Architecture,TMGRO048.ECO,shared_crop_highdim,1.34655,1.7,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+RWDTH,1.6,0.7,2.0,active,ECO_Architecture,TMGRO048.ECO,shared_crop_highdim,2.08,1.6,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+TRIFL,0.64,0.2,1.0,active,ECO_Architecture,TMGRO048.ECO,shared_crop_highdim,0.674767,0.463611,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+EM-V1,22.0,10.0,40.0,active,ECO_Phenology,TMGRO048.ECO,shared_crop_highdim,15.1997,38.4984,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+FL-VS,120.0,100.0,140.0,active,ECO_Phenology,TMGRO048.ECO,shared_crop_highdim,103.026,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+JU-R0,3.8,2.0,12.0,active,ECO_Phenology,TMGRO048.ECO,shared_crop_highdim,1.98221,3.8,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+LNGSH,39.0,25.0,50.0,active,ECO_Phenology,TMGRO048.ECO,shared_crop_highdim,31.2,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+PL-EM,11.4,3.0,12.0,active,ECO_Phenology,TMGRO048.ECO,shared_crop_highdim,6.72445,11.4,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+PM06,0.5,0.35,0.75,active,ECO_Phenology,TMGRO048.ECO,shared_crop_highdim,0.697848,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+PM09,0.97,0.6,1.0,active,ECO_Phenology,TMGRO048.ECO,shared_crop_highdim,0.6,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+V1-JU,0.0,0.0,0.0,fixed,ECO_Phenology,TMGRO048.ECO,fixed_structural_or_irrelevant,0.0,0.0,not_used,Retain fixed status; not identified by current observations
+XFINT,0.3,0.08,0.5,active,ECO_Phenology,TMGRO048.ECO,shared_crop_highdim,0.35729,0.35,diagnostic_seed_only,T8 boundary pile-up; widen within process-safe envelope and add compensating process parameters
+XFPHT,38.8,35.0,70.0,active,ECO_Phenology,TMGRO048.ECO,shared_crop_highdim,29.04,38.8,do_not_transfer_template_incompatible,T9 high-dimensional shared crop/process parameter
+XMAGE,13.5,8.0,30.0,active,ECO_Phenology,TMGRO048.ECO,shared_crop_highdim,14.7609,13.5,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+KCAN,0.66,0.5,0.9,active,SPE_Photosynthesis,TMGRO048.SPE,shared_crop_highdim,0.603964,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+KC_SLOPE,0.1,0.04,0.2,active,SPE_Photosynthesis,TMGRO048.SPE,shared_crop_highdim,0.09,0.1,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+PARMAX,41.0,25.0,55.0,active,SPE_Photosynthesis,TMGRO048.SPE,shared_crop_highdim,29.2623,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+PHTMAX,61.0,40.0,80.0,active,SPE_Photosynthesis,TMGRO048.SPE,shared_crop_highdim,53.9978,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+ATOP,0.8,0.55,1.0,active,SPE_RootWater,TMGRO048.SPE,shared_crop_highdim,0.773962,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+FRCNOD,0.05,0.05,0.05,fixed,SPE_Nodule,TMGRO048.SPE,fixed_nonlegume,0.0452797,,not_used,Retain fixed status; not identified by current observations
+FRLFF,0.37,0.25,0.5,active,SPE_RootWater,TMGRO048.SPE,shared_crop_highdim,0.288287,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+FRSTMF,0.53,0.35,0.7,active,SPE_RootWater,TMGRO048.SPE,shared_crop_highdim,0.390404,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+PORPT,0.21,0.12,0.3,active,SPE_RootWater,TMGRO048.SPE,shared_crop_highdim,0.1575,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+RTNO3,0.012,0.008,0.05,active,SPE_RootNitrogen,TMGRO048.SPE,shared_crop_highdim,0.0401964,0.0163265,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+RTNH4,0.012,0.008,0.05,active,SPE_RootNitrogen,TMGRO048.SPE,shared_crop_highdim,0.0183675,0.012,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+RTEXF,0.1,0.05,0.25,active,SPE_RootNitrogen,TMGRO048.SPE,shared_crop_highdim,0.141198,0.1,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+WTFSD,0.55,0.35,0.75,active,SPE_RootWater,TMGRO048.SPE,shared_crop_highdim,0.509342,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+EVMODC,0.0,0.0,0.0,fixed,SPE_SourceSink,TMGRO048.SPE,fixed_structural_or_irrelevant,,,not_used,Retain fixed status; not identified by current observations
+FINREF,220.0,150.0,320.0,active,SPE_SourceSink,TMGRO048.SPE,shared_crop_highdim,263.521,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+SIZREF,300.0,200.0,420.0,active,SPE_SourceSink,TMGRO048.SPE,shared_crop_highdim,284.421,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+SLAREF,300.0,200.0,420.0,active,SPE_SourceSink,TMGRO048.SPE,shared_crop_highdim,343.991,,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+VSSINK,4.1,1.5,8.0,active,SPE_SourceSink,TMGRO048.SPE,shared_crop_highdim,2.76977,4.1,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+TB1,9.2,6.0,14.0,active,SPE_TempStages,TMGRO048.SPE,shared_crop_highdim,8.67475,11.8891,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+TB2,8.6,6.0,14.0,active,SPE_TempStages,TMGRO048.SPE,shared_crop_highdim,10.5,12.0,diagnostic_seed_only,T8 boundary pile-up; widen within process-safe envelope and add compensating process parameters
+TB3,11.0,6.0,14.0,active,SPE_TempStages,TMGRO048.SPE,shared_crop_highdim,11.8409,11.0,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+TM1,40.0,36.5,48.0,active,SPE_TempStages,TMGRO048.SPE,shared_crop_highdim,38.1836,40.0,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+TM2,40.0,36.5,48.0,active,SPE_TempStages,TMGRO048.SPE,shared_crop_highdim,34.5372,41.7517,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+TM3,39.8,36.5,48.0,active,SPE_TempStages,TMGRO048.SPE,shared_crop_highdim,34.6908,39.8,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+TO11,25.5,18.0,27.0,active,SPE_TempStages,TMGRO048.SPE,shared_crop_highdim,22.1388,23.435,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+TO12,25.0,18.0,27.0,active,SPE_TempStages,TMGRO048.SPE,shared_crop_highdim,22.0,20.0,diagnostic_seed_only,T8 boundary pile-up; widen within process-safe envelope and add compensating process parameters
+TO13,26.0,18.0,27.0,active,SPE_TempStages,TMGRO048.SPE,shared_crop_highdim,23.0535,26.0,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+TO21,28.8,27.5,36.0,active,SPE_TempStages,TMGRO048.SPE,shared_crop_highdim,27.4934,28.8,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+TO22,29.6,27.5,36.0,active,SPE_TempStages,TMGRO048.SPE,shared_crop_highdim,28.8874,33.0,diagnostic_seed_only,T8 boundary pile-up; widen within process-safe envelope and add compensating process parameters
+TO23,29.1,27.5,36.0,active,SPE_TempStages,TMGRO048.SPE,shared_crop_highdim,29.7324,29.1,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+NSTFAC,0.5,0.2,1.0,active,SPE_Other,TMGRO048.SPE,shared_crop_highdim,,0.820598,not_used,T8 boundary pile-up; widen within process-safe envelope and add compensating process parameters
+NMOBMX,0.09,0.02,0.5,active,SPE_Other,TMGRO048.SPE,shared_crop_highdim,0.25,0.08,diagnostic_seed_only,T8 boundary pile-up; widen within process-safe envelope and add compensating process parameters
+NVSMOB,0.38,0.15,0.6,active,SPE_Other,TMGRO048.SPE,shared_crop_highdim,0.33133,0.432486,diagnostic_seed_only,T9 high-dimensional shared crop/process parameter
+NRCVR,0.15,0.03,0.35,active,SPE_Other,TMGRO048.SPE,shared_crop_highdim,,0.15,not_used,T9 high-dimensional shared crop/process parameter

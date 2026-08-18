@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_sobol23_e01review_v1_20260728"
+crop: "eggplant"
+created_at: "2026-07-27T23:43:17Z"
+approved_at: "2026-07-27T23:43:17Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_sobol23_e01review_v1_20260728.csv"
+derived_from_sha256: "68806030d0c4438bbf29d4baf7c6a5174fe99bf6e721aec4aae2aacda17e154c"
+bounds_sha256: "84493278e9bb61e9b648a7fa3ea16aee29f380991925b39d4eb0d1b07038b83e"
+parameter_count: 64
+automatic_repairs: 0
+notes: "E01 150x5 engineering-valid posterior review plus eggplant physiology/literature constraints; 23 active Sobol parameters; fixed XFPHT=32 for first-harvest structural timing smoke."

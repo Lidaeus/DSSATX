@@ -1,0 +1,300 @@
+{
+  "design_id": "eggplant_greenhouse_drip_pso_sequence_v3_1",
+  "supersedes": "eggplant_greenhouse_drip_pso_sequence_v3",
+  "status": "implementation_contract_ready_runner_pending",
+  "review_decision": "retain_v3_nitrogen_sequence_restore_v2_pareto_discipline_reduce_primary_dimension",
+  "production_system": "greenhouse_drip_eggplant",
+  "crop_model": "DSSAT_4.8_CROPGRO_Tomato",
+  "surrogate_model": false,
+  "rainfall_as_management_input": false,
+  "policy_transfer": "one_common_DAP_policy_across_2025_and_2026_spring_weather",
+  "seasons": [
+    {
+      "season_id": "XXQL2501_2025_spring",
+      "year": 2025,
+      "role": "robust_weather_scenario",
+      "weather_file": "data/user/experiments/xxql2501_actual_trial_calibration_v2_20260726/XXLI2502.WTH",
+      "actual_input_bundle": "data/user/experiments/xxql2501_actual_trial_calibration_v2_20260726",
+      "planting_date": 25075,
+      "last_harvest_date": 25220,
+      "template_treatment": 2
+    },
+    {
+      "season_id": "XXQL2601_2026_spring",
+      "year": 2026,
+      "role": "robust_weather_scenario_not_independent_validation",
+      "weather_file": "data/user/experiments/xxql2601_actual_trial_calibration_v2_20260726/XXQL2601.WTH",
+      "actual_input_bundle": "data/user/experiments/xxql2601_actual_trial_calibration_v2_20260726",
+      "planting_date": 26069,
+      "last_harvest_date": 26198,
+      "template_treatment": 1
+    }
+  ],
+  "reference_policy": {
+    "definition": "year_specific_current_practice_direct_DSSAT_replay",
+    "same_frozen_parameter_set_as_optimization": true,
+    "freeze_before_search": true,
+    "required_artifact": "reference_policy_yields.json",
+    "yield_floor_fraction": 0.90,
+    "prohibited": "redefine_reference_after_inspecting_PSO_or_Pareto_results"
+  },
+  "primary_parameterization": {
+    "purpose": "formal_global_search",
+    "dimension_count": 13,
+    "water_variables": [
+      "seasonal_irrigation_mm",
+      "water_stage_logit_S1",
+      "water_stage_logit_S2",
+      "water_stage_logit_S3",
+      "water_stage_logit_S4"
+    ],
+    "nitrogen_variables": [
+      "seasonal_nitrogen_kg_ha",
+      "basal_fraction",
+      "basal_dap",
+      "topdress_count_integer",
+      "topdress_stage_logit_S1",
+      "topdress_stage_logit_S2",
+      "topdress_stage_logit_S3",
+      "within_stage_timing_bias"
+    ],
+    "water_stage_shares": {
+      "stages": [[0, 28], [29, 63], [64, 96], [97, 145]],
+      "minimum_each": 0.08,
+      "sum": 1.0,
+      "event_dates": "frozen_template_dates"
+    },
+    "nitrogen_sequence_generation": {
+      "topdress_windows": [[14, 28], [29, 63], [64, 96]],
+      "minimum_one_event_per_window": true,
+      "remaining_event_counts": "largest_remainder_from_topdress_stage_shares",
+      "within_window_dates": "even_spacing_shifted_by_common_timing_bias",
+      "within_window_amounts": "equal_then_bounded_mass_conservation_repair"
+    }
+  },
+  "local_refinement_parameterization": {
+    "purpose": "selected_policy_robustness_only",
+    "candidate_limit": 12,
+    "source_codec": "src.management.nitrogen_sequence",
+    "free_variables": [
+      "individual_topdress_DAP_plus_minus_3_days",
+      "individual_topdress_amount_redistribution",
+      "seasonal_nitrogen_plus_minus_10_percent",
+      "topdress_count_K_minus_1_K_K_plus_1"
+    ],
+    "not_permitted": "use_high_dimensional_event_codec_for_full_global_search"
+  },
+  "bounds": {
+    "status": "provisional_until_preflight_freeze",
+    "seasonal_irrigation_mm": [240.0, 500.0],
+    "seasonal_nitrogen_kg_ha": [60.0, 320.0],
+    "zero_n_anchor": "outside_PSO",
+    "basal_fraction": [0.15, 0.50],
+    "basal_dap": [-7, 3],
+    "topdress_count_integer": [4, 10],
+    "within_stage_timing_bias": [-0.25, 0.25],
+    "single_irrigation_event_max_mm": 45.0,
+    "topdress_event_n_kg_ha": [2.0, 75.0],
+    "freeze_rule": {
+      "inputs": ["current_practice", "N0", "coarse_N_response", "FileX_slot_capacity"],
+      "required_artifact": "management_bounds_freeze.json",
+      "must_precede": "normalization_anchor_freeze_and_all_PSO_runs"
+    }
+  },
+  "filex_policy": {
+    "nitrogen_carrier_rows": "FE005_only",
+    "fertilizer_code_method_depth": "frozen",
+    "phosphorus_and_potassium_rows": "byte_identical",
+    "inactive_FE005_slots": "FAMN_zero",
+    "non_FE005_positive_FAMN": "hard_failure"
+  },
+  "hard_constraints": {
+    "nitrogen_after_dap": 96,
+    "failed_dssat_run_is_infeasible": true,
+    "one_common_policy_must_be_feasible_in_both_years": true,
+    "yield_floor_fraction_of_year_specific_reference": 0.90,
+    "year_specific_yield_floor_from_reference_policy": true,
+    "all_event_mass_balances_close_to_0_001": true
+  },
+  "objectives": [
+    {"name": "mean_fresh_yield", "direction": "maximize", "source": "mean_year_final_CHFPW"},
+    {"name": "worst_year_fresh_yield", "direction": "maximize", "source": "min_year_final_CHFPW"},
+    {"name": "seasonal_irrigation_mm", "direction": "minimize", "source": "unified_management_ledger"},
+    {"name": "seasonal_nitrogen_kg_ha", "direction": "minimize", "source": "unified_management_ledger"}
+  ],
+  "diagnostic_indicators": [
+    "interannual_yield_gap_fraction",
+    "irrigation_water_productivity",
+    "partial_factor_productivity_of_nitrogen",
+    "decoded_policy_collision_rate",
+    "DSSAT_failure_rate"
+  ],
+  "ahp": {
+    "role": "pre_registered_search_preferences_and_post_Pareto_selection",
+    "criteria": [
+      {"name": "mean_fresh_yield", "direction": "maximize"},
+      {"name": "worst_year_fresh_yield", "direction": "maximize"},
+      {"name": "seasonal_irrigation_mm", "direction": "minimize"},
+      {"name": "seasonal_nitrogen_kg_ha", "direction": "minimize"}
+    ],
+    "interannual_gap_role": "diagnostic_only_to_avoid_double_counting_yield_stability",
+    "matrix_origin": "ratio_consistent_engineering_preference_scenarios_not_stakeholder_elicitation",
+    "consistency_ratio_max": 0.10,
+    "normalization": {
+      "yield_lower": "reference_policy_yield_floor",
+      "yield_upper": "max_reference_or_preflight_p95",
+      "water_and_nitrogen": "frozen_formal_bounds",
+      "clip_outside_anchors": true,
+      "saturation_fraction_max": 0.10,
+      "required_artifact": "normalization_anchors.json"
+    },
+    "profiles": {
+      "balanced": {
+        "priority_seed": [1, 1, 1, 1],
+        "pairwise_matrix": [[1,1,1,1],[1,1,1,1],[1,1,1,1],[1,1,1,1]]
+      },
+      "yield_security": {
+        "priority_seed": [4, 5, 1, 1],
+        "pairwise_matrix": [[1,0.8,4,4],[1.25,1,5,5],[0.25,0.2,1,1],[0.25,0.2,1,1]]
+      },
+      "resource_efficiency": {
+        "priority_seed": [2, 2, 5, 5],
+        "pairwise_matrix": [[1,1,0.4,0.4],[1,1,0.4,0.4],[2.5,2.5,1,1],[2.5,2.5,1,1]]
+      }
+    }
+  },
+  "optimizer": {
+    "algorithm": "staged_PSO_AHP_direct_DSSAT_with_combined_Pareto_archive",
+    "direct_dssat_only": true,
+    "initial_design": {
+      "method": "topdress_count_stratified_maximin_LHS",
+      "candidates": 160,
+      "minimum_candidates_per_topdress_count": 20,
+      "seed": 20260727
+    },
+    "balanced_discovery": {
+      "profile": "balanced",
+      "swarm_size": 40,
+      "minimum_iterations": 25,
+      "maximum_iterations": 40,
+      "independent_seeds": [20260727, 20260810]
+    },
+    "preference_refinement": {
+      "profiles": ["yield_security", "resource_efficiency"],
+      "swarm_size": 32,
+      "minimum_iterations": 20,
+      "maximum_iterations": 30,
+      "initial_seeds": [20260727],
+      "confirmation_seed": 20260810,
+      "confirmation_trigger": "profile_contributes_a_final_report_candidate"
+    },
+    "particle_dynamics": {
+      "inertia": [0.70, 0.40],
+      "cognitive_constant": 2.0,
+      "social_constant": 2.0,
+      "velocity_limit_fraction": 0.20
+    },
+    "adaptive_controls": {
+      "score_relative_improvement_threshold": 0.005,
+      "plateau_window_iterations": 5,
+      "minimum_iterations_before_stop": 20,
+      "decoded_collision_rate_warning": 0.30,
+      "collision_response": "reinitialize_duplicate_particles_within_underrepresented_K_strata"
+    },
+    "cache_key": "decoded_common_policy_hash_plus_parameter_set_hash_plus_input_bundle_hash",
+    "archive": "all_unique_direct_DSSAT_evaluations_including_failures"
+  },
+  "execution_budget": {
+    "unit": "single_season_DSSAT_run",
+    "preflight_runs": 320,
+    "minimum_formal_and_refinement_runs": 6800,
+    "maximum_formal_and_refinement_runs": 14320,
+    "minimum_total_runs": 7120,
+    "maximum_total_runs": 14640,
+    "assumptions": [
+      "two_weather_years",
+      "no_cache_hits",
+      "12_selected_policies_times_10_local_perturbations"
+    ],
+    "parallel_workers_initial": 6,
+    "pilot_runtime_measurement_required": true,
+    "prohibited": "launch_maximum_budget_before_40_candidate_end_to_end_pilot_passes"
+  },
+  "selection": {
+    "primary_evidence": "four_objective_non_dominated_front_from_combined_archive",
+    "AHP_candidate_must_be_non_dominated": true,
+    "required_report_candidates": [
+      "balanced_compromise",
+      "yield_security_alternative",
+      "resource_efficiency_alternative",
+      "maximum_worst_year_yield_anchor",
+      "minimum_water_anchor",
+      "minimum_nitrogen_anchor",
+      "current_practice",
+      "N0"
+    ],
+    "seed_agreement": {
+      "objective_space_mutual_coverage_tolerance_fraction": 0.02,
+      "minimum_mutual_coverage": 0.60
+    }
+  },
+  "implementation_phases": [
+    {
+      "id": "P0",
+      "name": "input_parameter_and_reference_gate",
+      "status": "pending_upstream_parameter_freeze",
+      "exit_artifacts": ["parameter_set_manifest.json", "reference_policy_yields.json", "management_bounds_freeze.json"]
+    },
+    {
+      "id": "P1",
+      "name": "unified_water_nitrogen_materializer",
+      "status": "pending",
+      "exit_artifacts": ["unified_management_manifest.json", "UnifiedMgmtEvent.csv", "two_year_filex_diff_audit.json"]
+    },
+    {
+      "id": "P2",
+      "name": "40_candidate_end_to_end_pilot",
+      "status": "pending",
+      "exit_artifacts": ["pilot_manifest.json", "runtime_profile.json", "failure_catalog.csv"]
+    },
+    {
+      "id": "P3",
+      "name": "shared_preflight_and_anchor_freeze",
+      "status": "pending",
+      "exit_artifacts": ["preflight_archive.csv", "normalization_anchors.json", "preflight_QA.json"]
+    },
+    {
+      "id": "P4",
+      "name": "staged_PSO_and_combined_archive",
+      "status": "pending",
+      "exit_artifacts": ["particle_history.csv", "all_policy_archive.csv", "convergence_diagnostics.json"]
+    },
+    {
+      "id": "P5",
+      "name": "Pareto_selection_and_local_refinement",
+      "status": "pending",
+      "exit_artifacts": ["pareto_front.csv", "selected_policies.csv", "local_robustness.csv"]
+    },
+    {
+      "id": "P6",
+      "name": "formal_replay_and_reporting",
+      "status": "pending",
+      "exit_artifacts": ["formal_management_results.csv", "formal_run_manifest.json", "paper_data_manifest.json"]
+    }
+  ],
+  "environmental_endpoint_policy": {
+    "nitrate_leaching": "add_only_after_DSSAT_output_extraction_and_mass_balance_are_audited",
+    "not_permitted": "use_fertilizer_rate_as_a_proxy_for_nitrate_leaching"
+  },
+  "science_gates": [
+    "upstream_parameter_set_frozen_and_independently_validated",
+    "both_weather_files_rainfall_free_and_cover_planting_to_last_harvest",
+    "reference_policy_and_bounds_frozen_before_search",
+    "unified_materializer_passes_two_year_diff_audit",
+    "40_candidate_pilot_passes_before_large_search",
+    "AHP_matrices_pass_CR_and_normalization_saturation_gate",
+    "combined_archive_retains_failures_and_decoded_collisions",
+    "selected_policies_are_non_dominated_and_pass_local_refinement",
+    "2025_and_2026_are_not_described_as_independent_validation_after_both_enter_optimization"
+  ]
+}

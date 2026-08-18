@@ -1,0 +1,7 @@
+season_id,treatment,mi,water_level,irrigation_mm,mf,nitrogen_kg_ha,nitrogen_level,filex_path
+25SP,13,3,W1,283.1000000000001,4,0.0,N0,D:\Tomato_Cal\data\user\experiments\xxql2501_layermean_ic_valid_n012_v1_20260801\XXQL2501.TMX
+25SP,12,3,W1,283.1000000000001,3,122.0,N1,D:\Tomato_Cal\data\user\experiments\xxql2501_layermean_ic_valid_n012_v1_20260801\XXQL2501.TMX
+25SP,11,3,W1,283.1000000000001,2,254.0,N2,D:\Tomato_Cal\data\user\experiments\xxql2501_layermean_ic_valid_n012_v1_20260801\XXQL2501.TMX
+25SP,5,1,W3,481.3999999999999,4,0.0,N0,D:\Tomato_Cal\data\user\experiments\xxql2501_layermean_ic_valid_n012_v1_20260801\XXQL2501.TMX
+25SP,4,1,W3,481.3999999999999,3,122.0,N1,D:\Tomato_Cal\data\user\experiments\xxql2501_layermean_ic_valid_n012_v1_20260801\XXQL2501.TMX
+25SP,3,1,W3,481.3999999999999,2,254.0,N2,D:\Tomato_Cal\data\user\experiments\xxql2501_layermean_ic_valid_n012_v1_20260801\XXQL2501.TMX

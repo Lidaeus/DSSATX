@@ -1,0 +1,22 @@
+{
+  "profile_id": "e02_multitarget_dryharvest_v2",
+  "active_phi_targets": [
+    "PDAP",
+    "ADAP",
+    "LAIX",
+    "LAID",
+    "LWAD",
+    "SWAD",
+    "CHTD",
+    "CNAM",
+    "CHPDT",
+    "HPODW",
+    "SOIL_WATER"
+  ],
+  "diagnostic_targets": ["MDAP", "CHFPW", "PWAD", "PWAI", "HIAM"],
+  "forbidden_targets": ["HWAM", "L#SD", "M#AD", "CWID", "L#PA", "RWAD", "PDMCD"],
+  "transform": "ln(y+1) for CHPDT and HPODW; raw for other active targets",
+  "offset": 1.0,
+  "reference": 1.0,
+  "description": "E02 formal contract corrected on 2026-07-28: indeterminate eggplant MDAP is diagnostic-only; cumulative dry harvest CHPDT and single-harvest dry mass HPODW share one harvest-family Phi budget; cumulative fresh harvest CHFPW does not enter Phi. Available flowering phenology, canopy, biomass, plant-N and post-initial soil-water observations enter Phi under static family budgets."
+}

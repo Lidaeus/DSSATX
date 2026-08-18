@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from src.calibration.build_pest_multiseason import _design_observation_policies
 from src.calibration.multiseason_design import (
     MultiSeasonDesign,
     MultiSeasonDesignError,
@@ -59,6 +60,20 @@ class TestValidation:
         assert len(design.calibration_seasons) == 2
         assert len(design.validation_seasons) == 0
 
+    def test_design_policy_is_loaded_when_cli_omits_it(self, tmp_path):
+        policy = tmp_path / "policy.csv"
+        policy.write_text(
+            "group,transform,sigma,phi_role\n"
+            "LAIXM,raw,0.8,diagnostic_only\n",
+            encoding="utf-8",
+        )
+        design = type("Design", (), {"observation_policy": str(policy)})()
+        loaded = _design_observation_policies(design, explicit_policies={})
+        assert loaded["LAIXM"]["phi_role"] == "diagnostic_only"
+
+        explicit = {"LAIDM": {"phi_role": "calibration"}}
+        assert _design_observation_policies(design, explicit) is explicit
+
     def test_validation_season_not_counted_as_calibration(self, tmp_path):
         d = _valid_design()
         d["seasons"].append(
@@ -95,6 +110,22 @@ class TestValidation:
         ]
         path = _write_json(tmp_path, "design.json", d)
         with pytest.raises(MultiSeasonDesignError, match="at least two calibration"):
+            MultiSeasonDesign.load(path)
+
+    def test_explicit_single_season_diagnostic_is_allowed(self, tmp_path):
+        d = _valid_design()
+        d["diagnostic_single_season"] = True
+        d["seasons"] = [d["seasons"][0]]
+        path = _write_json(tmp_path, "design.json", d)
+        design = MultiSeasonDesign.load(path)
+        assert design.diagnostic_single_season is True
+        assert [season.season_id for season in design.calibration_seasons] == ["S1"]
+
+    def test_single_season_requires_explicit_diagnostic_opt_in(self, tmp_path):
+        d = _valid_design()
+        d["seasons"] = [d["seasons"][0]]
+        path = _write_json(tmp_path, "design.json", d)
+        with pytest.raises(MultiSeasonDesignError, match="at least two seasons"):
             MultiSeasonDesign.load(path)
 
     def test_duplicate_season_ids_fails(self, tmp_path):

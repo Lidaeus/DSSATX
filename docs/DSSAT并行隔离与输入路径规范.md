@@ -111,6 +111,17 @@ DSCSM048.EXE B DSSBatch.v48
 
 不要把 FileA/FileT 当成“只供率定、与模型无关”的外部表：当前 `DSSAT48.INP/INH` 已显式写入 `FILEA`、`FILET` 和 `SOILS`。同时，也不要把它们当成唯一的模拟输入来源：项目的 PEST 输出写入器会在 DSSAT 运行后再次读取本地 `.TMT`，把观测日期/采收事件与 `PlantGro.OUT`、`FreshWt.OUT` 对齐。
 
+### 4.2.1 连续采收的本地日历修正（T10）
+
+对于 T10 的 CHFPW/CHPDT，真实 FileT 采收日 `d` 与 DSSAT 日更新并非同一写出时点。runner 必须只在每次模型调用的本地 FileX 副本中：
+
+1. 将每个真实模型采收管理事件安排为 `d-1`；
+2. 在最后一个真实模型采收之后增加一个虚拟末次采收事件，并把模拟结束日延长至少一天；
+3. 从 `FreshWt.OUT` 在真实观测日 `d` 的 ±1 天窗口内有界就近读取，等距时选择较晚日期；
+4. 将 `scheduled_harvest_date`、`selected_simulation_date`、`date_distance_days`、虚拟事件日期及本地 FileX 哈希写入审计表。
+
+虚拟事件只用于让最后真实采收量在输出中落盘，不能成为 FileT 观测、PEST 权重、Phi、论文图点或管理情景事件。源输入包不得被写入；没有窗口内有限输出即视为本次模型提取失败，而不是读取更早的陈旧值。
+
 ### 4.3 当前必须注意的文件名耦合
 
 模板 `data/templates/DSSAT48.INP` 与 `DSSAT48.INH` 当前含有 `XXQL2501.TMX/.TMA/.TMT` 等固定文件名。对当前 XXQL2501 输入包这是一致的；切换 experiment stem 前，P2 必须把 INP/INH 生成为与本地 batch/FileX 一致的版本，或在 preflight 中明确拒绝不一致的组合。仅复制新文件而不更新 INP/INH 不应被视为安全。

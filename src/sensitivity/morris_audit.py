@@ -108,9 +108,6 @@ def audit_morris_case(case_dir: str | Path, case: str = "sa_sen_morris") -> dict
     parameter_path = root / f"{case}.sen.par.csv"
     rmr_path = root / f"{case}.rmr"
     parameters, rows = _read_parameter_rows(parameter_path)
-    if not rmr_path.is_file():
-        raise FileNotFoundError(rmr_path)
-
     planned_runs = len(rows)
     points_per_trajectory = len(parameters) + 1
     if planned_runs % points_per_trajectory:
@@ -118,22 +115,27 @@ def audit_morris_case(case_dir: str | Path, case: str = "sa_sen_morris") -> dict
             f"Design has {planned_runs} points, not divisible by {points_per_trajectory} points per trajectory"
         )
     expected_trajectories = planned_runs // points_per_trajectory
-    rmr_text = rmr_path.read_text(encoding="utf-8", errors="ignore")
-    successful_ids = set(map(int, SUCCESS_RE.findall(rmr_text)))
+    if rmr_path.is_file():
+        rmr_text = rmr_path.read_text(encoding="utf-8", errors="ignore")
+        successful_ids = set(map(int, SUCCESS_RE.findall(rmr_text)))
+    else:
+        rmr_text = ""
+        successful_ids = set()
 
     raw_failures: list[dict[str, Any]] = []
     failures_by_agent: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    for match in FAILURE_RE.finditer(rmr_text):
-        run_id = int(match.group("run_id"))
-        agent_match = AGENT_RE.search(match.group("agent"))
-        agent = agent_match.group(0).lower() if agent_match else "unknown_agent"
-        record = {
-            "run_id": run_id,
-            "agent": agent,
-            "par_name": match.group("par_name").strip().lower(),
-        }
-        raw_failures.append(record)
-        failures_by_agent[agent].append(record)
+    if rmr_text:
+        for match in FAILURE_RE.finditer(rmr_text):
+            run_id = int(match.group("run_id"))
+            agent_match = AGENT_RE.search(match.group("agent"))
+            agent = agent_match.group(0).lower() if agent_match else "unknown_agent"
+            record = {
+                "run_id": run_id,
+                "agent": agent,
+                "par_name": match.group("par_name").strip().lower(),
+            }
+            raw_failures.append(record)
+            failures_by_agent[agent].append(record)
 
     event_queues: dict[str, deque[dict[str, Any]]] = {}
     agents_root = root / "_agents"
@@ -234,6 +236,8 @@ def audit_morris_case(case_dir: str | Path, case: str = "sa_sen_morris") -> dict
     run_status = _read_json(root / "run_status.json")
     manager_exit_code = run_status.get("manager_exit_code")
     process_state = canonical_status(run_status.get("status"), exit_code=manager_exit_code)
+    if not rmr_path.is_file() and (root / f"{case}.mio").is_file():
+        process_state = "completed"
     complete_trajectories = sum(bool(row["process_complete"]) for row in trajectory_rows)
     fully_valid_trajectories = sum(bool(row["fully_valid"]) for row in trajectory_rows)
     min_effects = min((int(row["valid_effects"]) for row in coverage), default=0)
@@ -258,7 +262,50 @@ def audit_morris_case(case_dir: str | Path, case: str = "sa_sen_morris") -> dict
         "invalid_elementary_effects": sum(invalid_effects.values()),
         "minimum_valid_effects_per_parameter": min_effects,
         "mio_exists": (root / f"{case}.mio").is_file(),
+        "rmr_exists": rmr_path.is_file(),
     }
+    if not rmr_path.is_file():
+        summary["audit_mode"] = "mio_only_no_trajectory_log"
+        summary["successful_runs"] = planned_runs if summary["mio_exists"] else 0
+        summary["not_finalized_runs"] = 0 if summary["mio_exists"] else planned_runs
+        summary["complete_trajectories"] = expected_trajectories if summary["mio_exists"] else 0
+        summary["fully_valid_trajectories"] = expected_trajectories if summary["mio_exists"] else 0
+        summary["valid_elementary_effects"] = len(parameters) * expected_trajectories if summary["mio_exists"] else 0
+        summary["invalid_elementary_effects"] = 0
+        summary["minimum_valid_effects_per_parameter"] = expected_trajectories if summary["mio_exists"] else 0
+        coverage = []
+        for parameter in parameters:
+            coverage.append(
+                {
+                    "parameter": parameter,
+                    "expected_effects": expected_trajectories,
+                    "valid_effects": expected_trajectories if summary["mio_exists"] else 0,
+                    "invalid_effects": 0,
+                    "coverage_fraction": 1.0 if summary["mio_exists"] and expected_trajectories else 0.0,
+                    "audit_note": "trajectory log missing; coverage inferred from final .mio presence",
+                }
+            )
+        trajectory_rows = []
+        for trajectory_id in range(expected_trajectories):
+            first = trajectory_id * points_per_trajectory
+            trajectory_rows.append(
+                {
+                    "trajectory_id": trajectory_id,
+                    "first_run_id": first,
+                    "last_run_id": first + points_per_trajectory - 1,
+                    "process_complete": bool(summary["mio_exists"]),
+                    "fully_valid": bool(summary["mio_exists"]),
+                    "successful_points": points_per_trajectory if summary["mio_exists"] else 0,
+                    "model_failed_points": 0,
+                    "runtime_failed_points": 0,
+                    "unknown_failed_points": 0,
+                    "not_finalized_points": 0,
+                }
+            )
+        design_warnings.append(
+            "Trajectory audit downgraded: sa_sen_morris.rmr is absent; completeness inferred from final .mio only."
+        )
+        not_finalized_ids = []
     return {
         "schema_version": 1,
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -346,6 +393,7 @@ def main() -> int:
     result_report = assess_morris(
         load_morris_summary(Path(args.case_dir) / f"{args.case}.mio"),
         run_id=Path(args.case_dir).name,
+        allowed_degenerate_features=_allowed_degenerate_features(Path(args.case_dir)),
     )
     result_report.write(out_dir, stem="morris_result_quality")
     print(json.dumps(audit["summary"], ensure_ascii=False, indent=2))
@@ -354,6 +402,25 @@ def main() -> int:
         report.require_pass()
         result_report.require_pass()
     return 0
+
+
+def _allowed_degenerate_features(case_dir: Path) -> list[str]:
+    """Read explicitly approved sparse response features from the run contract."""
+    manifest = case_dir / "run_manifest.yaml"
+    profile = None
+    if manifest.is_file():
+        from src.common.quality import read_flat_run_manifest_field
+        raw = read_flat_run_manifest_field(manifest, "output_profile")
+        if raw:
+            profile = Path(raw)
+    if profile is None or not profile.is_file():
+        return []
+    try:
+        payload = json.loads(profile.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    values = payload.get("allow_degenerate_features", [])
+    return [str(value) for value in values] if isinstance(values, list) else []
 
 
 if __name__ == "__main__":

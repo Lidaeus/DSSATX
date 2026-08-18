@@ -1,0 +1,47 @@
+{
+  "input": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春作物生长指标集.xlsx",
+  "output": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春作物生长指标集_moisturefix_v1_20260728.xlsx",
+  "sheet": "Sheet1",
+  "corrections": [
+    {
+      "dateSerial": 45799,
+      "trno": 5,
+      "rep": 2,
+      "old": 0.893580406256722,
+      "value": 0.958,
+      "excel_row": 57,
+      "column": "J",
+      "actual_old": 0.893580406256722
+    },
+    {
+      "dateSerial": 45799,
+      "trno": 13,
+      "rep": 3,
+      "old": 0.784845063354661,
+      "value": 0.968,
+      "excel_row": 82,
+      "column": "J",
+      "actual_old": 0.784845063354661
+    },
+    {
+      "dateSerial": 45827,
+      "trno": 5,
+      "rep": 2,
+      "old": 0.893580406256722,
+      "value": 0.958,
+      "excel_row": 141,
+      "column": "J",
+      "actual_old": 0.893580406256722
+    },
+    {
+      "dateSerial": 45827,
+      "trno": 13,
+      "rep": 3,
+      "old": 0.784845063354661,
+      "value": 0.968,
+      "excel_row": 166,
+      "column": "J",
+      "actual_old": 0.784845063354661
+    }
+  ]
+}

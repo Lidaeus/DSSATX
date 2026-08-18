@@ -1,0 +1,71 @@
+{
+ "schema_version": 1,
+ "design_id": "e02_wnstress_layermean_best78_threeseason_full_20260801",
+ "cultivar_identity": "TM0008",
+ "shared_parameter_scope": "all",
+ "observation_policy": "configs/runs/e02_n_response_snam_lnam_chpdtlog_noadap_nochtd_v1.csv",
+ "group_policy": "configs/runs/t10_n_response_group_policy_harvestdry250_v2.csv",
+ "seasons": [
+  {
+   "season_id": "25SP",
+   "experiment_code": "XXQL2501",
+   "bundle_path": "data/user/experiments/xxql2501_layermean_ic_v1_20260801",
+   "bundle_manifest_sha256": "d14833e4e62f0bb7a07568362e752a4648a1965117fb4e9fdffc0ebe96352835",
+   "role": "calibration",
+   "treatments": [
+    2,
+    3,
+    4,
+    5,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ]
+  },
+  {
+   "season_id": "25FA",
+   "experiment_code": "XXQL2502",
+   "bundle_path": "data/user/experiments/xxql2502_actual_trial_calibration_v7_adap34_plantn_slpf_20260729",
+   "bundle_manifest_sha256": "0d37048d027ad08f3c5cdb87e6302974b63643864c6afd909517a741885b5897",
+   "role": "calibration",
+   "treatments": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+   ]
+  },
+  {
+   "season_id": "26SP",
+   "experiment_code": "XXQL2601",
+   "bundle_path": "data/user/experiments/xxql2601_layermean_ic_v1_20260801",
+   "bundle_manifest_sha256": "5fc7d264f1f25e3e785abb650f82ad6d169ca06ef4115594b6bc165082ceb5e1",
+   "role": "calibration",
+   "treatments": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+   ]
+  }
+ ]
+}

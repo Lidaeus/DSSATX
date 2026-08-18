@@ -10,9 +10,14 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from src.reporting.experiment_evaluation import evaluate_experiment
+from src.reporting.experiment_evaluation import _normalise_variable, evaluate_experiment
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_normalise_variable_preserves_bare_cumulative_aliases():
+    assert _normalise_variable("DRY_CUM") == "CHPDT"
+    assert _normalise_variable("FRESH_CUM") == "CHFPW"
 
 
 def _comparison(n_per_season=6):

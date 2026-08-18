@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_joint62_v7_nstfac050_rhght035_posterior15phys_batch1full_20260731"
+crop: "eggplant"
+created_at: "2026-07-31T09:27:44Z"
+approved_at: "2026-07-31T09:27:44Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_joint62_v7_nstfac050_rhght035_posterior15phys_batch1full_20260731.csv"
+derived_from_sha256: "3db9c3f930310c1519025290059ea77c5162d0544ab1ab91b2d90b25bc72649d"
+bounds_sha256: "3db9c3f930310c1519025290059ea77c5162d0544ab1ab91b2d90b25bc72649d"
+parameter_count: 92
+automatic_repairs: 0
+notes: "20260731 direct calibration extension on the three-season no-CHTD mainline bounds; batch-1 modules activated by user approval to skip SA for the first supplementation round"

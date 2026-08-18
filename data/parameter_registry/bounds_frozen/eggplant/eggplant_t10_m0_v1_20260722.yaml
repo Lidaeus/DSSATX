@@ -1,0 +1,12 @@
+bounds_id: "eggplant_t10_m0_v1_20260722"
+crop: "eggplant"
+created_at: "2026-07-22T12:49:53Z"
+approved_at: "2026-07-22T12:49:53Z"
+approved_by: "Ceres Architect"
+review_status: "approved"
+derived_from: "t10_bounds_freeze_ready.csv"
+derived_from_sha256: "bb8a48e45208a07223a103714e166cecb8fdf45db3e6413cb7e5b04bc342e4ac"
+bounds_sha256: "1bffe16e526ceae7b34b823d5c651238d810fc45b3a0bf71803d8dfbd85dce63"
+parameter_count: 64
+automatic_repairs: 0
+notes: "T10 M0: 41 active params; SLAREF=300 fixed; SLAVR 240-330; TRIFL 0.40-0.65; XFPHT 31-70; EM-FL/EM-V1/FL-VS fixed; TO/TM all fixed; direct CHFPW/CHPDT log calibration"

@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "design_id": "eggplant_e02_joint73_two_spring_actualn_nochtd_batch1narrow_v1_20260731",
+  "cultivar_identity": "same_eggplant_cultivar",
+  "shared_parameter_scope": "73 shared crop/process parameters: 55 current shared terms plus 20 newly released Batch-1 parameters with ranges narrowed around template originals; FL-VS fixed at 100; no seasonal offsets",
+  "observation_policy": "configs/runs/e02_n_response_snam_lnam_chpdtlog_noadap_nochtd_v1.csv",
+  "group_policy": "configs/runs/t10_n_response_group_policy_harvestdry250_v2.csv",
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data\\user\\experiments\\xxql2501_actual_trial_calibration_v2_20260726",
+      "bundle_manifest_sha256": "647a95b23062019f1fb76b6f88085e32b7dc3f5490c9d6faf0f20881ca2e3d95",
+      "role": "calibration",
+      "treatments": [2, 3, 4, 5, 9, 10, 11, 12, 13, 14]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data\\user\\experiments\\xxql2601_actual_trial_calibration_v2_20260726",
+      "bundle_manifest_sha256": "3694d955d11e305e9e9a4e42751c4b4cdffe97a7a28a5c3c1fb05875a2c02b69",
+      "role": "calibration",
+      "treatments": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    }
+  ],
+  "t10_scheme": {
+    "purpose": "Two-spring actual-FileX-N rerun with CHTD excluded from Phi and newly released Batch-1 parameters narrowed around template originals",
+    "harvest_contract": "ln(y+1) cumulative dry CHPDT plus ln(y+1) incremental dry HPODW",
+    "active_crop_targets": [
+      "PDAP",
+      "LAIX",
+      "LAID",
+      "LWAD",
+      "SWAD",
+      "SNAM",
+      "LNAM",
+      "CHPDT",
+      "HPODW"
+    ],
+    "active_process_targets": [
+      "SOIL_WATER"
+    ],
+    "shared_active_parameters": 73,
+    "seasonal_offset_parameters": 0,
+    "total_active_parameters": 73,
+    "fixed_project_invariants": {
+      "FL-VS": 100.0,
+      "ADAP": "diagnostic_only",
+      "CHTD": "diagnostic_only"
+    },
+    "management_authority": "ADAP diagnostic-only; CHTD diagnostic-only; PAGE=25 d and SPRL=-99; actual FileX initial soil N retained",
+    "virtual_terminal_harvest": true,
+    "bounded_nearest_read": "d+/-1 day window"
+  }
+}

@@ -8,19 +8,30 @@
   "total_active_params": 8,
   "stages": {
     "S1_phenology_canopy": {
-      "active_params": ["EM-FL", "TRIFL"],
+      "active_params": [
+        "EM-FL",
+        "TRIFL"
+      ],
       "primary_observations": "flowering/phenology dates, LAI time-series",
       "fixed_baseline": "v3 init values for all others",
       "excluded_and_reason": "TB2, TM2, TO12, TO22: single-season temperature range insufficient to stably identify multiple temperature thresholds"
     },
     "S2_nitrogen_vegetative": {
-      "active_params": ["NSTFAC", "RTNO3", "NMOBMX", "NVSMOB"],
+      "active_params": [
+        "NSTFAC",
+        "RTNO3",
+        "NMOBMX",
+        "NVSMOB"
+      ],
       "primary_observations": "plant nitrogen, biomass, LAI and treatment differences",
       "fixed_baseline": "S1 representative values for EM-FL/TRIFL, v3 init for all others",
       "excluded_and_reason": "RTNH4: no independent ammonium-uptake constraint; RWDTH: no direct root/width observation"
     },
     "S3_fruit_harvest": {
-      "active_params": ["XFRT", "XFINT"],
+      "active_params": [
+        "XFRT",
+        "XFINT"
+      ],
       "primary_observations": "incremental harvest, end-of-season yield",
       "fixed_baseline": "S1+S2 representative values, v3 init for all others",
       "excluded_and_reason": "cumulative harvest is diagnostic only, does not re-enter Phi"

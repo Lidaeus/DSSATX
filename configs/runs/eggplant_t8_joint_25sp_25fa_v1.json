@@ -9,26 +9,57 @@
     {
       "season_id": "25SP",
       "experiment_code": "XXQL2501",
-      "bundle_path": "data/user/experiments/xxql2501_20260716",
-      "bundle_manifest_sha256": "5b7deac1502a5005cb46a1c2767a11d0567e13c094544f2faef3b9fdb950cb1b",
+      "bundle_path": "data/user/experiments/xxql2501_actual_trial_calibration_v2_20260726",
+      "bundle_manifest_sha256": "5c44a3e75bd8ad4c04f58e558b714d7c7b5730f4bdb67ab8f635f85757a82641",
       "role": "calibration",
-      "treatments": [2, 3, 4, 5, 10, 11, 12, 13]
+      "treatments": [
+        2,
+        3,
+        4,
+        5,
+        10,
+        11,
+        12,
+        13
+      ]
     },
     {
       "season_id": "25FA",
       "experiment_code": "XXQL2502",
-      "bundle_path": "data/user/experiments/xxql2502_actual_trial_calibration_v1_20260721",
-      "bundle_manifest_sha256": "b8ba5e8a83d3012e4684d9c2d84e15b2782817460ccf41cec2a533d362922856",
+      "bundle_path": "data/user/experiments/xxql2502_actual_trial_calibration_v2_20260726",
+      "bundle_manifest_sha256": "edaf934407b596b6641266fe5fa2098ef7ed24f2defde3bf5f3f71aa27de5b2e",
       "role": "calibration",
-      "treatments": [3, 4, 7, 9, 1, 6, 10, 12]
+      "treatments": [
+        3,
+        4,
+        7,
+        9,
+        1,
+        6,
+        10,
+        12
+      ]
     },
     {
       "season_id": "26SP",
       "experiment_code": "XXQL2601",
-      "bundle_path": "data/user/experiments/xxql2601_actual_trial_validation_v1_20260721",
-      "bundle_manifest_sha256": "f62335c787d717bbb95eb832a7f34aca01574a9e8f55ca225aaa095102c7e2b5",
+      "bundle_path": "data/user/experiments/xxql2601_actual_trial_calibration_v2_20260726",
+      "bundle_manifest_sha256": "05611d3d164cb42a2314d617a7676f9a7c6b47f276f62d9f36e1c5a2e4fbf384",
       "role": "validation",
-      "treatments": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      "treatments": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
     }
   ]
 }

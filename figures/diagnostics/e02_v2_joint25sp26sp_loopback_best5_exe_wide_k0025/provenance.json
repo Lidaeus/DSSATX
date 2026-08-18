@@ -1,0 +1,15 @@
+{
+  "executable": "D:\\Tomato_Cal\\windows\\dscsm048-wide-k0025.exe",
+  "executable_sha256": "52bad951da943d06c6dd3e65ee59645d9c93fa1d6ab27cfa24b1dba5a8b1cd4f",
+  "parameter_csv": "D:\\Tomato_Cal\\workspace\\runs\\e02_v2_joint25sp26sp_nosoil_nresp_200x4_loopback_20260802_det_best5_exe_wide_k0025\\best_member_params.csv",
+  "parameter_csv_sha256": "076424b2776aba80b34b0765dd063a55c89f46a072b9dd2ae7d1ec125ea142c7",
+  "design_json": "D:\\Tomato_Cal\\workspace\\runs\\e02_v2_joint25sp26sp_nosoil_nresp_200x4_loopback_20260802_det_best5\\design.json",
+  "design_json_sha256": "58d8ac266592e8bca88d775ef0513f8087dfc79b80d5d2491bfc635a979fedc5",
+  "seasons": [
+    "25SP",
+    "26SP"
+  ],
+  "treatments": 20,
+  "plot_png_count": 23,
+  "runner_patch": "DSSAT_EXE_PATH explicit executable selection in src/calibration/run_dssat.py"
+}

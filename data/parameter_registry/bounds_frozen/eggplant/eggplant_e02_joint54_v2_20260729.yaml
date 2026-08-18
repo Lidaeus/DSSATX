@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_joint54_v2_20260729"
+crop: "eggplant"
+created_at: "2026-07-28T16:10:36Z"
+approved_at: "2026-07-28T16:10:36Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_joint54_v2_20260729.csv"
+derived_from_sha256: "5cc951e4bcf44cb2dd0275cc6b4ea54cb57755cbc766f7c9b7eeb49d2994dd07"
+bounds_sha256: "79fed33eca01df61e1bf23f50a06e8071769bcd3dc943384ad66fd1407000236"
+parameter_count: 64
+automatic_repairs: 0
+notes: "Joint 25SP+25FA PAGE25 smoke repair; FL-VS fixed; XFINT safety; posterior-tail contraction"

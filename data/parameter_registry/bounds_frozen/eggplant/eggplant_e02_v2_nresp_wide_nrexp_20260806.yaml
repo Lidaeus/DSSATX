@@ -1,0 +1,11 @@
+bounds_id: "eggplant_e02_v2_nresp_wide_nrexp_20260806"
+crop: "eggplant"
+created_at: "2026-08-07T00:00:00Z"
+approved_at: "2026-08-07T00:00:00Z"
+approved_by: "Codex"
+review_status: "approved"
+derived_from: "workspace/runs/e02_v2_formal25sp_nreleased_nrexp_nrmin_6treat_150x4_20260805_corrected/e02_v2_formal25sp_nreleased_nrexp_nrmin_6treat_150x4_20260805_corrected.pst"
+derived_from_note: "108 params (101 active) extracted from 0805_corrected PST parameter contract; NREXP lower 0.5->0.1, NRMIN lower 0.6->0.1 to widen N-response curve shape freedom"
+parameter_count: 108
+active_count: 101
+notes: "For batch B rawdiff_terminal mixed-config calibration; pairs the new objective function (signed_difference_plus_terminal + raw_difference N response) with the full 108/101 organ_n parameter set and NREXP/NRMIN adjustable."

@@ -1,0 +1,34 @@
+{
+  "season_id": "25FA",
+  "excode": "XXQL2502",
+  "generator": "tools/experiments/build_trial_observations_v2_20260726.py",
+  "generator_sha256": "763c5f22965bab1d12d49311939f25dc8d27dac06de141de3d41d3d74610d6a3",
+  "spec_compliance": "docs/三季FileA_FileT与不确定性适配计划_v1_20260726.md",
+  "source_files": {
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025秋\\2025秋季产量集.xlsx": "c541a3496baabf41e2d69db051f72a1fb1954e9808fd8c17b2d204c0dd5071dc",
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025秋\\2025年秋季茄子生长指标集.xlsx": "3acc415ae9fef503195c362fd2ffb00843cb7f4b3a2e87b92d42995b686deb9f",
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025秋\\2025年秋季茄子植株样氮磷钾测定.xlsx": "243d6db1d347cdc1efcb16ff0312e9394e5eb7f43d2c6fe4f64f77f9f62f61f4"
+  },
+  "qa_metrics": {
+    "plots": 12,
+    "growth_dates": 3,
+    "harvest_dates": 3,
+    "total_observations": 348,
+    "density": 27000.0
+  },
+  "source_notes": [
+    "Fresh yield = mean of 小区产量; SD = independent replicate 行产量.",
+    "Fruit DM fraction = 1 - measured fruit moisture fraction (生长指标集.果含水率).",
+    "DMFR filtering: manual outliers + low-weight (<10g) + date-specific Tukey 1.5*IQR.",
+    "Each harvest uses the nearest plot-level moisture measurement date (no max interval).",
+    "Strict FileA/FileT fill rule per docs/三季FileA_FileT与不确定性适配计划_v1_20260726.md."
+  ],
+  "output_files": [
+    "XXQL2502.TMA",
+    "XXQL2502.TMT",
+    "observation_uncertainty.csv",
+    "fruit_quality_match_audit.csv",
+    "FileA_values.csv",
+    "FileT_values.csv"
+  ]
+}

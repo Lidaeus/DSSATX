@@ -24,6 +24,7 @@ T1/T4 DSSAT path remedies (propagated from tools/sa/run_three_season_baseline_sm
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import re
 import time
@@ -56,6 +57,8 @@ _PEST_INTERFACE_FILES = (
     "PestJoint.OUT",
     "PestHarvest.OUT",
     "PestTmtGrow.OUT",
+    "PestHarvest.audit.csv",
+    "PestSoilWat.OUT",
 )
 
 # Raw DSSAT daily/summary outputs that the SA pipeline (sa_model.py) reads to
@@ -182,9 +185,11 @@ def prepare_run_directory(run_dir: Path, args: list[str]) -> Path:
     if input_dir is not None and not input_dir.is_dir():
         raise FileNotFoundError(f"User input directory does not exist: {input_dir}")
     genotype = DATA_DIR / "templates" / "genotype"
+    custom_spe = os.environ.get("DSSAT_SPE_BASE", "").strip()
     for filename in ("TMGRO048.CUL", "TMGRO048.ECO", "TMGRO048.SPE"):
-        _copy(genotype / f"{filename}.base", run_dir / f"{filename}.base")
-        _copy(genotype / f"{filename}.base", run_dir / filename)
+        source = Path(custom_spe) if filename == "TMGRO048.SPE" and custom_spe else genotype / f"{filename}.base"
+        _copy(source, run_dir / f"{filename}.base")
+        _copy(source, run_dir / filename)
 
     soil_source = (input_dir / "SOIL.SOL") if input_dir else (DATA_DIR / "raw" / "soil" / "SOIL.SOL")
     _copy(soil_source, run_dir / "SOIL.SOL.base")
@@ -195,7 +200,9 @@ def prepare_run_directory(run_dir: Path, args: list[str]) -> Path:
         _copy(templates / filename, run_dir / filename)
     _write_local_dssatpro(run_dir)
 
+    custom_exe = os.environ.get("DSSAT_CUSTOM_EXE", "").strip()
     exe_candidates = [
+        Path(custom_exe) if custom_exe else PROJECT_ROOT / "workspace" / "__missing_custom_exe__",
         PROJECT_ROOT / "workspace" / "DSCSM048.EXE",
         Path(os.environ.get("DSSAT48_HOME", r"C:\DSSAT48")) / "DSCSM048.EXE",
     ]
@@ -210,9 +217,27 @@ def prepare_run_directory(run_dir: Path, args: list[str]) -> Path:
         matches = list(experiments.glob(f"{stem}.*"))
         model_files = [path for path in matches if path.suffix.upper() in {".TMX", ".TMA", ".TMT"}]
         if not model_files:
+            # Custom Windows DSSAT builds commonly require FileX under the
+            # canonical C:\\DSSAT48\\TOMATO path.  Allow the pre-calibration
+            # batch bridge to reference a uniquely named, audited external
+            # FileX while still copying it into the isolated run directory.
+            standard_root = Path(os.environ.get("DSSAT_BATCH_FILEX_ROOT", r"C:\DSSAT48\TOMATO"))
+            model_files = [path for path in standard_root.glob(f"{stem}.*")
+                           if path.suffix.upper() in {".TMX", ".TMA", ".TMT"}]
+        if not model_files:
             raise FileNotFoundError(f"Experiment referenced by batch is missing: {stem}")
         for source in model_files:
             _copy(source, run_dir / source.name)
+
+    # Soil-water observations and the audited output-layer mapping are part of
+    # the formal PEST input contract.  They are copied into the isolated run so
+    # the model wrapper can generate PestSoilWat.OUT without reaching back into
+    # the immutable source bundle during an ensemble call.
+    if input_dir:
+        for filename in ("soil_water_observations.csv", "soil_water_layer_mapping.csv"):
+            source = input_dir / filename
+            if source.is_file():
+                _copy(source, run_dir / filename)
 
     # Rewrite absolute FileX paths to bare names using the same fixed-width-aware
     # logic as src/dssat/run_dssat._write_local_batch, so the batch column
@@ -261,7 +286,7 @@ def _param_csv_name(args: list[str]) -> str:
     return "pest_params.csv"
 
 
-def _atomic_copy_back(source_dir: Path, dest_dir: Path) -> None:
+def _atomic_copy_back(source_dir: Path, dest_dir: Path, *, keep_nitrogen_outputs: bool = False) -> None:
     """Atomically publish PEST interface files from the run dir to the PEST dir.
 
     Writes to a per-file ``*.tmp`` and ``os.replace``s it into place so PEST
@@ -282,7 +307,10 @@ def _atomic_copy_back(source_dir: Path, dest_dir: Path) -> None:
         tmp = dest_dir / f"{name}.tmp"
         shutil.copy2(source, tmp)
         os.replace(tmp, destination)
-    for name in _RAW_DSSAT_OUTPUT_FILES:
+    raw_outputs = list(_RAW_DSSAT_OUTPUT_FILES)
+    if keep_nitrogen_outputs:
+        raw_outputs.extend(["PlantN.OUT", "SoilNi.OUT", "SoilN.OUT"])
+    for name in raw_outputs:
         source = source_dir / name
         if not source.is_file():
             continue
@@ -302,6 +330,13 @@ def main() -> int:
     iso_root = pest_run_dir / "_iso_runs"
     iso_root.mkdir(parents=True, exist_ok=True)
     run_dir = Path(tempfile.mkdtemp(prefix="run_", dir=str(iso_root)))
+    # Disabled by default: normal ensemble execution must not retain all
+    # transient model folders.  Diagnostic replays can retain only failed
+    # calls so a native DSSAT crash remains inspectable.
+    keep_failed = os.environ.get("DSSAT_KEEP_FAILED_RUNS", "").strip().lower() in {
+        "1", "true", "yes", "on"
+    }
+    result: subprocess.CompletedProcess[str] | None = None
 
     try:
         batch_file = prepare_run_directory(run_dir, args)
@@ -337,6 +372,8 @@ def main() -> int:
             localized_args.extend(["--batch", batch_file.name])
         if "--model" not in localized_args and not any(value.startswith("--model=") for value in localized_args):
             localized_args.extend(["--model", _DSSAT_MODEL_CODE])
+        if (run_dir / "soil_water_observations.csv").is_file() and "--keep-soil-water" not in localized_args:
+            localized_args.append("--keep-soil-water")
 
         env = os.environ.copy()
         # All outputs stay inside the ephemeral run_dir; only the PEST interface
@@ -350,16 +387,53 @@ def main() -> int:
             cwd=run_dir,
             env=env,
             check=False,
+            # Normal PEST++ calls preserve streaming diagnostics.  The opt-in
+            # forensic mode captures them so the native process's own message
+            # is retained alongside the exact generated input files.
+            capture_output=keep_failed,
+            text=keep_failed,
         )
         # Spec §5.6: only on success, atomically write the PEST interface files
         # back to the directory PEST reads from.  On failure the Pest*.OUT are
         # left untouched (PEST treats a missing/stale run as failed via its own
         # max_run_fail logic rather than receiving recycled outputs).
         if result.returncode == 0:
-            _atomic_copy_back(run_dir, pest_run_dir)
+            keep_n = any(
+                value == "--keep-nitrogen-outputs"
+                or value.startswith("--keep-nitrogen-outputs=")
+                for value in localized_args
+            )
+            _atomic_copy_back(run_dir, pest_run_dir, keep_nitrogen_outputs=keep_n)
         return result.returncode
     finally:
-        shutil.rmtree(run_dir, ignore_errors=True)
+        if keep_failed and result is not None and result.returncode != 0:
+            # Do not infer the cause here: retain the exact input files plus a
+            # small provenance record for a separate fixed-width/numerical audit.
+            (run_dir / "failure_context.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "returncode": int(result.returncode),
+                        "parameter_csv": _param_csv_name(args),
+                        "model_command_args": args,
+                        "retained_reason": "DSSAT_KEEP_FAILED_RUNS enabled",
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (run_dir / "dssat_runner.stdout.log").write_text(
+                result.stdout or "", encoding="utf-8", errors="replace"
+            )
+            (run_dir / "dssat_runner.stderr.log").write_text(
+                result.stderr or "", encoding="utf-8", errors="replace"
+            )
+        else:
+            keep_all = os.environ.get("DSSAT_KEEP_RUNS", "").strip().lower() in {"1", "true", "yes", "on"}
+            if not keep_all:
+                shutil.rmtree(run_dir, ignore_errors=True)
 
 
 if __name__ == "__main__":

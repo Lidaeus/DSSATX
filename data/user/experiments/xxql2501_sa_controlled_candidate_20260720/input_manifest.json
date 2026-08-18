@@ -117,8 +117,8 @@
     },
     {
       "name": "XXQL2501.TMX",
-      "sha256": "9b3055bb75415486701ba3f72e67d849ea1ba6490bd0301a48b2ff7622a0b774",
-      "bytes": 22829,
+      "sha256": "358ae62458160bc078fb86c147bf7294147a414759d0070a6ab87e6da2800360",
+      "bytes": 22757,
       "previous_sha256": "b62bd3ed525009833aee9964d7dee873de06c9def6de4fa464998010f83740c2"
     }
   ],
@@ -964,6 +964,14 @@
       "file": "XXQL2501.TMX",
       "reason": "SYMBI corrected back to N (non-legume). IPSIM root cause was POTAS column misalignment, not SYMBI. With correct fixed-width alignment (POTAS@44=N), SYMBI=N runs fine (verified rc=0, 0 IPSIM, 8 eval rows).",
       "after_sha256": "9b3055bb75415486701ba3f72e67d849ea1ba6490bd0301a48b2ff7622a0b774"
+    }
+  ],
+  "data_corrections": [
+    {
+      "correction_id": "canonical_tmx_ic_fixed_width_20260818",
+      "scope": "INITIAL CONDITIONS ICBL/SH2O/SNH4/SNO3 header and records only",
+      "change": "Removed surplus blank records and rewrote the header and rows as DSSAT widths 2/6/6/6/6; numeric changes limited to width-safe rounding.",
+      "repair_audit": "D:\\Tomato_Cal\\workspace\\reports\\tmx_ic_format_repair_20260818\\tmx_ic_repair_rows.csv"
     }
   ]
 }

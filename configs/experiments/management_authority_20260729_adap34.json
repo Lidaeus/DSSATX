@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "authority_id": "eggplant_transplant_management_20260729_adap34",
+  "approved_on": "2026-07-29",
+  "authority": "user decision in project thread",
+  "rules": {
+    "25SP_ADAP_days": 34,
+    "25SP_PDAT": 25075,
+    "25SP_ADAT": 25109,
+    "PAGE_days_all_seasons": 25,
+    "SPRL_all_seasons": -99,
+    "SPRL_interpretation": "DSSAT missing/default"
+  },
+  "scope": [
+    "future E02 calibration and diagnostics containing 25SP",
+    "subsequent joint or pooled calibration derived from the ADAP=34 bundle"
+  ],
+  "supersedes_for_future_runs": {
+    "authority_id": "eggplant_transplant_management_20260728",
+    "25SP_ADAP_days": 21,
+    "25SP_ADAT": 25096
+  },
+  "preservation_policy": "Completed run directories and ADAP=21 source bundles remain unchanged; future runs use the versioned ADAP=34 bundle."
+}

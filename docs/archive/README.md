@@ -16,6 +16,13 @@
 - [research_inputs/](research_inputs/)：相似项目迁移材料、前沿方法评估和早期领域方案；
 - [sa_project/](sa_project/)：旧 SA 教程、分组和结果解释；
 - [handoffs/](handoffs/)：阶段性交接材料；
+- [development_records/](development_records/)：已完成的 Code Review、P0/P2 与质量门实施记录；
+- [sa_run_history/](sa_run_history/)：P1、Morris、Sobol、T6–T10 和早期率定历史；
+- [calibration_run_history/](calibration_run_history/)：E00–E02 的逐次率定、边界、权重和诊断记录；
+- [management_optimization/](management_optimization/)：尚未进入当前论文主线的水氮管理优化探索；
+- [decision_records/](decision_records/)：按日期冻结的科研决策快照；
 - [misc/](misc/)：其他已淘汰内容。
+
+2026-07-29 的集中整理范围与计数见 [归档清单](ARCHIVE_MANIFEST_20260729.md)。
 
 当前入口返回 [文档索引](../README.md)。

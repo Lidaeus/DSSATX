@@ -1,0 +1,22 @@
+Running DSCSM048.EXE B DSSBatch.selected.v48...
+Model run completed in 0.18 seconds.
+DSSAT execution failed with exit code 65.
+Created dummy Evaluate.OUT
+Exception running model: DSSAT exited with 65
+stdout:
+
+stderr:
+forrtl: error (65): floating invalid
+Image              PC                Routine            Line        Source             
+DSCSM048.EXE       00007FF677C94BF0  __libm_powf_e7              0  Unknown
+DSCSM048.EXE       00007FF677A46E10  Unknown               Unknown  Unknown
+DSCSM048.EXE       00007FF677A04830  Unknown               Unknown  Unknown
+DSCSM048.EXE       00007FF677A43255  Unknown               Unknown  Unknown
+DSCSM048.EXE       00007FF677A7C96B  Unknown               Unknown  Unknown
+DSCSM048.EXE       00007FF6775B0695  Unknown               Unknown  Unknown
+DSCSM048.EXE       00007FF677CAA41E  Unknown               Unknown  Unknown
+DSCSM048.EXE       00007FF677CAA800  Unknown               Unknown  Unknown
+KERNEL32.DLL       00007FFC0262E957  Unknown               Unknown  Unknown
+ntdll.dll          00007FFC02DCAD6C  Unknown               Unknown  Unknown
+
+DSSAT execution failed with exit code 998.

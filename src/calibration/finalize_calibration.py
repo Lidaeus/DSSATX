@@ -14,7 +14,7 @@ from typing import Any
 
 from src.common.quality import read_flat_run_manifest_field, serialize_manifest_scalar
 from src.calibration.engineering_gate import engineering_status, profile_for_run
-from src.calibration.stage_representative import write_stage_representative
+from src.calibration.stage_representative import resolve_final_iteration, write_stage_representative
 from src.reporting.quality_gate import assess_ies_run
 
 
@@ -54,18 +54,16 @@ def _write_artifact_manifest(run_dir: Path, case: str, representative: dict[str,
     run_dir = run_dir.resolve()
     quality_dir = run_dir / "ies_quality"
     rerun_dir = run_dir / "representative_deterministic_rerun"
-    # Locate the final parameter ensemble: highest iteration N in case.N.par.csv.
-    import re
+    # Resolve against PST noptmax and the Phi table so stale files copied from
+    # an older, longer run cannot be promoted as current evidence.
     final_iter = -1
     final_par = None
     final_obs = None
-    pattern = re.compile(rf"^{re.escape(case)}\.(\d+)\.par\.csv$")
     if run_dir.is_dir():
-        for entry in run_dir.iterdir():
-            m = pattern.match(entry.name)
-            if m and int(m.group(1)) > final_iter:
-                final_iter = int(m.group(1))
-                final_par = entry
+        try:
+            final_iter, final_par = resolve_final_iteration(run_dir, case)
+        except FileNotFoundError:
+            pass
     if final_iter >= 0:
         candidate = run_dir / f"{case}.{final_iter}.obs.csv"
         if candidate.is_file():

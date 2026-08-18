@@ -1,0 +1,22 @@
+{
+  "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2501_actual_trial_calibration_v8_adap34_plantn_slpf_moisturefix_20260729\\XXQL2501.TMX": {
+    "repair": {
+      "rows_rewritten": 50
+    },
+    "verify": {
+      "rows_checked": 65,
+      "issue_count": 0,
+      "issues": []
+    }
+  },
+  "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729\\XXQL2601.TMX": {
+    "repair": {
+      "rows_rewritten": 60
+    },
+    "verify": {
+      "rows_checked": 65,
+      "issue_count": 0,
+      "issues": []
+    }
+  }
+}

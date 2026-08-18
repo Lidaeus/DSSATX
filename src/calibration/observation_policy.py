@@ -21,6 +21,13 @@ import pandas as pd
 POLICY_VERSION = "observation_policy_v2"
 MISSING_VALUE = -99.0
 _GROUP_SUFFIX = re.compile(r"_(?:H|D)\d+$", re.IGNORECASE)
+# HWAM remains structurally incompatible with continuous-harvest eggplant.
+# ADAP is retained as a diagnostic date but is no longer allowed to enter Phi:
+# the project treats transplant-to-anthesis timing as an audit variable rather
+# than a calibration target for the indeterminate eggplant experiments.
+# LAIXM is a valid measured maximum-LAI target when paired with LAIXS; whether
+# it enters Phi is therefore controlled by the explicit observation policy.
+FORCED_DIAGNOSTIC_ROOTS = {"ADAPM", "HWAMM"}
 _TAGGED_VALUE = re.compile(
     r"(?P<prefix>@(?P<token>[^@\s]+)@\s+)"
     r"(?P<value>[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][-+]?\d+)?)"
@@ -158,7 +165,21 @@ def _resolve_policy(group: str, policies: Mapping[str, Mapping[str, Any]]) -> Ma
     # with ordinary FileA/FileT variable names.
     unscoped = exact.split("_", 1)[1] if "_" in exact else exact
     unscoped_root = _GROUP_SUFFIX.sub("", unscoped)
-    return policies.get(unscoped) or policies.get(unscoped_root) or {}
+    match = policies.get(unscoped) or policies.get(unscoped_root) or {}
+    if match:
+        return match
+    # Soil-water observations use compact token group names (e.g. SW0001M)
+    # that do not match the policy CSV's 'SOIL_WATER' group name.  Map any
+    # group whose root starts with 'SW' to the SOIL_WATER policy.
+    if unscoped_root.startswith("SW") and "SOIL_WATER" in policies:
+        return policies["SOIL_WATER"]
+    return {}
+
+
+def _unscoped_group_root(group: str) -> str:
+    exact = str(group).strip().upper()
+    unscoped = exact.split("_", 1)[1] if "_" in exact else exact
+    return _GROUP_SUFFIX.sub("", unscoped)
 
 
 def apply_observation_policy(
@@ -179,6 +200,12 @@ def apply_observation_policy(
         raw_obs = float(record.get("raw_obsval", record["obsval"]))
         is_missing = raw_obs == MISSING_VALUE or float(record.get("weight", 0.0)) == 0.0
         policy = _resolve_policy(str(record["obgnme"]), policies)
+        # Soil-water observations carry a unique token/date group so each
+        # measured point can retain its audited sigma.  Resolve them through a
+        # single explicit SOIL_WATER policy row rather than requiring hundreds
+        # of duplicated CSV entries.
+        if not policy and _unscoped_group_root(str(record["obgnme"])).startswith("SW"):
+            policy = policies.get("SOIL_WATER", {})
         transform = str(policy.get("transform") or "raw").strip().lower()
         offset = _optional_float(policy, "offset")
         reference = _optional_float(policy, "reference")
@@ -191,6 +218,8 @@ def apply_observation_policy(
         phi_role = str(policy.get("phi_role") or "calibration").strip().lower()
         if phi_role not in {"calibration", "diagnostic_only", "sensitivity_only"}:
             raise ValueError(f"unsupported phi_role for {record['obgnme']}: {phi_role!r}")
+        if _unscoped_group_root(str(record["obgnme"])) in FORCED_DIAGNOSTIC_ROOTS:
+            phi_role = "diagnostic_only"
 
         explicit_sigma = _optional_float(policy, "sigma")
         replicate_sd = _optional_float(policy, "replicate_sd")
@@ -309,8 +338,16 @@ def apply_transform_config(path: str | Path, output_dir: str | Path) -> None:
             if spec is None:
                 return match.group(0)
             seen.add(token)
+            raw_value = float(match.group("value"))
+            # DSSAT writes -99 (missing) when a treatment produced no harvestable
+            # output for a token (e.g. CHPDT for a treatment with zero fruit).
+            # Skip the transform for missing values — leave them as -99 so the
+            # .ins reader and apply_observation_policy handle them as zero-weight
+            # missing observations, rather than crashing on ln(-99+1).
+            if raw_value == MISSING_VALUE or raw_value <= 0:
+                return match.group(0)
             transformed = transform_value(
-                float(match.group("value")),
+                raw_value,
                 str(spec["transform"]),
                 offset=float(spec.get("offset", 0.0)),
                 reference=float(spec.get("reference", 1.0)),

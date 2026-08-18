@@ -1,0 +1,18 @@
+Running DSCSM048.EXE B DSSBatch.selected.v48...
+Model run completed in 0.13 seconds.
+DSSAT execution failed with exit code 99.
+Created dummy Evaluate.OUT
+Exception running model: DSSAT exited with 99
+stdout:
+
+ End-of-file encountered in input file.                                          
+File: SOIL.SOL   Line:  1873   Error key: IPSOIL
+
+Additional information may be available in WARNING.OUT file.
+ 
+
+ Please press < ENTER > key to continue 
+stderr:
+STOP 99
+
+DSSAT execution failed with exit code 998.

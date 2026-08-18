@@ -1,5 +1,6 @@
 import csv
 import os
+import re
 from pathlib import Path
 import time
 
@@ -7,6 +8,12 @@ import pytest
 
 from src.calibration.run_dssat import prepare_run_directory
 from src.dssat import run_dssat
+from src.dssat.array_expander import (
+    expand_leaf_area,
+    expand_leaf_partition,
+    expand_senpor,
+    expand_stem_partition,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,17 +27,27 @@ def _parameter_csv(path: Path, **values: float) -> Path:
     return path
 
 
-def test_candidate_validation_rejects_physical_and_relational_errors():
-    with pytest.raises(ValueError, match="LFMAX"):
-        run_dssat.validate_candidate_parameters({"LFMAX": 99.0})
-    with pytest.raises(ValueError, match="TB1 < TO11"):
-        run_dssat.validate_candidate_parameters(
-            {"TB1": 10.0, "TO11": 30.0, "TO21": 25.0, "TM1": 40.0}
-        )
-    with pytest.raises(ValueError, match="SLLL < SDUL < SSAT"):
-        run_dssat.validate_candidate_parameters(
-            {"SOIL_SLLL_01": 0.30, "SOIL_SDUL_01": 0.20, "SOIL_SSAT_01": 0.40}
-        )
+def test_candidate_validation_logs_safety_and_relation_risks_without_freezing(capsys):
+    values = {
+        "LFMAX": 99.0,
+        "TB1": 10.0,
+        "TO11": 30.0,
+        "TO21": 25.0,
+        "TM1": 40.0,
+        "SOIL_SLLL_01": 0.30,
+        "SOIL_SDUL_01": 0.20,
+        "SOIL_SSAT_01": 0.40,
+    }
+    assert run_dssat.validate_candidate_parameters(values) == values
+    captured = capsys.readouterr()
+    assert "RUNNER_ADVISORY parameter=LFMAX" in captured.err
+    assert "RUNNER_ADVISORY relation=TB1<TO11<TO21<TM1" in captured.err
+    assert "RUNNER_ADVISORY relation=SOIL_SLLL_01<SOIL_SDUL_01<SOIL_SSAT_01" in captured.err
+
+
+def test_candidate_validation_still_rejects_nonfinite_values():
+    with pytest.raises(ValueError, match="must be finite"):
+        run_dssat.validate_candidate_parameters({"LFMAX": float("nan")})
 
 
 def test_candidate_validation_accepts_shipped_tmgro_baselines():
@@ -112,6 +129,99 @@ def test_ecotype_and_species_injection_use_local_base_files(tmp_path, monkeypatc
         if "PARMAX,PHTMAX" in line
     )
     assert "0.75" in photosynthesis
+
+
+def test_species_injection_updates_fruit_water_related_spe_fields(tmp_path, monkeypatch):
+    genotype = ROOT / "data" / "templates" / "genotype"
+    (tmp_path / "TMGRO048.SPE.base").write_bytes((genotype / "TMGRO048.SPE.base").read_bytes())
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(run_dssat, "SPE_FILE", "TMGRO048.SPE")
+
+    spe_params = _parameter_csv(
+        tmp_path / "spe_fwc.csv",
+        SDPROS=0.410,
+        PCARSD=0.620,
+        XMPAGE=120.0,
+    )
+    run_dssat.update_spe_file(str(spe_params))
+    lines = (tmp_path / "TMGRO048.SPE").read_text(encoding="utf-8").splitlines()
+
+    composition = next(line for line in lines if "SDPROS,SDPROG" in line)
+    assert "0.410" in composition or ".410" in composition
+
+    carbohydrate = next(line for line in lines if "PCARLF,PCARST" in line)
+    assert "0.620" in carbohydrate or ".620" in carbohydrate
+
+    seed_shell = next(line for line in lines if "SETMAX,SRMAX" in line)
+    assert "120" in seed_shell
+
+
+def test_species_injection_expands_anchor_parameters_into_spe_arrays(tmp_path, monkeypatch):
+    genotype = ROOT / "data" / "templates" / "genotype"
+    (tmp_path / "TMGRO048.SPE.base").write_bytes((genotype / "TMGRO048.SPE.base").read_bytes())
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(run_dssat, "SPE_FILE", "TMGRO048.SPE")
+
+    spe_params = _parameter_csv(
+        tmp_path / "spe_anchor.csv",
+        LAREA_EARLY=18.0,
+        LAREA_MID=220.0,
+        LAREA_LATE=510.0,
+        LEAF_PART_EARLY=0.32,
+        LEAF_PART_FLORAL=0.55,
+        LEAF_PART_LATE=0.28,
+        STEM_PART_EARLY=0.22,
+        STEM_PART_LATE=0.50,
+        SENPOR_LATE=0.30,
+    )
+    run_dssat.update_spe_file(str(spe_params))
+    lines = (tmp_path / "TMGRO048.SPE").read_text(encoding="utf-8").splitlines()
+
+    def first_numbers(line: str, count: int) -> list[float]:
+        return [float(m.group(0)) for m in re.finditer(r"[-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[Ee][-+]?\d+)?", line)][:count]
+
+    yvref_line = next(line for line in lines if "YVREF(1-6)" in line)
+    assert first_numbers(yvref_line, 6) == pytest.approx(
+        expand_leaf_area(18.0, 220.0, 510.0).y_values,
+        abs=0.5,
+    )
+
+    yleaf_line = next(line for line in lines if "YLEAF VALUES" in line)
+    assert first_numbers(yleaf_line, 10) == pytest.approx(
+        expand_leaf_partition(0.32, 0.55, 0.28).y_values,
+        abs=0.02,
+    )
+
+    ystem_line = next(line for line in lines if "YSTEM VALUES" in line)
+    assert first_numbers(ystem_line, 10) == pytest.approx(
+        expand_stem_partition(0.22, 0.50).y_values,
+        abs=0.02,
+    )
+
+    senpor_idx = next(i for i, line in enumerate(lines) if "SENPOR........." in line)
+    assert first_numbers(lines[senpor_idx + 1], 4) == pytest.approx(
+        expand_senpor(0.30).y_values,
+        abs=0.02,
+    )
+
+
+def test_xfint_historical_safety_threshold_is_advisory_not_a_runner_rejection(tmp_path, monkeypatch, capsys):
+    """T10-approved XFINT=0.08 must reach DSSAT after an auditable warning."""
+    genotype = ROOT / "data" / "templates" / "genotype"
+    (tmp_path / "TMGRO048.ECO.base").write_bytes((genotype / "TMGRO048.ECO.base").read_bytes())
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(run_dssat, "ECO_FILE", "TMGRO048.ECO")
+
+    eco_params = _parameter_csv(tmp_path / "eco_xfint_008.csv", XFINT=0.08)
+    run_dssat.update_eco_file(str(eco_params), target_ecotype="TM0001")
+
+    captured = capsys.readouterr()
+    assert "RUNNER_ADVISORY parameter=XFINT value=0.08" in captured.err
+    eco_line = next(
+        line for line in (tmp_path / "TMGRO048.ECO").read_text(encoding="utf-8").splitlines()
+        if line.startswith("TM0001")
+    )
+    assert eco_line.rstrip().endswith("0.08")
 
 
 def test_soil_and_initial_condition_injection_are_explicit(tmp_path, monkeypatch):

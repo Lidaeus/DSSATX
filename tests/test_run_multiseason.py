@@ -13,7 +13,24 @@ from pathlib import Path
 
 import pytest
 
-from src.calibration.run_multiseason import _merge_tagged_outputs, _write_selected_batch
+from src.calibration.run_multiseason import (
+    _classify_dssat_failure,
+    _merge_tagged_outputs,
+    _retry_sleep_seconds,
+    _runner_advisories,
+    _write_selected_batch,
+)
+
+
+def test_dssat_retry_policy_classifies_transient_and_deterministic_failures():
+    assert _classify_dssat_failure(1, "", "GetExitCodeProcess returned error status") == ("transient_process_or_lock", True)
+    assert _classify_dssat_failure(1, "", "ValueError: bad FileX") == ("deterministic_input_or_parse", False)
+
+
+def test_dssat_retry_backoff_is_exponential():
+    assert _retry_sleep_seconds(1, 1.0) == 1.0
+    assert _retry_sleep_seconds(2, 1.0) == 2.0
+    assert _retry_sleep_seconds(3, 1.0) == 4.0
 
 
 def _write_tmp_file(dir_path: Path, name: str, content: str) -> Path:
@@ -184,3 +201,10 @@ def test_selected_batch_follows_design_order_and_localizes_filex(tmp_path):
             if line and not line.startswith(("$", "!", "@"))]
     assert [int(row[1]) for row in data] == [7, 1, 3]
     assert all(row[0] == "E.TMX" for row in data)
+
+
+def test_runner_advisories_are_forwarded_without_dumping_other_stderr():
+    stderr = "normal diagnostic\nRUNNER_ADVISORY parameter=XFINT value=0.08 action=continue_to_dssat\n"
+    assert _runner_advisories(stderr) == [
+        "RUNNER_ADVISORY parameter=XFINT value=0.08 action=continue_to_dssat"
+    ]

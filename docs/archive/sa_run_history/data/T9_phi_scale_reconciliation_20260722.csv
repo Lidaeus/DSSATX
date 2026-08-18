@@ -1,0 +1,5 @@
+case,phi,definition,share_of_legacy_pct
+legacy reported minimum,21552.8,246 active observations; legacy transformed scales and weights,100.0
+legacy minus invalid HIAM,2260.649999999998,removes HIAM bookkeeping mismatch,10.488892394491657
+legacy minus invalid HIAM and duplicate HWAM,2115.156119999998,approximately comparable valid-target order of magnitude,9.813834490182241
+T8 realization 53,976.022,448 active observations; raw sigma plus family budgets,4.528516016480458

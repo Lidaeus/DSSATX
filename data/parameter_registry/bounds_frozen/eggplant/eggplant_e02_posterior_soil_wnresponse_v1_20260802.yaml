@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_posterior_soil_wnresponse_v1_20260802"
+crop: "eggplant"
+created_at: "2026-08-01T15:54:13Z"
+approved_at: "2026-08-01T15:54:13Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_posterior_soil_wnresponse_v1_20260802.csv"
+derived_from_sha256: "8b2a887f2ebd33334b6d60d48a8170f1458b0394550f4970e8a47d0f22c5a5b4"
+bounds_sha256: "8b2a887f2ebd33334b6d60d48a8170f1458b0394550f4970e8a47d0f22c5a5b4"
+parameter_count: 109
+automatic_repairs: 0
+notes: "Derived from e02_joint62_posterior_soil_no_pdap_chtd_nresponse_100x4_20260802 posterior; modest widening of boundary-concentrated water/N parameters; PDAP/CHTD/NRESP excluded from Phi."

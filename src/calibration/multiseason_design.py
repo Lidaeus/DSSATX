@@ -25,6 +25,10 @@ from src.common.input_manifest import (
     load_input_manifest,
 )
 from src.common.project import PROJECT_ROOT
+from src.calibration.seasonal_parameters import (
+    SeasonalParameterization,
+    SeasonalParameterizationError,
+)
 
 
 @dataclass(frozen=True)
@@ -37,6 +41,7 @@ class SeasonSpec:
     role: str  # "calibration" | "validation"
     treatments: tuple[int, ...]
     manifest: InputManifest
+    initial_soil_n_reference_filex: Path | None = None
 
     @property
     def bundle_absolute(self) -> Path:
@@ -58,6 +63,16 @@ class MultiSeasonDesign:
     observation_policy: str
     group_policy: str
     seasons: tuple[SeasonSpec, ...]
+    seasonal_parameterization: SeasonalParameterization | None = None
+    nitrogen_response_objective: dict[str, Any] | None = None
+    water_response_objective: dict[str, Any] | None = None
+    harvest_dry_objective: dict[str, Any] | None = None
+    process_state_objective: dict[str, Any] | None = None
+    # This exception is deliberately narrow: it enables a controlled
+    # one-season *diagnostic* calibration using the otherwise identical T10
+    # multi-season data contract.  It is not a relaxation for formal joint
+    # calibration, which still requires two calibration seasons.
+    diagnostic_single_season: bool = False
 
     # Derived helpers --------------------------------------------------------
     _calibration: tuple[SeasonSpec, ...] = field(init=False, repr=False)
@@ -116,14 +131,29 @@ class MultiSeasonDesign:
         if not group_policy:
             raise MultiSeasonDesignError("group_policy is required")
 
+        diagnostic_single_season = bool(raw.get("diagnostic_single_season", False))
         raw_seasons = raw.get("seasons")
-        if not isinstance(raw_seasons, list) or len(raw_seasons) < 2:
+        minimum_seasons = 1 if diagnostic_single_season else 2
+        if not isinstance(raw_seasons, list) or len(raw_seasons) < minimum_seasons:
+            if diagnostic_single_season:
+                raise MultiSeasonDesignError(
+                    "diagnostic single-season design must contain one calibration season"
+                )
             raise MultiSeasonDesignError("design must contain at least two seasons")
 
         calibration_count = sum(1 for s in raw_seasons if s.get("role") == "calibration")
-        if calibration_count < 2:
+        minimum_calibration = 1 if diagnostic_single_season else 2
+        if calibration_count < minimum_calibration:
+            if diagnostic_single_season:
+                raise MultiSeasonDesignError(
+                    "diagnostic single-season design requires one calibration season"
+                )
             raise MultiSeasonDesignError(
                 f"design requires at least two calibration seasons, found {calibration_count}"
+            )
+        if diagnostic_single_season and calibration_count != 1:
+            raise MultiSeasonDesignError(
+                "diagnostic_single_season requires exactly one calibration season"
             )
 
         seen_ids: set[str] = set()
@@ -183,8 +213,148 @@ class MultiSeasonDesign:
                     role=role,
                     treatments=treatments,
                     manifest=manifest,
+                    initial_soil_n_reference_filex=(
+                        _resolve_optional_path(raw_season.get("initial_soil_n_reference_filex"), path.parent)
+                    ),
                 )
             )
+
+        # Seasonal offsets are optional.  Keeping the contract in the design
+        # (rather than in an untracked runner flag) makes every projected autumn
+        # parameter reconstructable from the PEST ensemble.
+        try:
+            seasonal_parameterization = SeasonalParameterization.from_dict(
+                raw.get("seasonal_parameterization"), season_ids=seen_ids
+            )
+        except SeasonalParameterizationError as exc:
+            raise MultiSeasonDesignError(str(exc)) from exc
+
+        nitrogen_response_objective = raw.get("nitrogen_response_objective")
+        if nitrogen_response_objective is not None:
+            if not isinstance(nitrogen_response_objective, dict):
+                raise MultiSeasonDesignError(
+                    "nitrogen_response_objective must be an object"
+                )
+            if bool(nitrogen_response_objective.get("enabled", False)):
+                mapping_csv = str(
+                    nitrogen_response_objective.get("mapping_csv", "")
+                ).strip()
+                if not mapping_csv:
+                    raise MultiSeasonDesignError(
+                        "enabled nitrogen_response_objective requires mapping_csv"
+                    )
+                sigma_floor = float(
+                    nitrogen_response_objective.get("sigma_floor", 0.10)
+                )
+                if sigma_floor <= 0:
+                    raise MultiSeasonDesignError(
+                        "nitrogen_response_objective sigma_floor must be positive"
+                    )
+                weighting = str(
+                    nitrogen_response_objective.get(
+                        "weighting",
+                        nitrogen_response_objective.get("objective_scale", "static"),
+                    )
+                ).strip().lower()
+                if weighting not in {"static", "nse", "season_nse"}:
+                    raise MultiSeasonDesignError(
+                        "nitrogen_response_objective weighting must be static or nse"
+                    )
+                if weighting in {"nse", "season_nse"}:
+                    nse_lambda = nitrogen_response_objective.get(
+                        "nse_lambda", nitrogen_response_objective.get("lambda_per_season")
+                    )
+                    if nse_lambda is None or float(nse_lambda) <= 0:
+                        raise MultiSeasonDesignError(
+                            "NSE-weighted nitrogen_response_objective requires positive nse_lambda"
+                        )
+
+        water_response_objective = raw.get("water_response_objective")
+        if water_response_objective is not None:
+            if not isinstance(water_response_objective, dict):
+                raise MultiSeasonDesignError(
+                    "water_response_objective must be an object"
+                )
+            if bool(water_response_objective.get("enabled", False)):
+                mapping_csv = str(
+                    water_response_objective.get("mapping_csv", "")
+                ).strip()
+                if not mapping_csv:
+                    raise MultiSeasonDesignError(
+                        "enabled water_response_objective requires mapping_csv"
+                    )
+                sigma_floor = float(
+                    water_response_objective.get("sigma_floor", 0.10)
+                )
+                if sigma_floor <= 0:
+                    raise MultiSeasonDesignError(
+                        "water_response_objective sigma_floor must be positive"
+                    )
+                weighting = str(
+                    water_response_objective.get(
+                        "weighting",
+                        water_response_objective.get("objective_scale", "static"),
+                    )
+                ).strip().lower()
+                if weighting not in {"static", "nse", "season_nse"}:
+                    raise MultiSeasonDesignError(
+                        "water_response_objective weighting must be static or nse"
+                    )
+                if weighting in {"nse", "season_nse"}:
+                    nse_lambda = water_response_objective.get(
+                        "nse_lambda", water_response_objective.get("lambda_per_season")
+                    )
+                    if nse_lambda is None or float(nse_lambda) <= 0:
+                        raise MultiSeasonDesignError(
+                            "NSE-weighted water_response_objective requires positive nse_lambda"
+                        )
+
+        harvest_dry_objective = raw.get("harvest_dry_objective")
+        if harvest_dry_objective is not None:
+            if not isinstance(harvest_dry_objective, dict):
+                raise MultiSeasonDesignError(
+                    "harvest_dry_objective must be an object"
+                )
+            if bool(harvest_dry_objective.get("enabled", False)):
+                mode = str(harvest_dry_objective.get("mode", "")).strip().lower()
+                if mode != "increment_plus_terminal":
+                    raise MultiSeasonDesignError(
+                        "enabled harvest_dry_objective requires mode=increment_plus_terminal"
+                    )
+                increment_source = str(
+                    harvest_dry_objective.get(
+                        "increment_source", "cumulative_difference"
+                    )
+                ).strip().lower()
+                if increment_source not in {
+                    "cumulative_difference", "measured_hpodw"
+                }:
+                    raise MultiSeasonDesignError(
+                        "harvest_dry_objective increment_source must be "
+                        "cumulative_difference or measured_hpodw"
+                    )
+
+        process_state_objective = raw.get("process_state_objective")
+        if process_state_objective is not None:
+            if not isinstance(process_state_objective, dict):
+                raise MultiSeasonDesignError(
+                    "process_state_objective must be an object"
+                )
+            if bool(process_state_objective.get("enabled", False)):
+                mode = str(process_state_objective.get("mode", "")).strip().lower()
+                if mode != "signed_difference_plus_terminal":
+                    raise MultiSeasonDesignError(
+                        "enabled process_state_objective requires "
+                        "mode=signed_difference_plus_terminal"
+                    )
+                variables = process_state_objective.get("variables", [])
+                if not isinstance(variables, list) or {
+                    str(item).strip().upper() for item in variables
+                } != {"LAID", "LWAD", "SWAD"}:
+                    raise MultiSeasonDesignError(
+                        "process_state_objective variables must be exactly "
+                        "LAID, LWAD, SWAD"
+                    )
 
         # Cross-season validation ---------------------------------------------------
         # All seasons should reference the same DSSAT cultivar/ecotype template
@@ -201,11 +371,30 @@ class MultiSeasonDesign:
             observation_policy=str(observation_policy),
             group_policy=str(group_policy),
             seasons=tuple(seasons),
+            seasonal_parameterization=seasonal_parameterization,
+            nitrogen_response_objective=nitrogen_response_objective,
+            water_response_objective=water_response_objective,
+            harvest_dry_objective=harvest_dry_objective,
+            process_state_objective=process_state_objective,
+            diagnostic_single_season=diagnostic_single_season,
         )
 
 
 class MultiSeasonDesignError(Exception):
     """Raised when a multi-season design file fails semantic validation."""
+
+
+def _resolve_optional_path(value: Any, base_dir: Path) -> Path | None:
+    if value in (None, ""):
+        return None
+    path = Path(str(value)).expanduser()
+    if not path.is_absolute():
+        path = (base_dir / path).resolve()
+    else:
+        path = path.resolve()
+    if not path.is_file():
+        raise MultiSeasonDesignError(f"initial_soil_n_reference_filex does not exist: {path}")
+    return path
 
 
 def _require_keys(obj: dict[str, Any], label: str, *keys: str) -> None:

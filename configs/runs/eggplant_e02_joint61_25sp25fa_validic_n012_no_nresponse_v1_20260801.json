@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "design_id": "eggplant_e02_joint71_25sp25fa_validic_n012_no_nresponse_v1_20260801",
+  "cultivar_identity": "same_eggplant_cultivar",
+  "shared_parameter_scope": "64 shared crop/process parameters plus seven documented 25FA effective offsets; FL-VS fixed at 100",
+  "observation_policy": "configs/runs/e02_plantn_chpdtlog_noadap_no_nresponse_v1.csv",
+  "group_policy": "configs/runs/t10_plantn_harvestdry250_no_nresponse_v1.csv",
+  "seasonal_parameterization": {
+    "reference_season_id": "25SP",
+    "offsets": [
+      {"offset_name": "DLFMAX_AUT", "parameter_name": "LFMAX", "transform": "log_multiplier", "target_season_ids": ["25FA"], "rationale": "documented autumn effective LFMAX adjustment"},
+      {"offset_name": "DSLAVR_AUT", "parameter_name": "SLAVR", "transform": "log_multiplier", "target_season_ids": ["25FA"], "rationale": "documented autumn effective SLAVR adjustment"},
+      {"offset_name": "DXFRT_AUT", "parameter_name": "XFRT", "transform": "logit_additive", "target_season_ids": ["25FA"], "rationale": "documented autumn effective fruit partition adjustment"},
+      {"offset_name": "DSFDUR_AUT", "parameter_name": "SFDUR", "transform": "log_multiplier", "target_season_ids": ["25FA"], "rationale": "documented autumn effective fruit duration adjustment"},
+      {"offset_name": "DTB1_AUT", "parameter_name": "TB1", "transform": "additive", "target_season_ids": ["25FA"], "rationale": "documented autumn vegetative base-temperature adjustment"},
+      {"offset_name": "DTB2_AUT", "parameter_name": "TB2", "transform": "additive", "target_season_ids": ["25FA"], "rationale": "documented autumn early-reproductive base-temperature adjustment"},
+      {"offset_name": "DTB3_AUT", "parameter_name": "TB3", "transform": "additive", "target_season_ids": ["25FA"], "rationale": "documented autumn late-reproductive base-temperature adjustment"}
+    ]
+  },
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_layermean_ic_valid_n012_v1_20260801",
+      "bundle_manifest_sha256": "767904430a07626bcdf94ef1aefd5ffaff6b9ac50fdddaf7fd600b1353422977",
+      "role": "calibration",
+      "treatments": [3, 4, 5, 9, 11, 12, 13, 14]
+    },
+    {
+      "season_id": "25FA",
+      "experiment_code": "XXQL2502",
+      "bundle_path": "data/user/experiments/xxql2502_layermean_ic_valid_n012_v1_20260801",
+      "bundle_manifest_sha256": "1152cc534029ee9980e1b68b23a895e0a180a75604e3067a766a4a39de1ea1f2",
+      "role": "calibration",
+      "treatments": [4, 5, 6, 7, 8, 9, 10, 11, 12]
+    }
+  ],
+  "t10_scheme": {
+    "purpose": "Joint 71-parameter calibration using valid IC layer means and N0-N2 observations only",
+    "harvest_contract": "ln(y+1) cumulative dry CHPDT plus ln(y+1) incremental dry HPODW",
+    "active_crop_targets": ["PDAP", "LAIX", "LAID", "LWAD", "SWAD", "SNAM", "LNAM", "CHPDT", "HPODW"],
+    "active_process_targets": ["SOIL_WATER"],
+    "shared_active_parameters": 64,
+    "seasonal_offset_parameters": 7,
+    "total_active_parameters": 71,
+    "fixed_project_invariants": {"FL-VS": 100.0, "ADAP": "excluded from Phi and parameter update", "MDAP": "diagnostic-only"},
+    "management_authority": "ADAP=34 d for 25SP; PAGE=25 d and SPRL=-99 retained from authoritative bundles",
+    "treatment_policy": "All available treatments with N0, N1 or N2 are calibration data; N3 treatments are excluded",
+    "nitrogen_response_objective": "disabled; no derived NRESP observations or water-nitrogen response budget",
+    "initial_condition_policy": "25SP mean IC2-IC13 (IC15 removed; IC14 receives the valid-subset mean); 25FA mean IC1-IC12",
+    "virtual_terminal_harvest": true,
+    "bounded_nearest_read": "d+/-1 day window",
+    "initial_ensemble": "Sobol sequence",
+    "formal_scale": "200 realizations x 5 IES iterations"
+  }
+}

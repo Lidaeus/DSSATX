@@ -14,6 +14,7 @@ the raw-scale evaluation.
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -50,10 +51,6 @@ def _read_comparison(path: str | Path) -> pd.DataFrame:
 def _normalise_variable(name: Any) -> str:
     """Map a comparison ``variable`` value onto its canonical root for grouping."""
     s = str(name).strip().upper()
-    # strip trailing M/S (PEST measured/simulated suffix) and season/time tags
-    for suffix in ("M", "S"):
-        if s.endswith(suffix) and len(s) > 4:
-            s = s[:-1]
     aliases = {
         "DRY_CUM": "CHPDT",
         "DRY_CUMM": "CHPDT",
@@ -62,7 +59,16 @@ def _normalise_variable(name: Any) -> str:
         "DRY_INC": "DRY_INC",
         "FRESH_INC": "FRESH_INC",
     }
-    return aliases.get(s, s)
+    # Check complete aliases first: the final M in DRY_CUM/FRESH_CUM is part
+    # of the name, not a PEST measured/simulated suffix.
+    if s in aliases:
+        return aliases[s]
+    # Strip trailing M/S only for non-alias PEST names, then re-check aliases.
+    for suffix in ("M", "S"):
+        if s.endswith(suffix) and len(s) > 4:
+            stripped = s[:-1]
+            return aliases.get(stripped, stripped)
+    return s
 
 
 def _enforce_profile(df: pd.DataFrame) -> pd.DataFrame:
@@ -191,8 +197,11 @@ def evaluate_experiment(
         try:
             traj = build_residual_trajectory(df, runs_keys)
             traj.to_csv(out / "residual_trajectory.csv", index=False)
-        except Exception:
-            pass  # trajectory is auxiliary, not a hard gate
+        except Exception as exc:
+            print(f"[warning] residual trajectory skipped: {exc}", file=sys.stderr)
+            (out / "residual_trajectory.SKIPPED").write_text(
+                f"{type(exc).__name__}: {exc}\n", encoding="utf-8"
+            )
 
     artefacts = {
         "comparison_raw": comparison_path,

@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_s1s2_morris_top95_plus_a3_0805_v2_20260806"
+crop: "eggplant"
+created_at: "2026-08-06T08:12:25Z"
+approved_at: "2026-08-06T08:12:25Z"
+approved_by: "user-requested"
+review_status: "approved"
+derived_from: "eggplant_e02_s1s2_morris_top95_plus_a3_0805_v2_20260806.csv"
+derived_from_sha256: "08588060737a75b75b7303579438604965849523ba96183b5136471c7ae08216"
+bounds_sha256: "08588060737a75b75b7303579438604965849523ba96183b5136471c7ae08216"
+parameter_count: 36
+automatic_repairs: 0
+notes: "Morris 20260804 top-95 active genetic parameters plus A3 0805 SPE NREXP/NRMIN/NUPK50/NUPCMN; FL-VS fixed at 120; E02 S1/S2 pre-calibration"

@@ -1,0 +1,110 @@
+﻿name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,review_note
+LFMAX,1.27,1.2070505,1.36,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+SIZLF,297.1,269.647655,334.22739499999994,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+SLAVR,293.0,276.107165,320.0,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+CSDL,12.33,12.33,12.33,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+PPSEN,0.0,0.0,0.0,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+THRSH,8.5,8.5,8.5,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+WTPSD,0.004,0.004,0.004,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+XFRT,0.9447397399999999,0.8574842599999999,0.9447397399999999,active,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+EM-FL,23.6586255,23.6586255,31.591459499999996,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+FL-LF,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+FL-SD,8.1,7.1585156,11.8364204,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+FL-SH,2.0,1.0,2.9994538999999993,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+PODUR,23.397583999999974,12.0,23.397583999999974,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+SD-PM,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+SDPDV,111.4,80.0,175.94623499999997,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+SFDUR,11.7,10.2081735,18.839851499999995,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+RHGHT,0.5773135,0.35,0.5773135,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+RWDTH,1.6,1.2178548999999999,2.0,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+TRIFL,0.64,0.464667525,0.680301225,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+EM-V1,22.0,17.469161500000006,30.62372349999999,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+FL-VS,100.0,100.0,100.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,E02 joint54 v2: project invariant; FL-VS is fixed at 100 and is not a calibration parameter
+JU-R0,3.8,2.0,6.854325649999999,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+LNGSH,39.0,30.793008,44.574071999999994,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+PL-EM,11.4,10.630973000000001,12.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+PM06,0.5,0.40536729000000005,0.64435941,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+PM09,0.97,0.9157932249999999,1.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+V1-JU,0.0,0.0,0.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+XFINT,0.3,0.183718165,0.36914318499999993,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+XFPHT,38.8,35.512795499999996,43.91140949999999,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+XMAGE,15.054633,15.054633,19.251776999999997,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+KCAN,0.66,0.5585579599999999,0.7062988400000001,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+KC_SLOPE,0.1,0.05936808150000001,0.14530888349999993,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+PARMAX,41.0,32.523179,50.659510999999995,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+PHTMAX,61.0,45.734,73.49318,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+ATOP,0.8,0.621579045,0.898463505,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+FRCNOD,0.05,0.05,0.05,fixed,SPE_Nodule,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+FRLFF,0.37,0.30585561,0.4516998899999999,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+FRSTMF,0.53,0.43320054999999996,0.6544325499999999,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+PORPT,0.21,0.16730325000000001,0.28588785,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+RTNO3,0.02,0.015212146999999999,0.032908343,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+RTNH4,0.012,0.002,0.020613286999999994,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+RTEXF,0.1,0.06596557250000001,0.1824964025,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+WTFSD,0.55,0.43985686500000004,0.6376160849999999,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+EVMODC,0.0,0.0,0.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+FINREF,220.0,188.6087,263.1875,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+SIZREF,300.0,262.42739000000006,352.23431,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+SLAREF,300.0,254.77733999999998,316.74606,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+VSSINK,4.1,0.8387380500000001,5.6069314499999985,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+TB1,9.2,6.575366400000001,10.785237599999999,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+TB2,8.6,6.0,9.613935500000002,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+TB3,11.0,8.511184400000001,13.4815796,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+TM1,40.0,35.74427,43.438129999999994,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+TM2,40.0,36.5,42.67353599999999,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+TM3,39.8,36.5000635,41.239181499999994,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+TO11,25.5,23.3677005,27.4,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+TO12,25.0,20.6219625,25.2661125,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+TO13,26.0,23.4724115,27.4,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+TO21,28.8,27.5,30.397047999999998,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+TO22,29.6,27.5,31.0197965,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+TO23,29.1,27.5,31.162994499999996,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+NSTFAC,0.85,0.74547957,0.9429531299999999,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+NMOBMX,0.09,0.02,0.11805823499999998,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+NVSMOB,0.38,0.27799126,0.5310603399999999,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+NRCVR,0.15,0.062000201000000005,0.262223909,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+DLFMAX_AUT,0.0,-0.1625189295,0.1397619424,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,Documented autumn LFMAX log multiplier: 0.85-1.15
+DSLAVR_AUT,0.0,-0.1625189295,0.1397619424,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,Documented autumn SLAVR log multiplier: 0.85-1.15
+DXFRT_AUT,0.0,-0.55,0.35,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,E02 v7 touch relaxation: lower -0.35 to -0.55 after 88.0% lower-edge accumulation
+DSFDUR_AUT,0.0,-0.1625189295,0.1397619424,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,Documented autumn SFDUR log multiplier: 0.85-1.15
+DTB1_AUT,0.0,-2.0,2.0,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,"Documented autumn TB1 additive offset, degrees C"
+DTB2_AUT,0.0,-2.0,2.0,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,"Documented autumn TB2 additive offset, degrees C"
+DTB3_AUT,0.0,-2.0,1.0,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,E02 v7 paired constraint: upper reduced to 1 C so widened shared TB3 remains within physical effective upper 15 C
+SOIL_SLPF,0.93,0.9215802,0.954972,active,SOIL_Fertility,SOIL,SOIL.SOL,TM0008,TM0001,both,Posterior q05-q95 with 10% padding; minimum 15% of prior width.
+LNREF,4.5,3.0,6.0,active,SPE_Other,SPE,TMGRO048.SPE.base,TM0008,TM0001,both,Requested water/N-linked SPE term; physical hard bounds retained.
+CMOBMX,0.022,0.01,0.05,active,SPE_Other,SPE,TMGRO048.SPE.base,TM0008,TM0001,both,Requested water/N-linked SPE term; physical hard bounds retained.
+RWUMX,0.04,0.02,0.06,active,SPE_Other,SPE,TMGRO048.SPE.base,TM0008,TM0001,both,Requested water/N-linked SPE term; physical hard bounds retained.
+DSWBAR,15.0,10.0,30.0,active,SPE_Other,SPE,TMGRO048.SPE.base,TM0008,TM0001,both,Requested water/N-linked SPE term; physical hard bounds retained.
+XFRMAX,0.0,0.0,0.5,active,SPE_Other,SPE,TMGRO048.SPE.base,TM0008,TM0001,both,Requested water/N-linked SPE term; physical hard bounds retained.
+SOIL_SBDM_01,1.36,1.3328,1.3872000000000002,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SLLL_01,0.148,0.14059999999999997,0.1554,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SDUL_01,0.3,0.285,0.315,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SSAT_01,0.49,0.46549999999999997,0.5145,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SBDM_02,1.55,1.519,1.5810000000000002,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SLLL_02,0.153,0.14534999999999998,0.16065000000000002,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SDUL_02,0.31,0.2945,0.3255,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SSAT_02,0.43,0.4085,0.4515,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SBDM_03,1.56,1.5288,1.5912000000000002,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SLLL_03,0.165,0.15675,0.17325000000000002,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SDUL_03,0.33,0.3135,0.34650000000000003,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SSAT_03,0.44,0.418,0.462,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SBDM_04,1.51,1.4798,1.5402,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SLLL_04,0.157,0.14915,0.16485,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SDUL_04,0.32,0.304,0.336,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SSAT_04,0.46,0.437,0.48300000000000004,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SBDM_05,1.47,1.4405999999999999,1.4994,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SLLL_05,0.165,0.15675,0.17325000000000002,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SDUL_05,0.33,0.3135,0.34650000000000003,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SSAT_05,0.5,0.475,0.525,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SBDM_06,1.59,1.5582,1.6218000000000001,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SLLL_06,0.182,0.1729,0.1911,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SDUL_06,0.291,0.27645,0.30555,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SSAT_06,0.334,0.3173,0.3507,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SBDM_07,1.61,1.5778,1.6422,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SLLL_07,0.162,0.1539,0.1701,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SDUL_07,0.272,0.2584,0.2856,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SSAT_07,0.32,0.304,0.336,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SBDM_08,1.58,1.5484,1.6116000000000001,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SLLL_08,0.154,0.14629999999999999,0.1617,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SDUL_08,0.263,0.24985,0.27615,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.
+SOIL_SSAT_08,0.319,0.30305,0.33495,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,IBTM910017 layer-specific uncertainty group; relation SLLL<SDUL<SSAT retained.

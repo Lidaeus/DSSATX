@@ -24,6 +24,15 @@ MANAGEMENT_EVENT_HEADINGS = (
     "*HARVEST DETAILS",
 )
 
+# The 2025 spring trial has a corrected management authority in
+# ``data/user/ref/XXQL2501.TMX``.  Keep this list deliberately narrow: the
+# authority governs fertilizer and harvest schedules, while each derived
+# bundle remains free to carry its own treatment-specific IC/soil values.
+MANAGEMENT_ALIGNMENT_HEADINGS = (
+    "*FERTILIZERS (INORGANIC)",
+    "*HARVEST DETAILS",
+)
+
 
 @dataclass(frozen=True)
 class InputFinding:
@@ -58,6 +67,101 @@ def _section_lines(path: Path, heading: str) -> list[str]:
         len(lines),
     )
     return lines[start:end]
+
+
+def filex_section_text(path: str | Path, heading: str) -> str:
+    """Return a normalized FileX section for byte-independent comparison."""
+
+    return "\n".join(line.rstrip() for line in _section_lines(Path(path), heading)).strip()
+
+
+def filex_management_signature(path: str | Path) -> dict[str, str]:
+    """Return the authoritative fertilizer/harvest section signatures."""
+
+    filex = Path(path)
+    return {
+        heading: filex_section_text(filex, heading)
+        for heading in MANAGEMENT_ALIGNMENT_HEADINGS
+    }
+
+
+def filex_harvest_dates(path: str | Path) -> list[int]:
+    """Parse all HDATE values in ``*HARVEST DETAILS`` as YYDDD codes."""
+
+    dates: list[int] = []
+    for raw in _section_lines(Path(path), "*HARVEST DETAILS"):
+        stripped = raw.strip()
+        if not stripped or stripped.startswith(("*", "@", "!")):
+            continue
+        fields = stripped.split()
+        if len(fields) < 2:
+            continue
+        try:
+            dates.append(int(float(fields[1])))
+        except ValueError:
+            continue
+    return dates
+
+
+def management_alignment_findings(
+    candidate: str | Path,
+    reference: str | Path,
+) -> list[InputFinding]:
+    """Check the candidate fertilizer/harvest schedules against a reference."""
+
+    candidate_sig = filex_management_signature(candidate)
+    reference_sig = filex_management_signature(reference)
+    findings: list[InputFinding] = []
+    for heading in MANAGEMENT_ALIGNMENT_HEADINGS:
+        if candidate_sig.get(heading) != reference_sig.get(heading):
+            findings.append(
+                InputFinding(
+                    "FILEX_MANAGEMENT_REFERENCE_MISMATCH",
+                    "error",
+                    f"{Path(candidate).name} {heading} differs from "
+                    f"{Path(reference).name}",
+                )
+            )
+    return findings
+
+
+def replace_filex_management_sections(
+    candidate: str | Path,
+    reference: str | Path,
+) -> None:
+    """Copy fertilizer and harvest sections from ``reference`` into ``candidate``.
+
+    Only the two management sections governed by the corrected XXQL2501
+    authority are replaced; treatment, initial-condition and other sections
+    remain byte-for-byte unchanged apart from normalizing line endings.
+    """
+
+    candidate_path = Path(candidate)
+    reference_path = Path(reference)
+    candidate_lines = candidate_path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    reference_lines = reference_path.read_text(encoding="utf-8", errors="ignore").splitlines()
+
+    def section_bounds(lines: list[str], heading: str) -> tuple[int, int] | None:
+        start = next((i for i, line in enumerate(lines) if line.strip().upper().startswith(heading)), None)
+        if start is None:
+            return None
+        end = next(
+            (i for i in range(start + 1, len(lines))
+             if lines[i].startswith("*") and not lines[i].strip().upper().startswith(heading)),
+            len(lines),
+        )
+        return start, end
+
+    replacements: list[tuple[int, int, list[str]]] = []
+    for heading in MANAGEMENT_ALIGNMENT_HEADINGS:
+        cb = section_bounds(candidate_lines, heading)
+        rb = section_bounds(reference_lines, heading)
+        if cb is None or rb is None:
+            raise ValueError(f"Missing management section {heading!r} in candidate or reference")
+        replacements.append((cb[0], cb[1], reference_lines[rb[0]:rb[1]]))
+    for start, end, replacement in sorted(replacements, reverse=True):
+        candidate_lines[start:end] = replacement
+    candidate_path.write_text("\n".join(candidate_lines) + "\n", encoding="utf-8", newline="\n")
 
 
 def parse_filex(path: str | Path) -> dict[str, object]:
@@ -482,6 +586,8 @@ def findings_as_dicts(findings: list[InputFinding]) -> list[dict[str, str]]:
 
 
 __all__ = [
-    "InputFinding", "batch_entries", "findings_as_dicts", "management_event_order_findings", "parse_filex",
+    "InputFinding", "batch_entries", "filex_harvest_dates", "filex_management_signature",
+    "findings_as_dicts", "management_alignment_findings", "management_event_order_findings",
+    "parse_filex", "replace_filex_management_sections",
     "parse_soil_profile", "validate_input_bundle",
 ]

@@ -1,0 +1,19 @@
+{
+  "set_id": "highdim61_joint_m1_v3_20260729",
+  "parameters": [
+    "ATOP", "DLFMAX_AUT", "DSFDUR_AUT", "DSLAVR_AUT", "DTB1_AUT",
+    "DTB2_AUT", "DTB3_AUT", "DXFRT_AUT", "EM-FL", "EM-V1", "FINREF",
+    "FL-SD", "FL-SH", "FRLFF", "FRSTMF", "JU-R0", "KCAN", "KC_SLOPE",
+    "LFMAX", "LNGSH", "NMOBMX", "NRCVR", "NSTFAC", "NVSMOB", "PARMAX",
+    "PHTMAX", "PL-EM", "PM06", "PM09", "PODUR", "PORPT", "RHGHT",
+    "RTEXF", "RTNH4", "RTNO3", "RWDTH", "SDPDV", "SFDUR", "SIZLF",
+    "SIZREF", "SLAREF", "SLAVR", "TB1", "TB2", "TB3", "TM1", "TM2",
+    "TM3", "TO11", "TO12", "TO13", "TO21", "TO22", "TO23", "TRIFL",
+    "VSSINK", "WTFSD", "XFINT", "XFPHT", "XFRT", "XMAGE"
+  ],
+  "declared_count": 61,
+  "source_file": "data/parameter_registry/bounds_frozen/eggplant/eggplant_e02_joint61_m1_offsets_v3_20260729.csv",
+  "source_sha256": "28bed0d54cf0fb4a86c9b5d1c47b957e5dc1ea0a6f549587a1c401f3d611a837",
+  "applicable_observations": "Same E02 joint dry-harvest contract: phenology, canopy, biomass, plant N when present, raw CHPDT, ln(y+1) HPODW, and soil water; MDAP and fresh harvest diagnostic-only.",
+  "approval_note": "54 shared parameters plus seven autumn effective offsets already defined in the methods document. Offsets apply to 25FA only and are not a second genetic parameter set."
+}

@@ -1,0 +1,17 @@
+﻿kind,source,reason,n_curve,gwad_min_delta,gwad_final,chpdt_final,gwad_to_chpdt_ratio,harvest_rows_adjusted,harvest_day_alignment,season_id,TN,water,nitrogen
+cum_dry,none,GWAD_unavailable;FreshWt_unavailable,0,,,,,0,not_applicable,25SP,2,W3,N3
+cum_dry,freshwt_reconstruction,GWAD_nonmonotone;GWAD_scale_incompatible_with_CHPDT,112,-53.0,14.0,3985.5,0.0035127336595157446,11,next_day_postharvest_onplant,25SP,3,W3,N2
+cum_dry,freshwt_reconstruction,GWAD_nonmonotone;GWAD_scale_incompatible_with_CHPDT,112,-55.0,15.0,4026.7,0.003725134725705913,11,next_day_postharvest_onplant,25SP,4,W3,N1
+cum_dry,freshwt_reconstruction,GWAD_nonmonotone;GWAD_scale_incompatible_with_CHPDT,112,-19.0,5.0,1596.3,0.0031322433126605275,11,next_day_postharvest_onplant,25SP,5,W3,N0
+cum_dry,none,GWAD_unavailable;FreshWt_unavailable,0,,,,,0,not_applicable,25SP,10,W1,N3
+cum_dry,freshwt_reconstruction,GWAD_nonmonotone;GWAD_scale_incompatible_with_CHPDT,112,-49.0,7.0,3836.5,0.0018245796950345367,11,next_day_postharvest_onplant,25SP,11,W1,N2
+cum_dry,freshwt_reconstruction,GWAD_nonmonotone;GWAD_scale_incompatible_with_CHPDT,112,-56.0,1.0,3597.7,0.0002779553603691247,11,next_day_postharvest_onplant,25SP,12,W1,N1
+cum_dry,freshwt_reconstruction,GWAD_nonmonotone;GWAD_scale_incompatible_with_CHPDT,112,-14.0,2.0,1391.1,0.0014377111638271872,11,next_day_postharvest_onplant,25SP,13,W1,N0
+cum_fresh,none,no_valid_curve;FreshWt_unavailable,0,,,,,0,not_applicable,25SP,2,W3,N3
+cum_fresh,freshwt_reconstruction,GWAF_unavailable_in_PlantGro,112,,,,,11,next_day_postharvest_onplant,25SP,3,W3,N2
+cum_fresh,freshwt_reconstruction,GWAF_unavailable_in_PlantGro,112,,,,,11,next_day_postharvest_onplant,25SP,4,W3,N1
+cum_fresh,freshwt_reconstruction,GWAF_unavailable_in_PlantGro,112,,,,,11,next_day_postharvest_onplant,25SP,5,W3,N0
+cum_fresh,none,no_valid_curve;FreshWt_unavailable,0,,,,,0,not_applicable,25SP,10,W1,N3
+cum_fresh,freshwt_reconstruction,GWAF_unavailable_in_PlantGro,112,,,,,11,next_day_postharvest_onplant,25SP,11,W1,N2
+cum_fresh,freshwt_reconstruction,GWAF_unavailable_in_PlantGro,112,,,,,11,next_day_postharvest_onplant,25SP,12,W1,N1
+cum_fresh,freshwt_reconstruction,GWAF_unavailable_in_PlantGro,112,,,,,11,next_day_postharvest_onplant,25SP,13,W1,N0

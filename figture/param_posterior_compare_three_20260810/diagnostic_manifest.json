@@ -1,0 +1,23 @@
+{
+  "artifact_type": "posterior_comparison_three_runs_20260810",
+  "runs": {
+    "v2": "e02_v2_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260808",
+    "official": "e02_official_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260809",
+    "a3": "e02_a3_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260810"
+  },
+  "n_realizations": 200,
+  "shared_params": 341,
+  "groups": {
+    "genetic": 73,
+    "soil_physical": 48,
+    "ic": 220
+  },
+  "figures": [
+    "caterpillar_genetic.png",
+    "caterpillar_soil_physical.png",
+    "ic_layer_boxplot_three.png",
+    "scatter_medians_genetic_pairs.png",
+    "scatter_medians_soil_pairs.png",
+    "spread_histogram.png"
+  ]
+}

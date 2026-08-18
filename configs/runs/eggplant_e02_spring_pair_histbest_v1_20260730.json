@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "design_id": "eggplant_e02_spring_pair_histbest_v1_20260730",
+  "cultivar_identity": "same_eggplant_cultivar",
+  "shared_parameter_scope": "55 shared crop/process parameters inherited from historical v6 PlantN+SLPF calibration; no autumn offsets",
+  "observation_policy": "configs/runs/e02_n_response_snam_lnam_chpdtlog_noadap_v3.csv",
+  "group_policy": "configs/runs/t10_water_n_response_group_policy_harvestdry250_v1.csv",
+  "nitrogen_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_spring_pair_water_n_mapping_20260730.csv",
+    "source_variable": "CHPDT",
+    "contrast": "ln1p_Nk_minus_ln1p_N0",
+    "response_target": "observed_shape",
+    "levels": ["N3"],
+    "sigma_floor": 0.1,
+    "budget_rule": "0.75 total per season; count-corrected across the four selected corner treatments"
+  },
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_actual_trial_calibration_v8_adap34_plantn_slpf_moisturefix_20260729",
+      "bundle_manifest_sha256": "f0c59a5e48127b62d77da13f1e5db154ac3b13f03b496b3586ee7514192e39fe",
+      "role": "calibration",
+      "treatments": [13, 10, 5, 2]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729",
+      "bundle_manifest_sha256": "365e0afc8e33be2ef6413a5420ec905211f7deb276f852f97723f4ce3dd1d24a",
+      "role": "calibration",
+      "treatments": [12, 3, 9, 1]
+    }
+  ],
+  "t10_scheme": {
+    "purpose": "Spring-pair calibration using only the four water x nitrogen corner treatments per season",
+    "harvest_budget_total": 2.5,
+    "absolute_harvest_budget": 1.75,
+    "nitrogen_response_budget": 0.75,
+    "active_parameters": 55,
+    "ADAP": "diagnostic_only",
+    "MDAP": "diagnostic_only",
+    "seasonal_offsets": "none"
+  }
+}

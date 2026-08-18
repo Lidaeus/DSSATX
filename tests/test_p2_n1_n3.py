@@ -2,6 +2,7 @@ import hashlib
 import json
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pytest
 import pyemu
@@ -19,7 +20,7 @@ from src.calibration.finalize_calibration import (
 )
 from src.calibration.observation_policy import apply_observation_policy
 from src.calibration.prior_coverage import summarize_prior_coverage
-from src.calibration.stage_representative import write_stage_representative
+from src.calibration.stage_representative import resolve_final_iteration, write_stage_representative
 from src.calibration.engineering_gate import engineering_status, profile_for_run
 from src.common.quality import (
     read_flat_run_manifest_field,
@@ -28,6 +29,7 @@ from src.common.quality import (
 from src.reporting.quality_gate import assess_ies_run
 from tools.package_sa_evidence import package_sa_evidence
 from src.calibration.build_pest import (
+    _build_ins_and_obs,
     _finalize_ies_contract,
     _fixed_from_provenance,
     _resolve_upstream_run_dir,
@@ -110,6 +112,23 @@ def test_continuous_harvest_stages_do_not_use_season_end_hwam_or_duplicate_pwam(
     assert all(released[name]["status"] == "fixed" for name in ("XFRT", "XFINT"))
 
 
+def test_hwam_cannot_be_reintroduced_as_a_calibration_target():
+    frame = pd.DataFrame({
+        "@RUN": [1],
+        "TN": [2],
+        "HWAMM": [4000.0],
+        "HWAMS": [3500.0],
+    })
+    with pytest.raises(ValueError, match="HWAM is diagnostic-only"):
+        _build_ins_and_obs(
+            frame,
+            obs_bases={"HWAM"},
+            critical_obs=set(),
+            model_out_path="PestJoint.OUT",
+            group_sigmas={"HWAMM": 50.0},
+        )
+
+
 def test_observation_noise_contract_is_explicit_and_reproducible(tmp_path):
     pst = pyemu.Pst.from_par_obs_names(["P"], ["OBS_A", "OBS_B"])
     obs_names = list(pst.observation_data.index)
@@ -121,7 +140,8 @@ def test_observation_noise_contract_is_explicit_and_reproducible(tmp_path):
     pst.write(str(pst_path))
     audit = pd.DataFrame({
         "obsnme": ["OBS_A", "OBS_B"],
-        "raw_sigma": [2.0, 4.0],
+        "raw_sigma": [200.0, 400.0],
+        "sigma": [2.0, 4.0],
     })
     audit_path = tmp_path / "case.weights.csv"
     audit.to_csv(audit_path, index=False)
@@ -136,6 +156,16 @@ def test_observation_noise_contract_is_explicit_and_reproducible(tmp_path):
     pd.testing.assert_frame_equal(values_first, values_second)
     assert list(values_first.columns) == ["real_name", "obs_a", "obs_b"]
     assert len(values_first) == 4
+    # The ensemble must use uncertainty on the same scale as PST obsval, not
+    # the raw-scale uncertainty retained only for provenance.
+    expected = np.random.default_rng(123).normal(
+        loc=np.array([[10.0, 20.0]]),
+        scale=np.array([[2.0, 4.0]]),
+        size=(4, 2),
+    )
+    np.testing.assert_allclose(
+        values_first[["obs_a", "obs_b"]].to_numpy(), expected, rtol=0, atol=1e-10
+    )
 
 
 def test_formal_staged_contract_disables_relative_phi_screening(tmp_path):
@@ -145,7 +175,7 @@ def test_formal_staged_contract_disables_relative_phi_screening(tmp_path):
     pst.observation_data.loc[obs_name, "weight"] = 0.5
     pst_path = tmp_path / "case.pst"
     pst.write(str(pst_path))
-    pd.DataFrame({"obsnme": ["OBS_A"], "raw_sigma": [2.0]}).to_csv(
+    pd.DataFrame({"obsnme": ["OBS_A"], "raw_sigma": [200.0], "sigma": [2.0]}).to_csv(
         tmp_path / "case.weights.csv", index=False
     )
     payload = _finalize_ies_contract(
@@ -410,6 +440,21 @@ def test_stage_representative_is_median_and_reproducibly_recorded(tmp_path):
     meta = json.loads((tmp_path / "calibration_finalize" / "stage_representative_params.json").read_text())
     assert meta["rule"] == "median_of_final_parameter_ensemble"
     assert result["sha256"] == meta["output_sha256"]
+
+
+def test_final_iteration_ignores_stale_higher_ensemble_beyond_phi(tmp_path):
+    pd.DataFrame({"real_name": ["0"], "p": [3.0]}).to_csv(
+        tmp_path / "case.3.par.csv", index=False
+    )
+    pd.DataFrame({"real_name": ["0"], "p": [999.0]}).to_csv(
+        tmp_path / "case.5.par.csv", index=False
+    )
+    pd.DataFrame({"iteration": [0, 1, 2, 3], "mean": [4.0, 3.0, 2.0, 1.0]}).to_csv(
+        tmp_path / "case.phi.actual.csv", index=False
+    )
+    iteration, source = resolve_final_iteration(tmp_path, "case")
+    assert iteration == 3
+    assert source.name == "case.3.par.csv"
 
 
 def test_finalize_manifest_representative_fields_are_upserted(tmp_path):

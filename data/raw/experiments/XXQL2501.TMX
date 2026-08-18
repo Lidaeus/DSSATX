@@ -243,25 +243,24 @@ Quncy, FL
 
 *FERTILIZERS (INORGANIC)
 @F FDATE  FMCD  FACD  FDEP  FAMN  FAMP  FAMK  FAMC  FAMO  FOCD FERNAME
- 1 25069 FE005 AP002    25   108     0     0     0     0     0 N3
  1 25069 FE018 AP002    25     0     0   280     0     0     0 N3
  1 25069 FE013 AP002    25     0   150     0   120     0     0 N3
- 1 25121 FE005 AP005    20    25     0     0     0     0     0 N3
- 1 25126 FE005 AP005    20    25     0     0     0     0     0 N3
- 1 25131 FE005 AP005    20    25     0     0     0     0     0 N3
- 1 25136 FE005 AP005    20    25     0     0     0     0     0 N3
- 1 25141 FE005 AP005    20    25     0     0     0     0     0 N3
- 1 25148 FE005 AP005    20    25     0     0     0     0     0 N3
+ 1 25069 FE005 AP002    25   108     0     0     0     0     0 N3
+ 1 25121 FE005 AP005    20    24     0     0     0     0     0 N3
+ 1 25126 FE005 AP005    20    24     0     0     0     0     0 N3
+ 1 25131 FE005 AP005    20    24     0     0     0     0     0 N3
+ 1 25136 FE005 AP005    20    24     0     0     0     0     0 N3
+ 1 25141 FE005 AP005    20    24     0     0     0     0     0 N3
+ 1 25148 FE005 AP005    20    24     0     0     0     0     0 N3
  1 25154 FE005 AP005    20     8     0     0     0     0     0 N3
  1 25158 FE005 AP005    20     8     0     0     0     0     0 N3
- 1 25162 FE005 AP005    20    25     0     0     0     0     0 N3
- 1 25166 FE005 AP005    20    25     0     0     0     0     0 N3
- 1 25171 FE005 AP005    20    25     0     0     0     0     0 N3
- 1 25178 FE005 AP005    20    25     0     0     0     0     0 N3
- 1 25188 FE005 AP005    20    25     0     0     0     0     0 N3
- 2 25069 FE013 AP002    25     0   150     0   120     0     0 N2
+ 1 25162 FE005 AP005    20    24     0     0     0     0     0 N3
+ 1 25166 FE005 AP005    20    24     0     0     0     0     0 N3
+ 1 25171 FE005 AP005    20    24     0     0     0     0     0 N3
+ 1 25178 FE005 AP005    20    24     0     0     0     0     0 N3
  2 25069 FE005 AP002    25    72     0     0     0     0     0 N2
  2 25069 FE018 AP002    25     0     0   280     0     0     0 N2
+ 2 25069 FE013 AP002    25     0   150     0   120     0     0 N2
  2 25121 FE005 AP005    20    17     0     0     0     0     0 N2
  2 25126 FE005 AP005    20    17     0     0     0     0     0 N2
  2 25131 FE005 AP005    20    17     0     0     0     0     0 N2
@@ -274,7 +273,6 @@ Quncy, FL
  2 25166 FE005 AP005    20    17     0     0     0     0     0 N2
  2 25171 FE005 AP005    20    17     0     0     0     0     0 N2
  2 25178 FE005 AP005    20    17     0     0     0     0     0 N2
- 2 25188 FE005 AP005    20    17     0     0     0     0     0 N2
  3 25069 FE005 AP002    25    36     0     0     0     0     0 N1
  3 25069 FE018 AP002    25     0     0   280     0     0     0 N1
  3 25069 FE013 AP002    25     0   150     0   120     0     0 N1
@@ -290,23 +288,9 @@ Quncy, FL
  3 25166 FE005 AP005    20     8     0     0     0     0     0 N1
  3 25171 FE005 AP005    20     8     0     0     0     0     0 N1
  3 25178 FE005 AP005    20     8     0     0     0     0     0 N1
- 3 25188 FE005 AP005    20     8     0     0     0     0     0 N1
- 4 25069 FE013 AP002    25     0   150     0   120     0     0 N0
  4 25069 FE005 AP002    25     0     0     0     0     0     0 N0
  4 25069 FE018 AP002    25     0     0   280     0     0     0 N0
- 4 25121 FE005 AP005    20     0     0     0     0     0     0 N0
- 4 25126 FE005 AP005    20     0     0     0     0     0     0 N0
- 4 25131 FE005 AP005    20     0     0     0     0     0     0 N0
- 4 25136 FE005 AP005    20     0     0     0     0     0     0 N0
- 4 25141 FE005 AP005    20     0     0     0     0     0     0 N0
- 4 25148 FE005 AP005    20     0     0     0     0     0     0 N0
- 4 25154 FE005 AP005    20     0     0     0     0     0     0 N0
- 4 25158 FE005 AP005    20     0     0     0     0     0     0 N0
- 4 25162 FE005 AP005    20     0     0     0     0     0     0 N0
- 4 25166 FE005 AP005    20     0     0     0     0     0     0 N0
- 4 25171 FE005 AP005    20     0     0     0     0     0     0 N0
- 4 25178 FE005 AP005    20     0     0     0     0     0     0 N0
- 4 25188 FE005 AP005    20     0     0     0     0     0     0 N0
+ 4 25069 FE013 AP002    25     0   150     0   120     0     0 N0
 
 *RESIDUES AND ORGANIC FERTILIZER
 @R RDATE  RCOD  RAMT  RESN  RESP  RESK  RINP  RDEP  RMET RENAME
@@ -328,52 +312,17 @@ Quncy, FL
 
 *HARVEST DETAILS
 @H HDATE  HSTG  HCOM HSIZE   HPC  HBPC HNAME
- 2 25140 GS000     H     A   -99   -99 Number 9 Harvest
- 2 25146 GS000     H     A   -99   -99 Number 9 Harvest
- 2 25153 GS000     H     A   -99   -99 Number 9 Harvest
- 2 25158 GS000     H     A   -99   -99 Number 9 Harvest
- 2 25163 GS000     H     A   -99   -99 Number 9 Harvest
- 2 25170 GS000     H     A   -99   -99 Number 9 Harvest
- 2 25175 GS000     H     A   -99   -99 Number 9 Harvest
- 2 25184 GS000     H     A   -99   -99 Number 9 Harvest
- 2 25192 GS000     H     A   -99   -99 Number 9 Harvest
- 2 25198 GS000     H     A   -99   -99 Number 9 Harvest
- 2 25204 GS000     H     A   -99   -99 Number 9 Harvest
- 3 25140 GS000     H     A   -99   -99 ALL
- 3 25146 GS000     H     A   -99   -99 ALL
- 3 25153 GS000     H     A   -99   -99 ALL
- 3 25158 GS000     H     A   -99   -99 ALL
- 3 25163 GS000     H     A   -99   -99 ALL
- 3 25170 GS000     H     A   -99   -99 ALL
- 3 25175 GS000     H     A   -99   -99 ALL
- 3 25184 GS000     H     A   -99   -99 ALL
- 3 25192 GS000     H     A   -99   -99 ALL
- 3 25198 GS000     H     A   -99   -99 ALL
- 3 25204 GS000     H     A   -99   -99 ALL
- 4 25140 GS000     H     M   -99   -99 byproduct
- 4 25146 GS000     H     M   -99   -99 byproduct
- 4 25153 GS000     H     M   -99   -99 byproduct
- 4 25158 GS000     H     M   -99   -99 byproduct
- 4 25163 GS000     H     M   -99   -99 byproduct
- 4 25170 GS000     H     M   -99   -99 byproduct
- 4 25175 GS000     H     M   -99   -99 byproduct
- 4 25175 GS000     H     M   -99   -99 byproduct
- 4 25184 GS000     H     M   -99   -99 byproduct
- 4 25192 GS000     H     M   -99   -99 byproduct
- 4 25198 GS000     H     M   -99   -99 byproduct
- 4 25204 GS000     H     A   -99   -99 byproduct
- 5 25140 GS000   -99   -99   -99   -99 byproduct
- 5 25146 GS000   -99   -99   -99   -99 byproduct
- 5 25153 GS000   -99   -99   -99   -99 byproduct
- 5 25158 GS000   -99   -99   -99   -99 byproduct
- 5 25163 GS000   -99   -99   -99   -99 byproduct
- 5 25170 GS000   -99   -99   -99   -99 byproduct
- 5 25175 GS000   -99   -99   -99   -99 byproduct
- 5 25175 GS000   -99   -99   -99   -99 byproduct
- 5 25184 GS000   -99   -99   -99   -99 byproduct
- 5 25192 GS000   -99   -99   -99   -99 byproduct
+ 5 25139 GS000   -99   -99   -99   -99 byproduct
+ 5 25145 GS000   -99   -99   -99   -99 byproduct
+ 5 25152 GS000   -99   -99   -99   -99 byproduct
+ 5 25157 GS000   -99   -99   -99   -99 byproduct
+ 5 25162 GS000   -99   -99   -99   -99 byproduct
+ 5 25169 GS000   -99   -99   -99   -99 byproduct
+ 5 25174 GS000   -99   -99   -99   -99 byproduct
+ 5 25183 GS000   -99   -99   -99   -99 byproduct
+ 5 25191 GS000   -99   -99   -99   -99 byproduct
+ 5 25197 GS000   -99   -99   -99   -99 byproduct
  5 25198 GS000   -99   -99   -99   -99 byproduct
- 5 25204 GS000   -99   -99   -99   -99 byproduct
 
 *SIMULATION CONTROLS
 @N GENERAL     NYERS NREPS START SDATE RSEED SNAME.................... SMODEL

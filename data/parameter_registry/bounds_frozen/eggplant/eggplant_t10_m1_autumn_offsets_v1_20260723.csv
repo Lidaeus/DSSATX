@@ -1,0 +1,72 @@
+name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,review_note
+LFMAX,1.27,0.9,1.5,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T10 M1: shared spring value; autumn uses DLFMAX_AUT
+SIZLF,297.1,240.0,380.0,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T10 M1 shared
+SLAVR,293,240,330,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T10 M1: shared spring value; autumn uses DSLAVR_AUT
+CSDL,12.33,12.33,12.33,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T10 M1 fixed
+PPSEN,0.0,0.0,0.0,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T10 M1 fixed
+THRSH,8.5,8.5,8.5,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T10 M1 fixed
+WTPSD,0.004,0.004,0.004,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T10 M1 fixed
+XFRT,0.95,0.7,0.98,active,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T10 M1: logit seasonal projection requires open unit interval
+EM-FL,23.3,23.3,23.3,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T10 M1 fixed
+FL-LF,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T10 M1 fixed
+FL-SD,8.1,5.0,25.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T10 M1 shared
+FL-SH,2.0,1.0,6.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T10 M1 shared
+PODUR,33.0,25.0,60.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T10 M1 shared; seasonal offset excluded as harvest-window confounded
+SD-PM,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T10 M1 fixed
+SDPDV,111.4,80.0,300.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T10 M1 shared
+SFDUR,11.7,8.0,30.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T10 M1: shared spring value; autumn uses DSFDUR_AUT
+RHGHT,1.7,0.8,2.2,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,T10 M1 shared
+RWDTH,1.6,0.7,2.0,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,T10 M1 shared
+TRIFL,0.50,0.40,0.65,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,T10 M1 shared
+EM-V1,22,22,22,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T10 M1 fixed
+FL-VS,120,120,120,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T10 M1 fixed
+JU-R0,3.8,2.0,12.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T10 M1 shared
+LNGSH,39.0,25.0,50.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T10 M1 shared
+PL-EM,11.4,11.4,11.4,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T10 M1 fixed
+PM06,0.5,0.35,0.75,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T10 M1 shared
+PM09,0.97,0.6,1.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T10 M1 shared
+V1-JU,0.0,0.0,0.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T10 M1 fixed
+XFINT,0.3,0.08,0.5,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T10 M1 shared
+XFPHT,38.8,31,70,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T10 M1 shared
+XMAGE,13.5,8.0,30.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T10 M1 shared
+KCAN,0.66,0.5,0.9,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+KC_SLOPE,0.1,0.04,0.2,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+PARMAX,41.0,25.0,55.0,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+PHTMAX,61.0,40.0,80.0,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+ATOP,0.8,0.55,1.0,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+FRCNOD,0.05,0.05,0.05,fixed,SPE_Nodule,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 fixed
+FRLFF,0.37,0.25,0.5,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+FRSTMF,0.53,0.35,0.7,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+PORPT,0.21,0.12,0.3,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+RTNO3,0.012,0.008,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+RTNH4,0.012,0.008,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+RTEXF,0.1,0.05,0.25,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+WTFSD,0.55,0.35,0.75,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+EVMODC,0.0,0.0,0.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 fixed
+FINREF,220.0,150.0,320.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+SIZREF,300.0,200.0,420.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+SLAREF,300,300,300,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 fixed
+VSSINK,4.1,1.5,8.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+TB1,9.2,6.0,13.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1: shared spring value; autumn uses DTB1_AUT; joint bounds preserve 4-15 C
+TB2,8.6,6.0,13.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1: shared spring value; autumn uses DTB2_AUT; joint bounds preserve 4-15 C
+TB3,11.0,6.0,13.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1: shared spring value; autumn uses DTB3_AUT; joint bounds preserve 4-15 C
+TM1,40.0,40.0,40.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 fixed
+TM2,40.0,40.0,40.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 fixed
+TM3,39.8,39.8,39.8,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 fixed
+TO11,25.5,25.5,25.5,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 fixed
+TO12,25.0,25.0,25.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 fixed
+TO13,26.0,26.0,26.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 fixed
+TO21,28.8,28.8,28.8,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 fixed
+TO22,29.6,29.6,29.6,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 fixed
+TO23,29.1,29.1,29.1,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 fixed
+NSTFAC,0.5,0.2,1.0,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+NMOBMX,0.09,0.02,0.5,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+NVSMOB,0.38,0.15,0.6,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+NRCVR,0.15,0.03,0.35,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,T10 M1 shared
+DLFMAX_AUT,0.0,-0.1625189295,0.1397619424,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,T10 M1 log multiplier: 0.85-1.15
+DSLAVR_AUT,0.0,-0.1625189295,0.1397619424,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,T10 M1 log multiplier: 0.85-1.15
+DXFRT_AUT,0.0,-0.35,0.35,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,T10 M1 logit additive offset
+DSFDUR_AUT,0.0,-0.1625189295,0.1397619424,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,T10 M1 log multiplier: 0.85-1.15
+DTB1_AUT,0.0,-2.0,2.0,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,T10 M1 additive base-temperature offset
+DTB2_AUT,0.0,-2.0,2.0,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,T10 M1 additive base-temperature offset
+DTB3_AUT,0.0,-2.0,2.0,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,T10 M1 additive base-temperature offset

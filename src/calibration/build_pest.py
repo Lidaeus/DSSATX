@@ -52,7 +52,12 @@ from src.common.quality import read_flat_run_manifest_field, serialize_manifest_
 WORKSPACE = str(WORKSPACE_DIR)
 CUL_BASE_FILE = str(PROJECT_ROOT / "data" / "templates" / "genotype" / "TMGRO048.CUL.base")
 ECO_FILE = str(PROJECT_ROOT / "data" / "templates" / "genotype" / "TMGRO048.ECO.base")
-SPE_FILE = str(PROJECT_ROOT / "data" / "templates" / "genotype" / "TMGRO048.SPE.base")
+# Allow an audited custom SPE template (for example the A4 N-uptake build)
+# without mutating the repository-wide default template during calibration.
+SPE_FILE = os.environ.get(
+    "DSSAT_SPE_BASE",
+    str(PROJECT_ROOT / "data" / "templates" / "genotype" / "TMGRO048.SPE.base"),
+)
 SOIL_FILE = str(PROJECT_ROOT / "data" / "raw" / "soil" / "SOIL.SOL")
 SOIL_BASE_FILE = SOIL_FILE
 USER_INPUT_DIR = None
@@ -67,6 +72,8 @@ PEST_EVAL_FILE = os.path.join(WORKSPACE, "PestEval.OUT")
 PEST_GROW_FILE = os.path.join(WORKSPACE, "PestGrow.OUT")
 PEST_JOINT_FILE = os.path.join(WORKSPACE, "PestJoint.OUT")
 PEST_HARVEST_FILE = os.path.join(WORKSPACE, "PestHarvest.OUT")
+PEST_N_RESPONSE_FILE = os.path.join(WORKSPACE, "PestNResponse.OUT")
+PEST_W_RESPONSE_FILE = os.path.join(WORKSPACE, "PestWResponse.OUT")
 PEST_TMTGROW_FILE = os.path.join(WORKSPACE, "PestTmtGrow.OUT")
 
 
@@ -352,13 +359,16 @@ def _write_observation_noise_ensemble(
     n_reals,
     seed,
 ):
-    """Freeze an observation-plus-noise ensemble from the audited sigma values.
+    """Freeze an observation-plus-noise ensemble on the residual scale.
 
     PEST++ otherwise silently falls back to ``no-noise`` when a PST contains
-    only ordinary observation weights.  The project uses ``1/sigma`` weights
-    for the objective, so this explicit file keeps the same ``sigma_eff``
-    available to the IES observation ensemble without conflating it with any
-    group multiplier used for Phi balancing.
+    only ordinary observation weights.  The audit's ``sigma`` column is the
+    uncertainty after applying any observation transform (for example the log
+    transform used by CHPDT).  Noise must use that same residual-scale sigma;
+    using ``raw_sigma`` with a transformed ``obsval`` mixes units and can make
+    the IES measured Phi dominate the actual Phi by orders of magnitude.
+
+    The Phi-only group multiplier remains excluded from observation noise.
     """
     pst = pyemu.Pst(str(pst_path))
     obs = pst.observation_data.copy()
@@ -375,9 +385,16 @@ def _write_observation_noise_ensemble(
     missing = [name for name, key in zip(obs.index, obs_keys) if key not in audit.index]
     if missing:
         raise ValueError(f"weights audit lacks sigma for {len(missing)} observations")
-    sigma = pd.to_numeric(audit.loc[obs_keys, "raw_sigma"], errors="coerce")
+    if "sigma" not in audit:
+        raise ValueError(
+            "weights audit lacks residual-scale sigma; cannot freeze observation noise"
+        )
+    sigma = pd.to_numeric(audit.loc[obs_keys, "sigma"], errors="coerce")
     if sigma.isna().any() or (sigma <= 0).any() or not np.isfinite(sigma.to_numpy()).all():
-        raise ValueError("observation-noise contract requires finite positive raw_sigma for every active observation")
+        raise ValueError(
+            "observation-noise contract requires finite positive residual-scale "
+            "sigma for every active observation"
+        )
     observed = pd.to_numeric(obs.loc[:, "obsval"], errors="coerce")
     if observed.isna().any() or not np.isfinite(observed.to_numpy()).all():
         raise ValueError("observation-noise contract requires finite obsval for every active observation")
@@ -398,8 +415,11 @@ def _write_observation_noise_ensemble(
         "n_reals": int(n_reals),
         "seed": int(seed),
         "noise_distribution": "independent_normal",
-        "sigma_source": "weights_audit.raw_sigma",
-        "weight_definition": "objective weight remains group_multiplier/raw_sigma; noise uses raw_sigma",
+        "sigma_source": "weights_audit.sigma",
+        "weight_definition": (
+            "objective weight is group_multiplier/residual_scale_sigma; "
+            "noise uses residual_scale_sigma without the Phi-only group multiplier"
+        ),
         "observation_count": int(len(obs)),
         "observation_names_sha256": sha256_file(path),
     }
@@ -416,8 +436,49 @@ def _finalize_ies_contract(
     random_seed,
     bad_phi_sigma,
     observation_noise=True,
+    initial_ensemble_method: str = "random",
+    reinflate_iterations: int = 0,
+    reinflate_factor: float | None = None,
 ):
-    """Apply explicit IES filtering/noise policy after PST construction."""
+    """Apply explicit IES filtering/noise policy after PST construction.
+
+    Parameters
+    ----------
+    pst_path
+        Path to the PST file (will be modified in place).
+    out_dir
+        Output directory for generated ensemble files.
+    prefix
+        Case prefix for file naming.
+    ies_num_reals
+        Number of realizations in the ensemble.
+    random_seed
+        Random seed for reproducibility.
+    bad_phi_sigma
+        Relative high-Phi screening threshold.
+    observation_noise
+        If True, generate observation noise ensemble.
+    initial_ensemble_method
+        Method for generating initial parameter ensemble:
+        - ``"random"``: PEST++ default random sampling (no pre-generated file)
+        - ``"lhs"``: Latin Hypercube Sampling (space-filling)
+        - ``"sobol"``: Sobol sequence (low-discrepancy)
+    reinflate_iterations
+        Number of iterations between covariance reinflation cycles.
+        Default 0 (disabled). A value of 1 means reinflate after every
+        iteration, 2 means every other iteration, etc.
+    reinflate_factor
+        Dampening factor for reinflation (0 < factor <= 1.0). If None,
+        reinflation uses full prior variance. Lower values dampen the
+        reinflation to prevent over-dispersion.
+
+    Notes
+    -----
+    - LHS/Sobol ensembles are written to ``{prefix}.0.par.csv`` and referenced
+      via ``ies_parameter_ensemble`` in the PST file.
+    - Reinflation helps prevent ensemble collapse in early iterations.
+    - See PEST++ manual section 9.1.15 for covariance reinflation details.
+    """
     pst = pyemu.Pst(str(pst_path))
     # 1e300 is PEST++'s effectively-disabled relative filter.  A finite value
     # is reserved for an explicitly requested D0 diagnostic comparison.
@@ -425,6 +486,42 @@ def _finalize_ies_contract(
     if not math.isfinite(sigma_value) or sigma_value <= 0:
         raise ValueError("bad_phi_sigma must be a positive finite value; use 1e300 to disable relative screening")
     pst.pestpp_options["ies_bad_phi_sigma"] = sigma_value
+
+    # Generate space-filling initial ensemble if requested.
+    ensemble_path = None
+    if initial_ensemble_method in ("lhs", "sobol"):
+        from src.calibration.initial_ensemble import generate_lhs_ensemble, write_ensemble_csv
+
+        # Load bounds from the PST parameter data section.
+        par_df = pst.parameter_data
+        bounds_df = pd.DataFrame({
+            "name": par_df["parnme"],
+            "init": par_df["parval1"],
+            "lower": par_df["parlbnd"],
+            "upper": par_df["parubnd"],
+            "status": par_df["partrans"].apply(lambda x: "active" if x == "log" or x == "none" else "fixed"),
+        })
+        # Only active parameters go into the ensemble.
+        ensemble_df = generate_lhs_ensemble(
+            n_reals=ies_num_reals,
+            bounds_df=bounds_df,
+            seed=int(random_seed),
+            method=initial_ensemble_method,
+            include_base=False,
+        )
+        ensemble_path = Path(out_dir) / f"{prefix}.0.par.csv"
+        write_ensemble_csv(ensemble_df, ensemble_path)
+        pst.pestpp_options["ies_parameter_ensemble"] = ensemble_path.name
+        print(f"Initial {initial_ensemble_method.upper()} ensemble written to {ensemble_path}")
+
+    # Configure covariance reinflation to prevent ensemble collapse.
+    if reinflate_iterations > 0:
+        pst.pestpp_options["ies_reinflate"] = reinflate_iterations
+        if reinflate_factor is not None:
+            if not (0.0 < reinflate_factor <= 1.0):
+                raise ValueError("reinflat_factor must be in (0, 1]")
+            pst.pestpp_options["ies_reinflate_factor"] = reinflate_factor
+
     noise_path = noise_meta_path = None
     noise_meta = None
     if observation_noise:
@@ -454,6 +551,10 @@ def _finalize_ies_contract(
         "observation_ensemble_sha256": (
             sha256_file(noise_path) if noise_path and os.path.isfile(noise_path) else ""
         ),
+        "initial_ensemble_method": initial_ensemble_method,
+        "initial_ensemble_file": str(ensemble_path) if ensemble_path else "",
+        "reinflate_iterations": reinflate_iterations,
+        "reinflate_factor": reinflate_factor,
     }
 
 ECO_BOUNDS_EGGPLANT = {
@@ -483,6 +584,13 @@ SPE_DIRECT_BOUNDS_EGGPLANT = {
     "RTNH4": (0.010, 0.050),
     "RTEXF": (0.05, 0.25),
     "NSTFAC": (0.40, 0.85),
+    "NREXP": (0.05, 2.00),
+    "NRMIN": (0.05, 0.80),
+    # A4 effective-concentration N-uptake response parameters.
+    "NUPK50": (1.0, 40.0),
+    "NUPQ": (0.50, 1.50),
+    "NUPCMN": (0.0, 2.0),
+    "NUPAV": (0.50, 1.00),
     "NMOBMX": (0.15, 0.40),
     "NVSMOB": (0.20, 0.50),
     "NRCVR": (0.05, 0.30),
@@ -502,6 +610,75 @@ SPE_DIRECT_BOUNDS_EGGPLANT = {
     "ATOP": (0.50, 1.10),
     "FRCNOD": (0.03, 0.07),
     "EVMODC": (0.0, 0.0),
+    # --- Parameter extension modules (docs/reference/参数拓展方案参考.MD) ---
+    # Leaf senescence (SPE line 69)
+    "SENRTE": (0.0, 5.0),
+    "SENDAY": (0.0, 0.2),
+    # Fruit set (SPE line 83)
+    "SETMAX": (0.0, 1.0),
+    "RFLWAB": (0.0, 1.0),
+    "XMPAGE": (1.0, 200.0),
+    # Fruit growth (SPE line 84)
+    "SHLAG": (0.0, 1.0),
+    "SRMAX": (0.0, 1.0),
+        "FNSDT_OPT1": (15.0, 30.0),
+        "FNSDT_OPT2": (20.0, 35.0),
+    # Leaf area SLA modifiers (SPE line 57)
+    "SLAMAX": (200.0, 1200.0),
+    "SLAMIN": (100.0, 600.0),
+    "TURSLA": (0.0, 3.0),
+    "NSLA": (0.0, 3.0),
+        # Array-anchor module parameters stored in SPE lines but expanded at runtime.
+        "LAREA_EARLY": (10.0, 100.0),
+        "LAREA_MID": (50.0, 400.0),
+        "LAREA_LATE": (150.0, 700.0),
+        "LEAF_PART_EARLY": (0.10, 0.80),
+        "LEAF_PART_FLORAL": (0.10, 0.90),
+        "LEAF_PART_LATE": (0.05, 0.80),
+        "STEM_PART_EARLY": (0.05, 0.80),
+        "STEM_PART_LATE": (0.05, 0.90),
+        "SENPOR_LATE": (0.0, 1.0),
+    # Vegetative partition (SPE line 53)
+    "FRLFMX": (0.3, 1.0),
+    # Photosynthesis (SPE line 11)
+    "PGEFF": (0.01, 0.1),
+    "KDIF": (0.3, 1.2),
+    "LFANGB": (0.0, 5.0),
+    # Nitrogen (SPE line 12)
+    "LNREF": (2.0, 8.0),
+    "NSLOPE": (0.0, 1.0),
+    # Water stress (SPE line 84)
+    "DSWBAR": (5.0, 50.0),
+    "XFRMAX": (0.0, 1.0),
+    # Root uptake (SPE lines 78, 80)
+    "PORMIN": (0.01, 0.1),
+    "RTDEPI": (5.0, 30.0),
+    "RWUMX": (0.01, 0.1),
+    # Carbon reserve mobilisation (SPE line 36)
+    "CMOBMX": (0.0, 0.1),
+    "CADSTF": (0.0, 1.0),
+    "CADPR1": (0.0, 1.0),
+    # Organ protein (SPE line 23)
+    "PROLFI": (0.1, 0.5),
+    "PROLFG": (0.1, 0.4),
+    "PROLFF": (0.01, 0.2),
+    # Organ composition parameters.  These are intentionally present in the
+    # builder discovery map even when a particular run keeps them fixed; a
+    # frozen bounds row must never disappear because it is absent from a
+    # legacy whitelist.
+    "PROSTI": (0.05, 0.30),
+    "PROSTG": (0.04, 0.20),
+    "PROSTF": (0.02, 0.12),
+    "PRORTI": (0.10, 0.20),
+    "PRORTG": (0.08, 0.16),
+    "PRORTF": (0.04, 0.08),
+    "PROSHI": (0.15, 0.30),
+    "PROSHG": (0.10, 0.22),
+    "PROSHF": (0.05, 0.15),
+    "FNPGN1": (1.5, 2.5),
+    "FNPGN2": (4.0, 5.0),
+    "FNPGN3": (15.0, 25.0),
+    "FNPGN4": (15.0, 25.0),
 }
 
 
@@ -1118,7 +1295,21 @@ def _read_spe_direct_init_values():
             nums = [m.group(0) for m in number_re.finditer(line)]
             if len(nums) >= 1:
                 try:
-                    out["NSTFAC"] = float(nums[-1])
+                    # Extended N-response SPE rows are ordered as
+                    # NSTFAC,NREXP,NRMIN; legacy rows contain NSTFAC only.
+                    out["NSTFAC"] = float(nums[0] if len(nums) >= 3 else nums[-1])
+                    if len(nums) >= 3:
+                        out["NREXP"] = float(nums[1])
+                        out["NRMIN"] = float(nums[2])
+                except Exception:
+                    pass
+        if "NUPK50" in u and "NUPQ" in u and ("NUPAV" in u or "NUPCMN" in u):
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 3:
+                try:
+                    out["NUPK50"] = float(nums[0])
+                    out["NUPQ"] = float(nums[1])
+                    out["NUPAV" if "NUPAV" in u else "NUPCMN"] = float(nums[2])
                 except Exception:
                     pass
         if "WTFSD,PORPT" in u and "FRCNOD" in u:
@@ -1154,6 +1345,179 @@ def _read_spe_direct_init_values():
                     out["RTEXF"] = float(nums[3])
                 except Exception:
                     pass
+        # --- Parameter extension modules: read init values from SPE template ---
+        # Leaf senescence (SPE line 69): SENRTE,SENRT2,SENDAY,FREEZ1,FREEZ2
+        if "SENRTE" in u and "SENDAY" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 3:
+                try:
+                    out["SENRTE"] = float(nums[0])
+                    out["SENDAY"] = float(nums[2])
+                except Exception:
+                    pass
+        # Fruit set + fruit growth (SPE line 83): SETMAX,SRMAX,RFLWAB,XMPAGE
+        if "SETMAX" in u and "XMPAGE" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 4:
+                try:
+                    out["SETMAX"] = float(nums[0])
+                    out["SRMAX"] = float(nums[1])
+                    out["RFLWAB"] = float(nums[2])
+                    out["XMPAGE"] = float(nums[3])
+                except Exception:
+                    pass
+        # Water stress + fruit growth (SPE line 84): DSWBAR,XFRMAX,SHLAG
+        if "DSWBAR" in u and "SHLAG" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 3:
+                try:
+                    out["DSWBAR"] = float(nums[0])
+                    out["XFRMAX"] = float(nums[1])
+                    out["SHLAG"] = float(nums[2])
+                except Exception:
+                    pass
+            # Fruit-growth temperature response anchors (SPE line 86): FNSDT(1-4)
+            if "FNSDT(1-4)" in u and "TYPSDT" in u:
+                nums = [m.group(0) for m in number_re.finditer(line)]
+                if len(nums) >= 4:
+                    try:
+                        out["FNSDT_OPT1"] = float(nums[1])
+                        out["FNSDT_OPT2"] = float(nums[2])
+                    except Exception:
+                        pass
+        # SLA modifiers (SPE line 57): SLAMAX,SLAMIN,SLAPAR,TURSLA,NSLA
+        if "SLAMAX" in u and "NSLA" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 5:
+                try:
+                    out["SLAMAX"] = float(nums[0])
+                    out["SLAMIN"] = float(nums[1])
+                    out["TURSLA"] = float(nums[3])
+                    out["NSLA"] = float(nums[4])
+                except Exception:
+                    pass
+            # Leaf area expansion anchors (SPE line 63): YVREF(1-6)
+            if "YVREF(1-6)" in u and "LEAF AREA VALUES" in u:
+                nums = [m.group(0) for m in number_re.finditer(line)]
+                if len(nums) >= 6:
+                    try:
+                        out["LAREA_EARLY"] = float(nums[0])
+                        out["LAREA_MID"] = float(nums[3])
+                        out["LAREA_LATE"] = float(nums[5])
+                    except Exception:
+                        pass
+            # Leaf/stem partition anchors (SPE lines 51-52): YLEAF / YSTEM
+            if "YLEAF VALUES" in u:
+                nums = [m.group(0) for m in number_re.finditer(line)]
+                if len(nums) >= 10:
+                    try:
+                        out["LEAF_PART_EARLY"] = float(nums[0])
+                        out["LEAF_PART_FLORAL"] = float(nums[4])
+                        out["LEAF_PART_LATE"] = float(nums[9])
+                    except Exception:
+                        pass
+            if "YSTEM VALUES" in u:
+                nums = [m.group(0) for m in number_re.finditer(line)]
+                if len(nums) >= 10:
+                    try:
+                        out["STEM_PART_EARLY"] = float(nums[0])
+                        out["STEM_PART_LATE"] = float(nums[9])
+                    except Exception:
+                        pass
+            # Leaf senescence anchors: marker line followed by 4 SENPOR values.
+            if "SENPOR........." in u:
+                try:
+                    idx = lines.index(line)
+                except ValueError:
+                    idx = -1
+                if idx != -1 and idx + 1 < len(lines):
+                    nums = [m.group(0) for m in number_re.finditer(lines[idx + 1])]
+                    if len(nums) >= 4:
+                        try:
+                            out["SENPOR_LATE"] = float(nums[3])
+                        except Exception:
+                            pass
+        # Vegetative partition (SPE line 53): FRLFMX
+        if "FRLFMX" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if nums:
+                try:
+                    out["FRLFMX"] = float(nums[0])
+                except Exception:
+                    pass
+        # Photosynthesis (SPE line 11): PGEFF SCV KDIF, LFANGB
+        if "PGEFF" in u and "KDIF" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 4:
+                try:
+                    out["PGEFF"] = float(nums[0])
+                    out["KDIF"] = float(nums[2])
+                    out["LFANGB"] = float(nums[3])
+                except Exception:
+                    pass
+        # Nitrogen (SPE line 12): SLWREF,SLWSLO,NSLOPE,LNREF,PGREF
+        if "NSLOPE" in u and "LNREF" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 4:
+                try:
+                    out["NSLOPE"] = float(nums[2])
+                    out["LNREF"] = float(nums[3])
+                except Exception:
+                    pass
+        # Root uptake (SPE line 78): RTDEPI,...,RWUMX
+        if "RTDEPI" in u and "RWUMX" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 7:
+                try:
+                    out["RTDEPI"] = float(nums[0])
+                    out["RWUMX"] = float(nums[6])
+                except Exception:
+                    pass
+        # Carbon reserve (SPE line 36): CMOBMX,CADSTF,CADPR1,NMOBMX,...
+        # (NMOBMX/NVSMOB/NRCVR already read above; add CMOBMX/CADSTF/CADPR1)
+        if "CMOBMX" in u and "CADPR1" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 3:
+                try:
+                    out["CMOBMX"] = float(nums[0])
+                    out["CADSTF"] = float(nums[1])
+                    out["CADPR1"] = float(nums[2])
+                except Exception:
+                    pass
+        # Organ protein (SPE line 23): PROLFI,PROLFG,PROLFF,...
+        if "PROLFI" in u and "PROLFF" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 3:
+                try:
+                    out["PROLFI"] = float(nums[0])
+                    out["PROLFG"] = float(nums[1])
+                    out["PROLFF"] = float(nums[2])
+                    if len(nums) >= 6:
+                        out["PROSTI"] = float(nums[3])
+                        out["PROSTG"] = float(nums[4])
+                        out["PROSTF"] = float(nums[5])
+                except Exception:
+                    pass
+        if "PRORTI" in u and "PROSHF" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 6:
+                try:
+                    out["PRORTI"] = float(nums[0])
+                    out["PRORTG"] = float(nums[1])
+                    out["PRORTF"] = float(nums[2])
+                    out["PROSHI"] = float(nums[3])
+                    out["PROSHG"] = float(nums[4])
+                    out["PROSHF"] = float(nums[5])
+                except Exception:
+                    pass
+        if "FNPGN(4)" in u:
+            nums = [m.group(0) for m in number_re.finditer(line)]
+            if len(nums) >= 4:
+                for key, value in zip(("FNPGN1", "FNPGN2", "FNPGN3", "FNPGN4"), nums[:4]):
+                    try:
+                        out[key] = float(value)
+                    except Exception:
+                        pass
     return out
 
 
@@ -1187,7 +1551,7 @@ def _read_tmt_harvest_events(tmt_path):
 
     header = None
     rows = []
-    with open(tmt_path, "r") as f:
+    with open(tmt_path, "r", encoding="utf-8-sig", errors="replace") as f:
         for line in f:
             s = line.rstrip("\n")
             if not s.strip():
@@ -1294,6 +1658,9 @@ def _read_tmt_harvest_events(tmt_path):
                     # direct harvest calibration (no differencing).
                     "chfpw": float(e["chfpw"]) if e["chfpw"] != -99.0 else -99.0,
                     "chpdt": float(e["chpdt"]) if e["chpdt"] != -99.0 else -99.0,
+                    # Preserve measured single-harvest dry mass for the formal
+                    # HPODW objective; ``dry_inc`` remains the legacy fallback.
+                    "hpodw": float(e["hpodw"]) if e.get("hpodw", -99.0) != -99.0 else -99.0,
                     "dry_cum": float(dry_cum)
                     if e["chpdt"] != -99.0 or e.get("hpodw", -99.0) != -99.0 or e.get("pwad", -99.0) != -99.0
                     else -99.0,
@@ -1315,7 +1682,7 @@ def _read_tmt_process_points(tmt_path):
 
     header = None
     rows = []
-    with open(tmt_path, "r") as f:
+    with open(tmt_path, "r", encoding="utf-8-sig", errors="replace") as f:
         for line in f:
             s = line.rstrip("\n")
             if not s.strip():
@@ -1358,8 +1725,11 @@ def _read_tmt_process_points(tmt_path):
         laid = _as_float(r.get("LAID"), default=-99.0)
         lwad = _as_float(r.get("LWAD"), default=-99.0)
         swad = _as_float(r.get("SWAD"), default=-99.0)
+        chtd = _as_float(r.get("CHTD"), default=-99.0)
+        snam = _as_float(r.get("SNAM"), default=-99.0)
+        lnam = _as_float(r.get("LNAM"), default=-99.0)
 
-        if lnsd == -99.0 and laid == -99.0 and lwad == -99.0 and swad == -99.0:
+        if lnsd == -99.0 and laid == -99.0 and lwad == -99.0 and swad == -99.0 and chtd == -99.0 and snam == -99.0 and lnam == -99.0:
             continue
 
         points_by_tn.setdefault(tn, []).append(
@@ -1369,6 +1739,9 @@ def _read_tmt_process_points(tmt_path):
                 "laid": float(laid),
                 "lwad": float(lwad),
                 "swad": float(swad),
+                "chtd": float(chtd),
+                "snam": float(snam),
+                "lnam": float(lnam),
             }
         )
 
@@ -1485,6 +1858,7 @@ def _try_read_evaluate_out(evaluate_out_path):
 
 
 _FILEA_DATE_TO_EVALUATE = {
+    "PDAT": "PDAPM",
     "EDAT": "EDAPM",
     "ADAT": "ADAPM",
     "PD1T": "PD1PM",
@@ -1520,7 +1894,7 @@ def _read_filea_rows(filea_path):
     """Read the treatment-level measured values from a DSSAT FileA."""
     header = None
     rows = {}
-    with open(filea_path, "r") as handle:
+    with open(filea_path, "r", encoding="utf-8-sig", errors="replace") as handle:
         for raw in handle:
             stripped = raw.strip()
             if not stripped:
@@ -2212,7 +2586,10 @@ def _is_tagged_output(model_out_path):
         os.path.normcase(os.path.abspath(PEST_GROW_FILE)),
         os.path.normcase(os.path.abspath(PEST_JOINT_FILE)),
         os.path.normcase(os.path.abspath(PEST_HARVEST_FILE)),
+        os.path.normcase(os.path.abspath(PEST_N_RESPONSE_FILE)),
+        os.path.normcase(os.path.abspath(PEST_W_RESPONSE_FILE)),
         os.path.normcase(os.path.abspath(PEST_TMTGROW_FILE)),
+        os.path.normcase(os.path.abspath("PestSoilWat.OUT")),
     }
 
 
@@ -2235,14 +2612,24 @@ def _build_ins_and_obs(df, obs_bases, critical_obs, model_out_path, group_sigmas
     _assert_no_hwam_calibration_target(obs_bases)
     obs_cols = [
         c for c in df.columns
-        if isinstance(c, str) and c.endswith('M') and c.upper() != "HWAMM"
+        if isinstance(c, str)
+        and (c.endswith('M') or c.endswith('_T'))
+        and c.upper() != "HWAMM"
     ]
-    sim_cols = [c[:-1] + 'S' for c in obs_cols]
+    # sim column: CHPDTM -> CHPDTS, CHPDTM_T -> CHPDTS_T
+    sim_cols = [c[:-3] + 'S_T' if c.endswith('_T') else c[:-1] + 'S' for c in obs_cols]
 
     if obs_bases is not None:
         filtered = []
         for o, s in zip(obs_cols, sim_cols):
-            if o[:-1] in obs_bases:
+            # Root match: strip the trailing M (mean) plus an optional _T
+            # trend suffix (e.g. CHPDTM_T -> CHPDT_T) before the obs_bases
+            # membership test.
+            root = o
+            if root.endswith("_T"):
+                root = root[:-2]  # CHPDTM_T -> CHPDTM
+            root = root[:-1]      # CHPDTM -> CHPDT
+            if root in obs_bases:
                 filtered.append((o, s))
         obs_cols = [o for o, _ in filtered]
         sim_cols = [s for _, s in filtered]
@@ -2284,7 +2671,10 @@ def _build_ins_and_obs(df, obs_bases, critical_obs, model_out_path, group_sigmas
         valid_obs = []
         for obs_col, sim_col in zip(obs_cols, sim_cols):
             val = row[obs_col]
-            if val != -99 or obs_col in critical_obs:
+            # Multi-season soil tables have season-specific token widths.  A
+            # column absent from one season is NaN after concat and must be
+            # treated like the -99 sentinel, not sent to sigma resolution.
+            if (pd.notna(val) and val != -99) or obs_col in critical_obs:
                 valid_obs.append((obs_col, sim_col, val))
 
         if not valid_obs:
@@ -2311,7 +2701,26 @@ def _build_ins_and_obs(df, obs_bases, critical_obs, model_out_path, group_sigmas
 
             base_group = f"{obs_col}{suffix}" if suffix else obs_col
             obgnme = f"{name_prefix}{base_group}"
-            sigma = _resolve_sigma(group_sigmas, base_group, obs_col)
+            # Multi-season trial bundles may provide observation-specific
+            # uncertainty derived from replicate measurements.  Prefer that
+            # audited value over a variable/date fallback sigma.  Companion
+            # metadata columns are deliberately kept beside the observation
+            # column so each PEST row remains independently traceable.
+            row_sigma_col = f"{obs_col}_SIGMA"
+            row_sigma = row.get(row_sigma_col) if row_sigma_col in row.index else None
+            sigma = (
+                float(row_sigma)
+                if row_sigma is not None and pd.notna(row_sigma)
+                else _resolve_sigma(group_sigmas, base_group, obs_col)
+            )
+            sigma_source_col = f"{obs_col}_SIGMA_SOURCE"
+            replicate_sd_col = f"{obs_col}_REPLICATE_SD"
+            n_replicates_col = f"{obs_col}_N_REPLICATES"
+            sigma_source = (
+                str(row.get(sigma_source_col))
+                if sigma_source_col in row.index and pd.notna(row.get(sigma_source_col))
+                else "builder_default"
+            )
             if val == -99:
                 weight = 0.0
             else:
@@ -2325,6 +2734,19 @@ def _build_ins_and_obs(df, obs_bases, critical_obs, model_out_path, group_sigmas
                     "weight": weight,
                     "obgnme": obgnme,
                     "sigma": sigma,
+                    "sigma_source": sigma_source,
+                    "replicate_sd": (
+                        float(row.get(replicate_sd_col))
+                        if replicate_sd_col in row.index
+                        and pd.notna(row.get(replicate_sd_col))
+                        else None
+                    ),
+                    "n_replicates": (
+                        int(row.get(n_replicates_col))
+                        if n_replicates_col in row.index
+                        and pd.notna(row.get(n_replicates_col))
+                        else None
+                    ),
                     "base_weight": weight,
                     "group_multiplier": 1.0,
                     "transform": "raw",
@@ -2342,15 +2764,21 @@ def _build_ins_and_obs(df, obs_bases, critical_obs, model_out_path, group_sigmas
 
 
 def _populate_pst_from_par_obs(pst, par_df, obs_df):
-    par_df_indexed = par_df.set_index('parnme')
+    # Multi-season parameter assembly can carry duplicate rows for a shared
+    # genetic parameter.  Pandas' positional assignment through ``.loc`` then
+    # expands duplicate labels and raises a misleading length-mismatch error.
+    # Collapse to the last validated row and assign by label instead.
+    par_df_indexed = par_df.drop_duplicates(subset=['parnme'], keep='last').set_index('parnme')
     for col in ['parval1', 'parlbnd', 'parubnd', 'pargp', 'partrans']:
-        pst.parameter_data.loc[par_df.parnme, col] = par_df_indexed[col].values
+        for parnme, value in par_df_indexed[col].items():
+            if parnme in pst.parameter_data.index:
+                pst.parameter_data.at[parnme, col] = value
 
-    fixed_pars = par_df[par_df['parlbnd'] == par_df['parubnd']]['parnme']
+    fixed_pars = par_df_indexed[par_df_indexed['parlbnd'] == par_df_indexed['parubnd']].index
     if not fixed_pars.empty:
         pst.parameter_data.loc[fixed_pars, 'partrans'] = 'fixed'
 
-    zero_pars = par_df[(par_df['parval1'] == 0) & (par_df['parlbnd'] != par_df['parubnd'])]['parnme']
+    zero_pars = par_df_indexed[(par_df_indexed['parval1'] == 0) & (par_df_indexed['parlbnd'] != par_df_indexed['parubnd'])].index
     if not zero_pars.empty:
         pst.parameter_data.loc[zero_pars, 'partrans'] = 'none'
 
@@ -2380,6 +2808,26 @@ def create_ins_and_pst_multi(
 ):
     out_dir = out_dir or WORKSPACE
     os.makedirs(out_dir, exist_ok=True)
+    # Shared genetic parameters can be emitted once per calibration season by
+    # the multiseason assembly. PEST++ requires one unique parameter row;
+    # collapse identical definitions while rejecting conflicting bounds.
+    unique_params = {}
+    for parameter in params:
+        name = str(parameter.get("name", "")).strip()
+        previous = unique_params.get(name)
+        if previous is not None:
+            # Frozen bounds already carry the soil parameter definitions while
+            # ``--include-soil`` also derives them from SOIL.SOL.  The two
+            # records can differ only in their inferred bounds; keep the
+            # first (frozen-bounds) record and avoid a false duplicate error.
+            if name.upper().startswith(("SOIL_", "IC_SH2O_")):
+                continue
+            for key in ("init", "lower", "upper", "status"):
+                if str(previous.get(key)) != str(parameter.get(key)):
+                    raise ValueError(f"Conflicting duplicate parameter definition: {name} ({key})")
+            continue
+        unique_params[name] = parameter
+    params = list(unique_params.values())
     eval_df = None
     if any(out.get("df") is None for out in outputs):
         try:
@@ -2669,6 +3117,24 @@ if __name__ == "__main__":
     parser.add_argument("--ies-num-reals", type=int, default=50)
     parser.add_argument("--random-seed", type=int, default=20260715)
     parser.add_argument(
+        "--initial-ensemble-method",
+        choices=["random", "lhs", "sobol"],
+        default="random",
+        help="Method for generating initial parameter ensemble: random (PEST++ default), lhs (Latin Hypercube), or sobol (Sobol sequence)",
+    )
+    parser.add_argument(
+        "--reinflate-iterations",
+        type=int,
+        default=0,
+        help="Number of iterations between covariance reinflation cycles (0=disabled, 1=every iteration, 2=every other, etc.)",
+    )
+    parser.add_argument(
+        "--reinflate-factor",
+        type=float,
+        default=None,
+        help="Dampening factor for reinflation (0 < factor <= 1.0); None uses full prior variance",
+    )
+    parser.add_argument(
         "--bad-phi-sigma",
         type=float,
         default=None,
@@ -2686,6 +3152,26 @@ if __name__ == "__main__":
     parser.add_argument("--tighten-frac", type=float, default=0.05)
     parser.add_argument("--include-soil", action="store_true", default=False)
     parser.add_argument("--include-ic", action="store_true", default=False)
+    parser.add_argument(
+        "--include-initial-soil-n",
+        action="store_true",
+        default=False,
+        help=(
+            "For multi-season calibration, release treatment- and layer-specific "
+            "FileX initial soil N parameters: *SOIL ANALYSIS SANI plus "
+            "*INITIAL CONDITIONS SNH4/SNO3"
+        ),
+    )
+    parser.add_argument(
+        "--freeze-existing-soil-params",
+        action="store_true",
+        default=False,
+        help=(
+            "For multi-season initial-soil-N calibration, keep existing SOIL_* "
+            "profile parameters at the --init-from best-member values and "
+            "release only the new initial-N parameters"
+        ),
+    )
     parser.add_argument("--soil-sbdm-delta", type=float, default=None)
     parser.add_argument("--soil-sbdm-frac", type=float, default=0.03)
     parser.add_argument("--ic-sh2o-delta", type=float, default=None)
@@ -3130,17 +3616,17 @@ if __name__ == "__main__":
             df_harvest = pd.DataFrame(columns=["@RUN", "TN", "HNO", "DATE", "PWADM", "PWAIM", "PWADS", "PWAIS"])
             harvest_sigmas = {"PWADM": 1.0}
             df_process = pd.DataFrame(
-                columns=["@RUN", "TN", "DATE", "LAIDM", "LWADM", "SWADM", "LAIDS", "LWADS", "SWADS"]
+                columns=["@RUN", "TN", "DATE", "LAIDM", "LWADM", "SWADM", "CHTDM", "LAIDS", "LWADS", "SWADS", "CHTDS"]
             )
-            process_sigmas = {"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
+            process_sigmas = {"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0, "CHTDM": 2.0}
         elif not entries:
             stage_evaluate_df = pd.DataFrame(columns=["@RUN", "TN", "ADAPM", "LAIXM", "CNAMM"])
             df_harvest = pd.DataFrame(columns=["@RUN", "TN", "HNO", "DATE", "PWADM", "PWAIM", "PWADS", "PWAIS"])
             harvest_sigmas = {"PWADM": 1.0}
             df_process = pd.DataFrame(
-                columns=["@RUN", "TN", "DATE", "LAIDM", "LWADM", "SWADM", "LAIDS", "LWADS", "SWADS"]
+                columns=["@RUN", "TN", "DATE", "LAIDM", "LWADM", "SWADM", "CHTDM", "LAIDS", "LWADS", "SWADS", "CHTDS"]
             )
-            process_sigmas = {"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
+            process_sigmas = {"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0, "CHTDM": 2.0}
         else:
             stage_evaluate_df = _build_evaluate_observations_from_filea(entries)
             events_by_run, points_by_run = _collect_tmt_events_per_run(entries)
@@ -3177,9 +3663,11 @@ if __name__ == "__main__":
                             "LAIDM": float(p["laid"]),
                             "LWADM": float(p["lwad"]),
                             "SWADM": float(p["swad"]),
+                            "CHTDM": float(p.get("chtd", -99.0)),
                             "LAIDS": -99.0,
                             "LWADS": -99.0,
                             "SWADS": -99.0,
+                            "CHTDS": -99.0,
                         }
                     )
 
@@ -3193,6 +3681,7 @@ if __name__ == "__main__":
                     ("LAIDM", 1.6, 0.50),
                     ("LWADM", 80.0, 0.25),
                     ("SWADM", 100.0, 0.25),
+                    ("CHTDM", 2.0, 0.15),
                 ],
                 defaults={"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0},
                 sigma_factors={
@@ -3205,9 +3694,13 @@ if __name__ == "__main__":
         stage2_outputs = [
             {
                 "model_out_path": PEST_EVAL_FILE,
-                "obs_bases": {"ADAP"},
+                "obs_bases": {"PDAP", "ADAP", "MDAP"},
                 "critical_obs": {"ADAPM"},
-                "group_sigmas": {"ADAPM": float(adapm_sigma) if adapm_sigma is not None else 25.0},
+                "group_sigmas": {
+                    "PDAPM": 1.0,
+                    "ADAPM": float(adapm_sigma) if adapm_sigma is not None else 25.0,
+                    "MDAPM": float(adapm_sigma) if adapm_sigma is not None else 25.0,
+                },
                 "df": stage_evaluate_df,
             },
             {
@@ -3234,7 +3727,7 @@ if __name__ == "__main__":
             },
             {
                 "model_out_path": PEST_TMTGROW_FILE,
-                "obs_bases": {"LAID", "LWAD", "SWAD"},
+                "obs_bases": {"LAID", "LWAD", "SWAD", "CHTD"},
                 "critical_obs": set(),
                 "group_sigmas": process_sigmas,
                 "df": df_process,
@@ -3264,7 +3757,12 @@ if __name__ == "__main__":
             for e in entries:
                 run_no = int(e["run"])
                 tn = int(e.get("tn", -99))
-                for ev in events_by_run.get(run_no, []):
+                # Fix C1 (CodeReview_BuildPest C1): events_by_tn is keyed by
+                # treatment number (tn), not run number. The legacy copy from
+                # eggplant_stage2 used events_by_run (run-number keyed, returned
+                # by _collect_tmt_events_per_run) which is undefined here and
+                # raised NameError.
+                for ev in events_by_tn.get(tn, []):
                     obs_cum = ev.get("dry_cum", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_cum", -99.0)
                     obs_inc = ev.get("dry_inc", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_inc", -99.0)
                     rows.append({
@@ -3447,7 +3945,10 @@ if __name__ == "__main__":
             for e in entries:
                 run_no = int(e["run"])
                 tn = int(e.get("tn", -99))
-                for p in points_by_run.get(run_no, []):
+                # Fix C2 (CodeReview_BuildPest C2): points_by_tn is keyed by
+                # treatment number (tn), not run number. Same NameError pattern
+                # as C1 — the legacy copy referenced the undefined points_by_run.
+                for p in points_by_tn.get(tn, []):
                     rows.append(
                         {
                             "@RUN": run_no,
@@ -3511,6 +4012,19 @@ if __name__ == "__main__":
         eco_init = _read_eco_init_values(ecotype)
         spe_init = _read_spe_temp_init_values()
         spe_init.update(_read_spe_direct_init_values())
+        # Frozen bounds are the executable whitelist.  Extend the static SPE
+        # map with any newly declared names before parsing, so additions such
+        # as organ-N composition and structural switches cannot be silently
+        # dropped merely because the legacy map predates them.
+        if _prevalidated_bounds:
+            try:
+                _frozen_lookup = load_frozen_bounds_lookup(_prevalidated_bounds)
+                for _name, _row in _frozen_lookup.items():
+                    _u = str(_name).strip().upper()
+                    if _u in extra_allowed and _u not in SPE_DIRECT_BOUNDS_EGGPLANT:
+                        SPE_DIRECT_BOUNDS_EGGPLANT[_u] = (float(_row[0]), float(_row[1]))
+            except (OSError, ValueError, KeyError, TypeError):
+                pass
         params.extend(
             parse_extra_params(
                 init_map=eco_init,
@@ -3746,6 +4260,9 @@ if __name__ == "__main__":
         random_seed=args.random_seed,
         bad_phi_sigma=bad_phi_sigma,
         observation_noise=bool(design_spec is not None and observation_policies),
+        initial_ensemble_method=args.initial_ensemble_method,
+        reinflate_iterations=args.reinflate_iterations,
+        reinflate_factor=args.reinflate_factor,
     )
 
     design_audit_path = ""

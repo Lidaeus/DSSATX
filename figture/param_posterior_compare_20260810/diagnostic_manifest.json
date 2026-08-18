@@ -1,0 +1,25 @@
+{
+  "artifact_type": "posterior_comparison_v2_vs_official_20260810",
+  "v2_run": "e02_v2_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260808",
+  "official_run": "e02_official_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260809",
+  "ensembles": {
+    "v2": "D:\\Tomato_Cal\\workspace\\runs\\e02_v2_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260808\\e02_v2_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260808.5.par.csv",
+    "official": "D:\\Tomato_Cal\\workspace\\runs\\e02_official_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260809\\e02_official_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260809.5.par.csv"
+  },
+  "n_realizations": 200,
+  "shared_params": 341,
+  "groups": {
+    "genetic": 73,
+    "soil_physical": 48,
+    "ic": 220
+  },
+  "note": "ks_p from two-sample KS (200 vs 200); overlap_5_95 = fraction of official samples inside v2 5-95% posterior",
+  "figures": [
+    "caterpillar_genetic.png",
+    "caterpillar_soil_physical.png",
+    "ic_layer_boxplot.png",
+    "scatter_medians_genetic.png",
+    "scatter_medians_soil_physical.png",
+    "shift_histogram.png"
+  ]
+}

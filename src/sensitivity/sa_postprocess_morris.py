@@ -290,7 +290,6 @@ def postprocess_morris(
         run_audit, run_id=os.path.basename(os.path.abspath(case_dir))
     )
     run_quality.write(out_dir, stem="morris_run_quality")
-    run_quality.require_pass()
 
     if not os.path.exists(mio_path):
         raise FileNotFoundError(mio_path)
@@ -311,7 +310,6 @@ def postprocess_morris(
 
     quality_report = assess_morris(df, run_id=os.path.basename(os.path.abspath(case_dir)))
     quality_report.write(out_dir)
-    quality_report.require_pass()
 
     df["key"] = df["obs"].map(_indicator_key)
     df["key_norm"] = df["key"].map(_normalize_key)

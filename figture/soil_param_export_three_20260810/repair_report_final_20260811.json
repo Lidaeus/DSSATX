@@ -1,0 +1,29 @@
+{
+  "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2501_actual_trial_calibration_v8_adap34_plantn_slpf_moisturefix_20260729\\XXQL2501.TMX": {
+    "repair": {
+      "reference_rows": 65,
+      "applied": 49
+    },
+    "verify": {
+      "rows_checked": 65,
+      "issue_count": 1,
+      "issues": [
+        "TN13 L1 SNH4 2 !=  2"
+      ]
+    }
+  },
+  "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729\\XXQL2601.TMX": {
+    "repair": {
+      "reference_rows": 65,
+      "applied": 66
+    },
+    "verify": {
+      "rows_checked": 65,
+      "issue_count": 2,
+      "issues": [
+        "TN11 L2 SNH4 1 !=  1",
+        "TN11 L2 SNO3 23 !=  23"
+      ]
+    }
+  }
+}

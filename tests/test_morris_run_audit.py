@@ -73,3 +73,32 @@ def test_audit_does_not_misclassify_interruption_as_model_failure(tmp_path):
     assert summary["runtime_failed_runs"] == 1
     assert summary["not_finalized_runs"] == 3
     assert audit["failures"][0]["outer_exit_code_hex"] == "0xC000026B"
+
+
+def test_audit_can_fallback_to_mio_when_rmr_is_missing(tmp_path):
+    (tmp_path / "sa_sen_morris.sen.par.csv").write_text(
+        "run_id,a,b\n"
+        "0,0,0\n"
+        "1,1,0\n"
+        "2,1,1\n"
+        "3,0,1\n"
+        "4,0,0\n"
+        "5,1,0\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "sa_sen_morris.mio").write_text(
+        "observation_name,parameter_name,n_samples,sen_mean_abs\n"
+        "tn2_fwc_end,a,4,1.0\n"
+        "tn2_fwc_end,b,4,0.5\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "run_status.json").write_text(
+        json.dumps({"status": "completed", "manager_exit_code": 0}), encoding="utf-8"
+    )
+    audit = audit_morris_case(tmp_path)
+    summary = audit["summary"]
+    assert summary["mio_exists"] is True
+    assert summary["rmr_exists"] is False
+    assert summary["process_state"] == "completed"
+    assert summary["fully_valid_trajectories"] == 2
+    assert audit["design_warnings"]

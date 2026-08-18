@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_sobol23_e01review_laisafe_v4_20260728"
+crop: "eggplant"
+created_at: "2026-07-28T00:04:56Z"
+approved_at: "2026-07-28T00:04:56Z"
+approved_by: "Codex"
+review_status: "approved"
+derived_from: "eggplant_e02_sobol23_e01review_laisafe_v4_20260728.csv"
+derived_from_sha256: "f6f19ace5da1d1fe3fc201e8498127b4a08fe18b48f7e14c56aa0a240ff54de4"
+bounds_sha256: "4d1e19c22287bc026c3852885934251e3ff81e32250e8c98f0bf2842bdafe488"
+parameter_count: 64
+automatic_repairs: 0
+notes: "Final E02 LAI-safe candidate: v3 passed LAID but 3/20 LAIX members reached 10.12-10.49; v4 minimally raises TRIFL lower bound to 0.48."

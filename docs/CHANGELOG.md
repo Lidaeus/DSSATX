@@ -1,5 +1,44 @@
 # Changelog
 
+## 2026-07-23（v2 方案操作机制代码实现：DAP 物化 + NSGA-III + 两年编排）
+
+在 v2 方案配置与数据门之上，补齐方案描述的操作机制代码，使正式运行链路在参数集冻结后可直接启动：
+
+- 新增 `src/management/dap_policy.py`：DAP（移栽后天数）政策物化器。`build_calendar_stages()` 把统一的 DAP 阶段通过各年移栽日期映射到 YYDDD 日历（2025: DAP96→25171、DAP145→25220；2026: DAP96→26165、DAP129→26198），同一政策在两年日历不同但 DAP 区间相同。`materialize_dap_scenario()` 复用 v1 已审计的 FileX 改写原语（`_events`/`_allocate`/`_replace_field`），但用 DAP 推导的日历阶段驱动；强制单次灌溉上限、DAP96 后停氮、S4 氮比例=0；基肥（移栽前事件）归入定植阶段；写 `MgmtEvent.OUT` 账本（`rainfall_considered=false`）与 manifest。`read_final_chfpw()` 包装 `_read_freshwt_var_by_run` 返回 `FreshWt.OUT` 末行累计鲜果重。
+- 新增 `src/management/nsga3_search.py`：`maximin_lhs_initial_population()` 用 `scipy.stats.qmc.LatinHypercube`（random-cd 优化）生成可复现的 128 候选初始种群（仅播种，非正式结果）；`decode_to_candidate()` 把 8 维决策向量解码为 `CandidatePolicy`（S4 灌溉比例=剩余、S4 氮比例=0，simplex 约束按构造满足）；`TwoYearRobustProblem`（pymoo）暴露 4 个最小化目标（产量取负）+ 2 个逐年产量底线不等式约束，失败 DSSAT 候选给大惩罚并判不可行；`build_nsga3()` 用 Das–Dennis 参考方向构造 NSGA-III。
+- 新增 `src/management/robust_orchestrator.py`：`evaluate_policy_two_years()` 对 2025、2026 各物化→stage→execute→读 CHFPW；`run_formal_nsga3()` 顶层入口，先 `load_formal_design`（含降雨审计），再校验参数集 `science_validated`——未通过且无 `--allow-engineering-precheck` 时 `PermissionError` 阻断；逐 seed 跑 NSGA-III，写出 Pareto CSV 与 manifest；工程预检输出强制带 `engineering_precheck_` 前缀、`approval_scope=engineering_precheck`，不可作为正式结果引用。
+- 新增 `tools/run_formal_optimization.py` CLI（`--design/--parameter-set-dir/--work-root/--seeds/--allow-engineering-precheck` 等）。
+- 更新 `src/management/__init__.py` 导出 v2 公共 API（`CandidatePolicy`、`build_calendar_stages`、`decode_to_candidate`、`evaluate_policy_two_years`、`run_formal_nsga3` 等）。
+- 新增 `tests/test_management_dap_policy.py`（9 条）与 `tests/test_management_nsga3_search.py`（8 条）；全部 27 条管理测试通过（含 v1，无回归）。NSGA-III 真实 DSSAT 运行受参数门保护，单元测试用可注入的 mock 评估器，不依赖真实 DSSAT。
+
+## 2026-07-23（双春季气象驱动的直接 DSSAT 多目标稳健优化方案 v2）
+
+- 将管理优化方法由“32 个 LHS 点 + 季节总水量/总氮量比例”升级为直接 DSSAT–NSGA-III 双春季稳健优化；LHS 降级为初始种群，不再被当作正式优化结果。
+- 正式研究对象仅包含新乡 2025 春和 2026 春气象，同一套水氮政策在两年分别运行，四目标为：两年平均鲜果产量、较差年份鲜果产量（最大化），季节灌溉量、季节施氮量（最小化）。
+- 管理政策改用统一 DAP 生育阶段（定植缓苗 0–28、冠层扩展 29–63、开花–早采收 64–96、盛果–后期 97–145）传递，避免把 2025 日历日期直接套到 2026；末段施氮固定为零。
+- 逐年施加 90% 产量底线（`yield_floor_fraction_of_year_specific_reference`），并在 `aggregate_policy_evidence()` 中分别按年评估，防止均值掩盖某一年的显著减产。
+- “天气稳健性试验”与“两年实际初始土壤条件回放”在配置中明确分角色，避免混淆天气效应与初始条件效应。
+- 硝态氮淋失仅在 DSSAT 氮平衡输出经单位与质量守恒审计后才允许进入目标函数；当前以施氮量为资源投入目标，不伪称环境损失。阶段土壤水分触发阈值列为第二阶段，在串行状态续跑器验证前不宣称完成实时阈值优化。
+- `load_formal_design()` 增加双年气象门：校验移栽—末次采收覆盖，并对 `.WTH` 全记录审计 `RAIN=0`（温室滴灌系统无降雨作为管理供水）。两个春季文件均已确认降雨量为 0。
+- 设计测试增至 6 条，覆盖双年天气年与无代理、稳健聚合与较差年、降雨审计、覆盖门、LHS 仅作初始种群、逐年产量底线。状态为 `formal_design_ready_parameter_pending`。
+
+## 2026-07-22（T10 直接连续采收与季节适应性联合率定方案，待实施）
+
+- T10 改用 FileT/FreshWt.OUT 的直接累计 `CHFPW`、`CHPDT`，取消 PWAD/PWAI 及累计差分进入正式 Phi。
+- 对 CHFPW/CHPDT 冻结同尺度 `ln((y+1 kg ha-1)/(1 kg ha-1))` 目标函数，以缓解时序累计量异方差；原始 FileT、DSSAT 输出、指标和论文图保持物理尺度。
+- 采收日历规定真实模型采收提前 1 天、在本地 FileX 副本追加虚拟末次采收并延长模拟结束日；输出采用真实观测日 ±1 天有界就近读取，虚拟事件不产生 Phi 或图表点。
+- T10 Phi 家庭预算调整为 `PLANT_N=1.00`、`HARVEST_FRESH=1.25`、`HARVEST_DRY=1.25`，并要求按家庭—季节—变量一次性分配，避免采收轮次膨胀。
+- T10 候选 `XFPHT` 下界由 35 放宽为 31，仍以 `XMAGE=8–30` 保证所有样本严格满足 `XMAGE<XFPHT`。
+
+## 2026-07-22（T9 连续采收观测合同与高维率定提案）
+
+- T9 高维诊断候选扩展为 55 个共享作物/生理参数；`EM-V1` 按用户决定恢复旧版基线 22 和 10–40 诊断域，`FL-VS` 使用 100–140。
+- 新增 T9 observation/group policy：物候 family budget 降至 0.25，LAIX 强制 diagnostic-only，PWAI 为主要收获证据，每季仅最终 PWAD 作为累计锚点。
+- HWAM 永久退出率定 builder；显式重新加入会失败，policy 即使误设 calibration 也会强制零权重。保留 runner 输出仅供历史诊断。
+- 修复多季 design 已声明 observation policy、但未显式传 CLI 时未自动加载的问题；T9 PST smoke 生成 464 条登记观测、336 条活动观测，HWAM=0、LAIX 活动数=0、最终 PWAD 活动数=16。
+- 对账旧/新 Phi：旧最低 21,552.8 中 HIAM 贡献约 19,292.2；扣除不适用 HIAM 和重复 HWAM 后约 2,115.2，说明数万与数千主要是目标及权重尺度差异。
+- T9 code review 修复：冻结的 64 项参数现均进入 PST（55 active + 9 fixed）；补齐根氮、氮胁迫和 ECO 参数的物理硬边界；IES 工程门只审计进入 Phi 的观测，零权重缺失诊断不再误报模型失败；一键启动器默认严格执行 D1 的 600 members、2 次更新，并在工程质量门失败时返回非零。8-member/1-update smoke 通过，8/8 成员保留。
+
 ## 2026-07-21（实际试验率定/验证输入包）
 
 - 将 XXQL2502、XXQL2601 原 FileX 的 `SYMBI` 由 Y 改为非豆科适用的 N，保持 DSSAT OPTIONS 固定宽度；两季原始目录补齐 SOIL.SOL。
@@ -82,7 +121,7 @@
 - [P2] 执行元数据冻结：去掉 `--cultivar TM0008` 硬编码（与 S4 model command 一致，cultivar 由冻结 FileX 决定）；每个 candidate_run_manifest.json 记录可复现 argv + harvest_var；sigma 分量语义改为基础 sigma>0、附加 model_sigma/sigma_floor≥0（匹配共享 observation-policy 语义）、组合 sigma_eff 有限正。
 - 新增 8 项负向/回归测试（与 5 项发现一一对应 + sigma 散活）：policy CLI 哈希不匹配、harvest_var 不匹配、posterior 上游过期、schema 严格（4 对/4.5/自配对/重复 pair_id）、非空 out_dir 拒绝、非零返回码+预存旧 OUT→incomplete、comparison 含 A/B 两侧、argv 无 --cultivar。
 - T4.2.1-C 受控重放：从干净 `3433c29` 重新生成 posterior demo + 运行 candidate_predictions 到新目录 `t4_candidate_predictions_v2/`（未覆盖 T4.2-B）。6/6 returncode=0，A/B comparison 覆盖全 6 realizations，3 对距离与 T4.2-B 精确一致（0.134508/0.015569/0.022550），manifest git_dirty=false，17 artifacts 哈希逐项复核 0 failures。
-- 全套测试 219 passed/2 skipped（基线 211 → +8）；compileall src+tests 通过。全程 tooling_demo/science_pending，未运行新 IES/SA，未改 bounds/sigma/split。证据见 `docs/reports/P2_MVP_T4_2_1_运行审计_20260719.md`。
+- 全套测试 219 passed/2 skipped（基线 211 → +8）；compileall src+tests 通过。全程 tooling_demo/science_pending，未运行新 IES/SA，未改 bounds/sigma/split。证据见 `docs/archive/development_records/P2_MVP_T4_2_1_运行审计_20260719.md`。
 
 ## 2026-07-19（T4.2 候选解预测复跑完成）
 
@@ -90,7 +129,7 @@
 - 从 `validation_metrics.py` 提取 `build_comparison_from_rerun()` 公共函数，代表解与候选解共用同一 comparison 定义（交接 §6）。
 - 新增 `tests/test_candidate_predictions.py`（12 测试，覆盖交接 §9 全部 11 项 + sigma 手算）：hash 篡改/缺 demo flag/realization 缺失重复非有限/去重/A-B 错配/calibration 排除/手算回归/sigma 缺失非正非 raw/失败 incomplete/demo 禁科学标签/manifest POSIX+哈希复核。全套 211 passed/2 skipped。
 - 修复 `_default_dssat_runner` 调用方式：`-m src.calibration.run_dssat` 在隔离 cwd 下找不到 src 包，改用脚本绝对路径（与 `sa_model.py` 同模式）。
-- 全程 `tooling_demo`/`science_pending`，未读 calibration Phi，未运行新 IES/SA，未改 bounds/sigma/split，未输出科学标签。结果不建立功能异参同效。证据见 `docs/reports/P2_MVP_T4_2_运行审计_20260719.md`。
+- 全程 `tooling_demo`/`science_pending`，未读 calibration Phi，未运行新 IES/SA，未改 bounds/sigma/split，未输出科学标签。结果不建立功能异参同效。证据见 `docs/archive/development_records/P2_MVP_T4_2_运行审计_20260719.md`。
 
 ## 2026-07-18（T3.1 review 与 T4 最小接口）
 
@@ -101,7 +140,7 @@
 
 ## 2026-07-18（T3 staged run）
 
-- T3 staged calibration 四阶段（S1→S2→S3→S4）全部 `engineering_validated`，继承链完整：S1（20/2, ADAP）→ S2（30/2, +4N, LAI/生物量/氮）→ S3（30/2, +XFRT/XFINT, PWAI 采收）→ S4（40/2, 联合 6 参数）。Phi 分别收敛到 0.81/2822/159/792；每阶段生成中位数代表参数、确定性复跑（LAID/PWAI）和完整 manifest/哈希。全程 `approval_scope=tooling_development`、`science_pending`，未读 validation。证据见 `docs/reports/P2_MVP_T3_staged_run_20260718.md`。
+- T3 staged calibration 四阶段（S1→S2→S3→S4）全部 `engineering_validated`，继承链完整：S1（20/2, ADAP）→ S2（30/2, +4N, LAI/生物量/氮）→ S3（30/2, +XFRT/XFINT, PWAI 采收）→ S4（40/2, 联合 6 参数）。Phi 分别收敛到 0.81/2822/159/792；每阶段生成中位数代表参数、确定性复跑（LAID/PWAI）和完整 manifest/哈希。全程 `approval_scope=tooling_development`、`science_pending`，未读 validation。证据见 `docs/archive/development_records/P2_MVP_T3_staged_run_20260718.md`。
 - [P0] 修复 S4 active 参数被 `--fixed-from` 钉死的缺陷：`apply_fixed_params_csv` 把 fixed_from 的每个参数设成 `status=fixed` 且 `lower=upper=init`，随后 `apply_parameter_stage` 对 active_params 未恢复状态/bounds，导致 S4 `npar_adj=0` 无法运行（S2/S3 因 active 参数不在 fixed_from CSV 里未暴露）。修复：新增 `load_frozen_bounds_lookup`，`apply_parameter_stage` 新增 `frozen_bounds` 参数，对 active 参数强制 `status="none"` 并从冻结 bounds 恢复 lower/upper，保留代表值为 init。回归测试 `test_s4_re_releases_parameters_pinned_by_fixed_from` 覆盖。
 - 发现 `run_parallel.py --resume` 与 pestpp-ies 不兼容（`/r option not supported by pestpp-ies`）；S4 改为从干净 build 重新启动。该工具层限制不在本轮修复范围。
 
@@ -114,7 +153,7 @@
   - [P2] DesignSpec 暴露 `bounds_id`/`input_bundle`/`observation_policy_id`，staged 入口分两段交叉校验 CLI 实际值与 design 声明一致（bounds id 字符串、bundle id 来自 input_manifest、policy id 来自 CSV 文件名 stem），不一致即 `parser.error`。
   - 新增 manifest↔finalize↔代表参数三方哈希一致校验，任一不一致即失败并指明三方各自哈希。
   - [P2] Finding 5（`model_failed` 暂无证据生产者）按审查意见不在本轮扩展，保守归类为 `other_dropped` 已安全。
-- 全测试：187 passed, 2 skipped（基线 179 → +8：7 单元 + 1 集成）。全程 `approval_scope=tooling_development`、`science_pending`，未启动 DSSAT/IES，未触达 validation。证据见 `docs/reports/P2_MVP_T2_2_修复记录_20260718.md`。
+- 全测试：187 passed, 2 skipped（基线 179 → +8：7 单元 + 1 集成）。全程 `approval_scope=tooling_development`、`science_pending`，未启动 DSSAT/IES，未触达 validation。证据见 `docs/archive/development_records/P2_MVP_T2_2_修复记录_20260718.md`。
 
 ## 2026-07-16
 
@@ -170,7 +209,7 @@
 - 统一项目路径与兼容入口，改为每个 worker 独立 DSSAT 运行目录，并拒绝陈旧/空输出。
 - 新增冻结边界、候选参数、Morris/Sobol 与 IES 科学质量门；历史退化运行现会明确失败。
 - 修复 CUL/ECO/SPE/SOIL/IC 注入链、IC 表状态解析和 frozen `init/status` 应用。
-- 完成真实 DSSAT 参数响应、非退化 Morris 和非退化 IES 微型验证，证据见 `reports/P0_verification_report.md`。
+- 完成真实 DSSAT 参数响应、非退化 Morris 和非退化 IES 微型验证，证据见 `archive/development_records/P0_verification_report.md`。
 - 重写产品定义与系统设计，将项目目标收敛为可信、有效、易用的 DSSAT SA/率定科研工具。
 - 建立 `process_completed` 与 `science_validated` 两级状态及阶段质量门。
 - 明确 SA 提案、人工审核、冻结边界和率定之间的受控衔接。

@@ -1,0 +1,4 @@
+season,n_obs,old_multiplier,corrected_multiplier,weight_inflation,phi_scale_inflation
+25SP,80,0.8,0.111803,7.16,51.20
+25FA,32,0.8,0.176777,4.53,20.48
+26SP,120,0.8,0.091287,8.76,76.80

@@ -7,9 +7,22 @@
   "experiment": "xxql2501",
   "source_bundle": "xxql2501_20260716",
   "treatment_roles": {
-    "calibration": [2, 3, 4, 10, 11, 12],
-    "validation": [5, 13],
-    "diagnostic": [9, 14]
+    "calibration": [
+      2,
+      3,
+      4,
+      10,
+      11,
+      12
+    ],
+    "validation": [
+      5,
+      13
+    ],
+    "diagnostic": [
+      9,
+      14
+    ]
   },
   "rationale": "Calibration covers two water levels (W3=TN2/3/4 and W1=TN10/11/12) × three non-zero nitrogen levels (N1/N2/N3), identifying growth, nitrogen-response, and harvest parameters. Validation holds out the zero-nitrogen treatments (N0) at both water levels (TN5=W3N0, TN13=W1N0), testing extrapolation to severe nitrogen stress. TN9/TN14 are incomplete intermediate-irrigation/CK treatments used only for diagnostic, never entering Phi.",
   "limitations": "Single-season internal validation; cannot substitute for cross-season or cross-site external validation. Paper must state this explicitly.",

@@ -1,0 +1,36 @@
+{
+  "artifact_type": "custom_dssat_versions_evaluation",
+  "bundle": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2501_layermean_ic_valid_n012_v1_20260801",
+  "bundle_manifest_sha256": "0be22893c511d9e6fe1831761a17e13b0c4015b6a27d2d784a907a1da57f2417",
+  "note": "DMFR-corrected bundle (new TMT); TN13 dry weight 5685->1958",
+  "versions": {
+    "a3": "A3 阈值氮吸收 (NUPK50+NUPCMN)",
+    "a3_nr_zp": "A3+零保持NR响应 (NUPK50+NUPCMN+NREXP+NRMIN)",
+    "nni": "NNI 临界氮稀释 (NUPK50+NUPQ)"
+  },
+  "figures": [
+    "comparison_d_index.png",
+    "comparison_nse.png",
+    "comparison_r2.png",
+    "comparison_rrmse_pct.png",
+    "residual_CHTD.png",
+    "residual_DRY_CUM.png",
+    "residual_DRY_INC.png",
+    "residual_FRESH_CUM.png",
+    "residual_FRESH_INC.png",
+    "residual_L#SD.png",
+    "residual_LAID.png",
+    "residual_LWAD.png",
+    "residual_SWAD.png",
+    "scatter_CHTD.png",
+    "scatter_DRY_CUM.png",
+    "scatter_DRY_INC.png",
+    "scatter_FRESH_CUM.png",
+    "scatter_FRESH_INC.png",
+    "scatter_L#SD.png",
+    "scatter_LAID.png",
+    "scatter_LWAD.png",
+    "scatter_SWAD.png"
+  ],
+  "metrics_csv": "D:\\Tomato_Cal\\figture\\custom_versions_20260808\\metrics_custom_versions_20260808.csv"
+}

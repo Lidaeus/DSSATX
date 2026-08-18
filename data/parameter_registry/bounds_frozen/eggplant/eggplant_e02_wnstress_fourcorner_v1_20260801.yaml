@@ -1,0 +1,19 @@
+bounds_id: eggplant_e02_wnstress_fourcorner_v1_20260801
+crop: eggplant
+source: e02_joint62_v7_nstfac050_rhght035_posterior15_offset0_phys + 9 water/N stress params
+active_count: 71
+base_active_count: 62
+new_parameters:
+  - DSWBAR (water stress sensing depth)
+  - XFRMAX (turgor reproductive partitioning)
+  - SENRTE (base leaf senescence rate)
+  - SENDAY (leaf-age senescence)
+  - RWUMX (max root water uptake)
+  - PORMIN (min porosity for root growth)
+  - LNREF (reference leaf N concentration)
+  - NSLOPE (canopy N gradient)
+  - CMOBMX (mobile carbohydrate reserve)
+notes: >
+  Built on the e02 nochtd posterior15phys posterior bounds. Adds 9 water/nitrogen
+  stress and senescence parameters per the extension plan (docs/reference/参数拓展方案参考.MD).
+  Designed for four-corner (W3xN0, W3xN3, W1xN0, W1xN3) calibration.

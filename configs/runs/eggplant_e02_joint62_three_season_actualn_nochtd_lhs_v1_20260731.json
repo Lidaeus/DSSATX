@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "design_id": "eggplant_e02_joint62_three_season_actualn_nochtd_lhs_v1_20260731",
+  "cultivar_identity": "same_eggplant_cultivar",
+  "shared_parameter_scope": "55 shared crop/process parameters including SOIL_SLPF plus seven predeclared 25FA effective offsets; FL-VS fixed at 100; CHTD retained for diagnostics only",
+  "observation_policy": "configs/runs/e02_n_response_snam_lnam_chpdtlog_noadap_nochtd_v1.csv",
+  "group_policy": "configs/runs/t10_n_response_group_policy_harvestdry250_v2.csv",
+  "seasonal_parameterization": {
+    "reference_season_id": "25SP",
+    "offsets": [
+      {
+        "offset_name": "DLFMAX_AUT",
+        "parameter_name": "LFMAX",
+        "transform": "log_multiplier",
+        "target_season_ids": ["25FA"],
+        "rationale": "documented autumn effective maximum leaf photosynthetic-capacity adjustment"
+      },
+      {
+        "offset_name": "DSLAVR_AUT",
+        "parameter_name": "SLAVR",
+        "transform": "log_multiplier",
+        "target_season_ids": ["25FA"],
+        "rationale": "documented autumn effective specific-leaf-area adjustment"
+      },
+      {
+        "offset_name": "DXFRT_AUT",
+        "parameter_name": "XFRT",
+        "transform": "logit_additive",
+        "target_season_ids": ["25FA"],
+        "rationale": "documented autumn effective fruit dry-matter partitioning adjustment"
+      },
+      {
+        "offset_name": "DSFDUR_AUT",
+        "parameter_name": "SFDUR",
+        "transform": "log_multiplier",
+        "target_season_ids": ["25FA"],
+        "rationale": "documented autumn effective fruit-growth-duration adjustment"
+      },
+      {
+        "offset_name": "DTB1_AUT",
+        "parameter_name": "TB1",
+        "transform": "additive",
+        "target_season_ids": ["25FA"],
+        "rationale": "documented autumn vegetative-stage base-temperature adjustment"
+      },
+      {
+        "offset_name": "DTB2_AUT",
+        "parameter_name": "TB2",
+        "transform": "additive",
+        "target_season_ids": ["25FA"],
+        "rationale": "documented autumn early-reproductive-stage base-temperature adjustment"
+      },
+      {
+        "offset_name": "DTB3_AUT",
+        "parameter_name": "TB3",
+        "transform": "additive",
+        "target_season_ids": ["25FA"],
+        "rationale": "documented autumn late-reproductive-stage base-temperature adjustment"
+      }
+    ]
+  },
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_actual_trial_calibration_v8_adap34_plantn_slpf_moisturefix_20260729",
+      "bundle_manifest_sha256": "f0c59a5e48127b62d77da13f1e5db154ac3b13f03b496b3586ee7514192e39fe",
+      "role": "calibration",
+      "treatments": [2, 3, 4, 5, 9, 10, 11, 12, 13, 14]
+    },
+    {
+      "season_id": "25FA",
+      "experiment_code": "XXQL2502",
+      "bundle_path": "data/user/experiments/xxql2502_actual_trial_calibration_v7_adap34_plantn_slpf_20260729",
+      "bundle_manifest_sha256": "0d37048d027ad08f3c5cdb87e6302974b63643864c6afd909517a741885b5897",
+      "role": "calibration",
+      "treatments": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729",
+      "bundle_manifest_sha256": "365e0afc8e33be2ef6413a5420ec905211f7deb276f852f97723f4ce3dd1d24a",
+      "role": "calibration",
+      "treatments": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    }
+  ],
+  "t10_scheme": {
+    "purpose": "Three-season actual-FileX-N no-CHTD calibration with LHS initial ensemble and covariance reinflation",
+    "harvest_contract": "raw cumulative dry CHPDT plus ln(y+1) incremental dry HPODW",
+    "active_crop_targets": [
+      "PDAP",
+      "LAIX",
+      "LAID",
+      "LWAD",
+      "SWAD",
+      "SNAM",
+      "LNAM",
+      "CHPDT",
+      "HPODW"
+    ],
+    "active_process_targets": [
+      "SOIL_WATER"
+    ],
+    "shared_active_parameters": 55,
+    "seasonal_offset_parameters": 7,
+    "total_active_parameters": 62,
+    "fixed_project_invariants": {
+      "FL-VS": 100.0,
+      "ADAP": "diagnostic_only",
+      "CHTD": "diagnostic_only"
+    },
+    "management_authority": "ADAP diagnostic-only; CHTD diagnostic-only; PAGE=25 d and SPRL=-99; actual FileX initial soil N retained",
+    "seasonal_offsets_are_effective_corrections_not_genetic_coefficients": true,
+    "virtual_terminal_harvest": true,
+    "bounded_nearest_read": "d+/-1 day window"
+  }
+}

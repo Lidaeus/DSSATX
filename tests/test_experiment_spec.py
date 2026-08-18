@@ -79,10 +79,10 @@ class TestValidSpecs:
 
 
 # ---------------------------------------------------------------------------
-# Spec loading: template specs that should fail
+# Spec loading: E01-approved 23-parameter specs
 # ---------------------------------------------------------------------------
 
-class TestTemplateSpecsFail:
+class TestApprovedSobol23Specs:
     """Template specs (E02, E03, E05) use sobol23 (23 params) with T9 bounds
     (55 active) — must fail with parameter-count mismatch until E01 produces
     23-active bounds."""
@@ -93,9 +93,11 @@ class TestTemplateSpecsFail:
         "E02_single23_26sp",
         "E03_joint23_25sp_25fa",
     ])
-    def test_sobol23_specs_fail_count_mismatch(self, spec_name):
-        with pytest.raises(ExperimentSpecError, match="Parameter count mismatch"):
-            ExperimentSpec.load(SPECS_DIR / f"{spec_name}.json")
+    def test_sobol23_specs_load_with_approved_bounds(self, spec_name):
+        spec = ExperimentSpec.load(SPECS_DIR / f"{spec_name}.json")
+        assert spec.parameter_set.declared_count == 23
+        assert spec.bounds_active_count == 23
+        assert spec.bounds_id == "eggplant_e02_sobol23_e01review_laisafe_v4_20260728"
 
 
 # ---------------------------------------------------------------------------
@@ -137,11 +139,11 @@ class Test26SPRoleEnforcement:
             "scientific_role": "test",
             "season_inputs": [
                 {"season_id": "25SP", "role": "calibration",
-                 "input_manifest": "data/user/experiments/xxql2501_20260716/input_manifest.json",
-                 "sha256": "5b7deac1502a5005cb46a1c2767a11d0567e13c094544f2faef3b9fdb950cb1b"},
+                 "input_manifest": "data/user/experiments/xxql2501_actual_trial_calibration_v2_20260726/input_manifest.json",
+                 "sha256": "93609bccd7c76cd95da89d4bc910214edcfa79c9225be198028e1bc8e9f0e17f"},
                 {"season_id": "26SP", "role": "validation",
-                 "input_manifest": "data/user/experiments/xxql2601_actual_trial_validation_v1_20260721/input_manifest.json",
-                 "sha256": "f62335c787d717bbb95eb832a7f34aca01574a9e8f55ca225aaa095102c7e2b5"},
+                 "input_manifest": "data/user/experiments/xxql2601_actual_trial_calibration_v2_20260726/input_manifest.json",
+                 "sha256": "b9ede2f7f331179a0ca8426373a9f61c99fda906f594edb16bdc4dbc2de77c84"},
             ],
             "parameter_set": "configs/experiments/parameter_sets/highdim55_dryonly_v1.json",
             "bounds_id": "eggplant_t9_highdim_v1_20260722",
@@ -160,8 +162,8 @@ class Test26SPRoleEnforcement:
             "scientific_role": "single_season_diagnostic",
             "season_inputs": [
                 {"season_id": "26SP", "role": "diagnostic",
-                 "input_manifest": "data/user/experiments/xxql2601_actual_trial_validation_v1_20260721/input_manifest.json",
-                 "sha256": "f62335c787d717bbb95eb832a7f34aca01574a9e8f55ca225aaa095102c7e2b5"},
+                 "input_manifest": "data/user/experiments/xxql2601_actual_trial_calibration_v2_20260726/input_manifest.json",
+                 "sha256": "b9ede2f7f331179a0ca8426373a9f61c99fda906f594edb16bdc4dbc2de77c84"},
             ],
             "parameter_set": "configs/experiments/parameter_sets/highdim55_dryonly_v1.json",
             "bounds_id": "eggplant_t9_highdim_v1_20260722",
@@ -424,8 +426,8 @@ def _make_minimal_spec(tmp_path: Path, *, active_phi_targets: list[str]) -> Path
         "scientific_role": "test",
         "season_inputs": [
             {"season_id": "25SP", "role": "calibration",
-             "input_manifest": "data/user/experiments/xxql2501_20260716/input_manifest.json",
-             "sha256": "5b7deac1502a5005cb46a1c2767a11d0567e13c094544f2faef3b9fdb950cb1b"},
+             "input_manifest": "data/user/experiments/xxql2501_actual_trial_calibration_v2_20260726/input_manifest.json",
+             "sha256": "93609bccd7c76cd95da89d4bc910214edcfa79c9225be198028e1bc8e9f0e17f"},
         ],
         "parameter_set": "configs/experiments/parameter_sets/highdim55_dryonly_v1.json",
         "bounds_id": "eggplant_t9_highdim_v1_20260722",
@@ -448,11 +450,11 @@ def _write_spec_with_seasonal(tmp_path: Path, seasonal: dict) -> Path:
         "scientific_role": "autumn_offset_comparison",
         "season_inputs": [
             {"season_id": "25SP", "role": "calibration",
-             "input_manifest": "data/user/experiments/xxql2501_20260716/input_manifest.json",
-             "sha256": "5b7deac1502a5005cb46a1c2767a11d0567e13c094544f2faef3b9fdb950cb1b"},
+             "input_manifest": "data/user/experiments/xxql2501_actual_trial_calibration_v2_20260726/input_manifest.json",
+             "sha256": "93609bccd7c76cd95da89d4bc910214edcfa79c9225be198028e1bc8e9f0e17f"},
             {"season_id": "25FA", "role": "calibration",
-             "input_manifest": "data/user/experiments/xxql2502_actual_trial_calibration_v1_20260721/input_manifest.json",
-             "sha256": "b8ba5e8a83d3012e4684d9c2d84e15b2782817460ccf41cec2a533d362922856"},
+             "input_manifest": "data/user/experiments/xxql2502_actual_trial_calibration_v2_20260726/input_manifest.json",
+             "sha256": "7c14690797c119e1e49b4c437ec6ab94b8ccf02bc21ffcbd04cca9bbe2fec347"},
         ],
         "parameter_set": "configs/experiments/parameter_sets/highdim55_dryonly_v1.json",
         "bounds_id": "eggplant_t9_highdim_v1_20260722",
@@ -472,8 +474,8 @@ def _base_spec_dict(**overrides) -> dict:
         "scientific_role": "test",
         "season_inputs": [
             {"season_id": "25SP", "role": "calibration",
-             "input_manifest": "data/user/experiments/xxql2501_20260716/input_manifest.json",
-             "sha256": "5b7deac1502a5005cb46a1c2767a11d0567e13c094544f2faef3b9fdb950cb1b"},
+             "input_manifest": "data/user/experiments/xxql2501_actual_trial_calibration_v2_20260726/input_manifest.json",
+             "sha256": "93609bccd7c76cd95da89d4bc910214edcfa79c9225be198028e1bc8e9f0e17f"},
         ],
         "parameter_set": "configs/experiments/parameter_sets/highdim55_dryonly_v1.json",
         "bounds_id": "eggplant_t9_highdim_v1_20260722",

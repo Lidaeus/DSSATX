@@ -1,0 +1,98 @@
+{
+  "artifact_type": "two_season_diagnostics_joint_v2_soilphys_20260809",
+  "source_calibration": "D:\\Tomato_Cal\\workspace\\runs\\e02_v2_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260808",
+  "best_member": "195",
+  "parameter_csv": "D:\\Tomato_Cal\\workspace\\runs\\e02_v2_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260808\\best_member_195_deterministic_20260809\\best_member_195_params.csv",
+  "parameter_count_exported": 345,
+  "custom_dssat_executable": "D:\\Tomato_Cal\\windows\\windows_a3_nr_zp_20260806\\DSCSM048.EXE",
+  "custom_spe": "D:\\Tomato_Cal\\windows\\windows_a3_nr_zp_20260806\\Genotype\\TMGRO048.SPE",
+  "soil_injection": "enabled (calibrated SBDM/SLPF/SSKS/SLCL/SLSI applied)",
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "excode": "XXQL2501",
+      "treatments": [
+        2,
+        3,
+        4,
+        5,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "bundle": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2501_actual_trial_calibration_v8_adap34_plantn_slpf_moisturefix_20260729"
+    },
+    {
+      "season_id": "26SP",
+      "excode": "XXQL2601",
+      "treatments": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "bundle": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729"
+    }
+  ],
+  "deterministic_run": "D:\\Tomato_Cal\\workspace\\runs\\e02_v2_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260808\\best_member_195_deterministic_20260809",
+  "output_root": "D:\\Tomato_Cal\\figture\\joint_v2_soilphys_twoseason_20260809",
+  "metric_plots": [
+    "metrics_heatmap_rrmse_pct.png",
+    "metrics_heatmap_r2.png",
+    "metrics_heatmap_nse.png",
+    "metrics_heatmap_d_index.png",
+    "metrics_rrmse_by_season.png",
+    "scatter_CHTD.png",
+    "residual_CHTD.png"
+  ],
+  "figures": [
+    "25SP\\bar_dry_yield_increment.png",
+    "25SP\\timeseries_LAID_by_WxN.png",
+    "25SP\\timeseries_LWAD_by_WxN.png",
+    "25SP\\timeseries_SWAD_by_WxN.png",
+    "25SP\\timeseries_dry_cum_by_WxN.png",
+    "25SP\\timeseries_fresh_cum_by_WxN.png",
+    "26SP\\bar_dry_yield_increment.png",
+    "26SP\\timeseries_LAID_by_WxN.png",
+    "26SP\\timeseries_LWAD_by_WxN.png",
+    "26SP\\timeseries_SWAD_by_WxN.png",
+    "26SP\\timeseries_dry_cum_by_WxN.png",
+    "26SP\\timeseries_fresh_cum_by_WxN.png",
+    "metrics_heatmap_d_index.png",
+    "metrics_heatmap_nse.png",
+    "metrics_heatmap_r2.png",
+    "metrics_heatmap_rrmse_pct.png",
+    "metrics_rrmse_by_season.png",
+    "residual_CHTD.png",
+    "residual_LAID.png",
+    "residual_LWAD.png",
+    "residual_SWAD.png",
+    "residual_dry_cum.png",
+    "residual_fresh_cum.png",
+    "response_structure_audit.png",
+    "scatter_CHTD.png",
+    "scatter_LAID.png",
+    "scatter_LWAD.png",
+    "scatter_SWAD.png",
+    "scatter_dry_cum.png",
+    "scatter_fresh_cum.png"
+  ],
+  "metrics_csv": "D:\\Tomato_Cal\\workspace\\runs\\e02_v2_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260808\\best_member_195_deterministic_20260809\\metrics_by_season_variable.csv",
+  "organ_n_pairs_csv": "D:\\Tomato_Cal\\workspace\\runs\\e02_v2_joint_genetic_soiln_soilphys_25sp26sp_200x5_20260808\\best_member_195_deterministic_20260809\\organ_n_compare.csv",
+  "bundle_note": "actual_trial bundles (same as calibration): v8 25SP / v7 26SP",
+  "limitations": [
+    "Python run-diagnostics product, not a publication Fig/FigS bundle.",
+    "W×N dynamics renderer excludes unmapped 25SP TN9/TN14 from factorial panels; all observations remain in metric CSVs."
+  ]
+}

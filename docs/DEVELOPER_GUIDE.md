@@ -4,7 +4,7 @@
 > 更新日期：2026-07-15
 > 实施状态：P0 已实施，待用户验收
 
-本文档面向本项目的开发和维护人员，说明当前架构、科学质量约束、模块边界和变更验收方式。用户操作入口见根目录 `README.md`，产品与长期路线见 `项目重构规划.md`，P0 证据见 `docs/reports/P0_verification_report.md`。
+本文档面向本项目的开发和维护人员，说明当前架构、科学质量约束、模块边界和变更验收方式。用户操作入口见根目录 `README.md`，产品与长期路线见 `项目重构规划.md`，P0 历史证据见 `docs/archive/development_records/P0_verification_report.md`。
 
 ## 1. 产品目标与开发原则
 

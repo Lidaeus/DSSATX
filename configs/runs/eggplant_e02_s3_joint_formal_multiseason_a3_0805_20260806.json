@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "design_id": "eggplant_e02_s3_joint_formal_multiseason_a3_0805_20260806",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "S3 joint release of all 35 Morris-top95 plus A3 0805 custom parameters",
+  "observation_policy": "configs/runs/e02_v2_rawdiff_terminal_nresp01_soil02_policy_20260805.csv",
+  "group_policy": "configs/runs/t10_rawdiff_terminal_nresp01_soil02_group_policy_20260805.csv",
+  "nitrogen_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_v2_25sp_water_n_mapping_corrected_20260805.csv",
+    "source_variable": "CHPDT",
+    "contrast": "N2_minus_N0_within_same_water",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "levels": [
+      "N1",
+      "N2"
+    ],
+    "harvest_scope": "all",
+    "sigma_floor": 50.0,
+    "budget_rule": "0.10 static N_RESPONSE budget within corrected 25SP six-treatment design"
+  },
+  "harvest_dry_objective": {
+    "enabled": true,
+    "mode": "increment_plus_terminal",
+    "increment_source": "measured_hpodw",
+    "terminal_variable": "CHPDT"
+  },
+  "process_state_objective": {
+    "enabled": true,
+    "mode": "signed_difference_plus_terminal",
+    "variables": [
+      "LAID",
+      "LWAD",
+      "SWAD"
+    ]
+  },
+  "seasonal_parameterization": null,
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_corrected_management_layermean_20260806",
+      "bundle_manifest_sha256": "e68e9740a0f32de22ade9811acc0b50546acf9ae85ee12d37fcc052b1a94bb64",
+      "role": "calibration",
+      "treatments": [
+        13,
+        12,
+        11,
+        5,
+        4,
+        3
+      ]
+    }
+  ],
+  "formal": {
+    "n_reals": 200,
+    "noptmax": 4,
+    "initial_ensemble_method": "sobol"
+  },
+  "diagnostic_single_season": true,
+  "custom_dssat_executable": "D:\\Tomato_Cal\\windows\\windows_a3_20260805\\dscsm048_a3.exe",
+  "custom_spe": "D:\\Tomato_Cal\\windows\\windows_a3_20260805\\Genotype\\TMGRO048.SPE",
+  "fl_vs_fixed": 120.0
+}

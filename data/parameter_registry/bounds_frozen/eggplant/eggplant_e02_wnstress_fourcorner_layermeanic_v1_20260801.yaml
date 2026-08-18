@@ -1,0 +1,23 @@
+bounds_id: eggplant_e02_wnstress_fourcorner_layermeanic_v1_20260801
+crop: eggplant
+source: e02_wnstress_fourcorner_formal_200x5_20260801 + historical v24 water/N response evidence + layer-mean IC counterfactual
+active_count: 71
+base_active_count: 62
+new_parameters:
+  - DSWBAR (water stress sensing depth)
+  - XFRMAX (turgor reproductive partitioning)
+  - SENRTE (base leaf senescence rate)
+  - SENDAY (leaf-age senescence)
+  - RWUMX (max root water uptake)
+  - PORMIN (min porosity for root growth)
+  - LNREF (reference leaf N concentration)
+  - NSLOPE (canopy N gradient)
+  - CMOBMX (mobile carbohydrate reserve)
+notes: >
+  Built on the e02 water/nitrogen four-corner posterior bounds. The source FileX
+  bundles are counterfactually transformed so SH2O, SNH4 and SNO3 are uniform
+  across treatments within each season at the layer mean. Selected root N,
+  root-water, N-stress, senescence and SLPF bounds are reopened using the
+  stage4 v6-v24 response analysis; the current soil profile is not reverted.
+  Designed for the same 25SP+26SP four-corner calibration and unchanged
+  observation/weight policy.

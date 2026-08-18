@@ -120,8 +120,8 @@
     },
     {
       "name": "XXQL2601.TMX",
-      "sha256": "8c606a042afe546ffa9881a6dac24ba049587e460638ac2e54a2d0ac8ac1cbb5",
-      "bytes": 24643
+      "sha256": "fa3f09a24c2540dc4417e642dd946744a441d3ead590267923b424539c92a898",
+      "bytes": 25100
     },
     {
       "name": "XXQL2601.WTH",
@@ -943,5 +943,19 @@
       "message": "SLCL/SLSI is missing at soil depths [145.0, 175.0, 203.0]; DSSAT may substitute default texture"
     }
   ],
-  "science_status": "counterfactual_pass_with_warnings"
+  "science_status": "counterfactual_pass_with_warnings",
+  "data_corrections": [
+    {
+      "correction_id": "canonical_tmx_ic_fixed_width_20260818",
+      "scope": "INITIAL CONDITIONS ICBL/SH2O/SNH4/SNO3 header and records only",
+      "change": "Removed surplus blank records and rewrote the header and rows as DSSAT widths 2/6/6/6/6; numeric changes limited to width-safe rounding.",
+      "repair_audit": "D:\\Tomato_Cal\\workspace\\reports\\tmx_ic_format_repair_20260818\\tmx_ic_repair_rows.csv"
+    },
+    {
+      "correction_id": "xxql2601_treatment12_initial_conditions_20260818",
+      "scope": "XXQL2601 treatment 12 INITIAL CONDITIONS only",
+      "change": "Set five ICBL/SH2O/SNH4/SNO3 rows to the user-specified 26SP values.",
+      "repair_audit": "D:\\Tomato_Cal\\workspace\\reports\\tmx_26sp_t12_ic_20260818\\rows.csv"
+    }
+  ]
 }

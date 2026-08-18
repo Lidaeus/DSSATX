@@ -1,0 +1,14 @@
+group,transform,offset,reference,sigma,sigma_source,model_sigma,sigma_floor,group_multiplier,n_eff,phi_role,note
+ADAPM,raw,0,1,25.0,assumption,2.0,1.0,1.0,,diagnostic_only,Low-priority phenology; model ADAPS is unavailable (-99) in this yield-only contract
+MDAPM,raw,0,1,25.0,assumption,2.0,1.0,1.0,,diagnostic_only,Phenology maturity date is unavailable (-99) in this yield-only contract; retain only for diagnostic output
+LAIXM,raw,0,1,0.8,assumption,0.2,0.1,1.0,,diagnostic_only,Maximum LAI diagnostic; LAID is calibration evidence
+LAIDM,raw,0,1,2.0,assumption,0.5,0.2,1.0,,calibration,Leaf area process observation
+LWADM,raw,0,1,150.0,assumption,20.0,10.0,1.0,,calibration,Leaf dry mass process observation
+SWADM,raw,0,1,200.0,assumption,25.0,10.0,1.0,,calibration,Stem dry mass process observation
+CNAMM,raw,0,1,25.0,assumption,5.0,2.0,1.0,,calibration,Plant nitrogen amount (kg N ha-1)
+CHFPWM,log,1,1,250.0,assumption,30.0,20.0,1.25,,diagnostic_only,Fresh fruit cumulative harvest; DROPPED from Phi (dry-only variant); ln((y+1)/1) still applied to keep token contract
+CHPDTM,log,1,1,200.0,assumption,25.0,15.0,1.25,,calibration,Dry fruit cumulative harvest; ONLY active harvest target in dry-only variant; ln((y+1)/1); sigma tightened 250->200 (dry magnitude ~3000-3500 vs fresh ~67000)
+HIAMM,raw,0,1,0.10,assumption,0.02,0.01,1.0,,sensitivity_only,Harvest index not a calibration target
+PWADM,raw,0,1,250.0,assumption,30.0,20.0,1.0,,diagnostic_only,Legacy PWAD; diagnostic only in T10
+PWAIM,raw,0,1,250.0,assumption,30.0,20.0,1.0,,diagnostic_only,Legacy PWAI; diagnostic only in T10
+SOIL_WATER,raw,0,1,,,,,,,calibration,Audited soil-water observations; sigma comes from observation_uncertainty.csv and group multiplier is applied by T8 audit

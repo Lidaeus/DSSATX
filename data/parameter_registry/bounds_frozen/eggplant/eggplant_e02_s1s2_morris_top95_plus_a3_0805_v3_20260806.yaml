@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_s1s2_morris_top95_plus_a3_0805_v3_20260806"
+crop: "eggplant"
+created_at: "2026-08-06T08:57:58Z"
+approved_at: "2026-08-06T08:57:58Z"
+approved_by: "user-requested"
+review_status: "approved"
+derived_from: "eggplant_e02_s1s2_morris_top95_plus_a3_0805_v3_20260806.csv"
+derived_from_sha256: "b060e584f24801b3b0e6c59abeab701aed701a2f46b4050468e11e415b4f472b"
+bounds_sha256: "b060e584f24801b3b0e6c59abeab701aed701a2f46b4050468e11e415b4f472b"
+parameter_count: 36
+automatic_repairs: 0
+notes: "A3 0805 S2 safe executable domain: NUPCMN lower bound tightened from documented 0 to 0.01 after STOP99/NUPTAK at zero; Morris top-95 plus A3 custom parameters; FL-VS fixed 120"

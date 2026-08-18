@@ -1,0 +1,9 @@
+group,phi_budget,note
+PHENO,0.20,PDAT/ADAT/MDAT phenology constraints; reduced relative to growth and harvest
+CANOPY,1.00,LAID process; LAIX diagnostic-only
+BIOMASS,1.00,LWAD+SWAD; exclude HWAM and fruit-containing total mass
+PLANT_N,1.00,CNAM; only seasons with observations participate
+HARVEST_FRESH,1.25,CHFPW full cumulative series; log Phi
+HARVEST_DRY,1.25,CHPDT cumulative plus HPODW incremental dry harvest; log Phi
+CUMULATIVE_HARVEST,1.00,Legacy PWAD diagnostic-only fallback
+INCREMENTAL_HARVEST,1.00,Legacy PWAI diagnostic-only fallback

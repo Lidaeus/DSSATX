@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "design_id": "eggplant_e02_v2_fixedsoil_joint_25sp26sp_20260812",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "Fixed-soil joint calibration (20260812): genetic params adjustable, IC/soil physical fixed; water response (W3-W1) objective added with minimal Phi budget",
+  "bounds_id": "eggplant_e02_v2_nresp_wide_nrexp_20260806",
+  "observation_policy": "configs/runs/e02_v2_rawdiff_terminal_nresp01_soil02_policy_20260812.csv",
+  "group_policy": "configs/runs/t10_rawdiff_terminal_nresp01_soil02_group_policy_20260812.csv",
+  "initial_condition_policy": "Fixed values from user approval (soil_physical_Fix / soil_n_ic_Fix); not inverted",
+  "nitrogen_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_v2_25sp26sp_water_n_mapping_20260808.csv",
+    "source_variable": "CHPDT",
+    "contrast": "N2_minus_N0_within_same_water",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "levels": [
+      "N1",
+      "N2"
+    ],
+    "harvest_scope": "all",
+    "sigma_floor": 50.0,
+    "budget_rule": "0.10 static N_RESPONSE budget per season"
+  },
+  "harvest_dry_objective": {
+    "enabled": true,
+    "mode": "increment_plus_terminal",
+    "increment_source": "measured_hpodw",
+    "terminal_variable": "CHPDT"
+  },
+  "process_state_objective": {
+    "enabled": true,
+    "mode": "signed_difference_plus_terminal",
+    "variables": [
+      "LAID",
+      "LWAD",
+      "SWAD"
+    ]
+  },
+  "seasonal_parameterization": null,
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "D:/Tomato_Cal/data/user/experiments/xxql2501_actual_trial_calibration_v8_adap34_plantn_slpf_moisturefix_20260729",
+      "role": "calibration",
+      "treatments": [
+        2,
+        3,
+        4,
+        5,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "D:/Tomato_Cal/data/user/experiments/xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729",
+      "role": "calibration",
+      "treatments": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    }
+  ],
+  "formal": {
+    "n_reals": 200,
+    "noptmax": 5,
+    "initial_ensemble_method": "sobol"
+  },
+  "water_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_v2_25sp26sp_water_n_mapping_20260808.csv",
+    "source_variable": "CHPDT",
+    "contrast": "W3_minus_W1_within_same_nitrogen",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "high_water": "W3",
+    "low_water": "W1",
+    "harvest_scope": "all",
+    "sigma_floor": 50.0,
+    "budget_rule": "0.01 static W_RESPONSE budget per season (<= N_RESPONSE 0.025)"
+  }
+}

@@ -96,6 +96,7 @@ def _prepare_runtime_bundle(case_dir, workspace_dir, input_dir, output_profile):
             Path("src/calibration/observation_policy.py"),
         ),
         (project_root / "src" / "dssat" / "__init__.py", Path("src/dssat/__init__.py")),
+        (project_root / "src" / "dssat" / "array_expander.py", Path("src/dssat/array_expander.py")),
         (project_root / "src" / "dssat" / "run_dssat.py", Path("src/dssat/run_dssat.py")),
         (project_root / "data" / "templates" / "DSSAT48.INH", Path("data/templates/DSSAT48.INH")),
         (project_root / "data" / "templates" / "DSSAT48.INP", Path("data/templates/DSSAT48.INP")),
@@ -111,7 +112,9 @@ def _prepare_runtime_bundle(case_dir, workspace_dir, input_dir, output_profile):
             )
         )
 
+    custom_exe = os.environ.get("DSSAT_CUSTOM_EXE", "").strip()
     executable_candidates = (
+        Path(custom_exe) if custom_exe else Path("__missing_custom_exe__"),
         Path(os.environ.get("DSSAT48_HOME", r"C:\DSSAT48")) / "DSCSM048.EXE",
         project_root / "workspace" / "DSCSM048.EXE",
     )
@@ -121,6 +124,11 @@ def _prepare_runtime_bundle(case_dir, workspace_dir, input_dir, output_profile):
     copied.append(
         _copy_runtime_file(executable, runtime_root, Path("workspace/DSCSM048.EXE"))
     )
+    custom_spe = os.environ.get("DSSAT_SPE_BASE", "").strip()
+    if custom_spe and Path(custom_spe).is_file():
+        copied.append(
+            _copy_runtime_file(custom_spe, runtime_root, Path("data/templates/genotype/TMGRO048.SPE.base"))
+        )
 
     runtime_input = runtime_root / "input"
     shutil.copytree(input_dir, runtime_input)

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "design_id": "eggplant_e02_v2_rawdiff_terminal_nresp01_soil02_saactive_a3_nr_zp_20260806",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "Morris top-95 active parameters and A3 NR-ZP custom N-uptake parameters",
+  "observation_policy": "configs/runs/e02_v2_rawdiff_terminal_nresp01_soil02_policy_20260805.csv",
+  "group_policy": "configs/runs/t10_rawdiff_terminal_nresp01_soil02_group_policy_20260805.csv",
+  "initial_condition_policy": "25SP corrected layer-mean IC valid bundle; TRNO9/TRNO14 excluded",
+  "nitrogen_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_v2_25sp_water_n_mapping_corrected_20260805.csv",
+    "source_variable": "CHPDT",
+    "contrast": "N2_minus_N0_within_same_water",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "levels": ["N1", "N2"],
+    "harvest_scope": "all",
+    "sigma_floor": 50.0,
+    "budget_rule": "0.10 static N_RESPONSE budget within corrected 25SP six-treatment design"
+  },
+  "harvest_dry_objective": {
+    "enabled": true,
+    "mode": "increment_plus_terminal",
+    "increment_source": "measured_hpodw",
+    "terminal_variable": "CHPDT"
+  },
+  "process_state_objective": {
+    "enabled": true,
+    "mode": "signed_difference_plus_terminal",
+    "variables": ["LAID", "LWAD", "SWAD"]
+  },
+  "seasonal_parameterization": null,
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_layermean_ic_valid_n012_v1_20260801",
+      "bundle_manifest_sha256": "f8a249a4e6282b6b52b0101673a0d77abd531d5d3fedb12fb6a2a69a19352707",
+      "role": "calibration",
+      "treatments": [13, 12, 11, 5, 4, 3]
+    }
+  ],
+  "formal": {"n_reals": 200, "noptmax": 4, "initial_ensemble_method": "sobol"},
+  "diagnostic_single_season": true
+}

@@ -1,0 +1,12 @@
+bounds_id: "eggplant_26sp_w1w2_n012_postprecal_20260804"
+crop: "eggplant"
+created_at: "2026-08-03T23:15:44Z"
+approved_at: "2026-08-03T23:15:44Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_26sp_w1w2_n012_postprecal_20260804.csv"
+derived_from_sha256: "00de9bd2a5ad10ba69672ea1cab0e7d9657524025cde3564f2ef8316c9727190"
+bounds_sha256: "00de9bd2a5ad10ba69672ea1cab0e7d9657524025cde3564f2ef8316c9727190"
+parameter_count: 188
+automatic_repairs: 0
+notes: "Post-precalibration bounds review for 26SP actual-trial W1/W2 N0/N1/N2; custom nresp DSSAT; no autumn."

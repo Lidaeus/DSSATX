@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "design_id": "eggplant_e02_v2_joint25sp26sp_nosoil_nresp_20260802",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "Same 99 active parameters and frozen bounds as eggplant_e02_v2_formal25sp_nreleased_20260802; organ-N parameters remain released",
+  "observation_policy": "configs/runs/e02_v2_joint25sp26sp_nosoil_nresp_policy_20260802.csv",
+  "group_policy": "configs/runs/t10_v2_joint25sp26sp_nosoil_nresp_group_policy_20260802.csv",
+  "initial_condition_policy": "Validated layer-mean IC bundles for 25SP and 26SP",
+  "nitrogen_response_objective": {
+    "enabled": false,
+    "reason": "NRESP excluded from Phi; no derived response rows are generated"
+  },
+  "water_response_objective": {
+    "enabled": false,
+    "reason": "SOIL_WATER observations remain diagnostic-only and are excluded from Phi"
+  },
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_layermean_ic_valid_n012_v1_20260801",
+      "bundle_manifest_sha256": "a04e2170ba94cc77220a9e1738f7b5b80e95e8f948e611a6ca318f970ad982a5",
+      "role": "calibration",
+      "treatments": [2, 3, 4, 5, 10, 11, 12, 13]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_layermean_ic_valid_n012_v1_20260801",
+      "bundle_manifest_sha256": "a13ab967a0b6dbba986a889be90137002cb412569a4d53072258e77b737e0fa0",
+      "role": "calibration",
+      "treatments": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    }
+  ],
+  "formal": {
+    "n_reals": 200,
+    "noptmax": 4,
+    "initial_ensemble_method": "sobol"
+  }
+}

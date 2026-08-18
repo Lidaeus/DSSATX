@@ -26,6 +26,19 @@ from src.calibration.experiment_spec import ExperimentSpec
 from src.common.project import PROJECT_ROOT, sha256_file, git_metadata
 
 
+# IES numerical-stability profile (mirrors the proven T10 dry-only runner).
+# Without these options, 25SP members crash at a high rate (DSSAT numerical
+# instability in certain parameter combinations).  ies_use_approx=False forces
+# the exact (non-approximate) objective; the multi-lambda search and bound
+# enforcement prevent the ensemble from drifting into unstable regions.
+IES_STABILITY_PROFILE = {
+    "ies_use_approx": False,
+    "ies_lambda_mults": "0.5,1.0,10.0",
+    "lambda_scale_fac": "0.9,1.0",
+    "ies_enforce_bounds": True,
+}
+
+
 @dataclass(frozen=True)
 class ExperimentRunResult:
     """Outcome of running (or building) an experiment."""
@@ -41,6 +54,8 @@ def prepare_experiment_run(
     run_dir: str | Path,
     *,
     smoke: bool = False,
+    ies_num_reals: int | None = None,
+    noptmax: int | None = None,
 ) -> ExperimentRunResult:
     """Load and validate a spec, write the receipt, and prepare the run directory.
 
@@ -71,9 +86,16 @@ def prepare_experiment_run(
     run_dir_path = Path(run_dir).expanduser().resolve()
     run_dir_path.mkdir(parents=True, exist_ok=True)
 
-    # Override execution for smoke runs
+    # Explicit run-size overrides are used for short, auditable pre-calibration
+    # trials.  They never alter the source spec on disk.
     if smoke:
         spec = _override_execution(spec, ies_num_reals=20, noptmax=1)
+    elif ies_num_reals is not None or noptmax is not None:
+        spec = _override_execution(
+            spec,
+            ies_num_reals=ies_num_reals or spec.execution.ies_num_reals,
+            noptmax=noptmax if noptmax is not None else spec.execution.noptmax,
+        )
 
     # Write the receipt
     receipt = spec.receipt()
@@ -201,7 +223,27 @@ def run_build(
     ]
     print("+ " + subprocess.list2cmdline(cmd), flush=True)
     subprocess.run(cmd, cwd=str(PROJECT_ROOT), check=check)
+    # Apply the IES stability profile to the generated PST (same mitigation as
+    # the T10 dry-only runner).  This must happen after build_pest writes the
+    # PST and before run_execute launches PEST++.
+    _apply_stability_profile(run_dir, pfx)
     return run_dir
+
+
+def _apply_stability_profile(run_dir: Path, case: str) -> None:
+    """Write the IES stability options into the PST (in place).
+
+    Mirrors ``run_t10_dryonly._apply_stability_profile``: loads the PST, updates
+    ``pestpp_options`` with :data:`IES_STABILITY_PROFILE`, and rewrites it.
+    """
+    import pyemu
+
+    pst_path = run_dir / f"{case}.pst"
+    if not pst_path.is_file():
+        return
+    pst = pyemu.Pst(str(pst_path))
+    pst.pestpp_options.update(IES_STABILITY_PROFILE)
+    pst.write(str(pst_path))
 
 
 def run_execute(

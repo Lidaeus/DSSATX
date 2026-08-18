@@ -1,0 +1,12 @@
+bounds_id: "eggplant_two_spring_organ_n_v1_20260803"
+crop: "eggplant"
+created_at: "2026-08-03T14:30:20Z"
+approved_at: "2026-08-03T14:30:20Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_two_spring_organ_n_v1_20260803.csv"
+derived_from_sha256: "0c8c2a34cd104391582ac10c4aaed81c3f4baf6d7ebe5bf7a4112c47dbdb07b1"
+bounds_sha256: "8f3e3db4e8788aa2efcbe9b596a9aa7c5e0cd1111478613831c1124ece98d84c"
+parameter_count: 188
+automatic_repairs: 0
+notes: "Approved two-spring organ-N SA; custom NRESP DSSAT; FL-VS fixed 120; no autumn"

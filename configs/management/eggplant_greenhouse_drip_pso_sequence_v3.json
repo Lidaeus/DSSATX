@@ -1,0 +1,158 @@
+{
+  "design_id": "eggplant_greenhouse_drip_pso_sequence_v3",
+  "status": "method_and_codec_ready_parameter_pending",
+  "method_reference": {
+    "citation": "Liao et al. (2026), Field Crops Research 337, 110276",
+    "doi": "10.1016/j.fcr.2025.110276",
+    "borrowed_dimensions": [
+      "fertilization_frequency",
+      "total_nitrogen",
+      "basal_topdressing_ratio",
+      "application_timing",
+      "PSO_DSSAT_external_closed_loop",
+      "AHP_preference_expression"
+    ],
+    "not_transferred": [
+      "regional_spatial_claims",
+      "maize_specific_bounds",
+      "SQX_Sequence_Module_file_contract",
+      "PSO_cultivar_calibration"
+    ]
+  },
+  "production_system": "greenhouse_drip_eggplant",
+  "crop_model": "DSSAT_4.8_CROPGRO_Tomato",
+  "surrogate_model": false,
+  "rainfall_as_management_input": false,
+  "policy_transfer": "one_common_DAP_policy_across_2025_and_2026_spring_weather",
+  "seasons": [
+    {
+      "season_id": "XXQL2501_2025_spring",
+      "year": 2025,
+      "role": "robust_weather_scenario",
+      "weather_file": "data/user/experiments/xxql2501_actual_trial_calibration_v2_20260726/XXLI2502.WTH",
+      "actual_input_bundle": "data/user/experiments/xxql2501_actual_trial_calibration_v2_20260726",
+      "planting_date": 25075,
+      "last_harvest_date": 25220,
+      "template_treatment": 2
+    },
+    {
+      "season_id": "XXQL2601_2026_spring",
+      "year": 2026,
+      "role": "robust_weather_scenario",
+      "weather_file": "data/user/experiments/xxql2601_actual_trial_calibration_v2_20260726/XXQL2601.WTH",
+      "actual_input_bundle": "data/user/experiments/xxql2601_actual_trial_calibration_v2_20260726",
+      "planting_date": 26069,
+      "last_harvest_date": 26198,
+      "template_treatment": 1
+    }
+  ],
+  "water_policy": {
+    "seasonal_irrigation_mm": [240.0, 500.0],
+    "stage_basis": "normalized_days_after_planting",
+    "stage_shares": {
+      "stages": [[0, 28], [29, 63], [64, 96], [97, 145]],
+      "minimum_each": 0.08,
+      "sum": 1.0
+    },
+    "event_dates": "frozen_template_dates",
+    "single_event_max_mm": 45.0
+  },
+  "nitrogen_sequence_policy": {
+    "carrier_rows": "FE005_only",
+    "fertilizer_form_method_depth": "frozen",
+    "phosphorus_and_potassium": "unchanged",
+    "total_nitrogen_kg_ha": [60.0, 320.0],
+    "zero_n_anchor": "evaluated_outside_PSO",
+    "basal_fraction": [0.15, 0.50],
+    "basal_dap": [-7, 3],
+    "topdress_count_integer": [4, 10],
+    "topdress_dap": [14, 96],
+    "minimum_interval_days": 5,
+    "topdress_event_n_kg_ha": [2.0, 75.0],
+    "inactive_FE005_slots": "FAMN_set_to_zero"
+  },
+  "hard_constraints": {
+    "nitrogen_after_dap": 96,
+    "yield_floor_fraction_of_year_specific_reference": 0.90,
+    "failed_dssat_run_is_infeasible": true,
+    "one_common_policy_must_be_feasible_in_both_years": true
+  },
+  "objectives": [
+    {"name": "mean_fresh_yield", "direction": "maximize", "source": "mean_year_final_CHFPW"},
+    {"name": "worst_year_fresh_yield", "direction": "maximize", "source": "min_year_final_CHFPW"},
+    {"name": "seasonal_irrigation_mm", "direction": "minimize", "source": "management_ledger"},
+    {"name": "seasonal_nitrogen_kg_ha", "direction": "minimize", "source": "nitrogen_sequence_ledger"}
+  ],
+  "criteria": [
+    {"name": "mean_fresh_yield", "direction": "maximize"},
+    {"name": "worst_year_fresh_yield", "direction": "maximize"},
+    {"name": "seasonal_irrigation_mm", "direction": "minimize"},
+    {"name": "seasonal_nitrogen_kg_ha", "direction": "minimize"},
+    {"name": "interannual_yield_gap_fraction", "direction": "minimize"}
+  ],
+  "ahp": {
+    "role": "pre_registered_preference_scenarios_not_scientific_truth",
+    "normalization": "fixed_p05_p95_anchors_from_shared_initial_LHS_then_clipped",
+    "consistency_ratio_max": 0.10,
+    "profiles": {
+      "balanced": {
+        "priority_seed": [1, 1, 1, 1, 1],
+        "pairwise_matrix": [[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]]
+      },
+      "yield_security": {
+        "priority_seed": [5,4,1,1,2],
+        "pairwise_matrix": [[1,1.25,5,5,2.5],[0.8,1,4,4,2],[0.2,0.25,1,1,0.5],[0.2,0.25,1,1,0.5],[0.4,0.5,2,2,1]]
+      },
+      "resource_efficiency": {
+        "priority_seed": [2,2,5,5,2],
+        "pairwise_matrix": [[1,1,0.4,0.4,1],[1,1,0.4,0.4,1],[2.5,2.5,1,1,2.5],[2.5,2.5,1,1,2.5],[1,1,0.4,0.4,1]]
+      }
+    }
+  },
+  "optimizer": {
+    "algorithm": "PSO_AHP_direct_DSSAT",
+    "mixed_variable_handling": "continuous_particle_plus_deterministic_integer_and_feasibility_repair",
+    "direct_dssat_only": true,
+    "shared_initial_design": "maximin_LHS",
+    "initial_candidates": 160,
+    "swarm_size": 40,
+    "iterations": 30,
+    "inertia": [0.70, 0.40],
+    "cognitive_constant": 2.0,
+    "social_constant": 2.0,
+    "velocity_limit_fraction": 0.20,
+    "independent_seeds": [20260726, 20260809],
+    "cache_key": "decoded_policy_hash",
+    "archive": "all_unique_direct_DSSAT_evaluations"
+  },
+  "selection": {
+    "primary_evidence": "non_dominated_front_reconstructed_from_combined_archive",
+    "AHP_candidate_must_be_non_dominated": true,
+    "required_recommendations": [
+      "balanced_compromise",
+      "yield_security_alternative",
+      "resource_efficiency_alternative",
+      "zero_N_and_current_practice_anchors"
+    ],
+    "robustness_checks": [
+      "two_seed_best_score_stability",
+      "profile_rank_sensitivity",
+      "event_count_neighbourhood_K_minus_1_K_K_plus_1",
+      "timing_jitter_plus_minus_3_days",
+      "total_N_plus_minus_10_percent",
+      "yearwise_yield_floor"
+    ]
+  },
+  "environmental_endpoint_policy": {
+    "nitrate_leaching": "add_only_after_DSSAT_output_extraction_and_mass_balance_are_audited",
+    "not_permitted": "use_fertilizer_rate_as_a_proxy_for_nitrate_leaching"
+  },
+  "science_gates": [
+    "upstream_parameter_set_frozen_and_independently_validated",
+    "both_weather_files_are_rainfall_free_and_span_planting_to_last_harvest",
+    "AHP_pairwise_matrices_pass_CR_le_0_10",
+    "all_PSO_candidates_are_direct_DSSAT_runs",
+    "combined_archive_and_failed_runs_are_retained",
+    "selected_policy_is_non_dominated_and_passes_local_perturbation_checks"
+  ]
+}

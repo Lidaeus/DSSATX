@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "design_id": "eggplant_e02_v2_formal25sp_nreleased_corrected_20260805",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "V2 posterior-adjusted canopy/yield/N-response plus organ-N and soil parameters",
+  "observation_policy": "configs/runs/e02_v2_canopy_yield_nresponse_policy_20260802.csv",
+  "group_policy": "configs/runs/t10_water_n_response_group_policy_harvestdry250_v1.csv",
+  "initial_condition_policy": "25SP layer-mean IC valid bundle; TRNO9/TRNO14 excluded",
+  "nitrogen_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_v2_25sp_water_n_mapping_corrected_20260805.csv",
+    "source_variable": "CHPDT",
+    "contrast": "ln1p_Nk_minus_ln1p_N0",
+    "response_target": "observed_shape",
+    "levels": ["N1", "N2", "N3"],
+    "sigma_floor": 0.1,
+    "budget_rule": "0.75 static N_RESPONSE budget within 25SP"
+  },
+  "seasonal_parameterization": null,
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_layermean_ic_valid_n012_v1_20260801",
+      "bundle_manifest_sha256": "f8a249a4e6282b6b52b0101673a0d77abd531d5d3fedb12fb6a2a69a19352707",
+      "role": "calibration",
+      "treatments": [2, 3, 4, 5, 10, 11, 12, 13]
+    }
+  ],
+  "formal": {
+    "n_reals": 200,
+    "noptmax": 5,
+    "initial_ensemble_method": "sobol"
+  },
+  "diagnostic_single_season": true
+}

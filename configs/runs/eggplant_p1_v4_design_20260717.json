@@ -11,10 +11,126 @@
   "weight_profile_id": "assumption_based_sigma_v2",
   "random_seed": 20260717,
   "stages": {
-    "S1": {"reals": 20, "noptmax": 2, "active_params": ["EM-FL", "TRIFL"], "observation_outputs": {"PestEval.OUT": ["ADAP"]}, "representative_outputs": {"PestTmtGrow.OUT": ["LAID"]}, "expected_runs_factor": "reals × (params+2) per iteration"},
-    "S2": {"reals": 30, "noptmax": 2, "active_params": ["NSTFAC", "RTNO3", "NMOBMX", "NVSMOB"], "fixed_params": ["EM-FL", "TRIFL"], "observation_outputs": {"PestJoint.OUT": ["LAIX", "CNAM"], "PestTmtGrow.OUT": ["LAID", "LWAD", "SWAD"]}, "representative_outputs": {"PestHarvest.OUT": ["PWAI", "PWAD"]}},
-    "S3": {"reals": 30, "noptmax": 2, "active_params": ["XFRT", "XFINT"], "fixed_params": ["EM-FL", "TRIFL", "NSTFAC", "RTNO3", "NMOBMX", "NVSMOB"], "observation_outputs": {"PestHarvest.OUT": ["PWAI"]}, "representative_outputs": {"PestHarvest.OUT": ["PWAD"], "PestJoint.OUT": ["HWAM"]}},
-    "S4": {"reals": 40, "noptmax": 2, "active_params": ["EM-FL", "TRIFL", "NSTFAC", "RTNO3", "NMOBMX", "NVSMOB"], "fixed_params": ["XFRT", "XFINT"], "observation_outputs": {"PestEval.OUT": ["ADAP"], "PestJoint.OUT": ["LAIX", "CNAM"], "PestTmtGrow.OUT": ["LAID", "LWAD", "SWAD"]}, "representative_outputs": {"PestHarvest.OUT": ["PWAI", "PWAD"], "PestJoint.OUT": ["HWAM"]}, "selection_evidence": "calibration_only", "validation_visibility": "forbidden_until_frozen"}
+    "S1": {
+      "reals": 20,
+      "noptmax": 2,
+      "active_params": [
+        "EM-FL",
+        "TRIFL"
+      ],
+      "observation_outputs": {
+        "PestEval.OUT": [
+          "ADAP"
+        ]
+      },
+      "representative_outputs": {
+        "PestTmtGrow.OUT": [
+          "LAID"
+        ]
+      },
+      "expected_runs_factor": "reals × (params+2) per iteration"
+    },
+    "S2": {
+      "reals": 30,
+      "noptmax": 2,
+      "active_params": [
+        "NSTFAC",
+        "RTNO3",
+        "NMOBMX",
+        "NVSMOB"
+      ],
+      "fixed_params": [
+        "EM-FL",
+        "TRIFL"
+      ],
+      "observation_outputs": {
+        "PestJoint.OUT": [
+          "LAIX",
+          "CNAM"
+        ],
+        "PestTmtGrow.OUT": [
+          "LAID",
+          "LWAD",
+          "SWAD"
+        ]
+      },
+      "representative_outputs": {
+        "PestHarvest.OUT": [
+          "PWAI",
+          "PWAD"
+        ]
+      }
+    },
+    "S3": {
+      "reals": 30,
+      "noptmax": 2,
+      "active_params": [
+        "XFRT",
+        "XFINT"
+      ],
+      "fixed_params": [
+        "EM-FL",
+        "TRIFL",
+        "NSTFAC",
+        "RTNO3",
+        "NMOBMX",
+        "NVSMOB"
+      ],
+      "observation_outputs": {
+        "PestHarvest.OUT": [
+          "PWAI"
+        ]
+      },
+      "representative_outputs": {
+        "PestHarvest.OUT": [
+          "PWAD"
+        ],
+        "PestJoint.OUT": [
+          "HWAM"
+        ]
+      }
+    },
+    "S4": {
+      "reals": 40,
+      "noptmax": 2,
+      "active_params": [
+        "EM-FL",
+        "TRIFL",
+        "NSTFAC",
+        "RTNO3",
+        "NMOBMX",
+        "NVSMOB"
+      ],
+      "fixed_params": [
+        "XFRT",
+        "XFINT"
+      ],
+      "observation_outputs": {
+        "PestEval.OUT": [
+          "ADAP"
+        ],
+        "PestJoint.OUT": [
+          "LAIX",
+          "CNAM"
+        ],
+        "PestTmtGrow.OUT": [
+          "LAID",
+          "LWAD",
+          "SWAD"
+        ]
+      },
+      "representative_outputs": {
+        "PestHarvest.OUT": [
+          "PWAI",
+          "PWAD"
+        ],
+        "PestJoint.OUT": [
+          "HWAM"
+        ]
+      },
+      "selection_evidence": "calibration_only",
+      "validation_visibility": "forbidden_until_frozen"
+    }
   },
   "stopping_rules": {
     "primary": "noptmax reached",

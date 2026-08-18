@@ -1,0 +1,9 @@
+{
+  "season_id": "26SP",
+  "source_bundle": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729",
+  "source_filex": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729\\XXQL2601.TMX",
+  "localized_filex": "D:\\Tomato_Cal\\_seasons\\26SP\\XXQL2601.TMX",
+  "filex_match_before_injection": true,
+  "batch_filex_token": "XXQL2601.TMX",
+  "soil_override": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729\\SOIL.SOL"
+}

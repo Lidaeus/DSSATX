@@ -110,9 +110,7 @@ def integration_full_preflight_report_categories():
     )
     xfint_errors = [r for r in report.readback_results
                     if r.parameter == "XFINT" and not r.matched]
-    assert not xfint_errors, (
-        f"XFINT should pass after lower-bound correction to 0.12; got {xfint_errors}"
-    )
+    assert not xfint_errors, f"XFINT must round-trip across the approved bound; got {xfint_errors}"
 
     exact = sum(1 for r in report.readback_results if r.matched)
     assert exact == 165, f"All 165 injections should match within field resolution; got {exact}"

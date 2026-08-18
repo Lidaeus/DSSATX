@@ -29,7 +29,6 @@ VARIABLE_TREATMENT = {
     "ADAPM": {"log_transform": False, "sigma_base": 25.0, "cumulate": False},
     "CNAMM": {"log_transform": False, "sigma_base": 25.0, "cumulate": True},
     "HIAMM": {"log_transform": False, "sigma_base": 0.10, "cumulate": False},
-    "HWAMM": {"log_transform": False, "sigma_base": 50.0, "cumulate": True},
     "LAIXM": {"log_transform": False, "sigma_base": 0.8, "cumulate": False},
     "LAIDM": {"log_transform": False, "sigma_base": 2.0, "cumulate": False},
     "LWADM": {"log_transform": False, "sigma_base": 150.0, "cumulate": False},

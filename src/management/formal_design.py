@@ -28,13 +28,45 @@ class FormalManagementDesign:
     optimizer: dict[str, Any]
 
 
-def _weather_dates(path: Path) -> list[int]:
-    dates = []
+def _weather_records(path: Path) -> list[tuple[int, float]]:
+    """Return ``(YYYYDDD, RAIN)`` pairs from a DSSAT .WTH file.
+
+    Records are the whitespace-separated data rows whose first field is a
+    seven-digit year-day code. RAIN is the fifth column. Missing/non-data
+    rows (headers, blanks) are skipped.
+    """
+    records: list[tuple[int, float]] = []
     for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
         fields = line.split()
         if fields and fields[0].isdigit() and len(fields[0]) == 7:
-            dates.append(int(fields[0]))
-    return dates
+            try:
+                rain = float(fields[4]) if len(fields) >= 5 else 0.0
+            except ValueError:
+                rain = 0.0
+            records.append((int(fields[0]), rain))
+    return records
+
+
+def _weather_dates(path: Path) -> list[int]:
+    return [date for date, _rain in _weather_records(path)]
+
+
+def _audit_zero_rainfall(path: Path) -> None:
+    """The greenhouse has no rainfall input: every weather record must be RAIN=0.
+
+    This enforces the v2 design's separation of weather (read by DSSAT) from
+    management water supply (drip irrigation only). A non-zero day would mean
+    the model is silently adding precipitation to the root zone and the formal
+    run is no longer rainfall-free.
+    """
+    records = _weather_records(path)
+    rainy_days = [(date, rain) for date, rain in records if rain > 0]
+    if rainy_days:
+        sample = ", ".join(f"{d}={r:g}" for d, r in rainy_days[:5])
+        raise ValueError(
+            f"weather file is not rainfall-free ({len(rainy_days)} non-zero days): "
+            f"{path} -- first: {sample}"
+        )
 
 
 def _full_date(date_code: int) -> int:
@@ -66,6 +98,8 @@ def load_formal_design(path: str | Path) -> FormalManagementDesign:
         planting, harvest = int(row["planting_date"]), int(row["last_harvest_date"])
         if not dates or min(dates) > _full_date(planting) or max(dates) < _full_date(harvest):
             raise ValueError(f"weather coverage does not span planting-to-harvest: {row['season_id']}")
+        # Greenhouse drip system: precipitation is never a management water source.
+        _audit_zero_rainfall(weather)
         if planting // 1000 != int(row["year"]) % 100 or harvest // 1000 != int(row["year"]) % 100:
             raise ValueError(f"season date codes do not match year: {row['season_id']}")
         seasons.append(SpringSeason(str(row["season_id"]), int(row["year"]), weather, planting, harvest, bundle, int(row["template_treatment"])))

@@ -1,0 +1,82 @@
+﻿name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,review_note
+LFMAX,1.25321,1.175286,1.331134,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+SIZLF,288.613,258.30015,318.92585,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+SLAVR,299.6025,278.351075,320.853925,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+CSDL,12.33,12.33,12.33,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+PPSEN,0.0,0.0,0.0,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+THRSH,8.5,8.5,8.5,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+WTPSD,0.004,0.004,0.004,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+XFRT,0.8525935,0.813368725,0.891818275,active,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+EM-FL,29.8034,26.23955,33.36725,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+FL-LF,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+FL-SD,9.355665,6.84574975,11.86558025,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+FL-SH,2.07235,1.0815675,3.0631325,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+PODUR,18.21155,11.0682675,25.3548325,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+SD-PM,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+SDPDV,111.374,75.2939,147.4541,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+SFDUR,15.73615,11.7221325,19.7501675,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+RHGHT,0.4508585,0.419142075,0.482574925,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+RWDTH,1.557615,1.18897675,1.92625325,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+TRIFL,0.6176435,0.531846025,0.703440975,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+EM-V1,25.9597,20.380705,31.538695,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+FL-VS,100.0,100.0,100.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,E02 joint54 v2: project invariant; FL-VS is fixed at 100 and is not a calibration parameter
+JU-R0,5.214045,2.75736325,7.67072675,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+LNGSH,38.4028,31.99868,44.80692,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+PL-EM,11.14935,10.2790875,12.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+PM06,0.480148,0.37866395,0.58163205,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+PM09,0.96949,0.93570875,1.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+V1-JU,0.0,0.0,0.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+XFINT,0.326541,0.24545565,0.40762635,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+XFPHT,40.36865,36.3675125,44.3697875,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+XMAGE,17.05025,15.1050825,18.9954175,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+KCAN,0.631905,0.56687135,0.69693865,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+KC_SLOPE,0.1194078,0.07746362,0.16135198,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+PARMAX,39.3321,30.93043,47.73377,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+PHTMAX,66.0113,53.16534,78.85726,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+ATOP,0.8016535,0.672862125,0.930444875,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+FRCNOD,0.05,0.05,0.05,fixed,SPE_Nodule,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+FRLFF,0.3804855,0.314507125,0.446463875,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+FRSTMF,0.5510285,0.454069125,0.647987875,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+PORPT,0.2400735,0.183954075,0.296192925,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+RTNO3,0.0146649,0.0070749,0.0222549,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+RTNH4,0.0114992,0.00057512,0.02242328,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+RTEXF,0.1295324,0.07330936,0.18575544,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+WTFSD,0.538856,0.450352,0.62736,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+EVMODC,0.0,0.0,0.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+FINREF,222.6995,187.125975,258.273025,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+SIZREF,298.519,255.07315,341.96485,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+SLAREF,270.78,248.82305,292.73695,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+VSSINK,2.6809825,0.561052375,4.800912625,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+TB1,7.6834,5.980388,9.386412,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+TB2,7.009885,5.84851725,8.17125275,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+TB3,11.88109,9.6909035,14.0712765,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+TM1,38.1713,34.251295,42.091305,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+TM2,39.43585,36.4701725,42.4015275,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+TM3,37.70165,36.3197525,39.0835475,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+TO11,26.1544,24.72196,27.4621,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+TO12,21.61955,19.4579525,23.7811475,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+TO13,26.01805,24.4288075,27.5942,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+TO21,28.5477,27.4676,29.752555,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+TO22,28.4067,27.363995,29.449405,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+TO23,29.71745,27.5997,31.8483425,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+NSTFAC,0.5542845,0.491857325,0.616711675,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+NMOBMX,0.0527195,0.01579507,0.08964393,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+NVSMOB,0.3994535,0.285528175,0.513378825,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+NRCVR,0.15131245,0.0535836675,0.2490412325,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+DLFMAX_AUT,0.0,0.0,0.144677665,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent; seasonal offset kept zero-centered and range forced to include 0
+DSLAVR_AUT,0.0,0.0,0.1441522625,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent; seasonal offset kept zero-centered and range forced to include 0
+DXFRT_AUT,0.0,-0.562463775,0.0,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent; seasonal offset kept zero-centered and range forced to include 0
+DSFDUR_AUT,0.0,-0.1219097975,0.0572110975,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent; seasonal offset kept zero-centered and range forced to include 0
+DTB1_AUT,0.0,-0.1659423675,1.914629467,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent; seasonal offset kept zero-centered and range forced to include 0
+DTB2_AUT,0.0,-1.84851725,0.0,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent; seasonal offset kept zero-centered and range forced to include 0; lower clipped so TB2 plus DTB2_AUT stays within physical lower bound 4.0
+DTB3_AUT,0.0,-0.687172125,0.756371125,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent; seasonal offset kept zero-centered and range forced to include 0
+SOIL_SLPF,0.9433185,0.927981525,0.958655475,active,SOIL_Fertility,SOIL,SOIL.SOL,TM0008,TM0001,both,20260731 posterior q05-q95 envelope expanded by 15 percent total width around midpoint for 200x6 rerun trial
+DSWBAR,15.0,10.0,30.0,active,SPE_WaterStress,SPE,TMGRO048.SPE.base,,,,Surface soil depth for SWBAR calculation (water stress sensing)
+XFRMAX,0.0,0.0,0.5,active,SPE_WaterStress,SPE,TMGRO048.SPE.base,,,,Turgor stress additional reproductive partitioning correction
+SENRTE,1.0,0.3,3.0,active,SPE_Senescence,SPE,TMGRO048.SPE.base,,,,Base leaf senescence rate
+SENDAY,0.02,0.005,0.08,active,SPE_Senescence,SPE,TMGRO048.SPE.base,,,,Leaf-age driven senescence
+RWUMX,0.04,0.015,0.08,active,SPE_RootWater,SPE,TMGRO048.SPE.base,,,,Max root water uptake
+PORMIN,0.02,0.01,0.06,active,SPE_RootWater,SPE,TMGRO048.SPE.base,,,,Min pore space for root growth
+LNREF,4.5,3.0,6.0,active,SPE_Nitrogen,SPE,TMGRO048.SPE.base,,,,Reference leaf N concentration for FNPGN normalization
+NSLOPE,0.25,0.1,0.5,active,SPE_Nitrogen,SPE,TMGRO048.SPE.base,,,,Canopy leaf N gradient with LAI depth
+CMOBMX,0.022,0.005,0.05,active,SPE_CarbonReserve,SPE,TMGRO048.SPE.base,,,,Max mobile stem carbohydrate fraction

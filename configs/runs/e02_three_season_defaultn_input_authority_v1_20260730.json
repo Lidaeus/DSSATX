@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "authority_id": "e02_three_season_defaultn_input_authority_v1_20260730",
+  "status": "calibration_authoritative",
+  "policy": "For the default-initial-mineral-N research branch, only the three bundles and hashes below may provide FileX, FileA or FileT.",
+  "filex_initial_mineral_n": {
+    "SNO3": 1.0,
+    "SNH4": 0.5,
+    "scope": "every initial-condition treatment and every declared layer"
+  },
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle": "data/user/experiments/xxql2501_special_defaultn_v1_20260730",
+      "manifest_sha256": "8d6de7989de08ea6741603e9b333e4d2bfab322290fcd3ff05e2763c5b376c4f",
+      "filex": "XXQL2501.TMX",
+      "filex_sha256": "e7531fa16861e67ff5413f2c8d9bfef7e1818e8248e33c48e102445a555cb410",
+      "filea": "XXQL2501.TMA",
+      "filea_sha256": "ff0cd1c29d159a459fff98594c9e44a060eb80f0b8f307637c7462158168c824",
+      "filet": "XXQL2501.TMT",
+      "filet_sha256": "5d937f033f15d7b3bec3c4301e7235d6baba07b0826b3510e67a8986d2ecc33c"
+    },
+    {
+      "season_id": "25FA",
+      "experiment_code": "XXQL2502",
+      "bundle": "data/user/experiments/xxql2502_special_defaultn_v1_20260730",
+      "manifest_sha256": "8c923317a26b5c70662498145bd55a41c5b0d3ec8997d9e915906c012740852d",
+      "filex": "XXQL2502.TMX",
+      "filex_sha256": "64d0298bd21b335131593dcb8af4c60ecdb42854d4eaed264dd8797bf6e0d8a4",
+      "filea": "XXQL2502.TMA",
+      "filea_sha256": "7069ccf43da644eb52e0fd6c63fc247a03d6ad06c2093e1d41926ad33bfb18a8",
+      "filet": "XXQL2502.TMT",
+      "filet_sha256": "79d0afdd0971f2f02fdf03f3b54750bd4a792ad53f4aecc36740037fbe74d309"
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle": "data/user/experiments/xxql2601_special_defaultn_v1_20260730",
+      "manifest_sha256": "a6e065ab82b4ccb7a43ab1b05f124c7fb535cc2c30fcfd4e9608b394b20f88f1",
+      "filex": "XXQL2601.TMX",
+      "filex_sha256": "c245e5f728896587da8ad00ae35e034288438b3d86a2071d0292799609b80887",
+      "filea": "XXQL2601.TMA",
+      "filea_sha256": "2cfc46783a3594072a24014f2abf1ac442e5cd89524111f3c5ddf16debadf672",
+      "filet": "XXQL2601.TMT",
+      "filet_sha256": "d864acaeab1ef6d1832144445a7eb3a3c8f245deb1c926ce7be152b67505c3d6"
+    }
+  ],
+  "superseded": [
+    {
+      "path": "configs/runs/eggplant_e02_joint62_three_season_defaultn_v1_20260730.json",
+      "reason": "The design retained stale 20260726 bundle paths and did not activate the corrected N-response objective."
+    },
+    {
+      "path": "data/user/experiments/xxql2502_actual_trial_calibration_v3_page25_20260728/XXQL2502.TMA",
+      "reason": "Generated before the complete 25FA growth observations were supplied; deleted."
+    },
+    {
+      "path": "data/user/experiments/xxql2502_actual_trial_calibration_v3_page25_20260728/XXQL2502.TMT",
+      "reason": "Truncated 6,481-byte FileT generated before the complete 25FA observations were supplied; deleted."
+    }
+  ]
+}

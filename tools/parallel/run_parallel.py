@@ -18,11 +18,13 @@
 import argparse
 import json
 import os
+import re
 import shutil
 import socket
 import subprocess
 import sys
 import time
+import urllib.request
 from datetime import datetime, timezone
 
 _PROJECT_ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
@@ -35,6 +37,42 @@ from src.common.run_state import classify_manager_exit
 def _repo_root_from_this_file():
     here = os.path.dirname(os.path.abspath(__file__))
     return os.path.normpath(os.path.join(here, "..", ".."))
+
+
+# #region debug-point helper:runtime-report
+def _debug_report(hypothesis_id, msg, *, data=None, run_id="pre-fix", location="tools/parallel/run_parallel.py"):
+    try:
+        env_path = os.path.join(_repo_root_from_this_file(), ".dbg", "pestpp-agent-disconnect.env")
+        url = "http://127.0.0.1:7777/event"
+        session_id = "pestpp-agent-disconnect"
+        try:
+            with open(env_path, "r", encoding="utf-8") as handle:
+                for line in handle:
+                    line = line.strip()
+                    if line.startswith("DEBUG_SERVER_URL="):
+                        url = line.split("=", 1)[1] or url
+                    elif line.startswith("DEBUG_SESSION_ID="):
+                        session_id = line.split("=", 1)[1] or session_id
+        except Exception:
+            pass
+        payload = {
+            "sessionId": session_id,
+            "runId": run_id,
+            "hypothesisId": hypothesis_id,
+            "location": location,
+            "msg": msg,
+            "data": data or {},
+            "ts": int(time.time() * 1000),
+        }
+        request = urllib.request.Request(
+            url,
+            data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+        )
+        urllib.request.urlopen(request, timeout=1).read()
+    except Exception:
+        pass
+# #endregion
 
 
 def _choose_free_port(start=4010, end=4999):
@@ -99,6 +137,195 @@ def _start_proc(exe, args, cwd, stdout_path, stderr_path, *, append=False, detac
         err_f.close()
         raise
     return p, out_f, err_f
+
+
+def _wait_for_manager_start(process, *, timeout_s=10.0):
+    """Give the PEST++ manager an exclusive startup window before agents connect.
+
+    Starting agents first was racy on Windows: an early agent could repeatedly
+    attempt the Panther security handshake before the manager had initialized,
+    then exit while the manager waited forever for workers.  PEST++ does not
+    expose a harmless readiness probe, so we instead require the manager to
+    remain alive through a short initialization window.
+    """
+    deadline = time.monotonic() + float(timeout_s)
+    while time.monotonic() < deadline:
+        rc = process.poll()
+        if rc is not None:
+            raise RuntimeError(f"manager exited during startup (exit_code={rc})")
+        time.sleep(0.1)
+    return True
+
+
+def _read_last_nonempty_line(path, *, max_bytes=4096):
+    if not os.path.isfile(path):
+        return ""
+    with open(path, "rb") as handle:
+        try:
+            handle.seek(0, os.SEEK_END)
+            size = handle.tell()
+            handle.seek(max(0, size - int(max_bytes)))
+        except Exception:
+            handle.seek(0)
+        text = handle.read().decode("utf-8", errors="ignore")
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    return lines[-1] if lines else ""
+
+
+def _parse_manager_progress_line(line):
+    match = re.search(
+        r"runs\(C(?P<C>\d+)\s+\|F(?P<F>\d+)\s+\|T(?P<T>\d+)\s+\)\s+agents\(R(?P<R>\d+)\s+\|W(?P<W>\d+)\s+\|U(?P<U>\d+)\s+\)",
+        line,
+    )
+    if not match:
+        return None
+    return {key: int(value) for key, value in match.groupdict().items()}
+
+
+def _agent_disconnect_signature(agent_dir):
+    line = _read_last_nonempty_line(os.path.join(agent_dir, "panther_agent.stdout.log"))
+    return "receive from master failed" in line.lower(), line
+
+
+def _wait_for_manager_with_agent_guard(
+    manager_process,
+    agent_handles,
+    *,
+    poll_s=0.5,
+    manager_log_path=None,
+    stall_timeout_s=180.0,
+    restart_agents=None,
+    max_agent_restarts=2,
+):
+    """Wait for manager completion without silently orphaning a queued case."""
+    stalled_signature = None
+    stalled_since = None
+    agent_restart_count = 0
+    while True:
+        rc = manager_process.poll()
+        if rc is not None:
+            _debug_report(
+                "A",
+                "[DEBUG] manager_exit_observed",
+                data={"manager_pid": manager_process.pid, "manager_exit_code": rc},
+                location="run_parallel.py:_wait_for_manager_with_agent_guard:manager_exit",
+            )
+            return rc
+        if manager_log_path:
+            progress_line = _read_last_nonempty_line(manager_log_path)
+            progress = _parse_manager_progress_line(progress_line)
+            if progress:
+                disconnect_checks = [_agent_disconnect_signature(agent_dir) for *_, agent_dir in agent_handles]
+                all_disconnected = bool(disconnect_checks) and all(flag for flag, _ in disconnect_checks)
+                signature = (
+                    progress["C"],
+                    progress["F"],
+                    progress["T"],
+                    progress["R"],
+                    progress["W"],
+                    progress["U"],
+                    all_disconnected,
+                )
+                stalled_pattern = (
+                    progress["T"] > 0
+                    and progress["W"] == 0
+                    and progress["U"] == 0
+                    and all_disconnected
+                )
+                if stalled_pattern:
+                    if stalled_signature != signature:
+                        stalled_signature = signature
+                        stalled_since = time.monotonic()
+                        _debug_report(
+                            "B",
+                            "[DEBUG] panther_stall_signature_detected",
+                            data={
+                                "manager_pid": manager_process.pid,
+                                "progress": progress,
+                                "manager_line": progress_line,
+                                "agent_disconnect_lines": [line for _, line in disconnect_checks],
+                            },
+                            location="run_parallel.py:_wait_for_manager_with_agent_guard:stall_detected",
+                        )
+                    elif stalled_since is not None and (time.monotonic() - stalled_since) >= float(stall_timeout_s):
+                        _debug_report(
+                            "B",
+                            "[DEBUG] panther_stall_timeout_abort",
+                            data={
+                                "manager_pid": manager_process.pid,
+                                "stall_timeout_s": stall_timeout_s,
+                                "progress": progress,
+                                "manager_line": progress_line,
+                                "agent_disconnect_lines": [line for _, line in disconnect_checks],
+                            },
+                            location="run_parallel.py:_wait_for_manager_with_agent_guard:stall_timeout",
+                        )
+                        raise RuntimeError(
+                            "panther stall detected: manager remained active with pending timed-out tasks "
+                            "while all agents reported receive-from-master failures"
+                        )
+                else:
+                    stalled_signature = None
+                    stalled_since = None
+        if agent_handles and all(process.poll() is not None for process, *_ in agent_handles):
+            exit_codes = [process.returncode for process, *_ in agent_handles]
+            # Re-poll after observing worker exits: on Windows a crashed
+            # manager and its disconnected workers can become signalled in
+            # the same polling interval.  Reporting only the worker codes
+            # (typically 0xFFFFFFFF after "receive from master failed") hides
+            # the actual manager/network failure.
+            manager_rc = manager_process.poll()
+            disconnect_lines = []
+            for *_, agent_dir in agent_handles:
+                if agent_dir:
+                    disconnected, line = _agent_disconnect_signature(agent_dir)
+                    if disconnected:
+                        disconnect_lines.append(line)
+            _debug_report(
+                "A",
+                "[DEBUG] all_agents_exited_while_manager_active",
+                data={
+                    "manager_pid": getattr(manager_process, "pid", None),
+                    "manager_alive": manager_rc is None,
+                    "manager_exit_code": manager_rc,
+                    "agent_exit_codes": exit_codes,
+                    "agent_pids": [getattr(process, "pid", None) for process, *_ in agent_handles],
+                    "agent_disconnect_lines": disconnect_lines,
+                },
+                location="run_parallel.py:_wait_for_manager_with_agent_guard:all_agents_exited",
+            )
+            if manager_rc is not None:
+                return manager_rc
+            if disconnect_lines:
+                if restart_agents is not None and agent_restart_count < int(max_agent_restarts):
+                    agent_restart_count += 1
+                    restarted = bool(restart_agents(agent_handles, agent_restart_count))
+                    if restarted:
+                        stalled_signature = None
+                        stalled_since = None
+                        _debug_report(
+                            "A",
+                            "[DEBUG] disconnected_agents_restarted",
+                            data={
+                                "manager_pid": getattr(manager_process, "pid", None),
+                                "restart_attempt": agent_restart_count,
+                                "agent_pids": [
+                                    getattr(process, "pid", None)
+                                    for process, *_ in agent_handles
+                                ],
+                            },
+                            location="run_parallel.py:_wait_for_manager_with_agent_guard:agents_restarted",
+                        )
+                        continue
+                raise RuntimeError(
+                    "PEST++ manager connection was lost; all agents then exited "
+                    f"(agent_exit_codes={exit_codes})"
+                )
+            raise RuntimeError(
+                "all PEST++ agents exited while manager remained active "
+                f"(agent_exit_codes={exit_codes})"
+            )
+        time.sleep(float(poll_s))
 
 
 def _write_pid(path, pid):
@@ -573,6 +800,39 @@ def cmd_run(args):
     manager_handle = None
     stop_on_exit = True
 
+    def _launch_agents(*, append_logs=False):
+        new_handles = []
+        for i in range(1, int(n_agents) + 1):
+            agent_dir = os.path.join(agents_root, f"agent_{i:02d}")
+            state_dir = os.path.join(agent_dir, "state")
+            os.makedirs(state_dir, exist_ok=True)
+            out_path = os.path.join(agent_dir, "panther_agent.stdout.log")
+            err_path = os.path.join(agent_dir, "panther_agent.stderr.log")
+            cmd = [exe_path, args.case, "/h", f"{host}:{port}"]
+            p, out_f, err_f = _start_proc(
+                exe_path, cmd, agent_dir, out_path, err_path, append=append_logs
+            )
+            _write_pid(os.path.join(state_dir, "agent.pid"), p.pid)
+            _write_pid(os.path.join(agent_dir, "panther_agent.pid"), p.pid)
+            _update_agent_last_job(agent_dir, status="running", pid=p.pid)
+            new_handles.append((p, out_f, err_f, agent_dir))
+        return new_handles
+
+    def _restart_agents(handles, restart_attempt):
+        for _, out_f, err_f, _ in handles:
+            for stream in (out_f, err_f):
+                try:
+                    stream.close()
+                except Exception:
+                    pass
+        handles[:] = _launch_agents(append_logs=True)
+        print(
+            f"[recover] restarted {len(handles)} disconnected PEST++ agents "
+            f"(attempt {restart_attempt}/2); manager remains active",
+            flush=True,
+        )
+        return bool(handles)
+
     def _stop_all():
         # Stop manager
         for loc in [os.path.join(manager_dir, "panther_manager.pid"),
@@ -586,38 +846,34 @@ def cmd_run(args):
                 _stop_pidfile(loc)
 
     try:
-        for i in range(1, int(n_agents) + 1):
-            agent_dir = os.path.join(agents_root, f"agent_{i:02d}")
-            state_dir = os.path.join(agent_dir, "state")
-            os.makedirs(state_dir, exist_ok=True)
-            out_path = os.path.join(agent_dir, "panther_agent.stdout.log")
-            err_path = os.path.join(agent_dir, "panther_agent.stderr.log")
-            cmd = [exe_path, args.case, "/h", f"{host}:{port}"]
-            p, out_f, err_f = _start_proc(
-                exe_path, cmd, agent_dir, out_path, err_path, append=args.resume
-            )
-            # Write PID to both locations
-            _write_pid(os.path.join(state_dir, "agent.pid"), p.pid)
-            _write_pid(os.path.join(agent_dir, "panther_agent.pid"), p.pid)
-            _update_agent_last_job(agent_dir, status="running", pid=p.pid)
-            agent_handles.append((p, out_f, err_f, agent_dir))
-
-        time.sleep(0.4)
-
+        # Start the manager before workers.  Panther agents exchange a security
+        # handshake on connection; launching them before the manager is ready
+        # is a Windows race that can leave a live manager with zero workers.
         manager_out = os.path.join(manager_dir, "panther_manager.stdout.log")
         manager_err = os.path.join(manager_dir, "panther_manager.stderr.log")
         manager_cmd = [exe_path, args.case]
         if args.resume:
             manager_cmd.append("/r")
         manager_cmd.extend(["/h", f":{port}"])
-        p, out_f, err_f = _start_proc(
+        manager_process, out_f, err_f = _start_proc(
             exe_path, manager_cmd, run_dir, manager_out, manager_err, append=args.resume
         )
-        _write_pid(os.path.join(manager_dir, "panther_manager.pid"), p.pid)
-        _write_pid(os.path.join(run_dir, "panther_manager.pid"), p.pid)
-        manager_handle = (p, out_f, err_f)
+        _write_pid(os.path.join(manager_dir, "panther_manager.pid"), manager_process.pid)
+        _write_pid(os.path.join(run_dir, "panther_manager.pid"), manager_process.pid)
+        manager_handle = (manager_process, out_f, err_f)
+        _debug_report(
+            "C",
+            "[DEBUG] manager_started",
+            data={
+                "case": args.case,
+                "mode": args.mode,
+                "port": port,
+                "manager_pid": manager_process.pid,
+                "resume": bool(args.resume),
+            },
+            location="run_parallel.py:cmd_run:manager_started",
+        )
 
-        # Update run_status.json
         run_status_path = os.path.join(run_dir, "run_status.json")
         now = _utc_now()
         previous = _read_json(run_status_path) or {}
@@ -631,17 +887,103 @@ def cmd_run(args):
             "port": port,
             "n_agents": n_agents,
             "started_at": now,
+            "status": "starting_agents",
+            "scientific_status": "pending",
+            "engineering_status": "pending",
+            "manager_pid": manager_process.pid,
+            "attempt": attempt,
+            "resumed": bool(args.resume),
+        })
+        _wait_for_manager_start(manager_process)
+
+        agent_handles.extend(_launch_agents(append_logs=args.resume))
+        _debug_report(
+            "C",
+            "[DEBUG] agents_started",
+            data={
+                "case": args.case,
+                "port": port,
+                "n_agents": n_agents,
+                "agent_pids": [process.pid for process, *_ in agent_handles],
+            },
+            location="run_parallel.py:cmd_run:agents_started",
+        )
+
+        _write_json(run_status_path, {
+            "state_schema_version": 2,
+            "run_dir": run_dir,
+            "case": args.case,
+            "mode": args.mode,
+            "host": host,
+            "port": port,
+            "n_agents": n_agents,
+            "started_at": now,
             "status": "running",
             "scientific_status": "pending",
             "engineering_status": "pending",
-            "manager_pid": p.pid,
+            "manager_pid": manager_process.pid,
             "attempt": attempt,
             "resumed": bool(args.resume),
         })
 
         if args.wait:
-            rc = p.wait()
+            try:
+                rc = _wait_for_manager_with_agent_guard(
+                    manager_process,
+                    agent_handles,
+                    manager_log_path=manager_out,
+                    restart_agents=_restart_agents,
+                )
+            except RuntimeError as exc:
+                _debug_report(
+                    "D",
+                    "[DEBUG] guard_runtime_error_before_stop_all",
+                    data={
+                        "error": str(exc),
+                        "manager_pid": manager_process.pid,
+                        "manager_alive_before_stop": _is_pid_alive(manager_process.pid),
+                        "agent_states": [
+                            {
+                                "pid": process.pid,
+                                "returncode": process.returncode,
+                                "alive": process.poll() is None,
+                            }
+                            for process, *_ in agent_handles
+                        ],
+                    },
+                    location="run_parallel.py:cmd_run:guard_exception_before_stop_all",
+                )
+                _update_run_status(
+                    run_dir,
+                    status="failed",
+                    scientific_status="not_assessable",
+                    engineering_status="engineering_failed",
+                    engineering_status_error=str(exc),
+                    finished_at=_utc_now(),
+                    termination_reason="all_agents_disconnected",
+                    manager_pid=manager_process.pid,
+                )
+                _stop_all()
+                _debug_report(
+                    "D",
+                    "[DEBUG] guard_runtime_error_after_stop_all",
+                    data={
+                        "manager_pid": manager_process.pid,
+                        "manager_alive_after_stop": _is_pid_alive(manager_process.pid),
+                        "agent_states_after_stop": [
+                            {
+                                "pid": process.pid,
+                                "returncode": process.returncode,
+                                "alive": process.poll() is None,
+                            }
+                            for process, *_ in agent_handles
+                        ],
+                    },
+                    location="run_parallel.py:cmd_run:guard_exception_after_stop_all",
+                )
+                raise
             print(f"manager_exit_code={rc}")
+            p = manager_process
 
             current = _read_json(run_status_path) or {}
             stop_requested = bool(current.get("stop_requested_at"))
@@ -726,6 +1068,12 @@ def cmd_run(args):
             return
 
     except KeyboardInterrupt:
+        _debug_report(
+            "D",
+            "[DEBUG] keyboard_interrupt_abort",
+            data={"run_dir": run_dir, "case": args.case},
+            location="run_parallel.py:cmd_run:keyboard_interrupt",
+        )
         _update_run_status(
             run_dir,
             status="aborted",
@@ -826,6 +1174,17 @@ def main():
     try:
         cmd_run(args)
     except Exception as exc:
+        _debug_report(
+            "D",
+            "[DEBUG] outer_parallel_controller_exception",
+            data={
+                "run_dir": os.path.abspath(args.run_dir),
+                "case": args.case,
+                "mode": args.mode,
+                "error": str(exc),
+            },
+            location="run_parallel.py:main:exception",
+        )
         _update_run_status(
             os.path.abspath(args.run_dir),
             status="runtime_failed",

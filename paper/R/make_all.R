@@ -4,6 +4,7 @@ script_dir <- dirname(script_path)
 project_root <- normalizePath(file.path(script_dir, "..", ".."), winslash = "/", mustWork = TRUE)
 
 source(file.path(script_dir, "common.R"), local = FALSE)
+source(file.path(script_dir, "sa_i18n.R"), local = FALSE)
 source(file.path(script_dir, "fig_model_performance.R"), local = FALSE)
 source(file.path(script_dir, "fig_selected_dynamics.R"), local = FALSE)
 source(file.path(script_dir, "fig_residual_diagnostics.R"), local = FALSE)
@@ -14,6 +15,8 @@ source(file.path(script_dir, "fig_spearman_demo.R"), local = FALSE)
 source(file.path(script_dir, "fig_equifinality_demo.R"), local = FALSE)
 source(file.path(script_dir, "fig_sa_morris.R"), local = FALSE)
 source(file.path(script_dir, "fig_sa_sobol.R"), local = FALSE)
+source(file.path(script_dir, "fig_sa_interaction.R"), local = FALSE)
+source(file.path(script_dir, "fig_sa_selection.R"), local = FALSE)
 
 check_r_dependencies()
 args <- parse_cli_args(commandArgs(trailingOnly = TRUE))
@@ -23,6 +26,9 @@ dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 out_dir <- normalizePath(out_dir, winslash = "/", mustWork = TRUE)
 profile_path <- if (is.null(args$profile)) file.path(project_root, "configs", "figures", "publication.json") else args$profile
 profile <- load_publication_profile(profile_path)
+# i18n: --lang en|zh (default en for backward compatibility).  SA figure
+# builders receive this to localise titles, axes, legends and captions.
+lang <- if (is.null(args$lang)) SA_DEFAULT_LANG else args$lang
 if (!is.null(args$formats)) profile$formats <- split_csv_arg(args$formats)
 
 # Figure selection: each scientific question is one module. --figure-ids selects
@@ -34,8 +40,10 @@ figure_ids <- if (is.null(args$figure_ids)) "all" else args$figure_ids
 selected <- function(id) figure_ids == "all" || id %in% split_csv_arg(figure_ids)
 requested_ids <- if (figure_ids == "all") character() else split_csv_arg(figure_ids)
 is_t4_request <- any(requested_ids %in% c("figs5_posterior", "figs6_spearman", "figs7_equifinality"))
-is_sa_request <- any(requested_ids %in% c("fig1_sa", "figs1_sa_stability", "figs1b_sa_effects"))
-is_sobol_request <- any(requested_ids %in% c("figs2_sobol_convergence"))
+is_sa_request <- any(requested_ids %in% c("fig1_sa", "fig1_sa_results", "figs1_sa_stability", "figs1b_sa_effects",
+                                          "figs1_sa", "fig_sa_summary",
+                                          "figs1c_sa_interaction", "figs1d_sa_selection"))
+is_sobol_request <- any(requested_ids %in% c("figs2_sobol_convergence", "figs2_sobol_results"))
 if (sum(c(is_t4_request, is_sa_request, is_sobol_request)) > 1) {
   stop("Morris SA, Sobol SA, and T4 figures require separate frozen bundles", call. = FALSE)
 }
@@ -79,7 +87,7 @@ artifacts <- character()
 if (is_sa_request) {
   if (selected("fig1_sa")) {
     result <- build_morris_main(
-      bundle$rankings, bundle$group_summary, bundle$focus, profile, bundle$is_demo
+      bundle$rankings, bundle$group_summary, bundle$focus, profile, bundle$is_demo, lang = lang
     )
     base <- file.path(out_dir, if (bundle$is_demo) "DEMO_Fig1_sa_morris" else "Fig1_sa_morris")
     artifacts <- c(artifacts, save_figure_set(
@@ -91,9 +99,23 @@ if (is_sa_request) {
     utils::write.csv(result$group_source, group_source, row.names = FALSE, fileEncoding = "UTF-8")
     artifacts <- c(artifacts, ranking_source, group_source)
   }
+  if (selected("fig1_sa_results")) {
+    result <- build_morris_results(
+      bundle$group_summary, bundle$summary, bundle$focus, profile, bundle$is_demo, lang = lang
+    )
+    base <- file.path(out_dir, if (bundle$is_demo) "DEMO_Fig1_sa_results" else "Fig1_sa_results")
+    artifacts <- c(artifacts, save_figure_set(
+      result$plot, base, profile, profile$double_column_width_mm, result$height_mm
+    ))
+    group_source <- paste0(base, ".group_source.csv")
+    score_source <- paste0(base, ".score_source.csv")
+    utils::write.csv(result$group_source, group_source, row.names = FALSE, fileEncoding = "UTF-8")
+    utils::write.csv(result$score_source, score_source, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, group_source, score_source)
+  }
   if (selected("figs1_sa_stability")) {
     result <- build_morris_stability(
-      bundle$seed_rankings, bundle$stability, bundle$focus, profile, bundle$is_demo
+      bundle$seed_rankings, bundle$stability, bundle$focus, profile, bundle$is_demo, lang = lang
     )
     base <- file.path(out_dir, if (bundle$is_demo) "DEMO_FigS1_sa_stability" else "FigS1_sa_stability")
     artifacts <- c(artifacts, save_figure_set(
@@ -116,7 +138,7 @@ if (is_sa_request) {
            call. = FALSE)
     }
     result <- build_morris_response_effects(
-      bundle$effects, bundle$focus, profile, bundle$is_demo
+      bundle$effects, bundle$focus, profile, bundle$is_demo, lang = lang
     )
     base <- file.path(out_dir, if (bundle$is_demo) "DEMO_FigS1b_sa_effects" else "FigS1b_sa_effects")
     artifacts <- c(artifacts, save_figure_set(
@@ -126,6 +148,101 @@ if (is_sa_request) {
     utils::write.csv(result$effects_source, effects_source, row.names = FALSE, fileEncoding = "UTF-8")
     artifacts <- c(artifacts, effects_source)
   }
+
+  # Task 1: Fig.S1 combined (stability + mu*-sigma in one figure, plan §9).
+  if (selected("figs1_sa")) {
+    if (!isTRUE(bundle$has_effects)) {
+      stop("figs1_sa was requested but the bundle does not carry ",
+           "morris_response_effects.csv. Rebuild the bundle with the W2 exporter.",
+           call. = FALSE)
+    }
+    result <- build_morris_s1_combined(
+      bundle$seed_rankings, bundle$stability, bundle$focus, bundle$effects,
+      profile, bundle$is_demo, lang = lang
+    )
+    base <- file.path(out_dir, if (bundle$is_demo) "DEMO_FigS1_sa_combined" else "FigS1_sa_combined")
+    artifacts <- c(artifacts, save_figure_set(
+      result$plot, base, profile, profile$double_column_width_mm, result$height_mm
+    ))
+    for (suffix in c("rank_source", "stability_source", "effects_source")) {
+      path <- paste0(base, ".", suffix, ".csv")
+      utils::write.csv(result[[suffix]], path, row.names = FALSE, fileEncoding = "UTF-8")
+      artifacts <- c(artifacts, path)
+    }
+  }
+
+  # Task 2: Morris + Sobol summary composite (plan §9 Fig.1 alternative).
+  if (selected("fig_sa_summary")) {
+    sobol_effects <- NULL
+    if (!is.null(args$sobol_effects_csv) && nzchar(args$sobol_effects_csv) && file.exists(args$sobol_effects_csv)) {
+      sobol_effects <- utils::read.csv(args$sobol_effects_csv, stringsAsFactors = FALSE, check.names = FALSE)
+    }
+    result <- build_sa_summary(
+      bundle$rankings, bundle$group_summary, bundle$focus, sobol_effects,
+      profile, bundle$is_demo, lang = lang
+    )
+    base <- file.path(out_dir, if (bundle$is_demo) "DEMO_Fig_sa_summary" else "Fig_sa_summary")
+    artifacts <- c(artifacts, save_figure_set(
+      result$plot, base, profile, profile$double_column_width_mm, result$height_mm
+    ))
+    ranking_source <- paste0(base, ".ranking_source.csv")
+    utils::write.csv(result$ranking_source, ranking_source, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, ranking_source)
+    if (!is.null(result$sobol_source)) {
+      sobol_source <- paste0(base, ".sobol_source.csv")
+      utils::write.csv(result$sobol_source, sobol_source, row.names = FALSE, fileEncoding = "UTF-8")
+      artifacts <- c(artifacts, sobol_source)
+    }
+  }
+
+  # Task 3a: Morris interaction mu*-sigma scatter.
+  if (selected("figs1c_sa_interaction")) {
+    interaction_csv <- if (!is.null(args$interaction_csv) && nzchar(args$interaction_csv)) {
+      args$interaction_csv
+    } else file.path(input_dir, "morris_interaction_summary.csv")
+    if (!file.exists(interaction_csv)) {
+      stop("figs1c_sa_interaction requires morris_interaction_summary.csv (run ",
+           "tools/sa/aggregate_morris_interaction.py). Expected: ", interaction_csv,
+           call. = FALSE)
+    }
+    summary_data <- utils::read.csv(interaction_csv, stringsAsFactors = FALSE, check.names = FALSE)
+    result <- build_morris_interaction(summary_data, profile, bundle$is_demo, lang = lang)
+    base <- file.path(out_dir, if (bundle$is_demo) "DEMO_FigS1c_sa_interaction" else "FigS1c_sa_interaction")
+    artifacts <- c(artifacts, save_figure_set(
+      result$plot, base, profile, profile$column_width_mm, result$height_mm
+    ))
+    src <- paste0(base, ".interaction_source.csv")
+    utils::write.csv(result$interaction_source, src, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, src)
+  }
+
+  # Task 3b: Parameter selection rationality funnel (55 -> 23).
+  if (selected("figs1d_sa_selection")) {
+    cross_summary <- utils::read.csv(file.path(input_dir, "morris_cross_season_summary.csv"),
+                                     stringsAsFactors = FALSE, check.names = FALSE)
+    sobol_candidates <- utils::read.csv(file.path(project_root,
+      "configs", "sa", "approved_topk", "eggplant_formal_sobol_top23_v1_20260721.csv"),
+      stringsAsFactors = FALSE, check.names = FALSE)
+    # Strip BOM from first column name if present
+    names(sobol_candidates)[1] <- sub("^\\ufeff", "", names(sobol_candidates)[1])
+    param_labels <- NULL
+    labels_csv <- if (!is.null(args$param_labels_csv) && nzchar(args$param_labels_csv)) {
+      args$param_labels_csv
+    } else file.path(project_root, "workspace", "sa", "supplement_tables", "Table_S1_morris_sampling_space.csv")
+    if (file.exists(labels_csv)) {
+      param_labels <- utils::read.csv(labels_csv, stringsAsFactors = FALSE, check.names = FALSE)
+    }
+    result <- build_selection_rationality(
+      cross_summary, sobol_candidates, param_labels, profile, bundle$is_demo, lang = lang
+    )
+    base <- file.path(out_dir, if (bundle$is_demo) "DEMO_FigS1d_sa_selection" else "FigS1d_sa_selection")
+    artifacts <- c(artifacts, save_figure_set(
+      result$plot, base, profile, profile$column_width_mm, result$height_mm
+    ))
+    src <- paste0(base, ".selection_source.csv")
+    utils::write.csv(result$selection_source, src, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, src)
+  }
 }
 
 if (is_sobol_request && selected("figs2_sobol_convergence")) {
@@ -133,7 +250,7 @@ if (is_sobol_request && selected("figs2_sobol_convergence")) {
     if (isTRUE(bundle$has_effects)) {
       build_sobol_multiseason_effects(bundle$rankings, bundle$metrics, bundle$run_scale,
                                       bundle$summary, bundle$effects, bundle$response_scales,
-                                      profile, bundle$is_demo)
+                                      profile, bundle$is_demo, lang = lang)
     } else {
       build_sobol_multiseason_convergence(bundle$rankings, bundle$metrics, bundle$run_scale,
                                           bundle$summary, profile, bundle$is_demo)
@@ -164,6 +281,23 @@ if (is_sobol_request && selected("figs2_sobol_convergence")) {
     utils::write.csv(result$response_scales_source, response_scales_source, row.names = FALSE, fileEncoding = "UTF-8")
     artifacts <- c(artifacts, effects_source, response_scales_source)
   }
+}
+
+if (is_sobol_request && selected("figs2_sobol_results")) {
+  if (!isTRUE(bundle$is_multiseason) || !isTRUE(bundle$has_effects)) {
+    stop("figs2_sobol_results requires the multi-season Sobol effects bundle", call. = FALSE)
+  }
+  result <- build_sobol_results(bundle$effects, bundle$response_scales,
+                                profile, bundle$is_demo, lang = lang)
+  base <- file.path(out_dir, if (bundle$is_demo) "DEMO_FigS2_sobol_results" else "FigS2_sobol_results")
+  artifacts <- c(artifacts, save_figure_set(
+    result$plot, base, profile, profile$double_column_width_mm, result$height_mm
+  ))
+  effects_source <- paste0(base, ".effects_source.csv")
+  scales_source <- paste0(base, ".response_scales_source.csv")
+  utils::write.csv(result$effects_source, effects_source, row.names = FALSE, fileEncoding = "UTF-8")
+  utils::write.csv(result$response_scales_source, scales_source, row.names = FALSE, fileEncoding = "UTF-8")
+  artifacts <- c(artifacts, effects_source, scales_source)
 }
 
 if (is_t4_request) {

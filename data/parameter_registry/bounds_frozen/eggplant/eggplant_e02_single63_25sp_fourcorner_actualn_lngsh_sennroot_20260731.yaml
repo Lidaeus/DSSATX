@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_single63_25sp_fourcorner_actualn_lngsh_sennroot_20260731"
+crop: "eggplant"
+created_at: "2026-07-31T15:04:35Z"
+approved_at: "2026-07-31T15:04:35Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_single63_25sp_fourcorner_actualn_lngsh_sennroot_20260731.csv"
+derived_from_sha256: "adb74212bce0f14f0638ace839c70017ac3629052022b49dd6ca1b2bfeb5203c"
+bounds_sha256: "adb74212bce0f14f0638ace839c70017ac3629052022b49dd6ca1b2bfeb5203c"
+parameter_count: 80
+automatic_repairs: 0
+notes: "25SP four-corner rerun from posterior15phys no-CHTD backbone: recenter LNGSH to ECO default +/-5 percent and add SENRTE SENDAY SENPOR_LATE LNREF NSLOPE RTDEPI RWUMX PORMIN with +/-5 percent local windows; autumn offsets fixed at zero"

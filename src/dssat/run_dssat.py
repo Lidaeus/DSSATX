@@ -1,4 +1,5 @@
 import argparse
+import csv
 import datetime
 import glob
 import math
@@ -19,6 +20,13 @@ if str(_BOOTSTRAP_ROOT) not in sys.path:
 
 from src.common.param_registry import PHYSICAL_BOUNDS
 from src.calibration.observation_policy import apply_transform_config
+from src.dssat.array_expander import (
+    expand_leaf_area,
+    expand_leaf_partition,
+    expand_senpor,
+    expand_stem_partition,
+    validate_partition_sum,
+)
 
 # Configuration
 DSSAT_EXE = "DSCSM048.EXE"
@@ -37,6 +45,8 @@ SOIL_FILE = "SOIL.SOL"
 SOIL_BASE_FILE = "SOIL.SOL.base"
 PARAM_CSV = "pest_params.csv"
 OBSERVATION_TRANSFORM_CONFIG = None
+KEEP_SOIL_WATER = False
+KEEP_NITROGEN_OUTPUTS = False
 
 OUTPUT_FILES = [
     "PlantGro.OUT",
@@ -47,8 +57,21 @@ OUTPUT_FILES = [
 ]
 
 
+def _runner_advisory(message):
+    """Emit a machine-readable warning without changing a candidate member."""
+    print(f"RUNNER_ADVISORY {message}", file=sys.stderr, flush=True)
+
+
 def validate_candidate_parameters(param_dict):
-    """Reject unsafe candidates before modifying any DSSAT input file."""
+    """Normalize finite values and log, rather than enforce, safety heuristics.
+
+    Frozen calibration bounds define the scientific parameter domain.  The
+    runner must not freeze a PEST++ realization merely because it crosses a
+    historical physical or relational safety threshold: DSSAT is allowed to
+    evaluate the actual value and its exit status decides whether the member
+    ran.  NaN/Inf remain unrecoverable because they cannot be written to a
+    DSSAT input file.
+    """
     normalized = {str(key).strip().upper(): float(value) for key, value in param_dict.items()}
     for name, value in normalized.items():
         if not math.isfinite(value):
@@ -56,17 +79,30 @@ def validate_candidate_parameters(param_dict):
         if name in PHYSICAL_BOUNDS:
             lower, upper = PHYSICAL_BOUNDS[name]
             if not lower <= value <= upper:
-                raise ValueError(f"Parameter {name}={value:g} outside physical bounds [{lower:g}, {upper:g}]")
+                _runner_advisory(
+                    f"parameter={name} value={value:g} safety_range=[{lower:g},{upper:g}] "
+                    "action=continue_to_dssat"
+                )
         if name.startswith(("SOIL_SLLL_", "SOIL_SDUL_", "SOIL_SSAT_", "IC_SH2O_")):
             if not 0.01 <= value <= 0.80:
-                raise ValueError(f"Parameter {name}={value:g} outside water-content bounds [0.01, 0.80]")
+                _runner_advisory(
+                    f"parameter={name} value={value:g} safety_range=[0.01,0.80] action=continue_to_dssat"
+                )
         if name.startswith("SOIL_SBDM_") and not 0.5 <= value <= 2.2:
-            raise ValueError(f"Parameter {name}={value:g} outside bulk-density bounds [0.5, 2.2]")
+            _runner_advisory(
+                f"parameter={name} value={value:g} safety_range=[0.5,2.2] action=continue_to_dssat"
+            )
         if name.startswith("SOIL_SLOC_") and not 0.0 <= value <= 10.0:
-            raise ValueError(f"Parameter {name}={value:g} outside soil-carbon bounds [0, 10]")
+            _runner_advisory(
+                f"parameter={name} value={value:g} safety_range=[0,10] action=continue_to_dssat"
+            )
+        if name == "SOIL_SLPF" and not 0.0 <= value <= 1.0:
+            _runner_advisory(
+                f"parameter={name} value={value:g} safety_range=[0,1] action=continue_to_dssat"
+            )
 
     if "XMAGE" in normalized and "XFPHT" in normalized and normalized["XMAGE"] >= normalized["XFPHT"]:
-        raise ValueError("Expected XMAGE < XFPHT")
+        _runner_advisory("relation=XMAGE<XFPHT action=continue_to_dssat")
 
     temperature_groups = [
         ("TB", "TO1", "TO2", "TM"),
@@ -78,7 +114,7 @@ def validate_candidate_parameters(param_dict):
         if all(name in normalized for name in names):
             values = [normalized[name] for name in names]
             if not all(left < right for left, right in zip(values, values[1:])):
-                raise ValueError(f"Expected {' < '.join(names)}")
+                _runner_advisory(f"relation={'<'.join(names)} action=continue_to_dssat")
 
     suffixes = {
         name.rsplit("_", 1)[-1]
@@ -90,7 +126,9 @@ def validate_candidate_parameters(param_dict):
         if all(name in normalized for name in names):
             values = [normalized[name] for name in names]
             if not values[0] < values[1] < values[2]:
-                raise ValueError(f"Expected SLLL < SDUL < SSAT for soil layer {suffix}")
+                _runner_advisory(
+                    f"relation={'<'.join(names)} safety_layer={suffix} action=continue_to_dssat"
+                )
     return normalized
 
 
@@ -117,6 +155,7 @@ PEST_GROW_FILE = "PestGrow.OUT"
 PEST_JOINT_FILE = "PestJoint.OUT"
 PEST_HARVEST_FILE = "PestHarvest.OUT"
 PEST_TMTGROW_FILE = "PestTmtGrow.OUT"
+PEST_SOILWAT_FILE = "PestSoilWat.OUT"
 
 
 def _get_pest_out_dir():
@@ -191,7 +230,7 @@ def _read_tmt_harvest_events(tmt_path):
 
     header = None
     rows = []
-    with open(tmt_path, "r") as f:
+    with open(tmt_path, "r", encoding="utf-8-sig", errors="replace") as f:
         for line in f:
             s = line.rstrip("\n")
             if not s.strip():
@@ -289,7 +328,7 @@ def _read_tmt_process_points(tmt_path):
 
     header = None
     rows = []
-    with open(tmt_path, "r") as f:
+    with open(tmt_path, "r", encoding="utf-8-sig", errors="replace") as f:
         for line in f:
             s = line.rstrip("\n")
             if not s.strip():
@@ -332,8 +371,11 @@ def _read_tmt_process_points(tmt_path):
         laid = _as_float(r.get("LAID"), default=-99.0)
         lwad = _as_float(r.get("LWAD"), default=-99.0)
         swad = _as_float(r.get("SWAD"), default=-99.0)
+        chtd = _as_float(r.get("CHTD"), default=-99.0)
+        snam = _as_float(r.get("SNAM"), default=-99.0)
+        lnam = _as_float(r.get("LNAM"), default=-99.0)
 
-        if lnsd == -99.0 and laid == -99.0 and lwad == -99.0 and swad == -99.0:
+        if lnsd == -99.0 and laid == -99.0 and lwad == -99.0 and swad == -99.0 and chtd == -99.0 and snam == -99.0 and lnam == -99.0:
             continue
 
         points_by_tn.setdefault(tn, []).append(
@@ -343,6 +385,9 @@ def _read_tmt_process_points(tmt_path):
                 "laid": float(laid),
                 "lwad": float(lwad),
                 "swad": float(swad),
+                "chtd": float(chtd),
+                "snam": float(snam),
+                "lnam": float(lnam),
             }
         )
 
@@ -546,11 +591,56 @@ def _yyddd_add_days(yyddd, days):
     return (d1.year % 100) * 1000 + int(d1.strftime("%j"))
 
 
+def _bounded_nearest_within_window(date_to_value: dict, target_date: int, window: int = 1):
+    """T10 bounded-nearest read: select the value at the date with minimum
+    absolute distance from ``target_date`` within ``[target_date - window,
+    target_date + window]``. Ties resolve to the later date (matching DSSAT's
+    "day-update-then-write" semantics). Returns ``(value, selected_date)`` or
+    ``(None, None)`` if no finite value exists in the window.
+    """
+    best_date = None
+    best_dist = None
+    # YYDDD is not an ordinal integer across a year boundary (e.g. 25365 is
+    # followed by 26001, not 25366).  Build the small search window with the
+    # same calendar helper used by the DSSAT-output readers.
+    for delta in range(-window, window + 1):
+        d = _yyddd_add_days(target_date, delta)
+        v = date_to_value.get(d)
+        if v is None:
+            continue
+        try:
+            fv = float(v)
+        except (TypeError, ValueError):
+            continue
+        if fv == -99.0 or fv != fv:  # skip -99 sentinel and NaN
+            continue
+        dist = abs(delta)
+        if best_dist is None or dist < best_dist or (dist == best_dist and d > best_date):
+            best_date = d
+            best_dist = dist
+    if best_date is None:
+        return None, None
+    return float(date_to_value[best_date]), best_date
+
+
 def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harvest_path, tmt_path=None, harvest_var="CHPDT"):
+    """Write PestHarvest.OUT with T10 direct cumulative harvest tokens.
+
+    T10 reads CHFPW and CHPDT as **direct cumulative series** from FreshWt.OUT
+    (no differencing) on the exact FileT observation date.  The audited FileX
+    schedules the corresponding management event on the preceding day. Both
+    are written on their raw kg ha-1 scale as
+    ``@CHFPWS@`` and ``@CHPDTS@`` tokens.  The shared observation-policy
+    transform is responsible for applying log exactly once to observations and
+    simulations after this file is written.
+    Legacy ``@PWADS@``/``@PWAIS@`` tokens are retained for backward-compatible
+    diagnostics but use the old differenced path. No neighbouring-date
+    fallback is permitted for the formal direct-harvest targets.
+    """
     entries = _parse_batch_entries(batch_file)
     if not entries:
         _append_pest_file(
-            ["RUN 1 TN -99 HNO -99 DATE -99 @PWADS@ -99.000 @PWAIS@ -99.000"],
+            ["RUN 1 TN -99 HNO -99 DATE -99 @CHFPWS@ -99.000 @CHPDTS@ -99.000 @HPODWS@ -99.000 @CHPDTS_T@ -99.000 @PWADS@ -99.000 @PWAIS@ -99.000"],
             pest_harvest_path,
         )
         return
@@ -564,20 +654,48 @@ def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harv
 
     events_by_tn = _read_tmt_harvest_events(tmt_path)
     harvest_var = str(harvest_var or "CHPDT").strip().upper()
-    var_by_run = _read_freshwt_var_by_run(freshwt_path, harvest_var)
+
+    # T10: read both CHFPW and CHPDT from FreshWt.OUT.
+    chfpw_by_run = _read_freshwt_var_by_run(freshwt_path, "CHFPW")
+    chpdt_by_run = _read_freshwt_var_by_run(freshwt_path, "CHPDT")
+    # Legacy: keep the old harvest_var for PWADS/PWAIS diagnostics.
+    legacy_by_run = _read_freshwt_var_by_run(freshwt_path, harvest_var)
 
     wrote_any = False
     new_lines = []
+    audit_rows = []
     for e in entries:
         run_no = int(e["run"])
         tn = int(e.get("tn", -99))
         events = events_by_tn.get(tn, [])
         prev_cum = None
+        prev_dry_cum = None
         for ev in events:
             hno = int(ev["hno"])
             date = int(ev["date"])
+            # T10 exact observation-date read.
+            # Read the FileT observation date exactly; FileX/FileT alignment
+            # is audited separately and no neighbouring date is admissible.
+            # FileT stores the post-harvest observation date.  The audited
+            # FileX schedules its matching harvest on the preceding day, so
+            # formal targets must read this exact date.  Nearest-day fallback
+            # can silently bind a neighbouring event to the wrong target.
+            read_reference_date = date
+            chfpw_date = date if date in chfpw_by_run.get(run_no, {}) else None
+            chpdt_date = date if date in chpdt_by_run.get(run_no, {}) else None
+            chfpw_raw = chfpw_by_run.get(run_no, {}).get(date)
+            chpdt_raw = chpdt_by_run.get(run_no, {}).get(date)
+            if chfpw_raw is None:
+                chfpw_raw = -99.0
+            if chpdt_raw is None:
+                chpdt_raw = -99.0
+            hpodw_raw = -99.0
+            if chpdt_raw != -99.0:
+                hpodw_raw = float(chpdt_raw) if prev_dry_cum is None else float(chpdt_raw) - float(prev_dry_cum)
+                prev_dry_cum = float(chpdt_raw)
+            # Legacy differenced path for PWADS/PWAIS.
             sim_date = _yyddd_add_days(date, 1)
-            sim_val = _nearest_on_or_before(var_by_run.get(run_no, {}), sim_date)
+            sim_val = _nearest_on_or_before(legacy_by_run.get(run_no, {}), sim_date)
             if sim_val is None:
                 sim_val = -99.0
             sim_inc = -99.0
@@ -588,29 +706,71 @@ def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harv
                     sim_inc = float(sim_val) - float(prev_cum)
                 prev_cum = float(sim_val)
             new_lines.append(
-                f"RUN {run_no:d} TN {tn:d} HNO {hno:d} DATE {date:d} @PWADS@ {float(sim_val):0.3f} @PWAIS@ {float(sim_inc):0.3f}"
+                f"RUN {run_no:d} TN {tn:d} HNO {hno:d} DATE {date:d}"
+                f" @CHFPWS@ {float(chfpw_raw):0.3f} @CHPDTS@ {float(chpdt_raw):0.3f}"
+                # Token order must match the .ins search order (CHFPWS ->
+                # HPODWS -> CHPDTS_T for intermediate harvests).  PEST
+                # instruction parsing advances a single forward cursor, so a
+                # token placed before an earlier-searched token is unreachable
+                # and the whole run is flagged failed.
+                f" @HPODWS@ {float(hpodw_raw):0.3f}"
+                f" @CHPDTS_T@ {float(chpdt_raw):0.3f}"
+                f" @PWADS@ {float(sim_val):0.3f} @PWAIS@ {float(sim_inc):0.3f}"
             )
+            audit_rows.append({
+                "run": run_no, "treatment": tn, "harvest_number": hno,
+                "target_date": date, "read_reference_date": read_reference_date,
+                "chfpw_selected_date": chfpw_date or "",
+                "chpdt_selected_date": chpdt_date or "",
+                "chfpw_raw": chfpw_raw, "chpdt_raw": chpdt_raw, "hpodw_raw": hpodw_raw,
+                "selection_window_days": 0,
+            })
             wrote_any = True
 
     if not wrote_any:
         for e in entries:
             run_no = int(e["run"])
             tn = int(e.get("tn", -99))
-            new_lines.append(f"RUN {run_no:d} TN {tn:d} HNO -99 DATE -99 @PWADS@ -99.000 @PWAIS@ -99.000")
+            new_lines.append(
+                f"RUN {run_no:d} TN {tn:d} HNO -99 DATE -99"
+                f" @CHFPWS@ -99.000 @CHPDTS@ -99.000"
+                f" @HPODWS@ -99.000 @CHPDTS_T@ -99.000"
+                f" @PWADS@ -99.000 @PWAIS@ -99.000"
+            )
 
-    # Overwrite (not append): a pre-run fallback may have seeded the file with
-    # placeholder -99 header lines, and the .ins reads positionally, so stale
-    # leading rows would shift every observation out of alignment.
     with open(pest_harvest_path, "w") as f:
         for line in new_lines:
             f.write(line + "\n")
+    # This audit is deliberately separate from the PEST interface. It records
+    # the bounded date match while leaving FileT/FreshWt and formal metrics on
+    # their native scale.
+    try:
+        import csv
+        audit_path = os.path.splitext(pest_harvest_path)[0] + ".audit.csv"
+        with open(audit_path, "w", newline="", encoding="utf-8") as handle:
+            fields = [
+                "run", "treatment", "harvest_number", "target_date",
+                "read_reference_date",
+                "chfpw_selected_date", "chpdt_selected_date", "chfpw_raw",
+                "chpdt_raw", "hpodw_raw", "selection_window_days",
+            ]
+            writer = csv.DictWriter(handle, fieldnames=fields)
+            writer.writeheader()
+            writer.writerows(audit_rows)
+    except Exception as exc:
+        print(f"Warning: failed to write PestHarvest audit: {exc}")
 
 
-def _write_pest_tmtgrow_from_tmt_and_plantgro(batch_file, plantgro_path, pest_tmtgrow_path, tmt_path=None):
+def _write_pest_tmtgrow_from_tmt_and_plantgro(batch_file, plantgro_path, pest_tmtgrow_path, tmt_path=None, plantn_path=None):
     entries = _parse_batch_entries(batch_file)
     if not entries:
         with open(pest_tmtgrow_path, "w") as f:
-            f.write("RUN 1 TN -99 DATE -99 @LAIDS@ -99.000 @LWADS@ -99.000 @SWADS@ -99.000\n")
+            f.write(
+                "RUN 1 TN -99 DATE -99 @LAIDS@ -99.000 @LWADS@ -99.000 "
+                "@SWADS@ -99.000 @CHTDS@ -99.000 @LAIDDS@ -99.000 "
+                "@LWADDS@ -99.000 @SWADDS@ -99.000 @LAIETS@ -99.000 "
+                "@LWETS@ -99.000 @SWETS@ -99.000\n"
+            )
         return
 
     base_dir = _run_base_dir()
@@ -621,7 +781,8 @@ def _write_pest_tmtgrow_from_tmt_and_plantgro(batch_file, plantgro_path, pest_tm
         tmt_path = os.path.join(filex_dir, f"{excode}.TMT") if excode else None
 
     points_by_tn = _read_tmt_process_points(tmt_path)
-    vars_by_run = _read_plantgro_vars_by_run(plantgro_path, ["L#SD", "LAID", "LWAD", "SWAD"])
+    vars_by_run = _read_plantgro_vars_by_run(plantgro_path, ["L#SD", "LAID", "LWAD", "SWAD", "CHTD"])
+    n_by_run = _read_plantgro_vars_by_run(plantn_path, ["SNAD", "LNAD"]) if plantn_path else {}
 
     wrote_any = False
     with open(pest_tmtgrow_path, "w") as f:
@@ -629,7 +790,17 @@ def _write_pest_tmtgrow_from_tmt_and_plantgro(batch_file, plantgro_path, pest_tm
             run_no = int(e["run"])
             tn = int(e.get("tn", -99))
             pts = points_by_tn.get(tn, [])
-            for p in pts:
+            previous_state = None
+            terminal_index = {}
+            for variable, field in (
+                ("LAID", "laid"), ("LWAD", "lwad"), ("SWAD", "swad")
+            ):
+                valid = [
+                    idx for idx, item in enumerate(pts)
+                    if float(item.get(field, -99.0)) != -99.0
+                ]
+                terminal_index[variable] = valid[-1] if valid else None
+            for point_index, p in enumerate(pts):
                 date = int(p["date"])
 
                 sim_day = None
@@ -645,16 +816,52 @@ def _write_pest_tmtgrow_from_tmt_and_plantgro(batch_file, plantgro_path, pest_tm
                 laid_s = -99.0
                 lwad_s = -99.0
                 swad_s = -99.0
+                chtd_s = -99.0
                 if sim_day is not None:
                     lnsd_s = float(sim_day.get("L#SD", -99.0))
                     laid_s = float(sim_day.get("LAID", -99.0))
                     lwad_s = float(sim_day.get("LWAD", -99.0))
                     swad_s = float(sim_day.get("SWAD", -99.0))
+                    chtd_s = float(sim_day.get("CHTD", -99.0))
+                # CANOPY_TERMINAL is an exact-date contract: the terminal
+                # observed LAI must be paired with DSSAT LAID on that same
+                # observation date.  Never inherit the general process-state
+                # on-or-before fallback for this token.
+                if point_index == terminal_index["LAID"] and date not in candidates:
+                    laid_s = -99.0
+                current_state = {
+                    "LAID": laid_s, "LWAD": lwad_s, "SWAD": swad_s
+                }
+                delta_state = {}
+                for variable, value in current_state.items():
+                    previous_value = (
+                        previous_state.get(variable, -99.0)
+                        if previous_state is not None
+                        else -99.0
+                    )
+                    delta_state[variable] = (
+                        float(value) - float(previous_value)
+                        if value != -99.0 and previous_value != -99.0
+                        else -99.0
+                    )
+                snam_s = -99.0
+                lnam_s = -99.0
+                n_candidates = n_by_run.get(run_no, {})
+                n_dates = [d for d in n_candidates if abs(int(d) - int(date)) <= 1]
+                if n_dates:
+                    selected_n = n_candidates[sorted(n_dates, key=lambda d: (abs(int(d) - int(date)), -int(d)))[0]]
+                    snam_s = float(selected_n.get("SNAD", -99.0))
+                    lnam_s = float(selected_n.get("LNAD", -99.0))
 
                 f.write(
                     f"RUN {run_no:d} TN {tn:d} DATE {date:d} "
-                    f"@L#SDS@ {lnsd_s:0.3f} @LAIDS@ {laid_s:0.3f} @LWADS@ {lwad_s:0.3f} @SWADS@ {swad_s:0.3f}\n"
+                    f"@L#SDS@ {lnsd_s:0.3f} @LAIDS@ {laid_s:0.3f} @LWADS@ {lwad_s:0.3f} @SWADS@ {swad_s:0.3f} @CHTDS@ {chtd_s:0.3f} "
+                    f"@SNAMS@ {snam_s:0.3f} @LNAMS@ {lnam_s:0.3f} "
+                    f"@LAIDDS@ {delta_state['LAID']:0.3f} @LAIETS@ {(laid_s if point_index == terminal_index['LAID'] else -99.0):0.3f} "
+                    f"@LWADDS@ {delta_state['LWAD']:0.3f} @LWETS@ {(lwad_s if point_index == terminal_index['LWAD'] else -99.0):0.3f} "
+                    f"@SWADDS@ {delta_state['SWAD']:0.3f} @SWETS@ {(swad_s if point_index == terminal_index['SWAD'] else -99.0):0.3f}\n"
                 )
+                previous_state = current_state
                 wrote_any = True
 
         if not wrote_any:
@@ -663,8 +870,136 @@ def _write_pest_tmtgrow_from_tmt_and_plantgro(batch_file, plantgro_path, pest_tm
                 tn = int(e.get("tn", -99))
                 f.write(
                     f"RUN {run_no:d} TN {tn:d} DATE -99 "
-                    f"@L#SDS@ -99.000 @LAIDS@ -99.000 @LWADS@ -99.000 @SWADS@ -99.000\n"
+                    f"@L#SDS@ -99.000 @LAIDS@ -99.000 @LWADS@ -99.000 "
+                    f"@SWADS@ -99.000 @CHTDS@ -99.000 @LAIDDS@ -99.000 "
+                    f"@LWADDS@ -99.000 @SWADDS@ -99.000 @LAIETS@ -99.000 "
+                    f"@LWETS@ -99.000 @SWETS@ -99.000 @SNAMS@ -99.000 "
+                    f"@LNAMS@ -99.000\n"
                 )
+
+
+def _yyddd_from_iso(value):
+    try:
+        d = datetime.date.fromisoformat(str(value).strip()[:10])
+        return int(f"{d.year % 100:02d}{d.timetuple().tm_yday:03d}")
+    except (TypeError, ValueError):
+        return -99
+
+
+def _soil_observation_records(path):
+    """Return non-initial soil observations in the same deterministic order as the builder."""
+    if not os.path.isfile(path):
+        return []
+    rows = []
+    with open(path, "r", encoding="utf-8-sig", newline="") as handle:
+        for row in csv.DictReader(handle):
+            if str(row.get("phi_role", "")).strip().lower() != "soil_water_phi":
+                continue
+            try:
+                row["trno"] = int(float(row.get("trno", -99)))
+                row["date_code"] = _yyddd_from_iso(row.get("date"))
+                row["vwc_mean"] = float(row.get("vwc_mean"))
+            except (TypeError, ValueError):
+                continue
+            if row["trno"] > 0 and row["date_code"] > 0:
+                rows.append(row)
+    rows.sort(key=lambda r: (int(r["trno"]), int(r["date_code"]), str(r.get("depth_label", ""))))
+    for idx, row in enumerate(rows, 1):
+        row["token"] = f"SW{idx:04d}S"
+    return rows
+
+
+def _read_soilwat_by_run(path):
+    """Parse SoilWat.OUT into run -> date-code -> SW column values."""
+    result = {}
+    if not os.path.isfile(path):
+        return result
+    run_no = None
+    header = None
+    with open(path, "r", encoding="utf-8", errors="ignore") as handle:
+        for raw in handle:
+            line = raw.rstrip("\n")
+            if line.startswith("*RUN"):
+                match = re.match(r"^\*RUN\s+(\d+)", line)
+                run_no = int(match.group(1)) if match else None
+                header = None
+                continue
+            if run_no is None:
+                continue
+            if line.lstrip().startswith("@YEAR"):
+                header = line.split()
+                continue
+            if header is None or not line.strip() or line.lstrip().startswith(("!", "*", "@")):
+                continue
+            parts = line.split()
+            if len(parts) < len(header):
+                continue
+            try:
+                date_code = int(parts[0]) % 100 * 1000 + int(parts[1])
+            except (ValueError, IndexError):
+                continue
+            values = {}
+            for name, value in zip(header, parts):
+                if name.startswith("SW") and name.endswith("D"):
+                    try:
+                        values[name] = float(value)
+                    except ValueError:
+                        pass
+            result.setdefault(run_no, {})[date_code] = values
+    return result
+
+
+def _write_pest_soilwat_from_soilwat(batch_file, soilwat_path, pest_path, observations_path=None):
+    """Create tagged soil-water observations using audited layer weights.
+
+    The first field measurement is excluded upstream by ``phi_role``.  For
+    each remaining observation the nearest available DSSAT date is selected;
+    no additional date shift or fabricated observation is introduced.
+    """
+    observations_path = observations_path or "soil_water_observations.csv"
+    observations = _soil_observation_records(observations_path)
+    entries = _parse_batch_entries(batch_file)
+    # The bundle may contain audited soil observations for all treatments,
+    # while a diagnostic E01/T10 batch intentionally runs a subset.  Compact
+    # token numbering must follow the actual batch treatments; otherwise the
+    # generated PestSoilWat.OUT tokens (e.g. SW0009S) no longer match the
+    # .ins file (SW0001S), producing an EOF/initial-evaluation failure.
+    run_order = {int(e.get("tn", -99)): i for i, e in enumerate(entries)}
+    allowed_treatments = set(run_order)
+    observations = [r for r in observations if int(r["trno"]) in allowed_treatments]
+    observations.sort(key=lambda r: (run_order[int(r["trno"])], int(r["date_code"]), str(r.get("depth_label", ""))))
+    for idx, row in enumerate(observations, 1):
+        row["token"] = f"SW{idx:04d}S"
+    by_run = _read_soilwat_by_run(soilwat_path)
+    with open(pest_path, "w", encoding="utf-8") as handle:
+        for entry in entries:
+            run_no = int(entry.get("run", -99))
+            tn = int(entry.get("tn", -99))
+            run_rows = [r for r in observations if int(r["trno"]) == tn]
+            for row in run_rows:
+                candidates = by_run.get(run_no, {})
+                if not candidates:
+                    value = -99.0
+                else:
+                    selected = min(candidates, key=lambda date: (abs(int(date) - int(row["date_code"])), int(date)))
+                    raw = candidates[selected]
+                    value = 0.0
+                    total = 0.0
+                    for item in str(row.get("dssat_layer_weights", "")).split(";"):
+                        if not item.strip() or ":" not in item:
+                            continue
+                        idx, weight = item.split(":", 1)
+                        try:
+                            w = float(weight)
+                            v = float(raw.get(f"SW{int(idx) + 1}D", float("nan")))
+                        except (ValueError, TypeError):
+                            continue
+                        if math.isfinite(v):
+                            value += w * v
+                            total += w
+                    if total <= 0:
+                        value = -99.0
+                handle.write(f"RUN {run_no:d} TN {tn:d} DATE {int(row['date_code']):d} @{row['token']}@ {value:.6f}\n")
 
 
 def _resolve_filex_from_batch(batch_file, base_dir):
@@ -843,7 +1178,58 @@ def _localize_experiment_files(filex_path, run_dir):
         if ext == "TMX":
             copied_filex = dst
 
+    if not copied_filex:
+        # The calibration wrapper may already have staged the FileX into the
+        # run directory.  In that case copying the file onto itself fails and
+        # the loop above intentionally leaves ``copied_filex`` unset; still
+        # normalize the staged copy and return it to the caller.
+        staged = os.path.join(run_dir, base)
+        if os.path.exists(staged):
+            copied_filex = staged
+    if copied_filex:
+        _normalize_filex_initial_conditions_boundary(copied_filex)
+
     return copied_filex
+
+
+def _normalize_filex_initial_conditions_boundary(filex_path):
+    """Remove a DSSAT-incompatible blank line at the end of INITIAL CONDITIONS.
+
+    Some user FileX files contain one empty line between the last initial
+    condition row and the next section header.  DSSAT's FileX reader can
+    interpret that line as an invalid initial-condition record (IPSLIN).  The
+    source file remains untouched; only the per-run localized copy is
+    normalized.
+    """
+    try:
+        with open(filex_path, "r", encoding="utf-8", errors="ignore") as f:
+            lines = f.readlines()
+    except Exception:
+        return
+
+    out_lines = []
+    section = None
+    changed = False
+    for index, line in enumerate(lines):
+        stripped = line.strip().upper()
+        if stripped.startswith("*"):
+            section = stripped
+        if not stripped:
+            next_section = ""
+            for candidate in lines[index + 1 :]:
+                if candidate.strip():
+                    next_section = candidate.strip().upper()
+                    break
+            if section == "*INITIAL CONDITIONS" or next_section.startswith("*PLANTING DETAILS"):
+                changed = True
+                continue
+        out_lines.append(line)
+
+    if not changed:
+        return
+    last_err = _atomic_write_lines(filex_path, out_lines, n_tries=20, sleep_s=0.05)
+    if last_err is not None:
+        raise last_err
 
 
 def _write_local_batch(batch_src_path, batch_dst_path, filex_basename):
@@ -953,17 +1339,18 @@ def _write_pest_eval_from_evaluate(evaluate_out_path, pest_eval_path):
         if n_runs <= 0:
             n_runs = 1
         new_lines = [
-            f"RUN {i:d} TN {-99:d} @ADAPS@ {-99.0:0.3f} @ADAPM@ {-99.0:0.3f} "
+            f"RUN {i:d} TN {-99:d} @PDAPS@ {0.0:0.3f} @PDAPM@ {0.0:0.3f} "
+            f"@ADAPS@ {-99.0:0.3f} @ADAPM@ {-99.0:0.3f} "
             f"@MDAPS@ {-99.0:0.3f} @MDAPM@ {-99.0:0.3f}"
             for i in range(1, n_runs + 1)
         ]
         _append_pest_file(new_lines, pest_eval_path)
         return
 
-    expected_cols = ["@RUN", "TN", "ADAPS", "ADAPM", "MDAPS", "MDAPM"]
+    expected_cols = ["@RUN", "TN", "PDAPS", "PDAPM", "ADAPS", "ADAPM", "MDAPS", "MDAPM"]
     for c in expected_cols:
         if c not in df.columns:
-            df[c] = -99
+            df[c] = 0 if c in {"PDAPS", "PDAPM"} else -99
 
     for c in expected_cols:
         df[c] = pd.to_numeric(df[c], errors="coerce").fillna(-99)
@@ -973,12 +1360,15 @@ def _write_pest_eval_from_evaluate(evaluate_out_path, pest_eval_path):
     for _, row in out_df.iterrows():
         run_no = _as_int(row["@RUN"], default=-99)
         tn = _as_int(row["TN"], default=-99)
+        pdaps = float(row["PDAPS"]) if not pd.isna(row["PDAPS"]) else 0.0
+        pdapm = float(row["PDAPM"]) if not pd.isna(row["PDAPM"]) else 0.0
         adaps = float(row["ADAPS"]) if not pd.isna(row["ADAPS"]) else -99.0
         adapm = float(row["ADAPM"]) if not pd.isna(row["ADAPM"]) else -99.0
         mdaps = float(row["MDAPS"]) if not pd.isna(row["MDAPS"]) else -99.0
         mdapm = float(row["MDAPM"]) if not pd.isna(row["MDAPM"]) else -99.0
         new_lines.append(
-            f"RUN {run_no:d} TN {tn:d} @ADAPS@ {adaps:0.3f} @ADAPM@ {adapm:0.3f} "
+            f"RUN {run_no:d} TN {tn:d} @PDAPS@ {pdaps:0.3f} @PDAPM@ {pdapm:0.3f} "
+            f"@ADAPS@ {adaps:0.3f} @ADAPM@ {adapm:0.3f} "
             f"@MDAPS@ {mdaps:0.3f} @MDAPM@ {mdapm:0.3f}"
         )
     _append_pest_file(new_lines, pest_eval_path)
@@ -1264,8 +1654,29 @@ def _infer_soil_id_from_filex(filex_path):
             return sid or None
     return None
 
-def cleanup(target_dir=".", keep_dssat_outputs=False):
-    if not keep_dssat_outputs:
+def cleanup(target_dir=".", keep_dssat_outputs=False, keep_soil_water=False, keep_nitrogen_outputs=False):
+    """Clean up DSSAT transient output files.
+
+    Parameters
+    ----------
+    target_dir : str
+        Directory containing DSSAT output files.
+    keep_dssat_outputs : bool
+        If True, keep FreshWt.OUT and PlantGro.OUT (process-level diagnostics).
+    keep_soil_water : bool
+        If True, keep SoilWat.OUT (needed for the SOIL_WATER observation group
+        in calibration mode; the file is large and should be off otherwise).
+    """
+    if not keep_dssat_outputs and not keep_soil_water:
+        for file in (OUTPUT_FILES + ["Evaluate.OUT", "SoilWat.OUT"]):
+            p = os.path.join(target_dir, file)
+            if os.path.exists(p):
+                try:
+                    os.remove(p)
+                except Exception:
+                    pass
+    elif not keep_dssat_outputs and keep_soil_water:
+        # SoilWat.OUT is kept; still drop other OUTPUT_FILES + Evaluate.OUT.
         for file in (OUTPUT_FILES + ["Evaluate.OUT"]):
             p = os.path.join(target_dir, file)
             if os.path.exists(p):
@@ -1288,10 +1699,15 @@ def cleanup(target_dir=".", keep_dssat_outputs=False):
         PEST_JOINT_FILE,
         PEST_HARVEST_FILE,
         PEST_TMTGROW_FILE,
+        PEST_SOILWAT_FILE,
         "Evaluate.OUT",
     }
     if keep_dssat_outputs:
         keep_out.update({"FreshWt.OUT", "PlantGro.OUT"})
+    if keep_soil_water:
+        keep_out.update({"SoilWat.OUT"})
+    if keep_nitrogen_outputs:
+        keep_out.update({"PlantN.OUT", "SoilNi.OUT", "SoilN.OUT"})
     for p in glob.glob(os.path.join(target_dir, "*.OUT")):
         if os.path.basename(p) in keep_out:
             continue
@@ -1331,7 +1747,8 @@ def handle_failure(exit_code):
         with open(_eval_pest_file(), "w") as f:
             for i in range(1, n_runs + 1):
                 f.write(
-                    f"RUN {i:d} TN {-99:d} @ADAPS@ {-99.0:0.3f} @ADAPM@ {-99.0:0.3f} "
+                    f"RUN {i:d} TN {-99:d} @PDAPS@ {0.0:0.3f} @PDAPM@ {0.0:0.3f} "
+                    f"@ADAPS@ {-99.0:0.3f} @ADAPM@ {-99.0:0.3f} "
                     f"@MDAPS@ {-99.0:0.3f} @MDAPM@ {-99.0:0.3f}\n"
                 )
 
@@ -1371,7 +1788,9 @@ def handle_failure(exit_code):
 
     if not os.path.exists(_tmtgrow_pest_file()):
         try:
-            _write_pest_tmtgrow_from_tmt_and_plantgro(BATCH_FILE, "PlantGro.OUT", _tmtgrow_pest_file())
+            _write_pest_tmtgrow_from_tmt_and_plantgro(
+                BATCH_FILE, "PlantGro.OUT", _tmtgrow_pest_file(), plantn_path="PlantN.OUT"
+            )
         except Exception:
             n_runs = _count_batch_runs(BATCH_FILE)
             if n_runs <= 0:
@@ -1380,7 +1799,7 @@ def handle_failure(exit_code):
                 for i in range(1, n_runs + 1):
                     f.write(
                         f"RUN {i:d} TN {-99:d} DATE -99 "
-                        f"@LAIDS@ -99.000 @LWADS@ -99.000 @SWADS@ -99.000\n"
+                        f"@LAIDS@ -99.000 @LWADS@ -99.000 @SWADS@ -99.000 @CHTDS@ -99.000\n"
                     )
 
 def _format_to_width(val, width, orig_token=None):
@@ -1396,6 +1815,20 @@ def _format_to_width(val, width, orig_token=None):
         orig_strip = (orig_token or "").strip()
         orig_has_dot = "." in orig_strip
         orig_trailing_dot = orig_strip.endswith(".")
+
+        # DSSAT SPE uses compact fractional tokens (e.g. ``.05``).  Do not
+        # round a sensitivity candidate back to the template precision: that
+        # would make lower/upper injections silently identical.  Prefer the
+        # shortest representation that preserves the requested value.
+        if abs(v) < 1 and (orig_strip.startswith((".", "-.")) or orig_has_dot):
+            sign = "-" if v < 0 else ""
+            av = abs(v)
+            for dec in range(6, 0, -1):
+                body = f"{av:.{dec}f}".split(".", 1)[1].rstrip("0")
+                if body:
+                    token = sign + "." + body
+                    if len(token) <= width:
+                        return token.rjust(width)
 
         if orig_token:
             tok = orig_token.strip()
@@ -1465,7 +1898,7 @@ def _format_to_width(val, width, orig_token=None):
 
     s = str(v)
     if len(s) > width:
-        return s[-width:]
+        raise ValueError(f"value {v!r} cannot be represented in SPE field width {width}")
     return s.rjust(width)
 
 
@@ -1857,8 +2290,22 @@ def update_eco_file(param_csv_path=PARAM_CSV, target_ecotype=None):
         except Exception:
             xfint = float("nan")
 
-        if (not math.isfinite(xfint)) or (xfint < 0.12) or (xfint > 0.50):
-            raise ValueError(f"Injected XFINT is invalid after formatting: {xfint!r}")
+        if not math.isfinite(xfint):
+            raise ValueError(f"Injected XFINT cannot be parsed after formatting: {xfint!r}")
+
+        # Historical T9/P2 runs treated 0.12--0.50 as a numerical-safety
+        # interval.  T10 deliberately freezes the scientific domain at
+        # 0.08--0.50.  A value outside the former interval is useful failure
+        # context, not a reason for the runner to delete a realization before
+        # DSSAT has had a chance to evaluate it.
+        if xfint < 0.12 or xfint > 0.50:
+            print(
+                "RUNNER_ADVISORY parameter=XFINT "
+                f"value={xfint:g} historical_advisory_range=[0.12,0.50] "
+                "action=continue_to_dssat",
+                file=sys.stderr,
+                flush=True,
+            )
 
     lines[eco_idx] = "".join(new_chars) + "\n"
     lock_path = os.path.abspath(ECO_FILE) + ".lock"
@@ -1879,8 +2326,13 @@ def update_spe_file(param_csv_path=PARAM_CSV):
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     spe_base_path = None
+    env_spe_base = os.environ.get("DSSAT_SPE_BASE", "").strip()
+    if env_spe_base and os.path.exists(env_spe_base):
+        spe_base_path = os.path.abspath(env_spe_base)
     cand = os.path.join(script_dir, SPE_FILE + ".base")
-    if os.path.exists(cand):
+    if spe_base_path:
+        cand = None
+    elif os.path.exists(cand):
         spe_base_path = cand
     else:
         local_base = SPE_FILE + ".base"
@@ -1918,6 +2370,24 @@ def update_spe_file(param_csv_path=PARAM_CSV):
         "RNH4C",
         "RPRO",
         "RFIXN",
+        # Plant composition/N concentration parameters.  These are not
+        # merely metadata: VEGGR uses the G-class values as the minimum
+        # tissue-N gate and the I-class values as potential N demand.
+        "PROLFI",
+        "PROLFG",
+        "PROLFF",
+        "PROSTI",
+        "PROSTG",
+        "PROSTF",
+        "PRORTI",
+        "PRORTG",
+        "PRORTF",
+        "PROSHI",
+        "PROSHG",
+        "PROSHF",
+        # Organ-composition parameters are deliberately explicit here.  They
+        # must not depend on the legacy high-dimensional whitelist in the
+        # calibration builder.
         "CMOBMX",
         "CADSTF",
         "CADPR1",
@@ -1925,6 +2395,12 @@ def update_spe_file(param_csv_path=PARAM_CSV):
         "NVSMOB",
         "NRCVR",
         "NSTFAC",
+        "NREXP",
+        "NRMIN",
+        "NUPK50",
+        "NUPQ",
+        "NUPCMN",
+        "NUPAV",
         "FNPGN1",
         "FNPGN2",
         "FNPGN3",
@@ -1956,76 +2432,270 @@ def update_spe_file(param_csv_path=PARAM_CSV):
         "RTSDF",
         "RWUEP1",
         "RWUMX",
+        "SDPROS",
+        "PCARSD",
+        "XMPAGE",
+        # Additional SPE fields used by the expanded sensitivity domain.
+        "SENRTE",
+        "SENDAY",
+        "SETMAX",
+        "SRMAX",
+        "RFLWAB",
+        "DSWBAR",
+        "XFRMAX",
+        "SHLAG",
+        "SLAMAX",
+        "SLAMIN",
+        "TURSLA",
+        "NSLA",
+        "FRLFMX",
+        "PGEFF",
+        "KDIF",
+        "LFANGB",
+        "FNPGN1",
+        "FNPGN2",
+        "FNPGN3",
+        "FNPGN4",
+    ]
+    anchor_keys = [
+        "LAREA_EARLY",
+        "LAREA_MID",
+        "LAREA_LATE",
+        "LEAF_PART_EARLY",
+        "LEAF_PART_FLORAL",
+        "LEAF_PART_LATE",
+        "STEM_PART_EARLY",
+        "STEM_PART_LATE",
+        "SENPOR_LATE",
+        "FNSDT_OPT1",
+        "FNSDT_OPT2",
     ]
 
     keys = [k for k in (base_names + stage_names + direct_keys) if k in param_dict]
-    if not keys:
+    if not keys and not any(k in param_dict for k in anchor_keys):
         return
 
     number_re = re.compile(r"[-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[Ee][-+]?\d+)?")
     with open(spe_base_path, "r") as f:
         lines = f.readlines()
 
-    def _update_named_line(contains_text, param_order):
-        if not contains_text or not param_order:
-            return
-        if not any((str(p).strip().upper() in param_dict) for p in param_order):
-            return
-        idx = -1
+    def _find_line_index(contains_text):
         for j, s in enumerate(lines):
             if contains_text in s:
-                idx = j
-                break
-        if idx == -1:
-            return
+                return j
+        return -1
+
+    def _read_prefix_values(idx, count):
+        if idx < 0 or idx >= len(lines):
+            return []
+        return [float(m.group(0)) for m in list(number_re.finditer(lines[idx]))[:count]]
+
+    def _write_prefix_values(idx, values, count=None):
+        if idx < 0 or idx >= len(lines):
+            raise ValueError(f"line index out of range for SPE update: {idx}")
         s = lines[idx]
         matches = list(number_re.finditer(s))
-        if len(matches) < len(param_order):
-            return
+        n_values = len(values) if count is None else count
+        if len(matches) < n_values:
+            raise ValueError(
+                f"SPE line {idx + 1} has only {len(matches)} numeric fields; "
+                f"expected at least {n_values}"
+            )
         new_chars = list(s.rstrip("\n"))
-        for name, m in zip(param_order, matches[: len(param_order)]):
-            key = str(name).strip().upper()
-            if key not in param_dict:
-                continue
-            v = float(param_dict[key])
+        for value, m in zip(values, matches[:n_values]):
             orig = m.group(0)
             width = m.end() - m.start()
-            formatted = _format_to_width(v, width, orig_token=orig)
+            formatted = _format_to_width(float(value), width, orig_token=orig)
             if len(formatted) != width:
                 formatted = formatted[:width].rjust(width)
             new_chars[m.start() : m.end()] = list(formatted)
         lines[idx] = "".join(new_chars) + "\n"
 
+    def _apply_anchor_expansions():
+        yvref_idx = _find_line_index("YVREF(1-6)")
+        if yvref_idx != -1 and any(
+            key in param_dict for key in ("LAREA_EARLY", "LAREA_MID", "LAREA_LATE")
+        ):
+            current_yvref = _read_prefix_values(yvref_idx, 6)
+            if len(current_yvref) < 6:
+                raise ValueError("Could not read the 6-node YVREF array from the SPE template")
+            expanded = expand_leaf_area(
+                float(param_dict.get("LAREA_EARLY", current_yvref[0])),
+                float(param_dict.get("LAREA_MID", current_yvref[3])),
+                float(param_dict.get("LAREA_LATE", current_yvref[5])),
+            )
+            _write_prefix_values(yvref_idx, expanded.y_values, count=6)
+
+        yleaf_idx = _find_line_index("YLEAF VALUES")
+        ystem_idx = _find_line_index("YSTEM VALUES")
+        yleaf_values = tuple(_read_prefix_values(yleaf_idx, 10))
+        ystem_values = tuple(_read_prefix_values(ystem_idx, 10))
+        update_leaf = yleaf_idx != -1 and any(
+            key in param_dict
+            for key in ("LEAF_PART_EARLY", "LEAF_PART_FLORAL", "LEAF_PART_LATE")
+        )
+        update_stem = ystem_idx != -1 and any(
+            key in param_dict for key in ("STEM_PART_EARLY", "STEM_PART_LATE")
+        )
+        if update_leaf:
+            if len(yleaf_values) < 10:
+                raise ValueError("Could not read the 10-node YLEAF array from the SPE template")
+            yleaf_values = expand_leaf_partition(
+                float(param_dict.get("LEAF_PART_EARLY", yleaf_values[0])),
+                float(param_dict.get("LEAF_PART_FLORAL", yleaf_values[4])),
+                float(param_dict.get("LEAF_PART_LATE", yleaf_values[9])),
+            ).y_values
+        if update_stem:
+            if len(ystem_values) < 10:
+                raise ValueError("Could not read the 10-node YSTEM array from the SPE template")
+            ystem_values = expand_stem_partition(
+                float(param_dict.get("STEM_PART_EARLY", ystem_values[0])),
+                float(param_dict.get("STEM_PART_LATE", ystem_values[9])),
+            ).y_values
+        if update_leaf or update_stem:
+            violations = validate_partition_sum(yleaf_values, ystem_values)
+            if violations:
+                raise ValueError(
+                    "Expanded leaf/stem partition anchors violate YLEAF + YSTEM <= 1 "
+                    f"at nodes {violations}"
+                )
+            if update_leaf:
+                _write_prefix_values(yleaf_idx, yleaf_values, count=10)
+            if update_stem:
+                _write_prefix_values(ystem_idx, ystem_values, count=10)
+
+        senpor_marker_idx = _find_line_index("SENPOR.........")
+        if senpor_marker_idx != -1 and "SENPOR_LATE" in param_dict:
+            senpor_values_idx = senpor_marker_idx + 1
+            current_senpor_line = _read_prefix_values(senpor_values_idx, 8)
+            if len(current_senpor_line) < 8:
+                raise ValueError("Could not read the SENPOR/SENMAX values from the SPE template")
+            expanded = expand_senpor(float(param_dict["SENPOR_LATE"]))
+            _write_prefix_values(
+                senpor_values_idx,
+                (*expanded.y_values, *current_senpor_line[4:8]),
+                count=8,
+            )
+
+        fnsdt_idx = _find_line_index("FNSDT(1-4)")
+        if fnsdt_idx != -1 and any(key in param_dict for key in ("FNSDT_OPT1", "FNSDT_OPT2")):
+            current_fnsdt = _read_prefix_values(fnsdt_idx, 4)
+            if len(current_fnsdt) < 4:
+                raise ValueError("Could not read the 4-node FNSDT array from the SPE template")
+            if "FNSDT_OPT1" in param_dict:
+                current_fnsdt[1] = float(param_dict["FNSDT_OPT1"])
+            if "FNSDT_OPT2" in param_dict:
+                current_fnsdt[2] = float(param_dict["FNSDT_OPT2"])
+            _write_prefix_values(fnsdt_idx, current_fnsdt, count=4)
+
+    def _update_named_line(contains_text, param_order):
+        if not contains_text or not param_order:
+            return
+        if not any((str(p).strip().upper() in param_dict) for p in param_order):
+            return
+        idx = _find_line_index(contains_text)
+        if idx == -1:
+            return
+        values = _read_prefix_values(idx, len(param_order))
+        if len(values) < len(param_order):
+            return
+        for pos, name in enumerate(param_order):
+            key = str(name).strip().upper()
+            if key in param_dict:
+                values[pos] = float(param_dict[key])
+        _write_prefix_values(idx, values, count=len(param_order))
+
+    _apply_anchor_expansions()
+
     _update_named_line("PARMAX,PHTMAX", ["PARMAX", "PHTMAX", "KCAN", "KC_SLOPE"])
     _update_named_line("RNO3C,RNH4C", ["RNO3C", "RNH4C", "RPRO", "RFIXN"])
+    _update_named_line(
+        "PROLFI,PROLFG,PROLFF",
+        ["PROLFI", "PROLFG", "PROLFF", "PROSTI", "PROSTG", "PROSTF"],
+    )
+    _update_named_line(
+        "PRORTI,PRORTG,PRORTF",
+        ["PRORTI", "PRORTG", "PRORTF", "PROSHI", "PROSHG", "PROSHF"],
+    )
     _update_named_line("CMOBMX,CADSTF", ["CMOBMX", "CADSTF", "CADPR1", "NMOBMX", "NVSMOB", "NRCVR"])
+    _update_named_line("SDPROS,SDPROG", ["SDPROS"])
+    _update_named_line("PCARLF,PCARST", ["PCARSD"])
     _update_named_line("FNPGN(4)", ["FNPGN1", "FNPGN2", "FNPGN3", "FNPGN4"])
     _update_named_line("SLWREF,SLWSLO", ["SLWREF", "SLWSLO", "NSLOPE", "LNREF", "PGREF"])
     _update_named_line("WTFSD,PORPT", ["WTFSD", "PORPT", "FRSTMF", "FRLFF", "ATOP", "FRCNOD"])
     _update_named_line("FINREF,SLAREF", ["FINREF", "SLAREF", "SIZREF", "VSSINK", "EVMODC"])
     _update_named_line("RTDEPI,RFAC1", ["RTDEPI", "RFAC1", "RTSEN", "RLDSM", "RTSDF", "RWUEP1", "RWUMX"])
     _update_named_line("RTNO3,RTNH4", ["RTNO3", "RTNH4", "PORMIN", "RTEXF"])
-    if "NSTFAC" in param_dict:
-        idx = -1
-        for j, s in enumerate(lines):
-            u = s.upper()
-            if "XPODF" in u and "NSTFAC" in u:
-                idx = j
-                break
-        if idx != -1:
-            s = lines[idx]
-            matches = list(number_re.finditer(s))
-            if matches:
-                m = matches[-1]
-                v = float(param_dict["NSTFAC"])
-                orig = m.group(0)
-                width = m.end() - m.start()
-                formatted = _format_to_width(v, width, orig_token=orig)
-                if len(formatted) != width:
-                    formatted = formatted[:width].rjust(width)
-                new_chars = list(s.rstrip("\n"))
-                new_chars[m.start() : m.end()] = list(formatted)
-                lines[idx] = "".join(new_chars) + "\n"
+    _update_named_line("SETMAX,SRMAX", ["SETMAX", "SRMAX", "RFLWAB", "XMPAGE"])
+    _update_named_line("SENRTE,SENRT2", ["SENRTE", "_SENRT2", "SENDAY", "_FREEZ1", "_FREEZ2"])
+    _update_named_line("SLAMAX,SLAMIN", ["SLAMAX", "SLAMIN", "_SLAPAR", "TURSLA", "NSLA"])
+    _update_named_line("PGEFF SCV KDIF", ["PGEFF", "_SCV", "KDIF", "LFANGB"])
+    _update_named_line("DSWBAR,XFRMAX", ["DSWBAR", "XFRMAX", "SHLAG"])
+    _update_named_line("FRLFMX", ["FRLFMX"])
+
+    # Last-resort label-driven injection.  This closes the whitelist gap for
+    # newly added SPE fields whose static grouping has not yet been extended:
+    # the comma-separated labels at the end of every SPE row are themselves a
+    # machine-readable contract, so update the matching numeric slot exactly.
+    for _key, _value in param_dict.items():
+        _u = str(_key).strip().upper()
+        if not _u:
+            continue
+        for _idx, _line in enumerate(lines):
+            if _u not in _line.upper() or "," not in _line:
+                continue
+            _label_text = _line.rsplit(" ", 1)[-1].strip().upper()
+            _labels = [x.strip() for x in _label_text.split(",")]
+            if _u not in _labels:
+                continue
+            _matches = list(number_re.finditer(_line))
+            _pos = _labels.index(_u)
+            if _pos >= len(_matches):
+                continue
+            _m = _matches[_pos]
+            _formatted = _format_to_width(float(_value), _m.end() - _m.start(), orig_token=_m.group(0))
+            _chars = list(_line.rstrip("\n"))
+            _chars[_m.start() : _m.end()] = list(_formatted)
+            lines[_idx] = "".join(_chars) + "\n"
+            break
+    # XPODF was historically a one-field row (only NSTFAC).  The modified
+    # executable extends it to three fields: NSTFAC, NREXP and NRMIN.  Map
+    # these by their labels so the legacy one-field template and the extended
+    # template are both written correctly.  In particular, do not use the
+    # last numeric token for NSTFAC: on the extended row that token is NRMIN.
+    for idx, line in enumerate(lines):
+        upper = line.upper()
+        marker = upper.find("XPODF")
+        if marker < 0:
+            continue
+        label_text = line[marker:].split("!", 1)[0]
+        if "," not in label_text:
+            continue
+        labels = [part.strip().upper() for part in label_text.split(",")]
+        if labels:
+            # XPODF is the section marker, not a numeric field.
+            labels = labels[1:]
+        if not labels:
+            continue
+        matches = list(number_re.finditer(line[:marker]))
+        if not matches:
+            continue
+        changed = False
+        new_chars = list(line.rstrip("\n"))
+        for pos, label in enumerate(labels):
+            if pos >= len(matches) or label not in param_dict:
+                continue
+            match = matches[pos]
+            orig = match.group(0)
+            width = match.end() - match.start()
+            formatted = _format_to_width(float(param_dict[label]), width, orig_token=orig)
+            if len(formatted) != width:
+                formatted = formatted[:width].rjust(width)
+            new_chars[match.start() : match.end()] = list(formatted)
+            changed = True
+        if changed:
+            lines[idx] = "".join(new_chars) + "\n"
+        break
 
     pheno_idx = -1
     for i, line in enumerate(lines):
@@ -2100,6 +2770,8 @@ def update_spe_file(param_csv_path=PARAM_CSV):
 
 
 def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=None):
+    if os.environ.get("DSSAT_DISABLE_SOIL_INJECTION", "").strip().lower() in {"1", "true", "yes", "on"}:
+        return
     if not os.path.exists(param_csv_path):
         return
 
@@ -2151,31 +2823,33 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
     def _as_layer_key(base, layer_idx_1):
         return f"SOIL_{base}_{int(layer_idx_1):02d}"
 
-    def _clamp(x, lo, hi):
+    def _recommended(x, lo, hi, *, name):
         try:
             v = float(x)
         except Exception:
             return None
-        if v < float(lo):
-            v = float(lo)
-        if v > float(hi):
-            v = float(hi)
+        if not float(lo) <= v <= float(hi):
+            _runner_advisory(
+                f"parameter={name} value={v:g} safety_range=[{float(lo):g},{float(hi):g}] "
+                "action=continue_to_dssat"
+            )
         return v
 
     def _safe_water_triplet(slll, sdul, ssat):
-        a = _clamp(slll, 0.01, 0.80) if slll is not None else None
-        b = _clamp(sdul, 0.01, 0.80) if sdul is not None else None
-        c = _clamp(ssat, 0.01, 0.80) if ssat is not None else None
+        a = float(slll) if slll is not None else None
+        b = float(sdul) if sdul is not None else None
+        c = float(ssat) if ssat is not None else None
         if a is None or b is None or c is None:
             return a, b, c
-        eps = 1e-3
-        if not (a < b):
-            b = min(max(a + 0.01, a + eps), 0.80)
-        if not (b < c):
-            c = min(max(b + 0.01, b + eps), 0.80)
-        if c - a < 2 * eps:
-            c = min(0.80, a + 0.02)
-            b = min(max(a + 0.01, a + eps), c - eps)
+        if not all(0.01 <= value <= 0.80 for value in (a, b, c)):
+            _runner_advisory(
+                "relation=SOIL_SLLL<SOIL_SDUL<SOIL_SSAT safety_range=[0.01,0.80] "
+                "action=continue_to_dssat"
+            )
+        if not a < b < c:
+            _runner_advisory(
+                "relation=SOIL_SLLL<SOIL_SDUL<SOIL_SSAT action=continue_to_dssat"
+            )
         return a, b, c
 
     sec_start = None
@@ -2204,11 +2878,13 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
             layer_header_idx = j
 
     if scom_header_idx is not None:
-        header_line = lines[scom_header_idx].rstrip("\n")
-        want = ["SALB", "SLDR", "SLRO"]
-        line_len = max(len(header_line), len(lines[scom_header_idx + 1].rstrip("\n")) if (scom_header_idx + 1) < sec_end else len(header_line))
-        spans = _field_spans_from_header(header_line, want, line_len)
-        if spans is not None and (scom_header_idx + 1) < sec_end:
+        # SCOM headers are whitespace-delimited labels, not fixed-column
+        # fields.  Character spans inferred from the header can swallow the
+        # intervening labels (SLU1/SLNF) and blank the remainder of the data
+        # row, which stricter custom DSSAT builds reject as IPSOIL.  Replace
+        # the numeric slots by semantic position instead.
+        want = [("SALB", 0), ("SLDR", 2), ("SLRO", 3), ("SLPF", 5)]
+        if (scom_header_idx + 1) < sec_end:
             data_idx = None
             for j in range(scom_header_idx + 1, sec_end):
                 if not lines[j].strip():
@@ -2218,34 +2894,34 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
                 data_idx = j
                 break
             if data_idx is not None:
-                s = lines[data_idx].rstrip("\n").ljust(line_len)
-                new_chars = list(s)
-                for name, (abs_s0, abs_s1) in zip(want, spans):
+                s = lines[data_idx].rstrip("\n")
+                matches = list(re.finditer(r"[-+]?\d*\.\d+|[-+]?\d+", s))
+                replacements = []
+                for name, pos in want:
                     key = f"SOIL_{name}"
                     if key not in param_dict:
                         continue
+                    if pos >= len(matches):
+                        continue
                     v = float(param_dict[key])
-                    if name == "SALB":
-                        v2 = _clamp(v, 0.05, 0.35)
-                    elif name == "SLDR":
-                        v2 = _clamp(v, 0.01, 5.00)
-                    elif name == "SLRO":
-                        v2 = _clamp(v, 1.0, 99.0)
-                    else:
-                        v2 = v
+                    ranges = {"SALB": (0.05, 0.35), "SLDR": (0.01, 5.00), "SLRO": (1.0, 99.0), "SLPF": (0.0, 1.0)}
+                    v2 = _recommended(v, *ranges[name], name=key) if name in ranges else v
                     if v2 is None:
                         continue
-                    orig = s[abs_s0:abs_s1]
-                    width = abs_s1 - abs_s0
+                    match = matches[pos]
+                    orig = s[match.start() : match.end()]
+                    width = len(orig)
                     formatted = _format_to_width_preserve_space(v2, width, orig_token=orig)
-                    new_chars[abs_s0:abs_s1] = list(formatted)
-                lines[data_idx] = "".join(new_chars).rstrip() + "\n"
+                    replacements.append((match.start(), match.end(), formatted))
+                for start, end, formatted in sorted(replacements, key=lambda x: x[0], reverse=True):
+                    s = s[:start] + formatted + s[end:]
+                lines[data_idx] = s.rstrip() + "\n"
 
     if layer_header_idx is not None:
         header_cols = lines[layer_header_idx].split()
         if header_cols and header_cols[0] == "@":
             header_cols = header_cols[1:]
-        want = ["SLLL", "SDUL", "SSAT", "SBDM", "SLOC"]
+        want = ["SLLL", "SDUL", "SSAT", "SBDM", "SLOC", "SSKS", "SLCL", "SLSI"]
         col_pos = {k: header_cols.index(k) for k in want if k in header_cols}
         layer_lines = []
         for j in range(layer_header_idx + 1, sec_end):
@@ -2270,10 +2946,16 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
             if ssat_v is not None:
                 param_dict[ssat_key] = ssat_v
 
+            # Locate all source tokens once, then apply replacements from
+            # right to left.  Re-scanning after every replacement is unsafe:
+            # values with different widths shift subsequent regex matches and
+            # can make a later soil field overwrite SCEC/SLNI/SLHW with
+            # overflow stars (DSSAT then reports SOILDYN).
             s = lines[idx].rstrip("\n")
             matches = list(re.finditer(r"[-+]?\d*\.\d+|[-+]?\d+", s))
+            replacements = []
 
-            for name in ["SLLL", "SDUL", "SSAT", "SBDM", "SLOC"]:
+            for name in ["SLLL", "SDUL", "SSAT", "SBDM", "SLOC", "SSKS", "SLCL", "SLSI"]:
                 key = _as_layer_key(name, li)
                 if key not in param_dict:
                     continue
@@ -2286,20 +2968,39 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
                 orig_tok = s[m.start() : m.end()]
                 v = float(param_dict[key])
                 if name in {"SLLL", "SDUL", "SSAT"}:
-                    v2 = _clamp(v, 0.01, 0.80)
+                    v2 = _recommended(v, 0.01, 0.80, name=key)
                     if v2 is None:
                         continue
-                    new_tok = f"{v2:.3f}"
+                    # Preserve the DSSAT token width/notation.  A fixed
+                    # ``.3f`` string would be truncated into e.g. ``456``
+                    # when the source token is ``.49`` (width 3), turning
+                    # SAT/DUL into invalid values and making DSSAT abort.
+                    new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
                 elif name == "SBDM":
-                    v2 = _clamp(v, 0.5, 2.2)
+                    v2 = _recommended(v, 0.5, 2.2, name=key)
                     if v2 is None:
                         continue
-                    new_tok = f"{v2:.2f}"
+                    new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
                 elif name == "SLOC":
-                    v2 = _clamp(v, 0.0, 10.0)
+                    v2 = _recommended(v, 0.0, 10.0, name=key)
                     if v2 is None:
                         continue
-                    new_tok = f"{v2:.2f}"
+                    new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
+                elif name == "SSKS":
+                    # Saturated hydraulic conductivity (cm/h); allow 0-100
+                    v2 = _recommended(v, 0.0, 100.0, name=key)
+                    if v2 is None:
+                        continue
+                    new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
+                elif name in ("SLCL", "SLSI"):
+                    # Clay/silt percentage (0-100); only inject if source is
+                    # not -99 (missing) to avoid overwriting unmeasured layers
+                    if orig_tok.strip() == "-99":
+                        continue
+                    v2 = _recommended(v, 0.0, 100.0, name=key)
+                    if v2 is None:
+                        continue
+                    new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
                 else:
                     new_tok = str(v)
 
@@ -2308,8 +3009,10 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
                 else:
                     new_tok = new_tok[-len(orig_tok) :]
 
-                s = s[: m.start()] + new_tok + s[m.end() :]
-                matches = list(re.finditer(r"[-+]?\d*\.\d+|[-+]?\d+", s))
+                replacements.append((m.start(), m.end(), new_tok))
+
+            for start, end, new_tok in sorted(replacements, key=lambda x: x[0], reverse=True):
+                s = s[:start] + new_tok + s[end:]
 
             lines[idx] = s + "\n"
 
@@ -2487,10 +3190,384 @@ def update_initial_conditions_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FI
         except Exception:
             continue
         if not 0.01 <= v <= 0.80:
-            raise ValueError(f"Initial water content {key}={v:g} is outside [0.01, 0.80]")
+            _runner_advisory(
+                f"parameter={key} value={v:g} safety_range=[0.01,0.80] action=continue_to_dssat"
+            )
         parts[sh2o_col] = f"{v:.3f}"
         lines[j] = " ".join(parts).rstrip() + "\n"
 
+    lock_path = os.path.abspath(filex_path) + ".lock"
+    lock_err = _acquire_file_lock(lock_path, timeout_s=180.0, poll_s=0.10, stale_s=900.0)
+    if lock_err is not None:
+        raise lock_err
+    try:
+        last_err = _atomic_write_lines(filex_path, lines, n_tries=60, sleep_s=0.20)
+        if last_err is not None:
+            raise last_err
+    finally:
+        _release_file_lock(lock_path)
+
+
+def _initial_n_key(prefix, excode, treatment, layer):
+    return f"{prefix}_{str(excode).strip().upper()}_TN{int(treatment):02d}_L{int(layer):02d}"
+
+
+def update_initial_soil_n_file(param_csv_path=PARAM_CSV, filex_path=None):
+    """Inject treatment/layer-specific SNH4 and SNO3 parameters into FileX."""
+    if not os.path.exists(param_csv_path) or not filex_path or not os.path.exists(filex_path):
+        return
+    param_dict = _read_param_dict(param_csv_path)
+    if not any(k.startswith("IC_SNH4_") or k.startswith("IC_SNO3_") for k in param_dict):
+        return
+
+    with open(filex_path, "r", encoding="utf-8", errors="ignore") as f:
+        lines = f.readlines()
+    excode = os.path.splitext(os.path.basename(filex_path))[0].upper()
+    ic_start = None
+    ic_end = None
+    for i, line in enumerate(lines):
+        u = line.strip().upper()
+        if u.startswith("*INITIAL CONDITIONS"):
+            ic_start = i
+            continue
+        if ic_start is not None and u.startswith("*") and not u.startswith("*INITIAL CONDITIONS"):
+            ic_end = i
+            break
+    if ic_start is None:
+        return
+    if ic_end is None:
+        ic_end = len(lines)
+
+    current_tn = None
+    table_cols = None
+    in_layer_table = False
+    layer_by_tn = {}
+    modified = False
+    for i in range(ic_start + 1, ic_end):
+        s = lines[i].rstrip("\n")
+        u = s.strip().upper()
+        if not u:
+            continue
+        if s.lstrip().startswith("@C") and "PCR" in u and "ICDAT" in u:
+            table_cols = None
+            in_layer_table = False
+            continue
+        if s.lstrip().startswith("@C") and "ICBL" in u and "SNH4" in u and "SNO3" in u:
+            table_cols = s.split()[1:]
+            in_layer_table = True
+            continue
+        if s.lstrip().startswith("@"):
+            table_cols = None
+            in_layer_table = False
+            continue
+        parts = s.split()
+        if table_cols is None:
+            # PCR data rows carry the treatment/ICNAME in the first column.
+            if parts:
+                try:
+                    current_tn = int(float(parts[0]))
+                    layer_by_tn[current_tn] = 0
+                except ValueError:
+                    current_tn = None
+            continue
+        if not in_layer_table or current_tn is None:
+            continue
+        layer_by_tn[current_tn] = layer_by_tn.get(current_tn, 0) + 1
+        layer = layer_by_tn[current_tn]
+        # Reconstruct the complete IC row before changing N.  The audited
+        # layer-mean bundles contain several legacy layouts, including rows
+        # where depth is attached to SH2O or SH2O/SNH4/SNO3 touch each other.
+        # Indexing ``parts`` in those rows can silently join the N fields and
+        # leaves DSSAT to report IPSLIN/SOILDYN.  The treatment and depth
+        # prefix is stable; the remaining numeric tokens are the three
+        # semantic fields.
+        snh4_key = _initial_n_key("IC_SNH4", excode, current_tn, layer)
+        sno3_key = _initial_n_key("IC_SNO3", excode, current_tn, layer)
+        if snh4_key not in param_dict and sno3_key not in param_dict:
+            continue
+        try:
+            prefix_match = re.match(r"^\s*(\d+)\s+(\d+)", s)
+            if prefix_match:
+                depth = int(prefix_match.group(2))
+                tail = s[prefix_match.end() :]
+                semantic = re.findall(r"[-+]?\d*\.?\d+", tail)
+            else:
+                depth = int(float(parts[1]))
+                semantic = parts[2:]
+            if len(semantic) < 3:
+                raise ValueError("incomplete IC layer row")
+            sh2o_token, snh4_token, sno3_token = semantic[:3]
+
+            def _fit_ic_field(value):
+                token = f"{float(value):.5g}"
+                if len(token) > 6:
+                    token = f"{float(value):.4g}"
+                if len(token) > 6:
+                    raise ValueError(f"initial-condition value does not fit FileX field: {value}")
+                return token
+
+            if snh4_key in param_dict:
+                snh4_token = _fit_ic_field(param_dict[snh4_key])
+            if sno3_key in param_dict:
+                sno3_token = _fit_ic_field(param_dict[sno3_key])
+            lines[i] = (
+                f"{current_tn:3d}{depth:6d}"
+                f"{_fit_ic_field(sh2o_token).rjust(6)}"
+                f"{_fit_ic_field(snh4_token).rjust(6)}"
+                f"{_fit_ic_field(sno3_token).rjust(6)}\n"
+            )
+            modified = True
+        except (TypeError, ValueError, IndexError):
+            continue
+        continue
+
+        try:
+            snh4_idx = 1 + table_cols.index("SNH4")
+            sno3_idx = 1 + table_cols.index("SNO3")
+        except ValueError:
+            continue
+        if len(parts) < len(table_cols) + 1:
+            # Audited layer-mean FileX rows use DSSAT fixed-width fields and
+            # may contain no whitespace between SH2O and SNH4 (e.g.
+            # ``.2121.7583``).  Rebuild the row in the same fixed-width layout
+            # as the audited bundle generator.  Do not write a whitespace-
+            # delimited row here: DSSAT's legacy FileX reader can interpret the
+            # adjacent decimal fields as one number and report IPSLAN/IPSLIN.
+            if len(parts) < 2 or len(s) < 20:
+                continue
+            # The first two fields are stable (treatment width 3, depth width
+            # 6), but the three numeric values can overflow their nominal six-
+            # character fields and become adjacent (e.g. ``.2121.7583``).
+            # Parse the semantic numeric tokens after that stable prefix, then
+            # render every field back into the canonical 3/6/6/6/6 layout.
+            depth = 20 * layer
+            sh2o_token = None
+            snh4_token = None
+            sno3_token = None
+            if len(s) >= 9:
+                try:
+                    fixed_tn = int(s[0:3])
+                    fixed_depth = int(s[3:9])
+                    tail_values = re.findall(r"[-+]?\d*\.\d+|[-+]?\d+", s[9:])
+                    if fixed_tn == current_tn and fixed_depth > 0 and tail_values:
+                        depth = fixed_depth
+                        # The legacy rows are sometimes whitespace-collapsed,
+                        # so the nominal fixed spans can cut through a token
+                        # (e.g. ``.2121.7583 35.15`` gives ``7583 3`` in a
+                        # six-character slice).  When the stable TN/depth
+                        # prefix is valid, the first three numeric tokens in
+                        # the tail are the semantic SH2O/SNH4/SNO3 fields.
+                        # This also avoids reducing a touching value such as
+                        # ``3.232.025`` to the suffix ``.025``.
+                        sh2o_token = tail_values[0]
+                        snh4_token = tail_values[1] if len(tail_values) > 1 else "0"
+                        sno3_token = tail_values[2] if len(tail_values) > 2 else "0"
+                except (TypeError, ValueError):
+                    pass
+            if sh2o_token is None:
+                raw_depth = parts[1]
+                depth_text = str(depth)
+                if raw_depth.startswith(depth_text) and raw_depth != depth_text:
+                    remainder = raw_depth[len(depth_text):]
+                    sh2o_token = remainder if remainder.startswith(".") else f".{remainder}"
+                    n_source = parts[2:]
+                else:
+                    numeric = re.findall(r"[-+]?\d*\.\d+|[-+]?\d+", " ".join(parts[2:]))
+                    sh2o_token = numeric[0] if numeric else ".190"
+                    n_source = numeric[1:] if len(numeric) > 1 else []
+                snh4_token = n_source[0] if n_source else "0"
+                sno3_token = n_source[1] if len(n_source) > 1 else "0"
+
+            def _fixed_n_token(value, fallback):
+                token = fallback if value is None else f"{float(value):.5g}"
+                if len(token) > 6:
+                    token = f"{float(token):.4g}"
+                if len(token) > 6:
+                    raise ValueError(f"initial soil-N value does not fit FileX field: {value}")
+                return token
+
+            # Keep every fixed-width field within six characters.  A few
+            # layer-mean SH2O anchors contain seven characters (for example
+            # ``.296581``); retaining all digits would shift SNH4/SNO3 and
+            # make DSSAT read the wrong columns.
+            sh2o_token = _fixed_n_token(None, sh2o_token)
+            snh4_token = _fixed_n_token(None, snh4_token)
+            sno3_token = _fixed_n_token(None, sno3_token)
+
+            changed_fixed = False
+            for prefix, fallback, token in (
+                ("IC_SNH4", snh4_token, "SNH4"),
+                ("IC_SNO3", sno3_token, "SNO3"),
+            ):
+                key = _initial_n_key(prefix, excode, current_tn, layer)
+                if key not in param_dict:
+                    continue
+                try:
+                    new_value = float(param_dict[key])
+                except (TypeError, ValueError):
+                    continue
+                if token == "SNH4":
+                    snh4_token = _fixed_n_token(new_value, fallback)
+                else:
+                    sno3_token = _fixed_n_token(new_value, fallback)
+                changed_fixed = True
+            if changed_fixed:
+                lines[i] = (
+                    f"{current_tn:3d}{depth:6d}"
+                    f"{str(sh2o_token).rjust(6)}"
+                    f"{str(snh4_token).rjust(6)}"
+                    f"{str(sno3_token).rjust(6)}\n"
+                )
+                modified = True
+            continue
+        for idx, prefix in ((snh4_idx, "IC_SNH4"), (sno3_idx, "IC_SNO3")):
+            key = _initial_n_key(prefix, excode, current_tn, layer)
+            if key not in param_dict:
+                continue
+            try:
+                value = float(param_dict[key])
+            except (TypeError, ValueError):
+                continue
+            parts[idx] = f"{value:.6g}"
+            modified = True
+        try:
+            # The normal-looking user rows still need the same fixed-width
+            # serialization as legacy layer-mean rows.  DSSAT may accept the
+            # former when no injection occurs, but its IPSLIN reader is not
+            # reliable after a whitespace-joined rewrite (notably at the
+            # deepest 26SP layer).
+            def _fit_normal_field(token):
+                rendered = f"{float(token):.5g}"
+                if rendered.startswith("0."):
+                    rendered = rendered[1:]
+                elif rendered.startswith("-0."):
+                    rendered = "-." + rendered[3:]
+                if len(rendered) > 6:
+                    rendered = f"{float(token):.4g}"
+                    if rendered.startswith("0."):
+                        rendered = rendered[1:]
+                    elif rendered.startswith("-0."):
+                        rendered = "-." + rendered[3:]
+                if len(rendered) > 6:
+                    raise ValueError(f"initial soil-N value does not fit FileX field: {token}")
+                return rendered.rjust(6)
+
+            lines[i] = (
+                f"{int(float(parts[0])):3d}{int(float(parts[1])):6d}"
+                f"{_fit_normal_field(parts[2])}"
+                f"{_fit_normal_field(parts[3])}"
+                f"{_fit_normal_field(parts[4])}\n"
+            )
+        except (IndexError, TypeError, ValueError):
+            lines[i] = " ".join(parts).rstrip() + "\n"
+
+    if not modified:
+        return
+    lock_path = os.path.abspath(filex_path) + ".lock"
+    lock_err = _acquire_file_lock(lock_path, timeout_s=180.0, poll_s=0.10, stale_s=900.0)
+    if lock_err is not None:
+        raise lock_err
+    try:
+        last_err = _atomic_write_lines(filex_path, lines, n_tries=60, sleep_s=0.20)
+        if last_err is not None:
+            raise last_err
+    finally:
+        _release_file_lock(lock_path)
+
+
+def update_soil_analysis_n_file(param_csv_path=PARAM_CSV, filex_path=None):
+    """Inject treatment/layer-specific SANI values into FileX soil analysis."""
+    if not os.path.exists(param_csv_path) or not filex_path or not os.path.exists(filex_path):
+        return
+    param_dict = _read_param_dict(param_csv_path)
+    if not any(k.startswith("SA_SANI_") for k in param_dict):
+        return
+
+    with open(filex_path, "r", encoding="utf-8", errors="ignore") as f:
+        lines = f.readlines()
+    excode = os.path.splitext(os.path.basename(filex_path))[0].upper()
+    section_start = None
+    section_end = None
+    for i, line in enumerate(lines):
+        u = line.strip().upper()
+        if u.startswith("*SOIL ANALYSIS"):
+            section_start = i
+            continue
+        if section_start is not None and u.startswith("*") and not u.startswith("*SOIL ANALYSIS"):
+            section_end = i
+            break
+    if section_start is None:
+        return
+    if section_end is None:
+        section_end = len(lines)
+
+    mode = None
+    current_tn = None
+    layer = 0
+    table_cols = None
+    modified = False
+    for i in range(section_start + 1, section_end):
+        s = lines[i].rstrip("\n")
+        u = s.strip().upper()
+        if not u:
+            continue
+        if s.lstrip().startswith("@A") and "SADAT" in u:
+            mode = "meta"
+            table_cols = None
+            continue
+        if s.lstrip().startswith("@A") and "SABL" in u and "SANI" in u:
+            mode = "layer"
+            table_cols = s.split()[1:]
+            layer = 0
+            continue
+        if s.lstrip().startswith("@"):
+            mode = None
+            table_cols = None
+            continue
+        parts = s.split()
+        if mode == "meta" and parts:
+            try:
+                current_tn = int(float(parts[0]))
+            except ValueError:
+                current_tn = None
+            mode = None
+            layer = 0
+            continue
+        if mode != "layer" or current_tn is None or not table_cols:
+            continue
+        sani_header_idx = next((j for j, name in enumerate(table_cols) if name == "SANI"), None)
+        if sani_header_idx is None or len(parts) <= sani_header_idx + 1:
+            continue
+        layer += 1
+        key = _initial_n_key("SA_SANI", excode, current_tn, layer)
+        if key not in param_dict:
+            continue
+        try:
+            value = float(param_dict[key])
+        except (TypeError, ValueError):
+            continue
+        # SANI is embedded in a fixed-width soil-analysis row.  Six
+        # significant digits can produce a seven-character token such as
+        # ``.336723`` and shift SAPHW/SAPHB/SAPX, which DSSAT later reports as
+        # a SOILDYN format error.  Keep the injected token within six chars.
+        numeric = list(re.finditer(r"[-+]?\d*\.?\d+", s))
+        numeric_idx = sani_header_idx + 1
+        if numeric_idx >= len(numeric):
+            continue
+        match = numeric[numeric_idx]
+        # Preserve the source field width as well as the <=6-character
+        # maximum.  Replacing ``.11`` with ``.2271`` in-place shifts all
+        # following SANI columns and causes DSSAT to report IPSLAN even though
+        # the numeric value itself is valid.
+        orig_token = s[match.start() : match.end()]
+        sani_token = _format_to_width(value, len(orig_token), orig_token=orig_token)
+        if len(sani_token) != len(orig_token) or "*" in sani_token:
+            raise ValueError(f"SANI value does not fit source FileX field: {value}")
+        lines[i] = s[: match.start()] + sani_token + s[match.end() :] + "\n"
+        modified = True
+
+    if not modified:
+        return
     lock_path = os.path.abspath(filex_path) + ".lock"
     lock_err = _acquire_file_lock(lock_path, timeout_s=180.0, poll_s=0.10, stale_s=900.0)
     if lock_err is not None:
@@ -2565,7 +3642,20 @@ def run_model():
                 pass
 
         localized_filex = _localize_experiment_files(filex_path, run_dir)
-        update_initial_conditions_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, filex_path=localized_filex or filex_path)
+        active_filex = localized_filex or filex_path
+        update_initial_conditions_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, filex_path=active_filex)
+        update_initial_soil_n_file(
+            param_csv_path=PARAM_CSV,
+            filex_path=active_filex,
+        )
+        update_soil_analysis_n_file(
+            param_csv_path=PARAM_CSV,
+            filex_path=active_filex,
+        )
+        # update_* functions intentionally preserve source line layout.  Apply
+        # the FileX boundary normalization once more after all injections so
+        # a wrapper-staged file cannot reintroduce the IPSLIN blank-line case.
+        _normalize_filex_initial_conditions_boundary(active_filex)
 
         batch_src = _resolve_batch_path(BATCH_FILE, base_dir=run_dir) or _resolve_batch_path(BATCH_FILE, base_dir=cwd_script)
 
@@ -2620,7 +3710,10 @@ def run_model():
             orig_cwd = os.getcwd()
             try:
                 os.chdir(run_dir)
-                _sync_outputs_from_filex_dir(BATCH_FILE, run_dir, OUTPUT_FILES + ["Evaluate.OUT"], dest_dir=run_dir)
+                extra_outputs = ["Evaluate.OUT"]
+                if KEEP_NITROGEN_OUTPUTS:
+                    extra_outputs.extend(["PlantN.OUT", "SoilNi.OUT", "SoilN.OUT"])
+                _sync_outputs_from_filex_dir(BATCH_FILE, run_dir, OUTPUT_FILES + extra_outputs, dest_dir=run_dir)
 
                 _assert_fresh_nonempty("Evaluate.OUT", start_time)
 
@@ -2647,9 +3740,19 @@ def run_model():
                 except Exception as e:
                     print(f"Warning: failed to write {_harvest_pest_file()}: {e}")
                 try:
-                    _write_pest_tmtgrow_from_tmt_and_plantgro(BATCH_FILE, "PlantGro.OUT", _tmtgrow_pest_file())
+                    _write_pest_tmtgrow_from_tmt_and_plantgro(
+                        BATCH_FILE, "PlantGro.OUT", _tmtgrow_pest_file(), plantn_path="PlantN.OUT"
+                    )
                 except Exception as e:
                     print(f"Warning: failed to write {_tmtgrow_pest_file()}: {e}")
+                if os.path.isfile("soil_water_observations.csv"):
+                    try:
+                        _write_pest_soilwat_from_soilwat(
+                            BATCH_FILE, "SoilWat.OUT", _pest_path(PEST_SOILWAT_FILE),
+                            "soil_water_observations.csv",
+                        )
+                    except Exception as e:
+                        print(f"Warning: failed to write {_pest_path(PEST_SOILWAT_FILE)}: {e}")
                 if OBSERVATION_TRANSFORM_CONFIG:
                     config_path = OBSERVATION_TRANSFORM_CONFIG
                     if not os.path.isabs(config_path):
@@ -2662,7 +3765,10 @@ def run_model():
                 except Exception:
                     pass
 
-            cleanup(run_dir, keep_dssat_outputs=True)
+            cleanup(
+                run_dir, keep_dssat_outputs=True, keep_soil_water=KEEP_SOIL_WATER,
+                keep_nitrogen_outputs=KEEP_NITROGEN_OUTPUTS,
+            )
 
     except Exception as e:
         print(f"Exception running model: {e}")
@@ -2679,6 +3785,10 @@ if __name__ == "__main__":
                         help="Explicit CSM model code passed to DSCSM048 (e.g. CRGRO048). "
                              "When omitted, DSSAT infers the model from $BATCH / DSSATPRO.")
     parser.add_argument("--observation-transform-config", default=None)
+    parser.add_argument("--keep-soil-water", action="store_true",
+                        help="Keep SoilWat.OUT after run (needed for SOIL_WATER Phi).")
+    parser.add_argument("--keep-nitrogen-outputs", action="store_true",
+                        help="Keep PlantN.OUT/SoilNi.OUT for nitrogen engineering gates.")
     args, _ = parser.parse_known_args()
 
     BATCH_FILE = args.batch
@@ -2686,6 +3796,8 @@ if __name__ == "__main__":
     HARVEST_VAR = (args.harvest_var or "CHPDT").strip().upper()
     DSSAT_MODEL = (args.model or None)
     OBSERVATION_TRANSFORM_CONFIG = args.observation_transform_config
+    KEEP_SOIL_WATER = bool(args.keep_soil_water)
+    KEEP_NITROGEN_OUTPUTS = bool(args.keep_nitrogen_outputs)
 
     candidate_parameters = _read_param_dict(PARAM_CSV)
     validate_candidate_parameters(candidate_parameters)

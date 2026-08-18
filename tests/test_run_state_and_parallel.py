@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from src.common.run_state import canonical_status, classify_manager_exit, normalize_exit_code
 from tools.parallel import run_parallel
 
@@ -125,3 +127,52 @@ def test_cmd_run_rejects_resume_with_ies_mode(tmp_path):
         assert "--resume" in str(exc)
     else:
         raise AssertionError("cmd_run should have raised NotImplementedError for --resume --mode ies")
+
+
+class _FakeProcess:
+    def __init__(self, poll_value=None, pid=123):
+        self._poll_value = poll_value
+        self.returncode = poll_value
+        self.pid = pid
+
+    def poll(self):
+        return self._poll_value
+
+
+def test_wait_guard_fails_when_every_agent_exits_before_manager():
+    manager = _FakeProcess(poll_value=None)
+    agents = [(_FakeProcess(1), None, None, None), (_FakeProcess(2), None, None, None)]
+    with pytest.raises(RuntimeError, match=r"all PEST\+\+ agents exited"):
+        run_parallel._wait_for_manager_with_agent_guard(manager, agents, poll_s=0.0)
+
+
+def test_wait_guard_restarts_disconnected_agents_while_manager_lives(tmp_path):
+    class _Manager:
+        pid = 456
+
+        def __init__(self):
+            self.calls = 0
+
+        def poll(self):
+            self.calls += 1
+            return None if self.calls <= 2 else 0
+
+    agent_dir = tmp_path / "agent_01"
+    agent_dir.mkdir()
+    (agent_dir / "panther_agent.stdout.log").write_text(
+        "receive from master failed\n", encoding="utf-8"
+    )
+    agents = [(_FakeProcess(4294967295), None, None, str(agent_dir))]
+    restart_calls = []
+
+    def _restart(handles, attempt):
+        restart_calls.append(attempt)
+        handles[:] = [(_FakeProcess(None, pid=789), None, None, str(agent_dir))]
+        return True
+
+    rc = run_parallel._wait_for_manager_with_agent_guard(
+        _Manager(), agents, poll_s=0.0, restart_agents=_restart
+    )
+    assert rc == 0
+    assert restart_calls == [1]
+    assert agents[0][0].pid == 789

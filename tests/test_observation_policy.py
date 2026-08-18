@@ -125,3 +125,61 @@ def test_multiseason_group_uses_unscoped_policy_and_diagnostic_is_zero_weight():
     })
     assert transformed.iloc[0]["phi_role"] == "diagnostic_only"
     assert transformed.iloc[0]["weight"] == 0.0
+
+
+@pytest.mark.parametrize(
+    ("obsnme", "obgnme", "sim_token"),
+    [
+        ("25SP_ADAPS_R1", "25SP_ADAPM", "ADAPS"),
+        ("25SP_HWAMS_R1", "25SP_HWAMM", "HWAMS"),
+    ],
+)
+def test_continuous_harvest_forced_diagnostics_cannot_be_reenabled(
+    obsnme, obgnme, sim_token
+):
+    obs = pd.DataFrame([{
+        "obsnme": obsnme,
+        "obsval": 4.0,
+        "weight": 1.0,
+        "obgnme": obgnme,
+        "sigma": 0.5,
+        "sim_token": sim_token,
+        "model_output_file": "PestJoint.OUT",
+    }])
+    out, _ = apply_observation_policy(
+        obs,
+        {obgnme.split("_", 1)[1]: {"sigma": "0.5", "phi_role": "calibration"}},
+    )
+    assert out.iloc[0]["phi_role"] == "diagnostic_only"
+    assert out.iloc[0]["weight"] == 0.0
+
+
+def test_apply_transform_config_skips_missing_minus99_values(tmp_path):
+    """DSSAT outputs -99 (missing) for treatments with no harvestable fruit.
+    apply_transform_config must skip the log transform for these and leave
+    them as -99, not crash on ln(-99+1)."""
+    import json
+    tagged_file = tmp_path / "PestHarvest.OUT"
+    tagged_file.write_text(
+        "RUN 1 TN 2 HNO 1 DATE 25140 @CHPDTS@ -99.000 @CHFPWS@ -99.000\n"
+        "RUN 2 TN 3 HNO 1 DATE 25140 @CHPDTS@ 235.000 @CHFPWS@ 4710.000\n",
+        encoding="utf-8",
+    )
+    config = {
+        "version": POLICY_VERSION,
+        "files": {
+            "PestHarvest.OUT": {
+                "CHPDTS": {"transform": "log", "offset": 1.0, "reference": 1.0},
+                "CHFPWS": {"transform": "log", "offset": 1.0, "reference": 1.0},
+            }
+        },
+    }
+    config_path = tmp_path / "transform_config.json"
+    config_path.write_text(json.dumps(config), encoding="utf-8")
+
+    # must not raise
+    apply_transform_config(config_path, tmp_path)
+    result = tagged_file.read_text(encoding="utf-8")
+    # missing -99 values preserved unchanged; valid values transformed
+    assert "@CHPDTS@ -99.000" in result  # missing preserved
+    assert "@CHPDTS@ 5.463831805" in result or "@CHPDTS@ 5.46" in result  # ln(235+1)

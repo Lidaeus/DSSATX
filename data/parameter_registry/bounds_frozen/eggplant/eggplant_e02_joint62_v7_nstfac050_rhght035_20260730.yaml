@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_joint62_v7_nstfac050_rhght035_20260730"
+crop: "eggplant"
+created_at: "2026-07-29T22:25:06Z"
+approved_at: "2026-07-29T22:25:06Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_joint62_v7_nstfac050_rhght035_20260730.csv"
+derived_from_sha256: "7a0094737a8d2beb3846099fabab30004d57653da588c1388b1bf335f29e5178"
+bounds_sha256: "7a0094737a8d2beb3846099fabab30004d57653da588c1388b1bf335f29e5178"
+parameter_count: 72
+automatic_repairs: 0
+notes: "User-approved NSTFAC lower 0.50 and RHGHT lower 0.35; actual three-season FileX N; ADAP diagnostic-only"

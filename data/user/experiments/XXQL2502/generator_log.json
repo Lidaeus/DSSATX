@@ -1,0 +1,37 @@
+{
+  "season_id": "25FA",
+  "excode": "XXQL2502",
+  "generator": "tools/experiments/build_trial_observations_v2_20260726.py",
+  "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+  "spec_compliance": "docs/三季FileA_FileT与不确定性适配计划_v1_20260726.md",
+  "source_files": {
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025秋\\2025秋季产量集.xlsx": "c541a3496baabf41e2d69db051f72a1fb1954e9808fd8c17b2d204c0dd5071dc",
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025秋\\2025年秋季茄子生长指标集.xlsx": "3acc415ae9fef503195c362fd2ffb00843cb7f4b3a2e87b92d42995b686deb9f",
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025秋\\2025年秋季茄子植株样氮磷钾测定.xlsx": "243d6db1d347cdc1efcb16ff0312e9394e5eb7f43d2c6fe4f64f77f9f62f61f4"
+  },
+  "qa_metrics": {
+    "plots": 12,
+    "growth_dates": 3,
+    "harvest_dates": 3,
+    "total_observations": 348,
+    "density": 27000.0,
+    "fruit_moisture_contract": "fixed_fraction",
+    "fruit_moisture_fraction": 0.95,
+    "fruit_dry_matter_fraction": 0.050000000000000044,
+    "fruit_moisture_sd": 0.0,
+    "dry_variance_rule": "DMFR^2 * fresh_variance"
+  },
+  "source_notes": [
+    "Canonical fruit dry-mass contract: fixed moisture fraction=0.95; DMFR/DMC=0.05; DMFR variance=0; dry variance=DMFR^2*fresh variance.",
+    "Fresh yield = mean of 小区产量; SD = independent replicate 行产量.",
+    "Strict FileA/FileT fill rule per docs/三季FileA_FileT与不确定性适配计划_v1_20260726.md."
+  ],
+  "output_files": [
+    "XXQL2502.TMA",
+    "XXQL2502.TMT",
+    "observation_uncertainty.csv",
+    "fruit_quality_match_audit.csv",
+    "FileA_values.csv",
+    "FileT_values.csv"
+  ]
+}

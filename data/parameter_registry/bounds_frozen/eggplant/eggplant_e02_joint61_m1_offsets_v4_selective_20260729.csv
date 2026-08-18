@@ -1,0 +1,72 @@
+﻿name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,review_note
+LFMAX,1.27,1.00,1.36,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,E01 LAI-safe v1 (2026-07-28): user-approved boundary contraction for 100x3 progress run; observed eggplant LAI <= 10
+SIZLF,297.1,250,350,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,E01 LAI-safe v1 (2026-07-28): user-approved boundary contraction for 100x3 progress run; observed eggplant LAI <= 10
+SLAVR,293.0,240,310,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,E01 LAI-safe v1 (2026-07-28): user-approved boundary contraction for 100x3 progress run; observed eggplant LAI <= 10
+CSDL,12.33,12.33,12.33,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+PPSEN,0.0,0.0,0.0,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+THRSH,8.5,8.5,8.5,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+WTPSD,0.004,0.004,0.004,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+XFRT,0.95,0.7,0.98,active,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,E02 joint M1 v3: open shared upper required by logit autumn projection; DXFRT_AUT can raise/lower autumn effective value
+EM-FL,23.3,22.0,42.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T8 boundary pile-up; widen within process-safe envelope and add compensating process parameters
+FL-LF,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+FL-SD,8.1,4.0,25.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T8 boundary pile-up; widen within process-safe envelope and add compensating process parameters
+FL-SH,2.0,1.0,6.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+PODUR,33.0,18.0,60.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,E02 joint M1 v3: 61.0% of final ensemble within lower 5%; conservative duration expansion
+SD-PM,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+SDPDV,111.4,80.0,300.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+SFDUR,11.7,8.0,30.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+RHGHT,1.7,0.5,2.2,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,E02 joint M1 v3: 98.7% of final ensemble within lower 5%; expand to physical lower bound
+RWDTH,1.6,0.7,2.0,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+TRIFL,0.64,0.35,0.80,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,E02 joint54 v2: three-season posterior envelope plus margin; removes unstable PAGE=25 smoke tails
+EM-V1,22.0,10.0,40.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+FL-VS,100.0,100.0,100.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,E02 joint54 v2: project invariant; FL-VS is fixed at 100 and is not a calibration parameter
+JU-R0,3.8,2.0,12.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+LNGSH,39.0,25.0,50.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+PL-EM,11.4,8.5,12.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,E02 joint54 v2: PAGE=25 smoke and three-season q05 support 8.5-12; upper 12 remains the physical hard limit
+PM06,0.5,0.35,0.75,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+PM09,0.97,0.80,1.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,E02 joint54 v2: three-season posterior q05 >=0.83; contraction reduces unsupported phenology compensation
+V1-JU,0.0,0.0,0.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+XFINT,0.3,0.15,0.45,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,E02 joint54 v2: restores XFINT numerical-safety guard and follows three-season posterior envelope
+XFPHT,38.8,31.0,45.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,E02 joint54 v2: lower bound follows direct-harvest evidence; upper bound follows three-season q95 plus margin and reduces PAGE=25 smoke failures; XMAGE<XFPHT remains guaranteed
+XMAGE,13.5,8.0,30.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+KCAN,0.66,0.55,0.78,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,E02 joint54 v2: three-season q95 <=0.733 plus margin; retains the user-approved LAI-safe lower bound
+KC_SLOPE,0.1,0.04,0.2,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+PARMAX,41.0,25.0,55.0,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+PHTMAX,61.0,40.0,80.0,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+ATOP,0.8,0.55,1.0,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+FRCNOD,0.05,0.05,0.05,fixed,SPE_Nodule,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+FRLFF,0.37,0.25,0.5,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+FRSTMF,0.53,0.35,0.7,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+PORPT,0.21,0.12,0.3,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+RTNO3,0.012,0.005,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+RTNH4,0.012,0.005,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+RTEXF,0.1,0.05,0.25,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+WTFSD,0.55,0.35,0.65,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,E02 joint54 v2: three-season q95 <=0.62 and PAGE=25 smoke failures favored unsupported high values
+EVMODC,0.0,0.0,0.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): Retain fixed status; not identified by current observations
+FINREF,220.0,150.0,270.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,E02 joint54 v2: three-season q95 <=254 plus margin; removes unstable high tail from PAGE=25 smoke
+SIZREF,300.0,225,375,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,E01 LAI-safe v1 (2026-07-28): user-approved boundary contraction for 100x3 progress run; observed eggplant LAI <= 10
+SLAREF,300.0,250,375,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,E01 LAI-safe v1 (2026-07-28): user-approved boundary contraction for 100x3 progress run; observed eggplant LAI <= 10
+VSSINK,4.1,1.5,8.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+TB1,9.2,6.0,13.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,E02 joint M1 v3: shared upper contracted so +2 C autumn offset remains within physical TB upper=15
+TB2,8.6,6.0,13.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,E02 joint M1 v3: shared upper contracted so +2 C autumn offset remains within physical TB upper=15
+TB3,11.0,6.0,13.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,E02 joint M1 v3: shared upper contracted so +2 C autumn offset remains within physical TB upper=15
+TM1,40.0,34.0,48.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,E02 joint M1 v3: 76.0% of final ensemble within lower 5%; restore recommended lower bound
+TM2,40.0,36.5,48.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+TM3,39.8,36.5,44.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,E02 joint54 v2: three-season q95 <=42.93 plus margin; preserves TO23<TM3 for every sample
+TO11,25.5,18.0,27.4,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,E02 joint55 v1 (2026-07-29): three-season upper-bound signal; conservative expansion remains below lower(TO21)=27.5 and preserves TB1<TO11<TO21<TM1 for every sample
+TO12,25.0,18.0,27.4,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,E02 joint M1 v3: 35.3% of final ensemble within upper 5%; remains below TO22 lower=27.5
+TO13,26.0,18.0,27.4,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,E02 joint M1 v3: 63.0% of final ensemble within upper 5%; remains below TO23 lower=27.5
+TO21,28.8,27.5,33.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,E02 joint M1 v3: contract upper tail to preserve TO21<TM1 for every independent draw; posterior q97.5=30.66
+TO22,29.6,27.5,36.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T8 boundary pile-up; widen within process-safe envelope and add compensating process parameters
+TO23,29.1,27.5,36.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+NSTFAC,0.5,0.2,1.0,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T8 boundary pile-up; widen within process-safe envelope and add compensating process parameters
+NMOBMX,0.09,0.02,0.25,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,E02 joint54 v2: three-season q95 <=0.233 and high values were enriched among PAGE=25 smoke failures
+NVSMOB,0.38,0.15,0.6,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+NRCVR,0.15,0.03,0.35,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,T9 high-dim v1 (2026-07-22): T9 high-dimensional shared crop/process parameter
+DLFMAX_AUT,0.0,-0.1625189295,0.1397619424,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,Documented autumn LFMAX log multiplier: 0.85-1.15
+DSLAVR_AUT,0.0,-0.1625189295,0.1397619424,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,Documented autumn SLAVR log multiplier: 0.85-1.15
+DXFRT_AUT,0.0,-0.35,0.35,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,Documented autumn XFRT logit-additive offset
+DSFDUR_AUT,0.0,-0.1625189295,0.1397619424,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,Documented autumn SFDUR log multiplier: 0.85-1.15
+DTB1_AUT,0.0,-2.0,2.0,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,"Documented autumn TB1 additive offset, degrees C"
+DTB2_AUT,0.0,-2.0,2.0,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,"Documented autumn TB2 additive offset, degrees C"
+DTB3_AUT,0.0,-2.0,2.0,active,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,"Documented autumn TB3 additive offset, degrees C"

@@ -137,7 +137,7 @@ def _read_tmt_harvest_obs(tmt_path):
 
     header = None
     rows = []
-    with open(tmt_path, "r") as f:
+    with open(tmt_path, "r", encoding="utf-8", errors="ignore") as f:
         for line in f:
             s = line.rstrip("\n")
             if not s.strip():
@@ -267,7 +267,7 @@ def _read_tmt_process_obs(tmt_path, var_names):
 
     header = None
     rows = []
-    with open(tmt_path, "r") as f:
+    with open(tmt_path, "r", encoding="utf-8", errors="ignore") as f:
         for line in f:
             s = line.rstrip("\n")
             if not s.strip():

@@ -1,0 +1,42 @@
+{
+  "season_id": "25SP",
+  "excode": "XXQL2501",
+  "generator": "tools/experiments/build_trial_observations_v2_20260726.py",
+  "generator_sha256": "60e0a9d7c71486995ae74b74279d86b22bdbaa1c82518c49eb6cf4793079767a",
+  "spec_compliance": "docs/三季FileA_FileT与不确定性适配计划_v1_20260726.md",
+  "source_files": {
+    "data\\user\\ref\\DSSAT文件\\2025春\\2025春产量数据集.xlsx": "4a61ec04518f5469cef2b660d42cef65cc45c81ac37fe2449e9133fa4f886690",
+    "data\\user\\ref\\DSSAT文件\\2025春\\2025春作物生长指标集.xlsx": "dc9af4e6250f4f71f7d770393477c790ded0f174ea17d9e3e220175ca3ffb3c4"
+  },
+  "qa_metrics": {
+    "plots": 10,
+    "growth_dates": 4,
+    "harvest_dates": 11,
+    "total_observations": 550,
+    "excluded_tn": [
+      1,
+      6,
+      7,
+      8
+    ],
+    "density": 27000.0
+  },
+  "source_notes": [
+    "Fresh yield uses pre-computed weighted plot yield (edge*0.5 + middle-row mean*0.5).",
+    "Fruit DM fraction = 1 - measured fruit moisture fraction (2025春作物生长指标集.果含水率).",
+    "Each harvest uses the nearest plot-level moisture measurement date (no max interval).",
+    "SD: hybrid method (replicate SD with min CV=5%, fallback CV=10%).",
+    "Cumulative yield SD propagates incremental variances.",
+    "FileA carries PDAT/ADAT/MDAT(PODD proxy) plus end-state diagnostics; FileT carries process, CHPDT and HPODW.",
+    "TN 1,6,7,8 excluded per FileA/FileT uncertainty adaptation plan v1 (2026-07-26) section 6.1."
+  ],
+  "output_files": [
+    "XXQL2501.TMA",
+    "XXQL2501.TMT",
+    "observation_uncertainty.csv",
+    "fruit_quality_match_audit.csv",
+    "FileA_values.csv",
+    "FileT_values.csv",
+    "treatment_exclusion_audit.csv"
+  ]
+}
