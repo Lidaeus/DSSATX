@@ -1,0 +1,433 @@
+season_id,excode,trno,date,variable,value,raw_sd,n_rep,sd_method,source_workbook,source_sheet,source_row_rule,quality_flag
+26SP,XXQL2601,1,26075,PDAT,0.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_pdat_event_date,ok
+26SP,XXQL2601,1,26075,ADAT,35.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_adat_event_date,ok
+26SP,XXQL2601,1,26075,MDAT,47.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_mdat_event_date,ok
+26SP,XXQL2601,2,26075,PDAT,0.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_pdat_event_date,ok
+26SP,XXQL2601,2,26075,ADAT,35.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_adat_event_date,ok
+26SP,XXQL2601,2,26075,MDAT,47.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_mdat_event_date,ok
+26SP,XXQL2601,3,26075,PDAT,0.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_pdat_event_date,ok
+26SP,XXQL2601,3,26075,ADAT,35.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_adat_event_date,ok
+26SP,XXQL2601,3,26075,MDAT,47.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_mdat_event_date,ok
+26SP,XXQL2601,4,26075,PDAT,0.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_pdat_event_date,ok
+26SP,XXQL2601,4,26075,ADAT,35.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_adat_event_date,ok
+26SP,XXQL2601,4,26075,MDAT,47.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_mdat_event_date,ok
+26SP,XXQL2601,5,26075,PDAT,0.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_pdat_event_date,ok
+26SP,XXQL2601,5,26075,ADAT,35.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_adat_event_date,ok
+26SP,XXQL2601,5,26075,MDAT,47.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_mdat_event_date,ok
+26SP,XXQL2601,6,26075,PDAT,0.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_pdat_event_date,ok
+26SP,XXQL2601,6,26075,ADAT,35.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_adat_event_date,ok
+26SP,XXQL2601,6,26075,MDAT,47.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_mdat_event_date,ok
+26SP,XXQL2601,7,26075,PDAT,0.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_pdat_event_date,ok
+26SP,XXQL2601,7,26075,ADAT,35.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_adat_event_date,ok
+26SP,XXQL2601,7,26075,MDAT,47.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_mdat_event_date,ok
+26SP,XXQL2601,8,26075,PDAT,0.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_pdat_event_date,ok
+26SP,XXQL2601,8,26075,ADAT,35.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_adat_event_date,ok
+26SP,XXQL2601,8,26075,MDAT,47.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_mdat_event_date,ok
+26SP,XXQL2601,9,26075,PDAT,0.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_pdat_event_date,ok
+26SP,XXQL2601,9,26075,ADAT,35.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_adat_event_date,ok
+26SP,XXQL2601,9,26075,MDAT,47.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_mdat_event_date,ok
+26SP,XXQL2601,10,26075,PDAT,0.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_pdat_event_date,ok
+26SP,XXQL2601,10,26075,ADAT,35.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_adat_event_date,ok
+26SP,XXQL2601,10,26075,MDAT,47.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_mdat_event_date,ok
+26SP,XXQL2601,11,26075,PDAT,0.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_pdat_event_date,ok
+26SP,XXQL2601,11,26075,ADAT,35.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_adat_event_date,ok
+26SP,XXQL2601,11,26075,MDAT,47.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_mdat_event_date,ok
+26SP,XXQL2601,12,26075,PDAT,0.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_pdat_event_date,ok
+26SP,XXQL2601,12,26075,ADAT,35.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_adat_event_date,ok
+26SP,XXQL2601,12,26075,MDAT,47.0,1.0,1,fixed_event_date_sd_1d,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,FileA,filea_mdat_event_date,ok
+26SP,XXQL2601,1,26198,LAIX,2.791612569958057,1.2111556468262274,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_laix,ok
+26SP,XXQL2601,1,26198,LWAM,1338.0300000000002,284.15577013321405,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_lwam,ok
+26SP,XXQL2601,1,26198,SWAM,2179.71,485.2286128208022,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_swam,ok
+26SP,XXQL2601,2,26198,LAIX,2.996279046481066,1.3126136267455977,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_laix,ok
+26SP,XXQL2601,2,26198,LWAM,1353.15,504.8080424280104,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_lwam,ok
+26SP,XXQL2601,2,26198,SWAM,2529.27,741.3651982660099,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_swam,ok
+26SP,XXQL2601,3,26198,LAIX,3.065353787188057,1.3561170577889792,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_laix,ok
+26SP,XXQL2601,3,26198,LWAM,1659.78,127.31361317628216,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_lwam,ok
+26SP,XXQL2601,3,26198,SWAM,2658.78,132.93900000000002,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_swam,ok
+26SP,XXQL2601,4,26198,LAIX,3.543167499308107,1.5781806519392343,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_laix,ok
+26SP,XXQL2601,4,26198,LWAM,1594.1699999999998,261.0682669341489,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_lwam,ok
+26SP,XXQL2601,4,26198,SWAM,2835.0,717.7002753935657,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_swam,ok
+26SP,XXQL2601,5,26198,LAIX,2.654977798963164,1.098939842213938,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_laix,ok
+26SP,XXQL2601,5,26198,LWAM,1423.44,136.75893133539762,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_lwam,ok
+26SP,XXQL2601,5,26198,SWAM,2152.26,303.13826399845993,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_swam,ok
+26SP,XXQL2601,6,26198,LAIX,2.633730346852673,1.1694599159872958,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_laix,ok
+26SP,XXQL2601,6,26198,LWAM,1202.58,113.43470897392912,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_lwam,ok
+26SP,XXQL2601,6,26198,SWAM,2173.95,108.69750000000002,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_swam,ok
+26SP,XXQL2601,7,26198,LAIX,2.666494102300617,1.1597236488840443,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_laix,ok
+26SP,XXQL2601,7,26198,LWAM,1287.7199999999998,64.386,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_lwam,ok
+26SP,XXQL2601,7,26198,SWAM,1711.4399999999998,336.9169804269295,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_swam,ok
+26SP,XXQL2601,8,26198,LAIX,2.535519631466104,1.1432461539226404,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_laix,ok
+26SP,XXQL2601,8,26198,LWAM,1236.5999999999997,125.3358496201306,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_lwam,ok
+26SP,XXQL2601,8,26198,SWAM,1732.68,86.634,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_swam,ok
+26SP,XXQL2601,9,26198,LAIX,2.308611043969,1.0413374658969383,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_laix,ok
+26SP,XXQL2601,9,26198,LWAM,1160.37,195.90734366021096,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_lwam,ok
+26SP,XXQL2601,9,26198,SWAM,1736.2800000000002,254.02571346224,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_swam,ok
+26SP,XXQL2601,10,26198,LAIX,2.30036437792119,1.0130950848831226,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_laix,ok
+26SP,XXQL2601,10,26198,LWAM,1087.2,137.67811590808466,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_lwam,ok
+26SP,XXQL2601,10,26198,SWAM,1765.98,110.2692472995078,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_swam,ok
+26SP,XXQL2601,11,26198,LAIX,2.98872348646433,1.3605985740527091,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_laix,ok
+26SP,XXQL2601,11,26198,LWAM,1349.37,243.79225849070764,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_lwam,ok
+26SP,XXQL2601,11,26198,SWAM,2001.69,214.9580431153951,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_swam,ok
+26SP,XXQL2601,12,26198,LAIX,2.532645473430286,1.1527997374267227,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_laix,ok
+26SP,XXQL2601,12,26198,LWAM,1104.48,100.87755498623072,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_lwam,ok
+26SP,XXQL2601,12,26198,SWAM,1763.1899999999998,128.4968361478212,0,last_obs_growth,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_last_observed_swam,ok
+26SP,XXQL2601,1,26122,LAID,0.3763624996799999,0.1025028589085045,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,1,26122,LWAD,201.015,51.51483960957269,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,1,26122,SWAD,143.64,47.500052631549785,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,1,26122,CHTD,0.4429999999999999,0.0538206899497457,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,1,26153,LAID,1.74404791728,0.3975928635188701,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,1,26153,LWAD,838.6200000000001,193.0567970831382,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,1,26153,SWAD,1137.6,343.69105210930354,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,1,26153,CHTD,1.0543333333333331,0.0681493458026805,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,1,26180,LWAD,1323.0,322.7658871380306,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,1,26180,SWAD,1807.29,603.8478822518134,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,1,26180,CHTD,1.4433333333333334,0.1173726259965811,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,1,26198,LAID,2.791612569958057,0.4971440715477582,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,1,26198,LWAD,1338.0300000000002,284.15577013321405,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,1,26198,SWAD,1902.4200000000003,97.75044143122815,2,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,repfilter_20260818
+26SP,XXQL2601,1,26198,CHTD,1.7566666666666666,0.0878333333333333,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,2,26122,LAID,0.38624123808,0.080511403080714,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,2,26122,LWAD,216.81,26.676765171212192,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,2,26122,SWAD,141.9525,27.978023965248155,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,2,26122,CHTD,0.45025,0.0528921859383154,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,2,26153,LAID,1.93547434824,0.2796232213710771,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,2,26153,LWAD,896.22,137.90164647312952,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,2,26153,SWAD,1103.3100000000002,145.66502085263983,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,2,26153,CHTD,1.0506666666666666,0.1101196319160817,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,2,26180,LWAD,1455.975,191.87342507496976,2,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,repfilter_20260818
+26SP,XXQL2601,2,26180,SWAD,1937.79,212.3017399834491,2,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,repfilter_20260818
+26SP,XXQL2601,2,26180,CHTD,1.4785,0.0190918830920367,2,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,repfilter_20260818
+26SP,XXQL2601,2,26198,LAID,2.996279046481066,1.3349408707651371,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,2,26198,LWAD,1353.15,504.8080424280104,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,2,26198,SWAD,2911.95,469.660324064105,2,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,repfilter_20260818
+26SP,XXQL2601,2,26198,CHTD,1.7066666666666666,0.0853333333333333,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,3,26122,LAID,0.35853379056,0.0611083544565135,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,3,26122,LWAD,193.32,39.25568493861751,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,3,26122,SWAD,129.1275,29.357973789074748,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,3,26122,CHTD,0.4025,0.0309246395829172,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,3,26153,LAID,1.56360447288,0.4036494095429577,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,3,26153,LWAD,775.35,231.08030617082025,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,3,26153,SWAD,967.86,253.9373086019461,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,3,26153,CHTD,1.08,0.0676387462923434,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,3,26180,LWAD,1314.4499999999998,408.2405654757988,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,3,26180,SWAD,1581.21,534.0344963576791,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,3,26180,CHTD,1.3916666666666666,0.0881891905696687,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,3,26198,LAID,2.724593292827765,0.2200699543291347,2,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,repfilter_20260818
+26SP,XXQL2601,3,26198,LWAD,1659.78,127.31361317628216,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,3,26198,SWAD,2658.78,132.93900000000002,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,3,26198,CHTD,1.6683333333333334,0.0834166666666666,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,4,26122,LAID,0.40213725102,0.0914705510567946,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,4,26122,LWAD,194.3325,52.97937358066817,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,4,26122,SWAD,146.475,33.84418857056555,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,4,26122,CHTD,0.45525,0.0413551689635044,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,4,26153,LAID,1.7035627154400002,0.4244618275739411,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,4,26153,LWAD,847.98,231.141815559193,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,4,26153,SWAD,949.14,391.6247697733125,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,4,26153,CHTD,1.0583333333333331,0.0880814017448254,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,4,26180,LWAD,1539.405,222.8022756840693,2,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,repfilter_20260818
+26SP,XXQL2601,4,26180,SWAD,2140.47,534.4535481218176,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,4,26180,CHTD,1.465,0.07325,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,4,26198,LAID,3.543167499308107,0.2765430366454885,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,4,26198,LWAD,1594.1699999999998,261.0682669341489,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,4,26198,SWAD,2835.0,717.7002753935657,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,4,26198,CHTD,1.8113333333333328,0.2063742555003732,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,5,26122,LAID,0.47012259546,0.1215675991971096,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,5,26122,LWAD,216.4725,52.65824935373376,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,5,26122,SWAD,150.525,39.52988110278097,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,5,26122,CHTD,0.461,0.0392173431022551,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,5,26153,LAID,1.3556392617600002,0.1900393906791136,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,5,26153,LWAD,680.9399999999999,59.46623579814012,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,5,26153,SWAD,871.02,90.25716758241416,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,5,26153,CHTD,1.078,0.1000599820107919,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,5,26180,LWAD,1556.82,83.62244794312117,2,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,repfilter_20260818
+26SP,XXQL2601,5,26180,SWAD,2194.65,201.7202386970628,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,5,26180,CHTD,1.505,0.1030582359639441,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,5,26198,LAID,2.654977798963164,0.4257068746834593,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,5,26198,LWAD,1423.44,136.75893133539762,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,5,26198,SWAD,2152.26,303.13826399845993,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,5,26198,CHTD,1.7133333333333334,0.0856666666666666,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,6,26122,LAID,0.30816402426,0.0360868820670916,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,6,26122,LWAD,150.65999999999997,9.528105792863558,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,6,26122,SWAD,110.835,10.113293232177138,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,6,26122,CHTD,0.39575,0.027633011658763,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,6,26153,LAID,1.25480962584,0.062740481292,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,6,26153,LWAD,656.1,52.16243475912526,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,6,26153,SWAD,719.28,35.964,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,6,26153,CHTD,1.099,0.0701498396291823,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,6,26180,LWAD,1071.36,173.86972795745675,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,6,26180,SWAD,1525.5,268.9465649529662,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,6,26180,CHTD,1.4220000000000002,0.0711,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,6,26198,LAID,2.633730346852673,0.5700344848736791,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,6,26198,LWAD,1202.58,113.43470897392912,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,6,26198,SWAD,2173.95,108.69750000000002,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,6,26198,CHTD,1.645,0.1068877916321597,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,7,26122,LAID,0.3488447601,0.0779846456745,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,7,26122,LWAD,170.64,17.493833199159077,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,7,26122,SWAD,117.585,16.662157723416257,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,7,26122,CHTD,0.45925,0.0291819007834193,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,7,26153,LAID,1.58674515624,0.2363060121228118,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,7,26153,LWAD,778.5899999999999,124.01624450046852,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,7,26153,SWAD,994.59,152.3001848324552,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,7,26153,CHTD,1.096666666666667,0.055075705472861,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,7,26180,LWAD,1565.73,308.68168458786147,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,7,26180,SWAD,2040.57,295.8547510181306,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,7,26180,CHTD,1.569,0.0833546639366988,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,7,26198,LAID,2.666494102300617,0.1876243363965298,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,7,26198,LWAD,1287.7199999999998,64.386,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,7,26198,SWAD,1711.4399999999998,336.9169804269295,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,7,26198,CHTD,1.6683333333333334,0.0834166666666666,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,8,26122,LAID,0.2653352639999999,0.0601297541160077,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,8,26122,LWAD,146.745,33.35310630211226,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,8,26122,SWAD,102.1275,26.09786629209369,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,8,26122,CHTD,0.40275,0.0228235988982164,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,8,26153,LAID,1.6365047839200002,0.2566462605551362,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,8,26153,LWAD,805.05,133.13062720501247,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,8,26153,SWAD,1016.1,278.9402306946776,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,8,26153,CHTD,1.0126666666666666,0.0506333333333333,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,8,26180,LWAD,1571.31,116.15942665147756,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,8,26180,SWAD,1871.01,197.2394506684705,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,8,26180,CHTD,1.4723333333333333,0.0736166666666666,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,8,26198,LAID,2.535519631466104,0.585408187887834,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,8,26198,LWAD,1236.5999999999997,125.3358496201306,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,8,26198,SWAD,1732.68,86.634,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,8,26198,CHTD,1.6033333333333335,0.0846069343099803,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,9,26122,LAID,0.22863961746,0.0362734585569512,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,9,26122,LWAD,119.205,21.23866521229618,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,9,26122,SWAD,86.26500000000001,13.069227215103428,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,9,26122,CHTD,0.411,0.02055,4,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,9,26153,LAID,1.17675421272,0.3585570102324181,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,9,26153,LWAD,577.17,193.40602136438253,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,9,26153,SWAD,798.3899999999999,244.9938699233105,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,9,26153,CHTD,0.9783333333333332,0.0489166666666666,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,9,26180,LWAD,1026.81,90.73928366479426,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,9,26180,SWAD,1262.43,99.76283827157287,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,9,26180,CHTD,1.4046666666666667,0.0702333333333333,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,9,26198,LAID,2.308611043969,0.1173408686770138,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,9,26198,LWAD,1047.33,9.54594154601839,2,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,repfilter_20260818
+26SP,XXQL2601,9,26198,SWAD,1736.2800000000002,254.02571346224,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,9,26198,CHTD,1.645,0.0822499999999999,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,10,26122,LAID,0.28498174218,0.027478845810274,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,10,26122,LWAD,154.575,9.210390871184565,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,10,26122,SWAD,118.05750000000002,5.902875000000001,4,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,10,26122,CHTD,0.45325,0.0226625,4,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,10,26153,LAID,1.11167699184,0.0904464449336372,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,10,26153,LWAD,629.91,37.95301173820073,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,10,26153,SWAD,763.83,40.95909789045654,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,10,26153,CHTD,0.9856666666666666,0.0492833333333333,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,10,26180,LWAD,1013.04,154.95248013504016,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,10,26180,SWAD,1347.84,307.7503775789723,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,10,26180,CHTD,1.3786666666666667,0.0689333333333333,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,10,26198,LAID,2.30036437792119,0.3145947698203255,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,10,26198,LWAD,1087.2,137.67811590808466,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,10,26198,SWAD,1765.98,110.2692472995078,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,10,26198,CHTD,1.5933333333333335,0.0796666666666666,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,11,26122,LAID,0.3112269422399999,0.0317896453254034,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,repfilter_20260818
+26SP,XXQL2601,11,26122,LWAD,118.26,17.385148834565662,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,11,26122,SWAD,86.12999999999998,18.939815205011904,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,11,26122,CHTD,0.41825,0.0292959041505805,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,11,26153,LAID,1.36487620296,0.4585823897389308,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,11,26153,LWAD,666.1800000000001,203.80445848901343,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,11,26153,SWAD,859.3199999999999,214.73613366175704,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,11,26153,CHTD,1.0639999999999998,0.0532,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,11,26180,LWAD,1294.92,343.496139279614,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,11,26180,SWAD,1739.34,567.037798740084,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,11,26180,CHTD,1.455,0.1543988341924898,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,11,26198,LAID,2.98872348646433,0.4593966893868713,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,11,26198,LWAD,1349.37,243.79225849070764,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,11,26198,SWAD,2001.69,214.9580431153951,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,11,26198,CHTD,1.6883333333333337,0.0844166666666666,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,12,26122,LAID,0.22765156542,0.025084417002762,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,12,26122,LWAD,116.50499999999998,11.794808179873035,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,12,26122,SWAD,83.4975,9.117248762647646,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,12,26122,CHTD,0.39775,0.0379857429395117,4,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,12,26153,LAID,1.4259089484,0.42698416348217,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,12,26153,LWAD,828.8099999999998,228.8533654985217,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,12,26153,SWAD,914.4,235.72814363159955,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,12,26153,CHTD,1.1328333333333334,0.0566416666666666,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,12,26180,LWAD,1367.37,141.8377442714033,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,12,26180,SWAD,1838.7000000000005,107.12877344579287,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,12,26180,CHTD,1.3923333333333332,0.0696166666666666,3,replicate_sd_min_cv_5pct,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,12,26198,LAID,2.532645473430286,0.2024821499787666,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
+26SP,XXQL2601,12,26198,LWAD,1104.48,100.87755498623072,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,12,26198,SWAD,1763.1899999999998,128.4968361478212,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
+26SP,XXQL2601,12,26198,CHTD,1.6129999999999998,0.0876755382076437,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
+26SP,XXQL2601,1,26146,CHFPW,10720.08,536.004,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,1,26146,CHPDT,536.0040000000005,26.800200000000025,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,1,26146,HPODW,536.0040000000005,26.800200000000025,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,1,26158,CHFPW,27524.88,2013.2627270219848,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,1,26158,CHPDT,1376.244000000001,100.66313635109933,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,1,26158,HPODW,840.2400000000007,97.0299762959881,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,1,26167,CHFPW,41171.76,6567.1365693136,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,1,26167,CHPDT,2058.5880000000016,328.3568284656803,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,1,26167,HPODW,682.3440000000006,312.5462202299048,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,1,26182,CHFPW,52737.48,6716.7284068969175,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,1,26182,CHPDT,2636.8740000000025,335.83642034484615,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,1,26182,HPODW,578.2860000000005,70.48329184991296,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,1,26198,CHFPW,67507.56,7468.059722847428,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,1,26198,CHPDT,3375.378000000003,373.4029861423717,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,1,26198,HPODW,738.5040000000006,163.22894605430756,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,2,26146,CHFPW,14071.6956521739,1387.451753485504,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,2,26146,CHPDT,703.5847826086956,69.37258767427527,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,2,26146,HPODW,703.5847826086956,69.37258767427527,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,2,26158,CHFPW,33623.2173913043,1915.7641615031848,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,2,26158,CHPDT,1681.1608695652164,95.7882080751593,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,2,26158,HPODW,977.5760869565208,66.0516834427784,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,2,26167,CHFPW,51891.652173913,6110.319796090873,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,2,26167,CHPDT,2594.582608695652,305.51598980454395,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,2,26167,HPODW,913.4217391304358,290.11142552474587,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,2,26182,CHFPW,65154.5217391304,6178.600470778152,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,2,26182,CHPDT,3257.726086956523,308.9300235389079,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,2,26182,HPODW,663.1434782608707,45.80108533102688,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,2,26198,CHFPW,80347.3043478261,6403.6980269801925,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,2,26198,CHPDT,4017.3652173913088,320.1849013490099,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,2,26198,HPODW,759.6391304347858,84.14637014230033,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,3,26146,CHFPW,11418.652173913,1515.6732033984108,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,3,26146,CHPDT,570.9326086956505,75.78366016992061,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,3,26146,HPODW,570.9326086956505,75.78366016992061,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,3,26158,CHFPW,26067.277173913,3086.4802915294954,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,3,26158,CHPDT,1303.3638586956513,154.32401457647492,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,3,26158,HPODW,732.4312500000007,134.43488507917144,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,3,26167,CHFPW,42008.527173913,3876.444593890129,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,3,26167,CHPDT,2100.426358695652,193.8222296945066,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,3,26167,HPODW,797.0625000000007,117.26531988934336,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,3,26182,CHFPW,59170.402173913,4223.965983527804,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,3,26182,CHPDT,2958.5201086956527,211.19829917639035,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,3,26182,HPODW,858.0937500000008,83.89079121840497,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,3,26198,CHFPW,70060.402173913,5138.453414014766,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,3,26198,CHPDT,3503.020108695653,256.9226707007385,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,3,26198,HPODW,544.5000000000005,146.30289520375197,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,4,26146,CHFPW,11252.52,2781.4125713385274,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,4,26146,CHPDT,562.6260000000005,139.0706285669265,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,4,26146,HPODW,562.6260000000005,139.0706285669265,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,4,26158,CHFPW,21933.72,3700.5179950920383,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,4,26158,CHPDT,1096.686000000001,185.02589975460208,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,4,26158,HPODW,534.0600000000005,122.0407466791318,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,4,26167,CHFPW,38300.04,9043.341000095044,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,4,26167,CHPDT,1915.002000000001,452.1670500047526,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,4,26167,HPODW,818.3160000000008,412.5778199685489,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,4,26182,CHFPW,52921.08,9160.444989846292,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,4,26182,CHPDT,2646.054000000003,458.022249492315,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,4,26182,HPODW,731.0520000000008,73.00232818205194,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,4,26198,CHFPW,66399.48000000001,9439.499960908948,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,4,26198,CHPDT,3319.974000000004,471.9749980454478,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,4,26198,HPODW,673.9200000000005,113.91232483800874,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,5,26146,CHFPW,9687.6,1050.8863401909837,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,5,26146,CHPDT,484.3800000000005,52.544317009549225,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,5,26146,HPODW,484.3800000000005,52.544317009549225,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,5,26158,CHFPW,24113.160000000003,3205.104938687656,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,5,26158,CHPDT,1205.6580000000013,160.25524693438294,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,5,26158,HPODW,721.2780000000007,151.39629757692242,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,5,26167,CHFPW,46483.2,5933.031385050985,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,5,26167,CHPDT,2324.160000000002,296.6515692525495,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,5,26167,HPODW,1118.502000000001,249.6405603462709,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,5,26182,CHFPW,59510.16,6096.111875941911,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,5,26182,CHPDT,2975.5080000000025,304.8055937970958,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,5,26182,HPODW,651.3480000000005,70.03068234709706,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,5,26198,CHFPW,70826.40000000001,6899.613620486295,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,5,26198,CHPDT,3541.320000000004,344.98068102431506,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,5,26198,HPODW,565.8120000000005,161.57109973630818,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,6,26146,CHFPW,8494.2,1304.9354466792602,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,6,26146,CHPDT,424.7100000000004,65.24677233396307,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,6,26146,HPODW,424.7100000000004,65.24677233396307,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,6,26158,CHFPW,18239.04,1418.698293507115,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,6,26158,CHPDT,911.9520000000008,70.93491467535581,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,6,26158,HPODW,487.2420000000004,27.83201070709771,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,6,26167,CHFPW,34969.32,5426.508335937575,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,6,26167,CHPDT,1748.4660000000017,271.32541679687904,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,6,26167,HPODW,836.5140000000007,261.8887543977406,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,6,26182,CHFPW,48222.0,5815.132357221114,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,6,26182,CHPDT,2411.100000000002,290.756617861056,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,6,26182,HPODW,662.6340000000005,104.50803332758694,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,6,26198,CHFPW,58484.16,6569.1493832915685,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,6,26198,CHPDT,2924.2080000000024,328.45746916457875,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,6,26198,HPODW,513.1080000000004,152.79037345330377,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,7,26146,CHFPW,5893.56,1563.9578408640043,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,7,26146,CHPDT,294.6780000000003,78.1978920432003,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,7,26146,HPODW,294.6780000000003,78.1978920432003,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,7,26158,CHFPW,15196.68,3821.9699292380624,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,7,26158,CHPDT,759.8340000000007,191.0984964619033,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,7,26158,HPODW,465.15600000000046,174.36663967055182,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,7,26167,CHFPW,33746.76,6186.784029849434,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,7,26167,CHPDT,1687.3380000000016,309.339201492472,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,7,26167,HPODW,927.5040000000008,243.25317311393928,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,7,26182,CHFPW,47274.885,6809.614139178519,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,7,26182,CHPDT,2363.7442500000025,340.48070695892625,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,7,26182,HPODW,676.4062500000006,142.25459652063984,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,7,26198,CHFPW,60592.635,8535.059956819285,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,7,26198,CHPDT,3029.6317500000027,426.75299784096455,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,7,26198,HPODW,665.8875000000006,257.2761344450746,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,8,26146,CHFPW,8847.40909090909,1967.1867222000053,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,8,26146,CHPDT,442.3704545454549,98.35933611000036,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,8,26146,HPODW,442.3704545454549,98.35933611000036,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,8,26158,CHFPW,19027.48909090909,2967.235877378137,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,8,26158,CHPDT,951.3744545454554,148.361793868907,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,8,26158,HPODW,509.0040000000005,111.07053110523974,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,8,26167,CHFPW,33045.88909090909,3596.496079797669,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,8,26167,CHPDT,1652.294454545456,179.8248039898836,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,8,26167,HPODW,700.9200000000006,101.61563979033944,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,8,26182,CHFPW,49426.24909090909,4619.828607210446,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,8,26182,CHPDT,2471.3124545454566,230.9914303605225,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,8,26182,HPODW,819.0180000000007,144.98303614561274,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,8,26198,CHFPW,64236.28909090909,6549.06091497094,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,8,26198,CHPDT,3211.814454545457,327.45304574854725,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,8,26198,HPODW,740.5020000000007,232.0957911509816,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,9,26146,CHFPW,5144.04,2115.580171489608,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,9,26146,CHPDT,257.2020000000002,105.77900857448049,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,9,26146,HPODW,257.2020000000002,105.77900857448049,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,9,26158,CHFPW,11741.759999999998,3479.400023279876,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,9,26158,CHPDT,587.0880000000004,173.9700011639939,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,9,26158,HPODW,329.88600000000025,138.1172062054545,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,9,26167,CHFPW,33863.399999999994,4969.733310400065,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,9,26167,CHPDT,1693.1700000000014,248.4866655200035,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,9,26167,HPODW,1106.082000000001,177.42621462526344,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,9,26182,CHFPW,48769.65,5452.4049288823,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,9,26182,CHPDT,2438.482500000002,272.62024644411525,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,9,26182,HPODW,745.3125000000007,112.14355010431952,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,9,26198,CHFPW,61599.15,6160.199317716919,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,9,26198,CHPDT,3079.9575000000027,308.0099658858462,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,9,26198,HPODW,641.4750000000006,143.34692293087437,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,10,26146,CHFPW,8338.5,3036.830192816187,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,10,26146,CHPDT,416.9250000000004,151.84150964080948,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,10,26146,HPODW,416.9250000000004,151.84150964080948,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,10,26158,CHFPW,21119.625,3580.150126915071,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,10,26158,CHPDT,1055.981250000001,179.00750634575368,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,10,26158,HPODW,639.0562500000005,94.80423660430483,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,10,26167,CHFPW,35601.75,4357.124959333849,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,10,26167,CHPDT,1780.0875000000017,217.85624796669265,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,10,26167,HPODW,724.1062500000006,124.1678599718946,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,10,26182,CHFPW,53336.8928571429,4906.294276946705,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,10,26182,CHPDT,2666.8446428571474,245.3147138473355,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,10,26182,HPODW,886.7571428571457,112.77395112292125,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,10,26198,CHFPW,65245.178571428594,5823.4334670579,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,10,26198,CHPDT,3262.258928571433,291.17167335289525,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,10,26198,HPODW,595.4142857142855,156.84908202831488,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,11,26146,CHFPW,6576.260869565219,2049.228941455786,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,11,26146,CHPDT,328.81304347826125,102.46144707278938,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,11,26146,HPODW,328.81304347826125,102.46144707278938,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,11,26158,CHFPW,18535.01086956522,3645.0469996969855,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,11,26158,CHPDT,926.7505434782618,182.25234998484945,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,11,26158,HPODW,597.9375000000006,150.72349166188408,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,11,26167,CHFPW,37670.96739130432,7834.781229444126,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,11,26167,CHPDT,1883.5483695652176,391.7390614722066,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,11,26167,HPODW,956.7978260869558,346.76155093684366,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,11,26182,CHFPW,51280.14130434782,7973.832157375776,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,11,26182,CHPDT,2564.007065217393,398.6916078687891,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,11,26182,HPODW,680.4586956521755,74.13167947561293,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,11,26198,CHFPW,60413.18478260869,8273.71234525349,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,11,26198,CHPDT,3020.659239130437,413.6856172626749,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,11,26198,HPODW,456.6521739130439,110.3666242348656,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,12,26146,CHFPW,4108.90909090909,874.7456233099996,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,12,26146,CHPDT,205.44545454545468,43.737281165500015,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,12,26146,HPODW,205.44545454545468,43.737281165500015,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,12,26158,CHFPW,15639.13636363639,3947.343626478445,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,12,26158,CHPDT,781.9568181818202,197.36718132392244,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,12,26158,HPODW,576.5113636363654,192.46000753403308,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,12,26167,CHFPW,38189.045454545485,5046.898644266596,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,12,26167,CHPDT,1909.452272727276,252.34493221333005,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,12,26167,HPODW,1127.495454545456,157.2391826168021,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,12,26182,CHFPW,48458.86363636369,5271.719596583263,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,12,26182,CHPDT,2422.9431818181865,263.58597982916336,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,12,26182,HPODW,513.4909090909105,76.15513081040574,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok
+26SP,XXQL2601,12,26198,CHFPW,56641.09090909096,6184.01216824482,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chfpw,ok
+26SP,XXQL2601,12,26198,CHPDT,2832.0545454545504,309.2006084122413,5,cumulative_variance_propagation,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_chpdt,ok
+26SP,XXQL2601,12,26198,HPODW,409.1113636363639,161.63986971041533,5,propagated_fresh_dmfr,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,cumulative_variance_propagation_hpodw,ok

@@ -24,5 +24,27 @@
     "protocol_notes": "26SP 0717 总叶鲜重 = 叶鲜重 + 小叶鲜重；干鲜比与其他日期不可直接比较"
   },
   "impact_on_frozen_results": "零影响：未改动任何测量值；现行 bundle/率定结果无需重算",
-  "bundle_log_note": "未来 bundle 重建时 generator_log 应引用本记录与修订后源文件哈希"
+  "bundle_log_note": "未来 bundle 重建时 generator_log 应引用本记录与修订后源文件哈希",
+  "repfilter_execution_20260818": {
+    "scheme": "docs/重复剔除方案_20260818.md",
+    "approval": "用户2026-08-18批准：通道1全部10例（单变量统计异常）；通道2五例（田间确认非代表性：25SP小区3@25194整株、25SP小区13@25170 LAI、26SP小区2@0629整株、26SP小区5@0629叶、26SP小区4@0629叶）",
+    "source_marks": {
+      "2025春作物生长指标集.xlsx": "7行标记（剔除标记列，未改值未删行）",
+      "2026春生长指标集.xlsx": "8行标记（0502×1, 0629×3, 0717×4）"
+    },
+    "bundles": {
+      "xxql2501_repfilter_v1_20260818": "TMT 6格重算（FileT/observation_uncertainty同步）",
+      "xxql2601_repfilter_v1_20260818": "TMT 10格重算（FileT/observation_uncertainty同步）"
+    },
+    "sha256_after": {
+      "2025春生长指标集.xlsx": "b661ea24b3fb3b83c457ebd3c760e42e414dc53e76cd364d8762a6532d7ac120",
+      "2026春生长指标集.xlsx": "1a8558fae276a49b7fb8de10c89f4885dbb09c830a09aa31b90b15a58bbae597"
+    },
+    "monotonicity_after": {
+      "25SP": "违规 6处→6处；小区3 -20%→-4~-6%（修复）；小区2 -21%保留（真实打叶，用户未批准剔除）",
+      "26SP": "违规 10处→9处；小区2 -19.6→-7.1%、小区5 -14.2→-8.6%（修复）；小区4 消除；小区7/8/12 -17~-21%保留（真实打叶）"
+    },
+    "paper_disclosure_sentence": "3 个重复中按预设定对称判据（单变量偏差>30%且其余变量<15%）剔除 10 个测量值；另有 5 例（2 整株 + 3 单变量）经田间记录确认非代表性样株剔除；剔除清单见 supplementary。",
+    "backup": "git 分支 feat/glm-followup-20260818 提交链即完整备份；源数据修改前状态见提交 3cf5034"
+  }
 }

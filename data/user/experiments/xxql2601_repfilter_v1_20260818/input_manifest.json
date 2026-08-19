@@ -1,0 +1,388 @@
+{
+  "bundle_id": "xxql2601_repfilter_v1_20260818",
+  "derived_from_bundle": "xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729",
+  "derived_from_manifest_sha256": "b14d1470d52be76da7849ce69df72777a7b768d291e29c687ea0c2e2b53b2854",
+  "spec_compliance": [
+    "docs/三季FileA_FileT与不确定性适配计划_v1_20260726.md",
+    "docs/土壤水分进入Phi与土壤参数预筛方案_v1_20260726.md"
+  ],
+  "created_at": "2026-07-29T11:59:31Z",
+  "season_id": "26SP",
+  "excode": "XXQL2601",
+  "intended_use": "actual_trial_parameter_calibration_v2",
+  "scenario_type": "actual_trial_calibration",
+  "scenario_role": "calibration",
+  "observation_policy": "FileA_FileT_strict_fill_plus_SOIL_WATER_group",
+  "treatment_plot_mapping": "TN1-TN12 map one-to-one to plots 1-12",
+  "treatment_exclusion": {
+    "excluded_tn": [],
+    "included_tn": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "reason": null,
+    "audit_file": null
+  },
+  "initial_condition_policy": "observed_treatment_specific_no_counterfactual_pooling",
+  "soil_analysis_policy": "observed_treatment_specific_no_counterfactual_pooling",
+  "actual_trial_preservation": {
+    "reference_filex": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2601\\XXQL2601.TMX",
+    "reference_filex_sha256": "67b765239506570ddcb3628e94df003093176124dbcd9dfe71fc5a103610670e",
+    "v1_bundle_manifest_id": null,
+    "v1_bundle_manifest_sha256": null,
+    "filex_retention_proof": "TMX byte-for-byte copied from authoritative data/user/experiments/XXQL*; SOIL.SOL/WTH/DSSBatch.v48 sources and SHAs are recorded"
+  },
+  "filex_fix_status": "authoritative FileX copied from data/user/experiments/XXQL2601; fertilizer management order audited",
+  "source_workbooks": {
+    "trial_observations": {
+      "data\\user\\ref\\DSSAT文件\\2026春\\2026春产量集.xlsx": "c070c7b4c503f13348e5f607c0a4bfdce348d77fdcade91353bf57bde955b32f",
+      "data\\user\\ref\\DSSAT文件\\2026春\\2026春生长指标集.xlsx": "b7205945e999d9eb8e16212d96e0ec7b10029723c319a0c3646beacce2f4c8ef",
+      "data\\user\\ref\\DSSAT文件\\2026春\\2026春品质指标集.xlsx": "34ef0c4a6cec8515335896da8e08e22545081bdf8f00e1ae0ef2661df8f105a0"
+    },
+    "soil_water": {
+      "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\2026春土壤数据集.xlsx": "cb13eaff04bb45caa4eca0144261520a99aaa9241a9e19bc326faf1754522530"
+    }
+  },
+  "generators": {
+    "trial_observations": {
+      "script": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "sha256": "763c5f22965bab1d12d49311939f25dc8d27dac06de141de3d41d3d74610d6a3"
+    },
+    "soil_water_observations": {
+      "script": "tools/experiments/build_soil_water_observations.py",
+      "sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6"
+    }
+  },
+  "trial_observation_qa": {
+    "plots": 12,
+    "growth_dates": 4,
+    "harvest_dates": 5,
+    "total_observations": 432,
+    "density": 27000.0
+  },
+  "soil_water_qa": {
+    "plots": 12,
+    "dates": 4,
+    "depths": 5,
+    "total_observations": 240,
+    "phi_observations": 180,
+    "initial_condition_observations": 60,
+    "soil_id": "IBTM910017",
+    "dssat_layer_bottoms_cm": [
+      5.0,
+      15.0,
+      20.0,
+      30.0,
+      40.0,
+      50.0,
+      60.0,
+      70.0,
+      80.0,
+      100.0,
+      122.0,
+      145.0,
+      175.0,
+      203.0
+    ]
+  },
+  "soil_water_warnings": [],
+  "files": [
+    {
+      "name": "XXQL2601.TMX",
+      "sha256": "7ea8368cfb11581a2732586793c2ba34745032bb2e52f7d38cdb04c5412c7d5a",
+      "bytes": 25516,
+      "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2601\\XXQL2601.TMX"
+    },
+    {
+      "name": "SOIL.SOL",
+      "sha256": "2ba84eb2ac4ae5817e594efb1146cf494812d3f57ac5c3c0a42c50642839cd55",
+      "bytes": 162881,
+      "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2601\\SOIL.SOL"
+    },
+    {
+      "name": "XXQL2601.WTH",
+      "sha256": "2beaf4c5fbf39ac36e469f17d4e3eb6437838d8e05f30bd0e2e5946c60f68a46",
+      "bytes": 7936,
+      "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2601\\XXQL2601.WTH"
+    },
+    {
+      "name": "DSSBatch.v48",
+      "sha256": "0956d41b903b0ec0691e7f90ba1bed3309f4d43bfd1a74cee5bd2e1f04a5faeb",
+      "bytes": 1956,
+      "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2601\\DSSBatch.v48"
+    },
+    {
+      "name": "XXQL2601.TMA",
+      "sha256": "67e105be76ac283f40c5a6a992a4c27d090a2f59c5e130e1109dc589071b4e75",
+      "bytes": 1362,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\XXQL2601.TMA"
+    },
+    {
+      "name": "XXQL2601.TMT",
+      "sha256": "80a78a613d21832a27711f3cf4a4d7a89523731d404050260d13c88799d71265",
+      "bytes": 12312,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\XXQL2601.TMT"
+    },
+    {
+      "name": "observation_uncertainty.csv",
+      "sha256": "d46c8f96bddc81cf4094ef09fbbc96871b0eb5143e466faa39f3681d2fbec348",
+      "bytes": 90587,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\observation_uncertainty.csv"
+    },
+    {
+      "name": "fruit_quality_match_audit.csv",
+      "sha256": "fd1cba694efa93a5542bbd9353b25dcf4252803b02bc2bb245bd3aab750b250b",
+      "bytes": 11270,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\fruit_quality_match_audit.csv"
+    },
+    {
+      "name": "trial_generator_log.json",
+      "sha256": "9c6a6f551ff5f0be9fad2427081fb6cf503f207bb545e2130165d10ecc4892a7",
+      "bytes": 1624,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "763c5f22965bab1d12d49311939f25dc8d27dac06de141de3d41d3d74610d6a3",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\generator_log.json"
+    },
+    {
+      "name": "soil_water_observations.csv",
+      "sha256": "e500b23eee2bee302c8475d4846116a4d542b4e4f3d8a564980bfe478b5e3a1b",
+      "bytes": 54736,
+      "generated_by": "tools/experiments/build_soil_water_observations.py",
+      "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\soil_water_observations.csv"
+    },
+    {
+      "name": "soil_water_layer_mapping.csv",
+      "sha256": "7a53e73afe36518c25fdf687e6d9b5634a372198dcf7411598e249e0d84b764f",
+      "bytes": 602,
+      "generated_by": "tools/experiments/build_soil_water_observations.py",
+      "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\soil_water_layer_mapping.csv"
+    },
+    {
+      "name": "soil_water_match_audit.csv",
+      "sha256": "9d2ccfd737358534d0c3c71c1ca1481c1c84409e49f49bb75baa5fae81328eeb",
+      "bytes": 29175,
+      "generated_by": "tools/experiments/build_soil_water_observations.py",
+      "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\soil_water_match_audit.csv"
+    },
+    {
+      "name": "soil_water_generator_log.json",
+      "sha256": "b40dfe39941f816aebe6cbffbe504ed14c311f28b2db151d068c2442a7d35bde",
+      "bytes": 1083,
+      "generated_by": "tools/experiments/build_soil_water_observations.py",
+      "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\soil_water_generator_log.json"
+    },
+    {
+      "name": "FileA_values.csv",
+      "sha256": "2f472493728ef57b8a6b29f0d08de7a64069179251ba1ef69e93370052c4a934",
+      "bytes": 2265,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\FileA_values.csv"
+    },
+    {
+      "name": "FileT_values.csv",
+      "sha256": "bb522aa632210a7c5b021fa11c949aed871db592f998ab7bc8097062e04fef66",
+      "bytes": 8379,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\FileT_values.csv"
+    },
+    {
+      "name": "generator_log.json",
+      "sha256": "d641a4da06b00a669c7596472e7e75dc263c2b593f19069af96e57507094d21e",
+      "bytes": 1840,
+      "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+      "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\generator_log.json"
+    }
+  ],
+  "files_by_role": {
+    "copied_inputs": [
+      {
+        "name": "XXQL2601.TMX",
+        "sha256": "7ea8368cfb11581a2732586793c2ba34745032bb2e52f7d38cdb04c5412c7d5a",
+        "bytes": 25516,
+        "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2601\\XXQL2601.TMX"
+      },
+      {
+        "name": "SOIL.SOL",
+        "sha256": "a986374f5ca95eaa3d65ed58162c3cb038450c57128b883b5e0fb22629600c67",
+        "bytes": 162881,
+        "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2601\\SOIL.SOL"
+      },
+      {
+        "name": "XXQL2601.WTH",
+        "sha256": "2beaf4c5fbf39ac36e469f17d4e3eb6437838d8e05f30bd0e2e5946c60f68a46",
+        "bytes": 7936,
+        "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2601\\XXQL2601.WTH"
+      },
+      {
+        "name": "DSSBatch.v48",
+        "sha256": "0956d41b903b0ec0691e7f90ba1bed3309f4d43bfd1a74cee5bd2e1f04a5faeb",
+        "bytes": 1956,
+        "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2601\\DSSBatch.v48"
+      }
+    ],
+    "generated_trial": [
+      {
+        "name": "XXQL2601.TMA",
+        "sha256": "67e105be76ac283f40c5a6a992a4c27d090a2f59c5e130e1109dc589071b4e75",
+        "bytes": 1362,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\XXQL2601.TMA"
+      },
+      {
+        "name": "XXQL2601.TMT",
+        "sha256": "80a78a613d21832a27711f3cf4a4d7a89523731d404050260d13c88799d71265",
+        "bytes": 12312,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\XXQL2601.TMT"
+      },
+      {
+        "name": "observation_uncertainty.csv",
+        "sha256": "d46c8f96bddc81cf4094ef09fbbc96871b0eb5143e466faa39f3681d2fbec348",
+        "bytes": 90587,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\observation_uncertainty.csv"
+      },
+      {
+        "name": "fruit_quality_match_audit.csv",
+        "sha256": "fd1cba694efa93a5542bbd9353b25dcf4252803b02bc2bb245bd3aab750b250b",
+        "bytes": 11270,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\fruit_quality_match_audit.csv"
+      },
+      {
+        "name": "trial_generator_log.json",
+        "sha256": "9c6a6f551ff5f0be9fad2427081fb6cf503f207bb545e2130165d10ecc4892a7",
+        "bytes": 1624,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "763c5f22965bab1d12d49311939f25dc8d27dac06de141de3d41d3d74610d6a3",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\generator_log.json"
+      },
+      {
+        "name": "FileA_values.csv",
+        "sha256": "2f472493728ef57b8a6b29f0d08de7a64069179251ba1ef69e93370052c4a934",
+        "bytes": 2265,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\FileA_values.csv"
+      },
+      {
+        "name": "FileT_values.csv",
+        "sha256": "bb522aa632210a7c5b021fa11c949aed871db592f998ab7bc8097062e04fef66",
+        "bytes": 8379,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\FileT_values.csv"
+      },
+      {
+        "name": "generator_log.json",
+        "sha256": "d641a4da06b00a669c7596472e7e75dc263c2b593f19069af96e57507094d21e",
+        "bytes": 1840,
+        "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
+        "generator_sha256": "ec07585e5d9e4bdbd9ac0eaf128dfbc7024aa05f4f33487fd398faac42715ded",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\generator_log.json"
+      }
+    ],
+    "generated_soil": [
+      {
+        "name": "soil_water_observations.csv",
+        "sha256": "e500b23eee2bee302c8475d4846116a4d542b4e4f3d8a564980bfe478b5e3a1b",
+        "bytes": 54736,
+        "generated_by": "tools/experiments/build_soil_water_observations.py",
+        "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\soil_water_observations.csv"
+      },
+      {
+        "name": "soil_water_layer_mapping.csv",
+        "sha256": "7a53e73afe36518c25fdf687e6d9b5634a372198dcf7411598e249e0d84b764f",
+        "bytes": 602,
+        "generated_by": "tools/experiments/build_soil_water_observations.py",
+        "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\soil_water_layer_mapping.csv"
+      },
+      {
+        "name": "soil_water_match_audit.csv",
+        "sha256": "9d2ccfd737358534d0c3c71c1ca1481c1c84409e49f49bb75baa5fae81328eeb",
+        "bytes": 29175,
+        "generated_by": "tools/experiments/build_soil_water_observations.py",
+        "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\soil_water_match_audit.csv"
+      },
+      {
+        "name": "soil_water_generator_log.json",
+        "sha256": "b40dfe39941f816aebe6cbffbe504ed14c311f28b2db151d068c2442a7d35bde",
+        "bytes": 1083,
+        "generated_by": "tools/experiments/build_soil_water_observations.py",
+        "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\DSSAT输出_v2\\soil_water_generator_log.json"
+      }
+    ]
+  },
+  "summary": {
+    "total_files": 16,
+    "copied_from_v1_count": 4,
+    "generated_trial_count": 8,
+    "generated_soil_count": 4
+  },
+  "data_corrections": {
+    "correction_id": "fixed_fruit_moisture_95pct_dmc5pct_v2_20260802",
+    "moisture_fraction": 0.95,
+    "dry_matter_fraction": 0.05,
+    "variance_rule": "DMFR/DMC variance=0; dry variance=DMFR^2*fresh variance",
+    "scope": "FileA/FileT, CHPDT/HPODW, observation uncertainty and harvest audit",
+    "source_generator": "tools/experiments/build_trial_observations_v2_20260726.py",
+    "canonical_tmx_ic_fixed_width_20260818": {
+      "correction_id": "canonical_tmx_ic_fixed_width_20260818",
+      "scope": "INITIAL CONDITIONS ICBL/SH2O/SNH4/SNO3 header and records only",
+      "change": "Removed surplus blank records and rewrote the header and rows as DSSAT widths 2/6/6/6/6; numeric changes limited to width-safe rounding.",
+      "repair_audit": "D:\\Tomato_Cal\\workspace\\reports\\tmx_ic_format_repair_20260818\\tmx_ic_repair_rows.csv"
+    },
+    "xxql2601_treatment12_initial_conditions_20260818": {
+      "correction_id": "xxql2601_treatment12_initial_conditions_20260818",
+      "scope": "XXQL2601 treatment 12 INITIAL CONDITIONS only",
+      "change": "Set five ICBL/SH2O/SNH4/SNO3 rows to the user-specified 26SP values.",
+      "repair_audit": "D:\\Tomato_Cal\\workspace\\reports\\tmx_26sp_t12_ic_20260818\\rows.csv"
+    }
+  },
+  "repfilter": {
+    "applied": "2026-08-18",
+    "scheme": "docs/重复剔除方案_20260818.md",
+    "user_approval": "通道1全部10例 + 通道2五例（用户2026-08-18确认'取样不具有代表性'）",
+    "source_marks": "源xlsx新增'剔除标记'列（不删行不改值），标记含通道与理由可审计",
+    "recalc": "受影响观测均值按剩余重复(n=2)重算，线性换算系数精确继承；SD同步重算",
+    "values_changed": {
+      "25SP_TMT_cells": 6,
+      "26SP_TMT_cells": 10
+    },
+    "dry_cum_unaffected": "产量数据集独立，CHFPW/CHPDT/HPODW 观测零改动",
+    "frozen_results_note": "v8/v7原bundle与已冻结率定结果未动；使用repfilter bundle重跑时成员126基线需重验"
+  }
+}
