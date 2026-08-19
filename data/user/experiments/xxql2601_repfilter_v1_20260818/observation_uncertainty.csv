@@ -169,7 +169,7 @@ season_id,excode,trno,date,variable,value,raw_sd,n_rep,sd_method,source_workbook
 26SP,XXQL2601,7,26153,LWAD,778.5899999999999,124.01624450046852,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
 26SP,XXQL2601,7,26153,SWAD,994.59,152.3001848324552,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
 26SP,XXQL2601,7,26153,CHTD,1.096666666666667,0.055075705472861,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
-26SP,XXQL2601,7,26180,LWAD,1565.73,308.68168458786147,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,ok
+26SP,XXQL2601,7,26180,LWAD,1387.0080879815987,69.35040439907993,2,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_lwad,repfilter_20260818
 26SP,XXQL2601,7,26180,SWAD,2040.57,295.8547510181306,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_swad,ok
 26SP,XXQL2601,7,26180,CHTD,1.569,0.0833546639366988,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_chtd; converted_cm_to_m_for_DSSAT,ok
 26SP,XXQL2601,7,26198,LAID,2.666494102300617,0.1876243363965298,3,replicate_sd,2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx,Sheet1,per_trno_date_mean_replicates_laid,ok
