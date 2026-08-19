@@ -108,7 +108,7 @@
   "files": [
     {
       "name": "XXQL2501.TMX",
-      "sha256": "d11e2b59283ec9534f1add12f31e32e376c3d11f5f3f376a3ea35bc65925071d",
+      "sha256": "1c975dda2288332c398dbf5160a69846561a64fb18b9b3a2e105ec49bde4acbc",
       "bytes": 22339,
       "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2501_special_defaultn_v1_20260730\\XXQL2501.TMX",
       "derived_transformation": "default_initial_mineral_n_plus_page25_sprl_default",
@@ -403,6 +403,14 @@
       "scope": "INITIAL CONDITIONS ICBL/SH2O/SNH4/SNO3 header and records only",
       "change": "Removed surplus blank records and rewrote the header and rows as DSSAT widths 2/6/6/6/6; numeric changes limited to width-safe rounding.",
       "repair_audit": "D:\\Tomato_Cal\\workspace\\reports\\tmx_ic_format_repair_20260818\\tmx_ic_repair_rows.csv"
+    },
+    {
+      "correction_id": "tmx_tn9_ic_user_specified_20260818",
+      "date": "2026-08-18",
+      "file": "XXQL2501.TMX",
+      "change": "TN9 IC: 20cm .216/3.4/30.4, 40cm .248/1.2/23.4, 60cm .297/1.5/6.6, 80cm .304/.5/1, 100cm .314/.5/1",
+      "reason": "用户指定 25SP 9号处理 INITIAL CONDITIONS 修改（同步全部活跃 25SP TMX）",
+      "backup": "workspace/backups/tmx_ic_tn9_20260818/"
     }
   ],
   "counterfactual_transformations": [

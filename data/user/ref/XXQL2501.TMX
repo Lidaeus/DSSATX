@@ -199,9 +199,9 @@ Quncy, FL
 @C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
  9   -99 25069     1     0     1     1   -99   -99   -99   -99   -99   -99 9
 @C  ICBL  SH2O  SNH4  SNO3
- 9    20  .216   3.4  37.4
- 9    40  .248   1.2    32
- 9    60  .297   1.5  16.6
+ 9    20  .216   3.4  30.4
+ 9    40  .248   1.2  23.4
+ 9    60  .297   1.5   6.6
  9    80  .304    .5     1
  9   100  .314    .5     1
 @C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
