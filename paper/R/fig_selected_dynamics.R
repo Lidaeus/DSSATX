@@ -194,6 +194,196 @@ monotone_cumulative_curve <- function(daily) {
   do.call(rbind, curves)
 }
 
+# ── conditional-ensemble dynamics (plan §6) ─────────────────────────────────
+# These builders consume only the frozen conditional bundle tables; they never
+# read DSSAT/PEST++ outputs and never apply regression-smoothing layers.
+
+build_process_dynamics_conditional <- function(prediction, trajectory, treatment_metadata,
+                                               variables, season_treatments, profile,
+                                               is_demo = FALSE) {
+  in_set <- function(frame) {
+    keep <- paste(frame$season_id, frame$treatment) %in%
+      paste(season_treatments$season_id, season_treatments$treatment)
+    frame[keep, , drop = FALSE]
+  }
+  observations <- in_set(prediction[prediction$variable %in% variables, , drop = FALSE])
+  daily <- in_set(trajectory[trajectory$variable %in% variables, , drop = FALSE])
+  if (nrow(observations) == 0 || nrow(daily) == 0) {
+    stop("Conditional process dynamics need prediction events and daily trajectory summaries")
+  }
+  observations <- attach_conditional_metadata(observations, treatment_metadata)
+  daily <- attach_conditional_metadata(daily, treatment_metadata)
+  observations$variable_panel <- paste0(observations$variable_label, " [", observations$unit, "]")
+  daily$variable_panel <- paste0(daily$variable_label, " [", daily$unit, "]")
+  panel_levels <- unique(daily$variable_panel[match(variables, daily$variable)])
+  observations$variable_panel <- factor(observations$variable_panel, levels = panel_levels)
+  daily$variable_panel <- factor(daily$variable_panel, levels = panel_levels)
+  treatment_levels <- unique(paste0(observations$treatment_label, "\n", observations$season_id))
+  observations$panel_label <- factor(paste0(observations$treatment_label, "\n", observations$season_id),
+                                     levels = treatment_levels)
+  daily$panel_label <- factor(paste0(daily$treatment_label, "\n", daily$season_id),
+                              levels = treatment_levels)
+
+  plot <- ggplot2::ggplot() +
+    ggplot2::geom_ribbon(
+      data = daily,
+      ggplot2::aes(x = dap, ymin = sim_q025, ymax = sim_q975, fill = nitrogen_level),
+      alpha = 0.28, colour = NA
+    ) +
+    ggplot2::geom_ribbon(
+      data = daily,
+      ggplot2::aes(x = dap, ymin = sim_q25, ymax = sim_q75, fill = nitrogen_level),
+      alpha = 0.42, colour = NA
+    ) +
+    ggplot2::geom_line(
+      data = daily,
+      ggplot2::aes(x = dap, y = sim_median, colour = nitrogen_level),
+      linewidth = profile$data_linewidth_pt, lineend = "round"
+    ) +
+    ggplot2::geom_point(
+      data = observations,
+      ggplot2::aes(x = dap, y = observed, fill = nitrogen_level, shape = water_level),
+      colour = "#202020", size = 1.9, stroke = 0.45
+    ) +
+    ggplot2::facet_grid(variable_panel ~ panel_label, scales = "free_y", switch = "y") +
+    management_scales(profile) +
+    ggplot2::labs(
+      title = "Growth dynamics with conditional-ensemble uncertainty",
+      subtitle = paste0("Line: conditional-ensemble median daily simulation; ribbons: ",
+                        "25–75% and 95% conditional-ensemble prediction intervals; ",
+                        "points: observed means"),
+      x = "Days after planting", y = NULL,
+      caption = paste(
+        "95% conditional-ensemble prediction interval (parameter ensemble only).",
+        ifelse(isTRUE(is_demo), demo_caption(TRUE), "")
+      )
+    ) +
+    dynamics_theme(profile)
+  plot <- add_conditional_observation_errorbars(plot, observations)
+  list(
+    plot = plot,
+    observations = observations,
+    daily = daily,
+    height_mm = min(profile$max_height_mm, max(82, 38 * length(variables)))
+  )
+}
+
+add_conditional_observation_errorbars <- function(plot, observations) {
+  if (is.null(observations$observed_se)) return(plot)
+  errors <- observations[is.finite(observations$observed_se) & observations$observed_se >= 0, , drop = FALSE]
+  if (nrow(errors) == 0) return(plot)
+  plot + ggplot2::geom_errorbar(
+    data = errors,
+    ggplot2::aes(x = dap, ymin = observed - observed_se, ymax = observed + observed_se),
+    width = 0, linewidth = 0.35, colour = "#303030"
+  )
+}
+
+build_harvest_dynamics_conditional <- function(prediction, treatment_metadata,
+                                               increment_variable, cumulative_variable,
+                                               season_treatments, profile, is_demo = FALSE) {
+  in_set <- function(frame) {
+    keep <- paste(frame$season_id, frame$treatment) %in%
+      paste(season_treatments$season_id, season_treatments$treatment)
+    frame[keep, , drop = FALSE]
+  }
+  increment <- in_set(prediction[prediction$variable == increment_variable, , drop = FALSE])
+  cumulative <- in_set(prediction[prediction$variable == cumulative_variable, , drop = FALSE])
+  if (nrow(increment) == 0 || nrow(cumulative) == 0) {
+    stop("Conditional harvest dynamics need incremental and cumulative event summaries")
+  }
+  increment <- attach_conditional_metadata(increment, treatment_metadata)
+  cumulative <- attach_conditional_metadata(cumulative, treatment_metadata)
+  increment <- increment[order(increment$treatment, increment$dap), , drop = FALSE]
+  cumulative <- cumulative[order(cumulative$treatment, cumulative$dap), , drop = FALSE]
+  treatment_levels <- unique(paste0(increment$treatment_label, "\n", increment$season_id))
+  increment$panel_label <- factor(paste0(increment$treatment_label, "\n", increment$season_id),
+                                  levels = treatment_levels)
+  cumulative$panel_label <- factor(paste0(cumulative$treatment_label, "\n", cumulative$season_id),
+                                   levels = treatment_levels)
+
+  # Incremental harvest: event lollipops of the ensemble median with vertical
+  # 95% intervals; never connected into a growth curve (plan §6.1).
+  p_increment <- ggplot2::ggplot(increment, ggplot2::aes(x = dap)) +
+    ggplot2::geom_segment(
+      ggplot2::aes(xend = dap, y = 0, yend = sim_median, colour = nitrogen_level),
+      linewidth = 0.55, alpha = 0.75
+    ) +
+    ggplot2::geom_errorbar(
+      ggplot2::aes(ymin = sim_q025, ymax = sim_q975, colour = nitrogen_level),
+      width = 0, linewidth = 0.35, alpha = 0.55
+    ) +
+    ggplot2::geom_point(
+      ggplot2::aes(y = sim_median, colour = nitrogen_level),
+      shape = 1, size = 1.7, stroke = 0.55
+    ) +
+    ggplot2::geom_point(
+      ggplot2::aes(y = observed, fill = nitrogen_level, shape = water_level),
+      colour = "#202020", size = 1.9, stroke = 0.45
+    ) +
+    ggplot2::facet_wrap(~panel_label, nrow = 1, scales = "free_y") +
+    management_scales(profile) +
+    ggplot2::labs(
+      title = "Incremental harvest by event",
+      subtitle = "Lollipops/lines: conditional-ensemble median with 95% interval; filled points: observed means",
+      x = "Days after planting",
+      y = paste0(increment$variable_label[[1]], " [", increment$unit[[1]], "]")
+    ) +
+    dynamics_theme(profile)
+  p_increment <- add_conditional_observation_errorbars(p_increment, increment)
+
+  # Cumulative harvest: event-step median line + per-event ribbons; no
+  # interpolation layer, metrics never use interpolated nodes.
+  p_cumulative <- ggplot2::ggplot() +
+    ggplot2::geom_ribbon(
+      data = cumulative,
+      ggplot2::aes(x = dap, ymin = sim_q025, ymax = sim_q975, fill = nitrogen_level,
+                   group = treatment),
+      alpha = 0.28, colour = NA
+    ) +
+    ggplot2::geom_ribbon(
+      data = cumulative,
+      ggplot2::aes(x = dap, ymin = sim_q25, ymax = sim_q75, fill = nitrogen_level,
+                   group = treatment),
+      alpha = 0.42, colour = NA
+    ) +
+    ggplot2::geom_line(
+      data = cumulative,
+      ggplot2::aes(x = dap, y = sim_median, colour = nitrogen_level, group = treatment),
+      linewidth = profile$data_linewidth_pt, lineend = "round"
+    ) +
+    ggplot2::geom_point(
+      data = cumulative,
+      ggplot2::aes(x = dap, y = observed, fill = nitrogen_level, shape = water_level),
+      colour = "#202020", size = 1.9, stroke = 0.45
+    ) +
+    ggplot2::facet_wrap(~panel_label, nrow = 1, scales = "free_y") +
+    management_scales(profile) +
+    ggplot2::labs(
+      title = "Cumulative harvest at observed events",
+      subtitle = "Line: ensemble median connecting simulated values at harvest dates; ribbon: 95% interval",
+      x = "Days after planting",
+      y = paste0(cumulative$variable_label[[1]], " [", cumulative$unit[[1]], "]"),
+      caption = paste(
+        "95% conditional-ensemble prediction interval (parameter ensemble only).",
+        ifelse(isTRUE(is_demo), demo_caption(TRUE), "")
+      )
+    ) +
+    dynamics_theme(profile)
+  p_cumulative <- add_conditional_observation_errorbars(p_cumulative, cumulative)
+
+  p_cumulative <- p_cumulative + ggplot2::theme(legend.position = "none")
+  plot <- patchwork::wrap_plots(p_increment, p_cumulative, ncol = 1, heights = c(1, 1)) +
+    patchwork::plot_annotation(
+      tag_levels = "a",
+      caption = demo_caption(is_demo),
+      theme = ggplot2::theme(plot.tag = ggplot2::element_text(face = "bold"),
+                             plot.caption = ggplot2::element_text(colour = "#666666", size = 5))
+    )
+  list(plot = plot, increment = increment, cumulative = cumulative,
+       height_mm = min(profile$max_height_mm, 145))
+}
+
 build_cumulative_smooth <- function(comparison, trajectory, treatment_metadata,
                                     cumulative_variable, treatments, profile, is_demo = FALSE) {
   observations <- comparison[comparison$variable == cumulative_variable &

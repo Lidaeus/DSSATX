@@ -382,6 +382,143 @@ read_sobol_bundle <- function(input_dir, allow_demo = FALSE) {
   bundle
 }
 
+validate_conditional_prediction_summary <- function(data) {
+  required <- c("run_id", "ensemble_iteration", "season_id", "dataset_role", "treatment",
+                "variable", "time", "date_code", "dap", "harvest_number", "observed",
+                "sim_mean", "sim_median", "sim_q025", "sim_q25", "sim_q75", "sim_q975",
+                "n_members_expected", "n_members_valid", "source_file",
+                "variable_label", "unit")
+  missing <- setdiff(required, names(data))
+  if (length(missing) > 0) stop("conditional_prediction_summary.csv missing: ", paste(missing, collapse = ", "))
+  for (column in c("time", "date_code", "dap", "observed", "sim_mean", "sim_median",
+                   "sim_q025", "sim_q25", "sim_q75", "sim_q975")) {
+    data[[column]] <- as.numeric(data[[column]])
+  }
+  ordered <- (data$sim_q025 <= data$sim_q25) & (data$sim_q25 <= data$sim_median) &
+    (data$sim_median <= data$sim_q75) & (data$sim_q75 <= data$sim_q975)
+  if (any(!ordered)) stop("conditional prediction quantile ordering violated")
+  data <- data[is.finite(data$observed) & is.finite(data$sim_median), , drop = FALSE]
+  if (nrow(data) == 0) stop("conditional_prediction_summary.csv has no finite pairs")
+  data
+}
+
+validate_conditional_trajectory_summary <- function(data) {
+  required <- c("run_id", "ensemble_iteration", "season_id", "dataset_role", "treatment",
+                "variable", "date_code", "dap", "sim_mean", "sim_median", "sim_q025",
+                "sim_q25", "sim_q75", "sim_q975", "n_members_expected", "n_members_valid",
+                "source_file", "variable_label", "unit")
+  missing <- setdiff(required, names(data))
+  if (length(missing) > 0) stop("conditional_trajectory_summary.csv missing: ", paste(missing, collapse = ", "))
+  for (column in c("date_code", "dap", "sim_mean", "sim_median", "sim_q025", "sim_q25",
+                   "sim_q75", "sim_q975")) {
+    data[[column]] <- as.numeric(data[[column]])
+  }
+  ordered <- (data$sim_q025 <= data$sim_q25) & (data$sim_q25 <= data$sim_median) &
+    (data$sim_median <= data$sim_q75) & (data$sim_q75 <= data$sim_q975)
+  if (any(!ordered)) stop("conditional trajectory quantile ordering violated")
+  data
+}
+
+validate_conditional_residual_members <- function(data) {
+  required <- c("run_id", "realization", "season_id", "dataset_role", "treatment", "variable",
+                "n_events", "signed_relative_bias_pct", "rrmse_pct",
+                "terminal_relative_error_pct", "member_phi", "member_status")
+  missing <- setdiff(required, names(data))
+  if (length(missing) > 0) stop("conditional_residual_by_treatment_member.csv missing: ", paste(missing, collapse = ", "))
+  for (column in c("n_events", "signed_relative_bias_pct", "rrmse_pct",
+                   "terminal_relative_error_pct", "member_phi")) {
+    data[[column]] <- as.numeric(data[[column]])
+  }
+  data
+}
+
+validate_two_season_treatment_metadata <- function(data) {
+  required <- c("season_id", "treatment", "treatment_label", "water_level", "nitrogen_level")
+  missing <- setdiff(required, names(data))
+  if (length(missing) > 0) stop("treatment_metadata_two_season.csv missing: ", paste(missing, collapse = ", "))
+  for (column in required) {
+    data[[column]] <- trimws(as.character(data[[column]]))
+    if (any(!nzchar(data[[column]]))) stop("Two-season treatment metadata has blank ", column)
+  }
+  if (anyDuplicated(paste(data$season_id, data$treatment))) {
+    stop("Two-season treatment metadata has duplicate season x treatment rows")
+  }
+  data
+}
+
+check_cumulative_monotone <- function(summary_data, variable) {
+  # Defense in depth: the exporter aborts on decreasing cumulative quantiles,
+  # the renderer refuses them again before drawing (plan §6.1).
+  part <- summary_data[summary_data$variable == variable, , drop = FALSE]
+  if (nrow(part) == 0) return(invisible(TRUE))
+  for (column in c("sim_q025", "sim_q25", "sim_median", "sim_q75", "sim_q975")) {
+    for (key in split(part, paste(part$season_id, part$treatment))) {
+      key <- key[order(key$dap), , drop = FALSE]
+      if (any(diff(key[[column]]) < -1e-9)) {
+        stop("Cumulative ", variable, " quantile curve decreases along DAP (column ", column, ")")
+      }
+    }
+  }
+  invisible(TRUE)
+}
+
+read_conditional_bundle <- function(input_dir, allow_demo = FALSE) {
+  manifest_path <- file.path(input_dir, "paper_data_manifest.json")
+  if (!file.exists(manifest_path)) stop("Missing paper_data_manifest.json in ", input_dir)
+  manifest <- jsonlite::fromJSON(manifest_path, simplifyVector = FALSE)
+  if (!identical(manifest$bundle_type, "conditional_ensemble_predictions")) {
+    stop("Conditional figures require bundle_type=conditional_ensemble_predictions", call. = FALSE)
+  }
+  if (!identical(manifest$interval_semantics, "parameter_conditional_ensemble_only")) {
+    stop("Conditional bundle must declare parameter_conditional_ensemble_only intervals", call. = FALSE)
+  }
+  listed <- vapply(manifest$artifacts, function(artifact) artifact$path, character(1))
+  required <- c("conditional_prediction_summary.csv", "conditional_trajectory_summary.csv",
+                "conditional_residual_by_treatment_member.csv", "treatment_metadata_two_season.csv")
+  missing_manifest <- setdiff(required, listed)
+  if (length(missing_manifest) > 0) {
+    stop("Conditional manifest does not bind required artifacts: ",
+         paste(missing_manifest, collapse = ", "), call. = FALSE)
+  }
+  for (artifact in manifest$artifacts) {
+    if (!identical(basename(artifact$path), artifact$path)) {
+      stop("Conditional manifest artifact path must be a local filename: ", artifact$path)
+    }
+    artifact_path <- file.path(input_dir, artifact$path)
+    if (!file.exists(artifact_path)) stop("Manifest artifact is missing: ", artifact$path)
+    if (!identical(tolower(sha256_file(artifact_path)), tolower(artifact$sha256))) {
+      stop("Manifest hash mismatch: ", artifact$path)
+    }
+  }
+  is_demo <- !identical(manifest$data_status, "science_validated")
+  if (is_demo && !isTRUE(allow_demo)) {
+    stop("Conditional input is not science_validated; use --allow-unvalidated-demo for layout QA only")
+  }
+  read_csv <- function(name) utils::read.csv(file.path(input_dir, name),
+                                             stringsAsFactors = FALSE, check.names = FALSE)
+  bundle <- list(
+    manifest = manifest,
+    is_demo = is_demo,
+    prediction = validate_conditional_prediction_summary(read_csv("conditional_prediction_summary.csv")),
+    trajectory = validate_conditional_trajectory_summary(read_csv("conditional_trajectory_summary.csv")),
+    residual_members = validate_conditional_residual_members(read_csv("conditional_residual_by_treatment_member.csv")),
+    treatment_metadata = validate_two_season_treatment_metadata(read_csv("treatment_metadata_two_season.csv"))
+  )
+  provenance_tables <- c("prediction", "trajectory", "residual_members")
+  for (name in provenance_tables) {
+    table <- bundle[[name]]
+    if (nrow(table) == 0) stop("Conditional table '", name, "' is empty")
+    if (length(unique(table$run_id)) != 1 || unique(table$run_id)[[1]] != manifest$run_id) {
+      stop("Conditional table '", name, "' run_id does not match manifest")
+    }
+  }
+  check_cumulative_monotone(bundle$prediction, "DRY_CUM")
+  check_cumulative_monotone(bundle$prediction, "FRESH_CUM")
+  check_cumulative_monotone(bundle$trajectory, "DRY_CUM")
+  check_cumulative_monotone(bundle$trajectory, "FRESH_CUM")
+  bundle
+}
+
 demo_watermark <- function(is_demo) {
   if (!isTRUE(is_demo)) return(NULL)
   ggplot2::annotate("text", x = Inf, y = Inf, label = "DEMO", hjust = 1.15, vjust = 1.5,

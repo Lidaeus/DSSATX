@@ -1,0 +1,7 @@
+season_id,treatment,display_order,selection_rule,dataset_role
+25SP,2,1,calibration_extreme_high_W3N3,calibration
+25SP,13,2,calibration_extreme_low_W1N0,calibration
+25SP,14,3,structural_outside_factorial_CK_water_control,validation
+26SP,1,4,calibration_extreme_high_W3N3,calibration
+26SP,12,5,calibration_extreme_low_W1N0,calibration
+26SP,5,6,furthest_WxN_cell_from_all_calibration_corners_W2N2,validation

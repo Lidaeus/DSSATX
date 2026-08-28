@@ -6,6 +6,8 @@ project_root <- normalizePath(file.path(script_dir, "..", ".."), winslash = "/",
 source(file.path(script_dir, "common.R"), local = FALSE)
 source(file.path(script_dir, "sa_i18n.R"), local = FALSE)
 source(file.path(script_dir, "fig_model_performance.R"), local = FALSE)
+source(file.path(script_dir, "fig_model_performance_uncertainty.R"), local = FALSE)
+source(file.path(script_dir, "fig_treatment_residual_uncertainty.R"), local = FALSE)
 source(file.path(script_dir, "fig_selected_dynamics.R"), local = FALSE)
 source(file.path(script_dir, "fig_residual_diagnostics.R"), local = FALSE)
 source(file.path(script_dir, "fig_all_treatment_dynamics.R"), local = FALSE)
@@ -44,23 +46,30 @@ is_sa_request <- any(requested_ids %in% c("fig1_sa", "fig1_sa_results", "figs1_s
                                           "figs1_sa", "fig_sa_summary",
                                           "figs1c_sa_interaction", "figs1d_sa_selection"))
 is_sobol_request <- any(requested_ids %in% c("figs2_sobol_convergence", "figs2_sobol_results"))
-if (sum(c(is_t4_request, is_sa_request, is_sobol_request)) > 1) {
-  stop("Morris SA, Sobol SA, and T4 figures require separate frozen bundles", call. = FALSE)
+# Conditional-ensemble uncertainty figures (plan 2026-08-28): a dedicated
+# frozen bundle; the diagnostic figure ids deliberately claim no formal
+# Fig/FigS number until the author approves one on validated data.
+is_conditional_request <- any(requested_ids %in% c(
+  "fig_model_performance_uncertainty", "diagnostic_conditional_residual_by_treatment",
+  "fig4_dynamics_conditional", "figs4_all_treatments_conditional"))
+if (sum(c(is_t4_request, is_sa_request, is_sobol_request, is_conditional_request)) > 1) {
+  stop("Morris SA, Sobol SA, T4, and conditional-ensemble figures require separate frozen bundles", call. = FALSE)
+}
+standard_ids <- c("fig2_phi", "fig3_performance", "figs3_residuals", "fig4_dynamics", "figs4_all_treatments")
+if (is_conditional_request && any(requested_ids %in% standard_ids)) {
+  stop("Conditional-ensemble figures require a dedicated bundle and cannot be mixed with standard paper figures", call. = FALSE)
 }
 if (is_t4_request) {
-  standard_ids <- c("fig2_phi", "fig3_performance", "figs3_residuals", "fig4_dynamics", "figs4_all_treatments")
   if (any(vapply(standard_ids, selected, logical(1)))) {
     stop("T4 demo figures require a dedicated bundle and cannot be mixed with standard paper figures", call. = FALSE)
   }
 }
 if (is_sa_request) {
-  standard_ids <- c("fig2_phi", "fig3_performance", "figs3_residuals", "fig4_dynamics", "figs4_all_treatments")
   if (any(requested_ids %in% standard_ids)) {
     stop("SA figures require a dedicated bundle and cannot be mixed with calibration figures", call. = FALSE)
   }
 }
 if (is_sobol_request) {
-  standard_ids <- c("fig2_phi", "fig3_performance", "figs3_residuals", "fig4_dynamics", "figs4_all_treatments")
   if (any(requested_ids %in% standard_ids)) {
     stop("Sobol figures require a dedicated bundle and cannot be mixed with calibration figures", call. = FALSE)
   }
@@ -74,10 +83,14 @@ bundle <- if (is_t4_request) {
   read_sa_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
 } else if (is_sobol_request) {
   read_sobol_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
+} else if (is_conditional_request) {
+  read_conditional_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
 } else {
   read_paper_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
 }
-if (!is_t4_request && !is_sa_request && !is_sobol_request) require_calibration_scenario(bundle)
+if (!is_t4_request && !is_sa_request && !is_sobol_request && !is_conditional_request) {
+  require_calibration_scenario(bundle)
+}
 variables <- split_csv_arg(if (is.null(args$variables)) "LAID,LWAD,SWAD,FRESH_INC" else args$variables)
 process_variables <- split_csv_arg(if (is.null(args$process_variables)) "LAID,LWAD" else args$process_variables)
 treatments <- split_csv_arg(if (is.null(args$treatments)) "2,13" else args$treatments)
@@ -355,6 +368,99 @@ supplement_process_variables <- split_csv_arg(
   if (is.null(args$supplement_process_variables)) "LAID,LWAD" else args$supplement_process_variables
 )
 
+# ── conditional-ensemble uncertainty figures (dedicated bundle) ────────────
+if (is_conditional_request) {
+  if (figure_ids == "all") {
+    stop("Conditional-ensemble bundles require explicit --figure-ids", call. = FALSE)
+  }
+  conditional_stem <- if (bundle$is_demo) "DEMO_conditional" else "conditional"
+  if (selected("fig_model_performance_uncertainty")) {
+    result <- build_model_performance_uncertainty(
+      bundle$prediction, bundle$treatment_metadata, "DRY_CUM", profile, bundle$is_demo
+    )
+    base <- file.path(out_dir, paste0(conditional_stem, "_model_performance_uncertainty"))
+    artifacts <- c(artifacts, save_figure_set(
+      result$plot, base, profile, profile$double_column_width_mm, result$height_mm
+    ))
+    source_path <- paste0(base, ".source.csv")
+    metrics_path <- paste0(base, ".metrics.csv")
+    utils::write.csv(result$source, source_path, row.names = FALSE, fileEncoding = "UTF-8")
+    utils::write.csv(result$metrics, metrics_path, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, source_path, metrics_path)
+  }
+  if (selected("diagnostic_conditional_residual_by_treatment")) {
+    result <- build_treatment_residual_uncertainty(
+      bundle$residual_members, bundle$treatment_metadata, "DRY_CUM",
+      "terminal_relative_error_pct", profile, bundle$is_demo
+    )
+    base <- file.path(out_dir, paste0(conditional_stem, "_treatment_residual_uncertainty"))
+    artifacts <- c(artifacts, save_figure_set(
+      result$plot, base, profile, profile$double_column_width_mm, result$height_mm
+    ))
+    forest_path <- paste0(base, ".forest.csv")
+    rrmse_path <- paste0(base, ".rrmse.csv")
+    source_path <- paste0(base, ".source.csv")
+    utils::write.csv(result$forest, forest_path, row.names = FALSE, fileEncoding = "UTF-8")
+    utils::write.csv(result$rrmse_forest, rrmse_path, row.names = FALSE, fileEncoding = "UTF-8")
+    utils::write.csv(result$source, source_path, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, forest_path, rrmse_path, source_path)
+  }
+  if (selected("fig4_dynamics_conditional")) {
+    frozen_selection <- utils::read.csv(
+      file.path(project_root, "configs", "figures", "selected_treatments_conditional.csv"),
+      stringsAsFactors = FALSE
+    )
+    season_treatments <- frozen_selection[order(frozen_selection$display_order),
+                                          c("season_id", "treatment")]
+    process <- build_process_dynamics_conditional(
+      bundle$prediction, bundle$trajectory, bundle$treatment_metadata,
+      process_variables, season_treatments, profile, bundle$is_demo
+    )
+    process_base <- file.path(out_dir, paste0(conditional_stem, "_selected_process_dynamics"))
+    artifacts <- c(artifacts, save_figure_set(
+      process$plot, process_base, profile, profile$double_column_width_mm, process$height_mm
+    ))
+    process_obs <- paste0(process_base, ".observations.csv")
+    process_sim <- paste0(process_base, ".daily_simulation.csv")
+    utils::write.csv(process$observations, process_obs, row.names = FALSE, fileEncoding = "UTF-8")
+    utils::write.csv(process$daily, process_sim, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, process_obs, process_sim)
+
+    harvest <- build_harvest_dynamics_conditional(
+      bundle$prediction, bundle$treatment_metadata, "FRESH_INC", "FRESH_CUM",
+      season_treatments, profile, bundle$is_demo
+    )
+    harvest_base <- file.path(out_dir, paste0(conditional_stem, "_selected_harvest_dynamics"))
+    artifacts <- c(artifacts, save_figure_set(
+      harvest$plot, harvest_base, profile, profile$double_column_width_mm, harvest$height_mm
+    ))
+    harvest_increment <- paste0(harvest_base, ".increment.csv")
+    harvest_cumulative <- paste0(harvest_base, ".cumulative.csv")
+    utils::write.csv(harvest$increment, harvest_increment, row.names = FALSE, fileEncoding = "UTF-8")
+    utils::write.csv(harvest$cumulative, harvest_cumulative, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, harvest_increment, harvest_cumulative)
+  }
+  if (selected("figs4_all_treatments_conditional")) {
+    all_variables <- unique(c(supplement_process_variables, "DRY_CUM", "FRESH_CUM"))
+    all_results <- build_all_treatment_dynamics_conditional(
+      bundle$prediction, bundle$trajectory, bundle$treatment_metadata,
+      all_variables, profile, bundle$is_demo
+    )
+    for (variable in names(all_results)) {
+      result <- all_results[[variable]]
+      all_base <- file.path(out_dir, paste0(conditional_stem, "_all_treatments_", variable))
+      artifacts <- c(artifacts, save_figure_set(
+        result$plot, all_base, profile, profile$double_column_width_mm, result$height_mm
+      ))
+      all_obs <- paste0(all_base, ".observations.csv")
+      all_sim <- paste0(all_base, ".daily_simulation.csv")
+      utils::write.csv(result$observations, all_obs, row.names = FALSE, fileEncoding = "UTF-8")
+      utils::write.csv(result$daily, all_sim, row.names = FALSE, fileEncoding = "UTF-8")
+      artifacts <- c(artifacts, all_obs, all_sim)
+    }
+  }
+}
+
 if (selected("figs3_residuals")) {
   residuals <- build_residual_diagnostics(bundle$comparison, bundle$treatment_metadata,
                                           variables, profile, bundle$is_demo)
@@ -489,7 +595,7 @@ manifest <- list(
   profile_id = profile$profile_id,
   profile = sha256_record(profile_path),
   run_id = bundle$manifest$run_id,
-  data_status = if (is_sa_request || is_sobol_request) bundle$manifest$data_status else if (bundle$is_demo) "legacy_layout_demo" else "science_validated",
+  data_status = if (is_sa_request || is_sobol_request || is_conditional_request) bundle$manifest$data_status else if (bundle$is_demo) "legacy_layout_demo" else "science_validated",
   input_manifest = sha256_record(file.path(input_dir, "paper_data_manifest.json")),
   artifacts = lapply(artifacts, sha256_record)
 )
