@@ -76,14 +76,6 @@ build_treatment_residual_uncertainty <- function(residual_members, treatment_met
   nitrogen <- unlist(profile$nitrogen_colors, use.names = TRUE)
   season_levels <- intersect(c("25SP", "26SP"), unique(data$season_id))
 
-  # Role banding: light background stripes mark diagnostic-validation rows so
-  # the second visual channel never competes with the nitrogen colours.
-  bands <- do.call(rbind, lapply(label_levels, function(label) {
-    row <- unique(data[data$row_label == label, c("row_label", "season_id", "dataset_role")])
-    data.frame(y_min = as.integer(label) - 0.5, y_max = as.integer(label) + 0.5,
-               season_id = row$season_id[[1]], dataset_role = row$dataset_role[[1]])
-  }))
-
   statistic_label <- switch(statistic,
     terminal_relative_error_pct = "Terminal relative error (%)",
     signed_relative_bias_pct = "Signed relative bias (%)",
@@ -101,26 +93,33 @@ build_treatment_residual_uncertainty <- function(residual_members, treatment_met
                                        y = row_label, yend = row_label),
                           linewidth = 1.5, lineend = "butt") +
     ggplot2::geom_point(size = 1.5, shape = 21, fill = "white", stroke = 0.5) +
-    ggplot2::facet_grid(season_id ~ ., scales = "free_y", space = "free_y") +
+    ggplot2::facet_grid(season_id ~ ., scales = "free_y", space = "free_y", switch = "y") +
     ggplot2::scale_colour_manual(name = "Nitrogen level", values = nitrogen, drop = FALSE) +
-    ggplot2::labs(title = "Treatment-level conditional-ensemble residuals",
-                  subtitle = paste0("Lines: member distribution of terminal relative error ",
-                                    "(thin 2.5–97.5%, thick 25–75%; point = median);\n",
-                                    "right panel: member-level RRMSE median and 95% range"),
+    ggplot2::labs(title = "Treatment-level dry-yield error distributions",
+                  subtitle = paste0("Left: terminal relative error; right: event-series RRMSE. ",
+                                    "Thin = 95% interval, thick = IQR, point = median."),
                   x = statistic_label, y = NULL) +
-    dynamics_theme(profile)
+    dynamics_theme(profile) +
+    ggplot2::theme(strip.placement = "outside",
+                   strip.text.y.left = ggplot2::element_text(angle = 0, face = "bold"))
 
   p_rrmse <- ggplot2::ggplot(rrmse_forest, ggplot2::aes(x = median, y = row_label,
                                                         colour = nitrogen_level)) +
     ggplot2::geom_segment(ggplot2::aes(x = q025, xend = q975,
                                        y = row_label, yend = row_label),
                           linewidth = 0.35, alpha = 0.55, lineend = "butt") +
+    ggplot2::geom_segment(ggplot2::aes(x = q25, xend = q75,
+                                       y = row_label, yend = row_label),
+                          linewidth = 1.5, lineend = "butt") +
     ggplot2::geom_point(size = 1.5, shape = 21, fill = "white", stroke = 0.5) +
-    ggplot2::facet_grid(season_id ~ ., scales = "free_y", space = "free_y") +
+    ggplot2::facet_grid(season_id ~ ., scales = "free_y", space = "free_y", switch = "y") +
     ggplot2::scale_colour_manual(name = "Nitrogen level", values = nitrogen, drop = FALSE) +
     ggplot2::labs(x = "Member-level RRMSE (%)", y = NULL) +
     dynamics_theme(profile) +
     ggplot2::theme(axis.text.y = ggplot2::element_blank(),
+                   strip.placement = "outside",
+                   strip.text.y.left = ggplot2::element_blank(),
+                   strip.background = ggplot2::element_blank(),
                    legend.position = "none")
 
   plot <- (p_main | p_rrmse) +
@@ -134,5 +133,5 @@ build_treatment_residual_uncertainty <- function(residual_members, treatment_met
     )
 
   list(plot = plot, source = data, forest = forest, rrmse_forest = rrmse_forest,
-       height_mm = min(profile$max_height_mm, 150))
+       height_mm = min(profile$max_height_mm, 142))
 }

@@ -494,8 +494,12 @@ read_conditional_bundle <- function(input_dir, allow_demo = FALSE) {
   if (is_demo && !isTRUE(allow_demo)) {
     stop("Conditional input is not science_validated; use --allow-unvalidated-demo for layout QA only")
   }
-  read_csv <- function(name) utils::read.csv(file.path(input_dir, name),
-                                             stringsAsFactors = FALSE, check.names = FALSE)
+  # The frozen CSVs are written as UTF-8 by Python.  On Windows, relying on
+  # the active locale corrupts middle dots, en dashes and superscript units.
+  read_csv <- function(name) utils::read.csv(
+    file.path(input_dir, name), fileEncoding = "UTF-8",
+    stringsAsFactors = FALSE, check.names = FALSE
+  )
   bundle <- list(
     manifest = manifest,
     is_demo = is_demo,
@@ -517,6 +521,28 @@ read_conditional_bundle <- function(input_dir, allow_demo = FALSE) {
   check_cumulative_monotone(bundle$trajectory, "DRY_CUM")
   check_cumulative_monotone(bundle$trajectory, "FRESH_CUM")
   bundle
+}
+
+conditional_axis_label <- function(data, variable = NULL) {
+  if (!is.null(variable)) data <- data[data$variable == variable, , drop = FALSE]
+  if (nrow(data) == 0) return(if (is.null(variable)) "Value" else variable)
+  label <- unique(as.character(data$variable_label))
+  unit <- unique(as.character(data$unit))
+  label <- label[nzchar(label) & !is.na(label)]
+  unit <- unit[nzchar(unit) & !is.na(unit)]
+  if (length(label) == 0) label <- if (is.null(variable)) "Value" else variable
+  if (length(unit) == 0) return(label[[1]])
+  paste0(label[[1]], " [", unit[[1]], "]")
+}
+
+conditional_treatment_levels <- function(data, season_treatments) {
+  keys <- paste(season_treatments$season_id, as.character(season_treatments$treatment))
+  metadata <- unique(data[, c("season_id", "treatment", "treatment_label"), drop = FALSE])
+  metadata$key <- paste(metadata$season_id, as.character(metadata$treatment))
+  labels <- paste0(metadata$treatment_label[match(keys, metadata$key)], "\n",
+                   season_treatments$season_id)
+  if (anyNA(labels)) stop("Selected treatment is absent from the conditional bundle")
+  labels
 }
 
 demo_watermark <- function(is_demo) {

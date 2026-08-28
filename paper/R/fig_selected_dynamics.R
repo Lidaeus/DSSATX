@@ -213,12 +213,15 @@ build_process_dynamics_conditional <- function(prediction, trajectory, treatment
   }
   observations <- attach_conditional_metadata(observations, treatment_metadata)
   daily <- attach_conditional_metadata(daily, treatment_metadata)
-  observations$variable_panel <- paste0(observations$variable_label, " [", observations$unit, "]")
-  daily$variable_panel <- paste0(daily$variable_label, " [", daily$unit, "]")
+  variable_labels <- setNames(vapply(variables, function(variable) {
+    conditional_axis_label(daily, variable)
+  }, character(1)), variables)
+  observations$variable_panel <- unname(variable_labels[observations$variable])
+  daily$variable_panel <- unname(variable_labels[daily$variable])
   panel_levels <- unique(daily$variable_panel[match(variables, daily$variable)])
   observations$variable_panel <- factor(observations$variable_panel, levels = panel_levels)
   daily$variable_panel <- factor(daily$variable_panel, levels = panel_levels)
-  treatment_levels <- unique(paste0(observations$treatment_label, "\n", observations$season_id))
+  treatment_levels <- conditional_treatment_levels(observations, season_treatments)
   observations$panel_label <- factor(paste0(observations$treatment_label, "\n", observations$season_id),
                                      levels = treatment_levels)
   daily$panel_label <- factor(paste0(daily$treatment_label, "\n", daily$season_id),
@@ -243,7 +246,7 @@ build_process_dynamics_conditional <- function(prediction, trajectory, treatment
     ggplot2::geom_point(
       data = observations,
       ggplot2::aes(x = dap, y = observed, fill = nitrogen_level, shape = water_level),
-      colour = "#202020", size = 1.9, stroke = 0.45
+      colour = "#202020", size = 1.65, stroke = 0.42
     ) +
     ggplot2::facet_grid(variable_panel ~ panel_label, scales = "free_y", switch = "y") +
     management_scales(profile) +
@@ -296,7 +299,7 @@ build_harvest_dynamics_conditional <- function(prediction, treatment_metadata,
   cumulative <- attach_conditional_metadata(cumulative, treatment_metadata)
   increment <- increment[order(increment$treatment, increment$dap), , drop = FALSE]
   cumulative <- cumulative[order(cumulative$treatment, cumulative$dap), , drop = FALSE]
-  treatment_levels <- unique(paste0(increment$treatment_label, "\n", increment$season_id))
+  treatment_levels <- conditional_treatment_levels(increment, season_treatments)
   increment$panel_label <- factor(paste0(increment$treatment_label, "\n", increment$season_id),
                                   levels = treatment_levels)
   cumulative$panel_label <- factor(paste0(cumulative$treatment_label, "\n", cumulative$season_id),
@@ -319,15 +322,15 @@ build_harvest_dynamics_conditional <- function(prediction, treatment_metadata,
     ) +
     ggplot2::geom_point(
       ggplot2::aes(y = observed, fill = nitrogen_level, shape = water_level),
-      colour = "#202020", size = 1.9, stroke = 0.45
+      colour = "#202020", size = 1.65, stroke = 0.42
     ) +
-    ggplot2::facet_wrap(~panel_label, nrow = 1, scales = "free_y") +
+    ggplot2::facet_wrap(~panel_label, nrow = 1, scales = "fixed") +
     management_scales(profile) +
     ggplot2::labs(
       title = "Incremental harvest by event",
       subtitle = "Lollipops/lines: conditional-ensemble median with 95% interval; filled points: observed means",
       x = "Days after planting",
-      y = paste0(increment$variable_label[[1]], " [", increment$unit[[1]], "]")
+      y = conditional_axis_label(increment, increment_variable)
     ) +
     dynamics_theme(profile)
   p_increment <- add_conditional_observation_errorbars(p_increment, increment)
@@ -355,19 +358,15 @@ build_harvest_dynamics_conditional <- function(prediction, treatment_metadata,
     ggplot2::geom_point(
       data = cumulative,
       ggplot2::aes(x = dap, y = observed, fill = nitrogen_level, shape = water_level),
-      colour = "#202020", size = 1.9, stroke = 0.45
+      colour = "#202020", size = 1.65, stroke = 0.42
     ) +
-    ggplot2::facet_wrap(~panel_label, nrow = 1, scales = "free_y") +
+    ggplot2::facet_wrap(~panel_label, nrow = 1, scales = "fixed") +
     management_scales(profile) +
     ggplot2::labs(
       title = "Cumulative harvest at observed events",
       subtitle = "Line: ensemble median connecting simulated values at harvest dates; ribbon: 95% interval",
       x = "Days after planting",
-      y = paste0(cumulative$variable_label[[1]], " [", cumulative$unit[[1]], "]"),
-      caption = paste(
-        "95% conditional-ensemble prediction interval (parameter ensemble only).",
-        ifelse(isTRUE(is_demo), demo_caption(TRUE), "")
-      )
+      y = conditional_axis_label(cumulative, cumulative_variable)
     ) +
     dynamics_theme(profile)
   p_cumulative <- add_conditional_observation_errorbars(p_cumulative, cumulative)

@@ -3,22 +3,26 @@ script_path <- normalizePath(sub("^--file=", "", script_arg[[1]]), winslash = "/
 script_dir <- dirname(script_path)
 project_root <- normalizePath(file.path(script_dir, "..", ".."), winslash = "/", mustWork = TRUE)
 
-source(file.path(script_dir, "common.R"), local = FALSE)
-source(file.path(script_dir, "sa_i18n.R"), local = FALSE)
-source(file.path(script_dir, "fig_model_performance.R"), local = FALSE)
-source(file.path(script_dir, "fig_model_performance_uncertainty.R"), local = FALSE)
-source(file.path(script_dir, "fig_treatment_residual_uncertainty.R"), local = FALSE)
-source(file.path(script_dir, "fig_selected_dynamics.R"), local = FALSE)
-source(file.path(script_dir, "fig_residual_diagnostics.R"), local = FALSE)
-source(file.path(script_dir, "fig_all_treatment_dynamics.R"), local = FALSE)
-source(file.path(script_dir, "fig_phi_convergence.R"), local = FALSE)
-source(file.path(script_dir, "fig_posterior_demo.R"), local = FALSE)
-source(file.path(script_dir, "fig_spearman_demo.R"), local = FALSE)
-source(file.path(script_dir, "fig_equifinality_demo.R"), local = FALSE)
-source(file.path(script_dir, "fig_sa_morris.R"), local = FALSE)
-source(file.path(script_dir, "fig_sa_sobol.R"), local = FALSE)
-source(file.path(script_dir, "fig_sa_interaction.R"), local = FALSE)
-source(file.path(script_dir, "fig_sa_selection.R"), local = FALSE)
+# R can start in the legacy C locale on Windows even when the source and CSV
+# contracts are UTF-8.  Establish a UTF-8 CTYPE before sourcing any module.
+if (.Platform$OS.type == "windows" && !isTRUE(l10n_info()[["UTF-8"]])) {
+  utf8_locale <- Sys.setlocale("LC_CTYPE", "English_United States.utf8")
+  if (is.na(utf8_locale) || !isTRUE(l10n_info()[["UTF-8"]])) {
+    stop("A UTF-8 Windows locale is required to render paper figures", call. = FALSE)
+  }
+}
+
+source_utf8 <- function(name) {
+  source(file.path(script_dir, name), local = FALSE, encoding = "UTF-8")
+}
+for (module in c(
+  "common.R", "sa_i18n.R", "fig_model_performance.R",
+  "fig_model_performance_uncertainty.R", "fig_treatment_residual_uncertainty.R",
+  "fig_selected_dynamics.R", "fig_residual_diagnostics.R",
+  "fig_all_treatment_dynamics.R", "fig_phi_convergence.R", "fig_posterior_demo.R",
+  "fig_spearman_demo.R", "fig_equifinality_demo.R", "fig_sa_morris.R",
+  "fig_sa_sobol.R", "fig_sa_interaction.R", "fig_sa_selection.R"
+)) source_utf8(module)
 
 check_r_dependencies()
 args <- parse_cli_args(commandArgs(trailingOnly = TRUE))
@@ -408,7 +412,7 @@ if (is_conditional_request) {
   if (selected("fig4_dynamics_conditional")) {
     frozen_selection <- utils::read.csv(
       file.path(project_root, "configs", "figures", "selected_treatments_conditional.csv"),
-      stringsAsFactors = FALSE
+      fileEncoding = "UTF-8", stringsAsFactors = FALSE
     )
     season_treatments <- frozen_selection[order(frozen_selection$display_order),
                                           c("season_id", "treatment")]
@@ -427,7 +431,7 @@ if (is_conditional_request) {
     artifacts <- c(artifacts, process_obs, process_sim)
 
     harvest <- build_harvest_dynamics_conditional(
-      bundle$prediction, bundle$treatment_metadata, "FRESH_INC", "FRESH_CUM",
+      bundle$prediction, bundle$treatment_metadata, "DRY_INC", "DRY_CUM",
       season_treatments, profile, bundle$is_demo
     )
     harvest_base <- file.path(out_dir, paste0(conditional_stem, "_selected_harvest_dynamics"))

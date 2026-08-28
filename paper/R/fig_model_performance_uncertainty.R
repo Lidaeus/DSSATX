@@ -84,87 +84,68 @@ build_model_performance_uncertainty <- function(prediction_summary, treatment_me
   fill_values[["held_out"]] <- "white"
 
   metrics <- conditional_metrics(data, variable)
-  role_names <- c(calibration = "Calibration", validation = "Validation")
-
   season_levels <- intersect(c("25SP", "26SP"), unique(data$season_id))
   data$season_id <- factor(data$season_id, levels = season_levels)
-
   nitrogen <- unlist(profile$nitrogen_colors, use.names = TRUE)
   water <- unlist(profile$water_shapes, use.names = TRUE)
+  metric_labels <- setNames(vapply(season_levels, function(season) {
+    paste0(season, "\n", gsub("Calibration", "Cal", gsub("Validation", "Val",
+                                                          annotation_row(metrics, season))))
+  }, character(1)), season_levels)
+  data$season_panel <- factor(as.character(data$season_id), levels = season_levels,
+                              labels = unname(metric_labels))
 
-  panels <- lapply(season_levels, function(season) {
-    frame <- data[data$season_id == season, , drop = FALSE]
-    values <- c(frame$observed, frame$sim_q975, frame$sim_q025)
-    padding <- max(diff(range(values)), 1) * 0.06
-    limits <- c(max(0, min(values) - padding), max(values) + padding)
-    ggplot2::ggplot(frame, ggplot2::aes(x = observed, y = sim_median,
-                                        colour = nitrogen_level, fill = fill_key,
-                                        shape = water_level)) +
-      ggplot2::geom_abline(slope = 1, intercept = 0, colour = "#8C8C8C",
-                           linetype = "dashed", linewidth = 0.4) +
-      ggplot2::geom_linerange(ggplot2::aes(ymin = sim_q025, ymax = sim_q975),
-                              linewidth = 0.35, alpha = 0.35) +
-      ggplot2::geom_pointrange(ggplot2::aes(ymin = sim_q25, ymax = sim_q75),
-                               linewidth = 0.5, size = 1.8, stroke = 0.5) +
-      ggplot2::scale_colour_manual(name = "Nitrogen level", values = nitrogen, drop = FALSE) +
-      ggplot2::scale_fill_manual(values = fill_values, drop = FALSE, guide = "none") +
-      ggplot2::scale_shape_manual(name = "Water treatment", values = water, drop = FALSE) +
-      ggplot2::coord_equal(xlim = limits, ylim = limits, expand = FALSE) +
-      ggplot2::labs(title = season, x = "Observed (kg ha\u207b\u00b9)",
-                    y = "Simulated ensemble median (kg ha\u207b\u00b9)") +
-      # Anchor the metric box on the side of the 1:1 line the data do not
-      # occupy: overestimation pushes points above the diagonal (empty lower
-      # right), underestimation below it (empty upper left).
-      ggplot2::annotate("label",
-                        x = if (season_bias(metrics, season) >= 0) limits[[2]] - 0.05 * diff(limits)
-                            else limits[[1]] + 0.05 * diff(limits),
-                        y = if (season_bias(metrics, season) >= 0) limits[[1]] + 0.05 * diff(limits)
-                            else limits[[2]] - 0.05 * diff(limits),
-                        hjust = if (season_bias(metrics, season) >= 0) 1 else 0,
-                        vjust = if (season_bias(metrics, season) >= 0) 0 else 1,
-                        label = annotation_row(metrics, season), size = 1.9,
-                        linewidth = 0, fill = "white", alpha = 0.85) +
-      theme_q1(profile)
-  })
-
-  plot <- patchwork::wrap_plots(panels, ncol = length(panels), guides = "collect") +
-    patchwork::plot_annotation(
-      title = "Observed vs conditional-ensemble predictions",
-      subtitle = paste(strwrap(paste(
-        "Points: ensemble median per observed harvest event;",
-        "bars: 95% (thin) and 25\u201375% (thick) conditional-ensemble prediction intervals;",
-        "filled = calibration, open = diagnostic-validation; dashed line = 1:1"
-      ), width = 62), collapse = "\n"),
-      caption = paste(
-        "95% conditional-ensemble prediction interval (parameter ensemble only;",
-        "observation and structural error not propagated).",
-        ifelse(isTRUE(is_demo), demo_caption(TRUE), "")
+  values <- c(data$observed, data$sim_q025, data$sim_q975)
+  padding <- max(diff(range(values)), 1) * 0.05
+  limits <- c(max(0, min(values) - padding), max(values) + padding)
+  plot <- ggplot2::ggplot(
+    data, ggplot2::aes(x = observed, y = sim_median, colour = nitrogen_level,
+                       fill = fill_key, shape = water_level)
+  ) +
+    ggplot2::geom_abline(slope = 1, intercept = 0, colour = "#8C8C8C",
+                         linetype = "dashed", linewidth = 0.4) +
+    ggplot2::geom_linerange(ggplot2::aes(ymin = sim_q025, ymax = sim_q975),
+                            linewidth = 0.3, alpha = 0.48) +
+    ggplot2::geom_linerange(ggplot2::aes(ymin = sim_q25, ymax = sim_q75),
+                            linewidth = 1.05, alpha = 0.9) +
+    ggplot2::geom_point(size = 1.35, stroke = 0.48) +
+    ggplot2::facet_wrap(~season_panel, nrow = 1) +
+    ggplot2::scale_colour_manual(name = "Nitrogen level", values = nitrogen, drop = FALSE) +
+    ggplot2::scale_fill_manual(values = fill_values, drop = FALSE, guide = "none") +
+    ggplot2::scale_shape_manual(name = "Water treatment", values = water, drop = FALSE) +
+    ggplot2::coord_equal(xlim = limits, ylim = limits, expand = FALSE) +
+    ggplot2::labs(
+      title = "Cumulative dry-yield performance and parameter uncertainty",
+      subtitle = paste(
+        "Point = ensemble median; thin/thick bars = 95% interval/IQR.",
+        "Filled = calibration; open = validation; dashed = 1:1."
       ),
-      theme = ggplot2::theme(
-        plot.tag = ggplot2::element_text(face = "bold"),
-        plot.caption = ggplot2::element_text(colour = "#666666", size = 5)
+      x = "Observed cumulative dry yield (kg ha\u207b\u00b9)",
+      y = "Simulated ensemble median (kg ha\u207b\u00b9)",
+      caption = paste(
+        "Conditional-ensemble prediction interval propagates parameter uncertainty only.",
+        ifelse(isTRUE(is_demo), demo_caption(TRUE), "")
       )
-    ) &
-    ggplot2::theme(legend.position = "top")
+    ) +
+    theme_q1(profile) +
+    ggplot2::theme(
+      legend.position = "top",
+      legend.box = "horizontal",
+      strip.text = ggplot2::element_text(face = "bold", size = profile$font_size_pt - 0.5,
+                                         lineheight = 1.05),
+      panel.spacing.x = grid::unit(4, "mm")
+    )
 
   list(plot = plot, source = data, metrics = metrics,
-       height_mm = min(profile$max_height_mm, 96))
+       height_mm = min(profile$max_height_mm, 104))
 }
 
 annotation_row <- function(metrics, season) {
   role_names <- c(calibration = "Calibration", validation = "Validation")
   frame <- metrics[metrics$season_id == season, ]
   paste(vapply(seq_len(nrow(frame)), function(index) {
-    sprintf("%s: RRMSE %.1f%% | Bias %.0f | PICP95 %.0f%%",
-            role_names[[frame$dataset_role[[index]]]], frame$rrmse_pct[[index]],
-            frame$bias[[index]], 100 * frame$picp95[[index]])
+    sprintf("%s: R\u00b2 %.2f | RMSE %.0f | RRMSE %.1f%% | PICP95 %.0f%%",
+            role_names[[frame$dataset_role[[index]]]], frame$r2[[index]],
+            frame$rmse[[index]], frame$rrmse_pct[[index]], 100 * frame$picp95[[index]])
   }, character(1)), collapse = "\n")
-}
-
-season_bias <- function(metrics, season) {
-  # Mean calibration+validation bias decides which side of the 1:1 line the
-  # points crowd, and therefore where the annotation box has room.
-  frame <- metrics[metrics$season_id == season, ]
-  if (nrow(frame) == 0) return(0)
-  mean(frame$bias, na.rm = TRUE)
 }

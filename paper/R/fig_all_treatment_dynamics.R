@@ -66,16 +66,17 @@ conditional_matrix_panel_labels <- function(treatment_metadata, season) {
     season_id = season,
     water_level = part$water_level,
     nitrogen_level = part$nitrogen_level,
-    tn_role = paste0("TN", part$treatment, " · ",
-                     ifelse(part$dataset_role == "calibration", "Cal", "Val"))
+    tn_role = paste0("TN", part$treatment, " [",
+                     ifelse(part$dataset_role == "calibration", "Cal", "Val"), "]")
   )
 }
 
 conditional_matrix_plot <- function(data, events, panel_labels, y_limits, y_label, title,
-                                    profile, is_demo, ribbons = TRUE) {
+                                    profile, is_demo, ribbons = TRUE,
+                                    water_levels = c("W3", "W2", "W1", "CK"),
+                                    show_legend = TRUE) {
   nitrogen <- unlist(profile$nitrogen_colors, use.names = TRUE)
   water <- unlist(profile$water_shapes, use.names = TRUE)
-  water_levels <- c("W3", "W2", "W1", "CK")
   nitrogen_levels <- c("N3", "N2", "N1", "N0")
   data$water_level <- factor(data$water_level, levels = water_levels)
   data$nitrogen_level <- factor(data$nitrogen_level, levels = nitrogen_levels)
@@ -132,7 +133,8 @@ conditional_matrix_plot <- function(data, events, panel_labels, y_limits, y_labe
     management_scales(profile) +
     ggplot2::labs(title = title, x = "Days after planting", y = y_label,
                   caption = demo_caption(is_demo)) +
-    all_treatment_theme(profile)
+    all_treatment_theme(profile) +
+    ggplot2::theme(legend.position = if (isTRUE(show_legend)) "top" else "none")
   plot
 }
 
@@ -149,34 +151,36 @@ build_all_treatment_dynamics_conditional <- function(prediction, trajectory, tre
     season_plots <- list()
     observations_out <- list()
     daily_out <- list()
-    season_tags <- c()
-    values <- c()
-    if (nrow(daily) > 0) values <- c(values, daily$sim_q025, daily$sim_q975)
-    if (nrow(events) > 0) values <- c(values, events$observed, events$sim_q975)
-    y_limits <- c(min(values, na.rm = TRUE), max(values, na.rm = TRUE))
     label_frame <- if (nrow(daily) > 0) daily else events
-    y_label <- paste0(label_frame$variable_label[[1]], " [", label_frame$unit[[1]], "]")
+    y_label <- conditional_axis_label(label_frame, variable)
 
-    for (season in intersect(c("25SP", "26SP"), unique(prediction$season_id))) {
+    available_seasons <- unique(c(as.character(daily$season_id), as.character(events$season_id)))
+    for (season in intersect(c("25SP", "26SP"), available_seasons)) {
       season_daily <- daily[daily$season_id == season, , drop = FALSE]
       season_events <- events[events$season_id == season, , drop = FALSE]
       labels <- conditional_matrix_panel_labels(treatment_metadata, season)
       source_frame <- if (nrow(season_daily) > 0) season_daily else season_events
+      season_values <- c()
+      if (nrow(season_daily) > 0) {
+        season_values <- c(season_values, season_daily$sim_q025, season_daily$sim_q975)
+      }
+      if (nrow(season_events) > 0) {
+        season_values <- c(season_values, season_events$observed, season_events$sim_q975)
+      }
+      y_limits <- c(0, max(season_values, na.rm = TRUE) * 1.04)
+      season_water_levels <- if (season == "26SP") c("W3", "W2", "W1") else c("W3", "W2", "W1", "CK")
       plot <- conditional_matrix_plot(
         source_frame, season_events, labels, y_limits, y_label,
-        paste0(unique(source_frame$variable_label)[[1]], " — ", season, " (all treatments)"),
-        profile, is_demo, ribbons = nrow(season_daily) > 0
+        paste0(season, " | ", unique(source_frame$variable_label)[[1]], " | all treatments"),
+        profile, is_demo, ribbons = nrow(season_daily) > 0,
+        water_levels = season_water_levels,
+        show_legend = length(season_plots) == 0
       )
       season_plots[[length(season_plots) + 1]] <- plot
-      season_tags <- c(season_tags, season)
       observations_out[[season]] <- season_events
       daily_out[[season]] <- season_daily
     }
-    combined <- patchwork::wrap_plots(season_plots, ncol = 1) +
-      patchwork::plot_annotation(
-        tag_levels = list(c("25SP" = "a", "26SP" = "b")),
-        theme = ggplot2::theme(plot.tag = ggplot2::element_text(face = "bold"))
-      )
+    combined <- patchwork::wrap_plots(season_plots, ncol = 1)
     results[[variable]] <- list(
       plot = combined,
       observations = do.call(rbind, observations_out),
