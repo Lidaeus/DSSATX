@@ -1,0 +1,12 @@
+bounds_id: "eggplant_calib_refined_comprehensive_20260825"
+crop: "eggplant"
+created_at: "2026-08-25T12:21:36Z"
+approved_at: "2026-08-25T12:21:36Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_calib_refined_comprehensive_20260825.csv"
+derived_from_sha256: "922880a9256884b7a6249a038b3ba6004b691dc767376984e3858975b4c28223"
+bounds_sha256: "37ac93944049857b46ae3a0841b21f40f85534791055b23410eb139b13339a6a"
+parameter_count: 148
+automatic_repairs: 0
+notes: "Comprehensive boundary refinement resolving Phase 2 boundary hits and integrating full nitrogen dynamics"

@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_v23_arm_armd_20260821"
+crop: "eggplant"
+created_at: "2026-08-21T15:46:14Z"
+approved_at: "2026-08-21T15:46:14Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_v23_arm_armd_20260821.csv"
+derived_from_sha256: "8918c586e24b3e8eb967df88f167b57e20f4db4cb2ae4f34cd7442f7f51258cb"
+bounds_sha256: "8918c586e24b3e8eb967df88f167b57e20f4db4cb2ae4f34cd7442f7f51258cb"
+parameter_count: 120
+automatic_repairs: 0
+notes: "v23 Exploratory ArmD (full_eco_hydraulic_synergy)"

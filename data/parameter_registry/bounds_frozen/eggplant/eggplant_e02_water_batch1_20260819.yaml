@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_water_batch1_20260819"
+crop: "eggplant"
+created_at: "2026-08-19T06:50:40Z"
+approved_at: "2026-08-19T06:50:40Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_water_batch1_20260819.csv"
+derived_from_sha256: "47f6e88564ec21a133c0298e68d9d4f781a51a80260d64a21efae6ab84546e72"
+bounds_sha256: "47f6e88564ec21a133c0298e68d9d4f781a51a80260d64a21efae6ab84546e72"
+parameter_count: 110
+automatic_repairs: 0
+notes: "Batch-1 report-driven release: PODUR lo 8, SFDUR hi 35, SENRTE [0.1,5], CMOBMX [0.001,0.10], FINREF hi 350; PPSEN fixed 0; W_RESPONSE budget 0.10/season"

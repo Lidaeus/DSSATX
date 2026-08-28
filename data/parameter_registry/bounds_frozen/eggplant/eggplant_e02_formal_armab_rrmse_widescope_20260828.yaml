@@ -1,0 +1,9 @@
+bounds_id: eggplant_e02_formal_armab_rrmse_widescope_20260828
+crop: eggplant
+created_at: '2026-08-28T08:02:04.288525+00:00'
+status: frozen_for_user_directed_formal_calibration
+source: 'Arm A #71 and Arm B #9 midpoint within fused S1/S2 bounds'
+crop_active: 70
+soil_active: 25
+soil_rule: SLPF and layers 1-6 only; narrow movement around audited profile
+terminal_yield_metric: seasonal treatment-level RRMSE; no terminal-yield NSE gate

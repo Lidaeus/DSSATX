@@ -1,0 +1,7 @@
+bounds_id: eggplant_calib_25sp_6treat_phase1_20260825
+crop: eggplant
+parent_bounds_id: eggplant_e02_v26_maximum_scope_full_root_20260822
+active_parameters: 87
+target_season: '25SP (6 treatments: W3N3, W3N2, W3N1, W1N3, W1N2, W1N1)'
+notes: Phase 1 Crop Genetic Parameter Calibration under Scheme 5 10-layer Soil & Cleaned
+  Soil N

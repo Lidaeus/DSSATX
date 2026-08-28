@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "status": "active_stage_calibration",
+  "design_id": "e02_from_scratch_arm_b_clean_measuredn_20260828",
+  "stage": "Arm_B",
+  "purpose": "Arm B: Clean repfilter TMT/TMA + Measured Soil N on 0-4cm and 4-60cm soil",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "full_joint_multiseason",
+  "bounds_id": "eggplant_e02_v15_baseline_0_4_60cm_bounds_20260828",
+  "observation_policy": "configs/runs/e02_from_scratch_objective_contract_20260826.csv",
+  "group_policy": "configs/runs/e02_from_scratch_group_policy_20260826.csv",
+  "initial_condition_policy": "0-4cm and 4-60cm two-layer soil scheme",
+  "nitrogen_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_from_scratch_water_n_mapping_20260826.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 1.0,
+    "sigma_floor": 50.0,
+    "contrast": "N3_minus_N0_within_same_water",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "levels": [
+      "N3"
+    ],
+    "harvest_scope": "all",
+    "sst_scope": "season_x_family"
+  },
+  "water_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_from_scratch_water_n_mapping_20260826.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 0.5,
+    "sigma_floor": 50.0,
+    "contrast": "W3_minus_W1_within_same_nitrogen",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "levels": [
+      "N3"
+    ],
+    "nitrogen_levels": [
+      "N0",
+      "N3"
+    ],
+    "harvest_scope": "all",
+    "season_contrasts": {
+      "25SP": {
+        "high_water": "W3",
+        "low_water": "W1"
+      },
+      "26SP": {
+        "high_water": "W3",
+        "low_water": "W1"
+      },
+      "25FA": {
+        "high_water": "W3",
+        "low_water": "W1"
+      }
+    },
+    "sst_scope": "season_x_family"
+  },
+  "harvest_dry_objective": {
+    "enabled": true,
+    "mode": "increment_plus_terminal",
+    "increment_source": "measured_hpodw",
+    "variable": "CHPDT"
+  },
+  "process_state_objective": {
+    "enabled": true,
+    "mode": "signed_difference_plus_terminal",
+    "variables": [
+      "LAID",
+      "LWAD",
+      "SWAD"
+    ]
+  },
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_clean_measuredn_0_4_60cm_20260828",
+      "bundle_manifest_sha256": "c8054ab71316360228308186f97913faf4be030936a74bf64a7fc439d5300c27",
+      "role": "calibration",
+      "treatments": [
+        2,
+        5,
+        10,
+        13
+      ]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_clean_measuredn_0_4_60cm_20260828",
+      "bundle_manifest_sha256": "646dd1a2c0b0624a88ba50824b5d7e4e8f6ea76ea8b1ccf167b9151423f72290",
+      "role": "calibration",
+      "treatments": [
+        1,
+        3,
+        9,
+        12
+      ]
+    },
+    {
+      "season_id": "25FA",
+      "experiment_code": "XXQL2502",
+      "bundle_path": "data/user/experiments/xxfa_clean_measuredn_0_4_60cm_20260828",
+      "bundle_manifest_sha256": "587dfcc3484454457ae5b0680e9156337823a61f4229c6888a57e805866e069c",
+      "role": "validation",
+      "treatments": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    }
+  ],
+  "pest_ies": {
+    "num_reals": 100,
+    "noptmax": 5,
+    "agents": 6,
+    "random_seed": 42,
+    "status": "ready"
+  }
+}

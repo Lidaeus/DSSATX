@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_root_arm_arm3_20260821"
+crop: "eggplant"
+created_at: "2026-08-21T14:28:26Z"
+approved_at: "2026-08-21T14:28:26Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_root_arm_arm3_20260821.csv"
+derived_from_sha256: "03fb248c53da39acf960d380f3bcd76b08f75f0e4d13bd2d6b0979d5cc62db86"
+bounds_sha256: "03fb248c53da39acf960d380f3bcd76b08f75f0e4d13bd2d6b0979d5cc62db86"
+parameter_count: 120
+automatic_repairs: 0
+notes: "Root Exploration Arm3 (high_nrcvr_root_longevity)"

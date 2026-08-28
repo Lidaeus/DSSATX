@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_root_arm_arm1_20260821"
+crop: "eggplant"
+created_at: "2026-08-21T14:10:41Z"
+approved_at: "2026-08-21T14:10:41Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_root_arm_arm1_20260821.csv"
+derived_from_sha256: "b0f0e20030b958751d5d6136ce119fb4b9f171427d9758477f1ad2a466c42465"
+bounds_sha256: "b0f0e20030b958751d5d6136ce119fb4b9f171427d9758477f1ad2a466c42465"
+parameter_count: 120
+automatic_repairs: 0
+notes: "Root Exploration Arm1 (high_rwdth_uptake)"

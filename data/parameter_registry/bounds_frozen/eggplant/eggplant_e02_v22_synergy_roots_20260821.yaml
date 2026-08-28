@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_v22_synergy_roots_20260821"
+crop: "eggplant"
+created_at: "2026-08-21T00:00:49Z"
+approved_at: "2026-08-21T00:00:49Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_v22_synergy_roots_20260821.csv"
+derived_from_sha256: "9e2e273821610f2b3da6d74f8dfafa4becc1ff3bb7ed6e0d33a3b3775a8b59c4"
+bounds_sha256: "9e2e273821610f2b3da6d74f8dfafa4becc1ff3bb7ed6e0d33a3b3775a8b59c4"
+parameter_count: 120
+automatic_repairs: 0
+notes: "v22 Formal Calibration: Synergy of Arm A (LNREF 4.2-5.6%, LFMAX 1.1-1.9) + Arm B (SLNF 1.8-2.8) + Arm C (RTEXF 0.22-0.45, RWDTH 0.6-1.2, RTNO3/NH4, NRCVR) + Arm D (XFINT 0.1-0.3, Senescence Protection)"

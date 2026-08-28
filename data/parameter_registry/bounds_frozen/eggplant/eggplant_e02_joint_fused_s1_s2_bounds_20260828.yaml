@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_joint_fused_s1_s2_bounds_20260828"
+crop: "eggplant"
+created_at: "2026-08-28T06:02:10Z"
+approved_at: "2026-08-28T06:02:10Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_joint_fused_s1_s2_proposal_20260828.csv"
+derived_from_sha256: "476d56896d45bba41195e985bb23acfdfa0ce0b44eb286c5f8c014ded4c7180d"
+bounds_sha256: "476d56896d45bba41195e985bb23acfdfa0ce0b44eb286c5f8c014ded4c7180d"
+parameter_count: 110
+automatic_repairs: 0
+notes: "Joint fused bounds inheriting verified S1 canopy anchor #81 + verified S2 yield anchor with fixed SPE injection engine"

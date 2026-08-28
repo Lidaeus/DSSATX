@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_v23_formal_full_synergy_20260821"
+crop: "eggplant"
+created_at: "2026-08-21T15:56:01Z"
+approved_at: "2026-08-21T15:56:01Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_v23_formal_full_synergy_20260821.csv"
+derived_from_sha256: "3c8915435c45d314005be9784f50083994f03cac62c843ec9a644931b5afaf76"
+bounds_sha256: "3c8915435c45d314005be9784f50083994f03cac62c843ec9a644931b5afaf76"
+parameter_count: 120
+automatic_repairs: 0
+notes: "v23 Formal Calibration with Root-Mineralization Synergy"

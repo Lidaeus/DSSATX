@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_s1_canopy_fixed_pgeff_bounds_20260828"
+crop: "eggplant"
+created_at: "2026-08-28T05:27:44Z"
+approved_at: "2026-08-28T05:27:44Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_s1_canopy_fixed_pgeff_proposal_20260828.csv"
+derived_from_sha256: "8107c3a0016162614a5e414d889598aa29d9f1c847acbd36902ac0533db696d2"
+bounds_sha256: "8107c3a0016162614a5e414d889598aa29d9f1c847acbd36902ac0533db696d2"
+parameter_count: 148
+automatic_repairs: 0
+notes: "S1 Canopy pre-calibration with fixed PGEFF injection and true physiological SLA domain"

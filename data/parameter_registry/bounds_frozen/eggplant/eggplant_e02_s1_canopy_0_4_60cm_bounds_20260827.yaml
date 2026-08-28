@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_s1_canopy_0_4_60cm_bounds_20260827"
+crop: "eggplant"
+created_at: "2026-08-27T11:53:57Z"
+approved_at: "2026-08-27T11:53:57Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_s1_canopy_0_4_60cm_proposal_20260827.csv"
+derived_from_sha256: "ceb60b8c6339e6791f06fe4fdc5b7ec2404295b949619a60c49b31ac5d1bf8f4"
+bounds_sha256: "ceb60b8c6339e6791f06fe4fdc5b7ec2404295b949619a60c49b31ac5d1bf8f4"
+parameter_count: 148
+automatic_repairs: 0
+notes: "Stage S1 Canopy Development Bounds for 0-4cm and 4-60cm soil scheme"

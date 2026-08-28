@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_arm_b_soil_n_supply_20260820"
+crop: "eggplant"
+created_at: "2026-08-19T17:50:12Z"
+approved_at: "2026-08-19T17:50:12Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_arm_b_soil_n_supply_20260820.csv"
+derived_from_sha256: "f2c617d8b82cf3764aa5c0140898e63aea94656ca718ac426552438a7a3a90df"
+bounds_sha256: "f2c617d8b82cf3764aa5c0140898e63aea94656ca718ac426552438a7a3a90df"
+parameter_count: 120
+automatic_repairs: 0
+notes: "Exploratory Arm b_soil_n_supply: Arm B: 土壤温室矿化供氮机制臂 (Soil N Supply & SLNF)"

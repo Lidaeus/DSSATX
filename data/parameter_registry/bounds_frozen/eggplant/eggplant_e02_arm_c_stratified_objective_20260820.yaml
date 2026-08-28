@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_arm_c_stratified_objective_20260820"
+crop: "eggplant"
+created_at: "2026-08-19T17:58:33Z"
+approved_at: "2026-08-19T17:58:33Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_arm_c_stratified_objective_20260820.csv"
+derived_from_sha256: "aecdb96daa6f8292b63658fc0fd97cdeeef8d53ebec283878e9ae370a747ce17"
+bounds_sha256: "aecdb96daa6f8292b63658fc0fd97cdeeef8d53ebec283878e9ae370a747ce17"
+parameter_count: 119
+automatic_repairs: 0
+notes: "Exploratory Arm c_stratified_objective: Arm C: 目标函数 N0/N3 分层等权优化臂 (Stratified Objective)"

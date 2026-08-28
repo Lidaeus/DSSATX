@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_clean_arm_d_20260821"
+crop: "eggplant"
+created_at: "2026-08-20T23:28:11Z"
+approved_at: "2026-08-20T23:28:11Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_clean_arm_d_20260821.csv"
+derived_from_sha256: "64a562cb0b17decbec4de7258ea990a1d75889cdfbc36083f3631c16c8688a7b"
+bounds_sha256: "64a562cb0b17decbec4de7258ea990a1d75889cdfbc36083f3631c16c8688a7b"
+parameter_count: 120
+automatic_repairs: 0
+notes: "Clean D (Full_Synergy_Enhanced_Roots) with pure measured IC"

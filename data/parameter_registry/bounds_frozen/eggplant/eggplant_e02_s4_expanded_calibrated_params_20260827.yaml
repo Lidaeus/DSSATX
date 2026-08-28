@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_s4_expanded_calibrated_params_20260827"
+crop: "eggplant"
+created_at: "2026-08-27T07:37:06Z"
+approved_at: "2026-08-27T07:37:06Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_s4_expanded_calibrated_proposal_20260827.csv"
+derived_from_sha256: "23456b5622e63fa641e5466f104543c059225e62ee9169d5581b96790f53143e"
+bounds_sha256: "23456b5622e63fa641e5466f104543c059225e62ee9169d5581b96790f53143e"
+parameter_count: 148
+automatic_repairs: 0
+notes: "E02 Stage S4 Expanded Calibrated Parameters (200 realizations, XFPHT adjustable 10-50, relaxed source-sink bounds, high spring/autumn fidelity)"

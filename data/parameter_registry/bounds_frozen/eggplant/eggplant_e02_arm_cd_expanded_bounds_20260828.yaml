@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_arm_cd_expanded_bounds_20260828"
+crop: "eggplant"
+created_at: "2026-08-28T02:54:37Z"
+approved_at: "2026-08-28T02:54:37Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_arm_cd_expanded_proposal_20260828.csv"
+derived_from_sha256: "c94c897e89d7a2bc19dbfbfd7194568d8d191a9528e80b78574e3132e510f22f"
+bounds_sha256: "c94c897e89d7a2bc19dbfbfd7194568d8d191a9528e80b78574e3132e510f22f"
+parameter_count: 148
+automatic_repairs: 0
+notes: "Arm C and Arm D: Expanded 61 parameter bounds with soil fertility/mineralization on 0-4cm and 4-60cm soil scheme"

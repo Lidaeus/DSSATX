@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_v24_synergy_plwt7g_rootzone7l_20260822"
+crop: "eggplant"
+created_at: "2026-08-21T23:19:19Z"
+approved_at: "2026-08-21T23:19:19Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_v24_synergy_plwt7g_rootzone7l_20260822.csv"
+derived_from_sha256: "3c8915435c45d314005be9784f50083994f03cac62c843ec9a644931b5afaf76"
+bounds_sha256: "3c8915435c45d314005be9784f50083994f03cac62c843ec9a644931b5afaf76"
+parameter_count: 120
+automatic_repairs: 0
+notes: "v24 Calibration with PLWT=7.0g and 7-layer Root-Zone Soil"

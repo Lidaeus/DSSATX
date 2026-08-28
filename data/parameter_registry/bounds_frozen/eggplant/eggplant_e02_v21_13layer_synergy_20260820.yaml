@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_v21_13layer_synergy_20260820"
+crop: "eggplant"
+created_at: "2026-08-20T15:21:51Z"
+approved_at: "2026-08-20T15:21:51Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_v21_13layer_synergy_20260820.csv"
+derived_from_sha256: "bf6f8317907f75535da893d3ad96cd660ccc97fb4e5928755db8a2a5877de7e1"
+bounds_sha256: "bf6f8317907f75535da893d3ad96cd660ccc97fb4e5928755db8a2a5877de7e1"
+parameter_count: 120
+automatic_repairs: 0
+notes: "v21 Formal Calibration: 13-layer soil + Measured LNREF (4.2-5.6%) + Greenhouse SLNF (1.6-2.4) + Deep Root Foraging (RTEXF 0.18-0.35) + Mild Senescence"

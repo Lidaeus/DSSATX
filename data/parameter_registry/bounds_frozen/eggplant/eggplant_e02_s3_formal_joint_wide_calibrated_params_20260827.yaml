@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_s3_formal_joint_wide_calibrated_params_20260827"
+crop: "eggplant"
+created_at: "2026-08-27T06:29:49Z"
+approved_at: "2026-08-27T06:29:49Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_s3_formal_joint_wide_calibrated_proposal_20260827.csv"
+derived_from_sha256: "865bac0deb455a4ae0c5fac4cee1c2b66fbf9161990758909acb6afe9d691f57"
+bounds_sha256: "865bac0deb455a4ae0c5fac4cee1c2b66fbf9161990758909acb6afe9d691f57"
+parameter_count: 148
+automatic_repairs: 0
+notes: "E02 Stage S3 Formal Joint Wide Calibrated Parameters (200 realizations, merged S1/S2 posteriors, wide exploration bounds)"

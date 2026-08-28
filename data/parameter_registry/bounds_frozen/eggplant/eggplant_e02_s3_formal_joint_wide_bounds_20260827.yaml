@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_s3_formal_joint_wide_bounds_20260827"
+crop: "eggplant"
+created_at: "2026-08-27T05:43:35Z"
+approved_at: "2026-08-27T05:43:35Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_s3_formal_joint_wide_proposal_20260827.csv"
+derived_from_sha256: "f923252c7fe7b379a778ec4bf04a65db3a29e991af3f70d09f97e36b96301761"
+bounds_sha256: "f923252c7fe7b379a778ec4bf04a65db3a29e991af3f70d09f97e36b96301761"
+parameter_count: 148
+automatic_repairs: 0
+notes: "E02 Stage S3 Formal Joint Wide Bounds (broad parameter envelope derived from S1 canopy and S2 yield posteriors for 200-realization calibration)"

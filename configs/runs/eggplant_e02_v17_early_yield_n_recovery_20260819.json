@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "design_id": "e02_v17_early_yield_n_recovery_20260819",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "v17 early yield and N remobilization calibration",
+  "bounds_id": "eggplant_e02_v17_early_yield_n_recovery_20260819",
+  "observation_policy": "configs/runs/e02_v2_rawdiff_terminal_nresp01_soil02_policy_20260813.csv",
+  "group_policy": "configs/runs/t10_rawdiff_terminal_nresp01_soil02_group_policy_20260813.csv",
+  "initial_condition_policy": "Fixed corrected FileX and soil inputs; not inverted",
+  "nitrogen_response_objective": {
+    "enabled": false,
+    "mapping_csv": "configs/runs/e02_selected8_water_n_mapping_20260818.csv",
+    "source_variable": "CHPDT",
+    "contrast": "N3_minus_N0_within_same_water",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "levels": [
+      "N3"
+    ],
+    "harvest_scope": "all",
+    "sigma_floor": 50.0,
+    "weighting": "static"
+  },
+  "water_response_objective": {
+    "enabled": false,
+    "mapping_csv": "configs/runs/e02_selected8_water_n_mapping_20260818.csv",
+    "source_variable": "CHPDT",
+    "contrast": "season_specific_high_minus_W1_within_same_nitrogen",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "levels": [
+      "N3"
+    ],
+    "nitrogen_levels": [
+      "N0",
+      "N3"
+    ],
+    "season_contrasts": {
+      "25SP": {
+        "high_water": "W3",
+        "low_water": "W1"
+      },
+      "26SP": {
+        "high_water": "W2",
+        "low_water": "W1"
+      }
+    },
+    "harvest_scope": "all",
+    "sigma_floor": 50.0,
+    "weighting": "nse",
+    "nse_lambda": 0.0,
+    "nse_lambda_allocation": "equal_split_N0_N3_separate_SST"
+  },
+  "harvest_dry_objective": {
+    "enabled": true,
+    "mode": "increment_plus_terminal",
+    "variable": "CHPDT",
+    "process_lambda_per_season": 300.0,
+    "terminal_lambda_per_season": 150.0
+  },
+  "process_state_objective": {
+    "enabled": true,
+    "mode": "signed_difference_plus_terminal",
+    "variables": [
+      "LAID",
+      "LWAD",
+      "SWAD"
+    ]
+  },
+  "seasonal_parameterization": null,
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2501_repfilter_measuredmoisture_v2_20260819",
+      "role": "calibration",
+      "treatments": [
+        2,
+        5,
+        10,
+        13
+      ]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2601_repfilter_measuredmoisture_v2_20260819",
+      "role": "calibration",
+      "treatments": [
+        2,
+        11,
+        3,
+        12
+      ]
+    }
+  ],
+  "formal_contract": {
+    "source_case": "e02_v16_senescence_harvest_fix_official_200x6_20260819",
+    "source_realization": "26",
+    "n_reals": 200,
+    "noptmax": 6,
+    "agents": 6,
+    "process_harvest_lambda": 300.0,
+    "terminal_harvest_lambda": 150.0
+  }
+}
