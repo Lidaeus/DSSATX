@@ -486,6 +486,8 @@ def build_observed_water_response_rows(
     harvest_scope: str = "all",
     high_water: str = "W3",
     low_water: str = "W1",
+    season_contrasts: Mapping[str, Mapping[str, str]] | None = None,
+    nitrogen_levels: Iterable[str] = ("N0", "N1", "N2", "N3"),
 ) -> pd.DataFrame:
     """Construct strictly paired within-nitrogen water-yield contrasts.
 
@@ -504,6 +506,9 @@ def build_observed_water_response_rows(
     harvest_scope = str(harvest_scope).strip().lower()
     if harvest_scope not in {"all", "terminal"}:
         raise ValueError("harvest_scope must be all or terminal")
+    levels = tuple(str(value).strip().upper() for value in nitrogen_levels)
+    if not levels or any(value not in {"N0", "N1", "N2", "N3"} for value in levels):
+        raise ValueError("nitrogen_levels must be a non-empty subset of N0..N3")
     required = {
         "@RUN", "TN", "HNO", "DATE", "CHPDTM", "CHPDTM_SIGMA", "season"
     }
@@ -513,6 +518,13 @@ def build_observed_water_response_rows(
 
     high_water = str(high_water).strip().upper()
     low_water = str(low_water).strip().upper()
+    contrast_by_season = {
+        str(season): (
+            str(spec["high_water"]).strip().upper(),
+            str(spec["low_water"]).strip().upper(),
+        )
+        for season, spec in (season_contrasts or {}).items()
+    }
     joined = harvest.merge(
         mapping[["season_id", "treatment", "water_level", "nitrogen_level"]],
         left_on=["season", "TN"],
@@ -520,14 +532,18 @@ def build_observed_water_response_rows(
         how="inner",
         validate="many_to_one",
     )
+    joined = joined.loc[joined["nitrogen_level"].isin(levels)].copy()
     rows: list[dict[str, object]] = []
     keys = ["season", "HNO", "DATE", "nitrogen_level"]
     for (season, hno, date, nitrogen), group in joined.groupby(keys, sort=True):
+        season_high, season_low = contrast_by_season.get(
+            str(season), (high_water, low_water)
+        )
         by_w = group.set_index("water_level")
-        if low_water not in by_w.index or high_water not in by_w.index:
+        if season_low not in by_w.index or season_high not in by_w.index:
             continue
-        ref = by_w.loc[low_water]
-        cur = by_w.loc[high_water]
+        ref = by_w.loc[season_low]
+        cur = by_w.loc[season_high]
         ref_y = float(ref["CHPDTM"])
         cur_y = float(cur["CHPDTM"])
         if ref_y < 0 or cur_y < 0:
@@ -535,11 +551,11 @@ def build_observed_water_response_rows(
         if response_target == "monotone_plateau" and cur_y < ref_y:
             target_y = ref_y
             target_sigma = float(ref["CHPDTM_SIGMA"])
-            target_source = low_water
+            target_source = season_low
         else:
             target_y = cur_y
             target_sigma = float(cur["CHPDTM_SIGMA"])
-            target_source = high_water
+            target_source = season_high
         if contrast_scale == "log_ratio":
             observed_contrast = math.log1p(target_y) - math.log1p(ref_y)
             propagated = math.sqrt(
@@ -567,7 +583,7 @@ def build_observed_water_response_rows(
                 "WRESPM_SIGMA": propagated,
                 "WRESPM_SIGMA_SOURCE": sigma_source,
                 "season": str(season),
-                "water_level": high_water,
+                "water_level": season_high,
                 "nitrogen_level": str(nitrogen),
                 "response_target": response_target,
                 "target_source_level": target_source,
@@ -595,6 +611,8 @@ def write_simulated_water_response(
     harvest_scope: str = "all",
     high_water: str = "W3",
     low_water: str = "W1",
+    season_contrasts: Mapping[str, Mapping[str, str]] | None = None,
+    nitrogen_levels: Iterable[str] = ("N0", "N1", "N2", "N3"),
 ) -> Path:
     """Derive simulated W3-vs-W1 water-yield contrasts from PestHarvest.OUT.
 
@@ -609,10 +627,20 @@ def write_simulated_water_response(
         raise ValueError("contrast_scale must be log_ratio or raw_difference")
     if harvest_scope not in {"all", "terminal"}:
         raise ValueError("harvest_scope must be all or terminal")
+    levels = tuple(str(value).strip().upper() for value in nitrogen_levels)
+    if not levels or any(value not in {"N0", "N1", "N2", "N3"} for value in levels):
+        raise ValueError("nitrogen_levels must be a non-empty subset of N0..N3")
     if contrast_scale == "raw_difference" and source_scale != "raw":
         raise ValueError("raw_difference requires raw CHPDT source values")
     high_water = str(high_water).strip().upper()
     low_water = str(low_water).strip().upper()
+    contrast_by_season = {
+        str(season): (
+            str(spec["high_water"]).strip().upper(),
+            str(spec["low_water"]).strip().upper(),
+        )
+        for season, spec in (season_contrasts or {}).items()
+    }
 
     lookup = {
         int(row.global_run): (
@@ -630,6 +658,8 @@ def write_simulated_water_response(
         if run not in lookup:
             continue
         season, water, nitrogen, treatment = lookup[run]
+        if nitrogen not in levels:
+            continue
         values[(season, int(match.group("hno")), int(match.group("date")), water, nitrogen)] = (
             run, treatment, float(match.group("value"))
         )
@@ -649,10 +679,13 @@ def write_simulated_water_response(
             if (group[1], group[2]) == terminal[(group[0], group[3])]
         ]
     for season, hno, date, nitrogen in groups:
-        ref = values.get((season, hno, date, low_water, nitrogen))
+        season_high, season_low = contrast_by_season.get(
+            str(season), (high_water, low_water)
+        )
+        ref = values.get((season, hno, date, season_low, nitrogen))
         if ref is None:
             continue
-        cur = values.get((season, hno, date, high_water, nitrogen))
+        cur = values.get((season, hno, date, season_high, nitrogen))
         if cur is None:
             continue
         run, treatment, value = cur

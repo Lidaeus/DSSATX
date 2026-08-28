@@ -17,6 +17,7 @@ from src.common.parameter_modules import (
 from src.dssat.array_expander import (
     expand_anchor_series,
     expand_leaf_area,
+    expand_water_stress_curves,
     expand_leaf_partition,
     expand_senpor,
     expand_stem_partition,
@@ -92,6 +93,24 @@ def test_expand_senpor_single_anchor() -> None:
     exp = expand_senpor(0.25)
     assert len(exp.y_values) == 4
     assert 0 <= exp.y_values[-1] <= 1
+
+
+def test_water_stress_curve_defaults_reproduce_template() -> None:
+    curves = expand_water_stress_curves()
+    assert curves["XSWFAC"] == (0.0, 0.01, 1.0, 1.0)
+    assert curves["YSWFAC"] == (0.0, 1.0, 1.0, 1.0)
+    assert curves["XSWBAR"] == (0.0, 0.01, 0.25, 1.0, 1.0)
+    assert curves["YSWBAR"] == (0.0, 0.0, 1.0, 1.0, 1.0)
+    assert curves["XTRFAC"] == (0.0, 0.5, 0.75, 1.0)
+    assert curves["YTRFAC"] == (0.0, 0.0, 0.0, 0.0)
+
+
+def test_water_stress_curve_anchors_preserve_constraints() -> None:
+    curves = expand_water_stress_curves(0.6, 0.5, 0.4, 0.7, 0.3, 0.2)
+    assert all(a <= b for a, b in zip(curves["XSWFAC"], curves["XSWFAC"][1:]))
+    assert all(a <= b for a, b in zip(curves["XSWBAR"], curves["XSWBAR"][1:]))
+    assert all(a <= b for a, b in zip(curves["XTRFAC"], curves["XTRFAC"][1:]))
+    assert all(0.0 <= value <= 1.0 for name in ("YSWFAC", "YSWBAR", "YTRFAC") for value in curves[name])
 
 
 # ===========================================================================

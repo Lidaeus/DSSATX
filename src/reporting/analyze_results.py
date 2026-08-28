@@ -68,6 +68,16 @@ def _yyddd_add_days(yyddd, days):
     return (d1.year % 100) * 1000 + int(d1.strftime("%j"))
 
 
+def _yyddd_day_difference(start_yyddd, end_yyddd):
+    """Calendar-day difference for DSSAT YYDDD codes, including year rollover."""
+    def decode(value):
+        yy = int(value) // 1000
+        doy = int(value) % 1000
+        year = 2000 + yy if yy < 70 else 1900 + yy
+        return datetime.date(year, 1, 1) + datetime.timedelta(days=doy - 1)
+    return (decode(end_yyddd) - decode(start_yyddd)).days
+
+
 def _nearest_on_or_before(date_to_value, date):
     if not date_to_value:
         return None
@@ -431,14 +441,24 @@ def deterministic_process_compare(prefix, batch_file, var_names=None, run_dir=No
         for p in obs_pts:
             date = int(p["DATE"])
             sim_day = None
+            sim_date_used = None
             if date in sim_candidates:
                 sim_day = sim_candidates[date]
+                sim_date_used = date
             else:
                 prev_dates = [d for d in sim_dates_sorted if d <= date]
                 if prev_dates:
-                    sim_day = sim_candidates[prev_dates[-1]]
+                    sim_date_used = prev_dates[-1]
+                    sim_day = sim_candidates[sim_date_used]
 
-            row = {"RUN": run_no, "TN": tn, "DATE": date}
+            row = {
+                "RUN": run_no, "TN": tn, "DATE": date,
+                "SIM_DATE": sim_date_used,
+                "SIM_DATE_GAP_DAYS": (
+                    _yyddd_day_difference(sim_date_used, date)
+                    if sim_date_used is not None else np.nan
+                ),
+            }
             for v in vars_list:
                 row[f"OBS_{v}"] = float(p.get(f"OBS_{v}", -99.0))
                 if sim_day is None:

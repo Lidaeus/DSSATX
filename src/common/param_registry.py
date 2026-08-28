@@ -71,8 +71,8 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     "SDPRO":  (0.0,    1.0),
     "SDLIP":  (0.0,    1.0),
     # --- ECO ---
-    "PL-EM":  (3.0,   12.0),
-    "EM-V1":  (10.0,  40.0),
+    "PL-EM":  (1.0,   12.0),
+    "EM-V1":  (10.0,  60.0),
     "V1-JU":  (0.0,   30.0),
     "JU-R0":  (2.0,   20.0),
     "LNGSH":  (1.0,  200.0),
@@ -82,7 +82,7 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     # Indeterminate crops may legitimately use values above 100; whether the
     # coefficient is identifiable is a separate scientific decision.
     "FL-VS":  (0.0,  300.0),
-    "TRIFL":  (0.10,   1.00),
+    "TRIFL":  (0.10,   2.50),
     "RWDTH":  (0.50,   2.00),
     # RHGHT is a relative multiplier on the species-file standard canopy-height
     # curve (YVSHT), not an absolute height in metres.  Joint E02 runs first
@@ -110,7 +110,7 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     "TO21":   (24.0,  38.0),
     "TM1":    (30.0,  48.0),
     "TB2":    (4.0,   15.0),
-    "TO12":   (18.0,  32.0),
+    "TO12":   (12.0,  32.0),
     "TO22":   (24.0,  38.0),
     "TM2":    (30.0,  48.0),
     "TB3":    (4.0,   15.0),
@@ -120,10 +120,10 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     # --- SPE photosynthesis / source-sink ---
     "PARMAX":  (5.0, 100.0),
     "PHTMAX":  (10.0, 100.0),
-    "KCAN":    (0.40,  1.00),
+    "KCAN":    (0.20,  1.00),
     "KC_SLOPE": (0.0,  0.50),
     "FINREF":  (0.0, 1000.0),
-    "SLAREF":  (100.0, 500.0),
+    "SLAREF":  (100.0, 800.0),
     "SIZREF":  (50.0, 1000.0),
     "VSSINK":  (0.2,   50.0),
     "EVMODC":  (0.0,    3.0),
@@ -137,6 +137,7 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     "FRSTMF":  (0.0,  1.0),
     "FRLFF":   (0.0,  1.0),
     "ATOP":    (0.0, 10.0),
+    "SRGF":    (0.0,  1.0),
     "FRCNOD":  (0.0,  1.0),  # narrow SA probe despite non-legume status
     # --- SPE root-N / N-stress ---
     # DSSAT TMGRO048.SPE stores these as small root-length-normalized
@@ -185,10 +186,12 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     # Water stress
     "DSWBAR":  (1.0, 100.0),
     "XFRMAX":  (0.0,  1.0),
-    # Root uptake
+    # Root uptake & transplant initial state
     "PORMIN":  (0.0,  0.5),
     "RTDEPI":  (1.0,  50.0),
     "RWUMX":   (0.001, 1.0),
+    "PLWT":    (1.0,  20.0),
+    "PLDP":    (1.0,  30.0),
     # Carbon reserve
     "CMOBMX":  (0.0,  1.0),
     "CADSTF":  (0.0,  1.0),
@@ -213,7 +216,8 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     # DSSAT SLPF is the soil-profile fertility/productivity multiplier.  It is
     # not a measured mineral-N concentration; it is calibrated here as the
     # explicit soil fertility index requested for the N-response subspace.
-    "SOIL_SLPF": (0.0, 1.0),
+    "SOIL_SLPF": (0.0, 2.0),
+    "SOIL_SLNF": (0.0, 10.0),
 }
 
 
@@ -296,6 +300,8 @@ DEFAULT_BOUNDS: dict[str, tuple[float, float]] = {
     "PORMIN":  (0.02, 0.06),
     "RTDEPI":  (10.0, 20.0),
     "RWUMX":   (0.02, 0.06),
+    "PLWT":    (4.0, 12.0),
+    "PLDP":    (5.0, 15.0),
     "CMOBMX":  (0.01, 0.05),
     "CADSTF":  (0.3, 0.9),
     "CADPR1":  (0.1, 0.5),
@@ -482,6 +488,10 @@ def _soil_bounds(name: str, init: float) -> tuple[float, float, str]:
         lb = max(0.0, init * 0.7)
         ub = min(10.0, init * 1.3)
         return lb, ub, "active" if lb != ub else "fixed"
+    if n == "SOIL_SLNF":
+        lb = max(0.5, init * 0.8)
+        ub = min(3.0, init * 1.3)
+        return lb, ub, "active" if lb != ub else "fixed"
     # 通用
     lb = max(0.0, init * 0.8)
     ub = init * 1.2
@@ -666,6 +676,7 @@ def _validate_stage_relationships(
                 "STAGE_RANGE_ORDER",
                 "Independent ranges do not guarantee XMAGE < XFPHT",
                 "XMAGE/XFPHT",
+                severity="warning",
             )
         )
 

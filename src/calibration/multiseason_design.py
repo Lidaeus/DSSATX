@@ -308,6 +308,30 @@ class MultiSeasonDesign:
                         raise MultiSeasonDesignError(
                             "NSE-weighted water_response_objective requires positive nse_lambda"
                         )
+                season_contrasts = water_response_objective.get("season_contrasts")
+                if season_contrasts is not None:
+                    if not isinstance(season_contrasts, dict):
+                        raise MultiSeasonDesignError(
+                            "water_response_objective season_contrasts must be an object"
+                        )
+                    expected_seasons = {season.season_id for season in seasons}
+                    missing_seasons = expected_seasons - set(map(str, season_contrasts))
+                    if missing_seasons:
+                        raise MultiSeasonDesignError(
+                            "water_response_objective season_contrasts lacks seasons: "
+                            + ", ".join(sorted(missing_seasons))
+                        )
+                    for season_id, contrast in season_contrasts.items():
+                        if not isinstance(contrast, dict):
+                            raise MultiSeasonDesignError(
+                                f"{season_id}: water-response contrast must be an object"
+                            )
+                        high = str(contrast.get("high_water", "")).upper()
+                        low = str(contrast.get("low_water", "")).upper()
+                        if high not in {"W1", "W2", "W3", "CK"} or low not in {"W1", "W2", "W3", "CK"} or high == low:
+                            raise MultiSeasonDesignError(
+                                f"{season_id}: invalid high_water/low_water contrast"
+                            )
 
         harvest_dry_objective = raw.get("harvest_dry_objective")
         if harvest_dry_objective is not None:
@@ -333,6 +357,19 @@ class MultiSeasonDesign:
                         "harvest_dry_objective increment_source must be "
                         "cumulative_difference or measured_hpodw"
                     )
+                weighting = str(
+                    harvest_dry_objective.get("terminal_weighting", "static")
+                ).strip().lower()
+                if weighting not in {"static", "rrmse", "season_rrmse"}:
+                    raise MultiSeasonDesignError(
+                        "harvest_dry_objective terminal_weighting must be static or rrmse"
+                    )
+                if "rrmse" in weighting:
+                    value = harvest_dry_objective.get("rrmse_lambda")
+                    if value is None or float(value) <= 0:
+                        raise MultiSeasonDesignError(
+                            "RRMSE-weighted terminal harvest requires positive rrmse_lambda"
+                        )
 
         process_state_objective = raw.get("process_state_objective")
         if process_state_objective is not None:

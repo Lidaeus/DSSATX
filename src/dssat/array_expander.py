@@ -165,10 +165,53 @@ def expand_senpor(senpor_late: float) -> ArrayExpansion:
     return ArrayExpansion("SENPOR", XSTAGE_NODES, tuple(y_values))
 
 
+def expand_water_stress_curves(
+    swfac_recovery: float = 1.0,
+    yswfac_mid: float = 1.0,
+    swbar_recovery: float = 0.25,
+    yswbar_mid: float = 1.0,
+    trfac_xmid: float = 0.50,
+    ytrfac_max: float = 0.0,
+) -> dict[str, tuple[float, ...]]:
+    """Expand six safe anchors into the three DSSAT water-response curves.
+
+    The parameterization exactly reproduces the tomato template at its
+    defaults and preserves ordered X nodes plus bounded Y responses.  It is
+    deliberately lower-dimensional than exposing all 26 raw array cells.
+    """
+    swfac_recovery = float(swfac_recovery)
+    yswfac_mid = float(yswfac_mid)
+    swbar_recovery = float(swbar_recovery)
+    yswbar_mid = float(yswbar_mid)
+    trfac_xmid = float(trfac_xmid)
+    ytrfac_max = float(ytrfac_max)
+    if not 0.01 <= swfac_recovery <= 1.0:
+        raise ValueError("SWFAC_REC must be within [0.01, 1.0]")
+    if not 0.0 <= yswfac_mid <= 1.0:
+        raise ValueError("YSWFAC_MID must be within [0, 1]")
+    if not 0.01 <= swbar_recovery <= 1.0:
+        raise ValueError("SWBAR_REC must be within [0.01, 1.0]")
+    if not 0.0 <= yswbar_mid <= 1.0:
+        raise ValueError("YSWBAR_MID must be within [0, 1]")
+    if not 0.0 <= trfac_xmid <= 0.75:
+        raise ValueError("TRFAC_XMID must be within [0, 0.75]")
+    if not 0.0 <= ytrfac_max <= 1.0:
+        raise ValueError("YTRFAC_MAX must be within [0, 1]")
+    return {
+        "XSWFAC": (0.0, 0.01, swfac_recovery, 1.0),
+        "YSWFAC": (0.0, yswfac_mid, 1.0, 1.0),
+        "XSWBAR": (0.0, 0.01, swbar_recovery, 1.0, 1.0),
+        "YSWBAR": (0.0, 0.0, yswbar_mid, 1.0, 1.0),
+        "XTRFAC": (0.0, trfac_xmid, 0.75, 1.0),
+        "YTRFAC": (0.0, ytrfac_max, ytrfac_max, 0.0),
+    }
+
+
 __all__ = [
     "ArrayExpansion",
     "linear_interp", "expand_anchor_series",
     "expand_leaf_area", "expand_leaf_partition", "expand_stem_partition",
     "expand_senpor", "validate_partition_sum",
+    "expand_water_stress_curves",
     "XVGROW_NODES", "XLEAF_NODES", "XSTAGE_NODES",
 ]

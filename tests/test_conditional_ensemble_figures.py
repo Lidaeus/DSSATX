@@ -236,6 +236,17 @@ class TestAggregation(unittest.TestCase):
         with self.assertRaises(ValueError):
             self._run(events, trajectory, metadata)
 
+    def test_missing_member_event_aborts_instead_of_silently_dropping_observation(self):
+        events, trajectory, metadata = _synthetic_events_and_trajectory()
+        missing = (
+            (events["realization"] == "2")
+            & (events["season_id"] == "25SP")
+            & (events["date_code"] == 25004)
+        )
+        events = events[~missing].copy()
+        with self.assertRaisesRegex(ValueError, "refusing to silently remove observations"):
+            self._run(events, trajectory, metadata)
+
     def test_residual_formulas_match_plan_definitions(self):
         events, trajectory, metadata = _synthetic_events_and_trajectory()
         aggregate = self._run(events, trajectory, metadata, member_phi={"0": 1.0, "1": 2.0, "2": 3.0})
@@ -368,6 +379,17 @@ class TestRendererSeparation(unittest.TestCase):
             self.assertNotIn("geom_smooth", text, module)
             for ribbon_column in ("sim_q025", "sim_q975", "sim_median"):
                 self.assertIn(ribbon_column, text, module)
+
+    def test_conditional_renderer_preserves_utf8_order_and_dry_harvest_contract(self):
+        common = (PAPER_R / "common.R").read_text(encoding="utf-8")
+        make_all = (PAPER_R / "make_all.R").read_text(encoding="utf-8")
+        selected = (PAPER_R / "fig_selected_dynamics.R").read_text(encoding="utf-8")
+        all_treatments = (PAPER_R / "fig_all_treatment_dynamics.R").read_text(encoding="utf-8")
+        self.assertIn('fileEncoding = "UTF-8"', common)
+        self.assertIn('"DRY_INC", "DRY_CUM"', make_all)
+        self.assertIn("conditional_treatment_levels", selected)
+        self.assertIn('season == "26SP"', all_treatments)
+        self.assertNotIn("tag_levels = list", all_treatments)
 
     def test_r_conditional_readers_only_consume_frozen_bundle(self):
         common = (PAPER_R / "common.R").read_text(encoding="utf-8")

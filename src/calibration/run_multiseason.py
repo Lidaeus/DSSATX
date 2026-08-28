@@ -309,7 +309,15 @@ def _copy_bundle(src: Path, dst: Path) -> None:
         if item.name.startswith(".") or item.name.startswith("_"):
             continue
         if item.is_file():
-            shutil.copy2(item, dst / item.name)
+            target_f = dst / item.name
+            for attempt in range(6):
+                try:
+                    shutil.copy2(item, target_f)
+                    break
+                except PermissionError:
+                    if attempt == 5:
+                        raise
+                    time.sleep(0.05)
     soil_override = os.environ.get("DSSAT_SOIL_BASE", "").strip()
     if soil_override:
         override = Path(soil_override).expanduser().resolve()
@@ -323,7 +331,15 @@ def _copy_bundle(src: Path, dst: Path) -> None:
             for suffix in (".base", ""):
                 f = gen_dir / f"{stem}{suffix}"
                 if f.is_file():
-                    shutil.copy2(f, dst / f.name)
+                    target_g = dst / f.name
+                    for attempt in range(6):
+                        try:
+                            shutil.copy2(f, target_g)
+                            break
+                        except PermissionError:
+                            if attempt == 5:
+                                raise
+                            time.sleep(0.05)
     # DSSAT control files — rewrite CRD and TMD to point to the season dir
     for fn in ("DSSAT48.INH", "DSSAT48.INP"):
         installed = Path(r"C:\DSSAT48\Tomato") / fn
@@ -760,7 +776,7 @@ def main(argv: list[str] | None = None) -> int:
         mapping = load_n_response_mapping(
             mapping_path,
             run_mapping_rows,
-            response_levels=("N1", "N2", "N3"),
+            response_levels=water_response.get("levels", ["N1", "N2", "N3"]),
         )
         write_simulated_water_response(
             pest_run_dir / "PestHarvest.OUT",
@@ -771,6 +787,10 @@ def main(argv: list[str] | None = None) -> int:
             harvest_scope=str(water_response.get("harvest_scope", "all")),
             high_water=str(water_response.get("high_water", "W3")),
             low_water=str(water_response.get("low_water", "W1")),
+            season_contrasts=water_response.get("season_contrasts"),
+            nitrogen_levels=water_response.get(
+                "nitrogen_levels", ["N0", "N1", "N2", "N3"]
+            ),
         )
 
     if design.design_id.startswith("eggplant_t10"):

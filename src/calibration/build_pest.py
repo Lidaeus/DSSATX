@@ -649,6 +649,14 @@ SPE_DIRECT_BOUNDS_EGGPLANT = {
     "NSLOPE": (0.0, 1.0),
     # Water stress (SPE line 84)
     "DSWBAR": (5.0, 50.0),
+    # Dimension-reduced water-response curve anchors. Defaults reproduce
+    # TMGRO048.SPE exactly; ordered X arrays are reconstructed at runtime.
+    "SWFAC_REC": (0.25, 1.00),
+    "YSWFAC_MID": (0.25, 1.00),
+    "SWBAR_REC": (0.05, 0.75),
+    "YSWBAR_MID": (0.10, 1.00),
+    "TRFAC_XMID": (0.20, 0.70),
+    "YTRFAC_MAX": (0.00, 0.50),
     "XFRMAX": (0.0, 1.0),
     # Root uptake (SPE lines 78, 80)
     "PORMIN": (0.01, 0.1),
@@ -3407,6 +3415,15 @@ if __name__ == "__main__":
     mode = (args.mode or "").strip().lower()
     filex = _first_batch_filex_path(args.batch)
     cultivar = _infer_cultivar_from_filex(_resolve_filex_path(filex) or filex) or "TM0001"
+    if getattr(args, "multiseason_design", None):
+        try:
+            ms_d = MultiSeasonDesign.load(str(args.multiseason_design))
+            if ms_d.cultivar_identity:
+                cultivar = str(ms_d.cultivar_identity).strip()
+        except Exception:
+            pass
+    elif design_spec is not None and getattr(design_spec, "cultivar_identity", None):
+        cultivar = str(design_spec.cultivar_identity).strip()
     ecotype = _infer_ecotype_from_cul_base(cultivar) or "TM0001"
     evaluate_out_path = _evaluate_out_path_from_batch(args.batch)
 

@@ -25,6 +25,7 @@ from src.dssat.array_expander import (
     expand_leaf_partition,
     expand_senpor,
     expand_stem_partition,
+    expand_water_stress_curves,
     validate_partition_sum,
 )
 
@@ -2103,15 +2104,16 @@ def update_cul_file(param_csv_path=PARAM_CSV, target_cultivar=None):
     """
     script_dir = os.path.dirname(os.path.abspath(__file__))
     cul_base_path = None
-    cand = os.path.join(script_dir, CUL_BASE_FILE)
-    if os.path.exists(cand):
-        cul_base_path = cand
-    elif os.path.exists(CUL_BASE_FILE):
-        cul_base_path = CUL_BASE_FILE
-    else:
-        cand = os.path.normpath(os.path.join(script_dir, "..", "..", "Genotype", CUL_FILE))
-        if os.path.exists(cand):
+    candidates = [
+        os.path.join(script_dir, CUL_BASE_FILE),
+        CUL_BASE_FILE,
+        os.path.normpath(os.path.join(script_dir, "..", "..", "data", "templates", "genotype", CUL_BASE_FILE)),
+        os.path.normpath(os.path.join(script_dir, "..", "..", "Genotype", CUL_FILE)),
+    ]
+    for cand in candidates:
+        if cand and os.path.exists(cand):
             cul_base_path = cand
+            break
 
     if not os.path.exists(param_csv_path):
         print(f"No {param_csv_path} found. Using base CUL file.")
@@ -2202,20 +2204,17 @@ def update_eco_file(param_csv_path=PARAM_CSV, target_ecotype=None):
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     eco_base_path = None
-    cand = os.path.join(script_dir, ECO_FILE + ".base")
-    if os.path.exists(cand):
-        eco_base_path = cand
-    else:
-        local_base = ECO_FILE + ".base"
-        if os.path.exists(local_base):
-            eco_base_path = local_base
-            cand = None
-        else:
-            cand = os.path.normpath(os.path.join(script_dir, "..", "..", "Genotype", ECO_FILE))
+    candidates = [
+        os.path.join(script_dir, ECO_FILE + ".base"),
+        ECO_FILE + ".base",
+        os.path.normpath(os.path.join(script_dir, "..", "..", "data", "templates", "genotype", ECO_FILE + ".base")),
+        os.path.normpath(os.path.join(script_dir, "..", "..", "Genotype", ECO_FILE)),
+        ECO_FILE,
+    ]
+    for cand in candidates:
         if cand and os.path.exists(cand):
             eco_base_path = cand
-        elif os.path.exists(ECO_FILE):
-            eco_base_path = ECO_FILE
+            break
 
     if not eco_base_path:
         raise FileNotFoundError(f"Ecotype base file not found: {ECO_FILE}.base")
@@ -2327,24 +2326,18 @@ def update_spe_file(param_csv_path=PARAM_CSV):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     spe_base_path = None
     env_spe_base = os.environ.get("DSSAT_SPE_BASE", "").strip()
-    if env_spe_base and os.path.exists(env_spe_base):
-        spe_base_path = os.path.abspath(env_spe_base)
-    cand = os.path.join(script_dir, SPE_FILE + ".base")
-    if spe_base_path:
-        cand = None
-    elif os.path.exists(cand):
-        spe_base_path = cand
-    else:
-        local_base = SPE_FILE + ".base"
-        if os.path.exists(local_base):
-            spe_base_path = local_base
-            cand = None
-        else:
-            cand = os.path.normpath(os.path.join(script_dir, "..", "..", "Genotype", SPE_FILE))
+    candidates = [
+        os.path.abspath(env_spe_base) if (env_spe_base and os.path.exists(env_spe_base)) else None,
+        os.path.join(script_dir, SPE_FILE + ".base"),
+        SPE_FILE + ".base",
+        os.path.normpath(os.path.join(script_dir, "..", "..", "data", "templates", "genotype", SPE_FILE + ".base")),
+        os.path.normpath(os.path.join(script_dir, "..", "..", "Genotype", SPE_FILE)),
+        SPE_FILE,
+    ]
+    for cand in candidates:
         if cand and os.path.exists(cand):
             spe_base_path = cand
-        elif os.path.exists(SPE_FILE):
-            spe_base_path = SPE_FILE
+            break
 
     if not spe_base_path:
         raise FileNotFoundError(f"Species base file not found: {SPE_FILE}.base")
@@ -2469,6 +2462,12 @@ def update_spe_file(param_csv_path=PARAM_CSV):
         "SENPOR_LATE",
         "FNSDT_OPT1",
         "FNSDT_OPT2",
+        "SWFAC_REC",
+        "YSWFAC_MID",
+        "SWBAR_REC",
+        "YSWBAR_MID",
+        "TRFAC_XMID",
+        "YTRFAC_MAX",
     ]
 
     keys = [k for k in (base_names + stage_names + direct_keys) if k in param_dict]
@@ -2588,6 +2587,25 @@ def update_spe_file(param_csv_path=PARAM_CSV):
                 current_fnsdt[2] = float(param_dict["FNSDT_OPT2"])
             _write_prefix_values(fnsdt_idx, current_fnsdt, count=4)
 
+        water_anchor_names = (
+            "SWFAC_REC", "YSWFAC_MID", "SWBAR_REC", "YSWBAR_MID",
+            "TRFAC_XMID", "YTRFAC_MAX",
+        )
+        if any(key in param_dict for key in water_anchor_names):
+            curves = expand_water_stress_curves(
+                float(param_dict.get("SWFAC_REC", 1.0)),
+                float(param_dict.get("YSWFAC_MID", 1.0)),
+                float(param_dict.get("SWBAR_REC", 0.25)),
+                float(param_dict.get("YSWBAR_MID", 1.0)),
+                float(param_dict.get("TRFAC_XMID", 0.50)),
+                float(param_dict.get("YTRFAC_MAX", 0.0)),
+            )
+            for marker, values in curves.items():
+                idx = _find_line_index(f"{marker}(")
+                if idx == -1:
+                    raise ValueError(f"Could not find {marker} array in the SPE template")
+                _write_prefix_values(idx, values, count=len(values))
+
     def _update_named_line(contains_text, param_order):
         if not contains_text or not param_order:
             return
@@ -2632,32 +2650,6 @@ def update_spe_file(param_csv_path=PARAM_CSV):
     _update_named_line("PGEFF SCV KDIF", ["PGEFF", "_SCV", "KDIF", "LFANGB"])
     _update_named_line("DSWBAR,XFRMAX", ["DSWBAR", "XFRMAX", "SHLAG"])
     _update_named_line("FRLFMX", ["FRLFMX"])
-
-    # Last-resort label-driven injection.  This closes the whitelist gap for
-    # newly added SPE fields whose static grouping has not yet been extended:
-    # the comma-separated labels at the end of every SPE row are themselves a
-    # machine-readable contract, so update the matching numeric slot exactly.
-    for _key, _value in param_dict.items():
-        _u = str(_key).strip().upper()
-        if not _u:
-            continue
-        for _idx, _line in enumerate(lines):
-            if _u not in _line.upper() or "," not in _line:
-                continue
-            _label_text = _line.rsplit(" ", 1)[-1].strip().upper()
-            _labels = [x.strip() for x in _label_text.split(",")]
-            if _u not in _labels:
-                continue
-            _matches = list(number_re.finditer(_line))
-            _pos = _labels.index(_u)
-            if _pos >= len(_matches):
-                continue
-            _m = _matches[_pos]
-            _formatted = _format_to_width(float(_value), _m.end() - _m.start(), orig_token=_m.group(0))
-            _chars = list(_line.rstrip("\n"))
-            _chars[_m.start() : _m.end()] = list(_formatted)
-            lines[_idx] = "".join(_chars) + "\n"
-            break
     # XPODF was historically a one-field row (only NSTFAC).  The modified
     # executable extends it to three fields: NSTFAC, NREXP and NRMIN.  Map
     # these by their labels so the legacy one-field template and the extended
@@ -2883,7 +2875,7 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
         # intervening labels (SLU1/SLNF) and blank the remainder of the data
         # row, which stricter custom DSSAT builds reject as IPSOIL.  Replace
         # the numeric slots by semantic position instead.
-        want = [("SALB", 0), ("SLDR", 2), ("SLRO", 3), ("SLPF", 5)]
+        want = [("SALB", 0), ("SLDR", 2), ("SLRO", 3), ("SLNF", 4), ("SLPF", 5)]
         if (scom_header_idx + 1) < sec_end:
             data_idx = None
             for j in range(scom_header_idx + 1, sec_end):
@@ -2904,7 +2896,7 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
                     if pos >= len(matches):
                         continue
                     v = float(param_dict[key])
-                    ranges = {"SALB": (0.05, 0.35), "SLDR": (0.01, 5.00), "SLRO": (1.0, 99.0), "SLPF": (0.0, 1.0)}
+                    ranges = {"SALB": (0.05, 0.35), "SLDR": (0.01, 5.00), "SLRO": (1.0, 99.0), "SLNF": (0.50, 3.00), "SLPF": (0.0, 1.0)}
                     v2 = _recommended(v, *ranges[name], name=key) if name in ranges else v
                     if v2 is None:
                         continue
@@ -2955,7 +2947,7 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
             matches = list(re.finditer(r"[-+]?\d*\.\d+|[-+]?\d+", s))
             replacements = []
 
-            for name in ["SLLL", "SDUL", "SSAT", "SBDM", "SLOC", "SSKS", "SLCL", "SLSI"]:
+            for name in ["SLLL", "SDUL", "SSAT", "SBDM", "SLOC", "SRGF", "SSKS", "SLCL", "SLSI"]:
                 key = _as_layer_key(name, li)
                 if key not in param_dict:
                     continue
@@ -2983,6 +2975,11 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
                     new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
                 elif name == "SLOC":
                     v2 = _recommended(v, 0.0, 10.0, name=key)
+                    if v2 is None:
+                        continue
+                    new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
+                elif name == "SRGF":
+                    v2 = _recommended(v, 0.0, 1.0, name=key)
                     if v2 is None:
                         continue
                     new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
@@ -3420,6 +3417,7 @@ def update_initial_soil_n_file(param_csv_path=PARAM_CSV, filex_path=None):
                 )
                 modified = True
             continue
+        line_mod = False
         for idx, prefix in ((snh4_idx, "IC_SNH4"), (sno3_idx, "IC_SNO3")):
             key = _initial_n_key(prefix, excode, current_tn, layer)
             if key not in param_dict:
@@ -3428,38 +3426,11 @@ def update_initial_soil_n_file(param_csv_path=PARAM_CSV, filex_path=None):
                 value = float(param_dict[key])
             except (TypeError, ValueError):
                 continue
-            parts[idx] = f"{value:.6g}"
+            parts[idx] = f"{value:.5g}".replace("0.", ".") if f"{value:.5g}".startswith("0.") else f"{value:.5g}"
+            line_mod = True
             modified = True
-        try:
-            # The normal-looking user rows still need the same fixed-width
-            # serialization as legacy layer-mean rows.  DSSAT may accept the
-            # former when no injection occurs, but its IPSLIN reader is not
-            # reliable after a whitespace-joined rewrite (notably at the
-            # deepest 26SP layer).
-            def _fit_normal_field(token):
-                rendered = f"{float(token):.5g}"
-                if rendered.startswith("0."):
-                    rendered = rendered[1:]
-                elif rendered.startswith("-0."):
-                    rendered = "-." + rendered[3:]
-                if len(rendered) > 6:
-                    rendered = f"{float(token):.4g}"
-                    if rendered.startswith("0."):
-                        rendered = rendered[1:]
-                    elif rendered.startswith("-0."):
-                        rendered = "-." + rendered[3:]
-                if len(rendered) > 6:
-                    raise ValueError(f"initial soil-N value does not fit FileX field: {token}")
-                return rendered.rjust(6)
-
-            lines[i] = (
-                f"{int(float(parts[0])):3d}{int(float(parts[1])):6d}"
-                f"{_fit_normal_field(parts[2])}"
-                f"{_fit_normal_field(parts[3])}"
-                f"{_fit_normal_field(parts[4])}\n"
-            )
-        except (IndexError, TypeError, ValueError):
-            lines[i] = " ".join(parts).rstrip() + "\n"
+        if line_mod:
+            lines[i] = f"{parts[0]:>3} {parts[1]:>6} {parts[2]:>6} {parts[3]:>6} {parts[4]:>6}\n"
 
     if not modified:
         return
@@ -3579,6 +3550,90 @@ def update_soil_analysis_n_file(param_csv_path=PARAM_CSV, filex_path=None):
     finally:
         _release_file_lock(lock_path)
 
+def update_planting_details_file(param_csv_path=PARAM_CSV, filex_path=None):
+    """Inject PLWT (seedling biomass) and PLDP (planting depth) parameters into FileX."""
+    if not os.path.exists(param_csv_path) or not filex_path or not os.path.exists(filex_path):
+        return
+    param_dict = _read_param_dict(param_csv_path)
+    plwt_val = None
+    for k in ["PLWT", "IC_PLWT", "PLANT_PLWT"]:
+        if k in param_dict:
+            try:
+                plwt_val = float(param_dict[k])
+                break
+            except Exception:
+                pass
+
+    pldp_val = None
+    for k in ["PLDP", "IC_PLDP", "PLANT_PLDP"]:
+        if k in param_dict:
+            try:
+                pldp_val = float(param_dict[k])
+                break
+            except Exception:
+                pass
+
+    if plwt_val is None and pldp_val is None:
+        return
+
+    with open(filex_path, "r", encoding="utf-8", errors="ignore") as f:
+        lines = f.readlines()
+
+    in_planting = False
+    header_cols = []
+    plwt_idx = None
+    pldp_idx = None
+    changed = False
+
+    for i, line in enumerate(lines):
+        u = line.strip().upper()
+        if u.startswith("*PLANTING DETAILS"):
+            in_planting = True
+        elif in_planting and u.startswith("*"):
+            in_planting = False
+        elif in_planting and u.startswith("@P"):
+            header_cols = [c for c in u.replace("@", "").split()]
+            if "PLWT" in header_cols:
+                plwt_idx = header_cols.index("PLWT")
+            if "PLDP" in header_cols:
+                pldp_idx = header_cols.index("PLDP")
+        elif in_planting and u and not u.startswith("@"):
+            parts = line.split()
+            if len(parts) >= 10:
+                try:
+                    p_code = parts[0]
+                    pdate = parts[1]
+                    edate = parts[2]
+                    ppop = float(parts[3])
+                    ppoe = float(parts[4])
+                    plme = parts[5]
+                    plds = parts[6]
+                    plrs = parts[7]
+                    plrd = parts[8]
+                    curr_pldp = f"{int(round(pldp_val)):>1d}" if pldp_val is not None else parts[9]
+                    curr_plwt = plwt_val if plwt_val is not None else float(parts[10])
+                    page = parts[11] if len(parts) > 11 else "60"
+                    penv = parts[12] if len(parts) > 12 else "25"
+                    plph = parts[13] if len(parts) > 13 else "1"
+                    sprl = parts[14] if len(parts) > 14 else "8"
+                    plname = "Eggplant"
+                    formatted = f" {int(p_code):1d} {pdate:5s} {edate:>5s}  {ppop:4.1f}  {ppoe:4.1f}     {plme:1s}     {plds:1s}    {plrs:>2s}    {plrd:>2s}     {curr_pldp:>1s}   {curr_plwt:3.1f}    {page:>2s}    {penv:>2s}     {plph:>1s}     {sprl:>1s}                        {plname:s}\n"
+                    lines[i] = formatted
+                    changed = True
+                except Exception:
+                    pass
+    if changed:
+        lock_path = os.path.abspath(filex_path) + ".lock"
+        lock_err = _acquire_file_lock(lock_path, timeout_s=180.0, poll_s=0.10, stale_s=900.0)
+        if lock_err is not None:
+            raise lock_err
+        try:
+            last_err = _atomic_write_lines(filex_path, lines, n_tries=60, sleep_s=0.20)
+            if last_err is not None:
+                raise last_err
+        finally:
+            _release_file_lock(lock_path)
+
 def _assert_fresh_nonempty(path, started_at, *, tolerance_seconds=2.0):
     """Reject missing, empty, or pre-existing outputs after a model run."""
     if not os.path.isfile(path):
@@ -3649,6 +3704,10 @@ def run_model():
             filex_path=active_filex,
         )
         update_soil_analysis_n_file(
+            param_csv_path=PARAM_CSV,
+            filex_path=active_filex,
+        )
+        update_planting_details_file(
             param_csv_path=PARAM_CSV,
             filex_path=active_filex,
         )

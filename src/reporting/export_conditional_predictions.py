@@ -844,6 +844,11 @@ def aggregate_replay(
 
     event_key = ["season_id", "treatment", "variable", "date_code", "harvest_number"]
     events, dropped_event_points = _apply_uniform_points(events, event_key, valid_members)
+    if dropped_event_points:
+        raise ValueError(
+            f"{dropped_event_points} observed event keys are not covered by every complete-case "
+            "member; refusing to silently remove observations from the frozen figure contract"
+        )
     traj_key = ["season_id", "treatment", "variable", "dap"]
     trajectory, dropped_traj_points = _apply_uniform_points(trajectory, traj_key, valid_members)
 

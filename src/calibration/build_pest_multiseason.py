@@ -292,6 +292,18 @@ def _attach_measured_sigma(
     record[f"{obs_col}_N_REPLICATES"] = n_replicates
 
 
+def _mask_disabled_harvest_objective(df_harvest: pd.DataFrame) -> None:
+    """Remove ordinary dry-harvest observations from a disabled stage.
+
+    The shared observation policy cannot express stage-local activation, so
+    disabled stages mark the corresponding measured tokens missing before the
+    PST is written.  Fresh yield remains available as a zero-weight diagnostic.
+    """
+    for column in ("CHPDTM", "CHPDTM_T", "HPODWM"):
+        if column in df_harvest.columns:
+            df_harvest[column] = -99.0
+
+
 def build_multiseason_stage2(
     args, prefix, allowed, extra_allowed, params, model_cmd_extra,
     *,
@@ -511,7 +523,11 @@ def build_multiseason_stage2(
         derived_rows = []
         for _, group in df_process.groupby("@RUN", sort=False):
             group = group.sort_values("DATE")
-            previous = None
+            # B2 fix: track previous valid value per variable independently.
+            # When a row has LAI=-99 but LWAD/SWAD present, the last valid LAI
+            # must be retained for the next LAI increment, not overwritten.
+            previous_valid = {"LAIDM": -99.0, "LWADM": -99.0, "SWADM": -99.0}
+            previous_valid_date = {"LAIDM": None, "LWADM": None, "SWADM": None}
             terminal_index = {}
             for variable in ("LAIDM", "LWADM", "SWADM"):
                 valid = group.loc[group[variable].astype(float).ne(-99.0)]
@@ -524,19 +540,23 @@ def build_multiseason_stage2(
                     ("SWADM", "SWADDM", "SWETM"),
                 ):
                     value = float(row.get(variable, -99.0))
-                    prev_value = (
-                        float(previous.get(variable, -99.0))
-                        if previous is not None else -99.0
-                    )
+                    prev_value = previous_valid[variable]
                     out[diff_name] = (
                         value - prev_value
                         if value != -99.0 and prev_value != -99.0 else -99.0
                     )
+                    out[f"{diff_name}_prev_date"] = (
+                        previous_valid_date[variable]
+                        if value != -99.0 and prev_value != -99.0 else None
+                    )
                     out[terminal_name] = (
                         value if idx == terminal_index[variable] else -99.0
                     )
+                    # Update per-variable previous only when current is valid
+                    if value != -99.0:
+                        previous_valid[variable] = value
+                        previous_valid_date[variable] = int(row.get("DATE", -99))
                 derived_rows.append(out)
-                previous = row.to_dict()
         df_process = pd.DataFrame(derived_rows)
 
     # CHPDT is a cumulative yield anchor at the terminal harvest only.  Event
@@ -546,7 +566,8 @@ def build_multiseason_stage2(
     # shape contributes to Phi at a relative-error scale; the terminal CHPDTM
     # stays the raw absolute-yield anchor.
     harvest_objective = design.harvest_dry_objective or {}
-    if bool(harvest_objective.get("enabled", False)) and not df_harvest.empty:
+    harvest_enabled = bool(harvest_objective.get("enabled", False))
+    if harvest_enabled and not df_harvest.empty:
         if "CHPDTM_T" not in df_harvest.columns:
             df_harvest["CHPDTM_T"] = -99.0
         for _, indices in df_harvest.groupby("@RUN", sort=False).groups.items():
@@ -558,6 +579,15 @@ def build_multiseason_stage2(
                     # intermediate cumulative dry harvest -> trend family
                     df_harvest.loc[nonterminal, "CHPDTM_T"] = df_harvest.loc[nonterminal, "CHPDTM"]
                     df_harvest.loc[nonterminal, "CHPDTM"] = -99.0
+    elif not df_harvest.empty:
+        # The observation policy is shared by all stages and marks CHPDT/HPODW
+        # as calibration observations.  A stage-level disabled objective must
+        # therefore remove those measured tokens before PST construction;
+        # otherwise the shared policy silently reactivates harvest Phi (as it
+        # did in the S1 canopy pre-calibration).  ``nresp_harvest_df`` was
+        # copied above, so N/W response contrasts can still be enabled without
+        # also enabling the ordinary harvest objective.
+        _mask_disabled_harvest_objective(df_harvest)
 
     adapm_sigma = float(getattr(args, "adapm_sigma", None) or 25.0)
     harvest_sigmas = {}
@@ -648,7 +678,7 @@ def build_multiseason_stage2(
         mapping = load_n_response_mapping(
             mapping_path,
             run_mapping_rows,
-            response_levels=("N1", "N2", "N3"),
+            response_levels=water_response.get("levels", ["N1", "N2", "N3"]),
         )
         wresp_df = build_observed_water_response_rows(
             nresp_harvest_df,
@@ -659,6 +689,10 @@ def build_multiseason_stage2(
             harvest_scope=str(water_response.get("harvest_scope", "all")),
             high_water=str(water_response.get("high_water", "W3")),
             low_water=str(water_response.get("low_water", "W1")),
+            season_contrasts=water_response.get("season_contrasts"),
+            nitrogen_levels=water_response.get(
+                "nitrogen_levels", ["N0", "N1", "N2", "N3"]
+            ),
         )
 
     stage2_outputs = [
@@ -752,6 +786,7 @@ def build_multiseason_stage2(
         nse_objectives={
             "N_RESPONSE": n_response,
             "W_RESPONSE": water_response,
+            "HARVEST_DRY_TOTAL": harvest_objective,
         },
     )
 
@@ -767,6 +802,7 @@ def build_multiseason_stage2(
         nse_objectives={
             "N_RESPONSE": n_response,
             "W_RESPONSE": water_response,
+            "HARVEST_DRY_TOTAL": harvest_objective,
         },
     )
 
@@ -776,7 +812,7 @@ def build_multiseason_stage2(
         prefix=prefix,
         ies_num_reals=int(args.ies_num_reals),
         random_seed=int(args.random_seed),
-        bad_phi_sigma=float(getattr(args, "bad_phi_sigma", 1.0e300)),
+        bad_phi_sigma=float(getattr(args, "bad_phi_sigma", None) or 1.0e300),
         observation_noise=bool(observation_policies),
     )
 
@@ -882,20 +918,65 @@ def _season_for_obsnme(obsnme, run_seasons):
     return season
 
 
-def _response_nse_lambda(nse_objectives, family):
-    """Return the optional season-wise NSE lambda for one response family."""
-    spec = (nse_objectives or {}).get(str(family).upper()) or {}
-    mode = str(spec.get("weighting", spec.get("objective_scale", "static"))).strip().lower()
-    if mode not in {"static", "nse", "season_nse"}:
+def _objective_weight_spec(objectives, family):
+    """Return the configured direct metric weighting for one objective family."""
+    spec = (objectives or {}).get(str(family).upper()) or {}
+    mode = str(
+        spec.get("terminal_weighting", spec.get("weighting", spec.get("objective_scale", "static")))
+    ).strip().lower()
+    if mode not in {"static", "nse", "season_nse", "rrmse", "season_rrmse"}:
         raise ValueError(
-            f"{family}: weighting must be static or nse, got {mode!r}"
+            f"{family}: weighting must be static, nse, or rrmse, got {mode!r}"
         )
     if mode == "static":
-        return None
-    value = spec.get("nse_lambda", spec.get("lambda_per_season"))
+        return mode, None, spec
+    key = "rrmse_lambda" if "rrmse" in mode else "nse_lambda"
+    value = spec.get(key, spec.get("lambda_per_season"))
     if value is None or float(value) <= 0:
-        raise ValueError(f"{family}: NSE weighting requires positive nse_lambda")
-    return float(value)
+        raise ValueError(f"{family}: {mode} weighting requires positive {key}")
+    return mode, float(value), spec
+
+
+def _response_nse_lambda(nse_objectives, family):
+    """Backward-compatible NSE-lambda accessor used by audit callers."""
+    mode, value, _ = _objective_weight_spec(nse_objectives, family)
+    return value if "nse" in mode else None
+
+
+def _objective_bucket(obsnme, family, run_rows, objective_specs):
+    """Partition metric objectives by season and, when requested, response stratum."""
+    run_seasons = {int(row["global_run"]): str(row["season_id"]) for row in run_rows}
+    season = _season_for_obsnme(obsnme, run_seasons)
+    _, _, spec = _objective_weight_spec(objective_specs, family)
+    scope = str(spec.get("sst_scope", "season_x_family")).strip().lower()
+    if family not in {"N_RESPONSE", "W_RESPONSE"} or scope in {"", "season_x_family"}:
+        return season, family
+    if scope not in {
+        "season_x_response_stratum", "season_x_family_x_stratum",
+        "season_x_water_stratum", "season_x_nitrogen_stratum",
+    }:
+        raise ValueError(f"{family}: unsupported SST scope {scope!r}")
+
+    import re
+    match = re.search(r"_R(\d+)(?:_|$)", str(obsnme), flags=re.IGNORECASE)
+    if match is None:
+        raise ValueError(f"cannot assign response stratum: {obsnme!r}")
+    global_run = int(match.group(1))
+    run = next((row for row in run_rows if int(row["global_run"]) == global_run), None)
+    if run is None:
+        raise ValueError(f"response run is absent from run mapping: {obsnme!r}")
+    mapping_path = Path(str(spec.get("mapping_csv", "")))
+    if not mapping_path.is_absolute():
+        mapping_path = (PROJECT_ROOT / mapping_path).resolve()
+    mapping = pd.read_csv(mapping_path)
+    selected = mapping.loc[
+        mapping["season_id"].astype(str).eq(str(run["season_id"]))
+        & pd.to_numeric(mapping["treatment"], errors="coerce").eq(int(run["treatment"]))
+    ]
+    if len(selected) != 1:
+        raise ValueError(f"cannot resolve unique response stratum for {obsnme!r}")
+    field = "water_level" if family == "N_RESPONSE" else "nitrogen_level"
+    return season, family, str(selected.iloc[0][field]).upper()
 
 
 def _apply_t8_weights(out_dir, prefix, group_policy, run_mapping_rows, *, nse_objectives=None):
@@ -919,7 +1000,8 @@ def _apply_t8_weights(out_dir, prefix, group_policy, run_mapping_rows, *, nse_ob
             obsnme = (row.get("obsnme") or row.get("\ufeffobsnme") or "").strip().lower()
             grp = (row.get("obgnme") or "").strip().lower()
             if float(row.get("weight", 0)) > 0:
-                bucket = (_season_for_obsnme(obsnme, run_seasons), _family_for_group(grp))
+                family = _family_for_group(grp)
+                bucket = _objective_bucket(obsnme, family, run_mapping_rows, nse_objectives)
                 obs_bucket[obsnme] = bucket
                 bucket_n[bucket] = bucket_n.get(bucket, 0) + 1
 
@@ -927,10 +1009,13 @@ def _apply_t8_weights(out_dir, prefix, group_policy, run_mapping_rows, *, nse_ob
     bucket_nse_weight = {}
     bucket_sst = {}
     bucket_lambda = {}
+    bucket_rrmse_mean = {}
+    bucket_mode = {}
     for bucket, n in bucket_n.items():
-        season, family = bucket
-        nse_lambda = _response_nse_lambda(nse_objectives, family)
-        if nse_lambda is not None:
+        season, family = bucket[:2]
+        mode, metric_lambda, _ = _objective_weight_spec(nse_objectives, family)
+        bucket_mode[bucket] = mode
+        if "nse" in mode:
             raw_values = [
                 float(row.get("raw_obsval", row.get("obsval", "nan")))
                 for row in csv.DictReader(
@@ -948,9 +1033,25 @@ def _apply_t8_weights(out_dir, prefix, group_policy, run_mapping_rows, *, nse_ob
             if not sst > 0:
                 raise ValueError(f"{season}:{family}: NSE SST must be positive")
             bucket_sst[bucket] = sst
-            bucket_lambda[bucket] = nse_lambda
-            bucket_nse_weight[bucket] = math.sqrt(nse_lambda / sst)
+            bucket_lambda[bucket] = metric_lambda
+            bucket_nse_weight[bucket] = math.sqrt(metric_lambda / sst)
             bucket_mult[bucket] = bucket_nse_weight[bucket]
+        elif "rrmse" in mode:
+            raw_values = [
+                abs(float(row.get("raw_obsval", row.get("obsval", "nan"))))
+                for row in csv.DictReader(
+                    weights_path.open("r", encoding="utf-8-sig", newline="")
+                )
+                if float(row.get("weight", 0)) > 0
+                and obs_bucket.get((row.get("obsnme") or "").strip().lower()) == bucket
+            ]
+            values = [value for value in raw_values if math.isfinite(value)]
+            mean_abs = sum(values) / len(values) if values else 0.0
+            if not mean_abs > 0:
+                raise ValueError(f"{season}:{family}: RRMSE mean(|obs|) must be positive")
+            bucket_lambda[bucket] = metric_lambda
+            bucket_rrmse_mean[bucket] = mean_abs
+            bucket_mult[bucket] = math.sqrt(metric_lambda / n) / mean_abs
         else:
             bucket_mult[bucket] = math.sqrt(budgets[family] / max(n, 1))
 
@@ -976,6 +1077,8 @@ def _apply_t8_weights(out_dir, prefix, group_policy, run_mapping_rows, *, nse_ob
             new_weights.append(0.0)
         elif bucket in bucket_nse_weight:
             new_weights.append(bucket_nse_weight[bucket])
+        elif bucket in bucket_rrmse_mean:
+            new_weights.append(bucket_mult[bucket])
         else:
             mult = bucket_mult.get(bucket, 1.0)
             new_weights.append(mult / sigma)
@@ -997,14 +1100,24 @@ def _apply_t8_weights(out_dir, prefix, group_policy, run_mapping_rows, *, nse_ob
         for key in audit_key
     ]
     audit["weight_mode"] = [
-        "season_nse" if obs_bucket.get(key) in bucket_nse_weight else "static"
+        bucket_mode.get(obs_bucket.get(key), "static")
         for key in audit_key
     ]
     audit["nse_lambda"] = [
-        bucket_lambda.get(obs_bucket.get(key), "") for key in audit_key
+        bucket_lambda.get(obs_bucket.get(key), "")
+        if "nse" in bucket_mode.get(obs_bucket.get(key), "") else ""
+        for key in audit_key
     ]
     audit["nse_sst"] = [
         bucket_sst.get(obs_bucket.get(key), "") for key in audit_key
+    ]
+    audit["rrmse_lambda"] = [
+        bucket_lambda.get(obs_bucket.get(key), "")
+        if "rrmse" in bucket_mode.get(obs_bucket.get(key), "") else ""
+        for key in audit_key
+    ]
+    audit["rrmse_mean_abs_obs"] = [
+        bucket_rrmse_mean.get(obs_bucket.get(key), "") for key in audit_key
     ]
     audit.to_csv(weights_path, index=False, encoding="utf-8-sig")
     print(f"T10 weights applied ({len(bucket_mult)} family-season budgets) -> {pst_path}")
@@ -1074,7 +1187,8 @@ def _write_group_weight_audit(out_dir, prefix, group_policy, run_mapping_rows, *
     with weights_path.open("r", encoding="utf-8-sig", newline="") as f:
         for row in csv.DictReader(f):
             obsnme = (row.get("obsnme") or row.get("\ufeffobsnme") or "").strip()
-            bucket = (_season_for_obsnme(obsnme, run_seasons), _family_for_group(row.get("obgnme", "")))
+            family = _family_for_group(row.get("obgnme", ""))
+            bucket = _objective_bucket(obsnme, family, run_mapping_rows, nse_objectives)
             obs_bucket[obsnme.lower()] = bucket
             if bucket not in groups:
                 groups[bucket] = {"n_obs": 0, "weights": [], "sigmas": [], "raw_values": []}
@@ -1095,11 +1209,14 @@ def _write_group_weight_audit(out_dir, prefix, group_policy, run_mapping_rows, *
         writer = csv.DictWriter(f_out, fieldnames=[
             "group", "season_id", "variable_family", "phi_budget", "n_obs",
             "mean_sigma_eff", "mean_weight", "weight_multiplier",
-            "weight_mode", "nse_lambda", "nse_sst", "sigma_source", "note"
+            "weight_mode", "nse_lambda", "nse_sst", "rrmse_lambda",
+            "rrmse_mean_abs_obs", "sigma_source", "note"
         ])
         writer.writeheader()
-        for season, family in sorted(groups):
-            g = groups[(season, family)]
+        for bucket in sorted(groups):
+            season, family = bucket[:2]
+            stratum = bucket[2] if len(bucket) > 2 else ""
+            g = groups[bucket]
             budget = budgets.get(family, 1.0)
             mean_s = sum(g["sigmas"]) / max(len(g["sigmas"]), 1)
             mean_w = sum(g["weights"]) / max(len(g["weights"]), 1)
@@ -1108,22 +1225,36 @@ def _write_group_weight_audit(out_dir, prefix, group_policy, run_mapping_rows, *
                 math.sqrt(budget / g["n_obs"]) if g["n_obs"] > 0 else 0.0
             )
             actual_mult = mean_w * mean_s  # since weight = mult / sigma
-            nse_lambda = _response_nse_lambda(nse_objectives, family)
+            mode, metric_lambda, _ = _objective_weight_spec(nse_objectives, family)
+            nse_lambda = metric_lambda if "nse" in mode else None
             finite_values = g["raw_values"]
             sst = float(sum((value - (sum(finite_values) / len(finite_values))) ** 2 for value in finite_values)) if finite_values else 0.0
             nse_weight = math.sqrt(nse_lambda / sst) if nse_lambda is not None and sst > 0 else None
+            rrmse_mean = (
+                sum(abs(value) for value in finite_values) / len(finite_values)
+                if "rrmse" in mode and finite_values else None
+            )
+            rrmse_weight = (
+                math.sqrt(metric_lambda / g["n_obs"]) / rrmse_mean
+                if rrmse_mean and g["n_obs"] > 0 else None
+            )
             writer.writerow({
-                "group": f"{season}:{family}",
+                "group": f"{season}:{family}" + (f":{stratum}" if stratum else ""),
                 "season_id": season,
                 "variable_family": family,
                 "phi_budget": budget,
                 "n_obs": g["n_obs"],
                 "mean_sigma_eff": round(mean_s, 4),
                 "mean_weight": round(mean_w, 6),
-                "weight_multiplier": round(nse_weight if nse_weight is not None else expected_mult, 6),
-                "weight_mode": "season_nse" if nse_weight is not None else "static",
+                "weight_multiplier": round(
+                    nse_weight if nse_weight is not None
+                    else (rrmse_weight if rrmse_weight is not None else expected_mult), 6
+                ),
+                "weight_mode": mode,
                 "nse_lambda": nse_lambda if nse_lambda is not None else "",
                 "nse_sst": sst if nse_weight is not None else "",
+                "rrmse_lambda": metric_lambda if "rrmse" in mode else "",
+                "rrmse_mean_abs_obs": rrmse_mean if rrmse_mean is not None else "",
                 "sigma_source": "assumed",
                 "note": (
                     f"T8 §7.2: sqrt({budget}/{g['n_obs']}) = {expected_mult:.4f}"
