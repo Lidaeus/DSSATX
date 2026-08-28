@@ -1,9 +1,0 @@
-{
-  "season_id": "25SP",
-  "source_bundle": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2501_layermean_ic_valid_n012_v1_20260801",
-  "source_filex": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2501_layermean_ic_valid_n012_v1_20260801\\XXQL2501.TMX",
-  "localized_filex": "D:\\Tomato_Cal\\_seasons\\25SP\\XXQL2501.TMX",
-  "filex_match_before_injection": true,
-  "batch_filex_token": "XXQL2501.TMX",
-  "soil_override": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2501_layermean_ic_valid_n012_v1_20260801\\SOIL.SOL"
-}

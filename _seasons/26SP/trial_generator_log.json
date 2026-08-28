@@ -2,19 +2,24 @@
   "season_id": "26SP",
   "excode": "XXQL2601",
   "generator": "tools/experiments/build_trial_observations_v2_20260726.py",
-  "generator_sha256": "60e0a9d7c71486995ae74b74279d86b22bdbaa1c82518c49eb6cf4793079767a",
+  "generator_sha256": "9d24145bbefb754f11825921e1cf027c722f5f1b9fd8b432f2fa24f11d95ec34",
   "spec_compliance": "docs/三季FileA_FileT与不确定性适配计划_v1_20260726.md",
   "source_files": {
-    "data\\user\\ref\\DSSAT文件\\2026春\\2026春产量集.xlsx": "c070c7b4c503f13348e5f607c0a4bfdce348d77fdcade91353bf57bde955b32f",
-    "data\\user\\ref\\DSSAT文件\\2026春\\2026春生长指标集.xlsx": "b7205945e999d9eb8e16212d96e0ec7b10029723c319a0c3646beacce2f4c8ef",
-    "data\\user\\ref\\DSSAT文件\\2026春\\2026春品质指标集.xlsx": "34ef0c4a6cec8515335896da8e08e22545081bdf8f00e1ae0ef2661df8f105a0"
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\2026春产量集.xlsx": "c070c7b4c503f13348e5f607c0a4bfdce348d77fdcade91353bf57bde955b32f",
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\2026春生长指标集.xlsx": "2f7155fcca5a33a8f50a8bafd239667e3d3b12383575037adacdbb9b8a27aaca",
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\2026春品质指标集.xlsx": "34ef0c4a6cec8515335896da8e08e22545081bdf8f00e1ae0ef2661df8f105a0"
   },
   "qa_metrics": {
     "plots": 12,
     "growth_dates": 4,
     "harvest_dates": 5,
     "total_observations": 432,
-    "density": 27000.0
+    "density": 27000.0,
+    "fruit_moisture_contract": "measured_nearest_by_plot_date",
+    "dmfr_min": 0.05299065884535833,
+    "dmfr_max": 0.06931766269853297,
+    "repfilter_cells": 11,
+    "repfilter_min_cv": 0.05
   },
   "source_notes": [
     "Fresh yield = mean of 小区产量; SD = independent replicate 产量.",
@@ -30,5 +35,155 @@
     "fruit_quality_match_audit.csv",
     "FileA_values.csv",
     "FileT_values.csv"
-  ]
+  ],
+  "repfilter_v2_20260819": {
+    "approved_exclusions": 9,
+    "updated_cells": 11,
+    "audit": [
+      {
+        "season": "26SP",
+        "plot": 11,
+        "date": "26122",
+        "variable": "LAID",
+        "value": 0.31122694223999997,
+        "raw_sd": 0.031789645325403404,
+        "sd_method": "replicate_sd",
+        "n_rep": 3,
+        "source_date": "0502",
+        "excluded_rep": "rep3",
+        "channel": 1
+      },
+      {
+        "season": "26SP",
+        "plot": 1,
+        "date": "26198",
+        "variable": "SWAD",
+        "value": 1902.4200000000003,
+        "raw_sd": 97.75044143122815,
+        "sd_method": "replicate_sd",
+        "n_rep": 2,
+        "source_date": "0717",
+        "excluded_rep": "rep2",
+        "channel": 1
+      },
+      {
+        "season": "26SP",
+        "plot": 2,
+        "date": "26198",
+        "variable": "SWAD",
+        "value": 2911.95,
+        "raw_sd": 469.660324064105,
+        "sd_method": "replicate_sd",
+        "n_rep": 2,
+        "source_date": "0717",
+        "excluded_rep": "rep3",
+        "channel": 1
+      },
+      {
+        "season": "26SP",
+        "plot": 3,
+        "date": "26198",
+        "variable": "LAID",
+        "value": 2.724593292827765,
+        "raw_sd": 0.22006995432913476,
+        "sd_method": "replicate_sd",
+        "n_rep": 2,
+        "source_date": "0717",
+        "excluded_rep": "rep1",
+        "channel": 1
+      },
+      {
+        "season": "26SP",
+        "plot": 9,
+        "date": "26198",
+        "variable": "LWAD",
+        "value": 1047.33,
+        "raw_sd": 52.3665,
+        "sd_method": "replicate_sd_min_cv_5pct",
+        "n_rep": 2,
+        "source_date": "0717",
+        "excluded_rep": "rep2",
+        "channel": 1
+      },
+      {
+        "season": "26SP",
+        "plot": 2,
+        "date": "26180",
+        "variable": "CHTD",
+        "value": 147.85,
+        "raw_sd": 7.3925,
+        "sd_method": "replicate_sd_min_cv_5pct",
+        "n_rep": 2,
+        "source_date": "0629",
+        "excluded_rep": "rep3",
+        "channel": 2
+      },
+      {
+        "season": "26SP",
+        "plot": 2,
+        "date": "26180",
+        "variable": "SWAD",
+        "value": 1937.79,
+        "raw_sd": 212.3017399834491,
+        "sd_method": "replicate_sd",
+        "n_rep": 2,
+        "source_date": "0629",
+        "excluded_rep": "rep3",
+        "channel": 2
+      },
+      {
+        "season": "26SP",
+        "plot": 2,
+        "date": "26180",
+        "variable": "LWAD",
+        "value": 1455.975,
+        "raw_sd": 191.87342507496976,
+        "sd_method": "replicate_sd",
+        "n_rep": 2,
+        "source_date": "0629",
+        "excluded_rep": "rep3",
+        "channel": 2
+      },
+      {
+        "season": "26SP",
+        "plot": 5,
+        "date": "26180",
+        "variable": "LWAD",
+        "value": 1556.82,
+        "raw_sd": 83.62244794312117,
+        "sd_method": "replicate_sd",
+        "n_rep": 2,
+        "source_date": "0629",
+        "excluded_rep": "rep3",
+        "channel": 2
+      },
+      {
+        "season": "26SP",
+        "plot": 4,
+        "date": "26180",
+        "variable": "LWAD",
+        "value": 1539.405,
+        "raw_sd": 222.8022756840693,
+        "sd_method": "replicate_sd",
+        "n_rep": 2,
+        "source_date": "0629",
+        "excluded_rep": "rep3",
+        "channel": 2
+      },
+      {
+        "season": "26SP",
+        "plot": 7,
+        "date": "26180",
+        "variable": "LWAD",
+        "value": 1387.53,
+        "raw_sd": 69.37650000000001,
+        "sd_method": "replicate_sd_min_cv_5pct",
+        "n_rep": 2,
+        "source_date": "0629",
+        "excluded_rep": "rep1",
+        "channel": 2
+      }
+    ],
+    "uncertainty_rule": "hybrid_sd(min_cv=0.05)"
+  }
 }

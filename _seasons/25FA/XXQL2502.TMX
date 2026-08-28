@@ -139,100 +139,99 @@ Quncy, FL
 @C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
  1   -99 25221     1     0     1     1   -99   -99   -99   -99   -99   -99 1
 @C  ICBL  SH2O  SNH4  SNO3
- 1    20   .26   4.7  49.7
- 1    40  .272   2.3  41.2
- 1    60  .292   2.1  25.3
+ 1    20   .26 4.706 49.71
+ 1    40  .272 2.281 41.17
+ 1    60  .292 2.182  25.3
  1    80  .361    .5     1
  1   100  .387    .5     1
 @C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
  2   -99 25221     1     0     1     1   -99   -99   -99   -99   -99   -99 2
 @C  ICBL  SH2O  SNH4  SNO3
- 2    20  .279     3  45.8
- 2    40  .278     3  39.7
- 2    60  .293   2.3    19
+ 2    20  .279 2.996 64.81
+ 2    40  .278 2.972 39.74
+ 2    60  .293 2.255 19.02
  2    80  .366    .5     1
  2   100  .305    .5     1
 @C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
  3   -99 25221     1     0     1     1   -99   -99   -99   -99   -99   -99 3
 @C  ICBL  SH2O  SNH4  SNO3
- 3    20  .276   3.3  41.7
- 3    40  .289   1.5  39.4
- 3    60  .305   2.2  19.8
+ 3    20  .276 3.324  41.7
+ 3    40  .289 1.478 39.37
+ 3    60  .305 2.154 19.79
  3    80  .339    .5     1
  3   100  .329    .5     1
 @C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
  4   -99 25221     1     0     1     1   -99   -99   -99   -99   -99   -99 4
 @C  ICBL  SH2O  SNH4  SNO3
- 4    20   .27   5.6  25.2
- 4    40  .289   2.7  16.2
- 4    60  .395   1.7   5.1
+ 4    20   .27  5.56 6.634
+ 4    40  .289 2.745 18.37
+ 4    60  .395 1.678 5.084
  4    80  .332    .5     1
  4   100  .331    .5     1
 @C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
  5   -99 25221     1     0     1     1   -99   -99   -99   -99   -99   -99 5
 @C  ICBL  SH2O  SNH4  SNO3
- 5    20  .282   2.9    26
- 5    40  .291   2.6  43.2
- 5    60  .323   2.4  16.1
+ 5    20  .282 2.936 16.87
+ 5    40  .291  3.15 43.25
+ 5    60  .323 2.391 16.05
  5    80  .345    .5     1
  5   100  .317    .5     1
 @C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
  6   -99 25221     1     0     1     1   -99   -99   -99   -99   -99   -99 6
 @C  ICBL  SH2O  SNH4  SNO3
- 6    20   .29   3.8  38.9
- 6    40  .301   1.6  38.2
- 6    60  .345   1.8  11.1
+ 6    20   .29 3.784 27.38
+ 6    40  .301 1.635 53.43
+ 6    60  .345 2.099 11.14
  6    80  .333    .5     1
  6   100  .298    .5     1
 @C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
  7   -99 25221     1     0     1     1   -99   -99   -99   -99   -99   -99 7
 @C  ICBL  SH2O  SNH4  SNO3
- 7    20  .273   2.6  11.9
- 7    40  .297   1.7  15.7
- 7    60  .332   1.4   4.7
+ 7    20  .273 3.192  11.9
+ 7    40  .297 1.688 4.336
+ 7    60  .332 .9767 4.703
  7    80  .313    .5     1
  7   100  .292    .5     1
 @C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
  8   -99 25221     1     0     1     1   -99   -99   -99   -99   -99   -99 8
 @C  ICBL  SH2O  SNH4  SNO3
- 8    20  .281     2  17.1
- 8    40  .297   1.7  10.6
- 8    60  .332   1.1   7.9
+ 8    20  .281 1.958 20.55
+ 8    40  .297  1.65 12.32
+ 8    60  .332 1.054 7.925
  8    80  .313    .5     1
  8   100  .294    .5     1
 @C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
  9   -99 25221     1     0     1     1   -99   -99   -99   -99   -99   -99 9
 @C  ICBL  SH2O  SNH4  SNO3
- 9    20   .29   2.4  15.6
- 9    40  .299   1.5  16.2
- 9    60  .288     1   3.3
+ 9    20   .29 2.432 2.588
+ 9    40  .299 1.498 3.432
+ 9    60  .288 1.047 3.299
  9    80  .319    .5     1
  9   100  .281    .5     1
 @C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
 10   -99 25221     1     0     1     1   -99   -99   -99   -99   -99   -99 10
 @C  ICBL  SH2O  SNH4  SNO3
-10    20  .287   3.2    40
-10    40  .307    .8    36
-10    60  .299     1  13.2
+10    20  .287 3.215 39.96
+10    40  .307 .8098    36
+10    60  .299 1.036  8.58
 10    80  .292    .5     1
 10   100  .292    .5     1
 @C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
 11   -99 25221     1     0     1     1   -99   -99   -99   -99   -99   -99 11
 @C  ICBL  SH2O  SNH4  SNO3
-11    20  .284   2.1  24.8
-11    40  .317    .9   8.3
-11    60  .307    .4   5.4
+11    20  .284 2.126 31.05
+11    40  .317 .8951 9.565
+11    60  .307 .7771 6.431
 11    80  .328    .5     1
 11   100  .341    .5     1
 @C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
 12   -99 25221     1     0     1     1   -99   -99   -99   -99   -99   -99 12
 @C  ICBL  SH2O  SNH4  SNO3
-12    20   .28   2.8  47.6
-12    40  .322   1.7  42.4
-12    60  .301   1.1  10.2
+12    20   .28 1.861 47.57
+12    40  .322 .7317 42.37
+12    60  .301 .8497 10.21
 12    80  .324    .5     1
 12   100   .36    .5     1
-
 *PLANTING DETAILS
 @P PDATE EDATE  PPOP  PPOE  PLME  PLDS  PLRS  PLRD  PLDP  PLWT  PAGE  PENV  PLPH  SPRL                        PLNAME
  2 25225   -99   2.7   2.7     T     R    90    90     3     3    60    25     1     6                        Eggplant

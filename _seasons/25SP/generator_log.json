@@ -2,11 +2,11 @@
   "season_id": "25SP",
   "excode": "XXQL2501",
   "generator": "tools/experiments/build_trial_observations_v2_20260726.py",
-  "generator_sha256": "e76548605fd61fe3e0b11e84a30832583f58d51b0951ef0fe595bba6043bf774",
+  "generator_sha256": "9d24145bbefb754f11825921e1cf027c722f5f1b9fd8b432f2fa24f11d95ec34",
   "spec_compliance": "docs/三季FileA_FileT与不确定性适配计划_v1_20260726.md",
   "source_files": {
     "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春产量数据集.xlsx": "4a61ec04518f5469cef2b660d42cef65cc45c81ac37fe2449e9133fa4f886690",
-    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春作物生长指标集.xlsx": "dc9af4e6250f4f71f7d770393477c790ded0f174ea17d9e3e220175ca3ffb3c4"
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春作物生长指标集.xlsx": "b661ea24b3fb3b83c457ebd3c760e42e414dc53e76cd364d8762a6532d7ac120"
   },
   "qa_metrics": {
     "plots": 10,
@@ -19,7 +19,12 @@
       7,
       8
     ],
-    "density": 27000.0
+    "density": 27000.0,
+    "fruit_moisture_contract": "measured_nearest_by_plot_date",
+    "dmfr_min": 0.03206425730506851,
+    "dmfr_max": 0.04864953140543234,
+    "repfilter_cells": 6,
+    "repfilter_min_cv": 0.05
   },
   "source_notes": [
     "Fresh yield uses pre-computed weighted plot yield (edge*0.5 + middle-row mean*0.5).",
@@ -39,5 +44,90 @@
     "FileA_values.csv",
     "FileT_values.csv",
     "treatment_exclusion_audit.csv"
-  ]
+  ],
+  "repfilter_v2_20260819": {
+    "approved_exclusions": 7,
+    "updated_cells": 6,
+    "audit": [
+      {
+        "season": "25SP",
+        "plot": 4,
+        "date": "25142",
+        "variable": "SWAD",
+        "value": 563.895,
+        "raw_sd": 260.22236654446135,
+        "sd_method": "replicate_sd",
+        "n_rep": 2,
+        "source_date": "25142",
+        "excluded_rep": "中间行2",
+        "channel": 1
+      },
+      {
+        "season": "25SP",
+        "plot": 3,
+        "date": "25194",
+        "variable": "CHTD",
+        "value": 178.5,
+        "raw_sd": 8.925,
+        "sd_method": "replicate_sd_min_cv_5pct",
+        "n_rep": 2,
+        "source_date": "25194",
+        "excluded_rep": "中间行1",
+        "channel": 2
+      },
+      {
+        "season": "25SP",
+        "plot": 3,
+        "date": "25194",
+        "variable": "SWAD",
+        "value": 2300.8050000000003,
+        "raw_sd": 115.04025000000001,
+        "sd_method": "replicate_sd_min_cv_5pct",
+        "n_rep": 2,
+        "source_date": "25194",
+        "excluded_rep": "中间行1",
+        "channel": 2
+      },
+      {
+        "season": "25SP",
+        "plot": 3,
+        "date": "25194",
+        "variable": "LWAD",
+        "value": 1291.275,
+        "raw_sd": 64.56375000000001,
+        "sd_method": "replicate_sd_min_cv_5pct",
+        "n_rep": 2,
+        "source_date": "25194",
+        "excluded_rep": "中间行1",
+        "channel": 2
+      },
+      {
+        "season": "25SP",
+        "plot": 3,
+        "date": "25194",
+        "variable": "LAID",
+        "value": 3.79777806468,
+        "raw_sd": 0.6713563962198238,
+        "sd_method": "replicate_sd",
+        "n_rep": 2,
+        "source_date": "25194",
+        "excluded_rep": "中间行1",
+        "channel": 2
+      },
+      {
+        "season": "25SP",
+        "plot": 13,
+        "date": "25170",
+        "variable": "LAID",
+        "value": 2.8446207663600003,
+        "raw_sd": 0.41926200942738173,
+        "sd_method": "replicate_sd",
+        "n_rep": 2,
+        "source_date": "25170",
+        "excluded_rep": "中间行2",
+        "channel": 2
+      }
+    ],
+    "uncertainty_rule": "hybrid_sd(min_cv=0.05)"
+  }
 }
