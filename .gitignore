@@ -125,9 +125,7 @@ workspace/figure_redesign_demo/
 wAppDataLocalProgramsTraeresourcesappoutvsworkbenchcontribterminalcommonscripts*
 
 # ── 新目录结构（阶段 0+） ──
-workspace/runs/
-workspace/artifacts/
-workspace/trash/
+workspace/
 # Frozen source-tree snapshots used as provenance checkpoints by formal SA
 # runs (e.g. workspace/formal_source_66513df/). These are historical artifacts,
 # not source code; they make the worktree appear dirty and block the formal
