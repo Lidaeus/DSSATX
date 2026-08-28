@@ -151,3 +151,4 @@ workspace/audits/
 
 # ZCode workspace skills (vendored third-party, e.g. nature-skills; reinstall from upstream)
 .zcode/
+node_modules/
