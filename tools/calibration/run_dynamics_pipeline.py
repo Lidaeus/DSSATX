@@ -42,13 +42,13 @@ FIGURES_ROOT = ROOT / "figures" / "diagnostics"
 # always run all three seasons regardless of which seasons a batch calibrated on.
 CANONICAL_SEASONS = {
     "25SP": {"experiment_code": "XXQL2501",
-             "bundle_path": "data/user/experiments/xxql2501_actual_trial_calibration_v8_adap34_plantn_slpf_moisturefix_20260729",
+             "bundle_path": "data/user/experiments/xxql2501_repfilter_measuredmoisture_v2_20260819",
              "treatments": [2, 3, 4, 5, 9, 10, 11, 12, 13, 14]},
     "25FA": {"experiment_code": "XXQL2502",
              "bundle_path": "data/user/experiments/xxql2502_actual_trial_calibration_v7_adap34_plantn_slpf_20260729",
              "treatments": list(range(1, 13))},
     "26SP": {"experiment_code": "XXQL2601",
-             "bundle_path": "data/user/experiments/xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729",
+             "bundle_path": "data/user/experiments/xxql2601_repfilter_measuredmoisture_v2_20260819",
              "treatments": list(range(1, 13))},
 }
 ALL_SEASONS = ["25SP", "25FA", "26SP"]

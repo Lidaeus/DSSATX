@@ -54,6 +54,8 @@ BEST_PHI = 24666.0
 CALIBRATION_STATE = "completed"
 ARTIFACT_TYPE = "two_season_diagnostics_fixedsoil_official_20260813"
 EXTRA_LIMITATIONS: list[str] = []
+HARVEST_OBJECTIVE = "increment_plus_terminal + HARVEST_DRY_TREND (log)"
+SOIL_INJECTION_DESCRIPTION = "enabled (calibrated SBDM/SLPF/SSKS/SLCL/SLSI applied; SLPF fixed 0.93)"
 PLOT_INCLUDE_ALL_TREATMENTS = False
 PLOT_MAPPING_CSV: Path | None = None
 EXE = ROOT / "DSCSM048.EXE"
@@ -306,16 +308,17 @@ def _plot_metrics(metrics: pd.DataFrame, out_root: Path) -> list[Path]:
     subset = metrics[metrics["variable"].isin(order)].copy()
     fig, ax = plt.subplots(figsize=(10.5, 5.2), dpi=180)
     x = np.arange(len(order))
-    width = 0.3
+    width = min(0.24, 0.8 / max(len(SEASON_IDS), 1))
     for j, season in enumerate(SEASON_IDS):
         vals = subset[subset["season"] == season].set_index("variable")["rrmse_pct"].reindex(order)
-        ax.bar(x + (j - 0.5) * width, vals.to_numpy(float), width, label=season, color=COLORS[season])
+        offset = (j - (len(SEASON_IDS) - 1) / 2) * width
+        ax.bar(x + offset, vals.to_numpy(float), width, label=season, color=COLORS[season])
     ax.set_xticks(x, order, rotation=45, ha="right")
     ax.set_ylabel("RRMSE (%)")
-    ax.set_title("Best-member RRMSE across two seasons")
+    ax.set_title(f"Best-member RRMSE across {len(SEASON_IDS)} seasons")
     ax.grid(True, axis="y", alpha=0.25)
     ax.spines[["top", "right"]].set_visible(False)
-    ax.legend(frameon=False, ncol=2)
+    ax.legend(frameon=False, ncol=len(SEASON_IDS))
     fig.tight_layout()
     path = out_root / "metrics_rrmse_by_season.png"
     fig.savefig(path, bbox_inches="tight")
@@ -331,7 +334,7 @@ def _plot_extra_pairs(pairs: pd.DataFrame, out_root: Path) -> list[Path]:
         return outputs
     for variable, group in pairs.groupby("variable", sort=False):
         n_seasons = len(SEASON_IDS)
-        fig, axes = plt.subplots(1, n_seasons, figsize=(8.6, 4.2), dpi=180, sharex=True, sharey=True)
+        fig, axes = plt.subplots(1, n_seasons, figsize=(4.2 * n_seasons, 4.2), dpi=180, sharex=True, sharey=True)
         if n_seasons == 1:
             axes = [axes]
         finite = group[["observed", "simulated"]].to_numpy(float)
@@ -351,7 +354,7 @@ def _plot_extra_pairs(pairs: pd.DataFrame, out_root: Path) -> list[Path]:
         fig.tight_layout(rect=(0, 0.05, 1, 0.94))
         path = out_root / f"scatter_{variable}.png"; fig.savefig(path, bbox_inches="tight"); plt.close(fig); outputs.append(path)
 
-        fig, axes = plt.subplots(1, n_seasons, figsize=(8.6, 4.2), dpi=180, sharex=True, sharey=True)
+        fig, axes = plt.subplots(1, n_seasons, figsize=(4.2 * n_seasons, 4.2), dpi=180, sharex=True, sharey=True)
         if n_seasons == 1:
             axes = [axes]
         residual = group["simulated"] - group["observed"]
@@ -400,7 +403,7 @@ def main() -> int:
         f"fixed-soil official calibration best member = #{BEST_MEMBER} "
         f"(iteration={SOURCE_ITERATION}, phi={BEST_PHI:g}, state={CALIBRATION_STATE})"
     )
-    print("two-season actual_trial bundles:")
+    print(f"{len(SEASONS)}-season actual_trial bundles:")
     for s in SEASONS:
         print(f"  {s['season_id']}  {s['excode']}  TN={s['treatments']}")
         print(f"    bundle: {s['bundle']}")
@@ -466,11 +469,11 @@ def main() -> int:
         "parameter_count_exported": n_params,
         "custom_dssat_executable": str(EXE.resolve()),
         "custom_spe": str(SPE.resolve()),
-        "soil_injection": "enabled (calibrated SBDM/SLPF/SSKS/SLCL/SLSI applied; SLPF fixed 0.93)",
+        "soil_injection": SOIL_INJECTION_DESCRIPTION,
         "dssat_version": "official fixed-soil build",
         "custom_genetic_params": "none (official v4.8 SPE)",
         "soil_params": "FIXED (user-approved values, not inverted)",
-        "harvest_objective": "increment_plus_terminal + HARVEST_DRY_TREND (log)",
+        "harvest_objective": HARVEST_OBJECTIVE,
         "seasons": [{**s, "bundle": str(s["bundle"])} for s in SEASONS],
         "deterministic_run": str(DET_ROOT),
         "output_root": str(OUT_ROOT),

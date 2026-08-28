@@ -560,7 +560,7 @@ def _plot_dynamics_single_season(season_data, season_id, variable, kind, out_png
     sd = season_data
     reg = _load_obs_sigma(registry_csv, season_id) if registry_csv else None
 
-    ncols = min(4, len(cells))
+    ncols = 5 if len(cells) == 10 else min(4, len(cells))
     nrows = int(np.ceil(len(cells) / ncols))
     fig, axes = plt.subplots(nrows, ncols, figsize=(3.4 * ncols, 2.7 * nrows),
                              dpi=150, sharex=True, sharey=True)

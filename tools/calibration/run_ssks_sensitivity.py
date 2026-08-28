@@ -37,10 +37,10 @@ SEASONS = [
         "experiment_code": "XXQL2501",
         "bundle_path": (
             "data/user/experiments/"
-            "xxql2501_actual_trial_calibration_v8_adap34_plantn_slpf_moisturefix_20260729"
+            "xxql2501_repfilter_measuredmoisture_v2_20260819"
         ),
         "manifest_sha256": (
-            "f0c59a5e48127b62d77da13f1e5db154ac3b13f03b496b3586ee7514192e39fe"
+            "a2de6e6dbd6f9329fb6b16c18125495f1699cb6d83f720663c17940aca426f84"
         ),
         "treatments": [2, 5, 10, 13],
     },
@@ -49,12 +49,12 @@ SEASONS = [
         "experiment_code": "XXQL2601",
         "bundle_path": (
             "data/user/experiments/"
-            "xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729"
+            "xxql2601_repfilter_measuredmoisture_v2_20260819"
         ),
         "manifest_sha256": (
-            "365e0afc8e33be2ef6413a5420ec905211f7deb276f852f97723f4ce3dd1d24a"
+            "d0f66af7984d0328394443df89c61bd162233a5afc98be80ffc4498a76b1e75e"
         ),
-        "treatments": [1, 3, 9, 12],
+        "treatments": [2, 11, 3, 12],
     },
 ]
 

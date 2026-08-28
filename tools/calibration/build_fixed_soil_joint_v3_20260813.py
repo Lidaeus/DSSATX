@@ -114,10 +114,27 @@ def _read_ic_n_from_filex(filex_path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--variant", choices=list(VARIANTS), required=True)
+    ap.add_argument("--case")
+    ap.add_argument("--design", type=Path, default=DESIGN)
+    ap.add_argument("--bounds-id", default=BOUNDS_ID)
+    ap.add_argument("--noptmax", type=int, default=5)
+    ap.add_argument("--ies-num-reals", type=int, default=200)
+    ap.add_argument("--random-seed", type=int, default=20260813)
     args = ap.parse_args()
     variant = VARIANTS[args.variant]
 
-    CASE = f"e02_v2_fixedsoil_joint_{args.variant}_25sp26sp_200x5_20260814"
+    CASE = args.case or f"e02_v2_fixedsoil_joint_{args.variant}_25sp26sp_200x5_20260814"
+    design_source = args.design.resolve()
+    design_raw = json.loads(design_source.read_text(encoding="utf-8"))
+    seasons = [
+        {
+            "season_id": str(item["season_id"]),
+            "excode": str(item["experiment_code"]),
+            "treatments": [int(value) for value in item["treatments"]],
+            "bundle": Path(item["bundle_path"]),
+        }
+        for item in design_raw["seasons"]
+    ]
     OUT = ROOT / "workspace/runs" / CASE
     if OUT.exists():
         raise FileExistsError(OUT)
@@ -129,18 +146,20 @@ def main():
     env["DSSAT_SPE_BASE"] = str(variant["spe"].resolve())
     cmd = [
         sys.executable, str(ROOT / "src/calibration/build_pest.py"),
-        "--mode", "eggplant_stage2", "--multiseason-design", str(DESIGN),
-        "--input-dir", str(SEASONS[0]["bundle"]),
-        "--bounds-id", BOUNDS_ID, "--bounds-crop", "eggplant",
-        "--prefix", CASE, "--noptmax", "5", "--ies-num-reals", "200",
-        "--random-seed", "20260813", "--bad-phi-sigma", "1e300",
-        "--batch", str(BATCH_25SP), "--harvest-var", "CHPDT",
+        "--mode", "eggplant_stage2", "--multiseason-design", str(design_source),
+        "--input-dir", str(seasons[0]["bundle"]),
+        "--bounds-id", args.bounds_id, "--bounds-crop", "eggplant",
+        "--prefix", CASE, "--noptmax", str(args.noptmax), "--ies-num-reals", str(args.ies_num_reals),
+        "--random-seed", str(args.random_seed), "--bad-phi-sigma", "1e300",
+        "--batch", str(seasons[0]["bundle"] / "DSSBatch.v48"), "--harvest-var", "CHPDT",
         "--include-soil", "--out-dir", str(OUT),
         "--param-review-mode", "off", "--bounds-review-mode", "off",
         "--observation-policy-csv", str(POLICY),
         "--initial-ensemble-method", "sobol", "--no-include-n-uptake",
     ]
     subprocess.run(cmd, cwd=str(ROOT), env=env, check=True)
+
+
 
     print("[2/7] updating genetic init values to a3_nr_zp #103")
     a3_par = pd.read_csv(A3_RUN / f"{A3_CASE}.4.par.csv")
@@ -161,9 +180,7 @@ def main():
     soil_fix = pd.read_excel(SOIL_FIX_XLSX)
     soil_fixes = dict(zip(soil_fix["param"].astype(str), soil_fix["Fix"].astype(float)))
     soil_fixes["SOIL_SLPF"] = SLPF_FIXED
-    ic_fix = pd.read_csv(IC_FIX_CSV)
-    ic_fixes = dict(zip(ic_fix["param"].astype(str), ic_fix["Fix"].astype(float)))
-    all_fixes = {**soil_fixes, **ic_fixes}
+    all_fixes = {**soil_fixes}
 
     # NUPK50/NUPCMN (a3 variant only): the base flow drops them under
     # --no-include-n-uptake; re-inject as adjustable species params.
@@ -202,7 +219,7 @@ def main():
     # IC params are NOT produced by the base build_pest flow; inject them as
     # fixed params with the user-approved values (read from the bundle FileX).
     ic_injected = 0
-    for s in SEASONS:
+    for s in seasons:
         ex = s["excode"]
         filex = s["bundle"] / f"{ex}.TMX"
         ic = _read_ic_n_from_filex(filex)
@@ -259,9 +276,9 @@ def main():
             pst.parameter_data.at[name, "parval1"] = hi - abs(hi) * 1e-6
 
     print("[5/7] writing PST + tpl/params sync")
-    pst.control_data.noptmax = 5
-    pst.pestpp_options["ies_num_reals"] = "200"
-    pst.pestpp_options["rand_seed"] = "20260813"
+    pst.control_data.noptmax = args.noptmax
+    pst.pestpp_options["ies_num_reals"] = str(args.ies_num_reals)
+    pst.pestpp_options["rand_seed"] = str(args.random_seed)
     # Avoid the default 0.075 effective lambda/step combination.  Prior T10
     # DSSAT audits established this narrower search as the stable formal IES
     # policy for nonlinear crop-model updates.
@@ -303,7 +320,7 @@ def main():
 
     print("[6/7] design json localization")
     run_design = OUT / "joint_design.json"
-    d = json.loads(DESIGN.read_text(encoding="utf-8"))
+    d = design_raw
     for season in d["seasons"]:
         manifest = Path(season["bundle_path"]) / "input_manifest.json"
         if manifest.is_file():
@@ -345,8 +362,8 @@ def main():
         "n_parameters": int(pst3.npar), "n_adjustable": int(pst3.npar_adj),
         "n_observations": int(pst3.nobs),
         "wresp_observations": int(len(wresp)),
-        "water_response": "W2-W1 within same nitrogen, raw_difference, W_RESPONSE budget 0.025",
-        "group_policy": "t10_rawdiff_terminal_nresp01_soil02_group_policy_20260813.csv",
+        "water_response": d.get("water_response_objective", {}),
+        "group_policy": d.get("group_policy"),
     }
     (OUT / "formal_launch_receipt.json").write_text(
         json.dumps(receipt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

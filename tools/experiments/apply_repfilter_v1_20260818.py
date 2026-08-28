@@ -1,113 +1,272 @@
-"""Apply the approved replicate-exclusion scheme (2026-08-18) and build
-_repfilter_v1 bundles.
+"""Build corrected replicate-filtered spring bundles.
 
-Per docs/重复剔除方案_20260818.md (user-approved 2026-08-18):
-- Channel 1 (statistical single-variable anomalies): 10 value-level removals
-- Channel 2 (field-confirmed non-representative plants): 2 whole-plant + 3
-  value-level removals
-
-Execution contract (user-approved):
-- Source xlsx gain a `剔除标记` column — NO row deletion, NO value edits
-- New bundle copies `*_repfilter_v1_20260818` with affected observations
-  recomputed from the remaining replicates (exact linear rescaling by the
-  treatment's density factor), FileT_values.csv / TMT /
-  observation_uncertainty.csv updated in lockstep
-- Original v8/v7 bundles and all frozen calibration results untouched
-
-Usage:
-    python tools/experiments/apply_repfilter_v1_20260818.py --dry-run | --apply
+The canonical trial-observation generator owns moisture matching, uncertainty
+rules and six-character FileA/FileT formatting.  This script applies only the
+approved replicate exclusions to its in-memory results, then writes two new
+versioned bundles without modifying their parent bundles.
 """
-
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
-import math
 import shutil
 import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from openpyxl import load_workbook
 
 ROOT = Path(__file__).resolve().parents[2]
-X25 = ROOT / "data/user/ref/DSSAT文件/2025春/2025春作物生长指标集.xlsx"
-X26 = ROOT / "data/user/ref/DSSAT文件/2026春/2026春生长指标集.xlsx"
-B25 = ROOT / "data/user/experiments/xxql2501_actual_trial_calibration_v8_adap34_plantn_slpf_moisturefix_20260729"
-B26 = ROOT / "data/user/experiments/xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729"
-NEW25 = ROOT / "data/user/experiments/xxql2501_repfilter_v1_20260818"
-NEW26 = ROOT / "data/user/experiments/xxql2601_repfilter_v1_20260818"
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-VAR_MAP = {"株高": "CHTD", "茎干重": "SWAD", "叶干重": "LWAD", "LAI": "LAID"}
-SHEET26 = {"0502": "26122", "0602": "26153", "0629": "26180", "0717": "26198"}
+import tools.experiments.build_trial_observations_v2_20260726 as generator
 
-# (season, plot, date, target, rep_id, channel)
+REF_ROOT = ROOT / "data/user/ref/DSSAT文件"
+X25 = REF_ROOT / "2025春/2025春作物生长指标集.xlsx"
+X26 = REF_ROOT / "2026春/2026春生长指标集.xlsx"
+BASE25 = ROOT / "data/user/experiments/xxql2501_actual_trial_calibration_v8_adap34_plantn_slpf_moisturefix_20260729"
+BASE26 = ROOT / "data/user/experiments/xxql2601_actual_trial_calibration_v7_adap34_plantn_slpf_20260729"
+NEW25 = ROOT / "data/user/experiments/xxql2501_repfilter_measuredmoisture_v2_20260819"
+NEW26 = ROOT / "data/user/experiments/xxql2601_repfilter_measuredmoisture_v2_20260819"
+
+# (season, plot, source date/sheet, variable scope, replicate id, channel)
 REMOVALS = [
-    # ── channel 1: single-variable anomalies (statistical) ──
-    ("25SP", 1,  "25120", "茎干重", "中间行2", 1),
-    ("25SP", 4,  "25142", "茎干重", "中间行2", 1),
-    ("25SP", 6,  "25120", "LAI",   "中间行2", 1),
-    ("25SP", 6,  "25142", "叶干重", "中间行2", 1),
-    ("25SP", 8,  "25170", "LAI",   "边行",   1),
-    ("26SP", 11, "0502",  "LAI",   "rep3",   1),
-    ("26SP", 1,  "0717",  "茎干重", "rep2",   1),
-    ("26SP", 2,  "0717",  "茎干重", "rep3",   1),
-    ("26SP", 3,  "0717",  "LAI",   "rep1",   1),
-    ("26SP", 9,  "0717",  "叶干重", "rep2",   1),
-    # ── channel 2: field-confirmed non-representative ──
-    ("25SP", 3,  "25194", "plant", "中间行1", 2),
-    ("25SP", 13, "25170", "LAI",   "中间行2", 2),
-    ("26SP", 2,  "0629",  "plant", "rep3",   2),
-    ("26SP", 5,  "0629",  "叶干重", "rep3",   2),
-    ("26SP", 4,  "0629",  "叶干重", "rep3",   2),
+    ("25SP", 1, "25120", "茎干重", "中间行2", 1),
+    ("25SP", 4, "25142", "茎干重", "中间行2", 1),
+    ("25SP", 6, "25120", "LAI", "中间行2", 1),
+    ("25SP", 6, "25142", "叶干重", "中间行2", 1),
+    ("25SP", 8, "25170", "LAI", "边行", 1),
+    ("26SP", 11, "0502", "LAI", "rep3", 1),
+    ("26SP", 1, "0717", "茎干重", "rep2", 1),
+    ("26SP", 2, "0717", "茎干重", "rep3", 1),
+    ("26SP", 3, "0717", "LAI", "rep1", 1),
+    ("26SP", 9, "0717", "叶干重", "rep2", 1),
+    ("25SP", 3, "25194", "plant", "中间行1", 2),
+    ("25SP", 13, "25170", "LAI", "中间行2", 2),
+    ("26SP", 2, "0629", "plant", "rep3", 2),
+    ("26SP", 5, "0629", "叶干重", "rep3", 2),
+    ("26SP", 4, "0629", "叶干重", "rep3", 2),
+    ("26SP", 7, "0629", "叶干重", "rep1", 2),
 ]
-# 25SP plots 1/6/7/8 are excluded from calibration TNs; marks still go to source.
-INCLUDED_25SP = {2, 3, 4, 5, 9, 10, 11, 12, 13, 14}
+INCLUDED25 = set(generator.SPRING25_INCLUDED_TN)
+SHEET26 = {"0502": "26122", "0602": "26153", "0629": "26180", "0717": "26198"}
+VAR_MAP = {"株高": "CHTD", "茎干重": "SWAD", "叶干重": "LWAD", "LAI": "LAID"}
 
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def rep_key_25(row) -> str:
-    return str(row["行位置"])
+def _raw_25() -> pd.DataFrame:
+    frame = pd.read_excel(X25, sheet_name="Sheet1")
+    frame["_date"] = pd.to_datetime(frame["日期"]).dt.strftime("%y%j")
+    frame["_rep"] = frame["行位置"].astype(str)
+    return frame
 
 
-def rep_key_26(rep: int) -> str:
-    return f"rep{int(rep)}"
-
-
-def load_25() -> pd.DataFrame:
-    df = pd.ExcelFile(X25).parse("Sheet1")
-    df["doy"] = pd.to_datetime(df["日期"]).dt.strftime("%y%j")
-    return df
-
-
-def load_26(sheet: str) -> pd.DataFrame:
-    df = pd.ExcelFile(X26).parse(sheet)
+def _raw_26(sheet: str) -> pd.DataFrame:
+    frame = pd.read_excel(X26, sheet_name=sheet)
     trcol = "小区" if sheet == "0502" else ("处理 (Treatment)" if sheet == "0629" else "处理")
-    df = df.rename(columns={trcol: "plot"})
-    return df
+    frame = frame.rename(columns={trcol: "_plot"})
+    frame["_rep"] = "rep" + pd.to_numeric(frame["重复"], errors="raise").astype(int).astype(str)
+    return frame
 
 
-def vars_for(target: str, available: list[str]) -> list[str]:
-    if target == "plant":
-        return [v for v in ("株高", "茎干重", "叶干重", "LAI") if v in available]
-    return [target]
+def _variables(target: str) -> list[str]:
+    return ["株高", "茎干重", "叶干重", "LAI"] if target == "plant" else [target]
 
 
-def affected_vars(season: str, date: str) -> list[str]:
-    if season == "25SP":
-        return ["株高", "茎干重", "叶干重", "LAI"]
-    specs = {"0502": ["株高", "茎干重", "叶干重", "LAI"], "0602": ["株高 (cm)", "茎干重", "叶干重", "LAI"],
-             "0629": ["株高 (Plant Height / cm)", "茎干重", "叶干重"], "0717": ["株高 (cm)", "茎干重", "叶干重", "LAI"]}
-    return specs[date]
+def _source_column(season: str, date: str, variable: str) -> str:
+    if season == "25SP" or variable != "株高":
+        return variable
+    return {
+        "0502": "株高",
+        "0602": "株高 (cm)",
+        "0629": "株高 (Plant Height / cm)",
+        "0717": "株高 (cm)",
+    }[date]
 
 
-def base_colname(var: str) -> str:
-    return var.split(" ")[0].split("(")[0]
+def _set_growth_value(result, plot: int, date_code: str, variable: str, values: pd.Series) -> dict:
+    clean = pd.to_numeric(values, errors="coerce").dropna().to_numpy(float)
+    sd, method, n_rep = generator.hybrid_sd(clean, min_cv=0.05)
+    mean = float(np.mean(clean))
+    target = pd.to_datetime(date_code, format="%y%j")
+    mask = result.growth["TRNO"].eq(plot) & pd.to_datetime(result.growth["DATE"]).eq(target)
+    if int(mask.sum()) != 1:
+        raise AssertionError((result.season_id, plot, date_code, variable, int(mask.sum())))
+    token = VAR_MAP[variable]
+    factor = generator.FACTOR if token in {"LWAD", "SWAD"} else 1.0
+    result.growth.loc[mask, token] = mean * factor
+    result.growth.loc[mask, f"{token}_sd"] = sd * factor
+    result.growth.loc[mask, f"{token}_sd_source"] = method
+    result.growth.loc[mask, f"{token}_n_rep"] = n_rep
+    return {
+        "season": result.season_id,
+        "plot": plot,
+        "date": date_code,
+        "variable": token,
+        "value": mean * factor,
+        "raw_sd": sd * factor,
+        "sd_method": method,
+        "n_rep": n_rep,
+    }
+
+
+def _refresh_filea(result) -> None:
+    for index, row in result.filea.iterrows():
+        plot = int(row["TRNO"])
+        growth = result.growth.loc[result.growth["TRNO"].eq(plot)].sort_values("DATE")
+        lai = growth.loc[growth["LAID"].notna()]
+        leaf = growth.loc[growth["LWAD"].notna()]
+        stem = growth.loc[growth["SWAD"].notna()]
+        if not lai.empty:
+            max_row = lai.loc[lai["LAID"].idxmax()]
+            result.filea.loc[index, ["LAIX", "LAIX_sd", "LAIX_sd_source", "LAIX_n_rep"]] = [
+                max_row["LAID"], max_row["LAID_sd"], max_row["LAID_sd_source"], max_row["LAID_n_rep"]
+            ]
+        if not leaf.empty:
+            last = leaf.iloc[-1]
+            result.filea.loc[index, ["LWAM", "LWAM_sd", "LWAM_sd_source", "LWAM_n_rep"]] = [
+                last["LWAD"], last["LWAD_sd"], last["LWAD_sd_source"], last["LWAD_n_rep"]
+            ]
+        if not stem.empty:
+            last = stem.iloc[-1]
+            result.filea.loc[index, ["SWAM", "SWAM_sd", "SWAM_sd_source", "SWAM_n_rep"]] = [
+                last["SWAD"], last["SWAD_sd"], last["SWAD_sd_source"], last["SWAD_n_rep"]
+            ]
+
+
+def _apply_removals(result) -> list[dict]:
+    raw25 = _raw_25() if result.season_id == "25SP" else None
+    audits: list[dict] = []
+    for season, plot, source_date, target, rep_id, channel in REMOVALS:
+        if season != result.season_id:
+            continue
+        if season == "25SP" and plot not in INCLUDED25:
+            continue
+        if season == "25SP":
+            group = raw25.loc[raw25["小区号"].eq(plot) & raw25["_date"].eq(source_date)].copy()
+            date_code = source_date
+        else:
+            group = _raw_26(source_date)
+            group = group.loc[group["_plot"].eq(plot)].copy()
+            date_code = SHEET26[source_date]
+        keep = group["_rep"].ne(rep_id)
+        if int((~keep).sum()) != 1:
+            raise AssertionError((season, plot, source_date, rep_id, int((~keep).sum())))
+        variables = _variables(target)
+        if target == "plant":
+            variables = [
+                variable for variable in variables
+                if _source_column(season, source_date, variable) in group.columns
+            ]
+        for variable in variables:
+            column = _source_column(season, source_date, variable)
+            audit = _set_growth_value(result, plot, date_code, variable, group.loc[keep, column])
+            audit.update({"source_date": source_date, "excluded_rep": rep_id, "channel": channel})
+            audits.append(audit)
+    _refresh_filea(result)
+    source_workbook = (
+        "2025春产量数据集.xlsx;2025春作物生长指标集.xlsx"
+        if result.season_id == "25SP"
+        else "2026春产量集.xlsx;2026春生长指标集.xlsx;2026春品质指标集.xlsx"
+    )
+    result.observation_uncertainty = generator.build_observation_uncertainty(
+        result.season_id, result.excode, result.filea, result.growth, result.harvest,
+        source_workbook=source_workbook,
+    )
+    changed = {(row["plot"], row["date"], row["variable"]): row for row in audits}
+    for key, audit in changed.items():
+        plot, date_code, variable = key
+        mask = (
+            result.observation_uncertainty["trno"].eq(plot)
+            & result.observation_uncertainty["date"].astype(str).eq(date_code)
+            & result.observation_uncertainty["variable"].eq(variable)
+        )
+        if int(mask.sum()) != 1:
+            raise AssertionError((key, int(mask.sum())))
+        result.observation_uncertainty.loc[mask, "quality_flag"] = "repfilter_v2_20260819"
+    return audits
+
+
+def _refresh_manifest(bundle: Path, parent: Path, result, audit_count: int) -> None:
+    manifest_path = bundle / "input_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["bundle_id"] = bundle.name
+    manifest["derived_from_bundle"] = parent.name
+    manifest["derived_from_manifest_sha256"] = sha256(parent / "input_manifest.json")
+    manifest["source_workbooks"] = manifest.get("source_workbooks", {})
+    manifest["source_workbooks"]["trial_observations"] = {
+        str(Path(path).resolve().relative_to(ROOT.resolve())): digest
+        for path, digest in result.source_files.items()
+    }
+    common = {
+        f"{result.excode}.TMA", f"{result.excode}.TMT",
+        "observation_uncertainty.csv", "fruit_quality_match_audit.csv",
+        "FileA_values.csv", "FileT_values.csv", "generator_log.json",
+        "trial_generator_log.json", "SOIL.SOL",
+    }
+    if (bundle / "treatment_exclusion_audit.csv").is_file():
+        common.add("treatment_exclusion_audit.csv")
+
+    def update_records(value):
+        if isinstance(value, dict):
+            name = value.get("name")
+            if name in common and (bundle / name).is_file():
+                value["sha256"] = sha256(bundle / name)
+                value["bytes"] = (bundle / name).stat().st_size
+                value["generated_by"] = "tools/experiments/apply_repfilter_v1_20260818.py"
+                value["generator_sha256"] = sha256(Path(__file__))
+            for child in value.values():
+                update_records(child)
+        elif isinstance(value, list):
+            for child in value:
+                update_records(child)
+
+    update_records(manifest)
+    manifest["data_corrections"] = {
+        "correction_id": "repfilter_measuredmoisture_v2_20260819",
+        "repfilter_cells": audit_count,
+        "uncertainty_rule": "remaining replicates with minimum CV 5%",
+        "fruit_moisture": "nearest plot-level measured moisture by harvest date",
+        "filea_filet_sync": "terminal FileA regenerated from corrected FileT states",
+    }
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def _build(parent: Path, target: Path, result) -> dict:
+    if target.exists():
+        raise FileExistsError(target)
+    shutil.copytree(parent, target)
+    audits = _apply_removals(result)
+    result.qa_metrics.update({
+        "fruit_moisture_contract": "measured_nearest_by_plot_date",
+        "dmfr_min": float(result.fruit_quality_match_audit["dmfr"].min()),
+        "dmfr_max": float(result.fruit_quality_match_audit["dmfr"].max()),
+        "repfilter_cells": len(audits),
+        "repfilter_min_cv": 0.05,
+    })
+    generator.write_season_outputs(result, target, sha256(Path(generator.__file__)))
+    log_path = target / "generator_log.json"
+    log = json.loads(log_path.read_text(encoding="utf-8"))
+    log["repfilter_v2_20260819"] = {
+        "approved_exclusions": len([row for row in REMOVALS if row[0] == result.season_id]),
+        "updated_cells": len(audits),
+        "audit": audits,
+        "uncertainty_rule": "hybrid_sd(min_cv=0.05)",
+    }
+    log_path.write_text(json.dumps(log, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    shutil.copy2(log_path, target / "trial_generator_log.json")
+    _refresh_manifest(target, parent, result, len(audits))
+    return {
+        "bundle": target.name,
+        "updated_cells": len(audits),
+        "dmfr_min": result.qa_metrics["dmfr_min"],
+        "dmfr_max": result.qa_metrics["dmfr_max"],
+    }
 
 
 def main() -> int:
@@ -115,181 +274,24 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--apply", action="store_true")
     args = parser.parse_args()
-    if not (args.dry_run or args.apply):
-        parser.error("choose --dry-run or --apply")
-
-    # ── 1. compute new means/sds from raw data ──
-    df25 = load_25()
-    updates: list[dict] = []
-    for season, plot, date, target, rep_id, channel in REMOVALS:
-        if season == "25SP":
-            g = df25[(df25.小区号 == plot) & (df25.doy == date)].copy()
-            g["_rep"] = g.apply(rep_key_25, axis=1)
-            avail = ["株高", "茎干重", "叶干重", "LAI"]
-            varcols = {v: v for v in avail}
-        else:
-            g = load_26(date)
-            g = g[g["plot"] == plot].copy()
-            g["_rep"] = g["重复"].apply(rep_key_26)
-            avail = affected_vars(season, date)
-            varcols = {v: c for v, c in zip([base_colname(c) for c in avail], avail)}
-        for var in vars_for(target, [base_colname(c) for c in avail]):
-            col = varcols[var]
-            vals = pd.to_numeric(g[col], errors="coerce")
-            old_mean = float(vals.mean())
-            keep = g["_rep"] != rep_id
-            new_mean = float(vals[keep].mean())
-            new_sd = float(vals[keep].std(ddof=1)) if keep.sum() >= 2 else float("nan")
-            old_sd = float(vals.std(ddof=1))
-            updates.append({
-                "season": season, "plot": plot, "date": date, "var": var, "rep": rep_id,
-                "channel": channel, "old_mean": old_mean, "new_mean": new_mean,
-                "old_sd": old_sd, "new_sd": new_sd, "n_new": int(keep.sum()),
-                "in_calibration": (season == "26SP") or (plot in INCLUDED_25SP),
-                "doy": date if season == "25SP" else SHEET26[date],
-            })
-
-    print(f"{'season':6s} {'plot':>4s} {'doy':6s} {'var':5s} {'rep':8s} ch  old_mean  new_mean   change")
-    for u in updates:
-        chg = (u["new_mean"] / u["old_mean"] - 1) * 100 if u["old_mean"] else float("nan")
-        star = "" if u["in_calibration"] else "  (excluded-TN, source mark only)"
-        print(f"{u['season']:6s} {u['plot']:>4d} {u['doy']:6s} {u['var']:5s} {u['rep']:8s} "
-              f"{u['channel']}   {u['old_mean']:8.2f} {u['new_mean']:8.2f} {chg:+7.1f}%{star}")
-
+    if args.dry_run == args.apply:
+        parser.error("choose exactly one of --dry-run or --apply")
+    results = [
+        (BASE25, NEW25, generator.load_2025_spring(REF_ROOT)),
+        (BASE26, NEW26, generator.load_2026_spring(REF_ROOT)),
+    ]
     if args.dry_run:
-        print("\n[dry-run] no files modified")
+        for _, target, result in results:
+            audits = _apply_removals(result)
+            print(json.dumps({
+                "bundle": target.name,
+                "updated_cells": len(audits),
+                "dmfr_min": float(result.fruit_quality_match_audit["dmfr"].min()),
+                "dmfr_max": float(result.fruit_quality_match_audit["dmfr"].max()),
+            }, ensure_ascii=True))
         return 0
-
-    # ── 2. mark source xlsx ──
-    # The mark column position is derived from the ORIGINAL header only, so
-    # repeated runs write to one fixed column instead of marching rightward.
-    def mark(ws, header_row: int, find_row, tag: str, mark_col: int) -> None:
-        if ws.cell(row=header_row, column=mark_col).value != "剔除标记":
-            ws.cell(row=header_row, column=mark_col, value="剔除标记")
-        r = find_row()
-        if r is None:
-            raise RuntimeError("row not found for marking")
-        ws.cell(row=r, column=mark_col, value=tag)
-
-    def mark_col_of(ws) -> int:
-        hdr = {c.value: c.column for c in ws[1]}
-        existing = [col for name, col in hdr.items()
-                    if name is not None and str(name).split(".")[0] == "剔除标记"]
-        return existing[0] if existing else max(col for name, col in hdr.items()
-                                                if name is not None and str(name) != "剔除标记") + 1
-
-    tag = {1: "剔除:{}:通道1-单变量异常:20260818", 2: "剔除:{}:通道2-非代表性样株(用户田间确认):20260818"}
-    wb25 = load_workbook(X25)
-    ws25 = wb25["Sheet1"]
-    hdr25 = {c.value: c.column for c in ws25[1]}
-    mc25 = mark_col_of(ws25)
-    for season, plot, date, target, rep_id, channel in [r for r in REMOVALS if r[0] == "25SP"]:
-        target_vars = vars_for(target, ["株高", "茎干重", "叶干重", "LAI"])
-        joined = "+".join(target_vars) if target != "plant" else "整株"
-        t = tag[channel].format(joined)
-        def find_row(p=plot, d=date, rp=rep_id):
-            import datetime as dt
-            dd = dt.datetime.strptime("20" + d, "%Y%j")
-            for r in range(2, ws25.max_row + 1):
-                if ws25.cell(row=r, column=hdr25["小区号"]).value == p \
-                        and ws25.cell(row=r, column=hdr25["日期"]).value == dd \
-                        and ws25.cell(row=r, column=hdr25["行位置"]).value == rp:
-                    return r
-            return None
-        mark(ws25, 1, find_row, t, mc25)
-    wb25.save(X25)
-    print("marked 25SP xlsx")
-
-    wb26 = load_workbook(X26)
-    for season, plot, date, target, rep_id, channel in [r for r in REMOVALS if r[0] == "26SP"]:
-        ws = wb26[date]
-        joined = "+".join(vars_for(target, [base_colname(c) for c in affected_vars("26SP", date)])) \
-            if target != "plant" else "整株"
-        t = tag[channel].format(joined)
-        repno = int(rep_id.replace("rep", ""))
-        hdr = {c.value: c.column for c in ws[1]}
-        trcol = "小区" if date == "0502" else ("处理 (Treatment)" if date == "0629" else "处理")
-        mc = mark_col_of(ws)
-        def find_row(p=plot, rn=repno, w=ws, h=hdr, tc=trcol):
-            for r in range(2, w.max_row + 1):
-                if w.cell(row=r, column=h[tc]).value == p and w.cell(row=r, column=h["重复"]).value == rn:
-                    return r
-            return None
-        mark(ws, 1, find_row, t, mc)
-    wb26.save(X26)
-    print("marked 26SP xlsx")
-
-    # ── 3. build repfilter bundles ──
-    for src, dst in ((B25, NEW25), (B26, NEW26)):
-        if dst.exists():
-            raise FileExistsError(dst)
-        shutil.copytree(src, dst)
-
-    def update_filet(bundle: Path, u: dict, value: float) -> None:
-        path = bundle / "FileT_values.csv"
-        ft = pd.read_csv(path)
-        doys = pd.to_datetime(ft["DATE"]).dt.strftime("%y%j")
-        m = (ft["TRNO"] == u["plot"]) & (doys == u["doy"])
-        assert int(m.sum()) == 1, (u, m.sum())
-        ft.loc[m, VAR_MAP[u["var"]]] = value
-        ft.to_csv(path, index=False)
-
-    def update_tmt(bundle: Path, excode: str, u: dict, value: float) -> None:
-        path = bundle / f"{excode}.TMT"
-        lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
-        idx = next(i for i, l in enumerate(lines) if l.startswith("@"))
-        hdr = [c.lstrip("@") for c in lines[idx].split()]
-        # hdr tokens align 1:1 with row tokens (hdr[0] is '@TRNO' -> 'TRNO')
-        vi = hdr.index(VAR_MAP[u["var"]])
-        hit = 0
-        for i in range(idx + 1, len(lines)):
-            parts = lines[i].split()
-            if len(parts) < len(hdr) or not parts[0].lstrip("-").isdigit():
-                continue
-            if int(parts[0]) == u["plot"] and parts[1] == u["doy"]:
-                old = parts[vi]
-                if old == "-99" or float(old) <= -99:
-                    raise AssertionError(f"target cell missing in TMT: {u} col {hdr[vi]}")
-                width = len(old)
-                dec = len(old.split(".")[1]) if "." in old else 0
-                parts[vi] = f"{value:{width}.{dec}f}" if dec else f"{value:{width}.0f}"
-                lines[i] = " ".join(parts)
-                hit += 1
-        assert hit == 1, (u, hit)
-        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-
-    def update_uncertainty(bundle: Path, season: str, excode: str, u: dict, value: float, sd: float) -> None:
-        path = bundle / "observation_uncertainty.csv"
-        un = pd.read_csv(path)
-        m = (un["trno"] == u["plot"]) & (un["date"].astype(str) == u["doy"]) \
-            & (un["variable"] == VAR_MAP[u["var"]])
-        assert int(m.sum()) == 1, (u, m.sum())
-        un.loc[m, "value"] = value
-        un.loc[m, "raw_sd"] = sd
-        un.loc[m, "n_rep"] = u["n_new"]
-        un.loc[m, "quality_flag"] = "repfilter_20260818"
-        un.to_csv(path, index=False)
-
-    scale_cache: dict[tuple, float] = {}
-    for u in updates:
-        if not u["in_calibration"]:
-            continue
-        bundle = NEW25 if u["season"] == "25SP" else NEW26
-        excode = "XXQL2501" if u["season"] == "25SP" else "XXQL2601"
-        key = (u["season"], u["plot"], VAR_MAP[u["var"]])
-        ft = pd.read_csv(bundle / "FileT_values.csv")
-        doys = pd.to_datetime(ft["DATE"]).dt.strftime("%y%j")
-        m = (ft["TRNO"] == u["plot"]) & (doys == u["doy"])
-        old_ft = float(ft.loc[m, VAR_MAP[u["var"]]].iloc[0])
-        scale = old_ft / u["old_mean"] if u["old_mean"] else 1.0
-        new_ft = u["new_mean"] * scale
-        new_sd = u["new_sd"] * scale if math.isfinite(u["new_sd"]) else u["old_sd"] * scale
-        update_filet(bundle, u, new_ft)
-        update_tmt(bundle, excode, u, new_ft)
-        update_uncertainty(bundle, u["season"], excode, u, new_ft, new_sd)
-        scale_cache[key] = scale
-
-    print(f"bundle updates applied: {sum(1 for u in updates if u['in_calibration'])} values")
+    receipts = [_build(parent, target, result) for parent, target, result in results]
+    print(json.dumps(receipts, ensure_ascii=True, indent=2))
     return 0
 
 

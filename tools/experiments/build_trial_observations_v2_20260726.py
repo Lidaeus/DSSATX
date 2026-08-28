@@ -924,6 +924,8 @@ def load_2026_spring(root: Path) -> SeasonResult:
     xls_g = pd.ExcelFile(g_path)
     g_frames = []
     for sheet in xls_g.sheet_names:
+        if str(sheet).strip() == "QA说明":
+            continue
         df_s = pd.read_excel(xls_g, sheet_name=sheet)
         df_s = df_s.rename(columns={c: str(c).strip() for c in df_s.columns})
         height_col = next((c for c in HEIGHT_ALIASES if c in df_s.columns), None)
