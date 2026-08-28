@@ -1,0 +1,151 @@
+{
+  "artifact_type": "v17_early_yield_n_recovery_best76_two_season_diagnostics_20260819",
+  "source_calibration": "D:\\Tomato_Cal\\workspace\\runs\\e02_v17_early_yield_n_recovery_official_200x6_20260819",
+  "source_iteration": 6,
+  "calibration_state": "engineering_validated",
+  "best_member": "76",
+  "best_phi": 3272.7,
+  "parameter_csv": "D:\\Tomato_Cal\\workspace\\runs\\e02_v17_early_yield_n_recovery_official_200x6_20260819\\deterministic_candidates\\best_phi_member76_two_season_20260819\\best_member_76_params.csv",
+  "parameter_count_exported": 206,
+  "custom_dssat_executable": "D:\\Tomato_Cal\\DSCSM048.EXE",
+  "custom_spe": "C:\\DSSAT48\\Genotype\\TMGRO048.SPE",
+  "soil_injection": "soil SLOC calibrated with measured SOM baseline; root N remobilization active; CHTD zero-weighted",
+  "dssat_version": "official fixed-soil build",
+  "custom_genetic_params": "none (official v4.8 SPE)",
+  "soil_params": "FIXED (user-approved values, not inverted)",
+  "harvest_objective": "raw cumulative dry mass; process phi = 300*(1-NSE); terminal phi = 150*(1-NSE); W/N response disabled",
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "excode": "XXQL2501",
+      "treatments": [
+        2,
+        3,
+        4,
+        5,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "bundle": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2501_repfilter_measuredmoisture_v2_20260819"
+    },
+    {
+      "season_id": "26SP",
+      "excode": "XXQL2601",
+      "treatments": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "bundle": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2601_repfilter_measuredmoisture_v2_20260819"
+    }
+  ],
+  "deterministic_run": "D:\\Tomato_Cal\\workspace\\runs\\e02_v17_early_yield_n_recovery_official_200x6_20260819\\deterministic_candidates\\best_phi_member76_two_season_20260819",
+  "output_root": "D:\\Tomato_Cal\\figture\\e02_v17_early_yield_n_recovery_best76_two_season_full_20260819",
+  "metric_plots": [
+    "metrics_heatmap_rrmse_pct.png",
+    "metrics_heatmap_r2.png",
+    "metrics_heatmap_nse.png",
+    "metrics_heatmap_d_index.png",
+    "metrics_rrmse_by_season.png",
+    "scatter_CHTD.png",
+    "residual_CHTD.png"
+  ],
+  "figures": [
+    "25SP\\bar_dry_yield_increment.png",
+    "25SP\\timeseries_LAID_by_WxN.png",
+    "25SP\\timeseries_LWAD_by_WxN.png",
+    "25SP\\timeseries_SWAD_by_WxN.png",
+    "25SP\\timeseries_dry_cum_by_WxN.png",
+    "25SP\\timeseries_fresh_cum_by_WxN.png",
+    "26SP\\bar_dry_yield_increment.png",
+    "26SP\\timeseries_LAID_by_WxN.png",
+    "26SP\\timeseries_LWAD_by_WxN.png",
+    "26SP\\timeseries_SWAD_by_WxN.png",
+    "26SP\\timeseries_dry_cum_by_WxN.png",
+    "26SP\\timeseries_fresh_cum_by_WxN.png",
+    "metrics_heatmap_d_index.png",
+    "metrics_heatmap_nse.png",
+    "metrics_heatmap_r2.png",
+    "metrics_heatmap_rrmse_pct.png",
+    "metrics_rrmse_by_season.png",
+    "residual_CHTD.png",
+    "residual_LAID.png",
+    "residual_LWAD.png",
+    "residual_SWAD.png",
+    "residual_dry_cum.png",
+    "residual_fresh_cum.png",
+    "response_structure_audit.png",
+    "scatter_CHTD.png",
+    "scatter_LAID.png",
+    "scatter_LWAD.png",
+    "scatter_SWAD.png",
+    "scatter_dry_cum.png",
+    "scatter_fresh_cum.png"
+  ],
+  "metrics_csv": "D:\\Tomato_Cal\\workspace\\runs\\e02_v17_early_yield_n_recovery_official_200x6_20260819\\deterministic_candidates\\best_phi_member76_two_season_20260819\\metrics_by_season_variable.csv",
+  "organ_n_pairs_csv": "D:\\Tomato_Cal\\workspace\\runs\\e02_v17_early_yield_n_recovery_official_200x6_20260819\\deterministic_candidates\\best_phi_member76_two_season_20260819\\organ_n_compare.csv",
+  "bundle_note": "corrected repfilter_measuredmoisture_v2 bundles for 25SP and 26SP",
+  "limitations": [
+    "Python run-diagnostics product, not a publication Fig/FigS bundle.",
+    "W×N dynamics renderer includes every selected treatment, including incomplete-factorial W2/CK cells.",
+    "Calibration used 25SP TN 2/5/10/13 and 26SP TN 2/11/3/12 only; other treatments are out-of-objective diagnostics.",
+    "Both spring seasons use harvest-date matched measured fruit dry-matter fractions from corrected bundles.",
+    "Water and nitrogen identities are read from current FileX management data, not inferred from treatment numbers.",
+    "Python run diagnostics only; these files are not publication Fig/FigS artifacts."
+  ],
+  "calibration_treatments": {
+    "25SP": [
+      2,
+      5,
+      10,
+      13
+    ],
+    "26SP": [
+      2,
+      11,
+      3,
+      12
+    ]
+  },
+  "evaluation_treatments": {
+    "25SP": [
+      2,
+      3,
+      4,
+      5,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "26SP": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ]
+  }
+}

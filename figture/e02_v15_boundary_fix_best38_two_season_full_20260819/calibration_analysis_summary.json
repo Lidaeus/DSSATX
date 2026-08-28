@@ -1,0 +1,35 @@
+{
+  "case": "e02_v15_boundary_fix_official_200x6_20260819",
+  "best_member": "38",
+  "reported_final_phi": 643.149,
+  "reconstructed_final_phi": 643.1490789236399,
+  "initial_mean_phi": 64899.2,
+  "final_mean_phi": 969.947,
+  "mean_phi_reduction_pct": 98.50545615354272,
+  "initial_min_phi": 2906.89,
+  "final_min_phi": 643.149,
+  "best_phi_reduction_pct": 77.87501419042344,
+  "engineering_quality": "pass",
+  "science_validated": false,
+  "retained_numeric_members": 200,
+  "best_parameters_near_boundary": [
+    "atop",
+    "nmobmx",
+    "podur",
+    "to21"
+  ],
+  "parameters_with_ensemble_boundary_pressure": [
+    "finref",
+    "fl-sh",
+    "frlff",
+    "frstmf",
+    "nmobmx",
+    "nslope",
+    "nvsmob",
+    "podur",
+    "porpt",
+    "senday",
+    "xfrt",
+    "xmage"
+  ]
+}
