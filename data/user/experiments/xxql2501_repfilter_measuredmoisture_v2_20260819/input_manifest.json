@@ -107,14 +107,14 @@
   "files": [
     {
       "name": "XXQL2501.TMX",
-      "sha256": "96f59509630a76fd44eaa73f3e6d44c9eb9e6010f4de1c8b3d76d9643a39b258",
+      "sha256": "e9a4b369727fadd0f1e3735b5e385c22bd15a3c2ed721fecf0a019dab5643ce3",
       "bytes": 20886,
       "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2501\\XXQL2501.TMX"
     },
     {
       "name": "SOIL.SOL",
-      "sha256": "2ba84eb2ac4ae5817e594efb1146cf494812d3f57ac5c3c0a42c50642839cd55",
-      "bytes": 162881,
+      "sha256": "2f5dc6f5a4a6bee6134ca020b0921686b024f5765413f84d74dab7993e8e8e43",
+      "bytes": 163106,
       "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2502\\SOIL.SOL",
       "copied_from_note": "SOIL.SOL shared across seasons; sourced from XXQL2502 bundle"
     },
@@ -239,14 +239,14 @@
     "copied_inputs": [
       {
         "name": "XXQL2501.TMX",
-        "sha256": "29dba1c746b9c3cf21631b0285da7322f1cb3b250e796cc584559db0cbbca5fd",
+        "sha256": "e9a4b369727fadd0f1e3735b5e385c22bd15a3c2ed721fecf0a019dab5643ce3",
         "bytes": 20886,
         "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2501\\XXQL2501.TMX"
       },
       {
         "name": "SOIL.SOL",
-        "sha256": "2ba84eb2ac4ae5817e594efb1146cf494812d3f57ac5c3c0a42c50642839cd55",
-        "bytes": 162881,
+        "sha256": "2f5dc6f5a4a6bee6134ca020b0921686b024f5765413f84d74dab7993e8e8e43",
+        "bytes": 163106,
         "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2502\\SOIL.SOL",
         "copied_from_note": "SOIL.SOL shared across seasons; sourced from XXQL2502 bundle"
       },

@@ -1,0 +1,628 @@
+{
+  "bundle_id": "xxql2501_full_synergy_0_4_60cm_20260828",
+  "derived_from_bundle": "xxql2501_repfilter_measuredmoisture_v3_measuredn_20260820",
+  "derived_from_manifest_sha256": "144619daa14eb6bb7593f3e260f2cdfd52f4f394ed91bad648c5096511fb6843",
+  "spec_compliance": [
+    "docs/\u4e09\u5b63FileA_FileT\u4e0e\u4e0d\u786e\u5b9a\u6027\u9002\u914d\u8ba1\u5212_v1_20260726.md",
+    "docs/\u571f\u58e4\u6c34\u5206\u8fdb\u5165Phi\u4e0e\u571f\u58e4\u53c2\u6570\u9884\u7b5b\u65b9\u6848_v1_20260726.md"
+  ],
+  "created_at": "2026-08-26T12:08:06.159271+00:00",
+  "season_id": "25SP",
+  "excode": "XXQL2501",
+  "intended_use": "parameter_calibration",
+  "scenario_type": "actual_trial_calibration",
+  "scenario_role": "calibration",
+  "observation_policy": "FileA_FileT_strict_fill_plus_SOIL_WATER_group",
+  "treatment_plot_mapping": "TN 2,3,4,5,9,10,11,12,13,14 map to plots 2-5,9-14; TN 1,6,7,8 excluded",
+  "treatment_exclusion": {
+    "excluded_tn": [
+      1,
+      6,
+      7,
+      8
+    ],
+    "included_tn": [
+      2,
+      3,
+      4,
+      5,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "reason": "\u7f3a\u5c11\u5b9e\u9645 FileX \u7ba1\u7406/\u521d\u59cb\u6761\u4ef6\u5b9a\u4e49",
+    "audit_file": "treatment_exclusion_audit.csv"
+  },
+  "initial_condition_policy": "observed_treatment_specific_measured_sh2o_and_mineral_n_fixed",
+  "soil_analysis_policy": "observed_treatment_specific_no_counterfactual_pooling",
+  "actual_trial_preservation": {
+    "reference_filex": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2501\\XXQL2501.TMX",
+    "reference_filex_sha256": "5c7a56ffa9e8515b1afa2e93c98632ea7b29fdf220918f1e9ec3c27a14013ed1",
+    "v1_bundle_manifest_id": null,
+    "v1_bundle_manifest_sha256": null,
+    "filex_retention_proof": "TMX byte-for-byte copied from authoritative data/user/experiments/XXQL*; SOIL.SOL/WTH/DSSBatch.v48 sources and SHAs are recorded"
+  },
+  "filex_fix_status": "authoritative FileX copied from data/user/experiments/XXQL2501; 25SP treatment exclusion audited",
+  "source_workbooks": {
+    "trial_observations": {
+      "data\\user\\ref\\DSSAT\u6587\u4ef6\\2025\u6625\\2025\u6625\u4ea7\u91cf\u6570\u636e\u96c6.xlsx": "4a61ec04518f5469cef2b660d42cef65cc45c81ac37fe2449e9133fa4f886690",
+      "data\\user\\ref\\DSSAT\u6587\u4ef6\\2025\u6625\\2025\u6625\u4f5c\u7269\u751f\u957f\u6307\u6807\u96c6.xlsx": "b661ea24b3fb3b83c457ebd3c760e42e414dc53e76cd364d8762a6532d7ac120"
+    },
+    "soil_water": {
+      "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT\u6587\u4ef6\\2025\u6625\\2025\u6625\u571f\u58e4\u6570\u636e\u96c6.xlsx": "fa42d4bf875ec98666b13bb46d7b0e6d34f68b2b5c336bad678a5138ea7d1599"
+    }
+  },
+  "generators": {
+    "trial_observations": {
+      "script": "tools/experiments/build_trial_observations_v2_20260726.py",
+      "sha256": "20631274c8a5e6d66b37c228e70c31079e62c080332e245be4005bcaecc066ca"
+    },
+    "soil_water_observations": {
+      "script": "tools/experiments/build_soil_water_observations.py",
+      "sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6"
+    }
+  },
+  "trial_observation_qa": {
+    "plots": 10,
+    "growth_dates": 4,
+    "harvest_dates": 10,
+    "total_observations": 520,
+    "excluded_tn": [
+      1,
+      6,
+      7,
+      8
+    ],
+    "density": 27000.0
+  },
+  "soil_water_qa": {
+    "plots": 10,
+    "dates": 3,
+    "depths": 5,
+    "total_observations": 150,
+    "phi_observations": 100,
+    "initial_condition_observations": 50,
+    "soil_id": "IBTM910017",
+    "dssat_layer_bottoms_cm": [
+      2,
+      4,
+      15,
+      30,
+      40,
+      60,
+      80,
+      100,
+      140,
+      180
+    ],
+    "filex_ic_layer_bottoms_cm": [
+      2,
+      4,
+      15,
+      30,
+      40,
+      60,
+      80,
+      100,
+      140,
+      180
+    ],
+    "soil_profile_layer_count": 10
+  },
+  "soil_water_warnings": [],
+  "files": [
+    {
+      "name": "DSSAT48.INH",
+      "sha256": "f9d97855dc1bcb90c5d97ee960066263fe44e2e1aa341b4e7200deb39df8feeb",
+      "bytes": 6277
+    },
+    {
+      "name": "DSSAT48.INP",
+      "sha256": "71f8b37e884add38c3729465b75beb395e81964245aee024f66aea4330aa27a7",
+      "bytes": 8466
+    },
+    {
+      "name": "DSSBatch.v48",
+      "sha256": "edec425563fe92bac21d9b494870f4b8e20bca10c3a6b46dc2a3fa62d3d49928",
+      "bytes": 1698
+    },
+    {
+      "name": "ET.OUT",
+      "sha256": "f6b3d96d7616200b32d322d83fc1cc036210abc6eaf6d358722fa3311edcbc4a",
+      "bytes": 244903
+    },
+    {
+      "name": "ETPhot.OUT",
+      "sha256": "e4094dc63dc186321af918ed7c24275e090b7d192681af727cfcc5c3b8699a2d",
+      "bytes": 139326
+    },
+    {
+      "name": "Evaluate.OUT",
+      "sha256": "f0d20c09427a4f0b1253db7731b8aaf5a5947a4f5f7f06bbb7e0012e1587a76e",
+      "bytes": 5240
+    },
+    {
+      "name": "FileA_values.csv",
+      "sha256": "3709d809fa8169021e2935612f778c54d7f50ce89df713873146f1e9b96a31a1",
+      "bytes": 1951
+    },
+    {
+      "name": "FileT_values.csv",
+      "sha256": "49746e1ed1ecaf0914c4ca8e44c327aa8d0e8d34c4324b820572f83ee4fc7332",
+      "bytes": 11048
+    },
+    {
+      "name": "FreshWt.OUT",
+      "sha256": "0d3aa6d780a4d71cf672d515c7142816aa1b6565e1c063f62643f66e16a79cd4",
+      "bytes": 303344
+    },
+    {
+      "name": "fruit_quality_match_audit.csv",
+      "sha256": "bd3d0c76c1c09db5ce55c3f9a8e828bcc2ac3b6c19c85cef3b938ac6c85398ee",
+      "bytes": 19167
+    },
+    {
+      "name": "generator_log.json",
+      "sha256": "404bae9938edae9493942c64a6c96c2a975d58761529207948c28b597b9e149b",
+      "bytes": 4343
+    },
+    {
+      "name": "GHG.OUT",
+      "sha256": "ff61a0ed970d073bdc3373e38b72490762e2dd7af5fd53f2660c38c014fdc6b0",
+      "bytes": 172098
+    },
+    {
+      "name": "INFO.OUT",
+      "sha256": "b33fea9586769f08f2d1c6893213c91cbfd33abd060603af224f978a5dfb7080",
+      "bytes": 71182
+    },
+    {
+      "name": "LUN.LST",
+      "sha256": "c504a89d4af58831a363eec301165a9edab52c4f07d44531223095ac83f54e7b",
+      "bytes": 920
+    },
+    {
+      "name": "Methane.OUT",
+      "sha256": "c0285027ccf27dfdf7cbac296e2a5f63a2c7c70c5656a1f40b4c04a04df0d4e6",
+      "bytes": 283172
+    },
+    {
+      "name": "MgmtEvent.OUT",
+      "sha256": "0af4cb7fbb849f2fea294efecf7d00037760a918cd4962c8d4ffdabf459632ce",
+      "bytes": 45308
+    },
+    {
+      "name": "MgmtOps.OUT",
+      "sha256": "17d07a487d396b9363e9db842d063bd7fd927d77c5c1f3ade414e2979d5f90b9",
+      "bytes": 89172
+    },
+    {
+      "name": "Mulch.OUT",
+      "sha256": "fb7c49d5a1be3391d0b729b2807682a6d3b795a943b2c75e3a44a348fc608454",
+      "bytes": 68514
+    },
+    {
+      "name": "N2O.OUT",
+      "sha256": "52eb03443f131fec0cd32e1dca4cc60a9265d58825ed5aed32f1508e41660cbb",
+      "bytes": 756298
+    },
+    {
+      "name": "observation_uncertainty.csv",
+      "sha256": "d445f854884acf1876c29168a3d51c91d8637db0a1e195ff2a0fda8a443b6fe9",
+      "bytes": 102418
+    },
+    {
+      "name": "OUTPUT.LST",
+      "sha256": "58a0cca6b1e0acf4d035b716e8ad4ec4b451072e9926c6e456f4843be8a917b4",
+      "bytes": 2467
+    },
+    {
+      "name": "OVERVIEW.OUT",
+      "sha256": "92071b44e5f0813ec0f01e596bd0561f85963f37a15f4ff1af8a6dade6dd9590",
+      "bytes": 100735
+    },
+    {
+      "name": "PlantC.OUT",
+      "sha256": "128baddcda1e96eab11638115acb45aea18712022324c24243c57ae345f623a7",
+      "bytes": 165832
+    },
+    {
+      "name": "PlantGro.OUT",
+      "sha256": "4710ec5885768f1d8bb6b8f0403032f9c453796d412751d71e4e202717560817",
+      "bytes": 433169
+    },
+    {
+      "name": "PlantN.OUT",
+      "sha256": "29fca9fa2886dc888653e5e27147f5308891287c9a203f771182ac7b130be3f1",
+      "bytes": 190832
+    },
+    {
+      "name": "PlantNBal.OUT",
+      "sha256": "e388a0c95cc3f0b22d0a5a92ae62a87372c128b02ad7fd3a0398e0c4c04d01b3",
+      "bytes": 43908
+    },
+    {
+      "name": "RunList.OUT",
+      "sha256": "d55403b7a67237d9bd56be7c6c859cf5e7f600191f2d4fe71d168f7328830481",
+      "bytes": 397
+    },
+    {
+      "name": "SOIL.SOL",
+      "sha256": "192d0c48a3d9bb8912804071a2d77c4a0b0e68901d7e6e7d80062b77d2843d24",
+      "bytes": 162688
+    },
+    {
+      "name": "soil_water_generator_log.json",
+      "sha256": "7c8ea8e297a09a22231362ccb255ffea2f36e2059f7715849cb5a34ca2b197bf",
+      "bytes": 1083
+    },
+    {
+      "name": "soil_water_layer_mapping.csv",
+      "sha256": "8d8f63f69f9a19d0f8fac64172e0394850133b32151a86f7a36352b8295a5ca7",
+      "bytes": 602
+    },
+    {
+      "name": "soil_water_match_audit.csv",
+      "sha256": "65f8c867383bdbd1cae7bbbc2c1088cfdc74096bb1687946523d3c38cbff40ea",
+      "bytes": 18382
+    },
+    {
+      "name": "soil_water_observations.csv",
+      "sha256": "7ecf97c7b9899cd2b89b164ca5b932d82a236b1b6f2ac9b5658253acd0e4ecb2",
+      "bytes": 34787
+    },
+    {
+      "name": "SoilCBal.OUT",
+      "sha256": "21047f604c76b6f5e01757447d8c696929f897d3430f4c06bbd1f92e9670f9e4",
+      "bytes": 361812
+    },
+    {
+      "name": "SoilCBalSum.OUT",
+      "sha256": "8ba2a17dc5cd26339119422aab20a07c2b8eed80cb00ae3b466101ae18d156e7",
+      "bytes": 3292
+    },
+    {
+      "name": "SoilNBalSum.OUT",
+      "sha256": "04a6e32bd45ed2b44af30c364ee97aaa01d28c01d1d6f80660b706d630e5164e",
+      "bytes": 4207
+    },
+    {
+      "name": "SoilNi.OUT",
+      "sha256": "1e39f6094fc4571a9b4b561f7335782db42037333db732969c7c5c7d3b5eba04",
+      "bytes": 506464
+    },
+    {
+      "name": "SoilNiBal.OUT",
+      "sha256": "c2875ddea11a0e1254a4779a0e3f6ed95816aa7cf2812a24aed01ccdd16c9367",
+      "bytes": 262213
+    },
+    {
+      "name": "SoilNoBal.OUT",
+      "sha256": "c39cde72fa0b4fcdc0f3302e0489309d852e1ec21a5369db103cf6b6e44247a1",
+      "bytes": 189200
+    },
+    {
+      "name": "SoilOrg.OUT",
+      "sha256": "a44f665dd7c9a827b3a8932e90dc275dcf2e34b721555d45c46fe6c9ab4778e8",
+      "bytes": 174920
+    },
+    {
+      "name": "SoilTemp.OUT",
+      "sha256": "5ff8aabbd8e63af2e7cfe0c449349dff1e53cc49971d67001fc88c2c14c6f7b7",
+      "bytes": 143899
+    },
+    {
+      "name": "SoilWat.OUT",
+      "sha256": "450d75e6e9d62e7c7f80d407f9a6b000ca43bdfc69a2a0838c2dfc0c5a4e5c97",
+      "bytes": 306661
+    },
+    {
+      "name": "SoilWatBal.OUT",
+      "sha256": "927e4628b64c7b609365fd332e8d13ad927287543d85c5ef6a45f423f07e89bf",
+      "bytes": 273008
+    },
+    {
+      "name": "SoilWater.OUT",
+      "sha256": "8da5ce3ad66a34af6dc6d604597f834c3f58e1bf279a6af64ebf4a2366a9b945",
+      "bytes": 666355
+    },
+    {
+      "name": "SOMLIT1.OUT",
+      "sha256": "2fab04ab1bfb4a132bc67dd90bab160e24fb5ae5438d11700e7d5e35dfd8c9c7",
+      "bytes": 3343452
+    },
+    {
+      "name": "SOMLITC.OUT",
+      "sha256": "997413b18c6a2614e96b68e5a08c894ca435e0e674e4eb66edf6db69139cc100",
+      "bytes": 670956
+    },
+    {
+      "name": "SOMLITN.OUT",
+      "sha256": "6cf3b501f881dde4736613b7812e3f9204c6c19595aa9c83c98e13620708c779",
+      "bytes": 603096
+    },
+    {
+      "name": "Summary.OUT",
+      "sha256": "9893514f6e1d6cee23cfb0f18dbc3c59d923fad510e305cee383ce46721dc7f9",
+      "bytes": 9082
+    },
+    {
+      "name": "treatment_exclusion_audit.csv",
+      "sha256": "6d92ecf19626932d10e427429569959bc58bc504f23d5959f44661c08f5d6e29",
+      "bytes": 235
+    },
+    {
+      "name": "trial_generator_log.json",
+      "sha256": "404bae9938edae9493942c64a6c96c2a975d58761529207948c28b597b9e149b",
+      "bytes": 4343
+    },
+    {
+      "name": "WARNING.OUT",
+      "sha256": "ec35cf164bc784e4dd1d74573ff8408132f4448a962b22b8abfda7ac265dafee",
+      "bytes": 13222
+    },
+    {
+      "name": "Weather.OUT",
+      "sha256": "aff9a01e9b11ac48cda2b246e7ced4a1d25c49efdf5939f846f2801a2e05baa6",
+      "bytes": 202665
+    },
+    {
+      "name": "XXLI2502.WTH",
+      "sha256": "d273b9b73c6efbca4703e896aefee1921efa18a8ee1a2cfea03e6f339cdc1b6a",
+      "bytes": 22171
+    },
+    {
+      "name": "XXQL2501.TMA",
+      "sha256": "a43211964090ef089486c5284fb5b05a34180135cffd58dd3a49a8a924a514d4",
+      "bytes": 1541
+    },
+    {
+      "name": "XXQL2501.TMT",
+      "sha256": "d35419934f6464b3ca039711fd3af1718fab0cde574c6198268cddafadf85062",
+      "bytes": 16775
+    },
+    {
+      "name": "XXQL2501.TMX",
+      "sha256": "b10b58f4e2f6677807272a734691f140e1c58ad32eddba2fd60b14be60d813e0",
+      "bytes": 20886
+    }
+  ],
+  "files_by_role": {
+    "copied_inputs": [
+      {
+        "name": "XXQL2501.TMX",
+        "sha256": "43ed8b9c242204424a6c74c2a31e2447dfcdcb6fc1bc17fda017ebf9d773ef87",
+        "bytes": 22167,
+        "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2501\\XXQL2501.TMX"
+      },
+      {
+        "name": "SOIL.SOL",
+        "sha256": "9cf9ceb8704e711bd2f8aef3e42d54f5885e55f41c612e3751d4a4eb3df5a58b",
+        "bytes": 163122,
+        "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2502\\SOIL.SOL",
+        "copied_from_note": "SOIL.SOL shared across seasons; sourced from XXQL2502 bundle"
+      },
+      {
+        "name": "XXLI2502.WTH",
+        "sha256": "d273b9b73c6efbca4703e896aefee1921efa18a8ee1a2cfea03e6f339cdc1b6a",
+        "bytes": 22171,
+        "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2501\\XXLI2502.WTH"
+      },
+      {
+        "name": "DSSBatch.v48",
+        "sha256": "edec425563fe92bac21d9b494870f4b8e20bca10c3a6b46dc2a3fa62d3d49928",
+        "bytes": 1698,
+        "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2501\\DSSBatch.v48"
+      }
+    ],
+    "generated_trial": [
+      {
+        "name": "XXQL2501.TMA",
+        "sha256": "a43211964090ef089486c5284fb5b05a34180135cffd58dd3a49a8a924a514d4",
+        "bytes": 1541,
+        "generated_by": "tools/experiments/apply_repfilter_v1_20260818.py",
+        "generator_sha256": "250977c223abf732ef0495bfef136139292f8bbe0f5a8cc1fb0bd7d376ab6d24",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT\u6587\u4ef6\\2025\u6625\\DSSAT\u8f93\u51fa_v2\\XXQL2501.TMA"
+      },
+      {
+        "name": "XXQL2501.TMT",
+        "sha256": "d35419934f6464b3ca039711fd3af1718fab0cde574c6198268cddafadf85062",
+        "bytes": 16775,
+        "generated_by": "tools/experiments/apply_repfilter_v1_20260818.py",
+        "generator_sha256": "250977c223abf732ef0495bfef136139292f8bbe0f5a8cc1fb0bd7d376ab6d24",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT\u6587\u4ef6\\2025\u6625\\DSSAT\u8f93\u51fa_v2\\XXQL2501.TMT"
+      },
+      {
+        "name": "observation_uncertainty.csv",
+        "sha256": "d445f854884acf1876c29168a3d51c91d8637db0a1e195ff2a0fda8a443b6fe9",
+        "bytes": 102418,
+        "generated_by": "tools/experiments/apply_repfilter_v1_20260818.py",
+        "generator_sha256": "250977c223abf732ef0495bfef136139292f8bbe0f5a8cc1fb0bd7d376ab6d24",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT\u6587\u4ef6\\2025\u6625\\DSSAT\u8f93\u51fa_v2\\observation_uncertainty.csv"
+      },
+      {
+        "name": "fruit_quality_match_audit.csv",
+        "sha256": "bd3d0c76c1c09db5ce55c3f9a8e828bcc2ac3b6c19c85cef3b938ac6c85398ee",
+        "bytes": 19167,
+        "generated_by": "tools/experiments/apply_repfilter_v1_20260818.py",
+        "generator_sha256": "250977c223abf732ef0495bfef136139292f8bbe0f5a8cc1fb0bd7d376ab6d24",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT\u6587\u4ef6\\2025\u6625\\DSSAT\u8f93\u51fa_v2\\fruit_quality_match_audit.csv"
+      },
+      {
+        "name": "trial_generator_log.json",
+        "sha256": "404bae9938edae9493942c64a6c96c2a975d58761529207948c28b597b9e149b",
+        "bytes": 4343,
+        "generated_by": "tools/experiments/apply_repfilter_v1_20260818.py",
+        "generator_sha256": "250977c223abf732ef0495bfef136139292f8bbe0f5a8cc1fb0bd7d376ab6d24",
+        "source_v2_dir": "D:\\Tomato_Cal\\workspace\\staging_25sp_moisturefix_v2_20260729\\2025\u6625\\DSSAT\u8f93\u51fa_v2\\generator_log.json"
+      },
+      {
+        "name": "treatment_exclusion_audit.csv",
+        "sha256": "6d92ecf19626932d10e427429569959bc58bc504f23d5959f44661c08f5d6e29",
+        "bytes": 235,
+        "generated_by": "tools/experiments/apply_repfilter_v1_20260818.py",
+        "generator_sha256": "250977c223abf732ef0495bfef136139292f8bbe0f5a8cc1fb0bd7d376ab6d24",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT\u6587\u4ef6\\2025\u6625\\DSSAT\u8f93\u51fa_v2\\treatment_exclusion_audit.csv"
+      },
+      {
+        "name": "FileA_values.csv",
+        "sha256": "3709d809fa8169021e2935612f778c54d7f50ce89df713873146f1e9b96a31a1",
+        "bytes": 1951,
+        "generated_by": "tools/experiments/apply_repfilter_v1_20260818.py",
+        "generator_sha256": "250977c223abf732ef0495bfef136139292f8bbe0f5a8cc1fb0bd7d376ab6d24",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT\u6587\u4ef6\\2025\u6625\\DSSAT\u8f93\u51fa_v2\\FileA_values.csv"
+      },
+      {
+        "name": "FileT_values.csv",
+        "sha256": "49746e1ed1ecaf0914c4ca8e44c327aa8d0e8d34c4324b820572f83ee4fc7332",
+        "bytes": 11048,
+        "generated_by": "tools/experiments/apply_repfilter_v1_20260818.py",
+        "generator_sha256": "250977c223abf732ef0495bfef136139292f8bbe0f5a8cc1fb0bd7d376ab6d24",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT\u6587\u4ef6\\2025\u6625\\DSSAT\u8f93\u51fa_v2\\FileT_values.csv"
+      },
+      {
+        "name": "generator_log.json",
+        "sha256": "404bae9938edae9493942c64a6c96c2a975d58761529207948c28b597b9e149b",
+        "bytes": 4343,
+        "generated_by": "tools/experiments/apply_repfilter_v1_20260818.py",
+        "generator_sha256": "250977c223abf732ef0495bfef136139292f8bbe0f5a8cc1fb0bd7d376ab6d24",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT\u6587\u4ef6\\2025\u6625\\DSSAT\u8f93\u51fa_v2\\generator_log.json"
+      }
+    ],
+    "generated_soil": [
+      {
+        "name": "soil_water_observations.csv",
+        "sha256": "7ecf97c7b9899cd2b89b164ca5b932d82a236b1b6f2ac9b5658253acd0e4ecb2",
+        "bytes": 34787,
+        "generated_by": "tools/experiments/build_soil_water_observations.py",
+        "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT\u6587\u4ef6\\2025\u6625\\DSSAT\u8f93\u51fa_v2\\soil_water_observations.csv"
+      },
+      {
+        "name": "soil_water_layer_mapping.csv",
+        "sha256": "8d8f63f69f9a19d0f8fac64172e0394850133b32151a86f7a36352b8295a5ca7",
+        "bytes": 602,
+        "generated_by": "tools/experiments/build_soil_water_observations.py",
+        "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT\u6587\u4ef6\\2025\u6625\\DSSAT\u8f93\u51fa_v2\\soil_water_layer_mapping.csv"
+      },
+      {
+        "name": "soil_water_match_audit.csv",
+        "sha256": "65f8c867383bdbd1cae7bbbc2c1088cfdc74096bb1687946523d3c38cbff40ea",
+        "bytes": 18382,
+        "generated_by": "tools/experiments/build_soil_water_observations.py",
+        "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT\u6587\u4ef6\\2025\u6625\\DSSAT\u8f93\u51fa_v2\\soil_water_match_audit.csv"
+      },
+      {
+        "name": "soil_water_generator_log.json",
+        "sha256": "7c8ea8e297a09a22231362ccb255ffea2f36e2059f7715849cb5a34ca2b197bf",
+        "bytes": 1083,
+        "generated_by": "tools/experiments/build_soil_water_observations.py",
+        "generator_sha256": "ac53368bd3d18d0eaa9f5350fd33244d568da5c702003b2d56d3e70c2b44c6f6",
+        "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT\u6587\u4ef6\\2025\u6625\\DSSAT\u8f93\u51fa_v2\\soil_water_generator_log.json"
+      }
+    ]
+  },
+  "summary": {
+    "total_files": 17,
+    "copied_from_v1_count": 4,
+    "generated_trial_count": 9,
+    "generated_soil_count": 4
+  },
+  "data_corrections": {
+    "correction_id": "repfilter_measuredmoisture_v2_20260819",
+    "repfilter_cells": 6,
+    "uncertainty_rule": "remaining replicates with minimum CV 5%",
+    "fruit_moisture": "nearest plot-level measured moisture by harvest date",
+    "filea_filet_sync": "terminal FileA regenerated from corrected FileT states",
+    "tmx_tn9_ic_user_specified_20260818": {
+      "correction_id": "tmx_tn9_ic_user_specified_20260818",
+      "date": "2026-08-18",
+      "file": "XXQL2501.TMX",
+      "change": "TN9 IC: 20cm .216/3.4/30.4, 40cm .248/1.2/23.4, 60cm .297/1.5/6.6, 80cm .304/.5/1, 100cm .314/.5/1",
+      "reason": "\u7528\u6237\u6307\u5b9a 25SP 9\u53f7\u5904\u7406 INITIAL CONDITIONS \u4fee\u6539\uff08\u540c\u6b65\u5168\u90e8\u6d3b\u8dc3 25SP TMX\uff09",
+      "backup": "workspace/backups/tmx_ic_tn9_20260818/"
+    },
+    "measured_mineral_n_ic_20260820": {
+      "correction_id": "measured_mineral_n_ic_20260820",
+      "date": "2026-08-20",
+      "file": "XXQL2501.TMX",
+      "change": "SNH4/SNO3 at ICBL 20/40/60 replaced with pre-season measured outlier-removed means (36 rows); SH2O and deeper layers untouched",
+      "source_workbook": "25SP\u785d\u6001\u6c2e\u94f5\u6001\u6c2e\u53c2\u8003.xlsx",
+      "source_sheet": "\u5254\u5f02\u5e38\u5e73\u5747\u7248",
+      "audit": "workspace/reports/measuredn_replacement_20260820/initial_mineral_n_replacement_audit.csv",
+      "source_workbook_sha256": "b63f9fc08fad5e4746c07185ee7ece5f30c53c6cc34ea8ba959bc809c327ec2f"
+    }
+  },
+  "package_name": "xxql2501_from_scratch_10L_B_20260826",
+  "design_id": "e02_from_scratch_10L_B_20260826",
+  "soil_scheme": {
+    "id": "10L-B",
+    "bottoms_cm": [
+      2,
+      4,
+      15,
+      30,
+      40,
+      60,
+      80,
+      100,
+      140,
+      180
+    ],
+    "tillage_depth_cm": 60,
+    "source_profile": "xxql2501_best_env_10layer_20260825/SOIL.SOL"
+  },
+  "treatment_roles": {
+    "calibration": [
+      2,
+      5,
+      10,
+      13
+    ],
+    "diagnostic": [
+      3,
+      4,
+      6,
+      7,
+      8,
+      9,
+      11,
+      12,
+      14
+    ],
+    "validation": []
+  },
+  "source_filex_treatments": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+  ],
+  "bundle_rebuild": {
+    "script": "tools/experiments/build_e02_from_scratch_10l_bundles_20260826.py",
+    "scheme": "10L-B",
+    "source_observations_preserved": true,
+    "ic_rule": "source 20/40/60/80/100 cm values mapped by depth interval; >100 cm uses 100 cm source value",
+    "sequential_measured_sh2o_26sp": false
+  },
+  "manifest_repair": {
+    "package_name_matches_directory": true,
+    "file_hashes_regenerated": true,
+    "nested_role_hashes_synchronized": true,
+    "old_layer_metadata_replaced": true
+  }
+}

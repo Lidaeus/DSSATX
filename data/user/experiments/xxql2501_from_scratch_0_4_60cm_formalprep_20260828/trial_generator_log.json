@@ -1,0 +1,133 @@
+{
+  "season_id": "25SP",
+  "excode": "XXQL2501",
+  "generator": "tools/experiments/build_trial_observations_v2_20260726.py",
+  "generator_sha256": "9d24145bbefb754f11825921e1cf027c722f5f1b9fd8b432f2fa24f11d95ec34",
+  "spec_compliance": "docs/三季FileA_FileT与不确定性适配计划_v1_20260726.md",
+  "source_files": {
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春产量数据集.xlsx": "4a61ec04518f5469cef2b660d42cef65cc45c81ac37fe2449e9133fa4f886690",
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春作物生长指标集.xlsx": "b661ea24b3fb3b83c457ebd3c760e42e414dc53e76cd364d8762a6532d7ac120"
+  },
+  "qa_metrics": {
+    "plots": 10,
+    "growth_dates": 4,
+    "harvest_dates": 10,
+    "total_observations": 520,
+    "excluded_tn": [
+      1,
+      6,
+      7,
+      8
+    ],
+    "density": 27000.0,
+    "fruit_moisture_contract": "measured_nearest_by_plot_date",
+    "dmfr_min": 0.03206425730506851,
+    "dmfr_max": 0.04864953140543234,
+    "repfilter_cells": 6,
+    "repfilter_min_cv": 0.05
+  },
+  "source_notes": [
+    "Fresh yield uses pre-computed weighted plot yield (edge*0.5 + middle-row mean*0.5).",
+    "Fruit DM fraction = 1 - measured fruit moisture fraction (2025春作物生长指标集.果含水率).",
+    "Each harvest uses the nearest plot-level moisture measurement date (no max interval).",
+    "SD: hybrid method (replicate SD with min CV=5%, fallback CV=10%).",
+    "Cumulative yield SD propagates incremental variances.",
+    "FileA carries PDAT/ADAT/MDAT(PODD proxy) plus end-state diagnostics; FileT carries process, CHPDT and HPODW.",
+    "TN 1,6,7,8 excluded per FileA/FileT uncertainty adaptation plan v1 (2026-07-26) section 6.1.",
+    "Estimated post-FileX harvest records excluded from observations: [25203]; FileX cutoff=25198."
+  ],
+  "output_files": [
+    "XXQL2501.TMA",
+    "XXQL2501.TMT",
+    "observation_uncertainty.csv",
+    "fruit_quality_match_audit.csv",
+    "FileA_values.csv",
+    "FileT_values.csv",
+    "treatment_exclusion_audit.csv"
+  ],
+  "repfilter_v2_20260819": {
+    "approved_exclusions": 7,
+    "updated_cells": 6,
+    "audit": [
+      {
+        "season": "25SP",
+        "plot": 4,
+        "date": "25142",
+        "variable": "SWAD",
+        "value": 563.895,
+        "raw_sd": 260.22236654446135,
+        "sd_method": "replicate_sd",
+        "n_rep": 2,
+        "source_date": "25142",
+        "excluded_rep": "中间行2",
+        "channel": 1
+      },
+      {
+        "season": "25SP",
+        "plot": 3,
+        "date": "25194",
+        "variable": "CHTD",
+        "value": 178.5,
+        "raw_sd": 8.925,
+        "sd_method": "replicate_sd_min_cv_5pct",
+        "n_rep": 2,
+        "source_date": "25194",
+        "excluded_rep": "中间行1",
+        "channel": 2
+      },
+      {
+        "season": "25SP",
+        "plot": 3,
+        "date": "25194",
+        "variable": "SWAD",
+        "value": 2300.8050000000003,
+        "raw_sd": 115.04025000000001,
+        "sd_method": "replicate_sd_min_cv_5pct",
+        "n_rep": 2,
+        "source_date": "25194",
+        "excluded_rep": "中间行1",
+        "channel": 2
+      },
+      {
+        "season": "25SP",
+        "plot": 3,
+        "date": "25194",
+        "variable": "LWAD",
+        "value": 1291.275,
+        "raw_sd": 64.56375000000001,
+        "sd_method": "replicate_sd_min_cv_5pct",
+        "n_rep": 2,
+        "source_date": "25194",
+        "excluded_rep": "中间行1",
+        "channel": 2
+      },
+      {
+        "season": "25SP",
+        "plot": 3,
+        "date": "25194",
+        "variable": "LAID",
+        "value": 3.79777806468,
+        "raw_sd": 0.6713563962198238,
+        "sd_method": "replicate_sd",
+        "n_rep": 2,
+        "source_date": "25194",
+        "excluded_rep": "中间行1",
+        "channel": 2
+      },
+      {
+        "season": "25SP",
+        "plot": 13,
+        "date": "25170",
+        "variable": "LAID",
+        "value": 2.8446207663600003,
+        "raw_sd": 0.41926200942738173,
+        "sd_method": "replicate_sd",
+        "n_rep": 2,
+        "source_date": "25170",
+        "excluded_rep": "中间行2",
+        "channel": 2
+      }
+    ],
+    "uncertainty_rule": "hybrid_sd(min_cv=0.05)"
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "bundle_id": "xxql2601_formal_armab_rrmse_20260828",
+  "created_at": "2026-08-28T08:02:04.188278+00:00",
+  "derived_from_bundle": "xxql2601_clean_measuredn_0_4_60cm_20260828",
+  "derived_from_manifest_sha256": "646dd1a2c0b0624a88ba50824b5d7e4e8f6ea76ea8b1ccf167b9151423f72290",
+  "season_id": "26SP",
+  "excode": "XXQL2601",
+  "intended_use": "parameter_calibration",
+  "prohibited_use": [],
+  "scenario_role": "calibration",
+  "treatment_roles": {
+    "calibration": [
+      1,
+      3,
+      9,
+      12
+    ],
+    "diagnostic": [
+      2,
+      4,
+      5,
+      6,
+      7,
+      8,
+      10,
+      11
+    ],
+    "validation": []
+  },
+  "initial_condition_policy": "treatment-specific measured mineral N and sequential measured soil water; copied byte-for-byte from corrected Arm-B source bundle",
+  "uncertainty_policy": "replicate filtering with minimum CV=5%; FileA/FileT synchronized",
+  "soil_scheme": {
+    "id": "10L-B",
+    "bottoms_cm": [
+      2,
+      4,
+      15,
+      30,
+      40,
+      60,
+      80,
+      100,
+      140,
+      180
+    ],
+    "tillage_depth_cm": 60,
+    "source_profile": "xxql2501_best_env_10layer_20260825/SOIL.SOL"
+  },
+  "data_corrections": {
+    "correction_id": "repfilter_measuredmoisture_v2_20260819",
+    "repfilter_cells": 6,
+    "uncertainty_rule": "remaining replicates with minimum CV 5%",
+    "fruit_moisture": "nearest plot-level measured moisture by harvest date",
+    "filea_filet_sync": "terminal FileA regenerated from corrected FileT states",
+    "tmx_tn9_ic_user_specified_20260818": {
+      "correction_id": "tmx_tn9_ic_user_specified_20260818",
+      "date": "2026-08-18",
+      "file": "XXQL2501.TMX",
+      "change": "TN9 IC: 20cm .216/3.4/30.4, 40cm .248/1.2/23.4, 60cm .297/1.5/6.6, 80cm .304/.5/1, 100cm .314/.5/1",
+      "reason": "用户指定 25SP 9号处理 INITIAL CONDITIONS 修改（同步全部活跃 25SP TMX）",
+      "backup": "workspace/backups/tmx_ic_tn9_20260818/"
+    },
+    "measured_mineral_n_ic_20260820": {
+      "correction_id": "measured_mineral_n_ic_20260820",
+      "date": "2026-08-20",
+      "file": "XXQL2501.TMX",
+      "change": "SNH4/SNO3 at ICBL 20/40/60 replaced with pre-season measured outlier-removed means (36 rows); SH2O and deeper layers untouched",
+      "source_workbook": "25SP硝态氮铵态氮参考.xlsx",
+      "source_sheet": "剔异常平均版",
+      "audit": "workspace/reports/measuredn_replacement_20260820/initial_mineral_n_replacement_audit.csv",
+      "source_workbook_sha256": "b63f9fc08fad5e4746c07185ee7ece5f30c53c6cc34ea8ba959bc809c327ec2f"
+    }
+  },
+  "manifest_repair": {
+    "wrong_cross_season_identity_removed": true,
+    "payload_hashes_regenerated": true,
+    "source_payload_modified": false
+  },
+  "files": [
+    {
+      "name": "DSSBatch.v48",
+      "sha256": "0956d41b903b0ec0691e7f90ba1bed3309f4d43bfd1a74cee5bd2e1f04a5faeb",
+      "bytes": 1956
+    },
+    {
+      "name": "FileA_values.csv",
+      "sha256": "a7cc015b2a47208d641d136509a9b343cd0e7327fafbde8863e17e5c7fcfefe7",
+      "bytes": 2374
+    },
+    {
+      "name": "FileT_values.csv",
+      "sha256": "e3b434bea6abcc3394a5df286199765073f1acb4e10e58d01e4da53c3dcf4253",
+      "bytes": 8351
+    },
+    {
+      "name": "fruit_quality_match_audit.csv",
+      "sha256": "209c978916f1e50b3a89267b6ce2b26b2033e529cded510f5699c326a46f5535",
+      "bytes": 11607
+    },
+    {
+      "name": "generator_log.json",
+      "sha256": "59e0925314cdf327e436bd8670b693d49cf20140913f6ad88553a8ba8dc7d602",
+      "bytes": 5747
+    },
+    {
+      "name": "observation_uncertainty.csv",
+      "sha256": "2d7588a43787f15b199dc02cdb9282714feeb8bd712469fe84220b1aa24d96a5",
+      "bytes": 90770
+    },
+    {
+      "name": "SOIL.SOL",
+      "sha256": "192d0c48a3d9bb8912804071a2d77c4a0b0e68901d7e6e7d80062b77d2843d24",
+      "bytes": 162688
+    },
+    {
+      "name": "soil_water_generator_log.json",
+      "sha256": "b40dfe39941f816aebe6cbffbe504ed14c311f28b2db151d068c2442a7d35bde",
+      "bytes": 1083
+    },
+    {
+      "name": "soil_water_layer_mapping.csv",
+      "sha256": "7a53e73afe36518c25fdf687e6d9b5634a372198dcf7411598e249e0d84b764f",
+      "bytes": 602
+    },
+    {
+      "name": "soil_water_match_audit.csv",
+      "sha256": "9d2ccfd737358534d0c3c71c1ca1481c1c84409e49f49bb75baa5fae81328eeb",
+      "bytes": 29175
+    },
+    {
+      "name": "soil_water_observations.csv",
+      "sha256": "e500b23eee2bee302c8475d4846116a4d542b4e4f3d8a564980bfe478b5e3a1b",
+      "bytes": 54736
+    },
+    {
+      "name": "trial_generator_log.json",
+      "sha256": "59e0925314cdf327e436bd8670b693d49cf20140913f6ad88553a8ba8dc7d602",
+      "bytes": 5747
+    },
+    {
+      "name": "XXQL2601.TMA",
+      "sha256": "9385b184acff2218cff623782fb00be5a7d56f602c40265225c13f3400c33626",
+      "bytes": 1417
+    },
+    {
+      "name": "XXQL2601.TMT",
+      "sha256": "fe7bb988b123ebb88b5dceb6fb1dc31f960673a6af9ef78d380a7391fcf125d2",
+      "bytes": 12367
+    },
+    {
+      "name": "XXQL2601.TMX",
+      "sha256": "cb51720a4496f434cde9a197bd66ba263f894bd33385e6594a6a0f6dc324b2bd",
+      "bytes": 25186
+    },
+    {
+      "name": "XXQL2601.WTH",
+      "sha256": "2beaf4c5fbf39ac36e469f17d4e3eb6437838d8e05f30bd0e2e5946c60f68a46",
+      "bytes": 7936
+    }
+  ]
+}
