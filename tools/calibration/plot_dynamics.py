@@ -925,6 +925,25 @@ def _response_structure_audit(all_proc, all_harv, out_png, metrics_csv):
     if not any(not x.empty for x in tables.values()):
         return None
 
+    # Lay out only seasons that are actually present in this deterministic
+    # replay.  The previous fixed three-column grid left an empty 25FA column
+    # in spring-only (22-treatment) diagnostics.
+    seasons_present = [
+        season for season in SEASON_ORDER
+        if any(
+            not table.empty and season in set(table["season"].astype(str))
+            for table in tables.values()
+        )
+    ]
+    seasons_present.extend(
+        season
+        for table in tables.values() if not table.empty
+        for season in table["season"].astype(str).drop_duplicates()
+        if season not in seasons_present
+    )
+    if not seasons_present:
+        return None
+
     ylims = {}
     for key, _, _, _, _, _ in specs:
         tab = tables[key]
@@ -937,13 +956,14 @@ def _response_structure_audit(all_proc, all_harv, out_png, metrics_csv):
         pad = 0.08 * (hi - lo) if hi > lo else max(abs(hi) * 0.08, 1.0)
         ylims[key] = (lo - pad, hi + pad)
 
-    fig = plt.figure(figsize=(15.0, 9.0), dpi=150)
-    gs = fig.add_gridspec(3, 3, height_ratios=[1.35, 1.35, 0.9],
+    n_seasons = len(seasons_present)
+    fig = plt.figure(figsize=(5.0 * n_seasons, 9.0), dpi=150)
+    gs = fig.add_gridspec(3, n_seasons, height_ratios=[1.35, 1.35, 0.9],
                           hspace=0.48, wspace=0.18)
     audit_rows = []
     for row_idx, (key, title, unit, _, _, _) in enumerate(specs):
         tab = tables[key]
-        for col_idx, season in enumerate(SEASON_ORDER):
+        for col_idx, season in enumerate(seasons_present):
             ax = fig.add_subplot(gs[row_idx, col_idx])
             sub = tab[tab["season"] == season].copy()
             if sub.empty:
@@ -992,13 +1012,13 @@ def _response_structure_audit(all_proc, all_harv, out_png, metrics_csv):
 
     axb = fig.add_subplot(gs[2, :])
     audit = pd.DataFrame(audit_rows)
-    positions = np.arange(len(SEASON_ORDER), dtype=float)
+    positions = np.arange(len(seasons_present), dtype=float)
     width = 0.34
     for j, (key, label, color) in enumerate([
         ("LAID", "LAI", "#3567a8"),
         ("DRY_CUM", "dry fruit", "#b35c3e"),
     ]):
-        sub = audit[audit["response"] == key].set_index("season").reindex(SEASON_ORDER)
+        sub = audit[audit["response"] == key].set_index("season").reindex(seasons_present)
         vals = sub["spread_ratio_sim_over_obs"].to_numpy(dtype=float)
         bars = axb.bar(positions + (j - 0.5) * width, vals, width=width,
                        color=color, alpha=0.88, label=label)
@@ -1008,7 +1028,7 @@ def _response_structure_audit(all_proc, all_harv, out_png, metrics_csv):
                          f"{val:.2f}", ha="center", va="bottom", fontsize=8)
     axb.axhline(1.0, color="#555555", ls="--", lw=1.0)
     axb.set_xticks(positions)
-    axb.set_xticklabels([SEASON_LABELS[s] for s in SEASON_ORDER], fontsize=9)
+    axb.set_xticklabels([SEASON_LABELS.get(s, s) for s in seasons_present], fontsize=9)
     axb.set_ylabel("Treatment spread ratio\nSD(simulated) / SD(observed)", fontsize=9)
     max_ratio = float(np.nanmax(audit["spread_ratio_sim_over_obs"]))
     axb.set_ylim(0, max(1.15, max_ratio * 1.25))

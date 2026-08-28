@@ -1,3 +1,0 @@
-﻿
-{"sessionId": "pestpp-agent-disconnect", "runId": "pre-fix", "hypothesisId": "C", "location": "run_parallel.py:cmd_run:manager_started", "msg": "[DEBUG] manager_started", "data": {"case": "e02_spring_pair_defaultn_v1_observedshape_150x5_20260730_fix6", "mode": "ies", "port": 4010, "manager_pid": 32000, "resume": false}, "ts": 1785423419534}
-{"sessionId": "pestpp-agent-disconnect", "runId": "pre-fix", "hypothesisId": "C", "location": "run_parallel.py:cmd_run:agents_started", "msg": "[DEBUG] agents_started", "data": {"case": "e02_spring_pair_defaultn_v1_observedshape_150x5_20260730_fix6", "port": 4010, "n_agents": 6, "agent_pids": [2308, 3328, 38340, 40440, 35100, 37792]}, "ts": 1785423429664}
