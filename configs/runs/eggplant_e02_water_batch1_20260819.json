@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "design_id": "eggplant_e02_water_batch1_20260819",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "Formal selected-eight genetic and water-response calibration on corrected measured-moisture bundles",
+  "bounds_id": "eggplant_e02_water_batch1_20260819",
+  "observation_policy": "configs/runs/e02_v2_rawdiff_terminal_nresp01_soil02_policy_20260813.csv",
+  "group_policy": "configs/runs/t10_water_batch1_group_policy_20260819.csv",
+  "initial_condition_policy": "Fixed corrected FileX and soil inputs; not inverted",
+  "nitrogen_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_selected8_water_n_mapping_20260818.csv",
+    "source_variable": "CHPDT",
+    "contrast": "N3_minus_N0_within_same_water",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "levels": [
+      "N3"
+    ],
+    "harvest_scope": "all",
+    "sigma_floor": 50.0,
+    "weighting": "static"
+  },
+  "water_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_selected8_water_n_mapping_20260818.csv",
+    "source_variable": "CHPDT",
+    "contrast": "season_specific_high_minus_W1_within_same_nitrogen",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "levels": [
+      "N3"
+    ],
+    "nitrogen_levels": [
+      "N0",
+      "N3"
+    ],
+    "season_contrasts": {
+      "25SP": {
+        "high_water": "W3",
+        "low_water": "W1"
+      },
+      "26SP": {
+        "high_water": "W2",
+        "low_water": "W1"
+      }
+    },
+    "harvest_scope": "all",
+    "sigma_floor": 50.0,
+    "weighting": "nse",
+    "nse_lambda": 0.5,
+    "nse_lambda_allocation": "equal_split_N0_N3_separate_SST"
+  },
+  "harvest_dry_objective": {
+    "enabled": true,
+    "mode": "increment_plus_terminal",
+    "variable": "CHPDT",
+    "lambda_per_season": 75.0
+  },
+  "process_state_objective": {
+    "enabled": true,
+    "mode": "signed_difference_plus_terminal",
+    "variables": [
+      "LAID",
+      "LWAD",
+      "SWAD"
+    ]
+  },
+  "seasonal_parameterization": null,
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "D:/Tomato_Cal/data/user/experiments/xxql2501_repfilter_measuredmoisture_v3_measuredn_20260820",
+      "role": "calibration",
+      "treatments": [
+        2,
+        5,
+        10,
+        13
+      ]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "D:/Tomato_Cal/data/user/experiments/xxql2601_repfilter_measuredmoisture_v3_measuredn_20260820",
+      "role": "calibration",
+      "treatments": [
+        2,
+        11,
+        3,
+        12
+      ]
+    }
+  ],
+  "formal_contract": {
+    "source_case": "e02_selected8_water_followup_official_100x4_20260818",
+    "source_realization": "94",
+    "n_reals": 200,
+    "noptmax": 6,
+    "agents": 6,
+    "dry_nse_lambda_per_season": 75.0,
+    "water_nse_lambda_per_season": 0.5
+  },
+  "batch1_scope": {
+    "report": "analysis_26sp_yield_and_boundary.md (20260819)",
+    "range_releases": {
+      "podur": {
+        "old": [
+          12.0,
+          58.0
+        ],
+        "new": [
+          8.0,
+          58.0
+        ]
+      },
+      "sfdur": {
+        "old": [
+          10.0,
+          27.0
+        ],
+        "new": [
+          10.0,
+          35.0
+        ]
+      },
+      "senrte": {
+        "old": [
+          0.3,
+          3.0
+        ],
+        "new": [
+          0.1,
+          5.0
+        ]
+      },
+      "cmobmx": {
+        "old": [
+          0.005,
+          0.05
+        ],
+        "new": [
+          0.001,
+          0.1
+        ]
+      },
+      "finref": {
+        "old": [
+          165.0,
+          275.0
+        ],
+        "new": [
+          165.0,
+          350.0
+        ]
+      },
+      "ppsen": {
+        "old": "active",
+        "new": "fixed@0.0"
+      }
+    },
+    "ppsen": "fixed at 0 (91.5% lower-bound pile-up; eggplant day-length insensitive)",
+    "w_response_budget_per_season": 0.1,
+    "deferred_batch2": [
+      "temperature TO11/TO21/TO22/TM1/TM2 releases WITH ladder-order constraints (TO11<TO12, TO21<TO22, TO1x<TO2x<TMx)",
+      "allocation FRLFF/FRSTMF/XFINT-upper/XFPHT/XMAGE/LNGSH",
+      "NSTFAC lower 0.3 (only if N-response rounds resume)",
+      "KCAN/SIZREF/PARMAX"
+    ],
+    "gate_to_batch2": "batch-1 must first improve 26SP DRY_CUM bias/plateau and LAI overestimate"
+  }
+}
