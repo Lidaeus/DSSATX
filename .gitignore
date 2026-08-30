@@ -87,7 +87,7 @@ windows/
 
 # Figures & Plotting Output Artifacts (Regenerable from scripts, excluded from lean core repo)
 figture/
-figures/
+/figures/
 paper_figures/
 paper_data/
 workspace/figure_redesign_demo/

@@ -74,8 +74,8 @@ PEST++ writes candidate parameters → `run_dssat.py` injects them into `.base` 
 
 ### Code Organization
 
-- `src/calibration/build_pest.py` — Main builder (~103KB). Parses `.base` files, generates PEST control files (.pst/.tpl/.ins). Contains all mode-specific logic (eggplant_stage2 handles phenology, growth, multi-harvest, process observations).
-- `src/dssat/run_dssat.py` — DSSAT runner (~87KB). The "black box" PEST calls each iteration. `format_val()` is critical — DSSAT `.CUL` files require exact 6-char fixed-width formatting.
+- `src/calibration/build_pest.py` — Main builder (~170KB). Parses `.base` files, generates PEST control files (.pst/.tpl/.ins). Contains all mode-specific logic (eggplant_stage2 handles phenology, growth, multi-harvest, process observations).
+- `src/dssat/run_dssat.py` — DSSAT runner (~147KB). The "black box" PEST calls each iteration. `_format_to_width()` / `_format_to_width_preserve_space()` are critical — DSSAT `.CUL` files require exact 6-char fixed-width formatting.
 - `src/common/param_registry.py` — Parameter registry with physical hard bounds (`PHYSICAL_BOUNDS` dict), default bound inference, and parameter grouping. Single source of truth for all parameter constraints.
 - `src/sensitivity/` — Morris/Sobol sensitivity analysis tools (separate pipeline from calibration).
 - `src/reporting/analyze_results.py` — Post-processing, metrics (RMSE/NRMSE/d-index), diagnostics.
@@ -121,13 +121,13 @@ Manager/agent architecture. Each agent gets a complete copy of the run directory
 
 ## Important Conventions
 
-- `FL-VS` is always fixed at 100.0 (not a calibration parameter)
-- `XFINT` constrained to 0.12–0.50 to avoid IPDMND risk
-- Observation groups: phenology (`PestEval.OUT`), growth process (`PestTmtGrow.OUT`), multi-harvest (`PestHarvest.OUT`), joint season-end (`PestJoint.OUT`)
+- `FL-VS`: physical bounds (0.0, 300.0); default bounds (100.0, 140.0) — calibration allowed only when last-leaf/terminal-growth observations identify it (`src/common/param_registry.py` is the single source of truth; the E02 running contract of 2026-08-26 currently fixes it at 100.0)
+- `XFINT`: physical bounds (0.0, 1.0); default working domain (0.10, 0.35) (`src/common/param_registry.py`)
+- Observation groups: phenology (`PestEval.OUT`), growth (`PestGrow.OUT`), growth process (`PestTmtGrow.OUT`), multi-harvest (`PestHarvest.OUT`), joint season-end (`PestJoint.OUT`), soil water (`PestSoilWat.OUT`), N response (`PestNResponse.OUT`), W response (`PestWResponse.OUT`)
 - DSSAT output path ambiguity: `Evaluate.OUT` may appear in workspace or `C:\DSSAT48\` — code checks both
 - `.base` files use `!Calibration` comment markers to identify calibratable parameter lines
-- Workspace scripts (`Workspace/*.py`) are stubs that redirect to `src/` via `exec()`
-- The project is mid-refactor (phases 0–4). Current branch `codex/p0-research-credibility` reflects active research-credibility work; `recalib-v14-consistent` reflects phases 0–4 completion.
+- `Workspace/*.py`: only a few files are redirect stubs into `src/` (`analyze_results.py`, `build_pest.py`, `run_dssat.py` via `runpy.run_module`; `plot_results.py` via `exec`). The rest are legacy one-off scripts slated for cleanup — do not add new tooling there.
+- Branch and refactor-stage status are volatile by nature; consult the git repository and `docs/CHANGELOG.md` instead of this file.
 
 ## Paper Figure Pipeline (dual-track, strictly separated)
 
@@ -161,13 +161,13 @@ This project uses an **unmixable two-track figure system**. Read `docs/科研图
 
 **Style profile:** `configs/figures/publication.json` (`general_q1_v1`): R≥4.3, single column 89 mm, double 183 mm, max height 170 mm, 7 pt body / 8 pt panel labels, 0.5 pt axes, 1.0 pt data lines, 600 dpi review PNG, PDF/SVG/PNG outputs, color-blind-friendly. Per-figure output = PDF+SVG+PNG+source CSV (+metrics/QQ/summary CSV where applicable) and a `figure_manifest.json` (R/pkg versions, git commit/dirty, profile hash, all-artifact SHA-256). On Windows, SHA-256 uses system `certutil`; elsewhere `sha256sum`.
 
-**Figure registry:** `configs/figures/figure_registry.csv` registers Fig. 1–6 (main) and Fig. S1–S8 (supplement) with status (`pending_P1`, `r_core_partial`, `r_core_implemented_demo_qa`, etc.). Do not fill empty figure numbers with placeholder/demo data — figures are gated on upstream scientific quality passes (P1 SA stability/convergence, P2 IES update, independent validation freeze, etc.). Check the registry before adding a figure.
+**Figure registry:** `configs/figures/figure_registry.csv` is the authoritative per-figure register (currently 23 rows: main Fig. 1–6, supplement Fig. S1–S8 incl. S1b/c/d, plus FigSa_summary, FigCondPerf, Fig4Cond, FigS4Cond, and one `diagnostic_*` entry). Status values in use: `pending_P4`, `pending_P5`, `pending_quality_bundle`, `r_demo_current_evidence`, `r_core_partial`, `r_core_implemented`, `r_core_implemented_demo_qa`. Do not fill empty figure numbers with placeholder/demo data — figures are gated on upstream scientific quality passes. Check the registry before adding a figure.
 
 **R environment gotcha:** the dev machine's R is not on `PATH`; QA was done with an explicit R 4.5.2 path. R 4.6.0 is binary-incompatible with existing 4.5 user libraries — do not mix. Production should put the chosen R on `PATH` and pin package versions.
 
 ## Dependencies
 
-- Python 3.13+; key packages: `pandas`, `numpy`, `pyemu`, `matplotlib`, `flopy` (see `requirements.txt`)
+- Python 3.13+; key packages: `pandas`, `numpy`, `pyemu`, `matplotlib`, `scipy` (initial ensemble, NSGA-III), `pymoo` (management optimization), `pyyaml` (tools) (see `requirements.txt`)
 - R ≥ 4.3 for paper figures; packages: `ggplot2`, `patchwork`, `jsonlite`, `svglite` (no runtime install — `common.R` checks once)
 - PEST++ binaries bundled in `pestpp-5.2.16-win/`
 - DSSAT v4.8 expected at `C:\DSSAT48\` (DSCSM048.EXE)

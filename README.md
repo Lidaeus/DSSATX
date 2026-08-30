@@ -9,7 +9,7 @@ Tomato_Cal 是一个面向作物模型研究的 DSSAT 参数敏感性分析与 P
 - DSSAT 参数注入、隔离运行、Morris/Sobol、分阶段 IES、确定性复跑和结果清单已经打通。
 - S1–S4 工具开发运行已达到 `engineering_validated`，证明工具链可执行；现有运行仍是 `tooling_development / science_pending`，不能直接作为论文结论。
 - staged builder 已可在干净 workspace 中仅依赖版本化 FileA/FileT 构建观测契约，不再读取旧 `workspace/Evaluate.OUT`。
-- 两春一秋的 Morris 筛选已完成三 seed 汇总：XXQL2501 和 XXQL2601 的两个域稳定，XXQL2502 的一般遗传域稳定，而水氮域的 Top-15 边界仍有种子敏感性。当前论文图链据此生成明确标记的 `science_pending / DEMO_` 图；Sobol 的 XXQL2501 N64→N128 收敛门未通过，只作为补充的数值不确定性记录。详见 [敏感性分析论文写作参考](docs/论文材料与方法_正式遗传参数敏感性分析.md)。
+- 两春一秋的 Morris 筛选已完成三 seed 汇总：XXQL2501 和 XXQL2601 的两个域稳定，XXQL2502 的一般遗传域稳定，而水氮域的 Top-15 边界仍有种子敏感性。当前论文图链据此生成明确标记的 `science_pending / DEMO_` 图；Sobol 三季 N=128→N=256 稳定性门中仅 XXQL2502 通过（XXQL2501 未通过 bootstrap 有效重采样门，XXQL2601 未通过最大名次变化门），只作为补充的数值不确定性记录。详见 [敏感性分析论文写作参考](docs/论文敏感性分析写作参考_W5重构_20260729.md)。
 - Python 只输出运行诊断和论文数据；所有可能进入论文的图由 `paper/R/` 统一绘制。
 
 ## 环境
@@ -46,10 +46,10 @@ python tools/import_experiment_bundle.py `
   --source-dir <原始文件目录> `
   --soil <SOIL.SOL> --weather <气象文件> --batch <DSSBatch.v48> `
   --experiment <试验名> --bundle-id <新bundle_id> `
-  --symbi Y
+  --symbi N
 ```
 
-茄子借用 CROPGRO-Tomato 模型，但仍是非豆科作物；为兼容 DSSAT 4.8.5 的 CRGRO048 (Tomato) 模型启动运行，正式输入的 FileX simulation OPTIONS 必须为 `SYMBI=Y`，实际固氮参数 `FRCNOD` 固定为 0.05 并排除在 SA/率定之外。
+茄子借用 CROPGRO-Tomato 模型，但仍是非豆科作物；正式输入的 FileX simulation OPTIONS 统一为 `SYMBI=N` 并配套 `POTAS=N`（非豆科政策；早期误用 `SYMBI=Y`，已于 2026-07-20/21 统一修正，见 `docs/CHANGELOG.md`）。`FRCNOD` 在 `src/common/param_registry.py` 中保留 (0, 1) 物理域作为窄幅 SA 探测，并非固定值。
 
 遗传模型基线只放在：
 
@@ -141,7 +141,9 @@ src/dssat/           DSSAT 隔离运行
 src/sensitivity/     Morris/Sobol
 src/calibration/     PEST++ 构建、运行与 finalize
 src/reporting/       指标、诊断和 R 数据导出
+src/management/      水氮管理情景优化（NSGA-III 等）
 paper/R/             唯一论文成图入口
+tools/               并行执行、实验脚本与发布工具
 data/                原始输入、模板和参数范围
 configs/             版本化运行配置
 workspace/runs/      隔离运行及证据链（不入 Git）
