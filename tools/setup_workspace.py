@@ -48,7 +48,6 @@ TARGET_DIRS = [
     "src/dssat",
     "src/sensitivity",
     "src/calibration",
-    "src/parallel",
     "src/reporting",
     "tests",
     "workspace",
@@ -139,8 +138,6 @@ MIGRATION_SUGGESTIONS: list[tuple[str, str, str]] = [
     ("Workspace/Sensitivity_Analyze/SA_Project_Code/sa_postprocess_morris.py",
                                                    "src/sensitivity/",              "阶段 2 迁移"),
     ("Workspace/Sensitivity_Analyze/SA_Project_Code/sa_postprocess_sobol.py",
-                                                   "src/sensitivity/",              "阶段 2 迁移"),
-    ("Workspace/Sensitivity_Analyze/SA_Project_Code/sa_postprocess_sobol_interpret.py",
                                                    "src/sensitivity/",              "阶段 2 迁移"),
     ("Workspace/Sensitivity_Analyze/SA_Project_Code/sa_select_topk_from_morris.py",
                                                    "src/sensitivity/",              "阶段 2 迁移"),
@@ -251,7 +248,6 @@ def create_init_files(root: str, *, dry_run: bool = False) -> list[str]:
         "src/dssat",
         "src/sensitivity",
         "src/calibration",
-        "src/parallel",
         "src/reporting",
     ]
     created = []

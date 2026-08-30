@@ -1,8 +1,8 @@
 # DSSAT–PEST++ 科研率定系统开发指南
 
 > 文档状态：当前实现规范
-> 更新日期：2026-07-15
-> 实施状态：P0 已实施，待用户验收
+> 更新日期：2026-08-29
+> 实施状态：P0 已实施；`src/management/` 水氮管理优化模块已加入（见 2.2）
 
 本文档面向本项目的开发和维护人员，说明当前架构、科学质量约束、模块边界和变更验收方式。用户操作入口见根目录 `README.md`，产品与长期路线见 `项目重构规划.md`，P0 历史证据见 `docs/archive/development_records/P0_verification_report.md`。
 
@@ -47,7 +47,8 @@ PEST++ 只负责提出候选参数和读取残差；DSSAT runner 负责参数注
 | `src/calibration/weight_scheme.py` | 观测误差、变换和权重策略；P0 中进行数学审计 |
 | `src/dssat/run_dssat.py` | CUL/ECO/SPE/SOL/IC 注入、DSSAT 执行和 Pest 输出生成 |
 | `src/sensitivity/` | Morris/Sobol 案例构建、运行和后处理 |
-| `tools/parallel/` | manager/agent 隔离运行与状态管理 |
+| `src/management/` | 水氮管理情景优化（DAP 政策物化、NSGA-III 双年稳健搜索，受参数集 `science_validated` 门保护） |
+| `tools/parallel/` | manager/agent 隔离运行与状态管理（`src/parallel` 空壳包已于 2026-08-29 移除） |
 | `src/reporting/` | 参数、预测、指标、后验和图表输出 |
 
 `workspace/` 只承载运行目录、产物和兼容入口。新业务逻辑不得继续写入一次性 workspace 脚本。

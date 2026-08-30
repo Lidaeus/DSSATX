@@ -13,7 +13,7 @@ EXP_26_9L = ROOT / "data/user/experiments/xxql2601_rootzone_9layer_30cm_20260822
 
 import sys
 sys.path.insert(0, str(ROOT / "tools/experiments"))
-from test_9layer_30cm_tillage_soil_plwt_ladder_20260822 import generate_9layer_soil_sol, generate_9layer_tmx
+from exp_9layer_30cm_tillage_soil_plwt_ladder_20260822 import generate_9layer_soil_sol, generate_9layer_tmx
 
 
 def main():

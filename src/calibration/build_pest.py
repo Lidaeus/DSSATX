@@ -540,6 +540,13 @@ def _finalize_ies_contract(
         )
         pst.pestpp_options["ies_observation_ensemble"] = os.path.basename(noise_path)
         pst.pestpp_options["ies_no_noise"] = False
+    pst.pestpp_options["ies_drop_conflicts"] = False
+    pst.pestpp_options["ies_pdc_sigma_distance"] = 0.0
+    # pyemu 1.4.0 materializes ``ies_autohold`` while serializing some IES
+    # options, but the bundled PEST++ 5.2.16 binary does not recognize it and
+    # aborts before starting the manager.  It is only a pyemu-side default,
+    # not part of this calibration contract.
+    pst.pestpp_options.pop("ies_autohold", None)
     pst.write(str(pst_path))
     return {
         "bad_phi_sigma": sigma_value,
@@ -1665,6 +1672,12 @@ def _read_tmt_harvest_events(tmt_path):
                     # T10: preserve original CHFPW/CHPDT cumulative values for
                     # direct harvest calibration (no differencing).
                     "chfpw": float(e["chfpw"]) if e["chfpw"] != -99.0 else -99.0,
+                    # Preserve the independently reported event fresh mass.
+                    # The formal fresh-increment objective uses measured
+                    # HFPOW directly, mirroring measured HPODW on the dry
+                    # side; ``fresh_inc`` remains a cumulative-difference
+                    # fallback only when HFPOW is absent.
+                    "hfpow": float(e["hfpow"]) if e["hfpow"] != -99.0 else -99.0,
                     "chpdt": float(e["chpdt"]) if e["chpdt"] != -99.0 else -99.0,
                     # Preserve measured single-harvest dry mass for the formal
                     # HPODW objective; ``dry_inc`` remains the legacy fallback.
@@ -2407,7 +2420,7 @@ def create_param_csv(params, param_csv_path):
 def _compute_harvest_sigmas(df_harvest, args):
     """Compute per-harvest-event sigmas for PWADM (cum) and PWAIM (inc).
 
-    Shared by ``eggplant_stage2``, ``eggplant_harvest``, and ``eggplant_v13``
+    Shared by ``eggplant_stage2`` (the former harvest/v13 modes were removed 2026-08-29)
     modes.  Replaces three near-identical ~24-line blocks (Code Review O2).
 
     sigma = (sigma0² + (cv * |median|)²)^0.5 * sigma_factor * early_scale
@@ -2449,7 +2462,7 @@ def _compute_process_sigmas(
 ):
     """Compute per-date process-point sigmas.
 
-    Shared by ``eggplant_stage2``, ``eggplant_v13``, and ``eggplant_process``
+    Shared by ``eggplant_stage2`` (the former v13/process modes were removed 2026-08-29)
     modes.  Replaces three near-identical ~15-line blocks (Code Review O3).
 
     sigma = (sigma0² + (cv * |median|)²)^0.5 * sigma_factors.get(var, 1.0)
@@ -2457,7 +2470,7 @@ def _compute_process_sigmas(
     *var_specs* is a list of ``(var_name, sigma0, cv)`` tuples.
     *defaults* provides the fallback sigma for each variable (e.g. ``{"LAIDM": 2.0}``).
     *sigma_factors* optionally multiplies both defaults and per-date sigmas
-    (used by ``eggplant_stage2``; ``None`` for ``eggplant_v13``/``eggplant_process``).
+    (used by ``eggplant_stage2``; formerly also by the removed v13/process modes).
     """
     factors = sigma_factors or {}
     sigmas: dict[str, float] = {
@@ -3443,20 +3456,15 @@ if __name__ == "__main__":
             "weight_scheme.py for hand-calc Phi regressions only."
         )
 
-    # P0-E.3: legacy modes with undefined/obsolete variables are deprecated.
-    # They are not extended or repaired; the article contract enters only via
-    # eggplant_stage2 (and the joint multiseason path).  A deprecation warning
-    # is emitted so historical reproduction runs still work, but the new
-    # experiment entry point (experiment_runner.run_build) hard-rejects them.
-    _DEPRECATED_MODES = {"eggplant_harvest", "eggplant_process", "eggplant_v13"}
-    if mode in _DEPRECATED_MODES:
-        import warnings as _warnings
-        _warnings.warn(
-            f"Mode '{mode}' is DEPRECATED: it contains undefined/obsolete harvest "
-            f"variables and is not maintained. Use 'eggplant_stage2' for the "
-            f"article contract. Historical reproduction may break without notice.",
-            DeprecationWarning,
-            stacklevel=2,
+    # P0-E.3: legacy modes with undefined/obsolete variables were removed in
+    # the open-source cleanup (2026-08-29); the article contract enters only
+    # via eggplant_stage2 (and the joint multiseason path).  Old commands fail
+    # loudly instead of silently falling into the legacy tomato_full branch.
+    if mode in {"eggplant_harvest", "eggplant_process", "eggplant_v13"}:
+        raise SystemExit(
+            f"Mode '{mode}' was deprecated and has been removed. Use "
+            f"'eggplant_stage2' (article contract) or the multiseason path. "
+            f"Historical reproduction requires a pre-2026-08-29 revision."
         )
 
     df_override = None
@@ -3750,247 +3758,6 @@ if __name__ == "__main__":
                 "df": df_process,
             },
         ]
-    elif mode == "eggplant_harvest":
-        prefix = args.prefix or "eggplant_harvest"
-        allowed = {"SLAVR", "SIZLF", "LFMAX", "XFRT", "WTPSD", "SFDUR", "SDPDV", "PODUR"}
-        obs_bases = {"PWAD", "PWAI"}
-        critical = set()
-        model_out_path = PEST_HARVEST_FILE
-
-        entries = _parse_batch_entries(args.batch)
-        if not entries:
-            print("Warning: batch file is empty; no harvest observations will be created.")
-            df_override = pd.DataFrame(columns=["@RUN", "TN", "HNO", "DATE", "PWADM", "PWAIM", "PWADS", "PWAIS"])
-            group_sigmas = {"PWADM": 1.0}
-        else:
-            filex = entries[0]["filex"]
-            filex_path = _resolve_filex_path(filex) or (filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex))
-            excode = _infer_excode_from_filex(filex_path)
-            tmt_path = os.path.join(os.path.dirname(os.path.abspath(filex_path)), f"{excode}.TMT") if excode else None
-
-            events_by_tn = _read_tmt_harvest_events(tmt_path)
-
-            rows = []
-            for e in entries:
-                run_no = int(e["run"])
-                tn = int(e.get("tn", -99))
-                # Fix C1 (CodeReview_BuildPest C1): events_by_tn is keyed by
-                # treatment number (tn), not run number. The legacy copy from
-                # eggplant_stage2 used events_by_run (run-number keyed, returned
-                # by _collect_tmt_events_per_run) which is undefined here and
-                # raised NameError.
-                for ev in events_by_tn.get(tn, []):
-                    obs_cum = ev.get("dry_cum", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_cum", -99.0)
-                    obs_inc = ev.get("dry_inc", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_inc", -99.0)
-                    rows.append({
-                        "@RUN": run_no,
-                        "TN": tn,
-                        "HNO": int(ev["hno"]),
-                        "DATE": int(ev["date"]),
-                        "PWADM": float(obs_cum),
-                        "PWAIM": float(obs_inc),
-                        "PWADS": -99.0,
-                        "PWAIS": -99.0,
-                    })
-
-            df_override = pd.DataFrame(rows)
-            group_sigmas = _compute_harvest_sigmas(df_override, args)
-        extra_allowed = {"XMAGE", "FL-VS", "TRIFL"}
-    elif mode == "eggplant_v13":
-        prefix = args.prefix or "eggplant_v13"
-        allowed = {
-            "CSDL",
-            "PPSEN",
-            "EM-FL",
-            "FL-SH",
-            "FL-SD",
-            "SD-PM",
-            "FL-LF",
-            "SLAVR",
-            "SIZLF",
-            "LFMAX",
-            "XFRT",
-            "WTPSD",
-            "SFDUR",
-            "SDPDV",
-            "PODUR",
-            "THRSH",
-        }
-
-        entries = _parse_batch_entries(args.batch)
-
-        if not entries:
-            df_harvest = pd.DataFrame(columns=["@RUN", "TN", "HNO", "DATE", "PWADM", "PWADS"])
-            harvest_sigmas = {"PWADM": 1.0}
-            df_process = pd.DataFrame(
-                columns=[
-                    "@RUN",
-                    "TN",
-                    "DATE",
-                    "L#SDM",
-                    "LAIDM",
-                    "LWADM",
-                    "SWADM",
-                    "L#SDS",
-                    "LAIDS",
-                    "LWADS",
-                    "SWADS",
-                ]
-            )
-            process_sigmas = {"L#SDM": 0.6, "LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
-        else:
-            events_by_run, points_by_run = _collect_tmt_events_per_run(entries)
-
-            harvest_rows = []
-            process_rows = []
-
-            for e in entries:
-                run_no = int(e["run"])
-                tn = int(e.get("tn", -99))
-
-                for ev in events_by_run.get(run_no, []):
-                    obs_cum = ev.get("dry_cum", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_cum", -99.0)
-                    obs_inc = ev.get("dry_inc", -99.0) if harvest_var == "CHPDT" else ev.get("fresh_inc", -99.0)
-                    harvest_rows.append(
-                        {
-                            "@RUN": run_no,
-                            "TN": tn,
-                            "HNO": int(ev["hno"]),
-                            "DATE": int(ev["date"]),
-                            "PWADM": float(obs_cum),
-                            "PWAIM": float(obs_inc),
-                            "PWADS": -99.0,
-                            "PWAIS": -99.0,
-                        }
-                    )
-
-                for p in points_by_run.get(run_no, []):
-                    process_rows.append(
-                        {
-                            "@RUN": run_no,
-                            "TN": tn,
-                            "DATE": int(p["date"]),
-                            "L#SDM": float(p.get("lnsd", -99.0)),
-                            "LAIDM": float(p["laid"]),
-                            "LWADM": float(p["lwad"]),
-                            "SWADM": float(p["swad"]),
-                            "L#SDS": -99.0,
-                            "LAIDS": -99.0,
-                            "LWADS": -99.0,
-                            "SWADS": -99.0,
-                        }
-                    )
-
-            df_harvest = pd.DataFrame(harvest_rows)
-            harvest_sigmas = _compute_harvest_sigmas(df_harvest, args)
-
-            df_process = pd.DataFrame(process_rows)
-            process_sigmas = _compute_process_sigmas(
-                df_process,
-                var_specs=[
-                    ("L#SDM", 0.5, 0.15),
-                    ("LAIDM", 1.6, 0.50),
-                    ("LWADM", 80.0, 0.25),
-                    ("SWADM", 100.0, 0.25),
-                ],
-                defaults={"L#SDM": 0.6, "LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0},
-            )
-
-        stage2_outputs = [
-            {
-                "model_out_path": PEST_HARVEST_FILE,
-                "obs_bases": {"PWAD", "PWAI"},
-                "critical_obs": set(),
-                "group_sigmas": harvest_sigmas,
-                "df": df_harvest,
-            },
-            {
-                "model_out_path": PEST_TMTGROW_FILE,
-                "obs_bases": {"L#SD", "LAID", "LWAD", "SWAD"},
-                "critical_obs": set(),
-                "group_sigmas": process_sigmas,
-                "df": df_process,
-            },
-        ]
-        extra_allowed = {
-            "PL-EM",
-            "EM-V1",
-            "V1-JU",
-            "JU-R0",
-            "FL-VS",
-            "TRIFL",
-            "RWDTH",
-            "RHGHT",
-            "OPTBI",
-            "SLOBI",
-            "XMAGE",
-            "XFPHT",
-            "XFINT",
-            "TB1",
-            "TO11",
-            "TO21",
-            "TM1",
-            "TB2",
-            "TO12",
-            "TO22",
-            "TM2",
-            "TB3",
-            "TO13",
-            "TO23",
-            "TM3",
-        }
-    elif mode == "eggplant_process":
-        prefix = args.prefix or "eggplant_process"
-        allowed = {"SLAVR", "SIZLF", "LFMAX", "XFRT", "WTPSD", "SFDUR", "SDPDV", "PODUR"}
-        obs_bases = {"LAID", "LWAD", "SWAD"}
-        critical = set()
-        model_out_path = PEST_TMTGROW_FILE
-
-        entries = _parse_batch_entries(args.batch)
-        if not entries:
-            print("Warning: batch file is empty; no process observations will be created.")
-            df_override = pd.DataFrame(columns=["@RUN", "TN", "DATE", "LAIDM", "LWADM", "SWADM", "LAIDS", "LWADS", "SWADS"])
-            group_sigmas = {"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0}
-        else:
-            filex = entries[0]["filex"]
-            filex_path = _resolve_filex_path(filex) or (filex if os.path.isabs(filex) else os.path.join(WORKSPACE, filex))
-            excode = _infer_excode_from_filex(filex_path)
-            tmt_path = os.path.join(os.path.dirname(os.path.abspath(filex_path)), f"{excode}.TMT") if excode else None
-
-            points_by_tn = _read_tmt_process_points(tmt_path)
-            rows = []
-            for e in entries:
-                run_no = int(e["run"])
-                tn = int(e.get("tn", -99))
-                # Fix C2 (CodeReview_BuildPest C2): points_by_tn is keyed by
-                # treatment number (tn), not run number. Same NameError pattern
-                # as C1 — the legacy copy referenced the undefined points_by_run.
-                for p in points_by_tn.get(tn, []):
-                    rows.append(
-                        {
-                            "@RUN": run_no,
-                            "TN": tn,
-                            "DATE": int(p["date"]),
-                            "LAIDM": float(p["laid"]),
-                            "LWADM": float(p["lwad"]),
-                            "SWADM": float(p["swad"]),
-                            "LAIDS": -99.0,
-                            "LWADS": -99.0,
-                            "SWADS": -99.0,
-                        }
-                    )
-
-            df_override = pd.DataFrame(rows)
-            group_sigmas = _compute_process_sigmas(
-                df_override,
-                var_specs=[
-                    ("LAIDM", 1.6, 0.50),
-                    ("LWADM", 80.0, 0.25),
-                    ("SWADM", 100.0, 0.25),
-                ],
-                defaults={"LAIDM": 2.0, "LWADM": 150.0, "SWADM": 200.0},
-            )
-        extra_allowed = None
     elif mode == "eggplant_spe_temp":
         prefix = args.prefix or "eggplant_spe_temp"
         allowed = set()
