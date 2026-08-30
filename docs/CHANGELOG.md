@@ -1,5 +1,45 @@
 # Changelog
 
+## 2026-08-30（TMA/TMT 数据链唯一性审查与 25SP 口径确认）
+
+- 完成 TMA(FileA)/TMT(FileT) 生成链路、文档口径与 25SP 均值口径的只读审查（报告：`docs/开源整理_TMT_TMA数据链唯一性与25SP均值口径审查_20260830.md`）。确认：运行时只读+强一致性闸门完好；生成侧存在 6 个内容级写入方 + 10 余个复制/同步方，无单一权威入口；25SP 重复之间均为算术平均（唯一加权为鲜产量的小区内行位置加权，源 xlsx 预计算）。
+- 取证确认 HEAD 提交状态健康：canonical 根 bundle 按设计保留剔除前数值，repfilter→from_scratch→armab 派生链含 2026-08-19 已批准的剔除修正且链内一致；**但当前未提交的协作者 WIP 已把整条 25SP 派生链观测文件批量回退为剔除前数值**（结构性根因：REMOVALS 仅存在于 apply_repfilter 旁路，经 canonical 生成器的再生产生剔除前数值）。已出具 `docs/待协作者确认_观测数值系与WIP覆盖_20260830.md`（含 26SP 同一观测 4 值并存与双缩放 WIP 脚本冲突），待确认后处置。
+- 按用户裁决执行：canonical 根目录放置 `OBSERVATION_AUTHORITY_NOTICE_20260830.md`（repfilter 系为权威）；《DSSAT_FileA_FileT_Excel操作指南》加"已被取代"横幅（旧生成器算术产量口径 vs 现行加权产量）；《数据来源与配置规范手册》§3.2 标注 LAIX 禁入 Phi、N2−N0 已收窄为 N3−N0。定宽丢失举报经核实为误报，关闭。
+
+## 2026-08-29（开源整理批次 1：元文档事实性修正）
+
+- 依据代码静态分析报告（`docs/开源整理_代码静态分析报告_20260829.md`）修正元文档与代码不符项：`requirements.txt` 补 `scipy`/`pymoo`/`pyyaml`、移除全仓库未 import 的 `flopy`。
+- README 与《目录与输入资产规范》的 SYMBI 政策由过期 `SYMBI=Y` 更正为现行非豆科政策 `SYMBI=N`（配套 `POTAS=N`，见 2026-07-20/21 条目）；`FRCNOD` 描述改为与 `param_registry.py` 一致（保留 (0,1) 物理域窄幅 SA 探测，非固定值）；README Sobol 状态行更新为三季 N128→N256 证据链，写作参考链接改指 W5 重构版；README 结构图补 `src/management/` 与 `tools/`。
+- AGENTS.md：`format_val()` 更正为 `_format_to_width()` / `_format_to_width_preserve_space()`；FL-VS/XFINT 约束以 `param_registry.py` 为真源改写；观测组由 4 组补全为 8 组；Workspace stub 描述按实际机制更正；figure registry 描述按 23 行现状重写；移除易变的"当前分支"信息，改为指向 git 与本 CHANGELOG。
+- `.gitignore`：`figures/` 锚定为 `/figures/`，解除对 `configs/figures/` 配置的误伤。
+- CLAUDE.md 降级为指向 AGENTS.md 的指针；《绘图工作交接文档_20260801》删除（其运行诊断轨说明并入《科研图表设计与开发计划》§4）；《生理黄金平衡解设计原理与复现指南》移入 `docs/archive/designs/`。
+- 开源整理批次 2（文档裁决与归档）：47 项过时文档按主题归档入 `docs/archive/`（论文旧底稿 2、SA 历史 2、任务卡/模板/参考 4、reports 31 份等），`ARCHIVE_MANIFEST` 登记去向与理由；`docs/README.md` 索引重写覆盖全部现行区文档；修复 7 处死链；《项目状态与科研启动清单》补 8 月状态摘要。
+- 开源整理批次 3（非核心代码清理）：删除 `src/parallel/` 空包、`src/reporting/posterior_extended.py`（520 行零引用）、`src/sensitivity/sa_postprocess_sobol_interpret.py`（硬编码路径一次性脚本）及 `build_pest.py` 三个已声明废弃的 mode 分支（eggplant_harvest/process/v13，约 240 行；旧命令现硬拒绝而非落入 legacy 分支）；约 60 个历史迭代脚本按家族归档入 `tools/archive/` 六个主题目录；`tools/experiments/` 11 个 `test_*.py` 更名 `exp_*.py`（避免 pytest 误收集）；删除 2 个临时 `.mjs`；`setup_workspace.py` 同步移除对已删路径的引用。
+- 已知待修（批次 4）：`d216627` 快照将 `src/calibration/run_dssat.py` 覆盖为 `src/dssat/run_dssat.py` 副本，原隔离层 API（`prepare_run_directory`/`_RAW_DSSAT_OUTPUT_FILES`/`_atomic_copy_back`）丢失，`src/management` 导入链与 `test_dssat_safety`/`test_concurrency_isolation` 暂断裂。
+
+## 2026-08-28（协作者率定代码演化快照 20260820-28 入库）
+
+- 输入包演化：0-4/60cm 土壤剖面系列、13 层 SLNF、measuredn 实测无机氮 IC 替换（三个 v3_measuredn 版本化输入包）等（协作者 WIP）。
+- 试验配置与冻结边界矩阵更新（协作者 WIP）；率定工具（prepare/launch/evaluate/plot）批量演化与新增。
+- 新增 ArmAB RRMSE 26SPN 率定评估绘图脚本与诊断结果集；batch-1 率定准备（报告驱动的边界释放与 W_RESPONSE 预算提升）。
+- PEST-IES 条件集合不确定性图表管线（方案一/二/三，20 成员 DEMO + 全量 199）；paper/R 图表脚本更新。
+- 仓库结构精简：根目录运行残留解除跟踪、`_seasons` 陈旧物化清理、figture 末轮批次目录删除、untrack node_modules。
+
+## 2026-08-19（重复剔除与数据 QA 执行）
+
+- 执行批准的重复剔除方案（15 例，repfilter_v1）；追加小区 7 叶干重剔除，并记录被拒绝的跨日期交换指令。
+- 25SP 9 号处理 INITIAL CONDITIONS 按用户指定值同步全部活跃 TMX。
+
+## 2026-08-18（GLM 后续率定开发 WP1–WP5 与源数据卫生）
+
+- GLM 后续率定：新增 IES→GLM 构建器与并行 `glm` 模式（WP1/WP2）；Jacobian 审计器、评价器、正式启动器与基线冻结（WP3/WP4/WP5）；差分步长抽查与稳定性判据修正；烟雾试验问题修复、code review 五项缺陷修复 + 回归测试、端到端基线验证。
+- 源数据卫生：生长指标源数据质量审查报告（20260818）与离群值分解；执行方案 A（零测量值改动）。
+- checkpoint：IES-NSE 两季正式率定代码基线（20260817 官方运行产物状态）。
+
+## 2026-07-30（SA 证据 finalize 与论文图产出）
+
+- finalize sensitivity evidence and paper figures：三季 Morris/Sobol 证据冻结与 R 论文图链产出。
+
 ## 2026-07-23（v2 方案操作机制代码实现：DAP 物化 + NSGA-III + 两年编排）
 
 在 v2 方案配置与数据门之上，补齐方案描述的操作机制代码，使正式运行链路在参数集冻结后可直接启动：

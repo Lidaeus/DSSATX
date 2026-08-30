@@ -1,5 +1,7 @@
 # 在 Excel 中整理 DSSAT File A / File T 的逐步操作指南
 
+> **⚠️ 已被取代（2026-08-30 标注）**：本指南绑定旧生成器 `generate_dssat_all_seasons.py`，其口径与现行生成器 `tools/experiments/build_trial_observations_v2_20260726.py` 不一致（关键差异：①25SP 鲜产量现行使用**预计算加权小区产量** edge×0.5+中间行均值×0.5，本文为算术平均；②FileT 列集、FileA 派生规则、含水率合同均已演进）。现行口径以 v8 及以后 bundle 的 `generator_log.json`、`data/user/ref/DSSAT文件/2025春/DSSAT输出/2025SPR_QA.md` 与 `docs/数据来源与配置规范手册_v1_20260808.md` 为准；本文仅作历史操作参考。
+>
 > 适用季节：2025 春、2025 秋、2026 春（茄子）
 > 对应自动生成脚本：`generate_dssat_all_seasons.py`
 > 本文档把脚本里的计算口径，逐条翻译成可在 Excel 里手动复现的鼠标/公式操作，方便在没有 Python 环境时也能得到与脚本完全一致的 `*.TMA`（File A）与 `*.TMT`（File T）。

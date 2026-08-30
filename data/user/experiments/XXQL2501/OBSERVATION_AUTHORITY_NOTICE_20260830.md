@@ -1,0 +1,14 @@
+# 25SP 观测数值权威关系公告（2026-08-30）
+
+本目录（canonical 根 bundle `XXQL2501`）**按设计保留剔除前观测数值**：2026-08-19 已批准执行的重复剔除方案（15 例，见 `docs/重复剔除方案_20260818.md`）通过 `tools/experiments/apply_repfilter_v1_20260818.py` 写入**新版本 bundle**，不修改父 bundle。
+
+## 权威关系
+
+| 数值系 | 位置 | 状态 |
+|---|---|---|
+| 剔除前基线（本目录） | `data/user/experiments/XXQL2501/` | 保留作历史基线，**不用于正式率定** |
+| **权威修正值** | `xxql2501_repfilter_measuredmoisture_v2_20260819` → v3 → v4 → `xxql2501_from_scratch_*` → `xxql2501_formal_armab_rrmse_20260828` 派生链 | 三个修正点位：TRNO3@25194（LAID 3.798/LWAD 1291/SWAD 2301/CHTD 1.785）、TRNO4@25142（SWAD 564）、TRNO13@25170（LAID 2.845）；审计见 v2 bundle `trial_generator_log.json` |
+
+## 当前风险提示（2026-08-30）
+
+工作树中存在**未提交的协作者 WIP**，已把上述派生链的观测文件批量回退为本目录的剔除前数值（HEAD 提交状态是正确的）。在协作者确认前，请勿基于工作树的观测数值开展率定或下结论。详见 `docs/开源整理_TMT_TMA数据链唯一性与25SP均值口径审查_20260830.md` §三。
