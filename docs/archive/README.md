@@ -12,6 +12,7 @@
 ## 分类
 
 - [designs/](designs/)：早期产品、聚类、绘图和率定方案；
+- [paper_drafts/](paper_drafts/)：被后续口径取代的论文底稿与写作参考；
 - [completed_plans/](completed_plans/)：已经实施或已被后续阶段替代的 P0/P1/P2/T4 计划；
 - [research_inputs/](research_inputs/)：相似项目迁移材料、前沿方法评估和早期领域方案；
 - [sa_project/](sa_project/)：旧 SA 教程、分组和结果解释；
