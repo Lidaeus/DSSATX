@@ -69,8 +69,8 @@
   "trial_observation_qa": {
     "plots": 10,
     "growth_dates": 4,
-    "harvest_dates": 10,
-    "total_observations": 520,
+    "harvest_dates": 9,
+    "total_observations": 490,
     "excluded_tn": [
       1,
       6,
@@ -108,8 +108,8 @@
   "files": [
     {
       "name": "XXQL2501.TMX",
-      "sha256": "8cb8b78367db48302d33156abd318c9bc23fb08d8b62540c0cf42acbeba0dff5",
-      "bytes": 20886,
+      "sha256": "2c0c0c5f3f4e7a0ad39236979e7bdc645ac1f26b2a0db10515ee226f28d76a5e",
+      "bytes": 20363,
       "copied_from": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2501\\XXQL2501.TMX"
     },
     {
@@ -133,34 +133,34 @@
     },
     {
       "name": "XXQL2501.TMA",
-      "sha256": "6ee4b1618f06939c1bb4ec75f9f049efde6ad3e0f2b85ca55a3d8682ce624c6a",
-      "bytes": 1541,
+      "sha256": "7b60f72082b0f17d3cff5c1516e433c7441ee4b3f122f7c820d18bdded595db3",
+      "bytes": 1536,
       "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
-      "generator_sha256": "e76548605fd61fe3e0b11e84a30832583f58d51b0951ef0fe595bba6043bf774",
+      "generator_sha256": "9d24145bbefb754f11825921e1cf027c722f5f1b9fd8b432f2fa24f11d95ec34",
       "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\XXQL2501.TMA"
     },
     {
       "name": "XXQL2501.TMT",
-      "sha256": "c812053bbf40dfdced3ad2c5ce0db2a422ce4f00c0a1542b02890250ca4ea2c9",
-      "bytes": 16775,
+      "sha256": "340a19cbc113a315b9db6b452b217cf363ad575881073c055b2396cd09c74245",
+      "bytes": 15550,
       "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
-      "generator_sha256": "e76548605fd61fe3e0b11e84a30832583f58d51b0951ef0fe595bba6043bf774",
+      "generator_sha256": "9d24145bbefb754f11825921e1cf027c722f5f1b9fd8b432f2fa24f11d95ec34",
       "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\XXQL2501.TMT"
     },
     {
       "name": "observation_uncertainty.csv",
-      "sha256": "138ded9ae316353eced06a501bf7bc6450843ec73b4d15ab036667252130e631",
-      "bytes": 102303,
+      "sha256": "6a167e5efaf99b2c48aa3ed65e3c4e1950f0ebb2ac0d82081bd563fbee01dc45",
+      "bytes": 96149,
       "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
-      "generator_sha256": "e76548605fd61fe3e0b11e84a30832583f58d51b0951ef0fe595bba6043bf774",
+      "generator_sha256": "9d24145bbefb754f11825921e1cf027c722f5f1b9fd8b432f2fa24f11d95ec34",
       "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\observation_uncertainty.csv"
     },
     {
       "name": "fruit_quality_match_audit.csv",
-      "sha256": "bd3d0c76c1c09db5ce55c3f9a8e828bcc2ac3b6c19c85cef3b938ac6c85398ee",
-      "bytes": 19167,
+      "sha256": "9428ae5f348c5eda64d51b8a9255c6df89bd61196fdeec074850f09c94146ef6",
+      "bytes": 17261,
       "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
-      "generator_sha256": "e76548605fd61fe3e0b11e84a30832583f58d51b0951ef0fe595bba6043bf774",
+      "generator_sha256": "9d24145bbefb754f11825921e1cf027c722f5f1b9fd8b432f2fa24f11d95ec34",
       "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\fruit_quality_match_audit.csv"
     },
     {
@@ -176,7 +176,7 @@
       "sha256": "6d92ecf19626932d10e427429569959bc58bc504f23d5959f44661c08f5d6e29",
       "bytes": 235,
       "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
-      "generator_sha256": "e76548605fd61fe3e0b11e84a30832583f58d51b0951ef0fe595bba6043bf774",
+      "generator_sha256": "9d24145bbefb754f11825921e1cf027c722f5f1b9fd8b432f2fa24f11d95ec34",
       "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\treatment_exclusion_audit.csv"
     },
     {
@@ -219,26 +219,26 @@
     },
     {
       "name": "FileA_values.csv",
-      "sha256": "86d5034666c158d86f235b89c849fe7030159ec601710841e15f4f2b8f2d6061",
+      "sha256": "e70a3d19d8b42fe6b7886de1826154c2e384edbc240f38e33513f4222e95a1e3",
       "bytes": 1876,
       "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
-      "generator_sha256": "e76548605fd61fe3e0b11e84a30832583f58d51b0951ef0fe595bba6043bf774",
+      "generator_sha256": "9d24145bbefb754f11825921e1cf027c722f5f1b9fd8b432f2fa24f11d95ec34",
       "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\FileA_values.csv"
     },
     {
       "name": "FileT_values.csv",
-      "sha256": "d4de75e2c2e16b4d5f1b2e76dc84f85230af3adb03027a6d497a030c86c4829a",
-      "bytes": 11059,
+      "sha256": "fafce31a604e29a8e69124dce7f62aa57d51fb13813180aa1d54e87695c348c3",
+      "bytes": 10262,
       "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
-      "generator_sha256": "e76548605fd61fe3e0b11e84a30832583f58d51b0951ef0fe595bba6043bf774",
+      "generator_sha256": "9d24145bbefb754f11825921e1cf027c722f5f1b9fd8b432f2fa24f11d95ec34",
       "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\FileT_values.csv"
     },
     {
       "name": "generator_log.json",
-      "sha256": "00b5eb37876a94ffaad15b2178182875c5654b1d55fcc12d8e4dd89191d71228",
-      "bytes": 1886,
+      "sha256": "a9bdb50125b092e2a6e2f88ec6cc3180028c6860d5564ce34da1268e4fb8b8f1",
+      "bytes": 1880,
       "generated_by": "tools/experiments/build_trial_observations_v2_20260726.py",
-      "generator_sha256": "e76548605fd61fe3e0b11e84a30832583f58d51b0951ef0fe595bba6043bf774",
+      "generator_sha256": "9d24145bbefb754f11825921e1cf027c722f5f1b9fd8b432f2fa24f11d95ec34",
       "source_v2_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\DSSAT输出_v2\\generator_log.json"
     }
   ],
@@ -385,46 +385,19 @@
     "generated_trial_count": 9,
     "generated_soil_count": 4
   },
-  "data_corrections": [
-    {
-      "correction_id": "fixed_fruit_moisture_95pct_dmc5pct_v2_20260802",
-      "moisture_fraction": 0.95,
-      "dry_matter_fraction": 0.05,
-      "variance_rule": "DMFR/DMC variance=0; dry variance=DMFR^2*fresh variance",
-      "scope": "FileA/FileT, CHPDT/HPODW, observation uncertainty and harvest audit",
-      "source_generator": "tools/experiments/build_trial_observations_v2_20260726.py",
-      "filex_management_reference": "data/user/ref/XXQL2501.TMX",
-      "filex_management_reference_sha256": "933bb58720a753b43521dbdff7f39b694746738d2d89ea6d5491d43828774a62",
-      "filex_management_scope": [
-        "*FERTILIZERS (INORGANIC)",
-        "*HARVEST DETAILS"
-      ],
-      "estimated_harvest_records_removed": [
-        25203,
-        25204
-      ]
-    },
-    {
-      "correction_id": "dmfr_anomalous_replicate_removal_20260807",
-      "scope": "25SP XXQL2501 fruit dry-weight conversion",
-      "change": "Removed anomalous fruit-moisture replicates (deviation > 0.05 from (TRNO,date) median): TN13 rep3 moisture=0.7848, TN5 rep2 moisture=0.8936. TN13 DMFR 9.31%->3.21%, TN5 6.35%->4.20%.",
-      "generator_sha256": "20631274c8a5e6d66b37c228e70c31079e62c080332e245be4005bcaecc066ca"
-    },
-    {
-      "correction_id": "canonical_tmx_ic_fixed_width_20260818",
-      "scope": "INITIAL CONDITIONS ICBL/SH2O/SNH4/SNO3 header and records only",
-      "change": "Removed surplus blank records and rewrote the header and rows as DSSAT widths 2/6/6/6/6; numeric changes limited to width-safe rounding.",
-      "repair_audit": "D:\\Tomato_Cal\\workspace\\reports\\tmx_ic_format_repair_20260818\\tmx_ic_repair_rows.csv"
-    },
-    {
-      "correction_id": "tmx_tn9_ic_user_specified_20260818",
-      "date": "2026-08-18",
-      "file": "XXQL2501.TMX",
-      "change": "TN9 IC: 20cm .216/3.4/30.4, 40cm .248/1.2/23.4, 60cm .297/1.5/6.6, 80cm .304/.5/1, 100cm .314/.5/1",
-      "reason": "用户指定 25SP 9号处理 INITIAL CONDITIONS 修改（同步全部活跃 25SP TMX）",
-      "backup": "workspace/backups/tmx_ic_tn9_20260818/"
-    }
-  ],
+  "data_corrections": {
+    "filex_management_reference": "data/user/ref/XXQL2501.TMX",
+    "filex_management_reference_sha256": "181b83762ac0f43482ecb4ba97d4ccedcd75cc3fb5582363cf0aee73638918b5",
+    "filex_management_scope": [
+      "*FERTILIZERS (INORGANIC)",
+      "*HARVEST DETAILS"
+    ],
+    "estimated_harvest_records_removed": [
+      25198,
+      25203,
+      25204
+    ]
+  },
   "initial_condition_valid_ic_layermean_audit": {
     "filex": "XXQL2501.TMX",
     "mean_ic_ids": [

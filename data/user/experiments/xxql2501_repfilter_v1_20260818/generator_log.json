@@ -2,17 +2,17 @@
   "season_id": "25SP",
   "excode": "XXQL2501",
   "generator": "tools/experiments/build_trial_observations_v2_20260726.py",
-  "generator_sha256": "20631274c8a5e6d66b37c228e70c31079e62c080332e245be4005bcaecc066ca",
+  "generator_sha256": "9d24145bbefb754f11825921e1cf027c722f5f1b9fd8b432f2fa24f11d95ec34",
   "spec_compliance": "docs/三季FileA_FileT与不确定性适配计划_v1_20260726.md",
   "source_files": {
-    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春产量数据集.xlsx": "4a61ec04518f5469cef2b660d42cef65cc45c81ac37fe2449e9133fa4f886690",
-    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春作物生长指标集.xlsx": "dc9af4e6250f4f71f7d770393477c790ded0f174ea17d9e3e220175ca3ffb3c4"
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春产量数据集.xlsx": "ae845fa905b09d9f99fde6bab9cdaaae5288174d408a510e556ab02a759de03c",
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春作物生长指标集.xlsx": "b661ea24b3fb3b83c457ebd3c760e42e414dc53e76cd364d8762a6532d7ac120"
   },
   "qa_metrics": {
     "plots": 10,
     "growth_dates": 4,
-    "harvest_dates": 10,
-    "total_observations": 520,
+    "harvest_dates": 9,
+    "total_observations": 490,
     "excluded_tn": [
       1,
       6,
@@ -29,7 +29,7 @@
     "Cumulative yield SD propagates incremental variances.",
     "FileA carries PDAT/ADAT/MDAT(PODD proxy) plus end-state diagnostics; FileT carries process, CHPDT and HPODW.",
     "TN 1,6,7,8 excluded per FileA/FileT uncertainty adaptation plan v1 (2026-07-26) section 6.1.",
-    "Estimated post-FileX harvest records excluded from observations: [25203]; FileX cutoff=25198."
+    "Estimated post-FileX harvest records excluded from observations: []; FileX cutoff=25192."
   ],
   "output_files": [
     "XXQL2501.TMA",
@@ -39,22 +39,5 @@
     "FileA_values.csv",
     "FileT_values.csv",
     "treatment_exclusion_audit.csv"
-  ],
-  "repfilter_20260818": {
-    "applied": "2026-08-18",
-    "scheme": "docs/重复剔除方案_20260818.md",
-    "user_approval": "通道1全部10例 + 通道2五例（用户2026-08-18确认'取样不具有代表性'）",
-    "source_marks": "源xlsx新增'剔除标记'列（不删行不改值），标记含通道与理由可审计",
-    "recalc": "受影响观测均值按剩余重复(n=2)重算，线性换算系数精确继承；SD同步重算",
-    "values_changed": {
-      "25SP_TMT_cells": 6,
-      "26SP_TMT_cells": 10
-    },
-    "dry_cum_unaffected": "产量数据集独立，CHFPW/CHPDT/HPODW 观测零改动",
-    "frozen_results_note": "v8/v7原bundle与已冻结率定结果未动；使用repfilter bundle重跑时成员126基线需重验"
-  },
-  "repfilter_source_marks": {
-    "2025春作物生长指标集.xlsx": "b661ea24b3fb3b83c457ebd3c760e42e414dc53e76cd364d8762a6532d7ac120",
-    "2026春生长指标集.xlsx": null
-  }
+  ]
 }

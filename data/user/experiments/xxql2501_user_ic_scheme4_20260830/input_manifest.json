@@ -1,0 +1,92 @@
+{
+  "bundle_id": "xxql2501_user_ic_scheme4_20260830",
+  "season_id": "25SP",
+  "soil_scheme": "Scheme_4_10_30_60_90_120_150_180cm",
+  "files": [
+    {
+      "name": "DSSBatch.v48",
+      "sha256": "edec425563fe92bac21d9b494870f4b8e20bca10c3a6b46dc2a3fa62d3d49928",
+      "size_bytes": 1698
+    },
+    {
+      "name": "FileA_values.csv",
+      "sha256": "bf3495abad41752b7fe9648bc655df3f40b0fc205126009f59e9bf507ea34479",
+      "size_bytes": 639
+    },
+    {
+      "name": "FileT_values.csv",
+      "sha256": "77e96f746826e4ed5e7de45d8c5edd4a455c8c266d6590d46a30131fee9d4639",
+      "size_bytes": 6414
+    },
+    {
+      "name": "fruit_quality_match_audit.csv",
+      "sha256": "9428ae5f348c5eda64d51b8a9255c6df89bd61196fdeec074850f09c94146ef6",
+      "size_bytes": 17261
+    },
+    {
+      "name": "generator_log.json",
+      "sha256": "a9bdb50125b092e2a6e2f88ec6cc3180028c6860d5564ce34da1268e4fb8b8f1",
+      "size_bytes": 1880
+    },
+    {
+      "name": "observation_uncertainty.csv",
+      "sha256": "418e4f4715bfd0eb19a27afa7404bd6f24fa971313b966f7863feb1e6f96ccc4",
+      "size_bytes": 88889
+    },
+    {
+      "name": "SOIL.SOL",
+      "sha256": "0ee09d10af72e73f9c654fe98880e431c199ec299cc9fb3ec93dbb5226bc0330",
+      "size_bytes": 162766
+    },
+    {
+      "name": "soil_water_generator_log.json",
+      "sha256": "7c8ea8e297a09a22231362ccb255ffea2f36e2059f7715849cb5a34ca2b197bf",
+      "size_bytes": 1083
+    },
+    {
+      "name": "soil_water_layer_mapping.csv",
+      "sha256": "8d8f63f69f9a19d0f8fac64172e0394850133b32151a86f7a36352b8295a5ca7",
+      "size_bytes": 602
+    },
+    {
+      "name": "soil_water_match_audit.csv",
+      "sha256": "65f8c867383bdbd1cae7bbbc2c1088cfdc74096bb1687946523d3c38cbff40ea",
+      "size_bytes": 18382
+    },
+    {
+      "name": "soil_water_observations.csv",
+      "sha256": "771164d993173237b7241606eb1c3af2c62172893945425e6f84d4567366f7f4",
+      "size_bytes": 33791
+    },
+    {
+      "name": "treatment_exclusion_audit.csv",
+      "sha256": "6d92ecf19626932d10e427429569959bc58bc504f23d5959f44661c08f5d6e29",
+      "size_bytes": 235
+    },
+    {
+      "name": "trial_generator_log.json",
+      "sha256": "404bae9938edae9493942c64a6c96c2a975d58761529207948c28b597b9e149b",
+      "size_bytes": 4343
+    },
+    {
+      "name": "XXLI2502.WTH",
+      "sha256": "d273b9b73c6efbca4703e896aefee1921efa18a8ee1a2cfea03e6f339cdc1b6a",
+      "size_bytes": 22171
+    },
+    {
+      "name": "XXQL2501.TMA",
+      "sha256": "28b3eaf422b86e66430e3c43803065c7da4ec45b219ce91a9ebd7e335220ba69",
+      "size_bytes": 1503
+    },
+    {
+      "name": "XXQL2501.TMT",
+      "sha256": "ff94c5da19ab9086464792dbf95e0a38f22e93c8815a23ba451db882b2fe2fec",
+      "size_bytes": 15517
+    },
+    {
+      "name": "XXQL2501.TMX",
+      "sha256": "0d2901eeaed6590609bcc3055530c4c8fd931a667fe17004f8086b19e500f052",
+      "size_bytes": 18793
+    }
+  ]
+}
