@@ -1,8 +1,34 @@
 # Changelog
 
-## 2026-08-30（TMA/TMT 数据链唯一性审查与 25SP 口径确认）
+## 2026-08-31（绘图代码与图表资产静态分析）
 
-- 完成 TMA(FileA)/TMT(FileT) 生成链路、文档口径与 25SP 均值口径的只读审查（报告：`docs/开源整理_TMT_TMA数据链唯一性与25SP均值口径审查_20260830.md`）。确认：运行时只读+强一致性闸门完好；生成侧存在 6 个内容级写入方 + 10 余个复制/同步方，无单一权威入口；25SP 重复之间均为算术平均（唯一加权为鲜产量的小区内行位置加权，源 xlsx 预计算）。
+- 完成三路只读盘点（报告：`docs/开源整理_绘图代码与图表资产静态分析报告_20260831.md`）：R 论文轨 17 文件无孤立脚本、无死函数；Python 诊断轨约 50 文件、以 plot_dynamics.py 与 evaluate_fixedsoil_official_best189 两大引擎为核心，全部输出落在 gitignored 区；figture/（287MB）与 figures/（53MB）仅写不读、src 零依赖；git 跟踪图像当前为 0。
+- 按用户裁决执行：13 个 0818 批次零引用一次性绘图/评估脚本归档 `tools/archive/oneshot_plot_diagnostics_20260804_10/`（组内自洽，附 README）；R 管线删除两个"实现未登记"的灰色分支（`fig1_sa_results`、`figs1_sa` combined，连同 `build_morris_results`/`build_morris_s1_combined`，R parse 验证通过）；命名合规——`fig_fixed_multi_arm_*` 与 `analyze_results` 的 8 处输出统一 `diagnostic_` 前缀（plot_dynamics.py 两处无前缀输出因协作者 WIP 未动，已记录于协作者确认单）。
+- figture/、figures/、workspace 图表产物按裁决**全部保留**（figures/ 根部 fig01-06 为唯一不可再生资产）；4 个 untracked 一次性绘图脚本列入《待协作者确认》问题 3。
+- 事实更新：本日确认协作者 2026-08-30 条目（25SP 观测全链条重构）后，25SP 鲜产量现行口径已改为算术平均、废除加权小区产量——绘图审查报告中"加权产量"结论相应标注为历史口径（见该报告 §五附注）。
+- 视觉核查与废案清理（用户批准）：抽检 6 张代表图确认 figures/ 根部 fig01-06 套装为废案（fig01-03 X 轴把 YYDDD 误作 DAP 致模拟线坍缩、fig04 指标超数学上限、全部为重构前旧契约且生成脚本未入库不可复现），撤回此前"保留并入库"建议；删除 figures/ 整目录、figture/ 根部 18 个重复副本、`_history` 23 个 DEMO 图目录、哈希污染的 `paper_figures_conditional_full199`、`r_paper_demo/paper_figures` 旧版式与 `workspace/generate_comparisons.py`；归档 v6/T10 时代诊断脚本至 `tools/archive/superseded_diag_20260831/`。figture/ 旧批次与全部现行绘图代码按裁决保留。
+- 26SP 0629 期缺失 LAI 补齐（用户批准方案 A）：叶干重/LAI 比值全季稳定（三期均值 17.90–18.96，总 CV≈12%），留一期交叉验证证明全局常数方案最优（MAE 6.1%，分处理方案反而退化至 9.3%）；以 R=18.52 反推 26180 期 12 个小区 LAID（32 行有效重复，4 行已批准剔除标记排除），raw_sd=sqrt(sd²+(0.079·LAI)²) 并全程携带 imputed 标记。**只增不改**：新版本 bundle `xxql2601_lai0629_imputed_20260831` 派生自 canonical XXQL2601 且逐字节保留其全部既有数值（不预设 26SP 数值系裁决），FileA LAIX 保持仅实测。运行时闸门一致性 max diff=0.0。审计：`docs/26SP_0629期LAI补齐方案与审计_20260831.md`。
+- 论文图/诊断图目检评审（11 张）：条件集合 5 张与 Morris Fig1 为出版级予以保留；建议淘汰 FigS7（3 对条形信息密度过低）与 S5/S6 渲染件、FigS2 n64_n128 旧单季版；建议立项 R 重实现 response_structure_audit（响应幅度比量化，registry 无对应图）与 metrics 热图面板——见 `docs/开源整理_论文图与诊断图评审建议_20260831.md`（4 个执行项待用户裁决）。
+
+## 2026-08-30（25SP 观测数据全链条重构、品质集升级与全项目同步）
+
+- **25SP 采收事件与鲜产口径修正**：
+  - 剔除 `2025春产量数据集.xlsx` 中 7月17日 与 7月22日 估算采收记录，25SP 采收事件统一截止于真实实测末次 **2025-07-11（DAP 117 / `25192`）**，共 10 次真实采收事件；
+  - 鲜产量计算口径统一为**小区内各行实测产量（`产量` 列）直接算术平均**，废除早期基于 `加权小区产量` 的几何加权；
+  - TMX `*HARVEST DETAILS` 10 次采收事件同步更新。
+- **25SP 果实品质与干物质率升级（2025春品质集.csv）**：
+  - 废除原仅 1 次测定且含离群值的品质来源，全面升级为包含 3 次独立全小区测定的 [`data/user/ref/DSSAT文件/2025春/2025春品质集.csv`](file:///d:/Tomato_Cal/data/user/ref/DSSAT文件/2025春/2025春品质集.csv)；
+  - 各采收批次就近动态匹配实测干物质率（DMFR），彻底纠正 W1N0（小区 13）干物质率异常偏低（3.21% $\rightarrow$ **5.39%**，累积干重从 1,771.6 恢复至 **2,975.5 kg/ha**）；
+  - 更新核心生成器 [`tools/experiments/build_trial_observations_v2_20260726.py`](file:///d:/Tomato_Cal/tools/experiments/build_trial_observations_v2_20260726.py) 重建权威 `XXQL2501.TMA`、`XXQL2501.TMT`、`FileT_values.csv`、`FileA_values.csv`、`fruit_quality_match_audit.csv`、`observation_uncertainty.csv`。
+- **25SP 初始土壤无机氮按物理小区号映射与 6/7/8 处理清理**：
+  - 依据最新 [`data/user/ref/25SP硝态氮铵态氮参考.xlsx`](file:///d:/Tomato_Cal/data/user/ref/25SP硝态氮铵态氮参考.xlsx)（工作表 `三重复与判定`），以物理**小区号（Plot Number 2, 3, 4, 5, 9, 10, 11, 12, 13）** 作为唯一索引计算 20/40/60 cm 三重复算术平均值；
+  - 权威模版 [`data/user/ref/XXQL2501.TMX`](file:///d:/Tomato_Cal/data/user/ref/XXQL2501.TMX) 彻底清理 6、7、8 处理的数据段与表头，保证定宽格式 100% 规范。
+- **全项目原子分发与同步**：
+  - 新增标准化同步工具 [`tools/experiments/sync_25sp_tmx_tma_tmt_20260830.py`](file:///d:/Tomato_Cal/tools/experiments/sync_25sp_tmx_tma_tmt_20260830.py)；
+  - 完成全项目所有运行目录与历史归档的原子更新：**3,284 个 `XXQL2501.TMX`**、**3,084 个 `XXQL2501.TMA`**、**3,085 个 `XXQL2501.TMT`** 同步成功率 100%；
+  - 核心自动化回归测试 10/10 全部通过。
+
+- 完成 TMA(FileA)/TMT(FileT) 生成链路、文档口径与 25SP 均值口径的只读审查（报告：`docs/开源整理_TMT_TMA数据链唯一性与25SP均值口径审查_20260830.md`）。确认：运行时只读+强一致性闸门完好；生成侧存在 6 个内容级写入方 + 10 余个复制/同步方，无单一权威入口；25SP 重复之间均为算术平均（审查时点唯一加权为鲜产量的小区内行位置加权，源 xlsx 预计算；**该加权口径已被本条目上方的 08-30 重构废除**）。
 - 取证确认 HEAD 提交状态健康：canonical 根 bundle 按设计保留剔除前数值，repfilter→from_scratch→armab 派生链含 2026-08-19 已批准的剔除修正且链内一致；**但当前未提交的协作者 WIP 已把整条 25SP 派生链观测文件批量回退为剔除前数值**（结构性根因：REMOVALS 仅存在于 apply_repfilter 旁路，经 canonical 生成器的再生产生剔除前数值）。已出具 `docs/待协作者确认_观测数值系与WIP覆盖_20260830.md`（含 26SP 同一观测 4 值并存与双缩放 WIP 脚本冲突），待确认后处置。
 - 按用户裁决执行：canonical 根目录放置 `OBSERVATION_AUTHORITY_NOTICE_20260830.md`（repfilter 系为权威）；《DSSAT_FileA_FileT_Excel操作指南》加"已被取代"横幅（旧生成器算术产量口径 vs 现行加权产量）；《数据来源与配置规范手册》§3.2 标注 LAIX 禁入 Phi、N2−N0 已收窄为 N3−N0。定宽丢失举报经核实为误报，关闭。
 
