@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "status": "formal_user_directed_calibration",
+  "design_id": "e02_formal_v35_boundary_relaxed_200x6_20260829",
+  "stage": "S5",
+  "purpose": "Formal 8-treatment fresh calibration with relaxed nitrogen buffering (NMOBMX, NVSMOB), relaxed expansion sensitivity (NSTFAC), and relaxed organ protein/photosynthesis boundaries",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "114 active parameters with boundary relaxations for NMOBMX, NSTFAC, PROSTI, PRORTG, PROLFG, PGEFF, CMOBMX, XFRT, etc.",
+  "bounds_id": "eggplant_e02_v35_formal_nitrogen_relaxed_bounds",
+  "observation_policy": "configs/runs/e02_from_scratch_objective_contract_20260826.csv",
+  "group_policy": "configs/runs/e02_group_policy_v33_formal_fresh.csv",
+  "initial_condition_policy": "25SP corrected soil nitrate (Trno 3/4/5 swapped, 9/12/13 SNO3 adjusted); 26SP harvest scaled 90%",
+  "nitrogen_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_from_scratch_water_n_mapping_20260826.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 1.0,
+    "sigma_floor": 50.0,
+    "contrast": "N3_minus_N0_within_same_water",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "levels": [
+      "N3"
+    ],
+    "harvest_scope": "all",
+    "sst_scope": "season_x_response_stratum"
+  },
+  "water_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_from_scratch_water_n_mapping_20260826.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 0.5,
+    "sigma_floor": 50.0,
+    "contrast": "W3_minus_W1_within_same_nitrogen",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "levels": [
+      "N3"
+    ],
+    "nitrogen_levels": [
+      "N0",
+      "N3"
+    ],
+    "harvest_scope": "all",
+    "season_contrasts": {
+      "25SP": {
+        "high_water": "W3",
+        "low_water": "W1"
+      },
+      "26SP": {
+        "high_water": "W3",
+        "low_water": "W1"
+      }
+    },
+    "sst_scope": "season_x_response_stratum"
+  },
+  "harvest_dry_objective": {
+    "enabled": false
+  },
+  "harvest_fresh_objective": {
+    "enabled": true,
+    "mode": "increment_plus_terminal",
+    "increment_source": "measured_hfpow",
+    "variable": "CHFPW",
+    "terminal_weighting": "season_rrmse",
+    "rrmse_lambda": 25.0,
+    "acceptance_metric": "RRMSE_pct",
+    "acceptance_threshold_pct": 25.0
+  },
+  "process_state_objective": {
+    "enabled": true,
+    "mode": "signed_difference_plus_terminal",
+    "variables": [
+      "LAID",
+      "LWAD",
+      "SWAD"
+    ]
+  },
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_formal_armab_rrmse_20260828",
+      "role": "calibration",
+      "treatments": [
+        2,
+        5,
+        10,
+        13
+      ]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_formal_armab_rrmse_26spncal_20260828",
+      "role": "calibration",
+      "treatments": [
+        1,
+        3,
+        9,
+        12
+      ]
+    }
+  ],
+  "diagnostic_only": {
+    "25SP": [
+      3,
+      4,
+      9,
+      11,
+      12,
+      14
+    ],
+    "26SP": [
+      2,
+      4,
+      5,
+      6,
+      7,
+      8,
+      10,
+      11
+    ]
+  },
+  "acceptance": {
+    "terminal_yield": "RRMSE <= 25% in each spring season; NSE is descriptive only",
+    "cumulative_fresh": "NSE >= 0.75 in each spring season",
+    "lai": "NSE >= 0.60 in each spring season"
+  },
+  "pest_ies": {
+    "num_reals": 200,
+    "noptmax": 6,
+    "agents": 6,
+    "random_seed": 42
+  }
+}

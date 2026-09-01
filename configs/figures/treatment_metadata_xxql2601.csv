@@ -1,0 +1,13 @@
+treatment,treatment_label,water_level,nitrogen_level,dataset_role
+1,TN1 (W3-N3),W3,N3,calibration
+2,TN2 (W2-N3),W2,N3,validation
+3,TN3 (W1-N3),W1,N3,calibration
+4,TN4 (W3-N2),W3,N2,validation
+5,TN5 (W2-N2),W2,N2,validation
+6,TN6 (W1-N2),W1,N2,validation
+7,TN7 (W3-N1),W3,N1,validation
+8,TN8 (W2-N1),W2,N1,validation
+9,TN9 (W3-N0),W3,N0,calibration
+10,TN10 (W1-N1),W1,N1,validation
+11,TN11 (W2-N0),W2,N0,validation
+12,TN12 (W1-N0),W1,N0,calibration

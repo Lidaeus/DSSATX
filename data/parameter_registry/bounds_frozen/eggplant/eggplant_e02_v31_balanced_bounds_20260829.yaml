@@ -1,0 +1,8 @@
+bounds_id: eggplant_e02_v31_balanced_bounds_20260829
+crop: eggplant
+date: '2026-08-29'
+purpose: 'v31 Balanced calibration bounds: unlocks CMOBMX, SFDUR, XFRMAX, SOIL_SLPF
+  and rebalances canopy vs yield objectives'
+source_baseline: eggplant_e02_joint_fused_s1_s2_bounds_20260828
+active_parameters_count: 102
+total_parameters_count: 110

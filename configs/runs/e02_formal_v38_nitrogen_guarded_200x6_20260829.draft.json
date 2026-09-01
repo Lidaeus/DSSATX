@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "status": "review_required_not_runnable",
+  "design_id": "e02_formal_v38_nitrogen_guarded_200x6_20260829",
+  "stage": "S5",
+  "purpose": "Conditional formal design after v37 nitrogen multi-arm study; preserves v37 scale while allowing constrained N mechanism and source-sink compensation",
+  "anchor": {
+    "run_id": "e02_formal_v37_fresh_yield_source_sink_200x4_20260829",
+    "iteration": 3,
+    "member": 137,
+    "selection_label_policy": "explicit_coordinates_only"
+  },
+  "bounds_proposal": "data/parameter_registry/bounds_proposals/eggplant_e02_v38_nitrogen_guarded_formal_bounds_proposal.csv",
+  "bounds_id_after_approval": "eggplant_e02_v38_nitrogen_guarded_formal_bounds",
+  "freeze_required_before_launch": true,
+  "active_parameter_count": 42,
+  "active_parameter_families": {
+    "nitrogen": [
+      "fnpgn1",
+      "fnpgn2",
+      "lnref",
+      "nmobmx",
+      "nrcvr",
+      "nslope",
+      "nstfac",
+      "nvsmob",
+      "prolff",
+      "prolfi",
+      "prostf",
+      "prosti",
+      "rtexf",
+      "rtnh4",
+      "rtno3",
+      "senrte"
+    ],
+    "canopy_scale": [
+      "kcan",
+      "lfmax",
+      "parmax",
+      "pgeff",
+      "phtmax",
+      "sizlf",
+      "sizref",
+      "slaref",
+      "slavr"
+    ],
+    "source_sink": [
+      "atop",
+      "cmobmx",
+      "finref",
+      "podur",
+      "porpt",
+      "sfdur",
+      "vssink",
+      "wtfsd",
+      "xfrmax",
+      "xfrt"
+    ],
+    "water_guard": [
+      "dswbar",
+      "pormin",
+      "rwdth",
+      "rwumx",
+      "swbar_rec",
+      "yswbar_mid"
+    ],
+    "soil_n_supply": [
+      "soil_slpf"
+    ]
+  },
+  "observation_policy": "configs/runs/e02_from_scratch_objective_contract_20260826.csv",
+  "group_policy": "configs/runs/e02_group_policy_v36_formal_fresh.csv",
+  "nitrogen_response_objective": {
+    "enabled": true,
+    "source_variable": "CHFPW",
+    "contrast": "N3_minus_N0_within_same_water",
+    "mapping_csv": "configs/runs/e02_from_scratch_water_n_mapping_20260826.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 1.0,
+    "sst_scope": "season_x_water_stratum",
+    "harvest_scope": "all",
+    "terminal_sign": "postrun_hard_gate; no extra whole-family weight inflation"
+  },
+  "water_response_objective": {
+    "enabled": true,
+    "source_variable": "CHFPW",
+    "contrast": "W3_minus_W1_within_same_nitrogen",
+    "mapping_csv": "configs/runs/e02_from_scratch_water_n_mapping_20260826.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 0.5,
+    "sst_scope": "season_x_nitrogen_stratum",
+    "nitrogen_levels": [
+      "N0",
+      "N3"
+    ]
+  },
+  "harvest_fresh_objective": {
+    "enabled": true,
+    "mode": "increment_plus_terminal",
+    "variable": "CHFPW",
+    "terminal_weighting": "season_rrmse",
+    "rrmse_lambda": 250.0
+  },
+  "process_state_objective": {
+    "enabled": true,
+    "mode": "signed_difference_plus_terminal",
+    "variables": [
+      "LAID",
+      "LWAD",
+      "SWAD"
+    ]
+  },
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_formal_armab_rrmse_20260828",
+      "role": "calibration",
+      "treatments": [
+        2,
+        5,
+        10,
+        13
+      ]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_formal_armab_rrmse_26spncal_20260828",
+      "role": "calibration",
+      "treatments": [
+        1,
+        3,
+        9,
+        12
+      ]
+    }
+  ],
+  "diagnostic_only": {
+    "25SP": [
+      3,
+      4,
+      9,
+      11,
+      12,
+      14
+    ],
+    "26SP": [
+      2,
+      4,
+      5,
+      6,
+      7,
+      8,
+      10,
+      11
+    ]
+  },
+  "pest_ies": {
+    "num_reals": 200,
+    "noptmax": 6,
+    "agents": 6,
+    "random_seed": 42,
+    "executable": "official_DSSAT_v4.8"
+  },
+  "candidate_gate_order": [
+    "25SP both terminal N3-N0 > 0",
+    "26SP N_RESPONSE all-event SAE reduction >= 30% versus v37 iteration-3 member137",
+    "at least 3 of 4 season-by-water N_RESPONSE NSE layers improve",
+    "terminal fresh RRMSE <= 25% each season and abs(PBIAS) <= 15% each season",
+    "cumulative fresh NSE >= 0.75 and LAI NSE >= 0.60 each calibration season",
+    "non-calibration treatments: fresh/LAI/W_RESPONSE degradation within predeclared tolerances",
+    "rank surviving candidates by Phi"
+  ],
+  "launch_preconditions": [
+    "Complete the 25SP N0 nitrogen-supply/input audit and explain why every A-E member retained negative terminal N3-N0.",
+    "Correctly rerun C/D/E at N_RESPONSE lambda=1 because the completed historical C/D/E runs were confounded at lambda=2."
+  ]
+}

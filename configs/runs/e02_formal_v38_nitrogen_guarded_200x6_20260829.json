@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "status": "formal_ready_user_approved",
+  "design_id": "e02_formal_v38_nitrogen_guarded_200x6_20260829",
+  "run_id": "e02_formal_v38_nitrogen_guarded_200x6_20260829",
+  "case": "e02_formal_v38_nitrogen_guarded_20260829",
+  "stage": "S5",
+  "purpose": "Formal 8-treatment fresh-yield calibration with guarded nitrogen mechanisms and source-sink compensation",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "42 active parameters anchored to v37 iteration-3 member137; remaining parameters fixed",
+  "bounds_id": "eggplant_e02_v38_nitrogen_guarded_formal_bounds",
+  "custom_dssat_executable": "D:/Tomato_Cal/DSCSM048.EXE",
+  "observation_policy": "configs/runs/e02_from_scratch_objective_contract_20260826.csv",
+  "group_policy": "configs/runs/e02_group_policy_v36_formal_fresh.csv",
+  "initial_condition_policy": "25SP corrected soil nitrate; 26SP measured nitrate/ammonium calibration values and sequential measured soil water; 26SP harvest scaled 90%",
+  "anchor": {
+    "run_id": "e02_formal_v37_fresh_yield_source_sink_200x4_20260829",
+    "iteration": 3,
+    "member": 137,
+    "selection_label_policy": "explicit_coordinates_only"
+  },
+  "decision_override": {
+    "approved_at": "2026-08-29",
+    "approved_by": "user",
+    "accept_25sp_setup": true,
+    "rerun_cde_required": false,
+    "note": "User explicitly waived the earlier 25SP input-audit and corrected-CDE rerun launch preconditions."
+  },
+  "nitrogen_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_from_scratch_water_n_mapping_20260826.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 1.0,
+    "sigma_floor": 50.0,
+    "contrast": "N3_minus_N0_within_same_water",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "source_variable": "CHFPW",
+    "levels": ["N3"],
+    "harvest_scope": "all",
+    "sst_scope": "season_x_response_stratum"
+  },
+  "water_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_from_scratch_water_n_mapping_20260826.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 0.5,
+    "sigma_floor": 50.0,
+    "contrast": "W3_minus_W1_within_same_nitrogen",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "source_variable": "CHFPW",
+    "levels": ["N3"],
+    "nitrogen_levels": ["N0", "N3"],
+    "harvest_scope": "all",
+    "season_contrasts": {
+      "25SP": {"high_water": "W3", "low_water": "W1"},
+      "26SP": {"high_water": "W3", "low_water": "W1"}
+    },
+    "sst_scope": "season_x_response_stratum"
+  },
+  "harvest_dry_objective": {"enabled": false},
+  "harvest_fresh_objective": {
+    "enabled": true,
+    "mode": "increment_plus_terminal",
+    "increment_source": "measured_hfpow",
+    "variable": "CHFPW",
+    "terminal_weighting": "season_rrmse",
+    "rrmse_lambda": 250.0,
+    "acceptance_metric": "RRMSE_pct",
+    "acceptance_threshold_pct": 25.0,
+    "acceptance_enforcement": "deterministic_postrun_hard_gate"
+  },
+  "process_state_objective": {
+    "enabled": true,
+    "mode": "signed_difference_plus_terminal",
+    "variables": ["LAID", "LWAD", "SWAD"]
+  },
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_formal_armab_rrmse_20260828",
+      "role": "calibration",
+      "treatments": [2, 5, 10, 13]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_formal_armab_rrmse_26spncal_20260828",
+      "role": "calibration",
+      "treatments": [1, 3, 9, 12]
+    }
+  ],
+  "diagnostic_only": {
+    "25SP": [3, 4, 9, 11, 12, 14],
+    "26SP": [2, 4, 5, 6, 7, 8, 10, 11]
+  },
+  "acceptance": {
+    "terminal_yield": "RRMSE <= 25% in each spring season; NSE is descriptive only",
+    "terminal_yield_pbias": "abs(PBIAS) <= 15% in each spring season",
+    "cumulative_fresh": "NSE >= 0.75 in each spring season",
+    "lai": "NSE >= 0.60 in each spring season",
+    "nitrogen_terminal": "25SP W3 and W1 terminal N3-N0 must both be positive",
+    "nitrogen_26sp": "all-event N_RESPONSE SAE reduction >=30% versus v37 iteration-3 member137",
+    "nitrogen_layers": "at least 3 of 4 season-by-water N_RESPONSE NSE layers improve",
+    "candidate_rule": "scan all iterations; reject candidates failing hard gates before Phi ranking"
+  },
+  "pest_ies": {
+    "num_reals": 200,
+    "noptmax": 6,
+    "agents": 6,
+    "random_seed": 42
+  }
+}

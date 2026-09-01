@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "status": "formal_user_directed_calibration",
+  "design_id": "e02_formal_yield_rebalanced_post_200x6_20260829",
+  "stage": "S5",
+  "purpose": "Posterior-informed formal recalibration with restored terminal-yield scale",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "previous full crop pool plus narrow soil movement; posterior-informed bounds with yield-response escape envelopes",
+  "bounds_id": "eggplant_e02_formal_yield_rebalanced_posterior_v1_20260829",
+  "observation_policy": "configs/runs/e02_from_scratch_objective_contract_20260826.csv",
+  "group_policy": "configs/runs/e02_formal_yield_rebalanced_group_policy_20260829.csv",
+  "initial_condition_policy": "reuse corrected 26SP measured SNH4/SNO3 and sequential measured SH2O bundles without modification",
+  "nitrogen_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_from_scratch_water_n_mapping_20260826.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 1.0,
+    "sigma_floor": 50.0,
+    "contrast": "N3_minus_N0_within_same_water",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "levels": [
+      "N3"
+    ],
+    "harvest_scope": "all",
+    "sst_scope": "season_x_response_stratum"
+  },
+  "water_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_from_scratch_water_n_mapping_20260826.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 0.5,
+    "sigma_floor": 50.0,
+    "contrast": "W3_minus_W1_within_same_nitrogen",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "levels": [
+      "N3"
+    ],
+    "nitrogen_levels": [
+      "N0",
+      "N3"
+    ],
+    "harvest_scope": "all",
+    "season_contrasts": {
+      "25SP": {
+        "high_water": "W3",
+        "low_water": "W1"
+      },
+      "26SP": {
+        "high_water": "W3",
+        "low_water": "W1"
+      },
+      "25FA": {
+        "high_water": "W3",
+        "low_water": "W1"
+      }
+    },
+    "sst_scope": "season_x_response_stratum"
+  },
+  "harvest_dry_objective": {
+    "enabled": true,
+    "mode": "increment_plus_terminal",
+    "increment_source": "measured_hpodw",
+    "variable": "CHPDT",
+    "terminal_weighting": "season_rrmse",
+    "rrmse_lambda": 250.0,
+    "acceptance_metric": "RRMSE_pct",
+    "acceptance_threshold_pct": 25.0,
+    "acceptance_enforcement": "deterministic_postrun_hard_gate"
+  },
+  "process_state_objective": {
+    "enabled": true,
+    "mode": "signed_difference_plus_terminal",
+    "variables": [
+      "LAID",
+      "LWAD",
+      "SWAD"
+    ],
+    "balance_note": "BIOMASS_INCREMENT budget 0.30; BIOMASS_TERMINAL budget 0.15; LAI budgets unchanged"
+  },
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_formal_armab_rrmse_20260828",
+      "bundle_manifest_sha256": "cd40b00ff75ba9d8c64b4cf2098a5b7c318ef5be52d5a755bc5426c60076c390",
+      "role": "calibration",
+      "treatments": [
+        2,
+        5,
+        10,
+        13
+      ]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_formal_armab_rrmse_26spncal_20260828",
+      "bundle_manifest_sha256": "ddadc73f78b25e43f4cd02d557c30929fb13bfbedfeaa41f3570ef28f4afc78c",
+      "role": "calibration",
+      "treatments": [
+        1,
+        3,
+        9,
+        12
+      ]
+    },
+    {
+      "season_id": "25FA",
+      "experiment_code": "XXQL2502",
+      "bundle_path": "data/user/experiments/xxfa_formal_armab_rrmse_20260828",
+      "bundle_manifest_sha256": "5e05a1639dbb782cfed78c1e08464ea63ed04fbf80ac4a79b3394b9c77e0247d",
+      "role": "validation",
+      "treatments": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    }
+  ],
+  "diagnostic_only": {
+    "25SP": [
+      3,
+      4,
+      9,
+      11,
+      12,
+      14
+    ],
+    "26SP": [
+      2,
+      4,
+      5,
+      6,
+      7,
+      8,
+      10,
+      11
+    ],
+    "25FA": "locked validation; never used for tuning or bounds"
+  },
+  "acceptance": {
+    "terminal_yield": "hard gate: calibration-treatment dry terminal RRMSE <= 25% in both 25SP and 26SP",
+    "terminal_yield_pbias": "abs(PBIAS) <= 15% in both spring seasons",
+    "cumulative_dry": "NSE decline <= 0.05 against same-input baseline; 26SP must be positive",
+    "lai": "calibration-treatment NSE >= 0.75 in 25SP and >= 0.60 in 26SP",
+    "organ_guard": "LWAD/SWAD NSE decline <= 0.10 or RRMSE increase <= 15%",
+    "candidate_rule": "scan all iterations; reject any candidate failing a hard gate before Phi ranking"
+  },
+  "pest_ies": {
+    "num_reals": 200,
+    "noptmax": 6,
+    "agents": 6,
+    "random_seed": 43,
+    "initial_ensemble_method": "lhs"
+  }
+}

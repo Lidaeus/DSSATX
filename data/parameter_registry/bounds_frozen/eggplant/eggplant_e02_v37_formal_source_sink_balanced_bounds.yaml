@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_v37_formal_source_sink_balanced_bounds"
+crop: "eggplant"
+created_at: "2026-08-29T07:30:10Z"
+approved_at: "2026-08-29T07:30:10Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_v37_formal_source_sink_balanced_bounds.csv"
+derived_from_sha256: "31e5cb128f3d885048e3163ef6110951895a343e3b1c36a05289c24ae7dddddb"
+bounds_sha256: "179656d1ab149078d118a7a8d3071078d89a01f50b12625672fccb89cd39845f"
+parameter_count: 122
+automatic_repairs: 0
+notes: "Formal v37: SLAREF capped at 280, PGEFF/kcan/wtfsd/cmobmx/xfrt relaxed for source-sink balance"

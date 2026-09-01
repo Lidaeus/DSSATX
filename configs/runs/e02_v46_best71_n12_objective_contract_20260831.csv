@@ -1,0 +1,30 @@
+group,transform,offset,reference,sigma,sigma_source,model_sigma,sigma_floor,group_multiplier,n_eff,phi_role,note
+PDAPM,raw,0,1,,,0.0,1.0,1.0,,diagnostic_only,Planting date retained for audit only
+ADAPM,raw,0,1,,,0.0,1.0,1.0,,diagnostic_only,Anthesis date diagnostic only
+MDAPM,raw,0,1,,,0.0,1.0,1.0,,diagnostic_only,Maturity date diagnostic only
+LAIXM,raw,0,1,,,0.2,0.1,1.0,,diagnostic_only,LAIX is never part of Phi
+LAIDM,raw,0,1,,,0.5,0.2,1.0,,diagnostic_only,Multi-date LAI is diagnostic; terminal LAI is retained separately
+LWADM,raw,0,1,,,20.0,10.0,1.0,,diagnostic_only,Raw leaf state is represented by increment and terminal pairs
+SWADM,raw,0,1,,,25.0,10.0,1.0,,diagnostic_only,Raw stem state is represented by increment and terminal pairs
+LAIDDM,raw,0,1,,,0.0,0.0,1.0,,diagnostic_only,Adjacent LAI increments are diagnostic only
+LWADDM,raw,0,1,,,0.0,0.0,1.0,,calibration,Adjacent measured-date leaf dry-mass increment
+SWADDM,raw,0,1,,,0.0,0.0,1.0,,calibration,Adjacent measured-date stem dry-mass increment
+LAIETM,raw,0,1,,,0.0,0.0,1.0,,calibration,Terminal LAI paired on the last observed LAI date
+LWETM,raw,0,1,,,0.0,0.0,1.0,,calibration,Terminal leaf dry mass
+SWETM,raw,0,1,,,0.0,0.0,1.0,,calibration,Terminal stem dry mass
+CHTDM,raw,0,1,,,0.05,0.02,1.0,,diagnostic_only,Canopy height diagnostic only
+SNAMM,raw,0,1,,,5.0,2.0,1.0,,unavailable_by_data,No stem-N observations
+LNAMM,raw,0,1,,,5.0,2.0,1.0,,unavailable_by_data,No leaf-N observations
+CNAMM,raw,0,1,,,5.0,2.0,1.0,,diagnostic_only,Combined plant N diagnostic only
+CHFPWM,raw,0,1,,,500.0,200.0,1.0,,calibration,Terminal cumulative fresh harvest
+CHFPWM_T,log,1,1,,harvest_sigma_relative_20pct,0.0,0.0,1.0,,calibration,Intermediate cumulative fresh trend
+HFPOWM,raw,0,1,,,200.0,100.0,1.0,,calibration,Fresh event-harvest increment
+CHPDTM,raw,0,1,,,25.0,15.0,1.0,,diagnostic_only,Dry yield is diagnostic in this fresh-yield experiment
+CHPDTM_T,log,1,1,,harvest_sigma_relative_20pct,0.0,0.0,1.0,,diagnostic_only,Dry cumulative trend diagnostic only
+HPODWM,raw,0,1,,,25.0,15.0,1.0,,diagnostic_only,Dry event increment diagnostic only
+HIAMM,raw,0,1,0.1,assumption,0.02,0.01,1.0,,sensitivity_only,Not part of the local N objective
+PWADM,raw,0,1,250.0,assumption,30.0,20.0,1.0,,diagnostic_only,Legacy cumulative token diagnostic only
+PWAIM,raw,0,1,250.0,assumption,30.0,20.0,1.0,,diagnostic_only,Legacy incremental token diagnostic only
+NRESPM,raw,0,1,50.0,assumption,50.0,50.0,1.0,,calibration,N2-N0 and N1-N0; season x water stratum SST
+WRESPM,raw,0,1,50.0,assumption,50.0,50.0,1.0,,calibration,Water response retained with season x nitrogen stratum SST
+SOIL_WATER,raw,0,1,,,,,,,calibration,Post-initial audited soil-water observations only

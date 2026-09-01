@@ -16,7 +16,9 @@ CHTDM,raw,0,1,,,0.05,0.02,1.0,,diagnostic_only,Canopy height diagnostic only
 SNAMM,raw,0,1,,,5.0,2.0,1.0,,unavailable_by_data,Stem nitrogen mass; no SNAM observations in current calibration treatments
 LNAMM,raw,0,1,,,5.0,2.0,1.0,,unavailable_by_data,Leaf nitrogen mass; no LNAM observations in current calibration treatments
 CNAMM,raw,0,1,,,5.0,2.0,1.0,,diagnostic_only,Combined nitrogen mass diagnostic only
-CHFPWM,raw,0,1,,,30.0,20.0,1.0,,diagnostic_only,Fresh cumulative harvest diagnostic only
+CHFPWM,raw,0,1,,,500.0,200.0,1.0,,calibration,Fresh cumulative harvest calibration target
+CHFPWM_T,log,1,1,,harvest_sigma_relative_20pct,0.0,0.0,1.0,,calibration,Intermediate fresh cumulative trend
+HFPOWM,raw,0,1,,,200.0,100.0,1.0,,calibration,Fresh event-harvest increment calibration target
 CHPDTM,raw,0,1,,,25.0,15.0,1.0,,calibration,Exactly one terminal cumulative dry harvest per treatment
 CHPDTM_T,log,1,1,,harvest_sigma_relative_20pct,0.0,0.0,1.0,,diagnostic_only,No double counting with terminal cumulative dry harvest
 HPODWM,raw,0,1,,,25.0,15.0,1.0,,calibration,Event dry-harvest increment

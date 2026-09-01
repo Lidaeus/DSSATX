@@ -1,0 +1,7 @@
+arm,label,num_reals,noptmax,agents,yield_level,terminal_rrmse_lambda,harvest_fresh_phi_budget,fresh_increment_phi_budget,fresh_trend_phi_budget,source_sink_bounds,n_remobilization_bounds,purpose
+A,latest_data_corrected_baseline,60,3,6,Y3,750,4.5,3.75,0.30,v45,v45,"Establish comparable baseline after bundle and terminal-LAI repair"
+B,weight_only_high,60,3,6,Y9,2250,13.5,7.50,0.60,v45,v45,"Test whether strong yield weighting alone removes two-season underprediction"
+C,source_sink_bounds_only,60,3,6,Y3,750,4.5,3.75,0.30,"XFINT 0.12-0.50; XFRMAX 0.12-0.50",v45,"Test fruit allocation and reproductive sink limitation"
+D,n_remobilization_bounds_only,60,3,6,Y3,750,4.5,3.75,0.30,v45,"NMOBMX 0.08-0.30; NVSMOB 0.30-0.60; RTEXF 0.08-0.35","Test nitrogen acquisition-remobilization limitation"
+E,combined_moderate,60,3,6,Y6,1500,9.0,6.00,0.45,"XFINT 0.12-0.50; XFRMAX 0.12-0.50","NMOBMX 0.08-0.30; NVSMOB 0.30-0.60; RTEXF 0.08-0.35","Test balanced source-sink-nitrogen synergy with moderate-high yield budget"
+F,combined_high,60,3,6,Y9,2250,13.5,7.50,0.60,"XFINT 0.12-0.50; XFRMAX 0.12-0.50","NMOBMX 0.08-0.30; NVSMOB 0.30-0.60; RTEXF 0.08-0.35","Test upper capability and scientific cost of strong yield forcing"

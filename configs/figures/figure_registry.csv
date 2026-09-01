@@ -3,8 +3,8 @@ Fig1,main,Which parameters robustly control each process?,Multi-season Morris do
 Fig2,main,Did calibration update the ensemble without one group dominating?,Phi ensemble history and group Phi by iteration,r_core_partial,paper/R/fig_phi_convergence.R
 Fig3,main,How accurately does the model reproduce calibration and validation observations?,Tidy observed-simulated table with dataset_role,r_core_implemented,paper/R/fig_model_performance.R
 Fig4,main,Does the model reproduce treatment-specific temporal and harvest dynamics?,Observed pairs plus daily DSSAT trajectories explicit water-nitrogen metadata and audited uncertainty,r_core_implemented_demo_qa,paper/R/fig_selected_dynamics.R
-Fig5,main,Which parameter combinations are identifiable or equifinal?,Prior/posterior ensembles bounds Phi and deterministic representative reruns,pending_P4,planned
-Fig6,main,What do calibrated predictions imply for water-nitrogen management?,Validated scenario ensemble with uncertainty,pending_P5,planned
+Fig5,main,Which parameter combinations are identifiable or equifinal?,Prior/posterior ensembles bounds Phi and deterministic representative reruns,r_core_implemented,paper/R/fig_posterior_demo.R
+Fig6,main,What do calibrated predictions imply for water-nitrogen management and response?,Validated scenario ensemble with water-nitrogen response gradients,r_core_implemented,paper/R/fig_water_nitrogen_response.R
 FigS1,supplement,Are Morris rankings stable across seeds and what is the elementary-effects geometry?,Combined seed-stability rank trajectories plus response-level mu*-sigma small multiples,r_demo_current_evidence,paper/R/fig_sa_morris.R
 FigS1b,supplement,What is the response-level Morris elementary-effects geometry (mu* vs sigma)?,Response-level mu*-sigma small multiples for core physiology-chain responses with Top-5 emphasis and two-domain colour,r_demo_current_evidence,paper/R/fig_sa_morris.R
 FigS1c,supplement,Which parameters combine high importance with high nonlinearity or interaction involvement?,Morris mu*-sigma scatter coloured by process group with sigma/mu* size encoding and Top parameter labels,r_demo_current_evidence,paper/R/fig_sa_interaction.R
@@ -13,8 +13,9 @@ FigSa_summary,main,What are the cross-season Morris findings and response-level 
 FigS2,supplement,Which parameters act directly or through interaction-involving effects, and is the evidence numerically supported?,S1 versus ST with paired-bootstrap intervals plus N128-to-N256 season-specific evidence gates,r_demo_current_evidence,paper/R/fig_sa_sobol.R
 FigS3,supplement,Are residual patterns acceptable?,Role-specific raw residuals vs fitted and DAP plus standardized QQ diagnostics,r_core_implemented_demo_qa,paper/R/fig_residual_diagnostics.R
 FigS4,supplement,Are all treatments reproduced and how does continuous cumulative harvest appear?,Per-variable all-treatment trajectories plus event-line and monotone smooth cumulative alternatives,r_core_implemented_demo_qa,paper/R/fig_all_treatment_dynamics.R
-FigS5,supplement,How much did each parameter contract and hit bounds?,Frozen posterior diagnostics,r_core_implemented_demo_qa,paper/R/fig_posterior_demo.R
-FigS6,supplement,Where are the strongest compensation structures?,Frozen Spearman correlation table,r_core_implemented_demo_qa,paper/R/fig_spearman_demo.R
+FigS5,supplement,How much did each parameter contract and hit bounds?,Parameter posterior distribution density and prior contraction diagnostics,r_core_implemented,paper/R/fig_posterior_demo.R
+FigS5b,supplement,How do harvested and standing on-plant fruits balance total production?,Multi-harvest terminal standing fruit biomass balance,r_core_implemented,paper/R/fig_standing_fruit_balance.R
+FigS6,supplement,Where are the strongest compensation structures?,Frozen Spearman correlation heatmap,r_core_implemented,paper/R/fig_spearman_demo.R
 FigS7,supplement,Do distant good parameter sets make equivalent predictions?,Frozen candidate-pair deterministic prediction distances,r_core_implemented_demo_qa,paper/R/fig_equifinality_demo.R
 FigS8,supplement,Did the run pass scientific quality gates?,Machine-readable quality report summary,pending_quality_bundle,planned
 FigCondPerf,main,"How well does the conditional parameter ensemble predict observed cumulative yield, with per-season role separation?",Conditional-ensemble 1:1 plot with 95%/25-75% intervals plus PICP95/RMPIW metrics,r_core_implemented_demo_qa,paper/R/fig_model_performance_uncertainty.R

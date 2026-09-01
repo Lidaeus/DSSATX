@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_v38_nitrogen_guarded_formal_bounds"
+crop: "eggplant"
+created_at: "2026-08-29T15:33:49Z"
+approved_at: "2026-08-29T15:33:49Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_v38_nitrogen_guarded_formal_bounds_proposal.csv"
+derived_from_sha256: "fc19f4dbd41f46d1f58771f8dab703f1df6041aa9e0ba491cf3968d227afa02f"
+bounds_sha256: "bc7f22870e8ba65b63d016ef397f78ff0b9a618172e79abbf6908bb7a59fb5f9"
+parameter_count: 122
+automatic_repairs: 0
+notes: "User approved formal v38 launch on 2026-08-29; accept 25SP setup and waive corrected CDE rerun; 42 active parameters anchored to v37 iteration3 member137"

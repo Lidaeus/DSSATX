@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "status": "multiarm_ready",
+  "design_id": "e02_v46_arm_a_corrected_v45_scale_baseline_60x3_20260830",
+  "stage": "v46_multiarm",
+  "purpose": "corrected_v45_scale_baseline",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "122 active parameters with PROLFF in [0.18, 0.22], PROSTF in [0.08, 0.12], NVSMOB in [0.32, 0.45], NMOBMX in [0.08, 0.15], FNPGN1 in [1.10, 1.45], FNPGN2 in [4.10, 4.45], LFMAX in [1.85, 2.20], SFDUR in [35.0, 42.0], KCAN in [0.35, 0.55], 10x N-response budget, 3x Yield budget, Scheme 4 soil.",
+  "bounds_id": "eggplant_e02_v46_arm_a_corrected_yield",
+  "observation_policy": "configs/runs/e02_from_scratch_objective_contract_20260826.csv",
+  "group_policy": "configs/runs/e02_group_policy_v41_nresp_10x_yield_3x.csv",
+  "initial_condition_policy": "Measured treatment-specific IC; unified 180-cm Scheme4 soil; loam-reference SRGF; 25194 virtual harvest excluded from yield targets",
+  "nitrogen_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_mapping_25sp_w3w1_26sp_w2w1_n2n0_20260830.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 10.0,
+    "sigma_floor": 50.0,
+    "contrast": "N2_minus_N0_within_same_water",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "source_variable": "CHFPW",
+    "levels": [
+      "N2"
+    ],
+    "harvest_scope": "all",
+    "sst_scope": "season_x_response_stratum"
+  },
+  "water_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_mapping_25sp_w3w1_26sp_w2w1_n2n0_20260830.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 0.5,
+    "sigma_floor": 50.0,
+    "contrast": "W_high_minus_W_low_within_same_nitrogen",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "source_variable": "CHFPW",
+    "levels": [
+      "N2"
+    ],
+    "nitrogen_levels": [
+      "N0",
+      "N2"
+    ],
+    "harvest_scope": "all",
+    "season_contrasts": {
+      "25SP": {
+        "high_water": "W3",
+        "low_water": "W1"
+      },
+      "26SP": {
+        "high_water": "W2",
+        "low_water": "W1"
+      }
+    },
+    "sst_scope": "season_x_response_stratum"
+  },
+  "harvest_dry_objective": {
+    "enabled": false
+  },
+  "harvest_fresh_objective": {
+    "enabled": true,
+    "mode": "increment_plus_terminal",
+    "increment_source": "measured_hfpow",
+    "variable": "CHFPW",
+    "terminal_weighting": "season_rrmse",
+    "rrmse_lambda": 750.0,
+    "acceptance_metric": "RRMSE_pct",
+    "acceptance_threshold_pct": 25.0,
+    "acceptance_enforcement": "deterministic_postrun_hard_gate"
+  },
+  "process_state_objective": {
+    "enabled": true,
+    "mode": "signed_difference_plus_terminal",
+    "variables": [
+      "LAID",
+      "LWAD",
+      "SWAD"
+    ]
+  },
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_user_ic_scheme4_20260830",
+      "role": "calibration",
+      "treatments": [
+        3,
+        5,
+        11,
+        13
+      ]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_formal_scheme4_soil_20260830",
+      "role": "calibration",
+      "treatments": [
+        5,
+        6,
+        11,
+        12
+      ]
+    }
+  ],
+  "diagnostic_only": {
+    "25SP": [
+      2,
+      4,
+      9,
+      10,
+      12,
+      14
+    ],
+    "26SP": [
+      1,
+      2,
+      3,
+      4,
+      7,
+      8,
+      9,
+      10
+    ]
+  },
+  "acceptance": {
+    "terminal_yield": "RRMSE <= 25% in each spring season; NSE is descriptive only",
+    "terminal_yield_pbias": "abs(PBIAS) <= 15% in each spring season",
+    "cumulative_fresh": "NSE >= 0.75 in each spring season",
+    "lai": "NSE >= 0.60 in each spring season",
+    "candidate_rule": "shortlist by Phi, then deterministic all-22 replay and hard-gate ranking",
+    "nitrogen_response": "For each season use the mean of terminal fresh-yield N2-N0 and N1-N0 contrasts over all complete water strata; N3 is excluded from this hard gate"
+  },
+  "pest_ies": {
+    "num_reals": 60,
+    "noptmax": 3,
+    "agents": 6,
+    "random_seed": 42
+  }
+}

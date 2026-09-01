@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "status": "multiarm_ready",
+  "design_id": "e02_v46_best71_n_b_local_n_baseline_lambda2_60x3_20260831",
+  "stage": "v46_best71_local_n_response",
+  "purpose": "local_n_baseline_lambda2",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "best71 frozen; only local nitrogen mechanism family released",
+  "bounds_id": "eggplant_e02_v46_best71_n_b_20260831",
+  "observation_policy": "configs/runs/e02_v46_best71_n12_objective_contract_20260831.csv",
+  "group_policy": "configs/runs/e02_v46_best71_n12_group_policy_20260831.csv",
+  "initial_condition_policy": "v46 best71 bundles; treatment-specific measured IC; no soil or water release",
+  "nitrogen_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_mapping_25sp_w3w1_26sp_w2w1_n2n0_20260830.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 2.0,
+    "sigma_floor": 50.0,
+    "contrast": "N2_and_N1_minus_N0_within_same_water",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "source_variable": "CHFPW",
+    "levels": [
+      "N1",
+      "N2"
+    ],
+    "harvest_scope": "all",
+    "sst_scope": "season_x_response_stratum"
+  },
+  "water_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_mapping_25sp_w3w1_26sp_w2w1_n2n0_20260830.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 0.5,
+    "sigma_floor": 50.0,
+    "contrast": "W_high_minus_W_low_within_same_nitrogen",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "source_variable": "CHFPW",
+    "levels": [
+      "N1",
+      "N2"
+    ],
+    "nitrogen_levels": [
+      "N0",
+      "N1",
+      "N2"
+    ],
+    "harvest_scope": "all",
+    "season_contrasts": {
+      "25SP": {
+        "high_water": "W3",
+        "low_water": "W1"
+      },
+      "26SP": {
+        "high_water": "W2",
+        "low_water": "W1"
+      }
+    },
+    "sst_scope": "season_x_response_stratum"
+  },
+  "harvest_dry_objective": {
+    "enabled": false
+  },
+  "harvest_fresh_objective": {
+    "enabled": true,
+    "mode": "increment_plus_terminal",
+    "increment_source": "measured_hfpow",
+    "variable": "CHFPW",
+    "terminal_weighting": "season_rrmse",
+    "rrmse_lambda": 750.0,
+    "acceptance_metric": "RRMSE_pct",
+    "acceptance_threshold_pct": 25.0,
+    "acceptance_enforcement": "deterministic_postrun_hard_gate"
+  },
+  "process_state_objective": {
+    "enabled": true,
+    "mode": "signed_difference_plus_terminal",
+    "variables": [
+      "LAID",
+      "LWAD",
+      "SWAD"
+    ]
+  },
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_formal_scheme4_soil_20260830",
+      "role": "calibration",
+      "treatments": [
+        2,
+        3,
+        4,
+        5,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_formal_scheme4_soil_20260830",
+      "role": "calibration",
+      "treatments": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    }
+  ],
+  "diagnostic_only": {
+    "25SP": [],
+    "26SP": []
+  },
+  "acceptance": {
+    "terminal_yield": "RRMSE <= 25% per season; NSE descriptive only",
+    "nitrogen_response": "25SP mean N2-N0 > 0 and mean N1-N0 > 0; 26SP N-response absolute error improves >=30% versus A",
+    "response_layers": "at least 3 complete season x water x N layers improve",
+    "protected_fit": "fresh yield scale, LAI and W_RESPONSE do not decline by >0.05 versus A",
+    "candidate_rule": "engineering gate, then deterministic all-22 replay and hard gates before Phi ranking"
+  },
+  "pest_ies": {
+    "num_reals": 60,
+    "noptmax": 3,
+    "agents": 6,
+    "random_seed": 42
+  }
+}

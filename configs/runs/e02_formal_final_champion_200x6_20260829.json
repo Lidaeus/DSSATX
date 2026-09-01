@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "design_id": "e02_formal_final_champion_200x6_20260829",
+  "run_id": "e02_formal_final_champion_200x6_20260829",
+  "case": "e02_formal_final_champion_20260829",
+  "crop": "eggplant",
+  "cultivar": "TM0008",
+  "cultivar_identity": "TM0008",
+  "mode": "eggplant_stage2",
+  "bounds_id": "eggplant_e02_v32_formal_final_champion_bounds",
+  "bounds_crop": "eggplant",
+  "observation_policy": "configs/runs/e02_from_scratch_objective_contract_v31.csv",
+  "group_policy": "configs/runs/e02_from_scratch_group_policy_v32_formal_final.csv",
+  "noptmax": 6,
+  "ies_num_reals": 200,
+  "ies_par_csv": null,
+  "pestpp_mode": "ies",
+  "n_agents": 6,
+  "harvest_var": "CHPDT",
+  "dssat_model": "CRGRO048",
+  "custom_dssat_executable": "C:/DSSAT48/DSCSM048.EXE",
+  "custom_spe": "data/templates/genotype/TMGRO048.SPE.base",
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_formal_armab_rrmse_20260828",
+      "treatments": [
+        2,
+        3,
+        4,
+        5,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "role": "calibration"
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_formal_armab_rrmse_26spncal_20260828",
+      "treatments": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "role": "calibration"
+    }
+  ]
+}

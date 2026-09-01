@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "status": "formal_ready",
+  "design_id": "e02_formal_v40_3x_yield_200x4_20260830",
+  "stage": "S5",
+  "purpose": "Formal 8-treatment calibration with 3x Yield Phi Budget (HARVEST_FRESH lambda=750, INCREMENT=3.75, TREND=0.30), 26SP calibrated on W2N3, W2N0, W1N3, W1N0 (TN 2, 3, 11, 12), and Scheme 4 Soil Layering",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "114 active parameters with SLAREF capped at 280, source-sink capacity expanded, Scheme 4 7-layer root-zone soil profile, 26SP W2/W1 calibration scope, and 3x yield Phi budget",
+  "bounds_id": "eggplant_e02_v37_formal_source_sink_balanced_bounds",
+  "observation_policy": "configs/runs/e02_from_scratch_objective_contract_20260826.csv",
+  "group_policy": "configs/runs/e02_group_policy_v40_formal_fresh_3x_yield.csv",
+  "initial_condition_policy": "25SP corrected soil nitrate (Trno 3/4/5 swapped, 9/12/13 SNO3 adjusted); 26SP harvest scaled 90%; Scheme 4 Soil Layering",
+  "nitrogen_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_mapping_26sp_w2_w1_20260830.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 1.0,
+    "sigma_floor": 50.0,
+    "contrast": "N3_minus_N0_within_same_water",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "source_variable": "CHFPW",
+    "levels": [
+      "N3"
+    ],
+    "harvest_scope": "all",
+    "sst_scope": "season_x_response_stratum"
+  },
+  "water_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_mapping_26sp_w2_w1_20260830.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 0.5,
+    "sigma_floor": 50.0,
+    "contrast": "W_high_minus_W_low_within_same_nitrogen",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "source_variable": "CHFPW",
+    "levels": [
+      "N3"
+    ],
+    "nitrogen_levels": [
+      "N0",
+      "N3"
+    ],
+    "harvest_scope": "all",
+    "season_contrasts": {
+      "25SP": {
+        "high_water": "W3",
+        "low_water": "W1"
+      },
+      "26SP": {
+        "high_water": "W2",
+        "low_water": "W1"
+      }
+    },
+    "sst_scope": "season_x_response_stratum"
+  },
+  "harvest_dry_objective": {
+    "enabled": false
+  },
+  "harvest_fresh_objective": {
+    "enabled": true,
+    "mode": "increment_plus_terminal",
+    "increment_source": "measured_hfpow",
+    "variable": "CHFPW",
+    "terminal_weighting": "season_rrmse",
+    "rrmse_lambda": 750.0,
+    "acceptance_metric": "RRMSE_pct",
+    "acceptance_threshold_pct": 25.0,
+    "acceptance_enforcement": "deterministic_postrun_hard_gate"
+  },
+  "process_state_objective": {
+    "enabled": true,
+    "mode": "signed_difference_plus_terminal",
+    "variables": [
+      "LAID",
+      "LWAD",
+      "SWAD"
+    ]
+  },
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_formal_scheme4_soil_20260830",
+      "role": "calibration",
+      "treatments": [
+        2,
+        5,
+        10,
+        13
+      ]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_formal_scheme4_soil_20260830",
+      "role": "calibration",
+      "treatments": [
+        2,
+        3,
+        11,
+        12
+      ]
+    }
+  ],
+  "diagnostic_only": {
+    "25SP": [
+      3,
+      4,
+      9,
+      11,
+      12,
+      14
+    ],
+    "26SP": [
+      1,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ]
+  },
+  "acceptance": {
+    "terminal_yield": "RRMSE <= 25% in each spring season; NSE is descriptive only",
+    "terminal_yield_pbias": "abs(PBIAS) <= 15% in each spring season",
+    "cumulative_fresh": "NSE >= 0.75 in each spring season",
+    "lai": "NSE >= 0.60 in each spring season",
+    "candidate_rule": "scan all iterations; reject candidates failing hard gates before Phi ranking"
+  },
+  "pest_ies": {
+    "num_reals": 200,
+    "noptmax": 4,
+    "agents": 6,
+    "random_seed": 42
+  }
+}

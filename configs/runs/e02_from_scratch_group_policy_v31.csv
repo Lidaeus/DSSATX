@@ -1,0 +1,18 @@
+group,phi_budget,note
+PHENO,0.10,PDAT only in first design; ADAT/MDAT diagnostic
+CANOPY,0.60,Measured multi-date LAI state constraint
+CANOPY_INCREMENT,0.40,Implementation alias for LAI increment; no LAIX target
+CANOPY_TERMINAL,0.20,Implementation alias for exact-date terminal LAI; no simulated-peak target
+BIOMASS,0.40,Raw LWAD/SWAD states diagnostic only
+BIOMASS_INCREMENT,0.40,Leaf/stem dry-mass increments relaxed to prevent fruit lockout
+BIOMASS_TERMINAL,0.20,Terminal leaf/stem dry-mass states relaxed to allow remobilization
+PLANT_N,0.50,SNAM plus LNAM
+HARVEST_FRESH,2.50,Diagnostic only in first design; active fresh target
+HARVEST_DRY_INCREMENT,2.50,Event dry-harvest increments boosted
+HARVEST_DRY_TOTAL,4.00,Terminal cumulative dry harvest strongly boosted for RRMSE<=25%
+HARVEST_DRY_TREND,0.10,Diagnostic-only safety budget; CHPDTM_T is not active
+N_RESPONSE,0.05,Response NSE replaces raw response weighting only after S2 gate
+W_RESPONSE,0.05,Response NSE replaces raw response weighting only after S3 gate
+CUMULATIVE_HARVEST,2.00,Cumulative yield target
+INCREMENTAL_HARVEST,1.50,Incremental harvest target
+SOIL_WATER,0.05,Audited post-initial soil-water observations
