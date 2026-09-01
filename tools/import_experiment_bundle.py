@@ -16,7 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.common.experiment_inputs import (
-    filex_harvest_dates,
+    filex_observed_harvest_dates,
     findings_as_dicts,
     management_alignment_findings,
     parse_filex,
@@ -336,7 +336,7 @@ def main() -> int:
                 "authority": "corrected XXQL2501.TMX",
             }
         )
-        harvest_dates = filex_harvest_dates(filex_target)
+        harvest_dates = filex_observed_harvest_dates(filex_target)
         if not harvest_dates:
             parser.error(f"Management reference has no harvest dates: {filex_target}")
         metadata_corrections.extend(

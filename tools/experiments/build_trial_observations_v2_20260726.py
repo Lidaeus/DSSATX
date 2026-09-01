@@ -51,6 +51,7 @@ Reference format: data/user/ref/XXQL2501.TMX management schedule;
 observations are written to the season's ``DSSAT输出_v2`` directory.
 """
 from __future__ import annotations
+import csv
 
 import argparse
 import hashlib
@@ -67,7 +68,7 @@ import pandas as pd
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
-from src.common.experiment_inputs import filex_harvest_dates
+from src.common.experiment_inputs import filex_observed_harvest_dates
 
 
 MISSING = -99.0
@@ -447,12 +448,12 @@ def load_2025_spring(root: Path) -> SeasonResult:
 
     yield_summary = []
     for (trno, date), grp in y.groupby(["TRNO", "日期"]):
-        weighted_val = float(grp["加权小区产量"].iloc[0])
         row_yields = grp["产量"].dropna().values
+        direct_mean = float(np.mean(row_yields)) if len(row_yields) else float(grp["加权小区产量"].iloc[0])
         sd, src, n = hybrid_sd(row_yields)
         yield_summary.append({
             "TRNO": int(trno), "DATE": date,
-            "HARVEST_FRESH": weighted_val,
+            "HARVEST_FRESH": direct_mean,
             "fresh_sd": sd, "fresh_sd_source": src, "fresh_n_rep": n,
         })
     yield_df = pd.DataFrame(yield_summary).sort_values(["TRNO", "DATE"]).reset_index(drop=True)
@@ -461,7 +462,7 @@ def load_2025_spring(root: Path) -> SeasonResult:
     # harvest after the corrected schedule; exclude all yield records after
     # the last FileX harvest date so FileA/FileT/TMT/TMA cannot reintroduce it.
     filex_path = PROJECT_ROOT / "data/user/ref/XXQL2501.TMX"
-    harvest_dates = filex_harvest_dates(filex_path)
+    harvest_dates = filex_observed_harvest_dates(filex_path)
     if not harvest_dates:
         raise ValueError(f"No harvest dates found in corrected FileX: {filex_path}")
     harvest_cutoff = max(harvest_dates)
@@ -474,48 +475,39 @@ def load_2025_spring(root: Path) -> SeasonResult:
         )
     yield_df = yield_df[yield_df["_DATE_CODE"] <= harvest_cutoff].drop(columns=["_DATE_CODE"])
 
-    # --- Fruit moisture -> DMFR ---
+    # --- Growth workbook for LAID, SWAD, LWAD ---
     g_path = folder / "2025春作物生长指标集.xlsx"
     source_files[str(g_path)] = sha256_file(g_path)
     g = pd.read_excel(g_path, sheet_name="Sheet1")
-    # Normalize column names (strip whitespace)
     g = g.rename(columns={c: str(c).strip() for c in g.columns})
-    require_columns(g, ["日期", "小区号", "重复", "株高", "果含水率", "茎干重", "叶干重", "LAI", "水处理", "氮处理"], "2025春生长")
+    require_columns(g, ["日期", "小区号", "重复", "株高", "茎干重", "叶干重", "LAI", "水处理", "氮处理"], "2025春生长")
     g["日期"] = pd.to_datetime(g["日期"], errors="coerce").dt.normalize()
     g["TRNO"] = pd.to_numeric(g["小区号"], errors="coerce").astype("Int64")
     g = g.dropna(subset=["TRNO", "日期"]).copy()
     g["TRNO"] = g["TRNO"].astype(int)
-    # Apply 25SP TN exclusion
     g = g[g["TRNO"].isin(SPRING25_INCLUDED_TN)].copy()
 
-    # DMFR from moisture: DMFR = 1 - moisture_fraction (units 0-1)
-    fruit = g[g["果含水率"].notna()].copy()
-    # Verify moisture is in [0, 1] not [0, 100]
+    # --- Fruit quality (moisture -> DMFR) from 2025春品质集.csv ---
+    q_path = folder / "2025春品质集.csv"
+    source_files[str(q_path)] = sha256_file(q_path)
+    q_lines = q_path.read_text(encoding="utf-8").splitlines()
+    q_reader = csv.reader(q_lines)
+    q_header = next(q_reader)
+    q_valid_cols = [c.strip() for c in q_header if c.strip()]
+    q_rows = []
+    for r in q_reader:
+        if not r or not any(x.strip() for x in r): continue
+        q_rows.append({q_valid_cols[k]: r[k].strip() for k in range(len(q_valid_cols)) if k < len(r)})
+    fruit = pd.DataFrame(q_rows)
+    fruit["小区号"] = pd.to_numeric(fruit["小区号"], errors="coerce").astype(int)
+    fruit["重复"] = pd.to_numeric(fruit["重复"], errors="coerce")
+    fruit["果含水率"] = pd.to_numeric(fruit["果含水率"], errors="coerce")
+    fruit["日期"] = pd.to_datetime(fruit["日期"]).dt.normalize()
+    fruit["TRNO"] = fruit["小区号"]
+    fruit = fruit[fruit["TRNO"].isin(SPRING25_INCLUDED_TN) & fruit["果含水率"].notna()].copy()
     if fruit["果含水率"].max() > 1.5:
-        raise ValueError("2025春 果含水率 单位异常（应 0-1，实测 >1.5）")
+        raise ValueError("2025春品质集 果含水率 单位异常（应 0-1，实测 >1.5）")
     fruit["DMFR"] = 1.0 - fruit["果含水率"]
-    # Outlier-replicate removal (2026-08-07 audit): within each (TRNO, growth
-    # date) group, drop replicates whose DMFR deviates from the group median by
-    # more than 0.05 before averaging.  Treatment 13 (rep 3 moisture 0.7848)
-    # and treatment 5 (rep 2 moisture 0.8936) carry clearly anomalous moisture
-    # readings that otherwise inflate DMFR (13 -> 9.31% instead of ~3.2%).
-    n_before = len(fruit)
-    outlier_mask = (
-        fruit.groupby(["TRNO", "日期"])["DMFR"]
-        .transform(lambda s: (s - s.median()).abs() > 0.05)
-    )
-    dropped = fruit[outlier_mask]
-    if not dropped.empty:
-        detail = ", ".join(
-            f"TN{int(row.TRNO)} {row['日期'].date()} rep{int(row['重复'])} (moisture={row['果含水率']:.4f})"
-            for _, row in dropped.iterrows()
-        )
-        print(
-            f"  25SP: removed {len(dropped)} anomalous moisture replicates "
-            f"(deviation > 0.05 from group median): {detail}"
-        )
-    fruit = fruit[~outlier_mask]
-    print(f"  25SP: moisture replicates {n_before} -> {len(fruit)} after outlier removal")
     dm_by_plot = (fruit.groupby(["TRNO", "日期"], as_index=False)
                   .agg(DMFR=("DMFR", "mean"), N_REP=("重复", "nunique"))
                   .rename(columns={"日期": "GROWTH_DATE"}))
@@ -644,8 +636,8 @@ def load_2025_spring(root: Path) -> SeasonResult:
         output_base="2025SPR",
         title="2025 SPRING EGGPLANT; TRNO=PLOT NUMBER (TN 1,6,7,8 excluded)",
         source_notes=[
-            "Fresh yield uses pre-computed weighted plot yield (edge*0.5 + middle-row mean*0.5).",
-            "Fruit DM fraction = 1 - measured fruit moisture fraction (2025春作物生长指标集.果含水率).",
+            "Fresh yield uses direct arithmetic mean of row replicates (unweighted).",
+            "Fruit DM fraction = 1 - measured fruit moisture fraction (2025春品质集.csv).",
             "Each harvest uses the nearest plot-level moisture measurement date (no max interval).",
             "SD: hybrid method (replicate SD with min CV=5%, fallback CV=10%).",
             "Cumulative yield SD propagates incremental variances.",

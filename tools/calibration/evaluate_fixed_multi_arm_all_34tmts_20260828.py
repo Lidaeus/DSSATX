@@ -244,7 +244,7 @@ def plot_comparison(df):
         ax.legend(frameon=True)
         ax.grid(True, linestyle=':', alpha=0.6)
         plt.tight_layout()
-        plt.savefig(FIG_DIR / "fig_fixed_multi_arm_lai_nse_comparison.png")
+        plt.savefig(FIG_DIR / "diagnostic_fixed_multi_arm_lai_nse_comparison.png")
         plt.close()
         
     # 2. Yield (CHPDT) NSE & d-index Comparison
@@ -280,7 +280,7 @@ def plot_comparison(df):
         ax2.grid(True, linestyle=':', alpha=0.6)
         
         plt.tight_layout()
-        plt.savefig(FIG_DIR / "fig_fixed_multi_arm_yield_metrics_comparison.png")
+        plt.savefig(FIG_DIR / "diagnostic_fixed_multi_arm_yield_metrics_comparison.png")
         plt.close()
         print(f"Summary figures saved to: {FIG_DIR}")
 

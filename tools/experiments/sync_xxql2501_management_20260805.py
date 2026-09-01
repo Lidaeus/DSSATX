@@ -82,15 +82,18 @@ def update_manifest(bundle: Path) -> None:
                 entry["generator_sha256"] = generator_hash
     qa = data.get("trial_observation_qa")
     if isinstance(qa, dict):
-        qa["harvest_dates"] = 10
-        qa["total_observations"] = 520
-    corrections = data.setdefault("data_corrections", {})
+        qa["harvest_dates"] = 9
+        qa["total_observations"] = 490
+    corrections = data.get("data_corrections")
+    if not isinstance(corrections, dict):
+        corrections = {}
+        data["data_corrections"] = corrections
     corrections.update(
         {
             "filex_management_reference": "data/user/ref/XXQL2501.TMX",
             "filex_management_reference_sha256": sha256(REFERENCE),
             "filex_management_scope": ["*FERTILIZERS (INORGANIC)", "*HARVEST DETAILS"],
-            "estimated_harvest_records_removed": [25203, 25204],
+            "estimated_harvest_records_removed": [25198, 25203, 25204],
         }
     )
     manifest_path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -125,8 +128,8 @@ def main() -> None:
         "reference": str(REFERENCE),
         "tmx_targets": [str(path) for path in TMX_TARGETS],
         "full_observation_bundles": [str(path) for path in FULL_OBSERVATION_BUNDLES],
-        "harvest_dates": 10,
-        "removed_estimated_dates": [25203, 25204],
+        "harvest_dates": 9,
+        "removed_estimated_dates": [25198, 25203, 25204],
     }, ensure_ascii=False, indent=2))
 
 

@@ -56,6 +56,9 @@ ARTIFACT_TYPE = "two_season_diagnostics_fixedsoil_official_20260813"
 EXTRA_LIMITATIONS: list[str] = []
 HARVEST_OBJECTIVE = "increment_plus_terminal + HARVEST_DRY_TREND (log)"
 SOIL_INJECTION_DESCRIPTION = "enabled (calibrated SBDM/SLPF/SSKS/SLCL/SLSI applied; SLPF fixed 0.93)"
+DSSAT_VERSION_DESCRIPTION = "official fixed-soil build"
+SOIL_PARAMETER_STATUS = "FIXED (user-approved values, not inverted)"
+BUNDLE_NOTE = "actual_trial bundles (same as calibration): v8 25SP / v7 26SP"
 PLOT_INCLUDE_ALL_TREATMENTS = False
 PLOT_MAPPING_CSV: Path | None = None
 EXE = ROOT / "DSCSM048.EXE"
@@ -133,15 +136,22 @@ def _write_design(det_root: Path) -> Path:
 def _swap() -> list[tuple[Path, Path]]:
     replacements = []
     bk_exe = ROOT / "workspace/DSCSM048.EXE.eval_fixedsoil_official_20260813"
-    bk_spe = GENOTYPE_DIR / "TMGRO048.SPE.base.eval_fixedsoil_official_20260813"
-    shutil.copy2(DEFAULT_EXE, bk_exe); shutil.copy2(EXE, DEFAULT_EXE)
-    replacements.append((DEFAULT_EXE, bk_exe))
-    shutil.copy2(GENOTYPE_DIR / "TMGRO048.SPE.base", bk_spe); shutil.copy2(SPE, GENOTYPE_DIR / "TMGRO048.SPE.base")
-    replacements.append((GENOTYPE_DIR / "TMGRO048.SPE.base", bk_spe))
+    if EXE.resolve() != DEFAULT_EXE.resolve():
+        if DEFAULT_EXE.is_file():
+            shutil.copy2(DEFAULT_EXE, bk_exe)
+        shutil.copy2(EXE, DEFAULT_EXE)
+        replacements.append((DEFAULT_EXE, bk_exe))
+    target_spe_base = GENOTYPE_DIR / "TMGRO048.SPE.base"
+    if Path(SPE).resolve() != target_spe_base.resolve():
+        bk_spe = GENOTYPE_DIR / "TMGRO048.SPE.base.eval_fixedsoil_official_20260813"
+        shutil.copy2(target_spe_base, bk_spe)
+        shutil.copy2(SPE, target_spe_base)
+        replacements.append((target_spe_base, bk_spe))
     plain = GENOTYPE_DIR / "TMGRO048.SPE"
-    if plain.is_file():
+    if plain.is_file() and Path(SPE).resolve() != plain.resolve():
         pb = GENOTYPE_DIR / "TMGRO048.SPE.eval_fixedsoil_official_20260813"
-        shutil.copy2(plain, pb); shutil.copy2(SPE, plain)
+        shutil.copy2(plain, pb)
+        shutil.copy2(SPE, plain)
         replacements.append((plain, pb))
     return replacements
 
@@ -237,7 +247,7 @@ def _metric_rows(det_root: Path) -> pd.DataFrame:
                     continue
                 obs = pd.to_numeric(frame[column], errors="coerce")
                 sim = pd.to_numeric(frame[sim_col], errors="coerce")
-                ok = obs.notna() & sim.notna() & (obs != -99) & (sim != -99)
+                ok = obs.notna() & sim.notna() & (obs > -90.0) & (sim > -90.0)
                 if not bool(ok.any()):
                     continue
                 y = obs.loc[ok].to_numpy(float)
@@ -388,7 +398,7 @@ def _process_extra_pairs(det_root: Path) -> pd.DataFrame:
                 sub = f[["TN", "DATE", obs_col, sim_col]].rename(columns={obs_col: "observed", sim_col: "simulated"})
                 sub["season"] = sid
                 sub["variable"] = variable
-                sub = sub[(sub["observed"] != -99) & (sub["simulated"] != -99)]
+                sub = sub[(sub["observed"] > -90.0) & (sub["simulated"] > -90.0)]
                 frames.append(sub)
     if not frames:
         return pd.DataFrame()
@@ -470,9 +480,9 @@ def main() -> int:
         "custom_dssat_executable": str(EXE.resolve()),
         "custom_spe": str(SPE.resolve()),
         "soil_injection": SOIL_INJECTION_DESCRIPTION,
-        "dssat_version": "official fixed-soil build",
+        "dssat_version": DSSAT_VERSION_DESCRIPTION,
         "custom_genetic_params": "none (official v4.8 SPE)",
-        "soil_params": "FIXED (user-approved values, not inverted)",
+        "soil_params": SOIL_PARAMETER_STATUS,
         "harvest_objective": HARVEST_OBJECTIVE,
         "seasons": [{**s, "bundle": str(s["bundle"])} for s in SEASONS],
         "deterministic_run": str(DET_ROOT),
@@ -481,7 +491,7 @@ def main() -> int:
         "figures": sorted(str(p.relative_to(OUT_ROOT)) for p in OUT_ROOT.rglob("*.png")),
         "metrics_csv": str((DET_ROOT / "metrics_by_season_variable.csv").resolve()),
         "organ_n_pairs_csv": str((DET_ROOT / "organ_n_compare.csv").resolve()),
-        "bundle_note": "actual_trial bundles (same as calibration): v8 25SP / v7 26SP",
+        "bundle_note": BUNDLE_NOTE,
         "limitations": [
             "Python run-diagnostics product, not a publication Fig/FigS bundle.",
             (

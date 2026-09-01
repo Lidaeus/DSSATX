@@ -57,7 +57,7 @@ _ALL_TREATMENT_IDS = {
 }
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-MAPPING_CSV = os.path.join(ROOT, "configs", "runs", "e02_three_season_water_n_mapping_20260730.csv")
+MAPPING_CSV = os.path.join(ROOT, "configs", "runs", "e02_from_scratch_water_n_mapping_20260826.csv")
 
 # Canonical publication palette / shapes (water -> shape, nitrogen -> color).
 WATER_MARKERS = {"W3": "o", "W2": "s", "W1": "^", "CK": "D"}
@@ -232,7 +232,7 @@ def _metrics(obs, sim):
     """
     o = pd.to_numeric(pd.Series(obs), errors="coerce")
     s = pd.to_numeric(pd.Series(sim), errors="coerce")
-    m = (~o.isna()) & (~s.isna()) & (o != -99) & (s != -99)
+    m = (~o.isna()) & (~s.isna()) & (o > -90.0) & (s > -90.0)
     n = int(m.sum())
     if n == 0:
         return {"n": 0}
@@ -266,7 +266,7 @@ def _mse_decomposition(obs, sim):
     """
     o = pd.to_numeric(pd.Series(obs), errors="coerce")
     s = pd.to_numeric(pd.Series(sim), errors="coerce")
-    m = (~o.isna()) & (~s.isna()) & (o != -99) & (s != -99)
+    m = (~o.isna()) & (~s.isna()) & (o > -90.0) & (s > -90.0)
     if int(m.sum()) < 3:
         return {}
     o, s = o[m].astype(float).to_numpy(), s[m].astype(float).to_numpy()
@@ -514,7 +514,7 @@ def _season_legend_handles(seasons_present):
 
 def _filter_pairs(df, obs_col, sim_col):
     o, s = _as_num(df.get(obs_col)), _as_num(df.get(sim_col))
-    ok = np.isfinite(o) & np.isfinite(s) & (o != -99) & (s != -99)
+    ok = np.isfinite(o) & np.isfinite(s) & (o > -90.0) & (s > -90.0)
     return df.loc[ok].copy(), o.loc[ok].astype(float), s.loc[ok].astype(float)
 
 
@@ -580,7 +580,7 @@ def _plot_dynamics_single_season(season_data, season_id, variable, kind, out_png
             cmp = sd["compare"]
             obs = cmp[cmp["TN"] == tn]
             o = _as_num(obs.get(f"OBS_{variable}"))
-            ok = o.notna() & (o != -99)
+            ok = o.notna() & (o > -90.0)
             if ok.any() and pg is not None:
                 lut = _yyddd_to_dap_lookup(pg[pg["TN"] == tn])
                 dcode = obs.loc[ok, "DATE"].astype(int)
@@ -612,7 +612,7 @@ def _plot_dynamics_single_season(season_data, season_id, variable, kind, out_png
             cmp = sd["compare"]
             obs_col = "OBS_DRY_CUM" if kind == "cum_dry" else "OBS_FRESH_CUM"
             o = _as_num(cmp[cmp["TN"] == tn].get(obs_col))
-            ok = o.notna() & (o != -99)
+            ok = o.notna() & (o > -90.0)
             if ok.any() and fw is not None:
                 lut = _yyddd_to_dap_lookup(fw[fw["TN"] == tn])
                 sub = cmp[cmp["TN"] == tn].loc[ok].sort_values("DATE")
