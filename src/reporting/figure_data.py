@@ -115,7 +115,7 @@ def validate_comparison_table(data: pd.DataFrame) -> pd.DataFrame:
     for column in numeric_columns:
         result[column] = _numeric(result[column])
     valid = np.isfinite(result["observed"]) & np.isfinite(result["simulated"])
-    valid &= (result["observed"] != -99) & (result["simulated"] != -99)
+    valid &= (result["observed"] > -90) & (result["simulated"] > -90)
     result = result.loc[valid].reset_index(drop=True)
     if result.empty:
         raise ValueError("Comparison table has no finite observed-simulated pairs")
@@ -151,7 +151,7 @@ def _legacy_records(
             simulated = pd.to_numeric(frame.at[index, sim_col], errors="coerce")
             if not np.isfinite(observed) or not np.isfinite(simulated):
                 continue
-            if float(observed) == -99 or float(simulated) == -99:
+            if float(observed) <= -90.0 or float(simulated) <= -90.0:
                 continue
             date_value = raw_date.loc[index]
             date_code = float(date_value) if np.isfinite(date_value) else np.nan
@@ -274,7 +274,7 @@ def _parse_dssat_trajectory_file(
                     value = float(parts[header.index(source_variable)])
                 except (ValueError, IndexError):
                     continue
-                if not np.isfinite(value) or value == -99:
+                if not np.isfinite(value) or value <= -90.0:
                     continue
                 spec = VARIABLE_SPECS[variable]
                 records.append(

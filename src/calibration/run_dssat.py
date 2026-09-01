@@ -3834,6 +3834,192 @@ def run_model():
         handle_failure(998)
         raise
 
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DATA_DIR = PROJECT_ROOT / "data"
+
+def _copy(source: Path, destination: Path) -> None:
+    if not source.is_file():
+        raise FileNotFoundError(f"Required DSSAT input is missing: {source}")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if source.resolve() != destination.resolve():
+        shutil.copy2(source, destination)
+
+
+def _batch_argument(args: list[str]) -> str:
+    for index, value in enumerate(args):
+        if value == "--batch" and index + 1 < len(args):
+            return args[index + 1]
+        if value.startswith("--batch="):
+            return value.split("=", 1)[1]
+    return "DSSBatch.v48"
+
+
+def _input_dir_argument(args: list[str]) -> Path | None:
+    for index, value in enumerate(args):
+        if value == "--input-dir" and index + 1 < len(args):
+            return Path(args[index + 1]).expanduser().resolve()
+        if value.startswith("--input-dir="):
+            return Path(value.split("=", 1)[1]).expanduser().resolve()
+    return None
+
+
+def _local_batch(args: list[str], run_dir: Path, input_dir: Path | None = None) -> Path:
+    requested = Path(_batch_argument(args))
+    candidates = [
+        requested if requested.is_absolute() else run_dir / requested,
+        input_dir / requested.name if input_dir else Path("__no_input_dir__"),
+        DATA_DIR / "templates" / "batch" / requested.name,
+        PROJECT_ROOT / "workspace" / requested.name,
+    ]
+    source = next((path for path in candidates if path.is_file()), None)
+    if source is None:
+        raise FileNotFoundError(f"DSSAT batch file not found: {requested}")
+    destination = run_dir / requested.name
+    _copy(source, destination)
+    return destination
+
+
+def _experiment_names(batch_file: Path) -> set[str]:
+    names: set[str] = set()
+    for raw_line in batch_file.read_text(encoding="utf-8", errors="ignore").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith(("!", "*", "@")):
+            continue
+        token = line.split()[0]
+        if Path(token).suffix.upper() in {".TMX", ".TMA", ".TMT"}:
+            names.add(Path(token).stem)
+    return names
+
+
+def _to_dssatpro_path(p: Path) -> str:
+    """Format a path the way DSSAT's DSSATPRO expects: 'D: \\path\\rest'."""
+    s = os.path.abspath(str(p))
+    drive, rest = os.path.splitdrive(s)
+    rest = rest.replace("/", "\\")
+    if not rest.startswith("\\"):
+        rest = "\\" + rest
+    return f"{drive} {rest}"
+
+
+def _write_local_dssatpro(run_dir: Path) -> Path:
+    """Write DSSATPRO.v48 into run_dir with CRD and TMD pointing to run_dir."""
+    templates = DATA_DIR / "templates"
+    lines = (templates / "DSSATPRO.v48").read_text(encoding="utf-8", errors="ignore").splitlines(keepends=True)
+    crd_line = f"CRD {_to_dssatpro_path(run_dir)}\n"
+    tmd_line = f"TMD {_to_dssatpro_path(run_dir)}\n"
+    out = []
+    wrote_crd = False
+    wrote_tmd = False
+    for ln in lines:
+        if ln.strip().startswith("CRD "):
+            out.append(crd_line)
+            wrote_crd = True
+        elif ln.strip().startswith("TMD "):
+            out.append(tmd_line)
+            wrote_tmd = True
+        else:
+            out.append(ln)
+    if not wrote_crd:
+        for i, ln in enumerate(out):
+            if ln.strip() == "":
+                out.insert(i + 1, crd_line)
+                break
+    if not wrote_tmd:
+        for i, ln in enumerate(out):
+            if ln.strip() == "":
+                out.insert(i + 1, tmd_line)
+                break
+    dst = run_dir / "DSSATPRO.v48"
+    dst.write_text("".join(out), encoding="utf-8")
+    return dst
+
+
+def prepare_run_directory(run_dir: Path, args: list[str]) -> Path:
+    """Populate one run directory with immutable inputs required by DSSAT."""
+    run_dir.mkdir(parents=True, exist_ok=True)
+    input_dir = _input_dir_argument(args)
+    if input_dir is not None and not input_dir.is_dir():
+        raise FileNotFoundError(f"User input directory does not exist: {input_dir}")
+    genotype = DATA_DIR / "templates" / "genotype"
+    custom_spe = os.environ.get("DSSAT_SPE_BASE", "").strip()
+    for filename in ("TMGRO048.CUL", "TMGRO048.ECO", "TMGRO048.SPE"):
+        source = Path(custom_spe) if filename == "TMGRO048.SPE" and custom_spe else genotype / f"{filename}.base"
+        _copy(source, run_dir / f"{filename}.base")
+        _copy(source, run_dir / filename)
+
+    soil_source = (input_dir / "SOIL.SOL") if input_dir else (DATA_DIR / "raw" / "soil" / "SOIL.SOL")
+    _copy(soil_source, run_dir / "SOIL.SOL.base")
+    _copy(soil_source, run_dir / "SOIL.SOL")
+
+    templates = DATA_DIR / "templates"
+    for filename in ("DSSAT48.INH", "DSSAT48.INP"):
+        _copy(templates / filename, run_dir / filename)
+    _write_local_dssatpro(run_dir)
+
+    custom_exe = os.environ.get("DSSAT_CUSTOM_EXE", "").strip()
+    exe_candidates = [
+        Path(custom_exe) if custom_exe else PROJECT_ROOT / "workspace" / "__missing_custom_exe__",
+        PROJECT_ROOT / "workspace" / "DSCSM048.EXE",
+        Path(os.environ.get("DSSAT48_HOME", r"C:\DSSAT48")) / "DSCSM048.EXE",
+    ]
+    executable = next((path for path in exe_candidates if path.is_file()), None)
+    if executable is None:
+        raise FileNotFoundError("DSCSM048.EXE was not found in DSSAT48_HOME or workspace")
+    _copy(executable, run_dir / "DSCSM048.EXE")
+
+    batch_file = _local_batch(args, run_dir, input_dir=input_dir)
+    experiments = input_dir if input_dir else DATA_DIR / "raw" / "experiments"
+    for stem in _experiment_names(batch_file):
+        matches = list(experiments.glob(f"{stem}.*"))
+        model_files = [path for path in matches if path.suffix.upper() in {".TMX", ".TMA", ".TMT"}]
+        if not model_files:
+            standard_root = Path(os.environ.get("DSSAT_BATCH_FILEX_ROOT", r"C:\DSSAT48\TOMATO"))
+            model_files = [path for path in standard_root.glob(f"{stem}.*")
+                           if path.suffix.upper() in {".TMX", ".TMA", ".TMT"}]
+        if not model_files:
+            raise FileNotFoundError(f"Experiment referenced by batch is missing: {stem}")
+        for source in model_files:
+            _copy(source, run_dir / source.name)
+
+    if input_dir:
+        for filename in ("soil_water_observations.csv", "soil_water_layer_mapping.csv"):
+            source = input_dir / filename
+            if source.is_file():
+                _copy(source, run_dir / filename)
+
+    batch_lines = batch_file.read_text(encoding="utf-8", errors="ignore").splitlines(keepends=True)
+    out_lines = []
+    for line in batch_lines:
+        s = line.strip()
+        if not s or s.startswith(("$", "!", "@", "*")):
+            out_lines.append(line)
+            continue
+        parts = line.split()
+        if not parts:
+            out_lines.append(line)
+            continue
+        old_tok = parts[0]
+        new_tok = Path(old_tok).name
+        col_start = line.find(old_tok)
+        prefix = line[:col_start]
+        rest = line[col_start + len(old_tok):]
+        if len(new_tok) < len(old_tok):
+            new_tok = new_tok.ljust(len(old_tok))
+        elif len(new_tok) > len(old_tok):
+            new_tok = new_tok[:len(old_tok)]
+        out_lines.append(prefix + new_tok + rest + "\n")
+    batch_file.write_text("".join(out_lines), encoding="utf-8")
+
+    weather = input_dir if input_dir else DATA_DIR / "raw" / "weather"
+    weather_files = list(weather.glob("*.WTH"))
+    if not weather_files:
+        raise FileNotFoundError(f"No weather files found in {weather}")
+    for source in weather_files:
+        _copy(source, run_dir / source.name)
+    return batch_file
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Inject parameters and run DSSAT in the current directory")
     parser.add_argument("--param-csv", default=PARAM_CSV)

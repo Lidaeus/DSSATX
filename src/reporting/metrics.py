@@ -51,7 +51,7 @@ def _clean_pairs(observed, simulated) -> tuple[np.ndarray, np.ndarray, str]:
             f"observed and simulated must have the same shape, got {o.shape} vs {s.shape}"
         )
     finite = np.isfinite(o) & np.isfinite(s)
-    non_missing = (o != MISSING_VALUE) & (s != MISSING_VALUE)
+    non_missing = (o > -90.0) & (s > -90.0)
     mask = finite & non_missing
     if not mask.any():
         return o[mask], s[mask], _EMPTY if o.size == 0 else _NON_FINITE

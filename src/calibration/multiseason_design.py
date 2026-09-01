@@ -67,6 +67,7 @@ class MultiSeasonDesign:
     nitrogen_response_objective: dict[str, Any] | None = None
     water_response_objective: dict[str, Any] | None = None
     harvest_dry_objective: dict[str, Any] | None = None
+    harvest_fresh_objective: dict[str, Any] | None = None
     process_state_objective: dict[str, Any] | None = None
     # This exception is deliberately narrow: it enables a controlled
     # one-season *diagnostic* calibration using the otherwise identical T10
@@ -236,6 +237,13 @@ class MultiSeasonDesign:
                     "nitrogen_response_objective must be an object"
                 )
             if bool(nitrogen_response_objective.get("enabled", False)):
+                source_variable = str(
+                    nitrogen_response_objective.get("source_variable", "CHPDT")
+                ).strip().upper()
+                if source_variable not in {"CHPDT", "CHFPW"}:
+                    raise ValueError(
+                        "nitrogen_response_objective source_variable must be CHPDT or CHFPW"
+                    )
                 mapping_csv = str(
                     nitrogen_response_objective.get("mapping_csv", "")
                 ).strip()
@@ -276,6 +284,13 @@ class MultiSeasonDesign:
                     "water_response_objective must be an object"
                 )
             if bool(water_response_objective.get("enabled", False)):
+                source_variable = str(
+                    water_response_objective.get("source_variable", "CHPDT")
+                ).strip().upper()
+                if source_variable not in {"CHPDT", "CHFPW"}:
+                    raise ValueError(
+                        "water_response_objective source_variable must be CHPDT or CHFPW"
+                    )
                 mapping_csv = str(
                     water_response_objective.get("mapping_csv", "")
                 ).strip()
@@ -371,6 +386,35 @@ class MultiSeasonDesign:
                             "RRMSE-weighted terminal harvest requires positive rrmse_lambda"
                         )
 
+        harvest_fresh_objective = raw.get("harvest_fresh_objective")
+        if harvest_fresh_objective is not None:
+            if not isinstance(harvest_fresh_objective, dict):
+                raise MultiSeasonDesignError(
+                    "harvest_fresh_objective must be an object"
+                )
+            if bool(harvest_fresh_objective.get("enabled", False)):
+                mode = str(harvest_fresh_objective.get("mode", "")).strip().lower()
+                if mode not in {"increment_plus_terminal", "direct_cumulative"}:
+                    raise MultiSeasonDesignError(
+                        "enabled harvest_fresh_objective requires mode=increment_plus_terminal or direct_cumulative"
+                    )
+                weighting = str(
+                    harvest_fresh_objective.get(
+                        "terminal_weighting",
+                        harvest_fresh_objective.get("weighting", "static"),
+                    )
+                ).strip().lower()
+                if weighting not in {"static", "rrmse", "season_rrmse", "nse", "season_nse"}:
+                    raise MultiSeasonDesignError(
+                        "harvest_fresh_objective terminal_weighting must be static, rrmse, or nse"
+                    )
+                if "rrmse" in weighting:
+                    value = harvest_fresh_objective.get("rrmse_lambda")
+                    if value is None or float(value) <= 0:
+                        raise MultiSeasonDesignError(
+                            "RRMSE-weighted terminal fresh harvest requires positive rrmse_lambda"
+                        )
+
         process_state_objective = raw.get("process_state_objective")
         if process_state_objective is not None:
             if not isinstance(process_state_objective, dict):
@@ -412,6 +456,7 @@ class MultiSeasonDesign:
             nitrogen_response_objective=nitrogen_response_objective,
             water_response_objective=water_response_objective,
             harvest_dry_objective=harvest_dry_objective,
+            harvest_fresh_objective=harvest_fresh_objective,
             process_state_objective=process_state_objective,
             diagnostic_single_season=diagnostic_single_season,
         )

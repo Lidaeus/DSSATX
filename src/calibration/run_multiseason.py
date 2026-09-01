@@ -766,6 +766,7 @@ def main(argv: list[str] | None = None) -> int:
             source_scale=str(n_response.get("source_scale", "raw")),
             contrast_scale=str(n_response.get("contrast_scale", "log_ratio")),
             harvest_scope=str(n_response.get("harvest_scope", "all")),
+            source_variable=str(n_response.get("source_variable", "CHPDT")),
         )
 
     water_response = design.water_response_objective or {}
@@ -791,6 +792,7 @@ def main(argv: list[str] | None = None) -> int:
             nitrogen_levels=water_response.get(
                 "nitrogen_levels", ["N0", "N1", "N2", "N3"]
             ),
+            source_variable=str(water_response.get("source_variable", "CHPDT")),
         )
 
     if design.design_id.startswith("eggplant_t10"):

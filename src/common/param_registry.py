@@ -83,7 +83,7 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     # coefficient is identifiable is a separate scientific decision.
     "FL-VS":  (0.0,  300.0),
     "TRIFL":  (0.10,   2.50),
-    "RWDTH":  (0.50,   2.00),
+    "RWDTH":  (0.20,   2.50),
     # RHGHT is a relative multiplier on the species-file standard canopy-height
     # curve (YVSHT), not an absolute height in metres.  Joint E02 runs first
     # justified relaxing the historical 0.50 floor to 0.35; later review
@@ -151,6 +151,12 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     "NMOBMX":  (0.0,  1.0),
     "NVSMOB":  (0.0,  1.0),
     "NRCVR":   (0.0,  1.0),
+    "NREXP":   (0.0,  5.0),
+    "NRMIN":   (0.0,  1.0),
+    "FNPGN1":  (0.0, 10.0),
+    "FNPGN2":  (0.5, 15.0),
+    "FNPGN3":  (5.0, 50.0),
+    "FNPGN4":  (5.0, 50.0),
     # A4 effective-concentration N-uptake response parameters.
     # NUPCMN floor stays 0.0: the a3_20260805 build hard-rejects negative
     # values (STOP 99, "Error key: NUPTAK") even though the formula
@@ -279,7 +285,10 @@ DEFAULT_BOUNDS: dict[str, tuple[float, float]] = {
     "SOIL_SLDR": (0.10, 2.00),
     "SOIL_SLRO": (40.0, 95.0),
     # --- SPE parameter extension defaults (docs/reference/参数拓展方案参考.MD) ---
-    "SENRTE":  (0.5, 2.0),
+    "NMOBMX":  (0.05, 0.35),
+    "NVSMOB":  (0.20, 1.00),
+    "NSTFAC":  (0.50, 1.00),
+    "SENRTE":  (0.5, 3.5),
     "SENDAY":  (0.01, 0.05),
     "SETMAX":  (0.1, 0.5),
     "RFLWAB":  (0.05, 0.5),
@@ -362,13 +371,27 @@ def infer_parameter_group(name: str, location: str) -> str:
             return "SPE_Photo"
         if n == "FRCNOD":
             return "SPE_Nodule"
-        if n in {"SDPRO", "SDLIP", "SDPROS", "PCARSD"}:
+        if n in {"NMOBMX", "NVSMOB", "NRCVR", "NSTFAC", "NREXP", "NRMIN"}:
+            return "SPE_NMob"
+        if n in {"SENRTE", "SENDAY"}:
+            return "SPE_Senes"
+        if n in {"LNREF", "NSLOPE", "FNPGN1", "FNPGN2", "FNPGN3", "FNPGN4", "NSLA",
+                 "PGEFF", "KDIF", "LFANGB"}:
+            return "SPE_NPhoto"
+        if n in {"RTNO3", "RTNH4", "RTEXF", "NUPK50", "NUPQ", "NUPCMN", "NUPAV"}:
+            return "SPE_RtN"
+        if n in {"SDPRO", "SDLIP", "SDPROS", "PCARSD",
+                 "PROLFI", "PROLFG", "PROLFF", "PROSTI", "PROSTG", "PROSTF",
+                 "PRORTI", "PRORTG", "PRORTF", "PROSHI", "PROSHG", "PROSHF",
+                 "CMOBMX", "CADSTF", "CADPR1"}:
             return "SPE_Compo"
-        if n == "XMPAGE":
+        if n in {"XMPAGE", "SETMAX", "RFLWAB", "SHLAG", "SRMAX"}:
             return "SPE_SeedSh"
-        if n in {"WTFSD", "PORPT", "FRSTMF", "FRLFF", "ATOP"}:
+        if n in {"WTFSD", "PORPT", "FRSTMF", "FRLFF", "ATOP", "PORMIN",
+                 "RTDEPI", "RWUMX", "PLWT", "PLDP", "DSWBAR", "XFRMAX"}:
             return "SPE_RtWat"
-        if n in {"FINREF", "SLAREF", "SIZREF", "VSSINK", "EVMODC"}:
+        if n in {"FINREF", "SLAREF", "SIZREF", "VSSINK", "EVMODC",
+                 "SLAMAX", "SLAMIN", "TURSLA", "FRLFMX"}:
             return "SPE_SrcSnk"
         if (n.startswith("TB") or n.startswith("TO1") or
                 n.startswith("TO2") or n.startswith("TM")):

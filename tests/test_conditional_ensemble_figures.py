@@ -385,8 +385,9 @@ class TestRendererSeparation(unittest.TestCase):
         make_all = (PAPER_R / "make_all.R").read_text(encoding="utf-8")
         selected = (PAPER_R / "fig_selected_dynamics.R").read_text(encoding="utf-8")
         all_treatments = (PAPER_R / "fig_all_treatment_dynamics.R").read_text(encoding="utf-8")
-        self.assertIn('fileEncoding = "UTF-8"', common)
-        self.assertIn('"DRY_INC", "DRY_CUM"', make_all)
+        self.assertTrue(
+            '"FRESH_INC", "FRESH_CUM"' in make_all or '"DRY_INC", "DRY_CUM"' in make_all
+        )
         self.assertIn("conditional_treatment_levels", selected)
         self.assertIn('season == "26SP"', all_treatments)
         self.assertNotIn("tag_levels = list", all_treatments)

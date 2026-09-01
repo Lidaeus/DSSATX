@@ -103,6 +103,29 @@ def filex_harvest_dates(path: str | Path) -> list[int]:
     return dates
 
 
+def filex_observed_harvest_dates(path: str | Path) -> list[int]:
+    """Return yield-observation harvest dates, excluding virtual output events.
+
+    A FileX row whose HNAME contains ``virtual`` is a simulation-control event:
+    it may extend DSSAT output availability, but it is never an observed yield
+    event and must not move the FileA/FileT observation cutoff.
+    """
+
+    dates: list[int] = []
+    for raw in _section_lines(Path(path), "*HARVEST DETAILS"):
+        stripped = raw.strip()
+        if not stripped or stripped.startswith(("*", "@", "!")):
+            continue
+        fields = stripped.split()
+        if len(fields) < 2 or "virtual" in stripped.lower():
+            continue
+        try:
+            dates.append(int(float(fields[1])))
+        except ValueError:
+            continue
+    return dates
+
+
 def management_alignment_findings(
     candidate: str | Path,
     reference: str | Path,
@@ -161,7 +184,11 @@ def replace_filex_management_sections(
         replacements.append((cb[0], cb[1], reference_lines[rb[0]:rb[1]]))
     for start, end, replacement in sorted(replacements, reverse=True):
         candidate_lines[start:end] = replacement
-    candidate_path.write_text("\n".join(candidate_lines) + "\n", encoding="utf-8", newline="\n")
+    out_text = "\n".join(candidate_lines) + "\n"
+    tmp_path = candidate_path.with_suffix(candidate_path.suffix + ".sync_tmp")
+    tmp_path.write_text(out_text, encoding="utf-8", newline="\n")
+    import os
+    os.replace(tmp_path, candidate_path)
 
 
 def parse_filex(path: str | Path) -> dict[str, object]:

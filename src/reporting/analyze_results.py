@@ -749,9 +749,9 @@ def _make_standard_plots(prefix, results_dir=None, out_dir=None, no_timeseries=F
 
     if os.path.exists(process_csv):
         dfp = pd.read_csv(process_csv)
-        pr._scatter_1to1(dfp, "OBS_LAID", "SIM_LAID", f"{prefix}: LAID", os.path.join(out_dir, "scatter_LAID.png"))
-        pr._scatter_1to1(dfp, "OBS_LWAD", "SIM_LWAD", f"{prefix}: LWAD", os.path.join(out_dir, "scatter_LWAD.png"))
-        pr._scatter_1to1(dfp, "OBS_SWAD", "SIM_SWAD", f"{prefix}: SWAD", os.path.join(out_dir, "scatter_SWAD.png"))
+        pr._scatter_1to1(dfp, "OBS_LAID", "SIM_LAID", f"{prefix}: LAID", os.path.join(out_dir, "diagnostic_scatter_LAID.png"))
+        pr._scatter_1to1(dfp, "OBS_LWAD", "SIM_LWAD", f"{prefix}: LWAD", os.path.join(out_dir, "diagnostic_scatter_LWAD.png"))
+        pr._scatter_1to1(dfp, "OBS_SWAD", "SIM_SWAD", f"{prefix}: SWAD", os.path.join(out_dir, "diagnostic_scatter_SWAD.png"))
         if not no_timeseries:
             pr._facet_timeseries(
                 dfp,
@@ -759,7 +759,7 @@ def _make_standard_plots(prefix, results_dir=None, out_dir=None, no_timeseries=F
                 date_col="DATE",
                 pairs=[("OBS_LAID", "SIM_LAID", "LAID")],
                 title=f"{prefix}: LAID time series by TN",
-                out_png=os.path.join(out_dir, "timeseries_LAID_by_TN.png"),
+                out_png=os.path.join(out_dir, "diagnostic_timeseries_LAID_by_TN.png"),
             )
 
     if os.path.exists(harvest_csv):
@@ -769,14 +769,14 @@ def _make_standard_plots(prefix, results_dir=None, out_dir=None, no_timeseries=F
             "OBS_FRESH_CUM",
             "SIM_FRESH_CUM",
             f"{prefix}: Fresh yield cumulative",
-            os.path.join(out_dir, "scatter_fresh_cum.png"),
+            os.path.join(out_dir, "diagnostic_scatter_fresh_cum.png"),
         )
         pr._scatter_1to1(
             dfh,
             "OBS_DRY_CUM",
             "SIM_DRY_CUM",
             f"{prefix}: Dry yield cumulative",
-            os.path.join(out_dir, "scatter_dry_cum.png"),
+            os.path.join(out_dir, "diagnostic_scatter_dry_cum.png"),
         )
         if not no_timeseries:
             pr._facet_timeseries(
@@ -785,7 +785,7 @@ def _make_standard_plots(prefix, results_dir=None, out_dir=None, no_timeseries=F
                 date_col="DATE",
                 pairs=[("OBS_FRESH_CUM", "SIM_FRESH_CUM", "FreshCum")],
                 title=f"{prefix}: cumulative fresh yield by TN",
-                out_png=os.path.join(out_dir, "timeseries_fresh_cum_by_TN.png"),
+                out_png=os.path.join(out_dir, "diagnostic_timeseries_fresh_cum_by_TN.png"),
             )
             pr._facet_timeseries(
                 dfh,
@@ -793,14 +793,14 @@ def _make_standard_plots(prefix, results_dir=None, out_dir=None, no_timeseries=F
                 date_col="DATE",
                 pairs=[("OBS_DRY_CUM", "SIM_DRY_CUM", "DryCum")],
                 title=f"{prefix}: cumulative dry yield by TN",
-                out_png=os.path.join(out_dir, "timeseries_dry_cum_by_TN.png"),
+                out_png=os.path.join(out_dir, "diagnostic_timeseries_dry_cum_by_TN.png"),
             )
 
     if os.path.exists(joint_csv):
         dfj = pd.read_csv(joint_csv)
-        pr._scatter_1to1(dfj, "OBS_HWAM", "SIM_HWAM", f"{prefix}: HWAM", os.path.join(out_dir, "scatter_HWAM.png"))
-        pr._scatter_1to1(dfj, "OBS_LAIX", "SIM_LAIX", f"{prefix}: LAIX", os.path.join(out_dir, "scatter_LAIX.png"))
-        pr._scatter_1to1(dfj, "OBS_CNAM", "SIM_CNAM", f"{prefix}: CNAM", os.path.join(out_dir, "scatter_CNAM.png"))
+        pr._scatter_1to1(dfj, "OBS_HWAM", "SIM_HWAM", f"{prefix}: HWAM", os.path.join(out_dir, "diagnostic_scatter_HWAM.png"))
+        pr._scatter_1to1(dfj, "OBS_LAIX", "SIM_LAIX", f"{prefix}: LAIX", os.path.join(out_dir, "diagnostic_scatter_LAIX.png"))
+        pr._scatter_1to1(dfj, "OBS_CNAM", "SIM_CNAM", f"{prefix}: CNAM", os.path.join(out_dir, "diagnostic_scatter_CNAM.png"))
 
     return out_dir
 

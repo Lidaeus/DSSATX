@@ -255,7 +255,7 @@ def _attach_measured_sigma(
     # allow only the documented half-unit serialization loss.  Continuous
     # canopy variables retain three decimals.
     integer_serialized = {
-        "LWADM", "SWADM", "CHFPWM", "CHPDTM", "HPODWM",
+        "LWADM", "SWADM", "CHFPWM", "HFPOWM", "CHPDTM", "HPODWM",
     }
     tolerance = (
         0.501
@@ -446,33 +446,69 @@ def build_multiseason_stage2(
             gr = local_to_global.get(lr, lr)
             tn = int(e.get("tn", -99))
             for ev in events_by_run.get(lr, []):
-                # Formal E02 retains cumulative fresh/dry series and the
-                # measured single-harvest dry series.  Policy activates CHPDT
-                # + HPODW and keeps CHFPW diagnostic-only.
+                # Preserve cumulative and event harvest observations on both
+                # fresh and dry scales.  The design selects which families
+                # enter Phi; keeping both here prevents a declared
+                # ``increment_plus_terminal`` fresh objective from silently
+                # losing its event increments.
                 chfpw_val = float(ev.get("chfpw", -99.0))
+                measured_hfpow = float(ev.get("hfpow", -99.0))
+                hfpow_val = (
+                    measured_hfpow
+                    if measured_hfpow != -99.0
+                    else float(ev.get("fresh_inc", -99.0))
+                )
                 chpdt_val = float(ev.get("chpdt", -99.0))
                 hpodw_val = float(ev.get("hpodw", ev.get("dry_inc", -99.0)))
                 record = {
                     "@RUN": gr, "TN": tn, "HNO": int(ev["hno"]),
                     "DATE": int(ev["date"]),
-                    "CHFPWM": chfpw_val, "CHPDTM": chpdt_val, "HPODWM": hpodw_val,
-                    "CHFPWS": -99.0, "CHPDTS": -99.0, "HPODWS": -99.0, "season": sid,
+                    "CHFPWM": chfpw_val, "HFPOWM": hfpow_val,
+                    "CHPDTM": chpdt_val, "HPODWM": hpodw_val,
+                    "CHFPWS": -99.0, "HFPOWS": -99.0,
+                    "CHPDTS": -99.0, "HPODWS": -99.0, "season": sid,
                 }
                 for obs_col, source_variable in {
                     "CHFPWM": "CHFPW",
+                    "HFPOWM": "HFPOW",
                     "CHPDTM": "CHPDT",
                     "HPODWM": "HPODW",
                 }.items():
                     if float(record[obs_col]) != -99.0:
-                        _attach_measured_sigma(
-                            record,
-                            crop_uncertainty,
-                            tn=tn,
-                            date=int(ev["date"]),
-                            obs_col=obs_col,
-                            source_variable=source_variable,
-                            policies=observation_policies,
+                        has_var = (
+                            "variable" in crop_uncertainty.columns
+                            and source_variable in crop_uncertainty["variable"].values
                         )
+                        if has_var:
+                            _attach_measured_sigma(
+                                record,
+                                crop_uncertainty,
+                                tn=tn,
+                                date=int(ev["date"]),
+                                obs_col=obs_col,
+                                source_variable=source_variable,
+                                policies=observation_policies,
+                            )
+                        elif obs_col == "HFPOWM":
+                            # The current frozen bundles contain independently
+                            # reported HFPOW values but no replicate-level
+                            # HFPOW row in observation_uncertainty.csv.  Do not
+                            # fall back to one HNO-wide median sigma: preserve
+                            # the established minimum-CV=5% rule per event and
+                            # add the observation-policy model/floor terms.
+                            min_cv_sd = 0.05 * abs(float(record[obs_col]))
+                            model_sigma = _policy_component(
+                                observation_policies, obs_col, "model_sigma"
+                            )
+                            sigma_floor = _policy_component(
+                                observation_policies, obs_col, "sigma_floor"
+                            )
+                            record[f"{obs_col}_SIGMA"] = math.sqrt(
+                                min_cv_sd**2 + model_sigma**2 + sigma_floor**2
+                            )
+                            record[f"{obs_col}_SIGMA_SOURCE"] = (
+                                "minimum_cv_5pct_plus_static_model_plus_floor"
+                            )
                 all_harvest_rows.append(record)
             for p in points_by_run.get(lr, []):
                 record = {
@@ -510,9 +546,9 @@ def build_multiseason_stage2(
     df_harvest = pd.DataFrame(all_harvest_rows)
     df_process = pd.DataFrame(all_process_rows)
     df_soil = pd.DataFrame(all_soil_rows)
-    # N-response contrasts are built from the complete observed cumulative
-    # harvest series even though the ordinary CHPDT calibration target below
-    # is terminal-only.
+    # Response contrasts are built from the complete observed cumulative
+    # harvest series before terminal-only masking.  Their source scale
+    # (CHPDT or CHFPW) is explicit in each response-objective contract.
     nresp_harvest_df = df_harvest.copy()
 
     # Calibrate continuous process states as signed inter-observation
@@ -565,9 +601,13 @@ def build_multiseason_stage2(
     # transformed in the observation policy) so the early-season cumulative
     # shape contributes to Phi at a relative-error scale; the terminal CHPDTM
     # stays the raw absolute-yield anchor.
-    harvest_objective = design.harvest_dry_objective or {}
-    harvest_enabled = bool(harvest_objective.get("enabled", False))
-    if harvest_enabled and not df_harvest.empty:
+    # CHPDT / CHFPW are cumulative yield anchors at the terminal harvest.
+    harvest_dry_obj = design.harvest_dry_objective or {}
+    harvest_fresh_obj = getattr(design, "harvest_fresh_objective", None) or {}
+    dry_enabled = bool(harvest_dry_obj.get("enabled", False))
+    fresh_enabled = bool(harvest_fresh_obj.get("enabled", False))
+
+    if dry_enabled and not df_harvest.empty:
         if "CHPDTM_T" not in df_harvest.columns:
             df_harvest["CHPDTM_T"] = -99.0
         for _, indices in df_harvest.groupby("@RUN", sort=False).groups.items():
@@ -579,15 +619,28 @@ def build_multiseason_stage2(
                     # intermediate cumulative dry harvest -> trend family
                     df_harvest.loc[nonterminal, "CHPDTM_T"] = df_harvest.loc[nonterminal, "CHPDTM"]
                     df_harvest.loc[nonterminal, "CHPDTM"] = -99.0
-    elif not df_harvest.empty:
-        # The observation policy is shared by all stages and marks CHPDT/HPODW
-        # as calibration observations.  A stage-level disabled objective must
-        # therefore remove those measured tokens before PST construction;
-        # otherwise the shared policy silently reactivates harvest Phi (as it
-        # did in the S1 canopy pre-calibration).  ``nresp_harvest_df`` was
-        # copied above, so N/W response contrasts can still be enabled without
-        # also enabling the ordinary harvest objective.
-        _mask_disabled_harvest_objective(df_harvest)
+    elif not dry_enabled and not df_harvest.empty:
+        for column in ("CHPDTM", "CHPDTM_T", "HPODWM"):
+            if column in df_harvest.columns:
+                df_harvest[column] = -99.0
+
+    if fresh_enabled and not df_harvest.empty:
+        if "CHFPWM_T" not in df_harvest.columns:
+            df_harvest["CHFPWM_T"] = -99.0
+        if harvest_fresh_obj.get("mode") == "increment_plus_terminal":
+            for _, indices in df_harvest.groupby("@RUN", sort=False).groups.items():
+                indices = list(indices)
+                if indices:
+                    terminal_idx = df_harvest.loc[indices].sort_values("HNO").index[-1]
+                    nonterminal = [idx for idx in indices if idx != terminal_idx]
+                    if nonterminal:
+                        # intermediate cumulative fresh harvest -> trend family
+                        df_harvest.loc[nonterminal, "CHFPWM_T"] = df_harvest.loc[nonterminal, "CHFPWM"]
+                        df_harvest.loc[nonterminal, "CHFPWM"] = -99.0
+    elif not fresh_enabled and not df_harvest.empty:
+        for column in ("CHFPWM", "CHFPWM_T", "HFPOWM"):
+            if column in df_harvest.columns:
+                df_harvest[column] = -99.0
 
     adapm_sigma = float(getattr(args, "adapm_sigma", None) or 25.0)
     harvest_sigmas = {}
@@ -597,22 +650,16 @@ def build_multiseason_stage2(
         sf = float(getattr(args, "pwadm_sigma_factor", 1.0))
         for hno, g in df_harvest.groupby("HNO"):
             # T10 direct harvest: CHFPW, CHPDT and the log-transformed trend
-            # series get their own sigma keys.  CHPDTM_T expresses a relative
-            # (log-domain ~20%) residual: raw_sigma = 0.2 * median value, so
-            # the delta-method propagation yields a stable log-scale sigma.
-            for var in ("CHFPWM", "CHPDTM", "HPODWM"):
-                med = float(g[var].median()) if var in g.columns else 0.0
-                harvest_sigmas[f"{var}_H{int(hno)}"] = float((s0**2 + (cv * abs(med))**2)**0.5 * sf)
-            if "CHPDTM_T" in g.columns:
-                # Terminal rows keep CHPDTM_T = -99 (invalid); including them in
-                # the median pollutes raw_sigma for HNO groups where most runs
-                # terminate at that harvest (e.g. 25SP H5: 9/10 runs terminal),
-                # shrinking sigma ~20x and exploding the T8 weight to dominate
-                # the whole Phi budget.  Only valid observations enter the
-                # median.
-                valid_t = g.loc[g["CHPDTM_T"] != -99.0, "CHPDTM_T"]
-                med_t = float(valid_t.median()) if (not valid_t.empty and pd.notna(valid_t.median())) else 0.0
-                harvest_sigmas[f"CHPDTM_T_H{int(hno)}"] = float(0.2 * abs(med_t))
+            # series get their own sigma keys.
+            for var in ("CHFPWM", "CHPDTM", "HPODWM", "HFPOWM"):
+                if var in g.columns:
+                    med = float(g[var].median())
+                    harvest_sigmas[f"{var}_H{int(hno)}"] = float((s0**2 + (cv * abs(med))**2)**0.5 * sf)
+            for trend_var in ("CHPDTM_T", "CHFPWM_T"):
+                if trend_var in g.columns:
+                    valid_t = g.loc[g[trend_var] != -99.0, trend_var]
+                    med_t = float(valid_t.median()) if (not valid_t.empty and pd.notna(valid_t.median())) else 0.0
+                    harvest_sigmas[f"{trend_var}_H{int(hno)}"] = float(0.2 * abs(med_t))
 
     process_sigmas = {}
     if not df_process.empty:
@@ -667,6 +714,7 @@ def build_multiseason_stage2(
             response_levels=n_response.get("levels", ["N1", "N2", "N3"]),
             contrast_scale=str(n_response.get("contrast_scale", "log_ratio")),
             harvest_scope=str(n_response.get("harvest_scope", "all")),
+            source_variable=str(n_response.get("source_variable", "CHPDT")),
         )
 
     water_response = design.water_response_objective or {}
@@ -693,6 +741,7 @@ def build_multiseason_stage2(
             nitrogen_levels=water_response.get(
                 "nitrogen_levels", ["N0", "N1", "N2", "N3"]
             ),
+            source_variable=str(water_response.get("source_variable", "CHPDT")),
         )
 
     stage2_outputs = [
@@ -715,7 +764,8 @@ def build_multiseason_stage2(
             "df": df_eval,
         },
         {
-            "model_out_path": PEST_HARVEST_FILE, "obs_bases": {"CHPDT", "CHPDT_T", "HPODW", "CHFPW"},
+            "model_out_path": PEST_HARVEST_FILE,
+            "obs_bases": {"CHPDT", "CHPDT_T", "HPODW", "CHFPW", "CHFPW_T", "HFPOW"},
             "critical_obs": set(), "group_sigmas": harvest_sigmas, "df": df_harvest,
         },
         {
@@ -786,7 +836,8 @@ def build_multiseason_stage2(
         nse_objectives={
             "N_RESPONSE": n_response,
             "W_RESPONSE": water_response,
-            "HARVEST_DRY_TOTAL": harvest_objective,
+            "HARVEST_DRY_TOTAL": harvest_dry_obj,
+            "HARVEST_FRESH": harvest_fresh_obj,
         },
     )
 
@@ -802,7 +853,8 @@ def build_multiseason_stage2(
         nse_objectives={
             "N_RESPONSE": n_response,
             "W_RESPONSE": water_response,
-            "HARVEST_DRY_TOTAL": harvest_objective,
+            "HARVEST_DRY_TOTAL": harvest_dry_obj,
+            "HARVEST_FRESH": harvest_fresh_obj,
         },
     )
 
@@ -814,6 +866,11 @@ def build_multiseason_stage2(
         random_seed=int(args.random_seed),
         bad_phi_sigma=float(getattr(args, "bad_phi_sigma", None) or 1.0e300),
         observation_noise=bool(observation_policies),
+        initial_ensemble_method=str(
+            getattr(args, "initial_ensemble_method", "random") or "random"
+        ),
+        reinflate_iterations=int(getattr(args, "reinflate_iterations", 0) or 0),
+        reinflate_factor=getattr(args, "reinflate_factor", None),
     )
 
     staged_fields = {}
@@ -877,15 +934,17 @@ def _family_for_group(group):
         # event dry-harvest increments have separate audited budgets; keeping
         # them in one family silently applied a missing/incorrect budget.
         "CHFPWM": "HARVEST_FRESH", "CHFPWS": "HARVEST_FRESH",
+        "CHFPWM_T": "HARVEST_FRESH_TREND", "CHFPWS_T": "HARVEST_FRESH_TREND",
+        "HFPOWM": "HARVEST_FRESH_INCREMENT", "HFPOWS": "HARVEST_FRESH_INCREMENT",
         "CHPDTM": "HARVEST_DRY_TOTAL", "CHPDTS": "HARVEST_DRY_TOTAL",
         "CHPDTM_T": "HARVEST_DRY_TREND", "CHPDTS_T": "HARVEST_DRY_TREND",
         "HPODWM": "HARVEST_DRY_INCREMENT", "HPODWS": "HARVEST_DRY_INCREMENT",
         "NRESPM": "N_RESPONSE", "NRESPS": "N_RESPONSE",
         "WRESPM": "W_RESPONSE", "WRESPS": "W_RESPONSE",
     }
-    for key, family in family_map.items():
+    for key in sorted(family_map.keys(), key=len, reverse=True):
         if root.startswith(key):
-            return family
+            return family_map[key]
     if root.startswith("SW") or root.startswith("SOILW"):
         return "SOIL_WATER"
     raise ValueError(f"no T8 variable family declared for observation group {group!r}")

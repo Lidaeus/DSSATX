@@ -28,13 +28,23 @@ from src.sensitivity.treatment_factor_attribution import fertilizer_n_total_kg_h
 PEST_N_RESPONSE_FILE = "PestNResponse.OUT"
 # Water-response contrast output: same-nitrogen W3 vs W1 yield difference.
 PEST_W_RESPONSE_FILE = "PestWResponse.OUT"
-_TAGGED = re.compile(
-    r"^RUN\s+(?P<run>\d+)\s+TN\s+(?P<tn>\d+)\s+"
-    r".*?(?:@HNO@|HNO)\s+(?P<hno>\d+)\s+"
-    r"(?:@DATE@|DATE)\s+(?P<date>\d+)\s+"
-    r".*?@CHPDTS@\s+(?P<value>[-+0-9.eE]+)"
-)
 _HNO = re.compile(r"(?:@HNO@|HNO)\s+(?P<hno>\d+)")
+
+
+def _response_source(source_variable: str) -> tuple[str, str, re.Pattern[str]]:
+    """Resolve a cumulative harvest source to measured column and output token."""
+    variable = str(source_variable).strip().upper()
+    sources = {"CHPDT": ("CHPDTM", "CHPDTS"), "CHFPW": ("CHFPWM", "CHFPWS")}
+    if variable not in sources:
+        raise ValueError("source_variable must be CHPDT or CHFPW")
+    measured, simulated = sources[variable]
+    pattern = re.compile(
+        r"^RUN\s+(?P<run>\d+)\s+TN\s+(?P<tn>\d+)\s+"
+        r".*?(?:@HNO@|HNO)\s+(?P<hno>\d+)\s+"
+        r"(?:@DATE@|DATE)\s+(?P<date>\d+)\s+"
+        rf".*?@{simulated}@\s+(?P<value>[-+0-9.eE]+)"
+    )
+    return measured, simulated, pattern
 
 
 def _filex_irrigation_profiles(filex: Path) -> dict[int, dict[str, float | str]]:
@@ -271,6 +281,7 @@ def build_observed_n_response_rows(
     response_levels: Iterable[str] = ("N1", "N2", "N3"),
     contrast_scale: str = "log_ratio",
     harvest_scope: str = "all",
+    source_variable: str = "CHPDT",
 ) -> pd.DataFrame:
     """Construct strictly paired within-water nitrogen-yield contrasts."""
     response_target = str(response_target).strip().lower()
@@ -284,9 +295,9 @@ def build_observed_n_response_rows(
     harvest_scope = str(harvest_scope).strip().lower()
     if harvest_scope not in {"all", "terminal"}:
         raise ValueError("harvest_scope must be all or terminal")
-    required = {
-        "@RUN", "TN", "HNO", "DATE", "CHPDTM", "CHPDTM_SIGMA", "season"
-    }
+    measured_col, _, _ = _response_source(source_variable)
+    sigma_col = f"{measured_col}_SIGMA"
+    required = {"@RUN", "TN", "HNO", "DATE", measured_col, sigma_col, "season"}
     missing = required - set(harvest.columns)
     if missing:
         raise ValueError(f"harvest table lacks N-response inputs: {sorted(missing)}")
@@ -306,8 +317,8 @@ def build_observed_n_response_rows(
         by_n = group.set_index("nitrogen_level")
         if not {"N0", *levels} <= set(by_n.index):
             continue
-        n0_y = float(by_n.loc["N0", "CHPDTM"])
-        n0_s = float(by_n.loc["N0", "CHPDTM_SIGMA"])
+        n0_y = float(by_n.loc["N0", measured_col])
+        n0_s = float(by_n.loc["N0", sigma_col])
         if n0_y < 0:
             continue
         target_source = {"N0": "N0"}
@@ -315,7 +326,7 @@ def build_observed_n_response_rows(
         target_sigma = {"N0": n0_s}
         running_level = "N0"
         for level in levels:
-            candidate_y = float(by_n.loc[level, "CHPDTM"])
+            candidate_y = float(by_n.loc[level, measured_col])
             if (
                 response_target == "monotone_plateau"
                 and candidate_y < target_y[running_level]
@@ -326,7 +337,7 @@ def build_observed_n_response_rows(
             else:
                 target_y[level] = candidate_y
                 target_sigma[level] = float(
-                    by_n.loc[level, "CHPDTM_SIGMA"]
+                    by_n.loc[level, sigma_col]
                 )
                 target_source[level] = level
                 running_level = level
@@ -387,12 +398,14 @@ def write_simulated_n_response(
     source_scale: str = "raw",
     contrast_scale: str = "log_ratio",
     harvest_scope: str = "all",
+    source_variable: str = "CHPDT",
 ) -> Path:
     """Derive simulated contrasts with explicit source and target scales.
 
     Never infer the CHPDT source scale from an observation-policy side effect.
     The output ordering intentionally matches :func:`build_observed_n_response_rows`.
     """
+    _, _, tagged = _response_source(source_variable)
     lookup = {
         int(row.global_run): (
             str(row.season_id), str(row.water_level), str(row.nitrogen_level),
@@ -410,11 +423,11 @@ def write_simulated_n_response(
     if harvest_scope not in {"all", "terminal"}:
         raise ValueError("harvest_scope must be all or terminal")
     if contrast_scale == "raw_difference" and source_scale != "raw":
-        raise ValueError("raw_difference requires raw CHPDT source values")
+        raise ValueError("raw_difference requires raw cumulative-harvest source values")
 
     values: dict[tuple[str, int, int, str, str], tuple[int, int, float]] = {}
     for line in Path(harvest_output).read_text(encoding="utf-8").splitlines():
-        match = _TAGGED.search(line)
+        match = tagged.search(line)
         if match is None:
             continue
         run = int(match.group("run"))
@@ -468,14 +481,6 @@ def write_simulated_n_response(
     return target
 
 
-_W_TAGGED = re.compile(
-    r"^RUN\s+(?P<run>\d+)\s+TN\s+(?P<tn>\d+)\s+"
-    r".*?(?:@HNO@|HNO)\s+(?P<hno>\d+)\s+"
-    r"(?:@DATE@|DATE)\s+(?P<date>\d+)\s+"
-    r".*?@CHPDTS@\s+(?P<value>[-+0-9.eE]+)"
-)
-
-
 def build_observed_water_response_rows(
     harvest: pd.DataFrame,
     mapping: pd.DataFrame,
@@ -488,6 +493,7 @@ def build_observed_water_response_rows(
     low_water: str = "W1",
     season_contrasts: Mapping[str, Mapping[str, str]] | None = None,
     nitrogen_levels: Iterable[str] = ("N0", "N1", "N2", "N3"),
+    source_variable: str = "CHPDT",
 ) -> pd.DataFrame:
     """Construct strictly paired within-nitrogen water-yield contrasts.
 
@@ -509,9 +515,9 @@ def build_observed_water_response_rows(
     levels = tuple(str(value).strip().upper() for value in nitrogen_levels)
     if not levels or any(value not in {"N0", "N1", "N2", "N3"} for value in levels):
         raise ValueError("nitrogen_levels must be a non-empty subset of N0..N3")
-    required = {
-        "@RUN", "TN", "HNO", "DATE", "CHPDTM", "CHPDTM_SIGMA", "season"
-    }
+    measured_col, _, _ = _response_source(source_variable)
+    sigma_col = f"{measured_col}_SIGMA"
+    required = {"@RUN", "TN", "HNO", "DATE", measured_col, sigma_col, "season"}
     missing = required - set(harvest.columns)
     if missing:
         raise ValueError(f"harvest table lacks water-response inputs: {sorted(missing)}")
@@ -544,23 +550,23 @@ def build_observed_water_response_rows(
             continue
         ref = by_w.loc[season_low]
         cur = by_w.loc[season_high]
-        ref_y = float(ref["CHPDTM"])
-        cur_y = float(cur["CHPDTM"])
+        ref_y = float(ref[measured_col])
+        cur_y = float(cur[measured_col])
         if ref_y < 0 or cur_y < 0:
             continue
         if response_target == "monotone_plateau" and cur_y < ref_y:
             target_y = ref_y
-            target_sigma = float(ref["CHPDTM_SIGMA"])
+            target_sigma = float(ref[sigma_col])
             target_source = season_low
         else:
             target_y = cur_y
-            target_sigma = float(cur["CHPDTM_SIGMA"])
+            target_sigma = float(cur[sigma_col])
             target_source = season_high
         if contrast_scale == "log_ratio":
             observed_contrast = math.log1p(target_y) - math.log1p(ref_y)
             propagated = math.sqrt(
                 (target_sigma / (target_y + 1.0)) ** 2
-                + (float(ref["CHPDTM_SIGMA"]) / (ref_y + 1.0)) ** 2
+                + (float(ref[sigma_col]) / (ref_y + 1.0)) ** 2
                 + float(sigma_floor) ** 2
             )
             sigma_source = "delta_method_ln1p_pair_plus_static_floor"
@@ -568,7 +574,7 @@ def build_observed_water_response_rows(
             observed_contrast = target_y - ref_y
             propagated = math.sqrt(
                 target_sigma**2
-                + float(ref["CHPDTM_SIGMA"]) ** 2
+                + float(ref[sigma_col]) ** 2
                 + float(sigma_floor) ** 2
             )
             sigma_source = "paired_raw_difference_plus_static_floor"
@@ -613,11 +619,13 @@ def write_simulated_water_response(
     low_water: str = "W1",
     season_contrasts: Mapping[str, Mapping[str, str]] | None = None,
     nitrogen_levels: Iterable[str] = ("N0", "N1", "N2", "N3"),
+    source_variable: str = "CHPDT",
 ) -> Path:
     """Derive simulated W3-vs-W1 water-yield contrasts from PestHarvest.OUT.
 
     Output ordering matches :func:`build_observed_water_response_rows`.
     """
+    _, _, tagged = _response_source(source_variable)
     source_scale = str(source_scale).strip().lower()
     contrast_scale = str(contrast_scale).strip().lower()
     harvest_scope = str(harvest_scope).strip().lower()
@@ -631,7 +639,7 @@ def write_simulated_water_response(
     if not levels or any(value not in {"N0", "N1", "N2", "N3"} for value in levels):
         raise ValueError("nitrogen_levels must be a non-empty subset of N0..N3")
     if contrast_scale == "raw_difference" and source_scale != "raw":
-        raise ValueError("raw_difference requires raw CHPDT source values")
+        raise ValueError("raw_difference requires raw cumulative-harvest source values")
     high_water = str(high_water).strip().upper()
     low_water = str(low_water).strip().upper()
     contrast_by_season = {
@@ -651,7 +659,7 @@ def write_simulated_water_response(
     }
     values: dict[tuple[str, int, int, str, str], tuple[int, int, float]] = {}
     for line in Path(harvest_output).read_text(encoding="utf-8").splitlines():
-        match = _W_TAGGED.search(line)
+        match = tagged.search(line)
         if match is None:
             continue
         run = int(match.group("run"))

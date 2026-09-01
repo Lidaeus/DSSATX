@@ -92,6 +92,25 @@ def test_simulated_response_uses_explicit_raw_to_log_contrast(tmp_path: Path) ->
     )
 
 
+def test_simulated_response_can_use_fresh_cumulative(tmp_path: Path) -> None:
+    source = tmp_path / "PestHarvest.OUT"
+    source.write_text(
+        "RUN 1 TN 1 HNO 1 DATE 25140 @CHFPWS@ 100 @CHPDTS@ 10\n"
+        "RUN 2 TN 2 HNO 1 DATE 25140 @CHFPWS@ 160 @CHPDTS@ 11\n",
+        encoding="utf-8",
+    )
+    mapping = pd.DataFrame([
+        {"global_run": 1, "season_id": "25SP", "treatment": 1, "water_level": "W1", "nitrogen_level": "N0"},
+        {"global_run": 2, "season_id": "25SP", "treatment": 2, "water_level": "W1", "nitrogen_level": "N3"},
+    ])
+    target = tmp_path / "PestNResponse.OUT"
+    write_simulated_n_response(
+        source, target, mapping, response_levels=["N3"],
+        contrast_scale="raw_difference", source_variable="CHFPW",
+    )
+    assert "@NRESPS@ 60" in target.read_text(encoding="utf-8")
+
+
 def test_raw_n2_minus_n0_terminal_is_strictly_keyed_and_ordered(tmp_path: Path) -> None:
     mapping, _ = _mapping(tmp_path)
     harvest_rows = []

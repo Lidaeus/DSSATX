@@ -36,7 +36,7 @@ def _data_rows(path: Path):
 
 def test_operational_filex_management_matches_reference():
     reference_dates = filex_harvest_dates(REFERENCE)
-    assert reference_dates[-1] == 25198
+    assert reference_dates[-1] == 25192
     for path in OPERATIONAL_FILEX:
         assert path.is_file()
         assert management_alignment_findings(path, REFERENCE) == []
@@ -48,12 +48,12 @@ def test_operational_filet_excludes_estimated_final_harvest():
         assert path.is_file()
         dates = [int(fields[1]) for fields in _data_rows(path)]
         assert dates
-        assert max(dates) < 25203
+        assert max(dates) < 25198
 
 
 def test_operational_filea_uses_last_real_harvest_and_no_estimated_yield():
     for path in [item.with_suffix(".TMA") for item in OPERATIONAL_OBSERVATIONS]:
         rows = list(_data_rows(path))
         assert rows
-        assert max(int(fields[4]) for fields in rows) == 25198
+        assert max(int(fields[4]) for fields in rows) == 25192
         assert all(float(fields[5]) == -99 for fields in rows)
