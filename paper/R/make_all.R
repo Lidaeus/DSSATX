@@ -21,7 +21,8 @@ for (module in c(
   "fig_selected_dynamics.R", "fig_residual_diagnostics.R",
   "fig_all_treatment_dynamics.R", "fig_phi_convergence.R", "fig_posterior_demo.R",
   "fig_spearman_demo.R", "fig_equifinality_demo.R", "fig_sa_morris.R",
-  "fig_sa_sobol.R", "fig_sa_interaction.R", "fig_sa_selection.R"
+  "fig_sa_sobol.R", "fig_sa_interaction.R", "fig_sa_selection.R",
+  "fig_water_nitrogen_response.R", "fig_standing_fruit_balance.R"
 )) source_utf8(module)
 
 check_r_dependencies()
@@ -46,8 +47,8 @@ figure_ids <- if (is.null(args$figure_ids)) "all" else args$figure_ids
 selected <- function(id) figure_ids == "all" || id %in% split_csv_arg(figure_ids)
 requested_ids <- if (figure_ids == "all") character() else split_csv_arg(figure_ids)
 is_t4_request <- any(requested_ids %in% c("figs5_posterior", "figs6_spearman", "figs7_equifinality"))
-is_sa_request <- any(requested_ids %in% c("fig1_sa", "fig1_sa_results", "figs1_sa_stability", "figs1b_sa_effects",
-                                          "figs1_sa", "fig_sa_summary",
+is_sa_request <- any(requested_ids %in% c("fig1_sa", "figs1_sa_stability", "figs1b_sa_effects",
+                                          "fig_sa_summary",
                                           "figs1c_sa_interaction", "figs1d_sa_selection"))
 is_sobol_request <- any(requested_ids %in% c("figs2_sobol_convergence", "figs2_sobol_results"))
 # Conditional-ensemble uncertainty figures (plan 2026-08-28): a dedicated
@@ -116,20 +117,6 @@ if (is_sa_request) {
     utils::write.csv(result$group_source, group_source, row.names = FALSE, fileEncoding = "UTF-8")
     artifacts <- c(artifacts, ranking_source, group_source)
   }
-  if (selected("fig1_sa_results")) {
-    result <- build_morris_results(
-      bundle$group_summary, bundle$summary, bundle$focus, profile, bundle$is_demo, lang = lang
-    )
-    base <- file.path(out_dir, if (bundle$is_demo) "DEMO_Fig1_sa_results" else "Fig1_sa_results")
-    artifacts <- c(artifacts, save_figure_set(
-      result$plot, base, profile, profile$double_column_width_mm, result$height_mm
-    ))
-    group_source <- paste0(base, ".group_source.csv")
-    score_source <- paste0(base, ".score_source.csv")
-    utils::write.csv(result$group_source, group_source, row.names = FALSE, fileEncoding = "UTF-8")
-    utils::write.csv(result$score_source, score_source, row.names = FALSE, fileEncoding = "UTF-8")
-    artifacts <- c(artifacts, group_source, score_source)
-  }
   if (selected("figs1_sa_stability")) {
     result <- build_morris_stability(
       bundle$seed_rankings, bundle$stability, bundle$focus, profile, bundle$is_demo, lang = lang
@@ -164,28 +151,6 @@ if (is_sa_request) {
     effects_source <- paste0(base, ".effects_source.csv")
     utils::write.csv(result$effects_source, effects_source, row.names = FALSE, fileEncoding = "UTF-8")
     artifacts <- c(artifacts, effects_source)
-  }
-
-  # Task 1: Fig.S1 combined (stability + mu*-sigma in one figure, plan §9).
-  if (selected("figs1_sa")) {
-    if (!isTRUE(bundle$has_effects)) {
-      stop("figs1_sa was requested but the bundle does not carry ",
-           "morris_response_effects.csv. Rebuild the bundle with the W2 exporter.",
-           call. = FALSE)
-    }
-    result <- build_morris_s1_combined(
-      bundle$seed_rankings, bundle$stability, bundle$focus, bundle$effects,
-      profile, bundle$is_demo, lang = lang
-    )
-    base <- file.path(out_dir, if (bundle$is_demo) "DEMO_FigS1_sa_combined" else "FigS1_sa_combined")
-    artifacts <- c(artifacts, save_figure_set(
-      result$plot, base, profile, profile$double_column_width_mm, result$height_mm
-    ))
-    for (suffix in c("rank_source", "stability_source", "effects_source")) {
-      path <- paste0(base, ".", suffix, ".csv")
-      utils::write.csv(result[[suffix]], path, row.names = FALSE, fileEncoding = "UTF-8")
-      artifacts <- c(artifacts, path)
-    }
   }
 
   # Task 2: Morris + Sobol summary composite (plan §9 Fig.1 alternative).
@@ -380,7 +345,7 @@ if (is_conditional_request) {
   conditional_stem <- if (bundle$is_demo) "DEMO_conditional" else "conditional"
   if (selected("fig_model_performance_uncertainty")) {
     result <- build_model_performance_uncertainty(
-      bundle$prediction, bundle$treatment_metadata, "DRY_CUM", profile, bundle$is_demo
+      bundle$prediction, bundle$treatment_metadata, "FRESH_CUM", profile, bundle$is_demo
     )
     base <- file.path(out_dir, paste0(conditional_stem, "_model_performance_uncertainty"))
     artifacts <- c(artifacts, save_figure_set(
@@ -394,7 +359,7 @@ if (is_conditional_request) {
   }
   if (selected("diagnostic_conditional_residual_by_treatment")) {
     result <- build_treatment_residual_uncertainty(
-      bundle$residual_members, bundle$treatment_metadata, "DRY_CUM",
+      bundle$residual_members, bundle$treatment_metadata, "FRESH_CUM",
       "terminal_relative_error_pct", profile, bundle$is_demo
     )
     base <- file.path(out_dir, paste0(conditional_stem, "_treatment_residual_uncertainty"))
@@ -431,7 +396,7 @@ if (is_conditional_request) {
     artifacts <- c(artifacts, process_obs, process_sim)
 
     harvest <- build_harvest_dynamics_conditional(
-      bundle$prediction, bundle$treatment_metadata, "DRY_INC", "DRY_CUM",
+      bundle$prediction, bundle$treatment_metadata, "FRESH_INC", "FRESH_CUM",
       season_treatments, profile, bundle$is_demo
     )
     harvest_base <- file.path(out_dir, paste0(conditional_stem, "_selected_harvest_dynamics"))

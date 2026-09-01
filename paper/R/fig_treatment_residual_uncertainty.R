@@ -43,7 +43,7 @@ summarise_member_distribution <- function(residual_members, statistic) {
 }
 
 build_treatment_residual_uncertainty <- function(residual_members, treatment_metadata,
-                                                 variable = "DRY_CUM",
+                                                 variable = "FRESH_CUM",
                                                  statistic = "terminal_relative_error_pct",
                                                  profile, is_demo = FALSE) {
   data <- residual_members[residual_members$variable == variable, , drop = FALSE]
@@ -82,6 +82,7 @@ build_treatment_residual_uncertainty <- function(residual_members, treatment_met
     rrmse_pct = "Member-level RRMSE (%)",
     statistic)
 
+  yield_type <- if (variable == "FRESH_CUM") "fresh-yield" else "dry-yield"
   p_main <- ggplot2::ggplot(forest, ggplot2::aes(x = median, y = row_label,
                                                  colour = nitrogen_level)) +
     ggplot2::geom_vline(xintercept = 0, linetype = "dashed",
@@ -95,7 +96,7 @@ build_treatment_residual_uncertainty <- function(residual_members, treatment_met
     ggplot2::geom_point(size = 1.5, shape = 21, fill = "white", stroke = 0.5) +
     ggplot2::facet_grid(season_id ~ ., scales = "free_y", space = "free_y", switch = "y") +
     ggplot2::scale_colour_manual(name = "Nitrogen level", values = nitrogen, drop = FALSE) +
-    ggplot2::labs(title = "Treatment-level dry-yield error distributions",
+    ggplot2::labs(title = paste0("Treatment-level ", yield_type, " error distributions"),
                   subtitle = paste0("Left: terminal relative error; right: event-series RRMSE. ",
                                     "Thin = 95% interval, thick = IQR, point = median."),
                   x = statistic_label, y = NULL) +

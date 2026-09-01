@@ -115,13 +115,16 @@ build_model_performance_uncertainty <- function(prediction_summary, treatment_me
     ggplot2::scale_shape_manual(name = "Water treatment", values = water, drop = FALSE) +
     ggplot2::coord_equal(xlim = limits, ylim = limits, expand = FALSE) +
     ggplot2::labs(
-      title = "Cumulative dry-yield performance and parameter uncertainty",
+      title = if (variable == "FRESH_CUM") "Cumulative fresh-yield performance and parameter uncertainty"
+              else "Cumulative dry-yield performance and parameter uncertainty",
       subtitle = paste(
         "Point = ensemble median; thin/thick bars = 95% interval/IQR.",
         "Filled = calibration; open = validation; dashed = 1:1."
       ),
-      x = "Observed cumulative dry yield (kg ha\u207b\u00b9)",
-      y = "Simulated ensemble median (kg ha\u207b\u00b9)",
+      x = if (variable == "FRESH_CUM") "Observed cumulative fresh yield (kg ha\u207b\u00b9)"
+          else "Observed cumulative dry yield (kg ha\u207b\u00b9)",
+      y = if (variable == "FRESH_CUM") "Simulated ensemble median (kg ha\u207b\u00b9)"
+          else "Simulated ensemble median (kg ha\u207b\u00b9)",
       caption = paste(
         "Conditional-ensemble prediction interval propagates parameter uncertainty only.",
         ifelse(isTRUE(is_demo), demo_caption(TRUE), "")

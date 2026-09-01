@@ -305,30 +305,26 @@ build_harvest_dynamics_conditional <- function(prediction, treatment_metadata,
   cumulative$panel_label <- factor(paste0(cumulative$treatment_label, "\n", cumulative$season_id),
                                    levels = treatment_levels)
 
-  # Incremental harvest: event lollipops of the ensemble median with vertical
+  # Incremental harvest: paired event points of the ensemble median with vertical
   # 95% intervals; never connected into a growth curve (plan §6.1).
   p_increment <- ggplot2::ggplot(increment, ggplot2::aes(x = dap)) +
-    ggplot2::geom_segment(
-      ggplot2::aes(xend = dap, y = 0, yend = sim_median, colour = nitrogen_level),
-      linewidth = 0.55, alpha = 0.75
-    ) +
     ggplot2::geom_errorbar(
       ggplot2::aes(ymin = sim_q025, ymax = sim_q975, colour = nitrogen_level),
-      width = 0, linewidth = 0.35, alpha = 0.55
+      width = 0, linewidth = 0.45, alpha = 0.65
     ) +
     ggplot2::geom_point(
       ggplot2::aes(y = sim_median, colour = nitrogen_level),
-      shape = 1, size = 1.7, stroke = 0.55
+      shape = 1, size = 1.8, stroke = 0.65
     ) +
     ggplot2::geom_point(
       ggplot2::aes(y = observed, fill = nitrogen_level, shape = water_level),
-      colour = "#202020", size = 1.65, stroke = 0.42
+      colour = "#202020", size = 1.75, stroke = 0.45
     ) +
     ggplot2::facet_wrap(~panel_label, nrow = 1, scales = "fixed") +
     management_scales(profile) +
     ggplot2::labs(
       title = "Incremental harvest by event",
-      subtitle = "Lollipops/lines: conditional-ensemble median with 95% interval; filled points: observed means",
+      subtitle = "Points and error bars: conditional-ensemble median with 95% interval; filled points: observed means",
       x = "Days after planting",
       y = conditional_axis_label(increment, increment_variable)
     ) +
