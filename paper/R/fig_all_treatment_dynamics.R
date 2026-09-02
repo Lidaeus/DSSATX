@@ -115,6 +115,16 @@ conditional_matrix_plot <- function(data, events, panel_labels, y_limits, y_labe
   if (has_events) {
     # Observed points live in the event summary, not the daily trajectory
     # table; draw them as their own layer over the median curves.
+    if (!is.null(events$observed_se)) {
+      errors <- events[is.finite(events$observed_se) & events$observed_se >= 0, , drop = FALSE]
+      if (nrow(errors) > 0) {
+        plot <- plot + ggplot2::geom_errorbar(
+          data = errors,
+          ggplot2::aes(x = dap, ymin = observed - observed_se, ymax = observed + observed_se),
+          width = 0, linewidth = 0.35, colour = "#303030"
+        )
+      }
+    }
     plot <- plot +
       ggplot2::geom_point(
         data = events,
@@ -148,10 +158,12 @@ build_all_treatment_dynamics_conditional <- function(prediction, trajectory, tre
     if (nrow(daily) > 0) daily <- attach_conditional_metadata(daily, treatment_metadata)
     if (nrow(events) > 0) events <- attach_conditional_metadata(events, treatment_metadata)
 
+    is_harvest <- variable %in% c("DRY_CUM", "FRESH_CUM", "CUM_HARVEST", "FRESH_HARVEST", "DRY_INC", "FRESH_INC")
+
     season_plots <- list()
     observations_out <- list()
     daily_out <- list()
-    label_frame <- if (nrow(daily) > 0) daily else events
+    label_frame <- if (nrow(events) > 0) events else daily
     y_label <- conditional_axis_label(label_frame, variable)
 
     available_seasons <- unique(c(as.character(daily$season_id), as.character(events$season_id)))
@@ -159,10 +171,19 @@ build_all_treatment_dynamics_conditional <- function(prediction, trajectory, tre
       season_daily <- daily[daily$season_id == season, , drop = FALSE]
       season_events <- events[events$season_id == season, , drop = FALSE]
       labels <- conditional_matrix_panel_labels(treatment_metadata, season)
-      source_frame <- if (nrow(season_daily) > 0) season_daily else season_events
+
+      # For cumulative harvest, use events (ordered by dap) to connect simulated harvest nodes
+      # and uncertainty bands strictly between harvest dates, matching the event line style.
+      if (is_harvest && nrow(season_events) > 0) {
+        season_events <- season_events[order(season_events$treatment, season_events$dap), , drop = FALSE]
+        source_frame <- season_events
+      } else {
+        source_frame <- if (nrow(season_daily) > 0) season_daily else season_events
+      }
+
       season_values <- c()
-      if (nrow(season_daily) > 0) {
-        season_values <- c(season_values, season_daily$sim_q025, season_daily$sim_q975)
+      if (nrow(source_frame) > 0) {
+        season_values <- c(season_values, source_frame$sim_q025, source_frame$sim_q975)
       }
       if (nrow(season_events) > 0) {
         season_values <- c(season_values, season_events$observed, season_events$sim_q975)
@@ -172,7 +193,7 @@ build_all_treatment_dynamics_conditional <- function(prediction, trajectory, tre
       plot <- conditional_matrix_plot(
         source_frame, season_events, labels, y_limits, y_label,
         paste0(season, " | ", unique(source_frame$variable_label)[[1]], " | all treatments"),
-        profile, is_demo, ribbons = nrow(season_daily) > 0,
+        profile, is_demo, ribbons = nrow(source_frame) > 0,
         water_levels = season_water_levels,
         show_legend = length(season_plots) == 0
       )

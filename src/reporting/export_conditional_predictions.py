@@ -1479,7 +1479,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--workers", type=int, default=6)
     parser.add_argument(
         "--members", type=int, default=None,
-        help="DEMO/performance only: replay just the first N members (never report 95% intervals)",
+        help="DEMO/performance only: replay just the first N members (never report 95%% intervals)",
     )
     parser.add_argument(
         "--member-list", default=None,
