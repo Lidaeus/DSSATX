@@ -1,0 +1,131 @@
+{
+  "bundle_id": "xxql2601_v20260917_refresh",
+  "derived_from_bundle": "xxql2601_unified_20260914",
+  "created": "2026-09-17",
+  "season": "26SP",
+  "soil_id": "XXSL2601",
+  "decisions_applied": {
+    "D1": "10L-B mass-conserving micro-grid scheme (2, 4, 15, 30, 40, 60, 80, 100, 140, 180 cm)",
+    "D2": "26SP initial mineral N directly uses unscaled measured values in TMX (D2=A)",
+    "D3": "25SP base nutrients missing Plot 14 interpolated using adjacent Plot 13 (low water CK-N2, D3=C)",
+    "D4": "25SP SLOC/SAOC derived from total N via C:N=11:1 (SAOC = TN% * 11, D4=A)",
+    "D5": "Section @A uses treatment-specific measured soil analysis blocks per plot (D5=A)",
+    "D6": "2025春 plant NPK (2025-07-13) fully incorporated into FileT/FileA/uncertainty (D6=B)",
+    "D7": "25FA references Plot 2 XXSL2601 and 26SP baseline nutrients; fall soil water merged (D7=A)",
+    "D8": "25SP harvest calendar: 9 real harvests + 1 virtual (25198); records after 25198 truncated (D8=A)",
+    "D9": "Section @C ICDAT aligned with pre-planting moisture sampling date; ICRT=0, ICRES=0 (D9=A)",
+    "D10": "Bulk density from 2号棚容重测定.xlsx Sheet2 authoritative 6-point mean (SBDM=1.364, D10=A)",
+    "D11": "Mass-weighted thickness overlap algorithm strictly aligned with 10L-B / SoilWat 12 sub-layers (D11=A)"
+  },
+  "simulation_options": {
+    "WATER": "Y",
+    "NITRO": "Y",
+    "PHOSP": "Y",
+    "POTAS": "N",
+    "TILL": "Y",
+    "CHEM": "N"
+  },
+  "immutable": true,
+  "files": [
+    {
+      "name": "DSSBatch.v48",
+      "sha256": "3ab50ecd5bb29799916ce9eb3e5cf08e8b60c86fe61cee1492ace3199c0cf140",
+      "size_bytes": 1934
+    },
+    {
+      "name": "FileA_values.csv",
+      "sha256": "3903b359969d00a6b7a0a53143baf18e38f3e81c49a5111a962db3fc4885ed16",
+      "size_bytes": 2447
+    },
+    {
+      "name": "FileT_values.csv",
+      "sha256": "6fd4efff063d3eb2cb98a83fa98621d0383bc0af78f0c2611abdfb8d494d02e2",
+      "size_bytes": 8316
+    },
+    {
+      "name": "fruit_quality_match_audit.csv",
+      "sha256": "6a8d2f86706e3cc8951e80a448d9258ca355372cf797d08dcce0e9ee68765c3d",
+      "size_bytes": 11578
+    },
+    {
+      "name": "generator_log.json",
+      "sha256": "370fa54e6431e24000cea7b038f97ed302d89312aae75e54b5eecfaebb039ef3",
+      "size_bytes": 1736
+    },
+    {
+      "name": "observation_uncertainty.csv",
+      "sha256": "83095829bdadc12b35434912a390d28ec894ab14381c7aacf9df8ff48ce974ca",
+      "size_bytes": 78718
+    },
+    {
+      "name": "PestHarvest.audit.csv",
+      "sha256": "94569dd8f59f3d0df2db0c340816895a6031abf52b807310b6fd76f5862ebb78",
+      "size_bytes": 4552
+    },
+    {
+      "name": "SOIL.SOL",
+      "sha256": "1cbb3ac8bb21b2a51ce936c33a0cb259f9302436cc86f18b523a9996654a64dd",
+      "size_bytes": 162884
+    },
+    {
+      "name": "soil_n_scale_rows.json",
+      "sha256": "cef169ae5be147344513ca2ace50ac446cdbf798e2ad77286339b8d160070b6d",
+      "size_bytes": 10089
+    },
+    {
+      "name": "soil_water_generator_log.json",
+      "sha256": "3c9640b92b0352b586d4e07dbc848abd716cb2fd0fc1781a8a7458631c15d784",
+      "size_bytes": 1069
+    },
+    {
+      "name": "soil_water_layer_mapping.csv",
+      "sha256": "6452e2bda728bc06afc8c41fdae88f144e288be33b309a0d996f71a6a16cea32",
+      "size_bytes": 603
+    },
+    {
+      "name": "soil_water_match_audit.csv",
+      "sha256": "556b49b391a7709a8cefbaa504abf3cc2dbbeaca253120ff63d39173d5f6341f",
+      "size_bytes": 29175
+    },
+    {
+      "name": "soil_water_observations.csv",
+      "sha256": "0883b8cbb47170d10820caef03e83cf1633fb9f26f197ad03e01d358543b58ea",
+      "size_bytes": 56896
+    },
+    {
+      "name": "TMGRO048.CUL",
+      "sha256": "92d1464476fb460c2c83213d4fc620fe69221bad841ba3e9eda94df8a1918e8e",
+      "size_bytes": 2879
+    },
+    {
+      "name": "TMGRO048.ECO",
+      "sha256": "38104c0f87325e528b67babd2655d9342fd6ea6f3f03c7f2ea8553ba7d4d908d",
+      "size_bytes": 2772
+    },
+    {
+      "name": "TMGRO048.SPE",
+      "sha256": "1e56c8186703df725fa728b6389fdeb4fae9a5dacff8cb1616f7165aa2474a72",
+      "size_bytes": 9747
+    },
+    {
+      "name": "XXQL2601.TMA",
+      "sha256": "4f53db013736264c2dc7fe3a72c448c102dfe2676d72263fdd2ec7b2a8fd3068",
+      "size_bytes": 1440
+    },
+    {
+      "name": "XXQL2601.TMT",
+      "sha256": "acc9e783d5343bdf9f129e935046615190e9c8d24def757c1c5241506f2f3d25",
+      "size_bytes": 12390
+    },
+    {
+      "name": "XXQL2601.TMX",
+      "sha256": "8bed67f8cb71a4f364371a3357d3739125120404da28bd693150306932efa855",
+      "size_bytes": 28006
+    },
+    {
+      "name": "XXQL2601.WTH",
+      "sha256": "094ffa0e25ad27945261bf024ba48ef40e1aabc4bb24f9bf01715473f0f29afa",
+      "size_bytes": 7732
+    }
+  ]
+}

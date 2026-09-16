@@ -1,0 +1,38 @@
+{
+  "season_id": "25SP",
+  "excode": "XXQL2501",
+  "generator": "tools/soil/build_soil_water_tables_20260917.py",
+  "generator_sha256": "d3dfd502a0a015ccb90aba330adbbaafdff299bfc6635392b8d020ef5311edb5",
+  "spec_compliance": "docs/reports/2025春_2026春数据重构与双地块土壤方案执行方案_20260917.md (D11=A)",
+  "source_files": {
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春土壤含水量数据集.xlsx": "fa42d4bf875ec98666b13bb46d7b0e6d34f68b2b5c336bad678a5138ea7d1599"
+  },
+  "qa_metrics": {
+    "plots": 10,
+    "dates": 3,
+    "depths": 5,
+    "total_observations": 150,
+    "phi_observations": 100,
+    "initial_condition_observations": 50,
+    "soil_id": "XXSL2501",
+    "dssat_layer_bottoms_cm": [
+      5.0,
+      15.0,
+      30.0,
+      45.0,
+      60.0,
+      70.0,
+      80.0,
+      100.0,
+      120.0,
+      140.0,
+      160.0,
+      180.0
+    ]
+  },
+  "output_files": [
+    "soil_water_observations.csv",
+    "soil_water_layer_mapping.csv",
+    "soil_water_match_audit.csv"
+  ]
+}

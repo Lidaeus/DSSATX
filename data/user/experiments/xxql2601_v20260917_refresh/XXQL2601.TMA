@@ -1,0 +1,23 @@
+*EXP.DATA (A): 2026 SPRING EGGPLANT; TRNO=PLOT NUMBER
+
+! Fresh yield uses arithmetic mean of replicates.
+! Fruit DM fraction = 1 - 半果含水率 (2026春品质指标集.xlsx).
+! Each harvest uses the nearest plot-level moisture measurement date (no max interval).
+! SD: hybrid method (replicate SD with min CV=5%, fallback CV=10%).
+! Cumulative yield SD propagates incremental variances.
+! LAI at 26180 imputed from leaf dry weight / SLA ratio R=18.52 (12 points flagged imputed_20260831).
+! Strict FileA/FileT fill rule per project standard.
+
+@TRNO   PDAT  ADAT  MDAT  HDAT  HWAM  LWAM  SWAM  LAIX  HIAM  CNAM
+     1 26075 26110 26122 26198   -99  1338  1902 2.792   -99   -99
+     2 26075 26110 26122 26198   -99  1353  2912 2.996   -99   -99
+     3 26075 26110 26122 26198   -99  1660  2659 2.725   -99   -99
+     4 26075 26110 26122 26198   -99  1594  2835 3.543   -99   -99
+     5 26075 26110 26122 26198   -99  1423  2152 3.113   -99   -99
+     6 26075 26110 26122 26198   -99  1203  2174 2.634   -99   -99
+     7 26075 26110 26122 26198   -99  1288  1711 2.775   -99   -99
+     8 26075 26110 26122 26198   -99  1237  1733 3.142   -99   -99
+     9 26075 26110 26122 26198   -99  1047  1736 2.309   -99   -99
+    10 26075 26110 26122 26198   -99  1087  1766 2.300   -99   -99
+    11 26075 26110 26122 26198   -99  1349  2002 2.989   -99   -99
+    12 26075 26110 26122 26198   -99  1104  1763 2.735   -99   -99
