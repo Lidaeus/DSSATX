@@ -120,7 +120,7 @@ def test_ecotype_and_species_injection_use_local_base_files(tmp_path, monkeypatc
         line for line in (tmp_path / "TMGRO048.ECO").read_text(encoding="utf-8").splitlines()
         if line.startswith("TM0001")
     )
-    assert eco_line.rstrip().endswith("0.30")
+    assert abs(float(eco_line.split()[-1]) - 0.30) < 1e-9  # T2: numeric equivalence (injected ".3" is value-correct fixed-width)
 
     spe_params = _parameter_csv(tmp_path / "spe.csv", KCAN=0.75)
     run_dssat.update_spe_file(str(spe_params))
@@ -128,7 +128,7 @@ def test_ecotype_and_species_injection_use_local_base_files(tmp_path, monkeypatc
         line for line in (tmp_path / "TMGRO048.SPE").read_text(encoding="utf-8").splitlines()
         if "PARMAX,PHTMAX" in line
     )
-    assert "0.75" in photosynthesis
+    assert abs(float(photosynthesis.split()[2]) - 0.75) < 1e-9  # T2: numeric equivalence
 
 
 def test_species_injection_updates_fruit_water_related_spe_fields(tmp_path, monkeypatch):
@@ -147,10 +147,10 @@ def test_species_injection_updates_fruit_water_related_spe_fields(tmp_path, monk
     lines = (tmp_path / "TMGRO048.SPE").read_text(encoding="utf-8").splitlines()
 
     composition = next(line for line in lines if "SDPROS,SDPROG" in line)
-    assert "0.410" in composition or ".410" in composition
+    assert abs(float(composition.split()[0]) - 0.410) < 1e-9  # T2: numeric equivalence
 
     carbohydrate = next(line for line in lines if "PCARLF,PCARST" in line)
-    assert "0.620" in carbohydrate or ".620" in carbohydrate
+    assert abs(float(carbohydrate.split()[0]) - 0.620) < 1e-9  # T2: numeric equivalence
 
     seed_shell = next(line for line in lines if "SETMAX,SRMAX" in line)
     assert "120" in seed_shell
@@ -221,7 +221,15 @@ def test_xfint_historical_safety_threshold_is_advisory_not_a_runner_rejection(tm
         line for line in (tmp_path / "TMGRO048.ECO").read_text(encoding="utf-8").splitlines()
         if line.startswith("TM0001")
     )
-    assert eco_line.rstrip().endswith("0.08")
+    assert abs(float(eco_line.split()[-1]) - 0.08) < 1e-9  # T2: numeric equivalence
+
+
+def _is_float(v):
+    try:
+        float(v)
+        return True
+    except ValueError:
+        return False
 
 
 def test_soil_and_initial_condition_injection_are_explicit(tmp_path, monkeypatch):
@@ -240,10 +248,19 @@ def test_soil_and_initial_condition_injection_are_explicit(tmp_path, monkeypatch
         SOIL_SDUL_01=0.210,
         SOIL_SSAT_01=0.300,
     )
-    run_dssat.update_soil_file(str(soil_params), soil_id="IBTM910017")
+    run_dssat.update_soil_file(str(soil_params), soil_id="XXSL2501")
     soil_lines = (tmp_path / "SOIL.SOL").read_text(encoding="utf-8").splitlines()
-    profile_index = next(i for i, line in enumerate(soil_lines) if line.startswith("*IBTM910017"))
-    assert any("0.130 0.210 0.300" in line for line in soil_lines[profile_index : profile_index + 10])
+    profile_index = next(i for i, line in enumerate(soil_lines) if line.startswith("*XXSL2501"))
+    assert any(  # T2: numeric equivalence (injected fields use leading-zero-free fixed width)
+        any(
+            abs(float(vals[k]) - 0.130) < 1e-9
+            and abs(float(vals[k + 1]) - 0.210) < 1e-9
+            and abs(float(vals[k + 2]) - 0.300) < 1e-9
+            for k in range(len(vals) - 2)
+        )
+        for line in soil_lines[profile_index : profile_index + 10]
+        if (vals := [v for v in line.split() if _is_float(v)])
+    )
 
     ic_params = _parameter_csv(tmp_path / "ic.csv", IC_SH2O_01=0.200)
     run_dssat.update_initial_conditions_file(str(ic_params), filex_path=str(experiment))
@@ -270,13 +287,13 @@ def test_run_directory_preparation_is_local_and_complete(tmp_path):
 
 
 def test_run_directory_uses_explicit_user_bundle_without_raw_fallback(tmp_path):
-    bundle = ROOT / "data" / "user" / "experiments" / "xxql2501_symbi_n_candidate_20260719"
+    bundle = ROOT / "data" / "user" / "experiments" / "xxql2501_unified_20260914"  # T2: gitignored historical bundle -> unified bundle
     batch = prepare_run_directory(
         tmp_path,
         ["--input-dir", str(bundle), "--batch", "DSSBatch.v48"],
     )
     assert batch == tmp_path / "DSSBatch.v48"
-    for name in ("XXQL2501.TMX", "XXQL2501.TMA", "XXQL2501.TMT", "XXN92501.WTH"):
+    for name in ("XXQL2501.TMX", "XXQL2501.TMA", "XXQL2501.TMT", "XXLI2502.WTH"):
         assert (tmp_path / name).read_bytes() == (bundle / name).read_bytes()
     assert (tmp_path / "SOIL.SOL.base").read_bytes() == (bundle / "SOIL.SOL").read_bytes()
 

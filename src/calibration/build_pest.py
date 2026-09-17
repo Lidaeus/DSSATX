@@ -45,7 +45,7 @@ from src.common.input_manifest import (
     InputManifestError,
     verify_calibrated_input_bundle,
 )
-from src.common.param_registry import DEFAULT_BOUNDS, assert_valid_frozen_bounds
+from src.common.param_registry import DEFAULT_BOUNDS, PHYSICAL_BOUNDS, assert_valid_frozen_bounds
 from src.common.project import PROJECT_ROOT, WORKSPACE_DIR, git_metadata, resolve_path, sha256_file
 from src.common.quality import read_flat_run_manifest_field, serialize_manifest_scalar
 
@@ -58,6 +58,204 @@ SPE_FILE = os.environ.get(
     "DSSAT_SPE_BASE",
     str(PROJECT_ROOT / "data" / "templates" / "genotype" / "TMGRO048.SPE.base"),
 )
+
+STAGE_ACTIVE_PARAMS = {
+    "S1": {
+        "EM-FL", "EM-V1", "FL-SH", "FL-SD", "TB1", "TB2",
+        "TO11", "TO12", "TM1", "TM2", "LNGSH", "SFDUR",
+    },
+    "S2": {
+        "PGEFF", "SLAVR", "SLAREF", "LFMAX", "SIZREF", "TRIFL",
+        "LNREF", "RHGHT", "FRLFF", "FRSTMF", "SENRTE",
+    },
+    "S3": {
+        "RWDTH", "RWUMX", "YSWBAR_MID", "DSWBAR", "SWBAR_REC",
+        "SOIL_SDUL_01", "SOIL_SLLL_01",
+    },
+    "S4": {
+        "PROLFI", "PROSTI", "PROLFF", "PROLFG", "PRORTI",
+        "NMOBMX", "CMOBMX", "NSTFAC", "NSLOPE", "NVSMOB",
+        "RTNO3", "RTNH4", "FNPGN1", "FNPGN2",
+        "OPTSDP_FS", "OPTLFP_FS", "OPTSTP_FS",
+    },
+    "S5": {
+        "XFRT", "PM06", "PORPT", "VSSINK", "PODUR",
+        "THRSH", "XMAGE", "FINREF",
+        "PGEFF", "PROLFI",
+    },
+}
+
+
+def _load_parent_par_csv(path: str | Path | list[str | Path]) -> dict[str, float]:
+    paths = []
+    if isinstance(path, list):
+        for item in path:
+            paths.extend(str(item).split(","))
+    elif isinstance(path, (str, Path)):
+        paths = str(path).split(",")
+
+    medians: dict[str, float] = {}
+    active_in_any = set()
+    for single_path in paths:
+        single_path = single_path.strip()
+        if not single_path:
+            continue
+        p = Path(single_path).expanduser().resolve()
+        if not p.is_file():
+            raise FileNotFoundError(f"--parent-par-csv not found: {p}")
+        df = pd.read_csv(p)
+        for col in df.columns:
+            u = str(col).strip().upper()
+            if u.lower() in {"real_name", "realization"}:
+                continue
+            vals = pd.to_numeric(df[col], errors="coerce").dropna()
+            if not vals.empty:
+                std_v = float(vals.std()) if len(vals) > 1 else 0.0
+                if std_v > 1e-6:
+                    medians[u] = float(vals.median())
+                    active_in_any.add(u)
+                elif u not in medians:
+                    medians[u] = float(vals.median())
+    return medians
+
+
+def _load_parent_ensemble_df(path: str | Path | list[str | Path]) -> pd.DataFrame:
+    paths = []
+    if isinstance(path, list):
+        for item in path:
+            paths.extend(str(item).split(","))
+    elif isinstance(path, (str, Path)):
+        paths = str(path).split(",")
+
+    merged_dict = {}
+    for single_path in paths:
+        single_path = single_path.strip()
+        if not single_path:
+            continue
+        p = Path(single_path).expanduser().resolve()
+        if not p.is_file():
+            continue
+        df = pd.read_csv(p)
+        for col in df.columns:
+            if str(col).strip().lower() in {"real_name", "realization"}:
+                continue
+            vals = pd.to_numeric(df[col], errors="coerce").dropna()
+            std_v = float(vals.std()) if len(vals) > 1 else 0.0
+            if col not in merged_dict or std_v > 1e-6:
+                merged_dict[col] = df[col]
+    return pd.DataFrame(merged_dict)
+
+
+def _detect_and_relax_boundary_touches(
+    parent_df: pd.DataFrame,
+    bounds_df: pd.DataFrame,
+    relax_fraction: float = 0.10,
+) -> tuple[pd.DataFrame, list[dict]]:
+    """Detect parameters severely touching boundaries in parent posterior and relax bounds in the touch direction.
+
+    Parameters
+    ----------
+    parent_df : pd.DataFrame
+        Parent stage posterior parameter ensemble.
+    bounds_df : pd.DataFrame
+        Target stage parameter bounds DataFrame with columns: name, lower, upper, status.
+    relax_fraction : float
+        Fraction of bound range (upper - lower) to expand by (default: 0.10).
+
+    Returns
+    -------
+    tuple[pd.DataFrame, list[dict]]
+        Updated bounds_df with relaxed bounds (strictly clamped to PHYSICAL_BOUNDS) and audit records.
+    """
+    from src.common.param_registry import PHYSICAL_BOUNDS
+
+    updated_bounds = bounds_df.copy()
+    parent_cols = {c.upper(): c for c in parent_df.columns if c.lower() not in {"real_name", "realization"}}
+    audit_records = []
+
+    for idx, row in updated_bounds.iterrows():
+        pname = str(row["name"]).strip().upper()
+        if pname not in parent_cols:
+            continue
+        col = parent_cols[pname]
+        vals = pd.to_numeric(parent_df[col], errors="coerce").dropna()
+        if len(vals) < 2 or float(vals.std()) <= 1e-6:
+            continue
+
+        l_orig = float(row["lower"])
+        u_orig = float(row["upper"])
+        if u_orig <= l_orig:
+            continue
+
+        rng = u_orig - l_orig
+        delta = rng * float(relax_fraction)
+
+        med = float(vals.median())
+        q05 = float(vals.quantile(0.05))
+        q95 = float(vals.quantile(0.95))
+        min_v = float(vals.min())
+        max_v = float(vals.max())
+
+        # Touching criteria:
+        # Lower touch: median within 5% of lower, or 5th percentile within 2%, or min at bound
+        lower_touch = (
+            ((med - l_orig) / rng <= 0.05) or
+            ((q05 - l_orig) / rng <= 0.02) or
+            (abs(min_v - l_orig) <= 1e-4 * rng)
+        )
+        # Upper touch: median within 5% of upper, or 95th percentile within 2%, or max at bound
+        upper_touch = (
+            ((u_orig - med) / rng <= 0.05) or
+            ((u_orig - q95) / rng <= 0.02) or
+            (abs(max_v - u_orig) <= 1e-4 * rng)
+        )
+
+        new_l = l_orig
+        new_u = u_orig
+        phys_min, phys_max = PHYSICAL_BOUNDS.get(pname, (None, None))
+
+        relaxed_dir = []
+        if lower_touch:
+            cand_l = l_orig - delta
+            if phys_min is not None:
+                cand_l = max(cand_l, phys_min)
+            if cand_l < l_orig:
+                new_l = cand_l
+                relaxed_dir.append("lower")
+
+        if upper_touch:
+            cand_u = u_orig + delta
+            if phys_max is not None:
+                cand_u = min(cand_u, phys_max)
+            if cand_u > u_orig:
+                new_u = cand_u
+                relaxed_dir.append("upper")
+
+        if relaxed_dir:
+            updated_bounds.at[idx, "lower"] = new_l
+            updated_bounds.at[idx, "upper"] = new_u
+            rec = {
+                "param": pname,
+                "direction": "+".join(relaxed_dir),
+                "orig_lower": l_orig,
+                "orig_upper": u_orig,
+                "new_lower": new_l,
+                "new_upper": new_u,
+                "median": med,
+                "q05": q05,
+                "q95": q95,
+                "phys_min": phys_min,
+                "phys_max": phys_max,
+            }
+            audit_records.append(rec)
+            print(
+                f"[INFO] Boundary touch detected for {pname} in parent posterior ({'+'.join(relaxed_dir)} touch). "
+                f"Relaxing {pname} bounds [{l_orig:.4f}, {u_orig:.4f}] -> [{new_l:.4f}, {new_u:.4f}] "
+                f"(PHYSICAL_BOUNDS: [{phys_min}, {phys_max}])"
+            )
+
+    return updated_bounds, audit_records
+
 SOIL_FILE = str(PROJECT_ROOT / "data" / "raw" / "soil" / "SOIL.SOL")
 SOIL_BASE_FILE = SOIL_FILE
 USER_INPUT_DIR = None
@@ -73,8 +271,10 @@ PEST_GROW_FILE = os.path.join(WORKSPACE, "PestGrow.OUT")
 PEST_JOINT_FILE = os.path.join(WORKSPACE, "PestJoint.OUT")
 PEST_HARVEST_FILE = os.path.join(WORKSPACE, "PestHarvest.OUT")
 PEST_N_RESPONSE_FILE = os.path.join(WORKSPACE, "PestNResponse.OUT")
+PEST_N_DOSE_GRADIENT_FILE = os.path.join(WORKSPACE, "PestNDoseGradient.OUT")
 PEST_W_RESPONSE_FILE = os.path.join(WORKSPACE, "PestWResponse.OUT")
 PEST_TMTGROW_FILE = os.path.join(WORKSPACE, "PestTmtGrow.OUT")
+PEST_WNCONTRAST_FILE = os.path.join(WORKSPACE, "PestWNContrast.OUT")
 
 
 def _project_root():
@@ -439,6 +639,7 @@ def _finalize_ies_contract(
     initial_ensemble_method: str = "random",
     reinflate_iterations: int = 0,
     reinflate_factor: float | None = None,
+    parent_par_csv: str | None = None,
 ):
     """Apply explicit IES filtering/noise policy after PST construction.
 
@@ -471,6 +672,8 @@ def _finalize_ies_contract(
         Dampening factor for reinflation (0 < factor <= 1.0). If None,
         reinflation uses full prior variance. Lower values dampen the
         reinflation to prevent over-dispersion.
+    parent_par_csv
+        Optional path to previous stage parameter ensemble CSV for covariance inheritance.
 
     Notes
     -----
@@ -501,18 +704,82 @@ def _finalize_ies_contract(
             "upper": par_df["parubnd"],
             "status": par_df["partrans"].apply(lambda x: "active" if x == "log" or x == "none" else "fixed"),
         })
-        # Only active parameters go into the ensemble.
-        ensemble_df = generate_lhs_ensemble(
-            n_reals=ies_num_reals,
-            bounds_df=bounds_df,
-            seed=int(random_seed),
-            method=initial_ensemble_method,
-            include_base=False,
-        )
-        ensemble_path = Path(out_dir) / f"{prefix}.0.par.csv"
-        write_ensemble_csv(ensemble_df, ensemble_path)
-        pst.pestpp_options["ies_parameter_ensemble"] = ensemble_path.name
-        print(f"Initial {initial_ensemble_method.upper()} ensemble written to {ensemble_path}")
+        active_bounds = bounds_df[bounds_df["status"] == "active"].copy()
+        parent_df = _load_parent_ensemble_df(parent_par_csv) if parent_par_csv else pd.DataFrame()
+        if not parent_df.empty:
+            # Detect boundary touch in parent posterior and relax bounds by 10% in the touch direction
+            active_bounds, relax_audit = _detect_and_relax_boundary_touches(
+                parent_df=parent_df,
+                bounds_df=active_bounds,
+                relax_fraction=0.10,
+            )
+            for rec in relax_audit:
+                pname = rec["param"].lower()
+                if pname in pst.parameter_data.index:
+                    pst.parameter_data.loc[pname, "parlbnd"] = rec["new_lower"]
+                    pst.parameter_data.loc[pname, "parubnd"] = rec["new_upper"]
+
+            parent_cols = {c.upper(): c for c in parent_df.columns if c.lower() not in {"real_name", "realization"}}
+            ensemble_data = {"real_name": [str(i) for i in range(ies_num_reals)]}
+
+            inherited_params = []
+            new_params = []
+            for name in active_bounds["name"]:
+                u = name.upper()
+                if u in parent_cols:
+                    orig_col = parent_cols[u]
+                    val_series = pd.to_numeric(parent_df[orig_col], errors="coerce").dropna()
+                    if len(val_series) > 1 and float(val_series.std()) > 1e-6:
+                        inherited_params.append(name)
+                    else:
+                        new_params.append(name)
+                else:
+                    new_params.append(name)
+
+            if inherited_params:
+                rng = np.random.default_rng(int(random_seed))
+                parent_n = len(parent_df)
+                if parent_n >= ies_num_reals:
+                    indices = np.arange(ies_num_reals)
+                else:
+                    indices = rng.choice(parent_n, size=ies_num_reals, replace=True)
+                for name in inherited_params:
+                    orig_col = parent_cols[name.upper()]
+                    vals = pd.to_numeric(parent_df[orig_col].iloc[indices], errors="coerce").to_numpy()
+                    lb = float(active_bounds.loc[active_bounds["name"] == name, "lower"].iloc[0])
+                    ub = float(active_bounds.loc[active_bounds["name"] == name, "upper"].iloc[0])
+                    ensemble_data[name] = np.clip(vals, lb, ub)
+
+            if new_params:
+                new_bounds = active_bounds[active_bounds["name"].isin(new_params)]
+                new_lhs_df = generate_lhs_ensemble(
+                    n_reals=ies_num_reals,
+                    bounds_df=new_bounds,
+                    seed=int(random_seed),
+                    method=initial_ensemble_method,
+                    include_base=False,
+                )
+                for name in new_params:
+                    ensemble_data[name] = new_lhs_df[name].to_numpy()
+
+            ensemble_df = pd.DataFrame(ensemble_data)
+            ensemble_path = Path(out_dir) / f"{prefix}.0.par.csv"
+            write_ensemble_csv(ensemble_df, ensemble_path)
+            pst.pestpp_options["ies_parameter_ensemble"] = ensemble_path.name
+            print(f"Inherited/{initial_ensemble_method.upper()} initial ensemble ({len(inherited_params)} inherited, {len(new_params)} new) written to {ensemble_path}")
+        else:
+            # Only active parameters go into the ensemble.
+            ensemble_df = generate_lhs_ensemble(
+                n_reals=ies_num_reals,
+                bounds_df=bounds_df,
+                seed=int(random_seed),
+                method=initial_ensemble_method,
+                include_base=False,
+            )
+            ensemble_path = Path(out_dir) / f"{prefix}.0.par.csv"
+            write_ensemble_csv(ensemble_df, ensemble_path)
+            pst.pestpp_options["ies_parameter_ensemble"] = ensemble_path.name
+            print(f"Initial {initial_ensemble_method.upper()} ensemble written to {ensemble_path}")
 
     # Configure covariance reinflation to prevent ensemble collapse.
     if reinflate_iterations > 0:
@@ -542,6 +809,8 @@ def _finalize_ies_contract(
         pst.pestpp_options["ies_no_noise"] = False
     pst.pestpp_options["ies_drop_conflicts"] = False
     pst.pestpp_options["ies_pdc_sigma_distance"] = 0.0
+    if ies_num_reals >= 100 and "ies_subset_size" not in pst.pestpp_options:
+        pst.pestpp_options["ies_subset_size"] = 30
     # pyemu 1.4.0 materializes ``ies_autohold`` while serializing some IES
     # options, but the bundled PEST++ 5.2.16 binary does not recognize it and
     # aborts before starting the manager.  It is only a pyemu-side default,
@@ -1560,6 +1829,60 @@ def parse_extra_params(init_map, bounds_map, allowed_params=None, pargp="ecotype
     return params
 
 
+def _parse_filex_seedling_params(bounds_path, *, names=None):
+    """Read season-scoped FileX terms from a frozen bounds CSV.
+
+    PAGE/PENV live in FileX Planting Details rather than CUL/ECO/SPE.  They
+    therefore cannot be discovered by the legacy template parsers.  The same
+    is true for the season-wide initial mineral-N scaling terms ICNS_25SP and
+    ICNS_26SP.  Formal designs may declare these controls as IC-location rows
+    in the frozen registry; the runner maps the season suffix to FileX.
+    """
+    if not bounds_path or not os.path.isfile(bounds_path):
+        return []
+    wanted = {str(x).strip().upper() for x in (names or {
+        "PAGE_25SP", "PENV_25SP", "PAGE_26SP", "PENV_26SP",
+        "ICNS_25SP", "ICNS_26SP",
+    })}
+    params = []
+    with open(bounds_path, "r", encoding="utf-8-sig", newline="") as handle:
+        for row in csv.DictReader(handle):
+            name = str(row.get("name", "")).strip().upper()
+            if name not in wanted:
+                continue
+            location = str(row.get("location", "")).strip().upper()
+            if location not in {"IC", "INIT"}:
+                raise ValueError(f"{name}: season-scoped FileX term must use location=IC/INIT")
+            try:
+                init = float(row["init"])
+                lower = float(row["lower"])
+                upper = float(row["upper"])
+            except (KeyError, TypeError, ValueError) as exc:
+                raise ValueError(f"{name}: non-numeric frozen FileX bounds") from exc
+            status = str(row.get("status", "active")).strip().lower()
+            if status not in {"active", "fixed", "disabled"}:
+                raise ValueError(f"{name}: invalid frozen status {status!r}")
+            if status == "disabled":
+                continue
+            valid = all(math.isfinite(v) for v in (lower, init, upper))
+            valid = valid and (lower == init == upper if status == "fixed"
+                               else lower < upper and lower <= init <= upper)
+            if not valid:
+                raise ValueError(f"{name}: invalid FileX bounds [{lower:g}, {upper:g}] init={init:g} status={status}")
+            params.append({
+                "name": name,
+                "init": init,
+                "lower": lower,
+                "upper": upper,
+                "idx": None,
+                "status": "none" if status == "active" else "fixed",
+                "pargp": "initial_conditions",
+                "filex_seedling": name.startswith(("PAGE_", "PENV_")),
+                "filex_initial_n_scale": name.startswith("ICNS_"),
+            })
+    return params
+
+
 def _read_tmt_harvest_events(tmt_path):
     if not tmt_path or not os.path.exists(tmt_path):
         return {}
@@ -2085,9 +2408,13 @@ def _resolve_filex_path(filex, input_dir=None):
     if os.path.isabs(p):
         return None
     dir_ = input_dir or USER_INPUT_DIR
+    stem = Path(p).stem
     candidates = [
         Path(dir_) / p if dir_ else Path("__no_user_input__"),
+        PROJECT_ROOT / "data" / "user" / "experiments" / f"{stem.lower()}_v20260917_refresh" / p,
         PROJECT_ROOT / "data" / "raw" / "experiments" / p,
+        PROJECT_ROOT / "data" / "user" / "experiments" / stem / p,
+        PROJECT_ROOT / "data" / "user" / "experiments" / f"{stem.lower()}_unified_20260914" / p,
         Path(WORKSPACE) / p,
     ]
     for candidate in candidates:
@@ -2608,9 +2935,12 @@ def _is_tagged_output(model_out_path):
         os.path.normcase(os.path.abspath(PEST_JOINT_FILE)),
         os.path.normcase(os.path.abspath(PEST_HARVEST_FILE)),
         os.path.normcase(os.path.abspath(PEST_N_RESPONSE_FILE)),
+        os.path.normcase(os.path.abspath(PEST_N_DOSE_GRADIENT_FILE)),
         os.path.normcase(os.path.abspath(PEST_W_RESPONSE_FILE)),
         os.path.normcase(os.path.abspath(PEST_TMTGROW_FILE)),
+        os.path.normcase(os.path.abspath(PEST_WNCONTRAST_FILE)),
         os.path.normcase(os.path.abspath("PestSoilWat.OUT")),
+        os.path.normcase(os.path.abspath("PestWNContrast.OUT")),
     }
 
 
@@ -2835,19 +3165,20 @@ def create_ins_and_pst_multi(
     unique_params = {}
     for parameter in params:
         name = str(parameter.get("name", "")).strip()
-        previous = unique_params.get(name)
+        name_key = name.upper()
+        previous = unique_params.get(name_key)
         if previous is not None:
             # Frozen bounds already carry the soil parameter definitions while
             # ``--include-soil`` also derives them from SOIL.SOL.  The two
             # records can differ only in their inferred bounds; keep the
             # first (frozen-bounds) record and avoid a false duplicate error.
-            if name.upper().startswith(("SOIL_", "IC_SH2O_")):
+            if name_key.startswith(("SOIL_", "IC_SH2O_")):
                 continue
             for key in ("init", "lower", "upper", "status"):
                 if str(previous.get(key)) != str(parameter.get(key)):
                     raise ValueError(f"Conflicting duplicate parameter definition: {name} ({key})")
             continue
-        unique_params[name] = parameter
+        unique_params[name_key] = parameter
     params = list(unique_params.values())
     eval_df = None
     if any(out.get("df") is None for out in outputs):
@@ -3140,7 +3471,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--initial-ensemble-method",
         choices=["random", "lhs", "sobol"],
-        default="random",
+        default="sobol",
         help="Method for generating initial parameter ensemble: random (PEST++ default), lhs (Latin Hypercube), or sobol (Sobol sequence)",
     )
     parser.add_argument(
@@ -3168,6 +3499,12 @@ if __name__ == "__main__":
         help="Versioned user bundle containing FileX/FileA/FileT/SOIL/weather/batch inputs",
     )
     parser.add_argument("--init-from", action="append", default=None)
+    parser.add_argument(
+        "--parent-par-csv",
+        type=str,
+        default=None,
+        help="Path to previous stage parameter ensemble CSV (e.g. s1_pheno.4.par.csv) for covariance inheritance and initial values",
+    )
     parser.add_argument("--fixed-from", action="append", default=None)
     parser.add_argument("--tighten-from", action="append", default=None)
     parser.add_argument("--tighten-frac", type=float, default=0.05)
@@ -3347,7 +3684,7 @@ if __name__ == "__main__":
     bad_phi_sigma = (
         float(args.bad_phi_sigma)
         if args.bad_phi_sigma is not None
-        else (1.0e300 if design_spec is not None else 2.0)
+        else (1.0e300 if (design_spec is not None or (args.mode or "").strip().lower().startswith("eggplant_staged_")) else 2.0)
     )
     if not math.isfinite(bad_phi_sigma) or bad_phi_sigma <= 0:
         parser.error("--bad-phi-sigma must be positive and finite; use 1e300 to disable relative screening")
@@ -3538,8 +3875,8 @@ if __name__ == "__main__":
             "HIAMM": float(args.hiamm_sigma),
         }
         extra_allowed = {"XMAGE", "TRIFL", "RWDTH", "RHGHT"}
-    elif mode == "eggplant_stage2":
-        prefix = args.prefix or "eggplant_stage2"
+    elif mode == "eggplant_stage2" or mode.startswith("eggplant_staged_"):
+        prefix = args.prefix or mode
         allowed = {
             "CSDL",
             "PPSEN",
@@ -3595,33 +3932,26 @@ if __name__ == "__main__":
         if not bool(args.include_n_uptake):
             extra_allowed = {p for p in extra_allowed if p not in {"RTNO3", "RTNH4", "RTEXF"}}
 
+        # High-dim support: when a frozen bounds-id is supplied, expand the
+        # CUL ``allowed`` and ECO/SPE ``extra_allowed`` whitelists to include
+        # every active parameter declared in the frozen bounds.
+        if args.bounds_id:
+            _hd_crop = args.bounds_crop or ("eggplant" if "eggplant" in mode else "tomato")
+            _hd_path = _resolve_bounds_id(args.bounds_id, crop=_hd_crop)
+            if _hd_path:
+                with open(_hd_path, encoding="utf-8-sig", newline="") as _hd_f:
+                    _hd_declared = {
+                        str(r["name"]).strip().upper()
+                        for r in csv.DictReader(_hd_f)
+                        if str(r.get("name", "")).strip()
+                    }
+                allowed = set(allowed) | _hd_declared
+                extra_allowed = set(extra_allowed) | _hd_declared
+
         if args.multiseason_design:
             multiseason_mode = True
             stage2_outputs = []  # placeholder — real build happens after params ready
             entries = []
-            # High-dim support: when a frozen bounds-id is supplied, expand the
-            # CUL ``allowed`` and ECO/SPE ``extra_allowed`` whitelists to include
-            # every active parameter declared in the frozen bounds. Without this,
-            # newly-activated parameters (e.g. T9's 55-active set vs the legacy
-            # ~47 whitelist) are invisible to parse_cul_params/parse_extra_params
-            # and silently dropped, yielding a smaller PST than the frozen design.
-            if args.bounds_id:
-                _hd_crop = args.bounds_crop or ("eggplant" if "eggplant" in mode else "tomato")
-                _hd_path = _resolve_bounds_id(args.bounds_id, crop=_hd_crop)
-                if _hd_path:
-                    import csv as _csv_hd
-                    with open(_hd_path, encoding="utf-8-sig", newline="") as _hd_f:
-                        _hd_declared = {
-                            str(r["name"]).strip().upper()
-                            for r in _csv_hd.DictReader(_hd_f)
-                            if str(r.get("name", "")).strip()
-                        }
-                    # Frozen bounds are an executable contract: fixed entries
-                    # must also be injected, not merely active entries exposed
-                    # to PEST.  Otherwise a frozen value can silently remain at
-                    # an unrelated template default.
-                    allowed = set(allowed) | _hd_declared
-                    extra_allowed = set(extra_allowed) | _hd_declared
 
         entries = _parse_batch_entries(args.batch)
 
@@ -3716,48 +4046,191 @@ if __name__ == "__main__":
                 },
             )
 
-        stage2_outputs = [
-            {
-                "model_out_path": PEST_EVAL_FILE,
-                "obs_bases": {"PDAP", "ADAP", "MDAP"},
-                "critical_obs": {"ADAPM"},
-                "group_sigmas": {
-                    "PDAPM": 1.0,
-                    "ADAPM": float(adapm_sigma) if adapm_sigma is not None else 25.0,
-                    "MDAPM": float(adapm_sigma) if adapm_sigma is not None else 25.0,
+        def _build_wn_contrast_observations(batch_entries):
+            """Build contrast and monotonic penalty observation DataFrame for calibration batch."""
+            if not batch_entries:
+                return None
+            trt_to_run = {}
+            for e in batch_entries:
+                fx = Path(e.get("filex", "")).stem.upper()
+                tn = int(e.get("tn", -99))
+                trt_to_run[(fx, tn)] = int(e["run"])
+
+            contrast_specs = [
+                (1, "XXQL2501", 2, 5, 4044.0),
+                (2, "XXQL2501", 10, 13, 8842.0),
+                (3, "XXQL2601", 2, 11, 17941.0),
+                (4, "XXQL2601", 3, 12, 12077.0),
+            ]
+
+            rows = []
+            for hno, fx, n3_tn, n0_tn, obs_contrast in contrast_specs:
+                run_n3 = trt_to_run.get((fx, n3_tn))
+                run_n0 = trt_to_run.get((fx, n0_tn))
+                if run_n3 is None or run_n0 is None:
+                    return None  # All 4 pairs must exist in the batch
+                rows.append({
+                    "@RUN": run_n3,
+                    "TN": n3_tn,
+                    "HNO": hno,
+                    "DATE": 0,
+                    "PEN_CTRM": float(obs_contrast),
+                    "PEN_CTRS": -99.0,
+                    "PEN_MONOM": 0.0,
+                    "PEN_MONOS": -99.0,
+                })
+            return pd.DataFrame(rows)
+
+        if mode == "eggplant_staged_s1":
+            stage2_outputs = [
+                {
+                    "model_out_path": PEST_EVAL_FILE,
+                    "obs_bases": {"ADAP"},
+                    "critical_obs": {"ADAPM"},
+                    "group_sigmas": {
+                        "ADAPM": float(adapm_sigma) if adapm_sigma is not None else 2.0,
+                    },
+                    "df": stage_evaluate_df,
                 },
-                "df": stage_evaluate_df,
-            },
-            {
-                "model_out_path": PEST_JOINT_FILE,
-                "obs_bases": {"LAIX", "CNAM", "CHTA", "CNAA", "PWAM", "H#AM", "HIAM"},
-                "critical_obs": set(),
-                "group_sigmas": {
-                    "PWAMM": float(args.pwamm_sigma),
-                    "LAIXM": float(args.laixm_sigma),
-                    "CNAMM": float(args.cnamm_sigma),
-                    "CHTAM": 15.0,
-                    "CNAAM": 20.0,
-                    "H#AMM": 50.0,
-                    "HIAMM": float(args.hiamm_sigma),
+            ]
+        elif mode == "eggplant_staged_s2":
+            stage2_outputs = [
+                {
+                    "model_out_path": PEST_JOINT_FILE,
+                    "obs_bases": {"LAIX", "CNAM", "PWAM"},
+                    "critical_obs": set(),
+                    "group_sigmas": {
+                        "PWAMM": float(args.pwamm_sigma),
+                        "LAIXM": float(args.laixm_sigma),
+                        "CNAMM": float(args.cnamm_sigma),
+                    },
+                    "df": stage_evaluate_df,
                 },
-                "df": stage_evaluate_df,
-            },
-            {
-                "model_out_path": PEST_HARVEST_FILE,
-                "obs_bases": {"PWAD", "PWAI"},
-                "critical_obs": set(),
-                "group_sigmas": harvest_sigmas,
-                "df": df_harvest,
-            },
-            {
-                "model_out_path": PEST_TMTGROW_FILE,
-                "obs_bases": {"LAID", "LWAD", "SWAD", "CHTD"},
-                "critical_obs": set(),
-                "group_sigmas": process_sigmas,
-                "df": df_process,
-            },
-        ]
+                {
+                    "model_out_path": PEST_TMTGROW_FILE,
+                    "obs_bases": {"LAID", "LWAD", "SWAD", "CHTD"},
+                    "critical_obs": set(),
+                    "group_sigmas": process_sigmas,
+                    "df": df_process,
+                },
+            ]
+        elif mode == "eggplant_staged_s3":
+            stage2_outputs = [
+                {
+                    "model_out_path": PEST_JOINT_FILE,
+                    "obs_bases": {"LAIX", "PWAM"},
+                    "critical_obs": set(),
+                    "group_sigmas": {
+                        "PWAMM": float(args.pwamm_sigma),
+                        "LAIXM": float(args.laixm_sigma),
+                    },
+                    "df": stage_evaluate_df,
+                },
+                {
+                    "model_out_path": PEST_TMTGROW_FILE,
+                    "obs_bases": {"SWAD", "LWAD"},
+                    "critical_obs": set(),
+                    "group_sigmas": process_sigmas,
+                    "df": df_process,
+                },
+            ]
+        elif mode == "eggplant_staged_s4":
+            stage2_outputs = [
+                {
+                    "model_out_path": PEST_JOINT_FILE,
+                    "obs_bases": {"CNAM", "CNAA"},
+                    "critical_obs": set(),
+                    "group_sigmas": {
+                        "CNAMM": float(args.cnamm_sigma),
+                        "CNAAM": 20.0,
+                    },
+                    "df": stage_evaluate_df,
+                },
+                {
+                    "model_out_path": PEST_TMTGROW_FILE,
+                    "obs_bases": {"LAID", "LWAD", "SWAD"},
+                    "critical_obs": set(),
+                    "group_sigmas": process_sigmas,
+                    "df": df_process,
+                },
+            ]
+        elif mode == "eggplant_staged_s5":
+            stage2_outputs = [
+                {
+                    "model_out_path": PEST_HARVEST_FILE,
+                    "obs_bases": {"PWAD", "PWAI"},
+                    "critical_obs": set(),
+                    "group_sigmas": harvest_sigmas,
+                    "df": df_harvest,
+                },
+                {
+                    "model_out_path": PEST_JOINT_FILE,
+                    "obs_bases": {"PWAM", "HIAM"},
+                    "critical_obs": set(),
+                    "group_sigmas": {
+                        "PWAMM": float(args.pwamm_sigma),
+                        "HIAMM": float(args.hiamm_sigma),
+                    },
+                    "df": stage_evaluate_df,
+                },
+            ]
+        else:
+            stage2_outputs = [
+                {
+                    "model_out_path": PEST_EVAL_FILE,
+                    "obs_bases": {"PDAP", "ADAP", "MDAP"},
+                    "critical_obs": {"ADAPM"},
+                    "group_sigmas": {
+                        "PDAPM": 1.0,
+                        "ADAPM": float(adapm_sigma) if adapm_sigma is not None else 25.0,
+                        "MDAPM": float(adapm_sigma) if adapm_sigma is not None else 25.0,
+                    },
+                    "df": stage_evaluate_df,
+                },
+                {
+                    "model_out_path": PEST_JOINT_FILE,
+                    "obs_bases": {"LAIX", "CNAM", "CHTA", "CNAA", "PWAM", "H#AM", "HIAM"},
+                    "critical_obs": set(),
+                    "group_sigmas": {
+                        "PWAMM": float(args.pwamm_sigma),
+                        "LAIXM": float(args.laixm_sigma),
+                        "CNAMM": float(args.cnamm_sigma),
+                        "CHTAM": 15.0,
+                        "CNAAM": 20.0,
+                        "H#AMM": 50.0,
+                        "HIAMM": float(args.hiamm_sigma),
+                    },
+                    "df": stage_evaluate_df,
+                },
+                {
+                    "model_out_path": PEST_HARVEST_FILE,
+                    "obs_bases": {"PWAD", "PWAI"},
+                    "critical_obs": set(),
+                    "group_sigmas": harvest_sigmas,
+                    "df": df_harvest,
+                },
+                {
+                    "model_out_path": PEST_TMTGROW_FILE,
+                    "obs_bases": {"LAID", "LWAD", "SWAD", "CHTD"},
+                    "critical_obs": set(),
+                    "group_sigmas": process_sigmas,
+                    "df": df_process,
+                },
+            ]
+            df_contrast = _build_wn_contrast_observations(entries)
+            if df_contrast is not None:
+                stage2_outputs.append(
+                    {
+                        "model_out_path": PEST_WNCONTRAST_FILE,
+                        "obs_bases": {"PEN_CTR", "PEN_MONO"},
+                        "critical_obs": set(),
+                        "group_sigmas": {
+                            "PEN_CTRM": 1500.0,
+                            "PEN_MONOM": 50.0,
+                        },
+                        "df": df_contrast,
+                    }
+                )
     elif mode == "eggplant_spe_temp":
         prefix = args.prefix or "eggplant_spe_temp"
         allowed = set()
@@ -3790,7 +4263,13 @@ if __name__ == "__main__":
         group_sigmas = None
         extra_allowed = None
 
-    params = parse_cul_params(cultivar, allowed_params=allowed, allow_all_flagged=multiseason_mode and bool(args.bounds_id))
+    params = parse_cul_params(cultivar, allowed_params=allowed, allow_all_flagged=bool(args.bounds_id))
+
+    # Season-scoped FileX controls (PAGE/PENV and initial mineral-N scales)
+    # are not present in the CUL/ECO/SPE template maps.  Materialize frozen
+    # declarations explicitly so the PST cannot silently omit them.
+    if multiseason_mode and _prevalidated_bounds:
+        params.extend(_parse_filex_seedling_params(_prevalidated_bounds))
 
     if extra_allowed is not None:
         eco_init = _read_eco_init_values(ecotype)
@@ -3868,6 +4347,17 @@ if __name__ == "__main__":
             if k and k in override:
                 p["init"] = float(override[k])
 
+    if args.parent_par_csv:
+        parent_medians = _load_parent_par_csv(args.parent_par_csv)
+        for p in params:
+            k = str(p.get("name", "")).strip().upper()
+            if k and k in parent_medians:
+                p["init"] = float(parent_medians[k])
+                if k in PHYSICAL_BOUNDS:
+                    p_min, p_max = PHYSICAL_BOUNDS[k]
+                    p["init"] = max(p_min, min(p_max, p["init"]))
+        print(f"Applied parent parameter values from {args.parent_par_csv} to matching parameters")
+
     # ── bounds-id resolution (Phase 1) ──
     if args.bounds_id:
         bounds_crop = args.bounds_crop
@@ -3915,11 +4405,107 @@ if __name__ == "__main__":
                 missing_preview = ", ".join([str(x) for x in (brm_report.get("missing_names") or [])[:12]])
                 print(f"Bounds CSV missing {brm_report['missing']} parameters (first: {missing_preview})")
 
+            # Also ensure all parameters declared in the frozen bounds CSV are present in params
+            try:
+                brm_df = pd.read_csv(brm_csv)
+                existing_names = {str(p.get("name", "")).strip().upper() for p in params}
+                for _, r in brm_df.iterrows():
+                    nm = str(r["name"]).strip().upper()
+                    if nm not in existing_names:
+                        stat = str(r.get("status", "fixed")).strip().lower()
+                        init_v = float(r["init"])
+                        if args.parent_par_csv and 'parent_medians' in locals() and nm in parent_medians:
+                            init_v = parent_medians[nm]
+                            if nm in PHYSICAL_BOUNDS:
+                                p_min, p_max = PHYSICAL_BOUNDS[nm]
+                                init_v = max(p_min, min(p_max, init_v))
+                        params.append({
+                            "name": nm,
+                            "init": init_v,
+                            "lower": float(r["lower"]),
+                            "upper": float(r["upper"]),
+                            "status": "none" if stat == "active" else "fixed",
+                            "pargp": str(r.get("pargp", "cultivar")),
+                        })
+                        existing_names.add(nm)
+            except Exception as _exc:
+                print(f"Warning: could not supplement missing frozen bounds: {_exc}")
+
+    if mode.startswith("eggplant_staged_"):
+        stage_key = mode.split("_")[-1].upper()
+        if stage_key in STAGE_ACTIVE_PARAMS:
+            active_set = STAGE_ACTIVE_PARAMS[stage_key]
+            stage_bounds_lookup = {}
+            if args.bounds_id:
+                _b_path = _prevalidated_bounds or _resolve_bounds_id(args.bounds_id, crop=bounds_crop)
+                if _b_path:
+                    try:
+                        stage_bounds_lookup = load_frozen_bounds_lookup(_b_path)
+                    except Exception:
+                        pass
+
+            parent_medians = {}
+            if args.parent_par_csv:
+                parent_medians = _load_parent_par_csv(args.parent_par_csv)
+
+            for p in params:
+                u = str(p.get("name", "")).strip().upper()
+                if u in parent_medians:
+                    p["init"] = float(parent_medians[u])
+                    if u in PHYSICAL_BOUNDS:
+                        p_min, p_max = PHYSICAL_BOUNDS[u]
+                        p["init"] = max(p_min, min(p_max, p["init"]))
+
+                if u in active_set:
+                    p["status"] = "none"
+                    if u in stage_bounds_lookup:
+                        p["lower"], p["upper"] = stage_bounds_lookup[u]
+                    if stage_key == "S5" and u in {"PGEFF", "PROLFI"}:
+                        cur_init = float(p["init"])
+                        lo = cur_init * 0.95
+                        hi = cur_init * 1.05
+                        if u in PHYSICAL_BOUNDS:
+                            p_min, p_max = PHYSICAL_BOUNDS[u]
+                            lo = max(lo, p_min)
+                            hi = min(hi, p_max)
+                        p["lower"] = min(lo, hi)
+                        p["upper"] = max(lo, hi)
+                    # Clamp init within [lower, upper]
+                    p["init"] = max(float(p["lower"]), min(float(p["upper"]), float(p["init"])))
+                else:
+                    p["status"] = "fixed"
+                    p["lower"] = p["init"]
+                    p["upper"] = p["init"]
+
+                if u == "FL-VS":
+                    p["init"] = 100.0
+                    p["lower"] = 100.0
+                    p["upper"] = 100.0
+                    p["status"] = "fixed"
+
+            if args.parent_par_csv:
+                _parent_df = _load_parent_ensemble_df(args.parent_par_csv)
+                _active_params_df = pd.DataFrame([p for p in params if p.get("status") == "none"])
+                if not _active_params_df.empty and not _parent_df.empty:
+                    _, _relax_records = _detect_and_relax_boundary_touches(
+                        parent_df=_parent_df,
+                        bounds_df=_active_params_df,
+                        relax_fraction=0.10,
+                    )
+                    _relax_lookup = {r["param"]: r for r in _relax_records}
+                    for p in params:
+                        u = str(p.get("name", "")).strip().upper()
+                        if u in _relax_lookup:
+                            p["lower"] = _relax_lookup[u]["new_lower"]
+                            p["upper"] = _relax_lookup[u]["new_upper"]
+
     param_review_csv = args.param_review_csv
     if not param_review_csv:
         param_review_csv = os.path.join(out_dir, f"{prefix}_param_review.csv")
 
     prm_mode = (args.param_review_mode or "auto").strip().lower()
+    if args.bounds_id and prm_mode == "auto":
+        prm_mode = "off"
     if prm_mode != "off":
         exists = os.path.exists(param_review_csv)
         if prm_mode in {"auto", "export"} and not exists:
@@ -4044,9 +4630,10 @@ if __name__ == "__main__":
         random_seed=args.random_seed,
         bad_phi_sigma=bad_phi_sigma,
         observation_noise=bool(design_spec is not None and observation_policies),
-        initial_ensemble_method=args.initial_ensemble_method,
+        initial_ensemble_method="sobol" if (mode.startswith("eggplant_staged_") and args.initial_ensemble_method == "random") else args.initial_ensemble_method,
         reinflate_iterations=args.reinflate_iterations,
         reinflate_factor=args.reinflate_factor,
+        parent_par_csv=args.parent_par_csv,
     )
 
     design_audit_path = ""
