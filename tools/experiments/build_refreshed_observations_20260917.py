@@ -43,8 +43,8 @@ MISSING = -99.0
 DENSITY = 27000.0  # plants/ha
 FACTOR = DENSITY / 1000.0  # g/plant -> kg/ha (27.0)
 
-SPRING25_INCLUDED_TN = [2, 3, 4, 5, 9, 10, 11, 12, 13, 14]
-SPRING25_EXCLUDED_TN = [1, 6, 7, 8]
+SPRING25_INCLUDED_TN = [2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14]
+SPRING25_EXCLUDED_TN = [1, 7, 8]
 SPRING25_EXCLUSION_REASON = "缺少实际 FileX 管理/初始条件定义"
 
 # Approved replicate removals (docs/重复剔除方案_20260818.md)
@@ -589,7 +589,7 @@ def load_2025_spring(root: Path) -> SeasonResult:
 
     return SeasonResult(
         season_id="25SP", excode="XXQL2501", output_base="2025SPR",
-        title="2025 SPRING EGGPLANT; TRNO = DSSAT treatment number (TN 1,6,7,8 excluded)",
+        title="2025 SPRING EGGPLANT; TRNO = DSSAT treatment number (TN 1,7,8 excluded)",
         source_notes=[
             "Fresh yield uses direct arithmetic mean of row replicates (unweighted).",
             "Fruit DM fraction = 1 - measured fruit moisture fraction (2025春品质集优先采用品质集中的果实含水率.xlsx).",
@@ -597,7 +597,7 @@ def load_2025_spring(root: Path) -> SeasonResult:
             "SD: hybrid method (replicate SD with min CV=5%, fallback CV=10%).",
             "Cumulative yield SD propagates incremental variances.",
             "Plant NPK: SNAD, LNAD, SNAM incorporated from 2025年春季茄子植株样氮磷钾测定.xlsx (D6=B).",
-            "TN 1,6,7,8 excluded per FileA/FileT uncertainty adaptation plan.",
+            "TN 1,7,8 excluded per FileA/FileT uncertainty adaptation plan (TN 6 included, N missing safe).",
             "D8=A: 9 real harvests + 1 virtual harvest (25198); records after 25198 truncated.",
         ],
         growth=growth, harvest=harvest, filea=filea,
@@ -641,7 +641,17 @@ def load_2026_spring(root: Path) -> SeasonResult:
     q_path = folder / "2026春品质指标集.xlsx"
     source_files[str(q_path)] = sha256_file(q_path)
     fruit = pd.read_excel(q_path)
-    fruit["TRNO"] = pd.to_numeric(fruit["小区号"], errors="coerce").astype(int)
+    # Map (水处理, 氮处理) to TRNO (1..12) to properly map 20260603 field plot numbers (1..48)
+    t_map_26 = {
+        ("W3", "N3"): 1, ("W2", "N3"): 2, ("W1", "N3"): 3,
+        ("W3", "N2"): 4, ("W2", "N2"): 5, ("W1", "N2"): 6,
+        ("W3", "N1"): 7, ("W2", "N1"): 8, ("W3", "N0"): 9,
+        ("W1", "N1"): 10, ("W2", "N0"): 11, ("W1", "N0"): 12,
+    }
+    fruit["TRNO"] = fruit.apply(
+        lambda r: t_map_26.get((str(r["水处理"]).strip(), str(r["氮处理"]).strip()), pd.to_numeric(r.get("小区号"), errors="coerce")),
+        axis=1,
+    ).astype(int)
     fruit["日期"] = pd.to_datetime(fruit["日期"].astype(str), format="%Y%m%d", errors="coerce").dt.normalize()
     fruit["半果含水率"] = pd.to_numeric(fruit["半果含水率"], errors="coerce")
     fruit = fruit[fruit["半果含水率"].notna()].copy()
@@ -694,6 +704,8 @@ def load_2026_spring(root: Path) -> SeasonResult:
     g_records = []
     # Sheet 0502: 2026-05-02 (26122)
     df_0502 = pd.read_excel(xls_g, sheet_name="0502")
+    # Sheet 0502 contains consolidated rows across multiple dates; strictly filter to sampling date 20260502
+    df_0502 = df_0502[df_0502["取样日期"] == 20260502].copy()
     for _, r in df_0502.iterrows():
         g_records.append({
             "TRNO": int(r["小区"]), "DATE": pd.Timestamp("2026-05-02"),

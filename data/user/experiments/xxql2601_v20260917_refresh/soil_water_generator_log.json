@@ -2,7 +2,7 @@
   "season_id": "26SP",
   "excode": "XXQL2601",
   "generator": "tools/soil/build_soil_water_tables_20260917.py",
-  "generator_sha256": "b716c7371b2b6b225bae90e9a9d45e80bcec11131d6c9cf6883c37db265d59f1",
+  "generator_sha256": "9b0f69ecc3db8624b6e94d1a7e7384f2c0fb1d9e837e50a30872c9cae0916097",
   "spec_compliance": "docs/reports/2025春_2026春数据重构与双地块土壤方案执行方案_20260917.md (D11=A)",
   "source_files": {
     "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\2026春土壤含水量数据集.xlsx": "cb13eaff04bb45caa4eca0144261520a99aaa9241a9e19bc326faf1754522530"

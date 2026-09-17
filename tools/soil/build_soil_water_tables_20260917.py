@@ -33,7 +33,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 REF_ROOT = PROJECT_ROOT / "data/user/ref/DSSAT文件"
 
 # 25SP treatment exclusion
-SPRING25_INCLUDED_TN = [2, 3, 4, 5, 9, 10, 11, 12, 13, 14]
+SPRING25_INCLUDED_TN = [2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14]
 
 # DSSAT SoilWat.OUT sub-layer tops and bottoms for 180 cm profile (13 layers)
 DSSAT_SOILWAT_LAYER_TOPS = [

@@ -11,6 +11,9 @@ season_id,excode,trno,date,variable,value,raw_sd,n_rep,sd_method,source_workbook
 25SP,XXQL2501,5,25075,PDAT,0.0,1.0,1,fixed_event_date_sd_1d,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,FileA,filea_pdat_event_date,ok
 25SP,XXQL2501,5,25075,ADAT,37.0,1.0,1,fixed_event_date_sd_1d,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,FileA,filea_adat_event_date,ok
 25SP,XXQL2501,5,25075,MDAT,49.0,1.0,1,fixed_event_date_sd_1d,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,FileA,filea_mdat_event_date,ok
+25SP,XXQL2501,6,25075,PDAT,0.0,1.0,1,fixed_event_date_sd_1d,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,FileA,filea_pdat_event_date,ok
+25SP,XXQL2501,6,25075,ADAT,37.0,1.0,1,fixed_event_date_sd_1d,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,FileA,filea_adat_event_date,ok
+25SP,XXQL2501,6,25075,MDAT,49.0,1.0,1,fixed_event_date_sd_1d,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,FileA,filea_mdat_event_date,ok
 25SP,XXQL2501,9,25075,PDAT,0.0,1.0,1,fixed_event_date_sd_1d,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,FileA,filea_pdat_event_date,ok
 25SP,XXQL2501,9,25075,ADAT,37.0,1.0,1,fixed_event_date_sd_1d,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,FileA,filea_adat_event_date,ok
 25SP,XXQL2501,9,25075,MDAT,49.0,1.0,1,fixed_event_date_sd_1d,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,FileA,filea_mdat_event_date,ok
@@ -49,6 +52,9 @@ season_id,excode,trno,date,variable,value,raw_sd,n_rep,sd_method,source_workbook
 25SP,XXQL2501,5,25198,SWAM,1714.5,416.4489837903318,3,last_obs_growth,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_last_observed_swam,ok
 25SP,XXQL2501,5,25198,SNAM,44.777906488913544,11.104518270159353,3,last_obs_growth,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_last_observed_snam,ok
 25SP,XXQL2501,5,25198,CNAM,88.6893191801845,13.711332260975231,3,propagated_concentration_drymass,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_last_observed_cnam,ok
+25SP,XXQL2501,6,25198,LAIX,3.768835905893333,1.6172293113378617,4,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_last_observed_laix,ok
+25SP,XXQL2501,6,25198,LWAM,1149.6599999999999,227.623131293812,3,last_obs_growth,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_last_observed_lwam,ok
+25SP,XXQL2501,6,25198,SWAM,2166.5699999999997,604.3747411168007,3,last_obs_growth,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_last_observed_swam,ok
 25SP,XXQL2501,9,25198,LAIX,3.6156702229333333,1.4085193584991198,4,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_last_observed_laix,ok
 25SP,XXQL2501,9,25198,LWAM,1082.07,170.4126412564514,3,last_obs_growth,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_last_observed_lwam,ok
 25SP,XXQL2501,9,25198,SWAM,1816.29,156.1601668159969,3,last_obs_growth,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_last_observed_swam,ok
@@ -149,6 +155,22 @@ season_id,excode,trno,date,variable,value,raw_sd,n_rep,sd_method,source_workbook
 25SP,XXQL2501,5,25194,CHTD,1.6966666666666665,0.08483333333333333,3,replicate_sd_min_cv_5pct,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_chtd; converted_cm_to_m_for_DSSAT,ok
 25SP,XXQL2501,5,25194,SNAM,44.777906488913544,11.104518270159353,3,propagated_concentration_drymass,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_snam,ok
 25SP,XXQL2501,5,25194,LNAM,43.911412691270954,8.043028432037106,3,propagated_concentration_drymass,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_lnam,ok
+25SP,XXQL2501,6,25120,LAID,0.2386275282,0.05816761136271577,2,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_laid,ok
+25SP,XXQL2501,6,25120,LWAD,94.5,19.648877830553072,3,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_lwad,ok
+25SP,XXQL2501,6,25120,SWAD,128.34,15.525195650941088,3,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_swad,ok
+25SP,XXQL2501,6,25120,CHTD,0.395,0.035,3,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_chtd; converted_cm_to_m_for_DSSAT,ok
+25SP,XXQL2501,6,25142,LAID,1.9112858560800001,0.12278036474463218,3,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_laid,ok
+25SP,XXQL2501,6,25142,LWAD,817.695,77.32212652274899,2,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_lwad,ok
+25SP,XXQL2501,6,25142,SWAD,821.8799999999999,76.40379833489958,3,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_swad,ok
+25SP,XXQL2501,6,25142,CHTD,0.8723333333333333,0.04361666666666667,3,replicate_sd_min_cv_5pct,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_chtd; converted_cm_to_m_for_DSSAT,ok
+25SP,XXQL2501,6,25170,LAID,3.437798154479997,0.31661914706510275,3,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_laid,ok
+25SP,XXQL2501,6,25170,LWAD,1275.39,104.0415960085196,3,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_lwad,ok
+25SP,XXQL2501,6,25170,SWAD,1627.9199999999998,125.43536702222382,3,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_swad,ok
+25SP,XXQL2501,6,25170,CHTD,1.28,0.064,3,replicate_sd_min_cv_5pct,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_chtd; converted_cm_to_m_for_DSSAT,ok
+25SP,XXQL2501,6,25194,LAID,3.768835905893333,0.4996097943987238,3,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_laid,ok
+25SP,XXQL2501,6,25194,LWAD,1149.6599999999999,227.623131293812,3,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_lwad,ok
+25SP,XXQL2501,6,25194,SWAD,2166.5699999999997,604.3747411168007,3,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_swad,ok
+25SP,XXQL2501,6,25194,CHTD,1.8416666666666666,0.09208333333333334,3,replicate_sd_min_cv_5pct,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_chtd; converted_cm_to_m_for_DSSAT,ok
 25SP,XXQL2501,9,25120,LAID,0.2821260016799996,0.02452486520447371,3,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_laid,ok
 25SP,XXQL2501,9,25120,LWAD,91.44,15.955911130361681,3,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_lwad,ok
 25SP,XXQL2501,9,25120,SWAD,125.91,12.910216884312984,3,replicate_sd,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,per_trno_date_swad,ok
@@ -335,6 +357,26 @@ season_id,excode,trno,date,variable,value,raw_sd,n_rep,sd_method,source_workbook
 25SP,XXQL2501,5,25192,HPODW,331.979517214294,53.32679542932967,3,propagated_fresh_dmfr,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,incremental_dry_yield_propagated_sd,ok
 25SP,XXQL2501,5,25198,CHPDT,3504.0381919038978,272.913400900653,3,cumulative_variance_propagation,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,cumulative_dry_yield_propagated_sd,ok
 25SP,XXQL2501,5,25198,HPODW,194.7943665631761,99.88339637557247,3,propagated_fresh_dmfr,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,incremental_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25140,CHPDT,196.13597772934466,122.8269275176257,3,cumulative_variance_propagation,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,cumulative_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25140,HPODW,196.13597772934466,122.8269275176257,3,propagated_fresh_dmfr,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,incremental_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25146,CHPDT,546.72773407632,142.11250719974203,3,cumulative_variance_propagation,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,cumulative_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25146,HPODW,350.5917563469753,71.48084064402606,3,propagated_fresh_dmfr,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,incremental_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25153,CHPDT,1148.591795192121,230.1810883353784,3,cumulative_variance_propagation,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,cumulative_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25153,HPODW,601.8640611158011,181.07282712948,3,propagated_fresh_dmfr,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,incremental_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25158,CHPDT,1585.4777700855475,301.38010158045233,3,cumulative_variance_propagation,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,cumulative_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25158,HPODW,436.8859748934265,194.54210906995044,3,propagated_fresh_dmfr,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,incremental_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25163,CHPDT,1910.8621750124917,342.5209523945444,3,cumulative_variance_propagation,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,cumulative_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25163,HPODW,325.3844049269441,162.75944581074845,3,propagated_fresh_dmfr,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,incremental_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25170,CHPDT,2644.1844983004994,454.45323789641424,3,cumulative_variance_propagation,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,cumulative_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25170,HPODW,733.322323288008,298.6756478276546,3,propagated_fresh_dmfr,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,incremental_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25175,CHPDT,3052.4733010943637,492.83187863418874,3,cumulative_variance_propagation,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,cumulative_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25175,HPODW,408.2888027938643,190.67122269385285,3,propagated_fresh_dmfr,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,incremental_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25184,CHPDT,3360.654959563123,506.2785576088429,3,cumulative_variance_propagation,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,cumulative_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25184,HPODW,308.1816584687595,115.90822790633423,3,propagated_fresh_dmfr,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,incremental_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25192,CHPDT,3669.8869159897,524.4190429810993,3,cumulative_variance_propagation,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,cumulative_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25192,HPODW,309.23195642657674,136.73827096581883,3,propagated_fresh_dmfr,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,incremental_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25198,CHPDT,3853.6082664571163,529.5960957549083,3,cumulative_variance_propagation,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,cumulative_dry_yield_propagated_sd,ok
+25SP,XXQL2501,6,25198,HPODW,183.72135046741622,73.86942532353875,3,propagated_fresh_dmfr,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,incremental_dry_yield_propagated_sd,ok
 25SP,XXQL2501,9,25140,CHPDT,149.2788445362686,44.22367337576464,3,cumulative_variance_propagation,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,cumulative_dry_yield_propagated_sd,ok
 25SP,XXQL2501,9,25140,HPODW,149.2788445362686,44.22367337576464,3,propagated_fresh_dmfr,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,incremental_dry_yield_propagated_sd,ok
 25SP,XXQL2501,9,25146,CHPDT,530.9536974201374,126.84946276239475,3,cumulative_variance_propagation,2025春产量数据集.xlsx;2025春作物生长指标集.xlsx;2025年春季茄子植株样氮磷钾测定.xlsx,Sheet1,cumulative_dry_yield_propagated_sd,ok

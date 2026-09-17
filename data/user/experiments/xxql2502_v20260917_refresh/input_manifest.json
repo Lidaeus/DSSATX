@@ -59,12 +59,12 @@
     },
     {
       "name": "SOIL.SOL",
-      "sha256": "1cbb3ac8bb21b2a51ce936c33a0cb259f9302436cc86f18b523a9996654a64dd",
+      "sha256": "3108b4990c87f0139ffddb45081d9df9b21626bc58783b1341935f0fb32d1c86",
       "size_bytes": 162884
     },
     {
       "name": "soil_water_generator_log.json",
-      "sha256": "459151680ee6c6208c2995a493185e062d82aae485503d9193fa2a84df9c7157",
+      "sha256": "947d29f45d572c580d27e34ad6b5bbce9f49ee3b566b6f672f871edcd5762e63",
       "size_bytes": 1080
     },
     {

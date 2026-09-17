@@ -80,8 +80,8 @@ def fmt_field(v, width: int, decimals: int) -> str:
 def load_nutrients_25sp():
     excel_path = ROOT / "data/user/ref/DSSAT文件/2025春/2025春初始土壤基础养分.xlsx"
     df = pd.read_excel(excel_path)
-    df["no3_n"] = df["硝态氮"] * (14.0 / 62.0)
-    df["nh4_n"] = df["铵态氮"] * (98.0 / 153.0)
+    df["no3_n"] = df["硝态氮"] * (14.0067 / 62.0049)
+    df["nh4_n"] = df["铵态氮"] * (14.0067 / 18.0387)
     df["sani"] = df["全氮TN"] / 10.0  # g/kg -> %
     df["saoc"] = (df["全氮TN"] / 10.0) * 11.0  # C:N = 11:1 per D4=A
     m = df.groupby(["小区", "深度"])[["no3_n", "nh4_n", "速效磷", "pH", "速效钾Cmol", "sani", "saoc"]].mean()
@@ -105,7 +105,7 @@ def load_soil_water(water_csv: Path, target_date: str):
 
 
 def generate_section_a_lines_25sp(nut_df):
-    trno_list = [2, 3, 4, 5, 9, 10, 11, 12, 13, 14]
+    trno_list = [2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14]
     lines = ["*SOIL ANALYSIS"]
     for tr in trno_list:
         plot_lookup = 13 if tr == 14 else tr  # D3=C: Plot 14 uses Plot 13
@@ -154,7 +154,7 @@ def generate_section_a_lines_25sp(nut_df):
 
 
 def generate_section_c_lines_25sp(nut_df, water_series):
-    trno_list = [2, 3, 4, 5, 9, 10, 11, 12, 13, 14]
+    trno_list = [2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14]
     lines = ["*INITIAL CONDITIONS"]
     for tr in trno_list:
         plot_lookup = 13 if tr == 14 else tr
@@ -420,7 +420,15 @@ def rebuild_tmx_file(tmx_path: Path, season_id: str):
     flname_target = "Number 9 Fields" if season_id == "25SP" else "Number 2 Fields"
 
     for line in head_lines:
-        if "@L" in line and "ID_FIELD" in line:
+        if (
+            season_id == "25SP"
+            and line.startswith(" 5 1 0 0 95F-180")
+            and not any(l.strip().startswith("6 1 0 0") for l in head_lines)
+        ):
+            new_head.append(line)
+            new_head.append(' 6 1 0 0 95F-180 N AI, N-B "off"    1  5  6  6  2  2  1  0  0  2  0  5  2')
+            continue
+        elif "@L" in line and "ID_FIELD" in line:
             new_head.append(line)
         elif "@L" in line and "XCRD" in line:
             new_head.append(line)
@@ -460,6 +468,7 @@ def fix_dssbatch(batch_path: Path, excode: str):
     text = batch_path.read_text(encoding="utf-8-sig")
     lines = text.splitlines()
     new_lines = []
+    seen_tr = set()
     for l in lines:
         if "XXQL" in l and "@FILEX" not in l and "!" not in l and "$" not in l:
             # ensure relative filename formatted exactly as 93 chars before 6-char TRTNO
@@ -469,11 +478,23 @@ def fix_dssbatch(batch_path: Path, excode: str):
             sq = int(parts[3]) if len(parts) > 3 else 0
             op = int(parts[4]) if len(parts) > 4 else 0
             co = int(parts[5]) if len(parts) > 5 else 0
+            seen_tr.add(tr)
             formatted = f"{excode}.TMX".ljust(93) + f"{tr:6d}{rp:7d}{sq:7d}{op:7d}{co:7d}"
-            new_lines.append(formatted)
+            new_lines.append((tr, formatted))
         else:
-            new_lines.append(l)
-    batch_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8", newline="\n")
+            new_lines.append((None, l))
+
+    if excode == "XXQL2501" and 6 not in seen_tr:
+        formatted_6 = f"{excode}.TMX".ljust(93) + f"{6:6d}{1:7d}{0:7d}{0:7d}{0:7d}"
+        ins_idx = len(new_lines)
+        for idx, (tr, _) in enumerate(new_lines):
+            if tr is not None and tr > 6:
+                ins_idx = idx
+                break
+        new_lines.insert(ins_idx, (6, formatted_6))
+
+    final_lines = [item[1] for item in new_lines]
+    batch_path.write_text("\n".join(final_lines) + "\n", encoding="utf-8", newline="\n")
 
 
 def validate_bundle_with_dssat(bundle_dir: Path, excode: str) -> None:
