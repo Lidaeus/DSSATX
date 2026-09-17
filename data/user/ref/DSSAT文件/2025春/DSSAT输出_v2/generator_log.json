@@ -2,7 +2,7 @@
   "season_id": "25SP",
   "excode": "XXQL2501",
   "generator": "tools/experiments/build_refreshed_observations_20260917.py",
-  "generator_sha256": "e4a092eada727bcafde6fb92f652fec444425129ce067452ede3aec566fe69ac",
+  "generator_sha256": "9a7e3c0cb6520d0415754ece55ea014c789b3138d6f6fa55030e4ac5cefd48ff",
   "spec_compliance": "docs/reports/2025春_2026春数据重构与双地块土壤方案执行方案_20260917.md",
   "source_files": {
     "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春产量数据集.xlsx": "e4ceaf7a50a7be46f6d359fc86a943239992e6f98ece0981b3e2963e23b563b9",
@@ -14,7 +14,7 @@
     "plots": 10,
     "growth_dates": 6,
     "harvest_dates": 10,
-    "total_observations": 447,
+    "total_observations": 456,
     "excluded_tn": [
       1,
       6,

@@ -2,7 +2,7 @@
   "season_id": "25FA",
   "excode": "XXQL2502",
   "generator": "tools/soil/build_soil_water_tables_20260917.py",
-  "generator_sha256": "d3dfd502a0a015ccb90aba330adbbaafdff299bfc6635392b8d020ef5311edb5",
+  "generator_sha256": "b716c7371b2b6b225bae90e9a9d45e80bcec11131d6c9cf6883c37db265d59f1",
   "spec_compliance": "docs/reports/2025春_2026春数据重构与双地块土壤方案执行方案_20260917.md (D7=A, D11=A)",
   "source_files": {
     "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025秋\\2025 2号棚秋季取土.xlsx": "213e47c26f13b230334587872fceabd0db4656f7631266dc8ab10ba4ceb4a73b"
@@ -19,7 +19,8 @@
       5.0,
       15.0,
       30.0,
-      45.0,
+      40.0,
+      50.0,
       60.0,
       70.0,
       80.0,

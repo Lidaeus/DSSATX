@@ -2,7 +2,7 @@
   "season_id": "26SP",
   "excode": "XXQL2601",
   "generator": "tools/experiments/build_refreshed_observations_20260917.py",
-  "generator_sha256": "e4a092eada727bcafde6fb92f652fec444425129ce067452ede3aec566fe69ac",
+  "generator_sha256": "9a7e3c0cb6520d0415754ece55ea014c789b3138d6f6fa55030e4ac5cefd48ff",
   "spec_compliance": "docs/reports/2025春_2026春数据重构与双地块土壤方案执行方案_20260917.md",
   "source_files": {
     "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\2026春产量集.xlsx": "a8007b82e197dbb5b35f41d4a99452d15978f547c43ec835010c2a837112b749",

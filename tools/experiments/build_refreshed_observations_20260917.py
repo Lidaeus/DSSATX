@@ -75,7 +75,7 @@ LAI_IMPUTED_SD = {1: 0.678, 2: 0.447, 3: 0.842, 4: 0.508, 5: 0.297, 6: 0.387,
                   7: 0.220, 8: 0.340, 9: 0.243, 10: 0.349, 11: 0.717, 12: 0.357}
 LAI_IMPUTED_N = {1: 3, 2: 2, 3: 3, 4: 2, 5: 2, 6: 3, 7: 2, 8: 3, 9: 3, 10: 3, 11: 3, 12: 3}
 
-TMA_COLUMNS = ["TRNO", "PDAT", "ADAT", "MDAT", "HDAT", "HWAM", "LWAM", "SWAM", "LAIX", "HIAM", "CNAM"]
+TMA_COLUMNS = ["TRNO", "PDAT", "ADAT", "MDAT", "HDAT", "HWAM", "LWAM", "SWAM", "LAIX", "HIAM", "SNAM", "CNAM"]
 TMT_COLUMNS = [
     "TRNO", "DATE", "L#SD", "LAID", "L#PA", "LWAD", "RWAD", "SWAD",
     "M#AD", "SLAD", "CHTD", "CWID", "CNAM", "SNAM", "LNAM",
@@ -90,7 +90,8 @@ INTEGER_COLS = {
     "CNAM", "SNAM", "LNAM",
 }
 
-TMA_FILL = {"TRNO", "PDAT", "ADAT", "MDAT", "HDAT", "LWAM", "SWAM", "LAIX", "CNAM"}
+TMA_FILL = {"TRNO", "PDAT", "ADAT", "MDAT", "HDAT", "LWAM", "SWAM", "LAIX", "SNAM", "CNAM"}
+
 TMT_FILL = {"TRNO", "DATE", "LAID", "LWAD", "SWAD", "CHTD", "SNAM", "LNAM", "CNAM", "CHFPW", "HPODW", "CHPDT"}
 
 PHENOLOGY_DATES = {
@@ -245,6 +246,7 @@ def build_observation_uncertainty(
             ("LAIX", "LAIX", "LAIX_sd", "LAIX_sd_source", "LAIX_n_rep"),
             ("LWAM", "LWAM", "LWAM_sd", "LWAM_sd_source", "LWAM_n_rep"),
             ("SWAM", "SWAM", "SWAM_sd", "SWAM_sd_source", "SWAM_n_rep"),
+            ("SNAM", "SNAM", "SNAM_sd", "SNAM_sd_source", "SNAM_n_rep"),
             ("CNAM", "CNAM", "CNAM_sd", "CNAM_sd_source", "CNAM_n_rep"),
         ]:
             val = getattr(r, val_attr, np.nan)
@@ -547,14 +549,19 @@ def load_2025_spring(root: Path) -> SeasonResult:
         cnam_val = pn.get("CNAM", np.nan)
         cnam_sd = pn.get("CNAM_sd", np.nan)
         cnam_n = pn.get("CNAM_n", 0)
+        snam_val = pn.get("SNAM", np.nan)
+        snam_sd = pn.get("SNAM_sd", np.nan)
+        snam_n = pn.get("SNAM_n", 0)
 
         filea_rows.append({
             "TRNO": int(trno), "PDAT": pdat_code, "ADAT": adat_code, "MDAT": podd_code,
             "HDAT": final_h["DATE"], "HWAM": np.nan, "LWAM": lwam, "SWAM": swam,
-            "LAIX": laix, "HIAM": np.nan, "CNAM": cnam_val,
+            "LAIX": laix, "HIAM": np.nan, "SNAM": snam_val, "CNAM": cnam_val,
             "LAIX_sd": laix_sd, "LAIX_sd_source": laix_src, "LAIX_n_rep": laix_n,
             "LWAM_sd": lwam_sd, "LWAM_sd_source": "last_obs_growth", "LWAM_n_rep": 3,
             "SWAM_sd": swam_sd, "SWAM_sd_source": "last_obs_growth", "SWAM_n_rep": 3,
+            "SNAM_sd": snam_sd, "SNAM_sd_source": "last_obs_growth" if pd.notna(snam_val) else "no_data",
+            "SNAM_n_rep": snam_n,
             "CNAM_sd": cnam_sd, "CNAM_sd_source": "propagated_concentration_drymass" if pd.notna(cnam_val) else "no_data",
             "CNAM_n_rep": cnam_n,
         })
@@ -582,7 +589,7 @@ def load_2025_spring(root: Path) -> SeasonResult:
 
     return SeasonResult(
         season_id="25SP", excode="XXQL2501", output_base="2025SPR",
-        title="2025 SPRING EGGPLANT; TRNO=PLOT NUMBER (TN 1,6,7,8 excluded)",
+        title="2025 SPRING EGGPLANT; TRNO = DSSAT treatment number (TN 1,6,7,8 excluded)",
         source_notes=[
             "Fresh yield uses direct arithmetic mean of row replicates (unweighted).",
             "Fruit DM fraction = 1 - measured fruit moisture fraction (2025春品质集优先采用品质集中的果实含水率.xlsx).",
@@ -801,10 +808,11 @@ def load_2026_spring(root: Path) -> SeasonResult:
         filea_rows.append({
             "TRNO": int(trno), "PDAT": pdat_code, "ADAT": adat_code, "MDAT": podd_code,
             "HDAT": final_h["DATE"], "HWAM": np.nan, "LWAM": lwam, "SWAM": swam,
-            "LAIX": laix, "HIAM": np.nan, "CNAM": np.nan,
+            "LAIX": laix, "HIAM": np.nan, "SNAM": np.nan, "CNAM": np.nan,
             "LAIX_sd": laix_sd, "LAIX_sd_source": laix_src, "LAIX_n_rep": laix_n,
             "LWAM_sd": lwam_sd, "LWAM_sd_source": "last_obs_growth", "LWAM_n_rep": 3,
             "SWAM_sd": swam_sd, "SWAM_sd_source": "last_obs_growth", "SWAM_n_rep": 3,
+            "SNAM_sd": np.nan, "SNAM_sd_source": "no_data", "SNAM_n_rep": 0,
             "CNAM_sd": np.nan, "CNAM_sd_source": "no_data", "CNAM_n_rep": 0,
         })
     filea = pd.DataFrame(filea_rows)
@@ -830,7 +838,7 @@ def load_2026_spring(root: Path) -> SeasonResult:
 
     return SeasonResult(
         season_id="26SP", excode="XXQL2601", output_base="2026SPR",
-        title="2026 SPRING EGGPLANT; TRNO=PLOT NUMBER",
+        title="2026 SPRING EGGPLANT; TRNO = DSSAT treatment number",
         source_notes=[
             "Fresh yield uses arithmetic mean of replicates.",
             "Fruit DM fraction = 1 - 半果含水率 (2026春品质指标集.xlsx).",

@@ -1,4 +1,4 @@
-*EXP.DATA (T): 2026 SPRING EGGPLANT; TRNO=PLOT NUMBER
+*EXP.DATA (T): 2026 SPRING EGGPLANT; TRNO = DSSAT treatment number
 
 ! Fresh yield uses arithmetic mean of replicates.
 ! Fruit DM fraction = 1 - 半果含水率 (2026春品质指标集.xlsx).

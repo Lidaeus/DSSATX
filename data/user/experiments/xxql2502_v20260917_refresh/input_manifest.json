@@ -15,7 +15,7 @@
     "D8": "25SP harvest calendar: 9 real harvests + 1 virtual (25198); records after 25198 truncated (D8=A)",
     "D9": "Section @C ICDAT aligned with pre-planting moisture sampling date; ICRT=0, ICRES=0 (D9=A)",
     "D10": "Bulk density from 2号棚容重测定.xlsx Sheet2 authoritative 6-point mean (SBDM=1.364, D10=A)",
-    "D11": "Mass-weighted thickness overlap algorithm strictly aligned with 10L-B / SoilWat 12 sub-layers (D11=A)"
+    "D11": "Mass-weighted thickness overlap algorithm strictly aligned with 10L-B / SoilWat 13 sub-layers (D11=A)"
   },
   "simulation_options": {
     "WATER": "Y",
@@ -64,22 +64,22 @@
     },
     {
       "name": "soil_water_generator_log.json",
-      "sha256": "c6d68fa47301a7dfd629771648dba1a0bb9daea82e99231c0dbfe28b4f46d7ba",
-      "size_bytes": 1067
+      "sha256": "459151680ee6c6208c2995a493185e062d82aae485503d9193fa2a84df9c7157",
+      "size_bytes": 1080
     },
     {
       "name": "soil_water_layer_mapping.csv",
-      "sha256": "8984a7031d3aef9ab37d6dffa0c167aecd9f6a78ec5928751469431044417aa4",
-      "size_bytes": 603
+      "sha256": "65105d89a06765e4316e9e8e1ac6f510d552b523096ad8c4fceb9b1b11f9fd4b",
+      "size_bytes": 601
     },
     {
       "name": "soil_water_match_audit.csv",
-      "sha256": "565a32aeed06e432676dad023a9e52479c9672e222fa28fdf2c21baa1f6d67c7",
+      "sha256": "d3de24dbccb99a3c46e12d1a1bd5f7c321a1256657658bb31a2c7fce9767c95b",
       "size_bytes": 13521
     },
     {
       "name": "soil_water_observations.csv",
-      "sha256": "2d07362fa4a6ae0423a4a66116c51263f626c27d323d79c80f80b5ae2f8be482",
+      "sha256": "388d8274028e4eef9a64ef90f3ed7725c60e151a4af31def79594d27a31a5570",
       "size_bytes": 25630
     },
     {
@@ -89,13 +89,13 @@
     },
     {
       "name": "XXQL2502.TMA",
-      "sha256": "7c28f3df4fc1caeeffbc69729a97e2ab7e8091a533826f6e1c32395d00f96003",
-      "size_bytes": 1256
+      "sha256": "5f179e9fa74c38598efd6377f0d01c7395c9c07a5288250e5263fe373b6ee319",
+      "size_bytes": 1269
     },
     {
       "name": "XXQL2502.TMT",
-      "sha256": "743beab05c6b2a0176b48d99cc2a76454b09d0a85cc91ea9b6e18ca61dac31db",
-      "size_bytes": 9278
+      "sha256": "56cffc54ae8129bcd2591149eb7b9e8ae8b3395bf51484644e5ac660a7fafbe4",
+      "size_bytes": 9291
     },
     {
       "name": "XXQL2502.TMX",

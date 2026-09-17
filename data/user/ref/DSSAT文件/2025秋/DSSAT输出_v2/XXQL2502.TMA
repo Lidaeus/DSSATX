@@ -1,4 +1,4 @@
-*EXP.DATA (A): 2025 FALL EGGPLANT; TRNO=PLOT NUMBER
+*EXP.DATA (A): 2025 FALL EGGPLANT; TRNO = DSSAT treatment number
 
 ! Canonical fruit dry-mass contract: fixed moisture fraction=0.95; DMFR/DMC=0.05; DMFR variance=0; dry variance=DMFR^2*fresh variance.
 ! Fresh yield = mean of 小区产量; SD = independent replicate 行产量.

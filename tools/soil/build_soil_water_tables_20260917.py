@@ -35,13 +35,14 @@ REF_ROOT = PROJECT_ROOT / "data/user/ref/DSSAT文件"
 # 25SP treatment exclusion
 SPRING25_INCLUDED_TN = [2, 3, 4, 5, 9, 10, 11, 12, 13, 14]
 
-# DSSAT SoilWat.OUT sub-layer bottoms for 180 cm profile (12 layers)
-DSSAT_SOILWAT_LAYER_BOTTOMS = [
-    5.0, 15.0, 30.0, 45.0, 60.0, 70.0, 80.0, 100.0, 120.0, 140.0, 160.0, 180.0
-]
+# DSSAT SoilWat.OUT sub-layer tops and bottoms for 180 cm profile (13 layers)
 DSSAT_SOILWAT_LAYER_TOPS = [
-    0.0, 5.0, 15.0, 30.0, 45.0, 60.0, 70.0, 80.0, 100.0, 120.0, 140.0, 160.0
+    0.0, 5.0, 15.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 100.0, 120.0, 140.0, 160.0
 ]
+DSSAT_SOILWAT_LAYER_BOTTOMS = [
+    5.0, 15.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 100.0, 120.0, 140.0, 160.0, 180.0
+]
+
 
 
 def sha256_file(path: Path) -> str:

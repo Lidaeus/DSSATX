@@ -108,28 +108,45 @@ def build_soil_sol(dst_path: Path, src_sol_path: Path = RAW_SOL) -> None:
 
     both_profiles = p25_lines + p26_lines
 
-    # Find position of XXSL1800S1 or IBTM910017 to replace, or insert before IBPP910015
-    target_start = None
-    target_end = None
-    for target_key in ["*XXSL1800S1", "*IBTM910017"]:
-        for i, l in enumerate(lines):
-            if l.startswith(target_key):
-                target_start = i
-                # find next profile starting with *
-                for j in range(i + 1, len(lines)):
-                    if lines[j].startswith("*"):
-                        target_end = j
-                        break
-                break
-        if target_start is not None:
+    # 1. If XXSL2501 is already present, replace the existing XXSL2501 and XXSL2601 profiles
+    xxsl25_idx = None
+    for i, l in enumerate(lines):
+        if l.startswith("*XXSL2501"):
+            xxsl25_idx = i
             break
 
-    if target_start is not None and target_end is not None:
-        new_lines = lines[:target_start] + both_profiles + lines[target_end:]
+    if xxsl25_idx is not None:
+        target_end = len(lines)
+        for j in range(xxsl25_idx + 1, len(lines)):
+            if lines[j].startswith("*") and not lines[j].startswith("*XXSL2501") and not lines[j].startswith("*XXSL2601"):
+                target_end = j
+                break
+        new_lines = lines[:xxsl25_idx] + both_profiles + lines[target_end:]
     else:
-        # insert before first profile
-        first_star = next(i for i, l in enumerate(lines) if l.startswith("*"))
-        new_lines = lines[:first_star] + both_profiles + lines[first_star:]
+        # 2. Check for legacy profiles to replace
+        legacy_idx = None
+        legacy_end = None
+        for target_key in ["*XXSL1800S1", "*IBTM910017"]:
+            for i, l in enumerate(lines):
+                if l.startswith(target_key):
+                    legacy_idx = i
+                    for j in range(i + 1, len(lines)):
+                        if lines[j].startswith("*"):
+                            legacy_end = j
+                            break
+                    break
+            if legacy_idx is not None:
+                break
+
+        if legacy_idx is not None and legacy_end is not None:
+            new_lines = lines[:legacy_idx] + both_profiles + lines[legacy_end:]
+        else:
+            # 3. Insert before first real profile (skip header *SOILS:)
+            first_profile_idx = next(
+                i for i, l in enumerate(lines)
+                if l.startswith("*") and not l.startswith("*SOILS")
+            )
+            new_lines = lines[:first_profile_idx] + both_profiles + lines[first_profile_idx:]
 
     dst_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8", newline="\n")
 

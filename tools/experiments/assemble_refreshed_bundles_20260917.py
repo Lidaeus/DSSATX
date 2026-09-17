@@ -539,7 +539,7 @@ def write_bundle_manifest(bundle_dir: Path, season_id: str, excode: str, derived
             "D8": "25SP harvest calendar: 9 real harvests + 1 virtual (25198); records after 25198 truncated (D8=A)",
             "D9": "Section @C ICDAT aligned with pre-planting moisture sampling date; ICRT=0, ICRES=0 (D9=A)",
             "D10": "Bulk density from 2号棚容重测定.xlsx Sheet2 authoritative 6-point mean (SBDM=1.364, D10=A)",
-            "D11": "Mass-weighted thickness overlap algorithm strictly aligned with 10L-B / SoilWat 12 sub-layers (D11=A)",
+            "D11": "Mass-weighted thickness overlap algorithm strictly aligned with 10L-B / SoilWat 13 sub-layers (D11=A)",
         },
         "simulation_options": {
             "WATER": "Y",
@@ -564,20 +564,38 @@ def assemble_bundle(src_dir: Path, dst_dir: Path, ref_obs_dir: Path, season_id: 
         shutil.rmtree(dst_dir)
     dst_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. Copy base files from unified bundle (excluding manifest and old logs/backups)
+    # 1. Copy base files from unified bundle (excluding manifest and old logs/backups/audits)
     for p in src_dir.iterdir():
         if (
             p.is_file()
             and not p.name.endswith(".OUT")
+            and not p.name.endswith(".LST")
             and not p.name.endswith(".old")
             and not p.name.endswith(".bak")
-            and p.name not in ["input_manifest.json", "trial_generator_log.json"]
+            and p.name not in [
+                "input_manifest.json",
+                "trial_generator_log.json",
+                "soil_n_scale_rows.json",
+                "PestHarvest.audit.csv",
+            ]
         ):
             shutil.copy2(p, dst_dir / p.name)
 
     # 2. Copy refreshed observations and soil water outputs from DSSAT输出_v2
     for p in ref_obs_dir.iterdir():
-        if p.is_file():
+        if (
+            p.is_file()
+            and not p.name.endswith(".OUT")
+            and not p.name.endswith(".LST")
+            and not p.name.endswith(".old")
+            and not p.name.endswith(".bak")
+            and p.name not in [
+                "input_manifest.json",
+                "trial_generator_log.json",
+                "soil_n_scale_rows.json",
+                "PestHarvest.audit.csv",
+            ]
+        ):
             shutil.copy2(p, dst_dir / p.name)
 
     # 3. Inject dual-plot 10L-B soil profiles into SOIL.SOL
@@ -594,7 +612,12 @@ def assemble_bundle(src_dir: Path, dst_dir: Path, ref_obs_dir: Path, season_id: 
 
     # 7. Write input_manifest.json with SHA-256
     write_bundle_manifest(dst_dir, season_id, excode, src_dir.name)
-    print(f"Successfully assembled and signed {dst_dir.name} ({len(list(dst_dir.iterdir()))} files).")
+
+    # 8. Verify bundle manifest integrity
+    from src.common.input_manifest import verify_manifest_integrity
+    verify_manifest_integrity(dst_dir)
+
+    print(f"Successfully assembled, signed, and integrity-verified {dst_dir.name} ({len(list(dst_dir.iterdir()))} files).")
 
 
 def main() -> int:

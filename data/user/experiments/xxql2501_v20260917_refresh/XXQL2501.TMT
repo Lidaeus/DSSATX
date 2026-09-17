@@ -1,4 +1,4 @@
-*EXP.DATA (T): 2025 SPRING EGGPLANT; TRNO=PLOT NUMBER (TN 1,6,7,8 excluded)
+*EXP.DATA (T): 2025 SPRING EGGPLANT; TRNO = DSSAT treatment number (TN 1,6,7,8 excluded)
 
 ! Fresh yield uses direct arithmetic mean of row replicates (unweighted).
 ! Fruit DM fraction = 1 - measured fruit moisture fraction (2025春品质集优先采用品质集中的果实含水率.xlsx).

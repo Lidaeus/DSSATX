@@ -15,7 +15,7 @@
     "D8": "25SP harvest calendar: 9 real harvests + 1 virtual (25198); records after 25198 truncated (D8=A)",
     "D9": "Section @C ICDAT aligned with pre-planting moisture sampling date; ICRT=0, ICRES=0 (D9=A)",
     "D10": "Bulk density from 2号棚容重测定.xlsx Sheet2 authoritative 6-point mean (SBDM=1.364, D10=A)",
-    "D11": "Mass-weighted thickness overlap algorithm strictly aligned with 10L-B / SoilWat 12 sub-layers (D11=A)"
+    "D11": "Mass-weighted thickness overlap algorithm strictly aligned with 10L-B / SoilWat 13 sub-layers (D11=A)"
   },
   "simulation_options": {
     "WATER": "Y",
@@ -34,8 +34,8 @@
     },
     {
       "name": "FileA_values.csv",
-      "sha256": "8ea81e7255ec4369688484436623fef5b7d1bed21d75ca4a4fab9187d94a6ba1",
-      "size_bytes": 2659
+      "sha256": "20c71d31fedbae3501a7aea8af8cce183269888674130af07441a9cd9ed57ab3",
+      "size_bytes": 3201
     },
     {
       "name": "FileT_values.csv",
@@ -49,18 +49,13 @@
     },
     {
       "name": "generator_log.json",
-      "sha256": "4c4a36422e9f3b1892cdf667ce640b0eeddb844a27d9529a7b983cf3e9c378a8",
+      "sha256": "f88bccea8c597ad505c4e1e61413c2a23621e4c012765807215aaca77b8585bf",
       "size_bytes": 2250
     },
     {
       "name": "observation_uncertainty.csv",
-      "sha256": "030247c856e3ac04e54ca10b33c301474b48da9e52d9bb2d806ba3f0058fb749",
-      "size_bytes": 106016
-    },
-    {
-      "name": "PestHarvest.audit.csv",
-      "sha256": "a69fe5ec1f14b723d7f5b07e64b79bb000f5df57bb95145ab7fe9cc341bea43f",
-      "size_bytes": 8135
+      "sha256": "242141dbf5bc2dad734b0a53e280359aaf1d78223d94a75407bed112fb979df6",
+      "size_bytes": 108105
     },
     {
       "name": "SOIL.SOL",
@@ -69,22 +64,22 @@
     },
     {
       "name": "soil_water_generator_log.json",
-      "sha256": "48ec5d45b2748b4729215bf2416635246a6b0e38843d3f3817961f65eb1ff1c7",
-      "size_bytes": 1069
+      "sha256": "2b060f1e62e7fbaaa0d82378289f1361a54a99ecf868c5b02d2e08101a1592f9",
+      "size_bytes": 1082
     },
     {
       "name": "soil_water_layer_mapping.csv",
-      "sha256": "fca0cc5282f43493710fcfe94f50db3738c56147ca0f7ab6f1fd5a368590dead",
-      "size_bytes": 603
+      "sha256": "d0611ba0f29523dc43ce80e425c11a73f6b66c6e5a1caf9f17315491b0d02b08",
+      "size_bytes": 601
     },
     {
       "name": "soil_water_match_audit.csv",
-      "sha256": "6e04502ccf1a255819bcb4fa62dbe522ef9a94cbdab42915eb27dc5484ffc7f1",
+      "sha256": "d9b48e0f53f99515b35f4600ac574c06c5d920da9376eea59aa4cdd6f438eb73",
       "size_bytes": 18382
     },
     {
       "name": "soil_water_observations.csv",
-      "sha256": "2b8b57d5ede7dde142623bb84282a749d94c381a5c79fdcb5412b507b2b19bdf",
+      "sha256": "4bdba4e803cfa8183de100711574ccf24a843c77dc7dcbb03c3be272a1e8856f",
       "size_bytes": 36137
     },
     {
@@ -114,13 +109,13 @@
     },
     {
       "name": "XXQL2501.TMA",
-      "sha256": "38ee632c38fec8fb464034c97e67ec8188be623841faef9bc3a33e4dc3fc7cfa",
-      "size_bytes": 1505
+      "sha256": "e96d9ceff2404d69cbca42479db1d846f1ddc8552153cab5db44d27851b5b454",
+      "size_bytes": 1584
     },
     {
       "name": "XXQL2501.TMT",
-      "sha256": "70a83ee38cf0f0fb206093c00daa333b658e0164ec97552c423150d53b8b8e6e",
-      "size_bytes": 19179
+      "sha256": "80adc65bf181cf2c8c2514d7fd226676a455bb51485b514838ae5c3935643bc1",
+      "size_bytes": 19192
     },
     {
       "name": "XXQL2501.TMX",
