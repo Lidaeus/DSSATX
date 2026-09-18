@@ -1,0 +1,369 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+
+<TITLE>中国农业科学 征稿简则</TITLE>
+
+<link href="https://www.chinaagrisci.com/images/0578-1752/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://www.chinaagrisci.com/images/0578-1752/css/css.css">
+<script src="https://www.chinaagrisci.com/js/jquery/jquery.min.js"></script>
+<script src="https://www.chinaagrisci.com/images/0578-1752/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://www.chinaagrisci.com/images/0578-1752/fonts/font-awesome.min.css">
+
+
+
+</HEAD>
+<body>
+<!--头部-->
+<script src='https://tongji.journalreport.cn/mstatistics.service.js' ></script><script>recordAdd('79a82bcc0f70470ba180e2eead6bc8cc')</script>
+
+<div class="header">
+	<div class="banner">
+			<div id="slider-mask">
+				<div id="slider">
+					<div><img src="https://www.chinaagrisci.com/images/0578-1752/image4.png" class="img-responsive"></div>
+					<div><img src="https://www.chinaagrisci.com/images/0578-1752/image8.png" class="img-responsive"></div>
+					<div><img src="https://www.chinaagrisci.com/images/0578-1752/image10.png" class="img-responsive"></div>   	      	      	     	
+					<div><img src="https://www.chinaagrisci.com/images/0578-1752/image12.png" class="img-responsive"></div>
+					<div><img src="https://www.chinaagrisci.com/images/0578-1752/image14.png" class="img-responsive"></div>
+					<div><img src="https://www.chinaagrisci.com/images/0578-1752/image16.png" class="img-responsive"></div>
+				</div>
+				<img src="https://www.chinaagrisci.com/images/0578-1752/prev.png" alt="" id="prev" class="img-responsive">
+			</div>
+
+			<script type="text/javascript">
+			$(document).ready(function(){
+				$('#slider').cycle({ 
+				
+					next:   '#next', 
+					timeout: 3500 
+				});
+			});
+			</script>
+			
+
+	</div>
+	
+	
+</div>	
+
+<!--导航-->
+<div class="daohang">
+<div class="navbar site-nav">
+	<div class="navbar-header">
+		<button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+			<span class="sr-only">Toggle navigation</span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		</button>
+		<div class="navbar-brand visible-xs"></div>
+	</div>
+	<div class="navbar-collapse collapse" role="navigation">
+		
+		<ul class="nav navbar-nav">
+			<li><a href="https://www.chinaagrisci.com/CN/0578-1752/home.shtml">首页</a></li>
+			<li role="presentation" class="dropdown">
+			   <a href="#" class="dropdown-toggle" data-toggle="dropdown">关于我们<b class="caret"></b></a>
+			   <ul class="dropdown-menu">
+			   <li role="presentation"><a role="menuitem" tabindex="-1" href="https://www.chinaagrisci.com/CN/column/column1.shtml">期刊介绍</a></li>
+			   <li role="presentation"><a role="menuitem" tabindex="-1" href="https://www.chinaagrisci.com/CN/column/column2.shtml">获奖情况</a></li>
+			   <li role="presentation"><a role="menuitem" tabindex="-1" href="https://www.chinaagrisci.com/CN/column/column3.shtml">被收录情况</a></li>
+			   </ul>
+			 </li>
+			<li><a href="https://www.chinaagrisci.com/CN/column/column4.shtml">编委会</a></li>
+			<li role="presentation" class="dropdown">
+			   <a href="#" class="dropdown-toggle" data-toggle="dropdown">作者中心<b class="caret"></b></a>
+			   <ul class="dropdown-menu">
+			   <li role="presentation"><a href="https://www.chinaagrisci.com/Journalx_zgnykx/authorLogOn.action" target="_blank">我要投稿</a></li>
+			   <li role="presentation"><a href="https://www.chinaagrisci.com/CN/column/column5.shtml">征稿简则</a></li>
+			   <li role="presentation"><a href="https://www.chinaagrisci.com/CN/column/column6.shtml">稿件写作标准规范</a></li>
+			   <li role="presentation"><a href="https://www.chinaagrisci.com/CN/column/column7.shtml">版权协议</a></li>
+			   <li role="presentation"><a href="https://www.chinaagrisci.com/CN/column/column8.shtml">论文模板</a></li>
+			   <li role="presentation"><a href="https://www.chinaagrisci.com/CN/column/column9.shtml">收费标准</a></li>
+			   <li role="presentation"><a href="https://www.chinaagrisci.com/CN/column/column10.shtml">审稿流程说明</a></li>
+			   </ul>
+			</li>
+			<li><a href="https://www.chinaagrisci.com/CN/column/column19.shtml">出版伦理声明</a></li>
+			<li><a href="https://www.chinaagrisci.com/CN/column/column11.shtml">期刊订阅</a></li>
+			<li><a href="https://www.chinaagrisci.com/CN/column/column12.shtml">广告服务</a></li>
+			<li><a href="https://www.chinaagrisci.com/CN/feedback/listFeedbackInfo.do">留言板</a></li>
+			<li><a href="https://www.chinaagrisci.com/CN/column/column13.shtml">联系我们</a></li>
+			<li><a href="https://www.chinaagrisci.com/EN/0578-1752/home.shtml" target="_blank">English</a></li>
+		</ul>
+			
+	</div>
+</div>		
+</div>
+
+
+<!--导航end-->
+
+ <!--中间-->
+<div class="container">
+	<!--左-->
+	<!--jsp的iframe引用，新闻的引用 -->
+		<script language="javascript">
+			$(document).ready(function () {
+				$("#ggfw").load("https://www.chinaagrisci.com/CN/model/gg.htm");
+			});
+		</script>
+<!--jsp的iframe引用，新闻的引用 -->
+		
+<div class="fl col-lg-3 col-md-3 col-sm-3">
+		<div class="left_tab soulu">
+			<dd>中文核心期刊</dd>
+			<dd>中国科技核心期刊</dd>
+			<dd>CSCD（核心版）</dd>
+			<dd>RCCSE（A+）</dd>
+			<dd>中国农林核心期刊（A）</dd>
+			<dd>中国科技期刊卓越行动计划-中文领军期刊</dd>
+		</div>
+		
+		<div class="left_tab hjlogo">
+			<div class="qkxx">
+				<img src="../../fileup/0578-1752/COVER/20260819135455.jpg" class="fm img-responsive">
+				<div class="qkxxjs">
+				<strong>1960年创刊，半月刊</strong><br>
+				主管：农业农村部<br>
+				主办：中国农业科学院<br>
+				　　　中国农学会<br>
+				主编：陈化兰<br>
+				ISSN 0578-1752<br>
+				CN 11-1328/S<br>
+				邮发代号：2-138<br>
+				国外代号：BM43
+				</div>
+			</div>
+		</div>
+		<div class="t_tab dian">
+			<div class="lmm">编辑部公告</div>	
+			<ul>
+				<marquee onMouseMove="this.stop()" onMouseOut="this.start()" height="214" width="100%" scrollamount="2" scrolldelay="90" direction="up" behavior="scroll">
+				                				                                <li>
+                <a href="../column/item134.shtml">
+ 					<span class="al"><img src="https://www.chinaagrisci.com/images/0578-1752/gif-06418.gif"></span><span class="ar">致谢 |《中国农业科学》2025年度审稿专家<sup style="color:red;">new</sup></span>
+			     </a>
+			    <br><span class="shijian">(2026-01-06)</span>
+			    </li>
+			   			   	           				                                <li>
+                <a href="../column/item131.shtml">
+ 					<span class="al"><img src="https://www.chinaagrisci.com/images/0578-1752/gif-06418.gif"></span><span class="ar">喜讯｜《中国农业科学》入选“最具国际影响力学术期刊”</span>
+			     </a>
+			    <br><span class="shijian">(2024-12-25)</span>
+			    </li>
+			   			   	           				                                <li>
+                <a href="../column/item132.shtml">
+ 					<span class="al"><img src="https://www.chinaagrisci.com/images/0578-1752/gif-06418.gif"></span><span class="ar">喜讯｜《中国农业科学》稳居WJCI农业科学综合领域Q1区，再次列为“顶尖期刊”</span>
+			     </a>
+			    <br><span class="shijian">(2024-12-25)</span>
+			    </li>
+			   			   	           				                                <li>
+                <a href="../column/item130.shtml">
+ 					<span class="al"><img src="https://www.chinaagrisci.com/images/0578-1752/gif-06418.gif"></span><span class="ar">喜讯｜《中国农业科学》入选中国科技期刊卓越行动计划二期领军期刊</span>
+			     </a>
+			    <br><span class="shijian">(2024-11-28)</span>
+			    </li>
+			   			   	           				                                <li>
+                <a href="../column/item128.shtml">
+ 					<span class="al"><img src="https://www.chinaagrisci.com/images/0578-1752/gif-06418.gif"></span><span class="ar">喜报|《中国农业科学》再次入选中文核心期刊（2023年版）</span>
+			     </a>
+			    <br><span class="shijian">(2023-12-29)</span>
+			    </li>
+			   			   	           				                                <li>
+                <a href="../column/item126.shtml">
+ 					<span class="al"><img src="https://www.chinaagrisci.com/images/0578-1752/gif-06418.gif"></span><span class="ar">关于假冒“《中国农业科学》版权协议书”骗取钱财情况的声明</span>
+			     </a>
+			    <br><span class="shijian">(2023-10-10)</span>
+			    </li>
+			   			   	           				                                <li>
+                <a href="../column/item125.shtml">
+ 					<span class="al"><img src="https://www.chinaagrisci.com/images/0578-1752/gif-06418.gif"></span><span class="ar">《中国农业科学》首届青年编委会编委名单</span>
+			     </a>
+			    <br><span class="shijian">(2023-08-25)</span>
+			    </li>
+			   			   	           				                                <li>
+                <a href="../column/item124.shtml">
+ 					<span class="al"><img src="https://www.chinaagrisci.com/images/0578-1752/gif-06418.gif"></span><span class="ar">中国农业科学院工作安排</span>
+			     </a>
+			    <br><span class="shijian">(2023-04-28)</span>
+			    </li>
+			   			   	           				                                <li>
+                <a href="../column/item123.shtml">
+ 					<span class="al"><img src="https://www.chinaagrisci.com/images/0578-1752/gif-06418.gif"></span><span class="ar">《中国农业科学》招募青年编委</span>
+			     </a>
+			    <br><span class="shijian">(2023-02-21)</span>
+			    </li>
+			   			   	           				                                <li>
+                <a href="../column/item122.shtml">
+ 					<span class="al"><img src="https://www.chinaagrisci.com/images/0578-1752/gif-06418.gif"></span><span class="ar">《中国农业科学》编委会换届通知</span>
+			     </a>
+			    <br><span class="shijian">(2022-04-20)</span>
+			    </li>
+			   			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				                			   	           				
+				</marquee>	
+			</ul>
+			<div class="gd"><a href="https://www.chinaagrisci.com/CN/column/column14.shtml">更多...</a></div>	
+		</div>
+		
+		<div class="zxqk shouji">
+			<ul>
+				<li><img src="https://www.chinaagrisci.com/images/0578-1752/gif-0.gif"><a href="https://www.chinaagrisci.com/CN/article/showBrowseTopList.do">摘要点击排行</a></li>
+				<li><img src="https://www.chinaagrisci.com/images/0578-1752/gif-0.gif"><a href="https://www.chinaagrisci.com/CN/article/showDownloadTopList.do">全文下载排行</a></li>
+				<li><img src="https://www.chinaagrisci.com/images/0578-1752/gif-0.gif"><a href="https://www.chinaagrisci.com/CN/article/showBeiyincishuTop.do">引用排行</a></li>
+				<li><img src="https://www.chinaagrisci.com/images/0578-1752/gif-0.gif"><a href="https://www.chinaagrisci.com/CN/alert/showAlertInfo.do">E-mail Alert</a></li>
+				<li><img src="https://www.chinaagrisci.com/images/0578-1752/gif-0.gif"><a href="https://www.chinaagrisci.com/CN/rss/showRssInfo.do">RSS</a></li>
+			</ul>
+		</div>
+		
+		<div class="left_tab hidden-xs">
+			<div class="lmm">广告服务</div>	
+			<dl>
+				<div id="ggfw"></div>
+				
+			</dl>
+			<div class="gd"><a href="../news/folder.do?folderId=2">更多...</a></div>
+		</div>	
+		
+		
+		<div class="left_tab hidden-xs">
+			<div class="wx"><img src="https://www.chinaagrisci.com/images/0578-1752/wx.jpg" class="img-respovsive"></div>
+		</div>
+		<div class="left_tab hidden-xs">
+			<div class="wx"><img src="https://www.chinaagrisci.com/images/0578-1752/wx1.jpg" class="img-respovsive"></div>
+		</div>
+		
+	
+		
+</div>
+	
+	<!--左end-->
+	<!--右-->
+	<div class="col-lg-9 col-md-9 col-sm-9">
+		<div class="c_nr">
+			<h4 class="item_title">征稿简则</h4>
+			<ul>
+				<li> 
+													<p align="left">
+	1 内容、形式<br />
+以推动发展高产、优质、高效、环境友好的农牧业为宗旨的科研成果。<br />
+农牧业科学各学科在应用基础和高新技术方面未经公开发表或未出版过的原创性研究论文、研究简报、快讯等。涉及农业基础和农业应用领域重要问题的综述、专论。来稿内容要求材料翔实、数据可靠、文字精炼、论点明确、论证合理，在某些方面有创新。综述性文章应是农业科学重要领域的国内外最新研究进展，结合作者自己在相应领域对学科的贡献，有独到见解，对学科发展有指导意义（一般性文献综述不受理）。投稿时须上传“版权授权转让协议”（以下简称“版权协议”）扫描件，须有全部作者签名及作者所在单位科研主管部门签章；原件在稿件被赋予稿号后邮寄至编辑部备案。<br />
+2 文稿项目<br />
+研究论文(包括研究简报)书写顺序为：题目、作者姓名、作者单位全称、所在城市、邮政编码、中文摘要、关键词、英文题名(与中文一致)、英文作者、单位全称、英文摘要、英文关键词。正文包括0引言、1材料与方法、2结果、3讨论、4结论、正文第一页脚注、正文末尾致谢、参考文献。<br />
+3 文章标题<br />
+文章题目务求简明确切，一般不超过20个字；正文各级标题用阿拉伯数字连续编号，可用至3 级标题。<br />
+4 作者与单位<br />
+署名应限于参加研究工作并可解答论文有关问题者，来稿请上传附全部作者签名的“版权协议”（以避免争议）。多位作者的署名之间应用逗号“，”隔开。所有作者均须注明所在单位（中、英文均须全称、城市及邮政编码。第一作者和通讯作者还应提供联系电话或手机号码、电子邮件，以方便联系。投稿作者之间应充分协商，排定作者顺序，一经录用，原则上不再调整作者排列顺序。<br />
+5 汉语姓名译法<br />
+汉语姓名译法采用姓前名后，在正文标题下的作者姓名为姓全部大写，名首字母大写，名为两个字时，中间不空，例如：ZHAI HuQu, LIU Xu, QU DongYu, GUO YuYuan；在文后参考文献中则保留姓首字母大写，名缩写，留首字母，例如：Zhai H Q, Liu X, Qu D Y, Guo Y Y。<br />
+6 中、英文摘要<br />
+本刊采用结构式长摘要，千字左右 ，以充分发挥国内外二次文献库的文献传播作用。摘要中各要素须用完整的语句阐述；摘要整体应能比较完整地再现论文的主要内容。其写作顺序为：目的、采用的主要方法、最主要的结果、结论。在摘要中须保留【目的】、【方法】、【结果】和【结论】等标识。英文摘要同样处理，用完整的句子分别说明研究的【Objective】、【Method】、【Result】和【Conclusion】。<br />
+7 首页脚注标识项目<br />
+基金项目：获得国家（或省部级）基金项目、攻关项目、农业部、科技部、教育部重点或专项等项目资助产出的文章应注明基金项目名称，并在括号内注明其项目编号，若无任何项目资助，除非具有重大学术价值，原则上不予受理。<br />
+作者简介：在首页注脚处注明第一作者姓名，职称，学位，电话，传真，E-mail。如有联系作者，请注明通信作者姓名，职称，学位及联系电话，传真，E-mail。<br />
+8 引言<br />
+应按照“研究意义（学术价值或经济意义）、前人研究进展（与本项研究有关的主要作者的最主要进展应尽可能高度概括性地列出）、本研究切入点（前人研究的薄弱环节或空白）、拟解决的关键问题”展开。【研究意义】这部分要写明您的研究对农业生产或农业研究的重要性，写明研究的意义，没有意义的论文不值得发表；【前人研究进展】是您所做研究的背景情况介绍，要有文献支持，国外文献不可忽略，近期文献应占相当比例。因为绝大多数研究都是在前人研究的基础上进行的，对前人所做的工作应有所说明；【本研究切入点】是转折，写前人的研究存在哪些不足，或有哪些需要完善之处，由此引出您所要做的事情；【拟解决的关键问题】说明您要做哪些工作，解决什么问题。通过阅读引言，应该能让读者了解该研究领域的基本情况，以及您所做研究在国内外所处的相对水平。<br />
+9 材料与方法<br />
+应写清楚试验时间、地点，试验材料与试验条件的代表性及具体名称、试验规模（样本容量）、设计思路、设计方法、重复次数，试验仪器、药品及规格、统计方法，等等。倘系借鉴他人方法，应交代清楚参见文献[**]。<br />
+10 结果<br />
+分别叙述本研究分项试验得出的主要结果，应有基础数据以及依据具体数据统计分析得来的二级或三、四级数据。要对统计、分析数据之后显示出来的信息予以描述，可对分项试验结果的逻辑关系进行阐述。要求层次分明，条理清晰。在结果部分，一般不对他人的研究进行评述。<br />
+11 图和表<br />
+文中只附必要的图和表，切忌与文字表述重复。图和表中的题名、注释或说明语等所有中文均需加对照英文。表题及表注均属表的部分。图和表要有自明性，即通过图表的标题、数据或图像以及图表注释能够说明问题。为便于期刊出版，强烈建议用Excel作图。<br />
+12 量和单位<br />
+按国际标准中关于量和单位的规定和我国法定计量单位书写。注意面积应换算为公顷(hm<sup>2</sup>)。<br />
+13 讨论<br />
+应单独成段，不与结果或结论混写。主要是将本研究结果与前人研究结果的异同加以比较，进行评论，说明验证或印证、证实了什么，否定了什么，对能够阐述清楚的道理或机制加以阐述，对不明确的原因或不一致之处要进一步分析、解释。通过阅读这部分内容，应能使读者了解您得出的结果与已有相关研究的不同或新颖之处，并由此引申出合乎逻辑的结论。<br />
+14 结论<br />
+应单独成段，不与讨论混写。应高度简明、扼要，要有实际内容。应条理清晰地概括本研究的基本结论。应将本研究揭示出来的基本信息全部概括性地展示给读者，以便他人引用。结论不是对研究结果的评论，要避免“奠定了基础”、“提供了保障”等评论性语言。<br />
+15 参考文献<br />
+列出与文章切实相关的国内外资料，特别要吸收国内外最近5年文献。研究报告引用参考文献数量不应低于30 篇，综述不应低于50 篇。未公开发表的文献和资料不宜引用，建议引用同行评议期刊。采用顺序编码制，著录顺序按在论文中所引用文献出现的先后连续编号。参照国际惯例，所有著作者全部著录。中文参考文献需用中英文两种文字排列，将参考文献中的中文条目译成英文，先以中文形式排列，再排列英文。英文不另编号。参考文献列表中的标点符号均采用半角英文符号。<br />
+引用的文献为书籍时，著录格式为：著者. 书名. 版本（初版省略）. 出版地: 出版者, 出版年: 起-止页.<br />
+引用的文献为期刊时，著录格式为：作者. 文献题名. 刊名（全称，勿缩写，英文刊名应为斜体）, 出版年, 卷(期): 起-止页.  连续页码可省略期号。<br />
+实例：<br />
+[1]         景润春, 卢洪. CRISPR/Cas9基因组定向编辑技术的发展与在作物遗传育种中的应用[J]. 中国农业科学, 2016, 49(7): 1219-1229. <br />
+Jing R C, Lu H. The development of CRISPR/Cas9 system and its application in crop genome editing [J]. Scientia Agricultura Sinica, 2016, 49(7): 1219-1229.  (in Chinese)<br />
+[2]<span> 翟振. 北方春玉米农田N<sub>2</sub>O排放规律及减排措施研究—以燕山东麓为例[D]. 北京: 中国农业科学院, 2013. <br />
+Zhai Z. Studies on N<sub>2</sub>O emissions and mitigation of spring maize field in North of China-A case study from Qianxi county, in Eastern Yanshan mountain [D]. Beijing: Chinese Academy of Agricultural Sciences, 2013. (in Chinese)</span><br />
+[3]<span> </span>徐云碧, 朱立煌. 分子数量遗传学[M]. 北京: 中国农业出版社, 1994: 108-110.<br />
+Xu Y B, Zhu L H. Molecular Quantitative Genetics [M]. Beijing: China Agriculture Press, 1994: 108-110. (in Chinese) <br />
+&nbsp;&nbsp;<br />
+投稿请登录<a href="http://www.chinaagrisci.com/CN/0578-1752/home.shtml" target="_blank">http://www.chinaagrisci.com/CN/0578-1752/home.shtml</a>，点击右侧“<span style="background-color:#339966;">作者投稿查稿</span>”按钮，按照提示操作即可。
+</p>
+<p align="left">
+	在按照提示投稿的过程中，如遇页面无法打开的情况，请回退一步，不再填写内容直接点击“下一步”跳过。
+</p>
+<div>
+	<br />
+感谢您对本刊的关注。
+</div>
+<div>
+	祝：顺利!
+</div>
+<div>
+</div>
+								</li>
+				<div class="liulancishu">
+		 			发布日期：2021-01-15 浏览：
+
+
+
+
+95043
+	
+	
+	 
+                </div>
+	 		</ul>
+		</div>
+	</div>
+	<!--右end-->
+
+</div>
+<!--中间end-->
+	
+<!--底部-->
+<div class="footer">
+	<div class="banquan">
+	<a href="https://beian.miit.gov.cn/" target="_blank" class="baise">京ICP备09089781号-30</a><br>
+		版权所有 &copy; 2018 《中国农业科学》 编辑部<br>
+		地址：北京市中关村南大街12号　邮政编码：100081　电话：86-010-82109808　E-mail: zgnykx@caas.cn <br>
+		本系统由<a href="http://www.magtech.com.cn" target="_blank" class="baise">北京玛格泰克科技发展有限公司</a>设计开发
+	</div>
+</div>
+
+<!--返回顶部-->
+<div class="top-arrow" id="backtop" style="display:block;">
+    <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>
+</div>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#backtop").hide();
+        $(window).scroll(function () {
+            if ($(this).scrollTop() >50) {
+                $('#backtop').fadeIn();
+            } else {
+                $('#backtop').fadeOut();
+            }
+        });
+        $('#backtop').click(function () {
+            $('body,html').animate({
+                scrollTop: 0
+            }, 500);
+        });
+        $("pre").addClass("prettyprint");
+       
+    });
+</script>
+<!--返回顶部end-->
+
+<!--头部切换图片调用-->
+<script type="text/javascript" src="https://www.chinaagrisci.com/images/0578-1752/js/jquery.cycle.all.min.js"></script>
+
+
+
+</BODY>
+</HTML>

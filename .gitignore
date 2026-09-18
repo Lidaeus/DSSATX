@@ -38,6 +38,8 @@ node_modules/
 *.rst
 *.nans.csv
 *_run_mapping.csv
+*.audit.csv
+Pest*.audit.csv
 
 # Binaries & Executables
 *.exe
@@ -62,6 +64,15 @@ Workspace/eggplant_v13pdc.csv
 Workspace/eggplant_v13pcs.csv
 Workspace/Sensitivity_Analyze/SA_Project_Output/
 **/_agents/
+.agents/
+**/.agents/
+_iso_runs/
+**/_iso_runs/
+scratch/
+tmp/
+/TMGRO048.CUL
+/TMGRO048.ECO
+/TMGRO048.SPE
 **/_seasons/
 **/failed_dssat_artifacts/
 failed_dssat_artifacts/
@@ -91,6 +102,7 @@ figture/
 paper_figures/
 paper_data/
 workspace/figure_redesign_demo/
+paper/journal_guidelines/files/
 
 # Transient / Root Dumps
 2025春品质集.csv

@@ -1,0 +1,72 @@
+[
+  {
+    "bundle": "25C",
+    "path": "data/user/experiments/XXQL2501/XXQL2501.TMX",
+    "sha256": "306ce6b1a691cead337076c2d545c979b3ba2e017a019749a1d27ba15160e028"
+  },
+  {
+    "bundle": "25C",
+    "path": "data/user/experiments/XXQL2501/XXLI2502.WTH",
+    "sha256": "d273b9b73c6efbca4703e896aefee1921efa18a8ee1a2cfea03e6f339cdc1b6a"
+  },
+  {
+    "bundle": "25D",
+    "path": "data/user/experiments/xxql2501_scheme4_double_n_20260831/XXQL2501.TMX",
+    "sha256": "d67c6492d49eb231dc4979f9412e563dbc521111b5f3a47d421c348ff84c219b"
+  },
+  {
+    "bundle": "25D",
+    "path": "data/user/experiments/xxql2501_scheme4_double_n_20260831/XXLI2502.WTH",
+    "sha256": "d273b9b73c6efbca4703e896aefee1921efa18a8ee1a2cfea03e6f339cdc1b6a"
+  },
+  {
+    "bundle": "25D",
+    "path": "data/user/experiments/xxql2501_scheme4_double_n_20260831/SOIL.SOL",
+    "sha256": "d84f5695f0cd8d6977c32a5ff7a037857288c9e9814fdf5d5b9cada1ab6e161d"
+  },
+  {
+    "bundle": "26C",
+    "path": "data/user/experiments/XXQL2601/XXQL2601.TMX",
+    "sha256": "e6ddf8fdc743be5d65fcb357fcc5181372b7c7771c45d85ce51ca64b699c4fef"
+  },
+  {
+    "bundle": "26C",
+    "path": "data/user/experiments/XXQL2601/XXQL2601.WTH",
+    "sha256": "2beaf4c5fbf39ac36e469f17d4e3eb6437838d8e05f30bd0e2e5946c60f68a46"
+  },
+  {
+    "bundle": "26C",
+    "path": "data/user/experiments/XXQL2601/SOIL.SOL",
+    "sha256": "de6cb0d3c84a678da02a7ff2df0aad6d58bdd1452871d1e86c3b596d98d4d3f3"
+  },
+  {
+    "bundle": "26D",
+    "path": "workspace/reports/e02_v46_26sp_soil_n_scale_sweep_20260901/bundles_v2/s0p34/XXQL2601.TMX",
+    "sha256": "c942ab9ab310bc3efe75f144afd8874aa87270360abaf9fb5a13bb30ad3bb2e1"
+  },
+  {
+    "bundle": "26D",
+    "path": "workspace/reports/e02_v46_26sp_soil_n_scale_sweep_20260901/bundles_v2/s0p34/XXQL2601.WTH",
+    "sha256": "2beaf4c5fbf39ac36e469f17d4e3eb6437838d8e05f30bd0e2e5946c60f68a46"
+  },
+  {
+    "bundle": "26D",
+    "path": "workspace/reports/e02_v46_26sp_soil_n_scale_sweep_20260901/bundles_v2/s0p34/SOIL.SOL",
+    "sha256": "d84f5695f0cd8d6977c32a5ff7a037857288c9e9814fdf5d5b9cada1ab6e161d"
+  },
+  {
+    "bundle": "FA",
+    "path": "data/user/experiments/XXQL2502/XXQL2502.TMX",
+    "sha256": "f3367442e8ddfe8a71afa817382adb77eb5ca8c95ee2b559ab9afb3c1bbc56ce"
+  },
+  {
+    "bundle": "FA",
+    "path": "data/user/experiments/XXQL2502/XXLI2502.WTH",
+    "sha256": "d273b9b73c6efbca4703e896aefee1921efa18a8ee1a2cfea03e6f339cdc1b6a"
+  },
+  {
+    "bundle": "FA",
+    "path": "data/user/experiments/XXQL2502/SOIL.SOL",
+    "sha256": "de6cb0d3c84a678da02a7ff2df0aad6d58bdd1452871d1e86c3b596d98d4d3f3"
+  }
+]

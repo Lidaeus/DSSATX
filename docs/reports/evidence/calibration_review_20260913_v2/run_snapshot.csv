@@ -1,0 +1,5 @@
+﻿candidate,run_dir,status,engineering_status,scientific_status,started_at,finished_at,iteration,member,actual_mean,actual_min,phi_recomputed,ensemble_size,n_observations,n_positive_weight
+v48_55,workspace\runs\e02_formal_v48_n_gradient_water2x_200x4_20260902_r2,completed,engineering_validated,not_assessed,2026-09-02T01:23:42Z,2026-09-02T02:40:41Z,4.0,55,658.125,578.428,578.4279128156605,200.0,1432.0,1168.0
+fix_191,workspace\runs\e02_formal_v48_fix_xfpht_xfint_200x4_20260903_r1,completed,engineering_validated,not_assessed,2026-09-13T02:52:43Z,2026-09-13T05:35:43Z,4.0,191,706.512,594.881,594.8813081683802,200.0,1432.0,1168.0
+26only_39,workspace\runs\e02_formal_v48_26sp_only_200x4_20260903_r1,completed,engineering_validated,not_assessed,2026-09-02T16:51:31Z,2026-09-02T17:25:34Z,4.0,39,283.044,249.54,249.5404655827892,200.0,760.0,616.0
+del_pending,workspace\runs\e02_formal_v48_del_xfpht_xfint_200x4_20260903_r1,running,pending,pending,2026-09-13T08:07:15Z,,,,,,,,,

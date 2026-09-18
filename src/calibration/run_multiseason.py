@@ -50,11 +50,13 @@ if str(_PROJECT_ROOT) not in sys.path:
 from src.calibration.multiseason_design import MultiSeasonDesign
 from src.calibration.seasonal_parameters import write_projected_parameter_csv
 from src.calibration.nitrogen_response import (
+    PEST_N_DOSE_GRADIENT_FILE,
     PEST_N_RESPONSE_FILE,
     PEST_W_RESPONSE_FILE,
     load_n_response_mapping,
     validate_mapping_against_filex,
     write_simulated_n_response,
+    write_simulated_n_dose_gradient,
     write_simulated_water_response,
 )
 from src.common.project import PROJECT_ROOT
@@ -479,6 +481,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="base seconds for exponential DSSAT retry backoff")
     parser.add_argument("--keep-nitrogen-outputs", action="store_true",
                         help="retain PlantN.OUT/SoilNi.OUT in each season sandbox")
+    parser.add_argument("--keep-soil-water", action="store_true",
+                        help="retain SoilWat.OUT in each season sandbox for mechanism diagnostics")
     args = parser.parse_args(argv)
     if args.dssat_max_retries < 0 or args.dssat_max_retries > 10:
         parser.error("--dssat-max-retries must be between 0 and 10")
@@ -627,6 +631,8 @@ def main(argv: list[str] | None = None) -> int:
         ]
         if getattr(args, "keep_nitrogen_outputs", False):
             result_args.append("--keep-nitrogen-outputs")
+        if args.keep_soil_water:
+            result_args.append("--keep-soil-water")
         if args.observation_transform_config:
             result_args.extend([
                 "--observation-transform-config",
@@ -767,6 +773,23 @@ def main(argv: list[str] | None = None) -> int:
             contrast_scale=str(n_response.get("contrast_scale", "log_ratio")),
             harvest_scope=str(n_response.get("harvest_scope", "all")),
             source_variable=str(n_response.get("source_variable", "CHPDT")),
+        )
+
+    n_dose_gradient = design.nitrogen_dose_gradient_objective or {}
+    if bool(n_dose_gradient.get("enabled", False)):
+        mapping_path = Path(str(n_dose_gradient["mapping_csv"]))
+        if not mapping_path.is_absolute():
+            mapping_path = (PROJECT_ROOT / mapping_path).resolve()
+        mapping = load_n_response_mapping(
+            mapping_path, run_mapping_rows, response_levels=["N1", "N2", "N3"]
+        )
+        write_simulated_n_dose_gradient(
+            pest_run_dir / "PestHarvest.OUT",
+            pest_run_dir / PEST_N_DOSE_GRADIENT_FILE,
+            mapping,
+            seasons=n_dose_gradient.get("seasons", ["26SP"]),
+            harvest_scope=str(n_dose_gradient.get("harvest_scope", "all")),
+            source_variable=str(n_dose_gradient.get("source_variable", "CHFPW")),
         )
 
     water_response = design.water_response_objective or {}

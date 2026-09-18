@@ -10,9 +10,12 @@ from __future__ import annotations
 
 import hashlib
 import shutil
+import sys
 from pathlib import Path
 
 ROOT = Path("D:/Tomato_Cal")
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 DSSAT_TOMATO = Path("C:/DSSAT48/Tomato")
 DSSAT_SOIL = Path("C:/DSSAT48/Soil/SOIL.SOL")
 
@@ -74,26 +77,9 @@ def sync_files():
 
     # Sync soil profiles to C:\DSSAT48\Soil\SOIL.SOL
     if DSSAT_SOIL.is_file() and RAW_SOIL.is_file():
-        raw_soil_text = RAW_SOIL.read_text(encoding="utf-8", errors="ignore")
-        dssat_soil_text = DSSAT_SOIL.read_text(encoding="utf-8", errors="ignore")
-
-        for soil_id in ["XXSL2501", "XXSL2601"]:
-            if soil_id not in dssat_soil_text:
-                # Extract profile from raw_soil_text
-                start = raw_soil_text.find(f"*{soil_id}")
-                if start != -1:
-                    # Find next profile starting with '*' or end of file
-                    next_star = raw_soil_text.find("\n*", start + 1)
-                    if next_star != -1:
-                        profile_block = raw_soil_text[start:next_star]
-                    else:
-                        profile_block = raw_soil_text[start:]
-                    
-                    with DSSAT_SOIL.open("a", encoding="utf-8") as f:
-                        f.write("\n" + profile_block.strip() + "\n")
-                    print(f"[INJECT] Injected {soil_id} into {DSSAT_SOIL}")
-            else:
-                print(f"[CHECK] {soil_id} already present in {DSSAT_SOIL}")
+        from tools.soil.build_dual_plot_soil_profiles_20260917 import build_soil_sol
+        build_soil_sol(DSSAT_SOIL, RAW_SOIL)
+        print(f"[SYNC] Updated {DSSAT_SOIL} with refreshed XXSL2501 and XXSL2601 profiles")
 
     print("Synchronization successfully completed!")
 

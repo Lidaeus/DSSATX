@@ -59,8 +59,8 @@
     },
     {
       "name": "SOIL.SOL",
-      "sha256": "3108b4990c87f0139ffddb45081d9df9b21626bc58783b1341935f0fb32d1c86",
-      "size_bytes": 162884
+      "sha256": "d2dae1fb5343e71df9172f581cc9343613f3d0c0d01ddfa6b5a8d44a8a742f98",
+      "size_bytes": 163594
     },
     {
       "name": "soil_water_generator_log.json",
@@ -109,8 +109,8 @@
     },
     {
       "name": "XXQL2601.TMX",
-      "sha256": "8bed67f8cb71a4f364371a3357d3739125120404da28bd693150306932efa855",
-      "size_bytes": 28006
+      "sha256": "e22fcbcf1df54291b01f4b2b04041663f2fc0608412adc6f6873a1051447392c",
+      "size_bytes": 28012
     },
     {
       "name": "XXQL2601.WTH",

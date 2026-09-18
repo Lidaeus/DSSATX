@@ -397,6 +397,22 @@ def _read_plantgro_vars_by_run(plantgro_path, var_names):
     return by_run
 
 
+def _resolve_tmt_path(filex_entry, run_dir=None):
+    if not filex_entry:
+        return None
+    filex_abs = filex_entry if os.path.isabs(filex_entry) else os.path.join(WORKSPACE, filex_entry)
+    filex_dir = os.path.dirname(os.path.abspath(filex_abs))
+    excode = _infer_excode_from_filex(filex_abs)
+    candidates = []
+    if run_dir and excode:
+        candidates.append(os.path.join(run_dir, f"{excode}.TMT"))
+    if excode:
+        candidates.append(os.path.join(filex_dir, f"{excode}.TMT"))
+        candidates.append(os.path.join(_BOOTSTRAP_ROOT, "data", "raw", "experiments", f"{excode}.TMT"))
+        candidates.append(os.path.join(WORKSPACE, f"{excode}.TMT"))
+    return _pick_latest_by_mtime(candidates)
+
+
 def deterministic_process_compare(prefix, batch_file, var_names=None, run_dir=None):
     ensure_results_dir()
     entries = _parse_batch_entries(batch_file)
@@ -406,8 +422,6 @@ def deterministic_process_compare(prefix, batch_file, var_names=None, run_dir=No
     filex0 = entries[0]["filex"]
     filex_abs = filex0 if os.path.isabs(filex0) else os.path.join(WORKSPACE, filex0)
     filex_dir = os.path.dirname(os.path.abspath(filex_abs))
-    excode = _infer_excode_from_filex(filex_abs)
-    tmt_path = os.path.join(filex_dir, f"{excode}.TMT") if excode else None
 
     plantgro_candidates = []
     if run_dir:
@@ -427,13 +441,17 @@ def deterministic_process_compare(prefix, batch_file, var_names=None, run_dir=No
         vars_list = ["L#SD", "LAID", "LWAD", "SWAD"]
     vars_list = [str(v).strip().upper() for v in vars_list if str(v).strip()]
 
-    obs_by_tn = _read_tmt_process_obs(tmt_path, vars_list)
+    obs_by_tmt = {}
     sim_by_run = _read_plantgro_vars_by_run(plantgro_path, vars_list)
 
     rows = []
     for e in entries:
         run_no = int(e["run"])
         tn = int(e.get("tn", -99))
+        tmt_path = _resolve_tmt_path(e.get("filex"), run_dir)
+        if tmt_path not in obs_by_tmt:
+            obs_by_tmt[tmt_path] = _read_tmt_process_obs(tmt_path, vars_list)
+        obs_by_tn = obs_by_tmt[tmt_path]
         obs_pts = obs_by_tn.get(tn, [])
         sim_candidates = sim_by_run.get(run_no, {})
         sim_dates_sorted = sorted(sim_candidates.keys())
@@ -482,8 +500,6 @@ def deterministic_harvest_compare(prefix, batch_file, run_dir=None):
     filex0 = entries[0]["filex"]
     filex_abs = filex0 if os.path.isabs(filex0) else os.path.join(WORKSPACE, filex0)
     filex_dir = os.path.dirname(os.path.abspath(filex_abs))
-    excode = _infer_excode_from_filex(filex_abs)
-    tmt_path = os.path.join(filex_dir, f"{excode}.TMT") if excode else None
 
     freshwt_candidates = []
     if run_dir:
@@ -498,7 +514,7 @@ def deterministic_harvest_compare(prefix, batch_file, run_dir=None):
     if not freshwt_path:
         freshwt_path = os.path.join(WORKSPACE, "FreshWt.OUT")
 
-    obs_by_tn = _read_tmt_harvest_obs(tmt_path)
+    obs_by_tmt = {}
     sim_chpdt = _read_freshwt_var_by_run(freshwt_path, "CHPDT")
     sim_chfpw = _read_freshwt_var_by_run(freshwt_path, "CHFPW")
 
@@ -506,6 +522,10 @@ def deterministic_harvest_compare(prefix, batch_file, run_dir=None):
     for e in entries:
         run_no = int(e["run"])
         tn = int(e.get("tn", -99))
+        tmt_path = _resolve_tmt_path(e.get("filex"), run_dir)
+        if tmt_path not in obs_by_tmt:
+            obs_by_tmt[tmt_path] = _read_tmt_harvest_obs(tmt_path)
+        obs_by_tn = obs_by_tmt[tmt_path]
         obs_events = obs_by_tn.get(tn, [])
         prev_sim_dry = None
         prev_sim_fresh = None
@@ -647,14 +667,15 @@ def deterministic_joint_compare(prefix, batch_file, var_bases=None, run_dir=None
 def ensure_results_dir():
     pass  # Deprecated, use run_dir directly
 
-def get_ensemble_files(pattern):
+def get_ensemble_files(pattern, run_dir=None):
     """
-    Finds files matching pattern in both RESULTS_DIR and WORKSPACE.
+    Finds files matching pattern in run_dir, WORKSPACE, and results root.
     Returns combined list of files.
     """
     files = []
+    if run_dir and os.path.isdir(run_dir):
+        files.extend(glob.glob(os.path.join(run_dir, pattern)))
     files.extend(glob.glob(os.path.join(WORKSPACE, pattern)))
-    # Removed old RESULTS_DIR lookup for simplicity
     runs_root = os.path.join(WORKSPACE, "Calibration_Results", "_runs")
     if os.path.isdir(runs_root):
         files.extend(glob.glob(os.path.join(runs_root, "*", "*", pattern)))
@@ -718,6 +739,10 @@ def _write_and_run_deterministic(prefix, batch_file, param_csv, det_dir, harvest
 
     batch_local = os.path.join(det_dir, "DSSBatch.v48")
     shutil.copy2(batch_file, batch_local)
+
+    from pathlib import Path
+    from src.calibration.run_dssat import prepare_run_directory
+    prepare_run_directory(Path(det_dir), ["--batch", batch_file])
 
     run_dssat_path = os.path.join(WORKSPACE, "run_dssat.py")
     cmd = [
@@ -823,6 +848,7 @@ def analyze(prefix, run_dir=None, batch_file=None, make_plots=True, plots_no_tim
         import pyemu
 
     pst = pyemu.Pst(pst_file)
+    effective_run_dir = run_dir or (os.path.dirname(os.path.abspath(pst_file)) if pst_file else None)
 
     batch_file = (batch_file or "").strip() or os.path.join(WORKSPACE, "DSSBatch.v48")
     
@@ -834,7 +860,7 @@ def analyze(prefix, run_dir=None, batch_file=None, make_plots=True, plots_no_tim
     obs['measured'] = obs['obsval']
     
     # Find the latest observation ensemble file
-    obs_files = get_ensemble_files(f"{prefix}.*.obs.csv")
+    obs_files = get_ensemble_files(f"{prefix}.*.obs.csv", run_dir=effective_run_dir)
     
     # Filter for numeric iteration numbers
     iter_files = []
@@ -900,8 +926,8 @@ def analyze(prefix, run_dir=None, batch_file=None, make_plots=True, plots_no_tim
             
     res_df = pd.DataFrame(results)
     
-    # Save to RESULTS_DIR
-    output_path = os.path.join(RESULTS_DIR, f"{prefix}_error_diag.csv")
+    # Save to RESULTS_DIR / effective_run_dir
+    output_path = os.path.join(effective_run_dir or RESULTS_DIR, f"{prefix}_error_diag.csv")
     res_df.to_csv(output_path, index=False)
     print(f"Detailed analysis saved to {output_path}")
     
@@ -917,7 +943,7 @@ def analyze(prefix, run_dir=None, batch_file=None, make_plots=True, plots_no_tim
         print("\nNo weighted observations found for statistics.")
 
     # Parameter Analysis
-    par_files = get_ensemble_files(f"{prefix}.*.par.csv")
+    par_files = get_ensemble_files(f"{prefix}.*.par.csv", run_dir=effective_run_dir)
     par_iter_files = []
     for f in par_files:
         basename = os.path.basename(f)
@@ -940,12 +966,12 @@ def analyze(prefix, run_dir=None, batch_file=None, make_plots=True, plots_no_tim
         par_stats = par_ens.describe(percentiles=[0.025, 0.975]).T
         par_stats['mean'] = par_ens.mean()
         
-        par_output_path = os.path.join(RESULTS_DIR, f"{prefix}_parameter_uncertainty.csv")
+        par_output_path = os.path.join(effective_run_dir or RESULTS_DIR, f"{prefix}_parameter_uncertainty.csv")
         par_stats.to_csv(par_output_path)
         print(f"Parameter uncertainty saved to {par_output_path}")
 
         # 2. Identify Best Realization (Minimum Phi)
-        phi_candidates = get_ensemble_files(f"{prefix}.phi.actual.csv")
+        phi_candidates = get_ensemble_files(f"{prefix}.phi.actual.csv", run_dir=effective_run_dir)
         phi_file = _pick_latest_by_mtime(phi_candidates)
         if not phi_file:
             phi_file = os.path.join(RESULTS_DIR, f"{prefix}.phi.actual.csv")

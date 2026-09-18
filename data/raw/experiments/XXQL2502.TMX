@@ -31,11 +31,13 @@ Quncy, FL
 
 *FIELDS
 @L ID_FIELD WSTA....  FLSA  FLOB  FLDT  FLDD  FLDS  FLST SLTX  SLDP  ID_SOIL    FLNAME
- 2 XXXXXXX6 XXLI2502   -99     0 DR000     0     0  0000 SL     180  XXSL2601     Number 2 Fields
- 5 AAXX2501 XXN9       -99     0 DR000     0     0  0000 SL     180  XXSL2601     Number 9 Fields
+ 2 XXXXXXX6 XXLI2502   -99     0 DR000     0     0  0000 SL     180  XXSL2601         Number 2 Fields
+ 5 AAXX2501 XXN9       -99     0 DR000     0     0  0000 SL     180  XXSL2601         Number 9 Fields
 @L ...........XCRD ...........YCRD .....ELEV .............AREA .SLEN .FLWR .SLAS FLHST FHDUR
  2           35.16           113.8        75               -99   -99   -99   -99 FH101   -99
  5             35.16           113.8      75               -99   -99   -99   -99 FH101   -99
+
+
 
 
 *SOIL ANALYSIS

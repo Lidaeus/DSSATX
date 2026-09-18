@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_genetic_98pct_v7_20260917"
+crop: "eggplant"
+created_at: "2026-09-17T06:37:48Z"
+approved_at: "2026-09-17T06:37:48Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_genetic_98pct_v7_20260917.csv"
+derived_from_sha256: "3b145e75acd2df40e35659a966d0fd4afa187547f2e549b3572bdcf30d6f9c9b"
+bounds_sha256: "3b145e75acd2df40e35659a966d0fd4afa187547f2e549b3572bdcf30d6f9c9b"
+parameter_count: 163
+automatic_repairs: 0
+notes: "V7 full genetic parameter bounds: 80cm SRGF truncation, sizlf<=380, xfrt<=0.95, fnpgn2 in [4.0, 5.2] per field measured leaf N, icns_26sp in [0.30, 0.45], nstfac in [0.60, 0.85]"

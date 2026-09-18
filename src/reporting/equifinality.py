@@ -22,6 +22,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 from datetime import datetime, timezone
 from itertools import combinations
@@ -103,14 +104,15 @@ def _read_par_iteration(run_dir: Path, prefix: str, iteration: int) -> pd.DataFr
 
 
 def _read_latest_par_iteration(run_dir: Path, prefix: str) -> pd.DataFrame:
-    candidates = sorted(run_dir.glob(f"{prefix}.*.par.csv"))
+    candidates = [(int(m.group(1)), p) for p in run_dir.glob(f"{prefix}.*.par.csv")
+                  if (m := re.fullmatch(re.escape(prefix) + r"\.(\d+)\.par\.csv", p.name))]
     if not candidates:
         raise FileNotFoundError(f"No posterior ensemble found for prefix {prefix!r} in {run_dir}")
     # Skip iteration 0 (prior) — pick the highest iteration number.
-    posterior_candidates = [p for p in candidates if not p.name.endswith(".0.par.csv")]
+    posterior_candidates = [(it, p) for it, p in candidates if it > 0]
     if not posterior_candidates:
-        posterior_candidates = candidates
-    path = posterior_candidates[-1]
+        raise FileNotFoundError("Only prior iteration 0 exists; no IES posterior available")
+    path = max(posterior_candidates, key=lambda item: item[0])[1]
     df = pd.read_csv(path)
     rename = {c: str(c).strip().upper() for c in df.columns if c != "real_name"}
     return df.rename(columns=rename)

@@ -227,7 +227,7 @@ def _wait_for_manager_with_agent_guard(
                     all_disconnected,
                 )
                 stalled_pattern = (
-                    progress["T"] > 0
+                    progress["R"] == 0
                     and progress["W"] == 0
                     and progress["U"] == 0
                     and all_disconnected
@@ -248,6 +248,19 @@ def _wait_for_manager_with_agent_guard(
                             location="run_parallel.py:_wait_for_manager_with_agent_guard:stall_detected",
                         )
                     elif stalled_since is not None and (time.monotonic() - stalled_since) >= float(stall_timeout_s):
+                        if restart_agents is not None and agent_restart_count < int(max_agent_restarts):
+                            agent_restart_count += 1
+                            print(f"[guard] Panther stall detected. Restarting {len(agent_handles)} agents (attempt {agent_restart_count}/{max_agent_restarts})...", flush=True)
+                            for proc_item, *_ in agent_handles:
+                                try:
+                                    proc_item.kill()
+                                except Exception:
+                                    pass
+                            time.sleep(1)
+                            restart_agents(agent_handles, agent_restart_count)
+                            stalled_signature = None
+                            stalled_since = None
+                            continue
                         _debug_report(
                             "B",
                             "[DEBUG] panther_stall_timeout_abort",
@@ -261,8 +274,7 @@ def _wait_for_manager_with_agent_guard(
                             location="run_parallel.py:_wait_for_manager_with_agent_guard:stall_timeout",
                         )
                         raise RuntimeError(
-                            "panther stall detected: manager remained active with pending timed-out tasks "
-                            "while all agents reported receive-from-master failures"
+                            "panther stall detected: manager remained active while all agents reported receive-from-master failures"
                         )
                 else:
                     stalled_signature = None
@@ -296,27 +308,27 @@ def _wait_for_manager_with_agent_guard(
             )
             if manager_rc is not None:
                 return manager_rc
+            if restart_agents is not None and agent_restart_count < int(max_agent_restarts):
+                agent_restart_count += 1
+                restarted = bool(restart_agents(agent_handles, agent_restart_count))
+                if restarted:
+                    stalled_signature = None
+                    stalled_since = None
+                    _debug_report(
+                        "A",
+                        "[DEBUG] disconnected_agents_restarted",
+                        data={
+                            "manager_pid": getattr(manager_process, "pid", None),
+                            "restart_attempt": agent_restart_count,
+                            "agent_pids": [
+                                getattr(process, "pid", None)
+                                for process, *_ in agent_handles
+                            ],
+                        },
+                        location="run_parallel.py:_wait_for_manager_with_agent_guard:agents_restarted",
+                    )
+                    continue
             if disconnect_lines:
-                if restart_agents is not None and agent_restart_count < int(max_agent_restarts):
-                    agent_restart_count += 1
-                    restarted = bool(restart_agents(agent_handles, agent_restart_count))
-                    if restarted:
-                        stalled_signature = None
-                        stalled_since = None
-                        _debug_report(
-                            "A",
-                            "[DEBUG] disconnected_agents_restarted",
-                            data={
-                                "manager_pid": getattr(manager_process, "pid", None),
-                                "restart_attempt": agent_restart_count,
-                                "agent_pids": [
-                                    getattr(process, "pid", None)
-                                    for process, *_ in agent_handles
-                                ],
-                            },
-                            location="run_parallel.py:_wait_for_manager_with_agent_guard:agents_restarted",
-                        )
-                        continue
                 raise RuntimeError(
                     "PEST++ manager connection was lost; all agents then exited "
                     f"(agent_exit_codes={exit_codes})"
@@ -753,7 +765,7 @@ def cmd_run(args):
     if port <= 0:
         port = _choose_free_port()
 
-    host = args.host or socket.gethostname()
+    host = args.host or "127.0.0.1"
 
     repo_root = _repo_root_from_this_file()
     exe_name = {"ies": "pestpp-ies.exe", "glm": "pestpp-glm.exe"}.get(args.mode, "pestpp-sen.exe")

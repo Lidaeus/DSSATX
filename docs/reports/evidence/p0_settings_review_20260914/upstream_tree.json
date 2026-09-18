@@ -1,0 +1,26 @@
+{
+  "sha": "d6556cca9f926c40eddffd9adcf77e970db7511b",
+  "paths": [
+    "InputModule/IPSOIL_Inp.for",
+    "InputModule/IPTILL.for",
+    "Plant/AROIDS/TR_Transpl_g.for",
+    "Plant/AROIDS/TR_Transpl_p.for",
+    "Plant/CASUPRO-Sugarcane/CSP_IPPLNT.for",
+    "Plant/CERES-Maize/MZ_KUPTAK.for",
+    "Plant/CERES-Rice/RI_KUPTAK.for",
+    "Plant/CERES-Rice/RI_Transpl_g.for",
+    "Plant/CERES-Rice/RI_Transpl_p.for",
+    "Plant/CERES-TEFF/TEFF_KUPTAK.for",
+    "Plant/CERES-TEFF/TEFF_Transpl_g.for",
+    "Plant/CERES-TEFF/TEFF_Transpl_p.for",
+    "Plant/CROPGRO/IPPLNT.for",
+    "Plant/FORAGE/for_ipplnt.for",
+    "Plant/FORAGE/for_seeddm.for",
+    "Plant/Generic-Pest/SEEDDM.for",
+    "Plant/Generic-PlantP/P_IPPLNT.for",
+    "Plant/NTEF/TF_KUPTAK.for",
+    "Plant/NWHEAT/WH_KUPTAK.for",
+    "Plant/OilCrop-Sunflower/SU_KUPTAK.for",
+    "Soil/SoilUtilities/IPSOIL.for"
+  ]
+}

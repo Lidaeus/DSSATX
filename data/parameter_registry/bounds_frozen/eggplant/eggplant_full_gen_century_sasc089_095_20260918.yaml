@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_gen_century_sasc089_095_20260918"
+crop: "eggplant"
+created_at: "2026-09-18T02:32:45Z"
+approved_at: "2026-09-18T02:32:45Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_gen_century_sasc089_095_20260918.csv"
+derived_from_sha256: "9e177886ba075448f4290f6573ad082628531de16fd4295c66191468fbdb7471"
+bounds_sha256: "2277dc7b34060399d1ad894d6f3379f03a662c4014369ca7965a246cb157b50d"
+parameter_count: 164
+automatic_repairs: 0
+notes: "CENTURY MESOM=P with SASC_RATIO in [0.89, 0.95], ICNS_26SP=0.70 fixed, and updated SRGF (80/100cm=0.200, 140cm=0.050, 180cm=0.000)"

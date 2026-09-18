@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="14" time="3.332" timestamp="2026-09-13T16:16:44.335901+08:00" hostname="Lidaeus-DESK"><testcase classname="tests.test_dssat_safety" name="test_candidate_validation_logs_safety_and_relation_risks_without_freezing" time="0.001" /><testcase classname="tests.test_dssat_safety" name="test_candidate_validation_still_rejects_nonfinite_values" time="0.001" /><testcase classname="tests.test_dssat_safety" name="test_candidate_validation_accepts_shipped_tmgro_baselines" time="0.001" /><testcase classname="tests.test_dssat_safety" name="test_candidate_validation_accepts_reviewed_indeterminate_and_partition_values" time="0.000" /><testcase classname="tests.test_dssat_safety" name="test_fresh_output_guard_rejects_empty_and_stale_files" time="0.060" /><testcase classname="tests.test_dssat_safety" name="test_cultivar_injection_changes_only_requested_parameter" time="0.325" /><testcase classname="tests.test_dssat_safety" name="test_ecotype_and_species_injection_use_local_base_files" time="0.197"><failure message="AssertionError: assert False&#10; +  where False = &lt;built-in method endswith of str object at 0x000002277F9F2BB0&gt;('0.30')&#10; +    where &lt;built-in method endswith of str object at 0x000002277F9F2BB0&gt; = 'TM0001 SEMI-DETERMINATE  01 00   0.0  11.4  39.3   0.0   3.8  0.60  0.75  39.0   0.0 100.0  0.25   1.3   1.3  0.00  0.00 -0.12  28.6  38.8    .3'.endswith&#10; +      where 'TM0001 SEMI-DETERMINATE  01 00   0.0  11.4  39.3   0.0   3.8  0.60  0.75  39.0   0.0 100.0  0.25   1.3   1.3  0.00  0.00 -0.12  28.6  38.8    .3' = &lt;built-in method rstrip of str object at 0x000002277F9F2BB0&gt;()&#10; +        where &lt;built-in method rstrip of str object at 0x000002277F9F2BB0&gt; = 'TM0001 SEMI-DETERMINATE  01 00   0.0  11.4  39.3   0.0   3.8  0.60  0.75  39.0   0.0 100.0  0.25   1.3   1.3  0.00  0.00 -0.12  28.6  38.8    .3'.rstrip">tmp_path = WindowsPath('C:/Users/Lidaeus/AppData/Local/Temp/pytest-of-Lidaeus/pytest-835/test_ecotype_and_species_injec0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002277FAA9480&gt;
+
+    def test_ecotype_and_species_injection_use_local_base_files(tmp_path, monkeypatch):
+        genotype = ROOT / "data" / "templates" / "genotype"
+        for filename in ("TMGRO048.ECO", "TMGRO048.SPE"):
+            (tmp_path / f"{filename}.base").write_bytes((genotype / f"{filename}.base").read_bytes())
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(run_dssat, "ECO_FILE", "TMGRO048.ECO")
+        monkeypatch.setattr(run_dssat, "SPE_FILE", "TMGRO048.SPE")
+    
+        eco_params = _parameter_csv(tmp_path / "eco.csv", XFINT=0.30)
+        run_dssat.update_eco_file(str(eco_params), target_ecotype="TM0001")
+        eco_line = next(
+            line for line in (tmp_path / "TMGRO048.ECO").read_text(encoding="utf-8").splitlines()
+            if line.startswith("TM0001")
+        )
+&gt;       assert eco_line.rstrip().endswith("0.30")
+E       AssertionError: assert False
+E        +  where False = &lt;built-in method endswith of str object at 0x000002277F9F2BB0&gt;('0.30')
+E        +    where &lt;built-in method endswith of str object at 0x000002277F9F2BB0&gt; = 'TM0001 SEMI-DETERMINATE  01 00   0.0  11.4  39.3   0.0   3.8  0.60  0.75  39.0   0.0 100.0  0.25   1.3   1.3  0.00  0.00 -0.12  28.6  38.8    .3'.endswith
+E        +      where 'TM0001 SEMI-DETERMINATE  01 00   0.0  11.4  39.3   0.0   3.8  0.60  0.75  39.0   0.0 100.0  0.25   1.3   1.3  0.00  0.00 -0.12  28.6  38.8    .3' = &lt;built-in method rstrip of str object at 0x000002277F9F2BB0&gt;()
+E        +        where &lt;built-in method rstrip of str object at 0x000002277F9F2BB0&gt; = 'TM0001 SEMI-DETERMINATE  01 00   0.0  11.4  39.3   0.0   3.8  0.60  0.75  39.0   0.0 100.0  0.25   1.3   1.3  0.00  0.00 -0.12  28.6  38.8    .3'.rstrip
+
+D:\Tomato_Cal\tests\test_dssat_safety.py:123: AssertionError</failure></testcase><testcase classname="tests.test_dssat_safety" name="test_species_injection_updates_fruit_water_related_spe_fields" time="0.266"><failure message="AssertionError: assert ('0.410' in '   .41  .274  .119  .021  .052  .900   SDPROS,SDPROG,PRONOD,PROMIN,PROMAX,THETA' or '.410' in '   .41  .274  .119  .021  .052  .900   SDPROS,SDPROG,PRONOD,PROMIN,PROMAX,THETA')">tmp_path = WindowsPath('C:/Users/Lidaeus/AppData/Local/Temp/pytest-of-Lidaeus/pytest-835/test_species_injection_updates0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002277FABE0F0&gt;
+
+    def test_species_injection_updates_fruit_water_related_spe_fields(tmp_path, monkeypatch):
+        genotype = ROOT / "data" / "templates" / "genotype"
+        (tmp_path / "TMGRO048.SPE.base").write_bytes((genotype / "TMGRO048.SPE.base").read_bytes())
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(run_dssat, "SPE_FILE", "TMGRO048.SPE")
+    
+        spe_params = _parameter_csv(
+            tmp_path / "spe_fwc.csv",
+            SDPROS=0.410,
+            PCARSD=0.620,
+            XMPAGE=120.0,
+        )
+        run_dssat.update_spe_file(str(spe_params))
+        lines = (tmp_path / "TMGRO048.SPE").read_text(encoding="utf-8").splitlines()
+    
+        composition = next(line for line in lines if "SDPROS,SDPROG" in line)
+&gt;       assert "0.410" in composition or ".410" in composition
+E       AssertionError: assert ('0.410' in '   .41  .274  .119  .021  .052  .900   SDPROS,SDPROG,PRONOD,PROMIN,PROMAX,THETA' or '.410' in '   .41  .274  .119  .021  .052  .900   SDPROS,SDPROG,PRONOD,PROMIN,PROMAX,THETA')
+
+D:\Tomato_Cal\tests\test_dssat_safety.py:150: AssertionError</failure></testcase><testcase classname="tests.test_dssat_safety" name="test_species_injection_expands_anchor_parameters_into_spe_arrays" time="0.183" /><testcase classname="tests.test_dssat_safety" name="test_xfint_historical_safety_threshold_is_advisory_not_a_runner_rejection" time="0.141"><failure message="AssertionError: assert False&#10; +  where False = &lt;built-in method endswith of str object at 0x000002277F9F2F70&gt;('0.08')&#10; +    where &lt;built-in method endswith of str object at 0x000002277F9F2F70&gt; = 'TM0001 SEMI-DETERMINATE  01 00   0.0  11.4  39.3   0.0   3.8  0.60  0.75  39.0   0.0 100.0  0.25   1.3   1.3  0.00  0.00 -0.12  28.6  38.8   .08'.endswith&#10; +      where 'TM0001 SEMI-DETERMINATE  01 00   0.0  11.4  39.3   0.0   3.8  0.60  0.75  39.0   0.0 100.0  0.25   1.3   1.3  0.00  0.00 -0.12  28.6  38.8   .08' = &lt;built-in method rstrip of str object at 0x000002277F9F2F70&gt;()&#10; +        where &lt;built-in method rstrip of str object at 0x000002277F9F2F70&gt; = 'TM0001 SEMI-DETERMINATE  01 00   0.0  11.4  39.3   0.0   3.8  0.60  0.75  39.0   0.0 100.0  0.25   1.3   1.3  0.00  0.00 -0.12  28.6  38.8   .08'.rstrip">tmp_path = WindowsPath('C:/Users/Lidaeus/AppData/Local/Temp/pytest-of-Lidaeus/pytest-835/test_xfint_historical_safety_t0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002277F9F78A0&gt;
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x000002277FA760D0&gt;
+
+    def test_xfint_historical_safety_threshold_is_advisory_not_a_runner_rejection(tmp_path, monkeypatch, capsys):
+        """T10-approved XFINT=0.08 must reach DSSAT after an auditable warning."""
+        genotype = ROOT / "data" / "templates" / "genotype"
+        (tmp_path / "TMGRO048.ECO.base").write_bytes((genotype / "TMGRO048.ECO.base").read_bytes())
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(run_dssat, "ECO_FILE", "TMGRO048.ECO")
+    
+        eco_params = _parameter_csv(tmp_path / "eco_xfint_008.csv", XFINT=0.08)
+        run_dssat.update_eco_file(str(eco_params), target_ecotype="TM0001")
+    
+        captured = capsys.readouterr()
+        assert "RUNNER_ADVISORY parameter=XFINT value=0.08" in captured.err
+        eco_line = next(
+            line for line in (tmp_path / "TMGRO048.ECO").read_text(encoding="utf-8").splitlines()
+            if line.startswith("TM0001")
+        )
+&gt;       assert eco_line.rstrip().endswith("0.08")
+E       AssertionError: assert False
+E        +  where False = &lt;built-in method endswith of str object at 0x000002277F9F2F70&gt;('0.08')
+E        +    where &lt;built-in method endswith of str object at 0x000002277F9F2F70&gt; = 'TM0001 SEMI-DETERMINATE  01 00   0.0  11.4  39.3   0.0   3.8  0.60  0.75  39.0   0.0 100.0  0.25   1.3   1.3  0.00  0.00 -0.12  28.6  38.8   .08'.endswith
+E        +      where 'TM0001 SEMI-DETERMINATE  01 00   0.0  11.4  39.3   0.0   3.8  0.60  0.75  39.0   0.0 100.0  0.25   1.3   1.3  0.00  0.00 -0.12  28.6  38.8   .08' = &lt;built-in method rstrip of str object at 0x000002277F9F2F70&gt;()
+E        +        where &lt;built-in method rstrip of str object at 0x000002277F9F2F70&gt; = 'TM0001 SEMI-DETERMINATE  01 00   0.0  11.4  39.3   0.0   3.8  0.60  0.75  39.0   0.0 100.0  0.25   1.3   1.3  0.00  0.00 -0.12  28.6  38.8   .08'.rstrip
+
+D:\Tomato_Cal\tests\test_dssat_safety.py:224: AssertionError</failure></testcase><testcase classname="tests.test_dssat_safety" name="test_soil_and_initial_condition_injection_are_explicit" time="0.181"><failure message="assert False&#10; +  where False = any(&lt;generator object test_soil_and_initial_condition_injection_are_explicit.&lt;locals&gt;.&lt;genexpr&gt; at 0x000002277FA718A0&gt;)">tmp_path = WindowsPath('C:/Users/Lidaeus/AppData/Local/Temp/pytest-of-Lidaeus/pytest-835/test_soil_and_initial_conditio0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002277FA37B50&gt;
+
+    def test_soil_and_initial_condition_injection_are_explicit(tmp_path, monkeypatch):
+        soil_source = ROOT / "data" / "raw" / "soil" / "SOIL.SOL"
+        (tmp_path / "SOIL.SOL.base").write_bytes(soil_source.read_bytes())
+        experiment_source = ROOT / "data" / "raw" / "experiments" / "XXQL2501.TMX"
+        experiment = tmp_path / "XXQL2501.TMX"
+        experiment.write_bytes(experiment_source.read_bytes())
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(run_dssat, "SOIL_BASE_FILE", "SOIL.SOL.base")
+        monkeypatch.setattr(run_dssat, "SOIL_FILE", "SOIL.SOL")
+    
+        soil_params = _parameter_csv(
+            tmp_path / "soil.csv",
+            SOIL_SLLL_01=0.130,
+            SOIL_SDUL_01=0.210,
+            SOIL_SSAT_01=0.300,
+        )
+        run_dssat.update_soil_file(str(soil_params), soil_id="IBTM910017")
+        soil_lines = (tmp_path / "SOIL.SOL").read_text(encoding="utf-8").splitlines()
+        profile_index = next(i for i, line in enumerate(soil_lines) if line.startswith("*IBTM910017"))
+&gt;       assert any("0.130 0.210 0.300" in line for line in soil_lines[profile_index : profile_index + 10])
+E       assert False
+E        +  where False = any(&lt;generator object test_soil_and_initial_condition_injection_are_explicit.&lt;locals&gt;.&lt;genexpr&gt; at 0x000002277FA718A0&gt;)
+
+D:\Tomato_Cal\tests\test_dssat_safety.py:246: AssertionError</failure></testcase><testcase classname="tests.test_dssat_safety" name="test_run_directory_preparation_is_local_and_complete" time="0.154" /><testcase classname="tests.test_dssat_safety" name="test_run_directory_uses_explicit_user_bundle_without_raw_fallback" time="0.013"><failure message="FileNotFoundError: User input directory does not exist: D:\Tomato_Cal\data\user\experiments\xxql2501_symbi_n_candidate_20260719">tmp_path = WindowsPath('C:/Users/Lidaeus/AppData/Local/Temp/pytest-of-Lidaeus/pytest-835/test_run_directory_uses_explic0')
+
+    def test_run_directory_uses_explicit_user_bundle_without_raw_fallback(tmp_path):
+        bundle = ROOT / "data" / "user" / "experiments" / "xxql2501_symbi_n_candidate_20260719"
+&gt;       batch = prepare_run_directory(
+            tmp_path,
+            ["--input-dir", str(bundle), "--batch", "DSSBatch.v48"],
+        )
+
+tests\test_dssat_safety.py:274: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+run_dir = WindowsPath('C:/Users/Lidaeus/AppData/Local/Temp/pytest-of-Lidaeus/pytest-835/test_run_directory_uses_explic0')
+args = ['--input-dir', 'D:\\Tomato_Cal\\data\\user\\experiments\\xxql2501_symbi_n_candidate_20260719', '--batch', 'DSSBatch.v48']
+
+    def prepare_run_directory(run_dir: Path, args: list[str]) -&gt; Path:
+        """Populate one run directory with immutable inputs required by DSSAT."""
+        run_dir.mkdir(parents=True, exist_ok=True)
+        input_dir = _input_dir_argument(args)
+        if input_dir is not None and not input_dir.is_dir():
+&gt;           raise FileNotFoundError(f"User input directory does not exist: {input_dir}")
+E           FileNotFoundError: User input directory does not exist: D:\Tomato_Cal\data\user\experiments\xxql2501_symbi_n_candidate_20260719
+
+src\calibration\run_dssat.py:4047: FileNotFoundError</failure></testcase><testcase classname="tests.test_dssat_safety" name="test_atomic_copy_back_publishes_raw_dssat_outputs_for_sa" time="0.004"><failure message="ImportError: cannot import name '_RAW_DSSAT_OUTPUT_FILES' from 'src.calibration.run_dssat' (D:\Tomato_Cal\src\calibration\run_dssat.py)">tmp_path = WindowsPath('C:/Users/Lidaeus/AppData/Local/Temp/pytest-of-Lidaeus/pytest-835/test_atomic_copy_back_publishe0')
+
+    def test_atomic_copy_back_publishes_raw_dssat_outputs_for_sa(tmp_path):
+        """The SA pipeline (sa_model.py) reads raw PlantGro.OUT/FreshWt.OUT/
+        Evaluate.OUT daily trajectories to build the 164-response contract; the
+        summary Pest*.OUT do not carry them. _atomic_copy_back must therefore copy
+        the raw outputs back from the ephemeral iso dir alongside the PEST
+        interface files, or every SA output silently becomes the -99 sentinel.
+        """
+&gt;       from src.calibration.run_dssat import _RAW_DSSAT_OUTPUT_FILES, _atomic_copy_back
+E       ImportError: cannot import name '_RAW_DSSAT_OUTPUT_FILES' from 'src.calibration.run_dssat' (D:\Tomato_Cal\src\calibration\run_dssat.py)
+
+tests\test_dssat_safety.py:291: ImportError</failure></testcase></testsuite></testsuites>

@@ -29,7 +29,7 @@ def generate_lhs_ensemble(
     bounds_df: pd.DataFrame,
     seed: int,
     *,
-    method: str = "lhs",
+    method: str = "sobol",
     optimization: str = "random-cd",
     include_base: bool = False,
 ) -> pd.DataFrame:
@@ -46,8 +46,8 @@ def generate_lhs_ensemble(
     seed
         Random seed for reproducibility.
     method
-        Sampling method: ``"lhs"`` (Latin Hypercube) or ``"sobol"``
-        (Sobol sequence). Default is ``"lhs"``.
+        Sampling method: ``"sobol"`` (Sobol sequence, default) or ``"lhs"``
+        (Latin Hypercube).
     optimization
         LHS optimization strategy passed to ``scipy.stats.qmc.LatinHypercube``.
         Common values: ``"random-cd"`` (default), ``"lloyd"``.
@@ -63,13 +63,6 @@ def generate_lhs_ensemble(
         like ``"0"``, ``"1"``, ..., followed by one column per parameter.
         Realization names use plain integer strings to match PEST++'s
         observation-ensemble index convention.
-
-    Notes
-    -----
-    - For Sobol sequences, the number of realizations should ideally be a
-      power of 2 for optimal space-filling properties.
-    - LHS with ``optimization="random-cd"`` uses the centered-LHS variant
-      and optimizes the centered discrepancy.
     """
     # Filter to active parameters only.
     active = bounds_df[bounds_df["status"].astype(str).str.lower() == "active"].copy()
@@ -84,19 +77,15 @@ def generate_lhs_ensemble(
 
     # Generate samples in unit hypercube [0, 1]^d.
     if method == "sobol":
-        # Sobol sequence: use scipy's Sobol engine.
+        # Sobol sequence: use scipy's Sobol engine with random_base2.
         sampler = qmc.Sobol(d=n_par, scramble=True, seed=seed)
-        # Sobol requires n_reals to be a power of 2 for best uniformity.
-        # If not, we generate the next power of 2 and truncate.
-        n_pow2 = 1 << (n_reals - 1).bit_length()
-        if n_pow2 < n_reals:
-            n_pow2 <<= 1
-        unit_samples = sampler.random(n_pow2)[:n_reals]
+        m = (n_reals - 1).bit_length()
+        unit_samples = sampler.random_base2(m=m)[:n_reals]
     elif method == "lhs":
         sampler = qmc.LatinHypercube(d=n_par, optimization=optimization, seed=seed)
         unit_samples = sampler.random(n_reals)
     else:
-        raise ValueError(f"Unknown method: {method}. Use 'lhs' or 'sobol'.")
+        raise ValueError(f"Unknown method: {method}. Use 'sobol' or 'lhs'.")
 
     # Scale from [0, 1] to [lower, upper].
     samples = qmc.scale(unit_samples, lower, upper)

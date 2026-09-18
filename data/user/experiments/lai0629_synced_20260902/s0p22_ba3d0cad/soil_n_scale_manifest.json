@@ -1,0 +1,8 @@
+{
+  "format_version": 2,
+  "source_bundle": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2601_scheme4_double_n_20260831",
+  "scale": 0.22,
+  "xlsx": "D:\\Tomato_Cal\\data\\user\\ref\\26SP硝态氮铵态氮校准值.xlsx",
+  "scope": "SNH4/SNO3 only, DSSAT depths <=60 cm",
+  "deeper_layers_unchanged": true
+}

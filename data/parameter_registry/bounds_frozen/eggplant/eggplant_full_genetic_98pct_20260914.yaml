@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_genetic_98pct_20260914"
+crop: "eggplant"
+created_at: "2026-09-14T17:42:36Z"
+approved_at: "2026-09-14T17:42:36Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_genetic_98pct_20260914.csv"
+derived_from_sha256: "83593945fd2c9328f52caacde5575d21989f1581a2f4fcf0ac6cec747f89b5ca"
+bounds_sha256: "83593945fd2c9328f52caacde5575d21989f1581a2f4fcf0ac6cec747f89b5ca"
+parameter_count: 154
+automatic_repairs: 0
+notes: "Full-scale 60 genetic parameters covering 99.78% genetic sensitivity with relaxed physiological bounds"

@@ -87,11 +87,10 @@ def test_current_v14_is_a_preserved_failure_fixture():
             "INIT_OUTSIDE_BOUNDS": 8,
             "FIXED_NOT_CONSTANT": 2,
             "TEMP_RANGE_ORDER": 3,
-            "STAGE_RANGE_ORDER": 1,
             "SOIL_WATER_RANGE_ORDER": 2,
         }
     )
-    assert Counter(issue.code for issue in warnings) == Counter({"NUISANCE_PARAMETER_ACTIVE": 44})
+    assert Counter(issue.code for issue in warnings) == Counter({"NUISANCE_PARAMETER_ACTIVE": 44, "STAGE_RANGE_ORDER": 1})  # T2 2026-09-14: registry XMAGE<XFPHT rule reports v14 overlap as warning (registry WIP 1140e10/8c77ae9)
 
 
 def test_physical_safety_envelopes_include_shipped_dssat_baselines():

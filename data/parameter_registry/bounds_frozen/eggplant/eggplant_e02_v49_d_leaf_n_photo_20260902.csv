@@ -1,0 +1,133 @@
+name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,review_note,notes,source_lower,source_upper
+atop,0.909517,0.909517,0.909517,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.813768,0.996325
+cmobmx,0.0625788,0.0625788,0.0625788,fixed,SPE_CarbonReserve,SPE,TMGRO048.SPE.base,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v37: cmobmx upper relaxed to 0.15 to unlock stem C remobilization,0.01,0.15
+csdl,12.6833,12.6833,12.6833,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,11.5,13.0
+dswbar,9.64495,9.64495,9.64495,fixed,SPE_WaterStress,SPE,TMGRO048.SPE.base,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,2.0,20.0
+em-fl,28.4339,28.4339,28.4339,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v31: lower widened to 20.0 to avoid hitting 23.0,20.0,32.0
+em-v1,38.0498,38.0498,38.0498,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,38.0,40.0
+evmodc,0.0,0.0,0.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.0,0.0
+finref,109.215,109.215,109.215,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v15 boundary pressure fix 20260819,100.0,300.0
+fl-lf,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,400.0,400.0
+fl-sd,13.2101,13.2101,13.2101,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,7.0,21.0
+fl-sh,1.31627,1.31627,1.31627,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,1.0,4.6
+fl-vs,100.0,100.0,100.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,100.0,100.0
+frcnod,0.05,0.05,0.05,fixed,SPE_Nodule,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.05,0.05
+frlff,0.191369,0.191369,0.191369,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v15 boundary pressure fix 20260819,0.15,0.5
+frstmf,0.692505,0.692505,0.692505,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v15 boundary pressure fix 20260819,0.462343,0.75
+ju-r0,5.96753,5.96753,5.96753,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,2.0,20.0
+kcan,0.410021,0.410021,0.410021,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v37: kcan lower adjusted to 0.35 to avoid artificial 0.25 clamping,0.35,0.7
+kc_slope,0.0105679,0.0105679,0.0105679,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.003,0.05
+lfmax,1.61958,1.61958,1.61958,fixed,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,1.6,2.4
+lngsh,22.9261,22.9261,22.9261,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v15 boundary pressure fix 20260819,15.0,45.0
+lnref,3.42527,3.42527,3.42527,fixed,SPE_Nitrogen,SPE,TMGRO048.SPE.base,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,2.5,4.2
+nmobmx,0.230416,0.230416,0.230416,fixed,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v37: nmobmx upper relaxed to 0.60 to avoid 0.45 clamping,0.1,0.6
+nrcvr,0.215172,0.215172,0.215172,fixed,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.1,0.35
+nslope,0.065948,0.065948,0.065948,fixed,SPE_Nitrogen,SPE,TMGRO048.SPE.base,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.06,0.2
+nstfac,0.15707,0.15707,0.15707,fixed,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.15,0.6
+nvsmob,0.455043,0.455043,0.455043,fixed,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.45,0.85
+parmax,50.5953,50.5953,50.5953,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v31: widened to 38-60 to avoid photosynthetic lower bound lock,38.0,55.0
+phtmax,66.0898,66.0898,66.0898,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,20260817 formal confirmation: frozen PHTMAX 45-75,50.0,80.0
+pl-em,7.75306,7.75306,7.75306,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,7.564492,11.000322
+pm06,0.1,0.1,0.1,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v31: upper widened to 0.90 to avoid hitting 0.70,0.1,0.9
+pm09,0.183451,0.183451,0.183451,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.1,0.7
+podur,22.5275,22.5275,22.5275,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v15 boundary pressure fix 20260819,8.0,25.0
+pormin,0.00886494,0.00886494,0.00886494,fixed,SPE_RootWater,SPE,TMGRO048.SPE.base,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.001,0.01
+porpt,0.257907,0.257907,0.257907,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.22,0.42
+ppsen,0.0,0.0,0.0,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v15 boundary pressure fix 20260819,0.0,0.0
+rhght,0.747468,0.747468,0.747468,fixed,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.4,1.2
+rtexf,0.148713,0.148713,0.148713,fixed,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.08,0.3
+rtnh4,0.0438139,0.0438139,0.0438139,fixed,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.008,0.05
+rtno3,0.0156206,0.0156206,0.0156206,fixed,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.015,0.05
+rwdth,0.35,0.35,0.35,fixed,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v31: lower widened to 0.50 to avoid hitting 0.70,0.35,1.8
+rwumx,0.0448298,0.0448298,0.0448298,fixed,SPE_RootWater,SPE,TMGRO048.SPE.base,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.025452,0.053393
+sd-pm,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,400.0,400.0
+sdpdv,173.886,173.886,173.886,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,150.850915,230.900885
+senday,0.00568054,0.00568054,0.00568054,fixed,SPE_Senescence,SPE,TMGRO048.SPE.base,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.001,0.08
+senrte,3.03654,3.03654,3.03654,fixed,SPE_Senescence,SPE,TMGRO048.SPE.base,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v15 boundary pressure fix 20260819,0.1,5.0
+sfdur,22.9666,22.9666,22.9666,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v31: widened to 35-65 to uncap fruit filling duration for long-season harvests,20.0,65.0
+sizlf,333.907,333.907,333.907,fixed,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,280.0,400.0
+sizref,547.762,547.762,547.762,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v15 boundary pressure fix 20260819,300.0,600.0
+slaref,274.07,274.07,274.07,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v37: slaref upper bound capped at 280 per user directive,225.0,280.0
+slavr,189.886,189.886,189.886,fixed,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,185.0,310.0
+soil_sbdm_01,1.39982,1.39982,1.39982,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,1.3192,1.4008
+soil_sbdm_02,1.55206,1.55206,1.55206,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,1.5035,1.5965
+soil_sbdm_03,1.55539,1.55539,1.55539,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,1.5132,1.6068
+soil_sbdm_04,1.50723,1.50723,1.50723,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,1.4647,1.5553
+soil_sbdm_05,1.49586,1.49586,1.49586,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,1.4259,1.5141
+soil_sbdm_06,1.58088,1.58088,1.58088,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,1.5423,1.6377
+soil_sbdm_07,1.58718,1.58718,1.58718,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,1.5617,1.6583
+soil_sbdm_08,1.5789,1.5789,1.5789,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,1.5326,1.6274
+soil_sdul_01,0.313747,0.313747,0.313747,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.285,0.315
+soil_sdul_02,0.306493,0.306493,0.306493,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.297409,0.31012
+soil_sdul_03,0.338602,0.338602,0.338602,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.322287,0.339459
+soil_sdul_04,0.317609,0.317609,0.317609,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.304696,0.320725
+soil_sdul_05,0.335319,0.335319,0.335319,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.320332,0.335324
+soil_sdul_06,0.290659,0.290659,0.290659,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.285514,0.301898
+soil_sdul_07,0.266565,0.266565,0.266565,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.265916,0.280474
+soil_sdul_08,0.266734,0.266734,0.266734,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.24985,0.27615
+soil_slll_01,0.140865,0.140865,0.140865,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.1406,0.1554
+soil_slll_02,0.15278,0.15278,0.15278,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.151979,0.159988
+soil_slll_03,0.169763,0.169763,0.169763,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.162213,0.171528
+soil_slll_04,0.160429,0.160429,0.160429,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.150993,0.161644
+soil_slll_05,0.159996,0.159996,0.159996,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.159771,0.169522
+soil_slll_06,0.175644,0.175644,0.175644,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.175644,0.186366
+soil_slll_07,0.162325,0.162325,0.162325,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.159516,0.167534
+soil_slll_08,0.148317,0.148317,0.148317,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.1463,0.1617
+soil_slpf,0.959054,0.959054,0.959054,fixed,SOIL_Fertility,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v31: adjusted to 0.88-0.96 matching high greenhouse fertility,0.88,0.96
+soil_ssat_01,0.489247,0.489247,0.489247,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.476717,0.506093
+soil_ssat_02,0.440409,0.440409,0.440409,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.418307,0.440409
+soil_ssat_03,0.443041,0.443041,0.443041,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.42734,0.450717
+soil_ssat_04,0.475839,0.475839,0.475839,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.437,0.483
+soil_ssat_05,0.509348,0.509348,0.509348,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.481643,0.512177
+soil_ssat_06,0.33444,0.33444,0.33444,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.318389,0.336908
+soil_ssat_07,0.319536,0.319536,0.319536,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.314302,0.332607
+soil_ssat_08,0.323447,0.323447,0.323447,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.30305,0.323549
+tb1,9.0169,9.0169,9.0169,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,8.251098,9.016904
+tb2,9.28549,9.28549,9.28549,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,8.0,12.0
+tb3,11.1356,11.1356,11.1356,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,10.76361,11.84742
+thrsh,8.49318,8.49318,8.49318,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,7.5,9.5
+tm1,43.8817,43.8817,43.8817,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v31: lower 35.0 > upper(TO21),35.0,46.0
+tm2,45.7908,45.7908,45.7908,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v31: lower 32.0 > upper(TO22),32.0,46.0
+tm3,42.7335,42.7335,42.7335,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,35.0,48.0
+to11,22.9516,22.9516,22.9516,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v15 boundary pressure fix 20260819,22.0,26.617
+to12,21.0345,21.0345,21.0345,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v31: upper 27.5 < lower(TO22),20.0,27.5
+to13,27.1928,27.1928,27.1928,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,20.0,27.9
+to21,33.7909,33.7909,33.7909,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v31: upper 34.5 < lower(TM1),28.0,34.5
+to22,30.3872,30.3872,30.3872,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,"v31: lower 27.6 > upper(TO12), upper 31.5 < lower(TM2)",27.6,31.5
+to23,31.7611,31.7611,31.7611,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,28.0,33.0
+trifl,0.761895,0.761895,0.761895,fixed,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.72,0.85
+v1-ju,0.0,0.0,0.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.0,0.0
+vssink,5.03361,5.03361,5.03361,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,2.82135,7.0
+wtfsd,0.445796,0.445796,0.445796,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v37: wtfsd lower relaxed to 0.25 to unlock fruit dry weight flexibility,0.25,0.6
+wtpsd,0.004,0.004,0.004,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.004,0.004
+xfint,0.343251,0.343251,0.343251,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST,0.12,0.4
+xfpht,38.2388,38.2388,38.2388,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v15 boundary pressure fix 20260819,35.0,70.0
+xfrmax,0.247583,0.247583,0.247583,fixed,SPE_WaterStress,SPE,TMGRO048.SPE.base,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v31: widened to 0.10-0.45 for sufficient daily reproductive sink allocation,0.12,0.4
+xfrt,0.926407,0.926407,0.926407,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v37: xfrt relaxed to 0.60-0.95 for maximum fruit partition,0.6,1.0
+xmage,19.0904,19.0904,19.0904,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v37: xmage upper relaxed to 25.0 to avoid 15.8 clamping,10.0,25.0
+nrexp,0.359251,0.359251,0.359251,fixed,species,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST; NREXP/NRMIN lower widened to 0.1,0.2,0.9
+nrmin,0.716094,0.716094,0.716094,fixed,species,SPE,TMGRO048.SPE,TM0008,TM0001,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Extracted from 0805_corrected PST; NREXP/NRMIN lower widened to 0.1,0.3,0.85
+swbar_rec,0.477073,0.477073,0.477073,fixed,SPE_WaterResponse,SPE,TMGRO048.SPE.base,,,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Anchor reconstructs XSWBAR ordered nodes,0.25,0.75
+yswbar_mid,0.987525,0.987525,0.987525,fixed,SPE_WaterResponse,SPE,TMGRO048.SPE.base,,,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Anchor reconstructs YSWBAR bounded nodes,0.4,1.0
+pgeff,0.0574852,0.0574852,0.0574852,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v37: PGEFF upper relaxed to 0.065 to expand photosynthate source pool,0.042,0.065
+prolff,0.0580212,0.0580212,0.0580212,fixed,SPE_Compo,SPE,TMGRO048.SPE,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,0.05,0.13
+prostf,0.050816,0.050816,0.050816,fixed,SPE_Compo,SPE,TMGRO048.SPE,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,0.025,0.06
+prortf,0.0363101,0.0363101,0.0363101,fixed,SPE_Compo,SPE,TMGRO048.SPE,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,0.02,0.05
+prolfg,0.133581,0.133581,0.133581,fixed,SPE_Compo,SPE,TMGRO048.SPE,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,0.13,0.25
+prostg,0.123501,0.123501,0.123501,fixed,SPE_Compo,SPE,TMGRO048.SPE,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,0.1,0.18
+prortg,0.101292,0.101292,0.101292,fixed,SPE_Compo,SPE,TMGRO048.SPE,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,0.08,0.2
+prolfi,0.207849,0.207849,0.207849,fixed,SPE_Compo,SPE,TMGRO048.SPE,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,0.2,0.35
+prosti,0.287837,0.287837,0.287837,fixed,SPE_Compo,SPE,TMGRO048.SPE,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,0.15,0.32
+prorti,0.155719,0.155719,0.155719,fixed,SPE_Compo,SPE,TMGRO048.SPE,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,0.11,0.19
+fnpgn1,1.38869,0.9,1.8,active,SPE_Photo,SPE,TMGRO048.SPE,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v37: fnpgn1 lower relaxed to 0.3,0.3,1.4
+fnpgn2,2.79099,2.2,4.2,active,SPE_Photo,SPE,TMGRO048.SPE,,,,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,v37: fnpgn2 lower relaxed to 2.0,2.0,4.2
+page_25sp,52.6,52.6,52.6,fixed,initial_conditions,IC,XXQL2501.TMX,TM0008,TM0001,25SP,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,24.0,60.0
+penv_25sp,19.5263,19.5263,19.5263,fixed,initial_conditions,IC,XXQL2501.TMX,TM0008,TM0001,25SP,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,8.0,20.0
+page_26sp,49.4247,49.4247,49.4247,fixed,initial_conditions,IC,XXQL2601.TMX,TM0008,TM0001,26SP,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,24.0,60.0
+penv_26sp,18.807,18.807,18.807,fixed,initial_conditions,IC,XXQL2601.TMX,TM0008,TM0001,26SP,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,8.0,20.0
+icns_25sp,0.612986,0.4,0.8,active,initial_conditions,IC,XXQL2501.TMX,TM0008,TM0001,25SP,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Anchor is the v46 25SP double-N FileX bundle; multiplier is not compounded,0.15,1.2
+icns_26sp,0.682762,0.4,0.8,active,initial_conditions,IC,XXQL2601.TMX,TM0008,TM0001,26SP,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,Anchor is the v46 26SP n0.34 FileX bundle; multiplier is not compounded,0.15,1.2
+swfac_rec,1.0,1.0,1.0,fixed,SPE_WaterResponse,SPE,TMGRO048.SPE.base,,,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,0.0,1.0
+yswfac_mid,1.0,1.0,1.0,fixed,SPE_WaterResponse,SPE,TMGRO048.SPE.base,,,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,0.0,1.0
+trfac_xmid,0.5,0.5,0.5,fixed,SPE_WaterResponse,SPE,TMGRO048.SPE.base,,,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,0.0,1.0
+ytrfac_max,0.0,0.0,0.0,fixed,SPE_WaterResponse,SPE,TMGRO048.SPE.base,,,both,v49: fixed to v48 iteration4 member55 except explicit arm whitelist,,0.0,1.0

@@ -150,6 +150,10 @@ def validate_partition_sum(
 XSTAGE_NODES = (0.0, 5.0, 14.0, 30.0)
 SENPOR_DEFAULT = (0.0, 0.0, 0.12, 0.16)
 
+# XSENMX x-axis (stage nodes) — fixed, from SPE template line 73.
+XSENMX_NODES = (3.0, 5.0, 10.0, 30.0)
+SENMAX_DEFAULT = (0.0, 0.40, 0.50, 0.50)
+
 
 def expand_senpor(senpor_late: float) -> ArrayExpansion:
     """Expand the SENPOR_LATE anchor into the full SENPOR array (4 nodes).
@@ -163,6 +167,20 @@ def expand_senpor(senpor_late: float) -> ArrayExpansion:
     # Clamp to [0, 1].
     y_values = [max(0.0, min(1.0, v)) for v in y_values]
     return ArrayExpansion("SENPOR", XSTAGE_NODES, tuple(y_values))
+
+
+def expand_senmax(senmax_late: float) -> ArrayExpansion:
+    """Expand the SENMAX_LATE anchor into the full SENMAX array (4 nodes).
+
+    Only the last node (late stage) is free; early nodes stay at template
+    defaults (0.0, 0.40). The third node interpolates.
+    """
+    anchor_x = (XSENMX_NODES[0], XSENMX_NODES[1], XSENMX_NODES[3])
+    anchor_y = (SENMAX_DEFAULT[0], SENMAX_DEFAULT[1], senmax_late)
+    y_values = expand_anchor_series(XSENMX_NODES, anchor_x, anchor_y)
+    y_values = [max(0.0, min(1.0, v)) for v in y_values]
+    return ArrayExpansion("SENMAX", XSENMX_NODES, tuple(y_values))
+
 
 
 def expand_water_stress_curves(
@@ -211,7 +229,7 @@ __all__ = [
     "ArrayExpansion",
     "linear_interp", "expand_anchor_series",
     "expand_leaf_area", "expand_leaf_partition", "expand_stem_partition",
-    "expand_senpor", "validate_partition_sum",
+    "expand_senpor", "expand_senmax", "validate_partition_sum",
     "expand_water_stress_curves",
-    "XVGROW_NODES", "XLEAF_NODES", "XSTAGE_NODES",
+    "XVGROW_NODES", "XLEAF_NODES", "XSTAGE_NODES", "XSENMX_NODES",
 ]

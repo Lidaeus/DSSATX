@@ -126,7 +126,7 @@ Manager/agent architecture. Each agent gets a complete copy of the run directory
 - Observation groups: phenology (`PestEval.OUT`), growth (`PestGrow.OUT`), growth process (`PestTmtGrow.OUT`), multi-harvest (`PestHarvest.OUT`), joint season-end (`PestJoint.OUT`), soil water (`PestSoilWat.OUT`), N response (`PestNResponse.OUT`), W response (`PestWResponse.OUT`)
 - DSSAT output path ambiguity: `Evaluate.OUT` may appear in workspace or `C:\DSSAT48\` — code checks both
 - `.base` files use `!Calibration` comment markers to identify calibratable parameter lines
-- `Workspace/*.py`: only a few files are redirect stubs into `src/` (`analyze_results.py`, `build_pest.py`, `run_dssat.py` via `runpy.run_module`; `plot_results.py` via `exec`). The rest are legacy one-off scripts slated for cleanup — do not add new tooling there.
+- `Workspace/*.py`: 仅保留 4 个指向 `src/` 的规范重定向存根（`analyze_results.py`, `build_pest.py`, `run_dssat.py`, `plot_results.py`，全部基于 `runpy.run_module` 实现）。其余历史旧脚本已在 2026-09-14 净化完毕 — 严禁在此添加新代码。
 - Branch and refactor-stage status are volatile by nature; consult the git repository and `docs/CHANGELOG.md` instead of this file.
 
 ## Paper Figure Pipeline (dual-track, strictly separated)

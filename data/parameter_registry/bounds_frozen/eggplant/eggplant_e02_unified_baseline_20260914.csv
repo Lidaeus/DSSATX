@@ -1,0 +1,129 @@
+﻿name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,review_note,notes
+atop,0.869222,0.813768,0.996325,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+cmobmx,0.0766237,0.01,0.15,active,SPE_CarbonReserve,SPE,TMGRO048.SPE.base,,,,v15: lower 0.005→0.001; upper 0.05→0.12,v37: cmobmx upper relaxed to 0.15 to unlock stem C remobilization
+csdl,12.5418,11.5,13.0,active,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+dswbar,8.01354,2.0,20.0,active,SPE_WaterStress,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+em-fl,25.9491,20.0,32.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,v31: lower widened to 20.0 to avoid hitting 23.0
+em-v1,38.5229,38.0,40.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+evmodc,0.0,0.0,0.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+finref,150.0,100.0,300.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,v48 lower relaxation after 74% posterior lower-bound pressure,v15 boundary pressure fix 20260819
+fl-lf,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+fl-sd,14.0195,7.0,21.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+fl-sh,1.08906,1.0,4.6,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+fl-vs,100.0,100.0,100.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+frcnod,0.05,0.05,0.05,fixed,SPE_Nodule,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+frlff,0.271549,0.15,0.5,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,v48 lower relaxation after 78.5% posterior lower-bound pressure,v15 boundary pressure fix 20260819
+frstmf,0.654546,0.462343,0.75,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,v15: upper 0.668104→0.75,v15 boundary pressure fix 20260819
+ju-r0,4.18135,2.0,20.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+kcan,0.417839,0.35,0.7,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,,v37: kcan lower adjusted to 0.35 to avoid artificial 0.25 clamping
+kc_slope,0.0117804,0.003,0.05,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+lfmax,1.68529,1.6,2.4,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+lngsh,23.3434,15.0,45.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v15: lower 29.2→20.0,v15 boundary pressure fix 20260819
+lnref,3.34697,2.5,4.2,active,SPE_Nitrogen,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+nmobmx,0.197068,0.1,0.6,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,,v37: nmobmx upper relaxed to 0.60 to avoid 0.45 clamping
+nrcvr,0.164739,0.1,0.35,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+nslope,0.06,0.06,0.2,active,SPE_Nitrogen,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+nstfac,0.150669,0.15,0.6,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+nvsmob,0.552269,0.45,0.85,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+parmax,52.0249,38.0,55.0,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,,v31: widened to 38-60 to avoid photosynthetic lower bound lock
+phtmax,58.564,50.0,80.0,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,,20260817 formal confirmation: frozen PHTMAX 45-75
+pl-em,8.51376,7.564492,11.000322,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+pm06,0.125623,0.1,0.9,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,v31: upper widened to 0.90 to avoid hitting 0.70
+pm09,0.306048,0.1,0.7,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+podur,18.4595,8.0,25.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v15: lower 12.0→8.0,v15 boundary pressure fix 20260819
+pormin,0.00813383,0.001,0.01,active,SPE_RootWater,SPE,TMGRO048.SPE.base,,,,OAT: PORMIN=0.001 improved mean W-response NSE and 26SP dry NSE; values >=0.02 broke the dry/scale gate,Extracted from 0805_corrected PST
+porpt,0.236689,0.22,0.42,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+ppsen,0.0,0.0,0.0,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,"v15: status→fixed; 91.5% ensemble at lower bound, eggplant photoperiod insensitive",v15 boundary pressure fix 20260819
+rhght,0.759085,0.4,1.2,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+rtexf,0.175545,0.08,0.3,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+rtnh4,0.0260995,0.008,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+rtno3,0.0292847,0.015,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+rwdth,0.416027,0.35,1.8,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,,v31: lower widened to 0.50 to avoid hitting 0.70
+rwumx,0.0475663,0.025452,0.053393,active,SPE_RootWater,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+sd-pm,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+sdpdv,193.702,150.850915,230.900885,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+senday,0.0262379,0.001,0.08,active,SPE_Senescence,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+senrte,2.69295,0.1,5.0,active,SPE_Senescence,SPE,TMGRO048.SPE.base,,,,v15: lower 0.3→0.1; upper 3.0→5.0,v15 boundary pressure fix 20260819
+sfdur,23.2785,20.0,65.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v47 user-approved lower relaxation 40 -> 20 d,v31: widened to 35-65 to uncap fruit filling duration for long-season harvests
+sizlf,333.958,280.0,400.0,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+sizref,560.721,300.0,600.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,v15: lower 247.311107→247.311; upper 333.194242→380.0,v15 boundary pressure fix 20260819
+slaref,275.134,225.0,280.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,,v37: slaref upper bound capped at 280 per user directive
+slavr,199.503,185.0,310.0,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_01,1.40071,1.3192,1.4008,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_02,1.54978,1.5035,1.5965,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_03,1.54062,1.5132,1.6068,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_04,1.49205,1.4647,1.5553,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_05,1.49971,1.4259,1.5141,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_06,1.574,1.5423,1.6377,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_07,1.59586,1.5617,1.6583,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_08,1.58523,1.5326,1.6274,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_01,0.314701,0.285,0.315,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_02,0.309053,0.297409,0.31012,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_03,0.337922,0.322287,0.339459,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_04,0.31984,0.304696,0.320725,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_05,0.333316,0.320332,0.335324,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_06,0.29317,0.285514,0.301898,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_07,0.268227,0.265916,0.280474,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_08,0.268888,0.24985,0.27615,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_01,0.14187,0.1406,0.1554,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_02,0.152663,0.151979,0.159988,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_03,0.170396,0.162213,0.171528,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_04,0.157637,0.150993,0.161644,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_05,0.163033,0.159771,0.169522,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_06,0.176178,0.175644,0.186366,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_07,0.16097,0.159516,0.167534,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_08,0.155024,0.1463,0.1617,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slpf,0.950559,0.88,0.96,active,SOIL_Fertility,SOIL,SOIL.SOL,TM0008,TM0001,both,,v31: adjusted to 0.88-0.96 matching high greenhouse fertility
+soil_ssat_01,0.487592,0.476717,0.506093,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_02,0.431253,0.418307,0.440409,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_03,0.446967,0.42734,0.450717,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_04,0.45882,0.437,0.483,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_05,0.510829,0.481643,0.512177,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_06,0.335233,0.318389,0.336908,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_07,0.317468,0.314302,0.332607,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_08,0.323549,0.30305,0.323549,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+tb1,9.0169,8.251098,9.016904,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+tb2,9.60468,8.0,12.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+tb3,11.0435,10.76361,11.84742,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+thrsh,8.31515,7.5,9.5,active,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+tm1,39.0911,35.0,46.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,v31: lower 35.0 > upper(TO21)
+tm2,46.0,32.0,46.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v15: lower 34.0→32.0,v31: lower 32.0 > upper(TO22)
+tm3,44.5129,35.0,48.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+to11,22.6896,22.0,26.617,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v15: lower 24.75235→22.0; upper 26.61746→26.617,v15 boundary pressure fix 20260819
+to12,21.5726,20.0,27.5,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,v31: upper 27.5 < lower(TO22)
+to13,27.7825,20.0,27.9,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+to21,33.4372,28.0,34.5,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v15: upper 33.0→35.0,v31: upper 34.5 < lower(TM1)
+to22,30.0063,27.6,31.5,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v15: lower 28.022244→27.6; upper 29.513696→29.514,"v31: lower 27.6 > upper(TO12), upper 31.5 < lower(TM2)"
+to23,31.1725,28.0,33.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+trifl,0.797073,0.72,0.85,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+v1-ju,0.0,0.0,0.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+vssink,5.73119,2.82135,7.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,v47 modest upper relaxation 5.596237 -> 7.0,Extracted from 0805_corrected PST
+wtfsd,0.3393,0.25,0.6,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,,v37: wtfsd lower relaxed to 0.25 to unlock fruit dry weight flexibility
+wtpsd,0.004,0.004,0.004,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+xfint,0.379887,0.379887,0.379887,disabled,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,deleted from calibration and injection: ECO keeps its own XFPHT/XFINT values (user-directed 2026-09-03),Extracted from 0805_corrected PST
+xfpht,43.7261,43.7261,43.7261,disabled,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,deleted from calibration and injection: ECO keeps its own XFPHT/XFINT values (user-directed 2026-09-03),v15 boundary pressure fix 20260819
+xfrmax,0.20643,0.12,0.4,active,SPE_WaterStress,SPE,TMGRO048.SPE.base,,,,,v31: widened to 0.10-0.45 for sufficient daily reproductive sink allocation
+xfrt,0.948571,0.6,1.0,active,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v48 upper relaxation after 92% posterior upper-bound pressure,v37: xfrt relaxed to 0.60-0.95 for maximum fruit partition
+xmage,19.381,10.0,25.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v15: lower 13.871373→10.0; upper 15.808997→15.809,v37: xmage upper relaxed to 25.0 to avoid 15.8 clamping
+nrexp,0.306147,0.2,0.9,active,species,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST; NREXP/NRMIN lower widened to 0.1
+nrmin,0.581436,0.3,0.85,active,species,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST; NREXP/NRMIN lower widened to 0.1
+swbar_rec,0.447052,0.25,0.75,active,SPE_WaterResponse,SPE,TMGRO048.SPE.base,,,both,OAT gate-qualified: mean W-response NSE -10.685 to -7.918 at 0.72,Anchor reconstructs XSWBAR ordered nodes
+yswbar_mid,0.882383,0.4,1.0,active,SPE_WaterResponse,SPE,TMGRO048.SPE.base,,,both,OAT gate-qualified: mean W-response NSE -10.685 to -8.399 at 0.55; 0.15 failed gate,Anchor reconstructs YSWBAR bounded nodes
+PGEFF,0.0536264,0.042,0.065,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,,,,,v37: PGEFF upper relaxed to 0.065 to expand photosynthate source pool
+PROLFF,0.0690409,0.05,0.13,active,SPE_Compo,SPE,TMGRO048.SPE,,,,,
+PROSTF,0.0517973,0.025,0.06,active,SPE_Compo,SPE,TMGRO048.SPE,,,,,
+PRORTF,0.0287621,0.02,0.05,active,SPE_Compo,SPE,TMGRO048.SPE,,,,,
+PROLFG,0.141593,0.13,0.25,active,SPE_Compo,SPE,TMGRO048.SPE,,,,,
+PROSTG,0.114573,0.1,0.18,active,SPE_Compo,SPE,TMGRO048.SPE,,,,,
+PRORTG,0.141339,0.08,0.2,active,SPE_Compo,SPE,TMGRO048.SPE,,,,,
+PROLFI,0.233032,0.2,0.35,active,SPE_Compo,SPE,TMGRO048.SPE,,,,,
+PROSTI,0.257019,0.15,0.32,active,SPE_Compo,SPE,TMGRO048.SPE,,,,,
+PRORTI,0.152342,0.11,0.19,active,SPE_Compo,SPE,TMGRO048.SPE,,,,,
+FNPGN1,1.33769,0.3,1.4,active,SPE_Photo,SPE,TMGRO048.SPE,,,,,v37: fnpgn1 lower relaxed to 0.3
+FNPGN2,2.37631,2.0,4.2,active,SPE_Photo,SPE,TMGRO048.SPE,,,,,v37: fnpgn2 lower relaxed to 2.0
+PAGE_25SP,25.0,25.0,25.0,fixed,initial_conditions,IC,XXQL2501.TMX,TM0008,TM0001,25SP,"fixed at approved unified-baseline value (T0/P0 D4/D7/D8, 2026-09-14)",
+PENV_25SP,20.0,20.0,20.0,fixed,initial_conditions,IC,XXQL2501.TMX,TM0008,TM0001,25SP,"fixed at approved unified-baseline value (T0/P0 D4/D7/D8, 2026-09-14)",
+PAGE_26SP,24.0,24.0,24.0,fixed,initial_conditions,IC,XXQL2601.TMX,TM0008,TM0001,26SP,"fixed at approved unified-baseline value (T0/P0 D4/D7/D8, 2026-09-14)",
+PENV_26SP,20.0,20.0,20.0,fixed,initial_conditions,IC,XXQL2601.TMX,TM0008,TM0001,26SP,"fixed at approved unified-baseline value (T0/P0 D4/D7/D8, 2026-09-14)",
+ICNS_25SP,1.0,1.0,1.0,fixed,initial_conditions,IC,XXQL2501.TMX,TM0008,TM0001,25SP,"fixed at approved unified-baseline value (T0/P0 D4/D7/D8, 2026-09-14)",Anchor is the v46 25SP double-N FileX bundle; multiplier is not compounded
+ICNS_26SP,1.0,1.0,1.0,fixed,initial_conditions,IC,XXQL2601.TMX,TM0008,TM0001,26SP,"fixed at approved unified-baseline value (T0/P0 D4/D7/D8, 2026-09-14)",Anchor is the v46 26SP n0.34 FileX bundle; multiplier is not compounded

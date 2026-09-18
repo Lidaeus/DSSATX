@@ -1,0 +1,44 @@
+{
+  "season_id": "25SP",
+  "excode": "XXQL2501",
+  "generator": "tools/experiments/build_refreshed_observations_20260917.py",
+  "generator_sha256": "96de2b628c00cb1530da8b5bbac66d2dbe5e9b4bf493d4dfb4a33740112ce737",
+  "spec_compliance": "docs/reports/2025春_2026春数据重构与双地块土壤方案执行方案_20260917.md",
+  "source_files": {
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春产量数据集.xlsx": "e4ceaf7a50a7be46f6d359fc86a943239992e6f98ece0981b3e2963e23b563b9",
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春品质集优先采用品质集中的果实含水率.xlsx": "19db913ef91767cb88d7c1a1fe010b0ea35cd731529fe63bdea253ddb1fe292f",
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春作物生长指标集.xlsx": "4f9bb1b18c784ddaf796ef7f0a3ab3d2a1310a44320bb64496ea2b5dd4401fd5",
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025年春季茄子植株样氮磷钾测定.xlsx": "10d637dd8793a0e14847cd6689579ea092bc47a015cba60b0c811650e7fdf4aa"
+  },
+  "qa_metrics": {
+    "plots": 11,
+    "growth_dates": 6,
+    "harvest_dates": 10,
+    "total_observations": 498,
+    "excluded_tn": [
+      1,
+      7,
+      8
+    ],
+    "density": 27000.0
+  },
+  "source_notes": [
+    "Fresh yield uses direct arithmetic mean of row replicates (unweighted).",
+    "Fruit DM fraction = 1 - measured fruit moisture fraction (2025春品质集优先采用品质集中的果实含水率.xlsx).",
+    "Each harvest uses the nearest plot-level moisture measurement date (no max interval).",
+    "SD: hybrid method (replicate SD with min CV=5%, fallback CV=10%).",
+    "Cumulative yield SD propagates incremental variances.",
+    "Plant NPK: SNAD, LNAD, SNAM incorporated from 2025年春季茄子植株样氮磷钾测定.xlsx (D6=B).",
+    "TN 1,7,8 excluded per FileA/FileT uncertainty adaptation plan (TN 6 included, N missing safe).",
+    "D8=A: 9 real harvests + 1 virtual harvest (25198); records after 25198 truncated."
+  ],
+  "output_files": [
+    "XXQL2501.TMA",
+    "XXQL2501.TMT",
+    "observation_uncertainty.csv",
+    "fruit_quality_match_audit.csv",
+    "FileA_values.csv",
+    "FileT_values.csv",
+    "treatment_exclusion_audit.csv"
+  ]
+}

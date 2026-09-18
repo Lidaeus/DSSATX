@@ -1,6 +1,29 @@
 # Changelog
 
-## 2026-08-31（绘图代码与图表资产静态分析）
+## 2026-09-14（项目代码全域静态分析与代码净化实施）
+
+- **根目录与非受控目录物理清理**：
+  - 彻底清理根目录下散落的临时重定向文件（`--help.rec`）、R 画板缓存（`Rplots.pdf`）、根目录直接运行生成的 `Pest*.OUT` (7个) 与 `*mapping.csv` (3个)；
+  - 清理根目录下多余的 `DSCSM048.EXE` 副本（保留 `workspace/` 及系统的单一来源）；
+  - 清理根目录未清理的工作目录 `_seasons/`（含 40 个过程文件）与历史崩溃转储 `failed_dssat_artifacts/`；
+  - 移除外部无 package.json 的孤立包目录 `node_modules/` 以及 `data/user/ref/~$25SP硝态氮铵态氮参考.xlsx` 临时锁文件；
+  - 彻底移除未受版本控制但严重干扰全局搜索的 8 月 macOS 历史整库克隆目录 `macOS_dssat_n_response_workspace_20260803/`，以及 102 个子目录的错名图表转储目录 `figture/`。
+- **工作区 (`workspace/`) 淘汰旧脚本治理**：
+  - 彻底删除 15 个 2026-07-21 遗留旧调试脚本（`generate_pst.py`, `generate_pst_improved.py`, `debug_tmtgrow.py`, `extract_baseline_sims.py`, `extract_best_params.py`, `generate_pest_outputs.py`, `run_dssat_direct.py`, `run_dssat_test.py`, `setup_improved_run.py`, `test_exe.py`, `test_pest_out.py`, `test_pest_out2.py`, `test_stub.py`, `test_tmtgrow.py`, `verify_improved_weights.py`）及废弃文件（`DSSBat`, `t8_formal_run_20260721.log`, `_v14_excl_tighten.csv`, `trash/`, `tmp/`, `scratch/`）；
+  - 将 `workspace/plot_results.py` 存根规范化为与 `analyze_results.py` 一致的 `runpy.run_module` 模式；
+  - 严格保留受 `tests/test_migration.py` 保护的 3 个兼容存根（`analyze_results.py`, `build_pest.py`, `run_dssat.py`）。
+- **工具箱 (`tools/`) 瘦身与结构化归档**：
+  - 彻底清理 `tools/scratch/` 下直接改源码的 3 个热补丁脚本及过期根级补丁（`patch_build_pest_paths.py`, `sort_docs.py`, `run_test_sa.py`）；
+  - 建立 `tools/archive/historical_explorations_202608/` 与 `tools/archive/historical_sa_202607/`，将 400 余个 7-8 月历史探索性单次脚本统一归档隔离；
+  - 顶层 `tools/` 恢复为以 `run_parallel.py`, `freeze_bounds.py`, `import_experiment_bundle.py` 为核心的 16 个受控生产工具。
+- **核心代码库架构去重 (`src/calibration/run_dssat.py`)**：
+  - 消除 `src/calibration/run_dssat.py` 与 `src/dssat/run_dssat.py` 之间 4140 行逐字重复代码；
+  - `src/calibration/run_dssat.py` 重构为轻量级隔离调度包装器（175 行），直接调用并委托底层 `src.dssat.run_dssat`，并向后兼容导出 `prepare_run_directory`, `DATA_DIR`, `_atomic_copy_back` 等隔离 API；
+  - 全套回归测试（`test_dssat_safety.py`, `test_concurrency_isolation.py`, `test_run_state_and_parallel.py`, `test_migration.py`）32 项全部 100% 通过。
+- **数据目录说明完善**：
+  - 在 `data/user/ref/DSSAT文件/` 下建立 `README.md`，明确该目录下历史整理脚本仅用于原始数据审计溯源，不参与自动化校准管线；
+  - `notebooks/` 历史文件移入 `notebooks/archive/`。
+
 
 - 完成三路只读盘点（报告：`docs/开源整理_绘图代码与图表资产静态分析报告_20260831.md`）：R 论文轨 17 文件无孤立脚本、无死函数；Python 诊断轨约 50 文件、以 plot_dynamics.py 与 evaluate_fixedsoil_official_best189 两大引擎为核心，全部输出落在 gitignored 区；figture/（287MB）与 figures/（53MB）仅写不读、src 零依赖；git 跟踪图像当前为 0。
 - 按用户裁决执行：13 个 0818 批次零引用一次性绘图/评估脚本归档 `tools/archive/oneshot_plot_diagnostics_20260804_10/`（组内自洽，附 README）；R 管线删除两个"实现未登记"的灰色分支（`fig1_sa_results`、`figs1_sa` combined，连同 `build_morris_results`/`build_morris_s1_combined`，R parse 验证通过）；命名合规——`fig_fixed_multi_arm_*` 与 `analyze_results` 的 8 处输出统一 `diagnostic_` 前缀（plot_dynamics.py 两处无前缀输出因协作者 WIP 未动，已记录于协作者确认单）。

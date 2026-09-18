@@ -1,0 +1,17 @@
+﻿run,deterministic_dir,member,output,n,max_abs_difference,n_difference_gt_0p001
+e02_formal_v48_fix_xfpht_xfint_200x4_20260903_r1,det_m191_tf,191,PestEval.OUT,66,0.0,0
+e02_formal_v48_fix_xfpht_xfint_200x4_20260903_r1,det_m191_tf,191,PestHarvest.OUT,300,145.30000000000018,296
+e02_formal_v48_fix_xfpht_xfint_200x4_20260903_r1,det_m191_tf,191,PestJoint.OUT,22,0.010000000000000231,12
+e02_formal_v48_fix_xfpht_xfint_200x4_20260903_r1,det_m191_tf,191,PestNDoseGradient.OUT,45,0.0006184244394399998,0
+e02_formal_v48_fix_xfpht_xfint_200x4_20260903_r1,det_m191_tf,191,PestNResponse.OUT,99,105.29999999999973,98
+e02_formal_v48_fix_xfpht_xfint_200x4_20260903_r1,det_m191_tf,191,PestSoilWat.OUT,280,0.0010000000000000009,2
+e02_formal_v48_fix_xfpht_xfint_200x4_20260903_r1,det_m191_tf,191,PestTmtGrow.OUT,592,9.0,419
+e02_formal_v48_fix_xfpht_xfint_200x4_20260903_r1,det_m191_tf,191,PestWResponse.OUT,28,100.90000000000055,28
+e02_formal_v48_n_gradient_water2x_200x4_20260902_r2,det_m55_20260903,55,PestEval.OUT,66,0.0,0
+e02_formal_v48_n_gradient_water2x_200x4_20260902_r2,det_m55_20260903,55,PestHarvest.OUT,300,4.89961999985411e-05,0
+e02_formal_v48_n_gradient_water2x_200x4_20260902_r2,det_m55_20260903,55,PestJoint.OUT,22,0.0,0
+e02_formal_v48_n_gradient_water2x_200x4_20260902_r2,det_m55_20260903,55,PestNDoseGradient.OUT,45,4.830539999684663e-09,0
+e02_formal_v48_n_gradient_water2x_200x4_20260902_r2,det_m55_20260903,55,PestNResponse.OUT,99,0.0,0
+e02_formal_v48_n_gradient_water2x_200x4_20260902_r2,det_m55_20260903,55,PestSoilWat.OUT,280,0.0,0
+e02_formal_v48_n_gradient_water2x_200x4_20260902_r2,det_m55_20260903,55,PestTmtGrow.OUT,592,0.0,0
+e02_formal_v48_n_gradient_water2x_200x4_20260902_r2,det_m55_20260903,55,PestWResponse.OUT,28,0.0,0

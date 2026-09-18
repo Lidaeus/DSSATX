@@ -56,7 +56,10 @@ _ALL_TREATMENT_IDS = {
     "26SP": set(range(1, 13)),
 }
 
+import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
 MAPPING_CSV = os.path.join(ROOT, "configs", "runs", "e02_from_scratch_water_n_mapping_20260826.csv")
 
 # Canonical publication palette / shapes (water -> shape, nitrogen -> color).
@@ -223,7 +226,7 @@ def _load_obs_sigma(registry_csv, season_id):
 # --------------------------------------------------------------------------- #
 # Metrics
 # --------------------------------------------------------------------------- #
-def _metrics(obs, sim):
+def _metrics(obs, sim, *, value_kind="raw"):
     """RMSE, RRMSE(%), d-index, R^2, NSE, MAE for paired finite values.
 
     Accepts pandas Series or numpy arrays. RRMSE = 100 * RMSE / |mean(obs)|.
@@ -232,7 +235,8 @@ def _metrics(obs, sim):
     """
     o = pd.to_numeric(pd.Series(obs), errors="coerce")
     s = pd.to_numeric(pd.Series(sim), errors="coerce")
-    m = (~o.isna()) & (~s.isna()) & (o > -90.0) & (s > -90.0)
+    from src.reporting.metrics import valid_pair_mask
+    m = valid_pair_mask(o, s, value_kind=value_kind)
     n = int(m.sum())
     if n == 0:
         return {"n": 0}
@@ -266,7 +270,8 @@ def _mse_decomposition(obs, sim):
     """
     o = pd.to_numeric(pd.Series(obs), errors="coerce")
     s = pd.to_numeric(pd.Series(sim), errors="coerce")
-    m = (~o.isna()) & (~s.isna()) & (o > -90.0) & (s > -90.0)
+    from src.reporting.metrics import valid_pair_mask
+    m = valid_pair_mask(o, s)
     if int(m.sum()) < 3:
         return {}
     o, s = o[m].astype(float).to_numpy(), s[m].astype(float).to_numpy()
@@ -514,7 +519,8 @@ def _season_legend_handles(seasons_present):
 
 def _filter_pairs(df, obs_col, sim_col):
     o, s = _as_num(df.get(obs_col)), _as_num(df.get(sim_col))
-    ok = np.isfinite(o) & np.isfinite(s) & (o > -90.0) & (s > -90.0)
+    from src.reporting.metrics import valid_pair_mask
+    ok = valid_pair_mask(o, s, value_kind="state")
     return df.loc[ok].copy(), o.loc[ok].astype(float), s.loc[ok].astype(float)
 
 
@@ -580,7 +586,7 @@ def _plot_dynamics_single_season(season_data, season_id, variable, kind, out_png
             cmp = sd["compare"]
             obs = cmp[cmp["TN"] == tn]
             o = _as_num(obs.get(f"OBS_{variable}"))
-            ok = o.notna() & (o > -90.0)
+            ok = np.isfinite(o) & (o >= 0)
             if ok.any() and pg is not None:
                 lut = _yyddd_to_dap_lookup(pg[pg["TN"] == tn])
                 dcode = obs.loc[ok, "DATE"].astype(int)
@@ -612,7 +618,7 @@ def _plot_dynamics_single_season(season_data, season_id, variable, kind, out_png
             cmp = sd["compare"]
             obs_col = "OBS_DRY_CUM" if kind == "cum_dry" else "OBS_FRESH_CUM"
             o = _as_num(cmp[cmp["TN"] == tn].get(obs_col))
-            ok = o.notna() & (o > -90.0)
+            ok = np.isfinite(o) & (o >= 0)
             if ok.any() and fw is not None:
                 lut = _yyddd_to_dap_lookup(fw[fw["TN"] == tn])
                 sub = cmp[cmp["TN"] == tn].loc[ok].sort_values("DATE")
@@ -896,6 +902,7 @@ def _final_response_table(all_season_data, obs_col, sim_col, response):
                 "TN": tn,
                 "water": water,
                 "nitrogen": nitrogen,
+                "date": row.get("DATE"),
                 "observed": float(row["_obs"]),
                 "simulated": float(row["_sim"]),
             })
@@ -903,12 +910,11 @@ def _final_response_table(all_season_data, obs_col, sim_col, response):
 
 
 def _response_structure_audit(all_proc, all_harv, out_png, metrics_csv):
-    """Plot final W×N contrasts and their spread compression by season.
+    """Plot paired final states; export signed adjacent-N contrast errors.
 
     Filled markers are observations and open markers are simulations; the
-    connecting segment exposes the final bias for each treatment. The bottom
-    panel reports SD(simulated treatments) / SD(observed treatments), where
-    values below one mean that the simulated treatment response is flatter.
+    connecting segment exposes final bias. Contrasts are computed within each
+    season and water level, never from pooled treatment standard deviations.
     """
     import matplotlib.pyplot as plt
     from matplotlib.lines import Line2D
@@ -957,8 +963,8 @@ def _response_structure_audit(all_proc, all_harv, out_png, metrics_csv):
         ylims[key] = (lo - pad, hi + pad)
 
     n_seasons = len(seasons_present)
-    fig = plt.figure(figsize=(5.0 * n_seasons, 9.0), dpi=150)
-    gs = fig.add_gridspec(3, n_seasons, height_ratios=[1.35, 1.35, 0.9],
+    fig = plt.figure(figsize=(5.0 * n_seasons, 7.0), dpi=150)
+    gs = fig.add_gridspec(2, n_seasons, height_ratios=[1.35, 1.35],
                           hspace=0.48, wspace=0.18)
     audit_rows = []
     for row_idx, (key, title, unit, _, _, _) in enumerate(specs):
@@ -998,47 +1004,28 @@ def _response_structure_audit(all_proc, all_harv, out_png, metrics_csv):
             else:
                 ax.tick_params(labelleft=False)
 
-            obs_sd = float(sub["observed"].std(ddof=1)) if len(sub) > 1 else np.nan
-            sim_sd = float(sub["simulated"].std(ddof=1)) if len(sub) > 1 else np.nan
-            ratio = sim_sd / obs_sd if np.isfinite(obs_sd) and obs_sd > 0 else np.nan
-            audit_rows.append({
-                "season": season, "response": key, "n_treatments": len(sub),
-                "observed_sd": obs_sd, "simulated_sd": sim_sd,
-                "spread_ratio_sim_over_obs": ratio,
-                "observed_range": float(sub["observed"].max() - sub["observed"].min()),
-                "simulated_range": float(sub["simulated"].max() - sub["simulated"].min()),
-                "mean_bias_sim_minus_obs": float((sub["simulated"] - sub["observed"]).mean()),
-            })
+            for water, group in sub.groupby("water"):
+                if group["nitrogen"].duplicated().any():
+                    raise ValueError(f"Duplicate N level in {season}/{water}/{key}")
+                levels = group.set_index("nitrogen")
+                for low, high in [("N0", "N1"), ("N1", "N2"), ("N2", "N3")]:
+                    if low not in levels.index or high not in levels.index:
+                        continue
+                    if pd.isna(levels.loc[high, "date"]) or str(levels.loc[high, "date"]) != str(levels.loc[low, "date"]):
+                        print(f"Response omitted: terminal dates differ/missing for {season}/{water}/{high}-{low}")
+                        continue
+                    od = float(levels.loc[high, "observed"] - levels.loc[low, "observed"])
+                    sd = float(levels.loc[high, "simulated"] - levels.loc[low, "simulated"])
+                    audit_rows.append({
+                        "season": season, "response": key, "water": water,
+                        "contrast": f"{high}-{low}", "observed_difference": od,
+                        "simulated_difference": sd, "residual_sim_minus_obs": sd - od,
+                        "absolute_error": abs(sd - od),
+                        "observed_zero_difference": abs(od) <= 1e-12,
+                        "sign_agreement": (np.sign(od) == np.sign(sd)) if abs(od) > 1e-12 else np.nan,
+                    })
 
-    axb = fig.add_subplot(gs[2, :])
     audit = pd.DataFrame(audit_rows)
-    positions = np.arange(len(seasons_present), dtype=float)
-    width = 0.34
-    for j, (key, label, color) in enumerate([
-        ("LAID", "LAI", "#3567a8"),
-        ("DRY_CUM", "dry fruit", "#b35c3e"),
-    ]):
-        sub = audit[audit["response"] == key].set_index("season").reindex(seasons_present)
-        vals = sub["spread_ratio_sim_over_obs"].to_numpy(dtype=float)
-        bars = axb.bar(positions + (j - 0.5) * width, vals, width=width,
-                       color=color, alpha=0.88, label=label)
-        for bar, val in zip(bars, vals):
-            if np.isfinite(val):
-                axb.text(bar.get_x() + bar.get_width() / 2, val + 0.035,
-                         f"{val:.2f}", ha="center", va="bottom", fontsize=8)
-    axb.axhline(1.0, color="#555555", ls="--", lw=1.0)
-    axb.set_xticks(positions)
-    axb.set_xticklabels([SEASON_LABELS.get(s, s) for s in seasons_present], fontsize=9)
-    axb.set_ylabel("Treatment spread ratio\nSD(simulated) / SD(observed)", fontsize=9)
-    max_ratio = float(np.nanmax(audit["spread_ratio_sim_over_obs"]))
-    axb.set_ylim(0, max(1.15, max_ratio * 1.25))
-    axb.grid(True, axis="y", alpha=0.25)
-    axb.legend(loc="upper right", frameon=True, fontsize=8, ncol=2)
-    axb.text(0.01, 0.95, "<1 = simulated W×N response is compressed",
-             transform=axb.transAxes, ha="left", va="top", fontsize=8,
-             color="#444444")
-    for sp in ("top", "right"):
-        axb.spines[sp].set_visible(False)
 
     handles = [
         Line2D([0], [0], marker="o", color="w", markerfacecolor="#777777",
@@ -1053,7 +1040,7 @@ def _response_structure_audit(all_proc, all_harv, out_png, metrics_csv):
     fig.suptitle("Treatment-response structure audit: final LAI and dry fruit",
                  fontsize=13, y=1.04)
     fig.text(0.5, 1.005,
-             "Paired segments show final bias; bottom panel tests whether treatment contrasts are preserved.",
+             "Paired segments show final bias; CSV records signed adjacent-N contrasts within each water level.",
              ha="center", va="top", fontsize=9, color="#444444")
     _ensure_dir(os.path.dirname(out_png))
     fig.savefig(out_png, bbox_inches="tight", dpi=150)
@@ -1086,7 +1073,7 @@ def _increment_plot(all_season_data, out_png):
             w, n = _wn_for(tn, season)
             d = dfh[dfh["TN"] == tn].sort_values("HNO")
             o = _as_num(d.get("OBS_DRY_INC")); si = _as_num(d.get("SIM_DRY_INC"))
-            ok = o.notna() & si.notna() & (o > -90) & (si > -90)
+            ok = np.isfinite(o) & np.isfinite(si) & (o >= 0) & (si >= 0)
             d = d[ok]; o = o[ok].astype(float); si = si[ok].astype(float)
             for k in range(len(d)):
                 x_pos.append(len(x_labels))

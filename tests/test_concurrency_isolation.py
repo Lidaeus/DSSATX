@@ -79,7 +79,7 @@ def test_main_appends_model_parameter(tmp_path, monkeypatch):
         return FakeResult()
         
     monkeypatch.setattr(subprocess, "run", mock_run)
-    monkeypatch.setattr(cal_rd, "_atomic_copy_back", lambda r, p: None)
+    monkeypatch.setattr(cal_rd, "_atomic_copy_back", lambda r, p, **kw: None)  # T2: kwarg added 18d1228
     
     cal_rd.main()
     

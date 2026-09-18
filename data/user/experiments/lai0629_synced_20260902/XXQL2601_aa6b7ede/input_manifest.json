@@ -1,0 +1,66 @@
+{
+  "bundle_id": "XXQL2601_aa6b7ede",
+  "derived_from_bundle": "D:\\Tomato_Cal\\data\\user\\experiments\\XXQL2601",
+  "derived_from_manifest_sha256": null,
+  "lai_sync": {
+    "date": 26180,
+    "points": 12,
+    "quality_flag": "imputed_20260831",
+    "reference": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2601_lai0629_imputed_20260831",
+    "unchanged": "All non-LAI fields, TMA, FileA, TMX, soil, weather and fruit moisture"
+  },
+  "files": [
+    {
+      "name": "DSSBatch.v48",
+      "sha256": "0956d41b903b0ec0691e7f90ba1bed3309f4d43bfd1a74cee5bd2e1f04a5faeb"
+    },
+    {
+      "name": "FileA_values.csv",
+      "sha256": "2f472493728ef57b8a6b29f0d08de7a64069179251ba1ef69e93370052c4a934"
+    },
+    {
+      "name": "FileT_values.csv",
+      "sha256": "f40d1032fff7bc13ad7893d0077d70a0cf742f171dc8bb0432b9a4c96670b53d"
+    },
+    {
+      "name": "fruit_quality_match_audit.csv",
+      "sha256": "fd1cba694efa93a5542bbd9353b25dcf4252803b02bc2bb245bd3aab750b250b"
+    },
+    {
+      "name": "generator_log.json",
+      "sha256": "d641a4da06b00a669c7596472e7e75dc263c2b593f19069af96e57507094d21e"
+    },
+    {
+      "name": "lai0629_imputation_audit.csv",
+      "sha256": "035ec2c5823cab3f90e9e8264207e4d4111c66d91e18c2e9136609bb50ffcecf"
+    },
+    {
+      "name": "observation_uncertainty.csv",
+      "sha256": "ee8b5269406178441610bcdb004b1017aa690e6f90c615e5dc998f06e706b2dd"
+    },
+    {
+      "name": "SOIL.SOL",
+      "sha256": "de6cb0d3c84a678da02a7ff2df0aad6d58bdd1452871d1e86c3b596d98d4d3f3"
+    },
+    {
+      "name": "XXQL2601.TMA",
+      "sha256": "67e105be76ac283f40c5a6a992a4c27d090a2f59c5e130e1109dc589071b4e75"
+    },
+    {
+      "name": "XXQL2601.TMT",
+      "sha256": "0bd15bd576c0fe0db944d738a3f30215979737ef1839a148939df23f548a5c6e"
+    },
+    {
+      "name": "XXQL2601.TMX",
+      "sha256": "e6ddf8fdc743be5d65fcb357fcc5181372b7c7771c45d85ce51ca64b699c4fef"
+    },
+    {
+      "name": "XXQL2601.TMX.old",
+      "sha256": "b979e88124a3f48d2109f357833261cfbb892e51daab68030a21aaa84a55c762"
+    },
+    {
+      "name": "XXQL2601.WTH",
+      "sha256": "2beaf4c5fbf39ac36e469f17d4e3eb6437838d8e05f30bd0e2e5946c60f68a46"
+    }
+  ]
+}

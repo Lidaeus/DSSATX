@@ -1,0 +1,103 @@
+{
+  "25C": {
+    "2": {
+      "WTHER": "M",
+      "INCON": "M",
+      "LIGHT": "E",
+      "EVAPO": "R",
+      "INFIL": "S",
+      "PHOTO": "L",
+      "HYDRO": "R",
+      "NSWIT": "1",
+      "MESOM": "P",
+      "MESEV": "R",
+      "MESOL": "2"
+    },
+    "3": {
+      "WTHER": "M",
+      "INCON": "M",
+      "LIGHT": "E",
+      "EVAPO": "R",
+      "INFIL": "S",
+      "PHOTO": "L",
+      "HYDRO": "R",
+      "NSWIT": "1",
+      "MESOM": "P",
+      "MESEV": "R",
+      "MESOL": "2"
+    }
+  },
+  "25D": {
+    "2": {
+      "WTHER": "M",
+      "INCON": "M",
+      "LIGHT": "E",
+      "EVAPO": "R",
+      "INFIL": "S",
+      "PHOTO": "L",
+      "HYDRO": "R",
+      "NSWIT": "1",
+      "MESOM": "P",
+      "MESEV": "R",
+      "MESOL": "2"
+    },
+    "3": {
+      "WTHER": "M",
+      "INCON": "M",
+      "LIGHT": "E",
+      "EVAPO": "R",
+      "INFIL": "S",
+      "PHOTO": "L",
+      "HYDRO": "R",
+      "NSWIT": "1",
+      "MESOM": "P",
+      "MESEV": "R",
+      "MESOL": "2"
+    }
+  },
+  "26C": {
+    "2": {
+      "WTHER": "M",
+      "INCON": "M",
+      "LIGHT": "E",
+      "EVAPO": "R",
+      "INFIL": "S",
+      "PHOTO": "L",
+      "HYDRO": "R",
+      "NSWIT": "1",
+      "MESOM": "P",
+      "MESEV": "R",
+      "MESOL": "2"
+    }
+  },
+  "26D": {
+    "2": {
+      "WTHER": "M",
+      "INCON": "M",
+      "LIGHT": "E",
+      "EVAPO": "R",
+      "INFIL": "S",
+      "PHOTO": "L",
+      "HYDRO": "R",
+      "NSWIT": "1",
+      "MESOM": "P",
+      "MESEV": "R",
+      "MESOL": "2"
+    }
+  },
+  "FA": {
+    "2": {
+      "WTHER": "M",
+      "INCON": "M",
+      "LIGHT": "E",
+      "EVAPO": "R",
+      "INFIL": "S",
+      "PHOTO": "L",
+      "HYDRO": "R",
+      "NSWIT": "1",
+      "MESOM": "P",
+      "MESEV": "R",
+      "MESOL": "2"
+    }
+  }
+}

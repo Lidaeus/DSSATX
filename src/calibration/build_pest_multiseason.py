@@ -28,6 +28,7 @@ from src.calibration.build_pest import (
     PEST_HARVEST_FILE,
     PEST_JOINT_FILE,
     PEST_N_RESPONSE_FILE,
+    PEST_N_DOSE_GRADIENT_FILE,
     PEST_TMTGROW_FILE,
     PEST_W_RESPONSE_FILE,
     _build_evaluate_observations_from_filea,
@@ -43,6 +44,7 @@ from src.calibration.build_pest import (
 from src.calibration.multiseason_design import MultiSeasonDesign
 from src.calibration.design_config import load_design_config
 from src.calibration.nitrogen_response import (
+    build_observed_n_dose_gradient_rows,
     build_observed_n_response_rows,
     build_observed_water_response_rows,
     load_n_response_mapping,
@@ -717,6 +719,25 @@ def build_multiseason_stage2(
             source_variable=str(n_response.get("source_variable", "CHPDT")),
         )
 
+    n_dose_gradient = design.nitrogen_dose_gradient_objective or {}
+    ngrad_df = None
+    if bool(n_dose_gradient.get("enabled", False)):
+        mapping_path = Path(str(n_dose_gradient["mapping_csv"]))
+        if not mapping_path.is_absolute():
+            mapping_path = (PROJECT_ROOT / mapping_path).resolve()
+        mapping = load_n_response_mapping(
+            mapping_path, run_mapping_rows, response_levels=["N1", "N2", "N3"]
+        )
+        ngrad_df = build_observed_n_dose_gradient_rows(
+            nresp_harvest_df,
+            mapping,
+            seasons=n_dose_gradient.get("seasons", ["26SP"]),
+            sigma_floor=float(n_dose_gradient.get("sigma_floor", 0.05)),
+            response_target=str(n_dose_gradient.get("response_target", "monotone_plateau")),
+            harvest_scope=str(n_dose_gradient.get("harvest_scope", "all")),
+            source_variable=str(n_dose_gradient.get("source_variable", "CHFPW")),
+        )
+
     water_response = design.water_response_objective or {}
     wresp_df = None
     if bool(water_response.get("enabled", False)):
@@ -786,6 +807,14 @@ def build_multiseason_stage2(
             "group_sigmas": {},
             "df": nresp_df,
         })
+    if ngrad_df is not None and not ngrad_df.empty:
+        stage2_outputs.append({
+            "model_out_path": PEST_N_DOSE_GRADIENT_FILE,
+            "obs_bases": {"NG12", "NG23", "NGCV"},
+            "critical_obs": set(),
+            "group_sigmas": {},
+            "df": ngrad_df,
+        })
     if wresp_df is not None and not wresp_df.empty:
         stage2_outputs.append({
             "model_out_path": PEST_W_RESPONSE_FILE,
@@ -835,6 +864,7 @@ def build_multiseason_stage2(
         run_mapping_rows,
         nse_objectives={
             "N_RESPONSE": n_response,
+            "N_DOSE_GRADIENT": n_dose_gradient,
             "W_RESPONSE": water_response,
             "HARVEST_DRY_TOTAL": harvest_dry_obj,
             "HARVEST_FRESH": harvest_fresh_obj,
@@ -852,6 +882,7 @@ def build_multiseason_stage2(
         run_mapping_rows,
         nse_objectives={
             "N_RESPONSE": n_response,
+            "N_DOSE_GRADIENT": n_dose_gradient,
             "W_RESPONSE": water_response,
             "HARVEST_DRY_TOTAL": harvest_dry_obj,
             "HARVEST_FRESH": harvest_fresh_obj,
@@ -923,7 +954,7 @@ def _family_for_group(group):
         "LAIXM": "CANOPY", "LAIDM": "CANOPY", "LAIXS": "CANOPY",
         "LAIDDM": "CANOPY_INCREMENT", "LAIDDS": "CANOPY_INCREMENT",
         "LAIETM": "CANOPY_TERMINAL", "LAIETS": "CANOPY_TERMINAL",
-        "CHTDM": "CANOPY", "CHTDS": "CANOPY",
+        "CHTDM": "CANOPY_HEIGHT", "CHTDS": "CANOPY_HEIGHT",
         "LWADM": "BIOMASS", "SWADM": "BIOMASS",
         "LWADDM": "BIOMASS_INCREMENT", "SWADDM": "BIOMASS_INCREMENT",
         "LWETM": "BIOMASS_TERMINAL", "SWETM": "BIOMASS_TERMINAL",
@@ -940,6 +971,9 @@ def _family_for_group(group):
         "CHPDTM_T": "HARVEST_DRY_TREND", "CHPDTS_T": "HARVEST_DRY_TREND",
         "HPODWM": "HARVEST_DRY_INCREMENT", "HPODWS": "HARVEST_DRY_INCREMENT",
         "NRESPM": "N_RESPONSE", "NRESPS": "N_RESPONSE",
+        "NG12M": "N_DOSE_GRADIENT", "NG12S": "N_DOSE_GRADIENT",
+        "NG23M": "N_DOSE_GRADIENT", "NG23S": "N_DOSE_GRADIENT",
+        "NGCVM": "N_DOSE_GRADIENT", "NGCVS": "N_DOSE_GRADIENT",
         "WRESPM": "W_RESPONSE", "WRESPS": "W_RESPONSE",
     }
     for key in sorted(family_map.keys(), key=len, reverse=True):

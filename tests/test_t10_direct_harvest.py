@@ -67,7 +67,11 @@ def test_t10_writer_derives_fresh_event_increments(tmp_path: Path, monkeypatch) 
         "batch", "fresh", str(target), tmt_path="events"
     )
     text = target.read_text(encoding="utf-8")
-    assert "DATE 25140 @CHFPWS@ 100.000 @HFPOWS@ 100.000" in text
+    # Nonterminal rows expose both the increment/trend token and cumulative
+    # CHFPWS so N/W response writers can pair every harvest event.
+    assert "DATE 25140 @HFPOWS@ 100.000 @CHFPWS_T@ 100.000 @CHFPWS@ 100.000" in text
+    # The terminal row keeps CHFPWS before HFPOWS for the direct terminal
+    # fresh-yield instruction contract.
     assert "DATE 25146 @CHFPWS@ 260.000 @HFPOWS@ 160.000" in text
 
 

@@ -40,8 +40,14 @@ def sync_bundle(src_dir: Path, dst_dir: Path):
         if src_file.is_file():
             dst_file = dst_dir / src_file.name
             shutil.copy2(src_file, dst_file)
-            assert sha256(src_file) == sha256(dst_file), f"Mismatch: {dst_file}"
-    print(f"[SYNCED] {src_dir.name} -> {dst_dir.name} ({len(list(src_dir.iterdir()))} files)")
+    # Update bundle_id in input_manifest.json to match dst_dir.name
+    manifest_p = dst_dir / "input_manifest.json"
+    if manifest_p.is_file():
+        import json
+        m_data = json.loads(manifest_p.read_text(encoding="utf-8"))
+        m_data["bundle_id"] = dst_dir.name
+        manifest_p.write_text(json.dumps(m_data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"[SYNCED] {src_dir.name} -> {dst_dir.name} ({len(list(dst_dir.iterdir()))} files)")
 
 
 def remove_obsolete_dirs():

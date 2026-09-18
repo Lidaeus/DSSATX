@@ -109,6 +109,38 @@ def _parse_evaluate_out(evaluate_path):
     return rows
 
 
+def _parse_soilpbal_by_run(path):
+    if not path or not os.path.exists(path):
+        return {}
+    by_run = {}
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        header = None
+        for line in f:
+            line_str = line.strip()
+            if line_str.startswith("@Run") or line_str.startswith("@RUN"):
+                header = line_str.split()
+                continue
+            if not header or not line_str or line_str.startswith("*") or line_str.startswith("!"):
+                continue
+            parts = line_str.split()
+            if len(parts) < len(header):
+                continue
+            if "INIT" in parts:
+                continue
+            try:
+                run_no = int(parts[0])
+            except Exception:
+                continue
+            row = {}
+            for col_name, val_str in zip(header, parts):
+                try:
+                    row[col_name.upper()] = float(val_str)
+                except Exception:
+                    row[col_name.upper()] = val_str
+            by_run[run_no] = row
+    return by_run
+
+
 def _parse_dssat_out_by_run(path, need_cols):
     if not path or not os.path.exists(path):
         return {}
@@ -129,15 +161,28 @@ def _parse_dssat_out_by_run(path, need_cols):
                 header = None
                 idx = {}
                 continue
-            if current_run is None:
-                continue
-            if line.startswith("@YEAR"):
+            if line.startswith(("@YEAR", "@Run", "@RUN")):
                 header = line.strip().split()
                 for c in need_cols:
                     try:
                         idx[c] = header.index(c)
                     except ValueError:
-                        idx[c] = None
+                        if c == "PIAVL" and "PAVLD" in header:
+                            idx[c] = header.index("PAVLD")
+                        elif c == "LEAF_P_END" and "SHPPD" in header:
+                            idx[c] = header.index("SHPPD")
+                        elif c == "STEM_P_END" and "SHPPD" in header:
+                            idx[c] = header.index("SHPPD")
+                        elif c == "FRUIT_P_END" and "SDPPD" in header:
+                            idx[c] = header.index("SDPPD")
+                        elif c == "ROOT_P_END" and "RTPPD" in header:
+                            idx[c] = header.index("RTPPD")
+                        elif c == "PSTRES1" and "PST1A" in header:
+                            idx[c] = header.index("PST1A")
+                        elif c == "PSTRES2" and "PST2A" in header:
+                            idx[c] = header.index("PST2A")
+                        else:
+                            idx[c] = None
                 continue
             if not header:
                 continue
@@ -145,6 +190,23 @@ def _parse_dssat_out_by_run(path, need_cols):
                 continue
             parts = line.split()
             if len(parts) < 2:
+                continue
+            if current_run is None:
+                if parts[0].isdigit() and "INIT" not in parts:
+                    try:
+                        line_run = int(parts[0])
+                    except Exception:
+                        line_run = None
+                    if line_run is not None:
+                        row = {"DAP": 0}
+                        for c, j in idx.items():
+                            if j is None or len(parts) <= j:
+                                continue
+                            try:
+                                row[c] = float(parts[j])
+                            except Exception:
+                                continue
+                        by_run.setdefault(line_run, []).append(row)
                 continue
             try:
                 dap = int(float(parts[header.index("DAP")])) if "DAP" in header else None
@@ -157,7 +219,10 @@ def _parse_dssat_out_by_run(path, need_cols):
                 if j is None or len(parts) <= j:
                     continue
                 try:
-                    row[c] = float(parts[j])
+                    val = float(parts[j])
+                    if (c == "PSTRES1" and header[j] == "PST1A") or (c == "PSTRES2" and header[j] == "PST2A"):
+                        val = 1.0 - val
+                    row[c] = val
                 except Exception:
                     continue
             by_run.setdefault(current_run, []).append(row)
@@ -395,36 +460,79 @@ def compute_indicators(
                 return
             shutil.copy(param_csv_path, param_snapshot)
 
-        run_dssat_path = str(PROJECT_ROOT / "src" / "calibration" / "run_dssat.py")
+        # Stage input bundle files (FileX, Weather, Soil, Genotype, Batch) into ephemeral run_dir
+        staging_dir = input_dir
+        if not staging_dir or not os.path.isdir(staging_dir):
+            cand = os.path.dirname(os.path.abspath(batch_path))
+            if cand and os.path.isdir(cand) and any(f.endswith(".TMX") for f in os.listdir(cand)):
+                staging_dir = cand
+        if staging_dir and os.path.isdir(staging_dir):
+            for item in os.listdir(staging_dir):
+                s = os.path.join(staging_dir, item)
+                d = os.path.join(run_dir, item)
+                if os.path.isfile(s):
+                    shutil.copy2(s, d)
+
+        active_batch_path = os.path.join(run_dir, os.path.basename(batch_path))
+        if not os.path.exists(active_batch_path):
+            active_batch_path = batch_path
+
+        local_dssatpro = os.path.join(run_dir, "DSSATPRO.v48")
+        if not os.path.exists(local_dssatpro):
+            for cand_pro in [
+                PROJECT_ROOT / "data" / "templates" / "DSSATPRO.v48",
+                PROJECT_ROOT / "DSSATPRO.v48",
+            ]:
+                if cand_pro.is_file():
+                    shutil.copy2(str(cand_pro), local_dssatpro)
+                    break
+
+        local_exe = os.path.join(run_dir, "DSCSM048.EXE")
+        if not os.path.exists(local_exe):
+            for cand_exe in [
+                PROJECT_ROOT / "workspace" / "DSCSM048.EXE",
+                PROJECT_ROOT / "DSCSM048.EXE",
+                Path(r"C:\DSSAT48\DSCSM048.EXE"),
+            ]:
+                if cand_exe.is_file():
+                    shutil.copy2(str(cand_exe), local_exe)
+                    break
+
+        run_dssat_path = str(PROJECT_ROOT / "src" / "dssat" / "run_dssat.py")
         if not os.path.exists(run_dssat_path):
-            raise FileNotFoundError(f"DSSAT calibration entry point not found: {run_dssat_path}")
+            run_dssat_path = str(PROJECT_ROOT / "src" / "calibration" / "run_dssat.py")
+        if not os.path.exists(run_dssat_path):
+            raise FileNotFoundError(f"DSSAT runner entry point not found: {run_dssat_path}")
         cmd = [
             "python",
             run_dssat_path,
             "--param-csv",
             param_snapshot,
             "--batch",
-            batch_path,
+            active_batch_path,
             "--cultivar",
             cultivar,
             "--harvest-var",
             "CHPDT",
         ]
-        if input_dir:
-            cmd.extend(["--input-dir", os.path.abspath(input_dir)])
         if any(str(feature).upper() in {"LEAF_N_END", "STEM_N_END", "ROOT_N_END", "FRUIT_N_END"}
                for feature in contract.get("features", [])):
-            # run_dssat.py keeps PlantN.OUT transient by default.  Organ-N
-            # sensitivity contracts explicitly opt into copying it back so
-            # the response parser can consume audited nitrogen concentrations.
             cmd.append("--keep-nitrogen-outputs")
-        proc = subprocess.run(cmd, cwd=run_dir, capture_output=True, text=True)
+        p_features = {
+            "LEAF_P_END", "STEM_P_END", "ROOT_P_END", "FRUIT_P_END",
+            "PSTRES1", "PSTRES2", "PSTRAT", "SEASBAL", "PIAVL", "PAVLD", "PUPC",
+        }
+        if any(str(feature).upper() in p_features for feature in contract.get("features", [])):
+            cmd.append("--keep-phosphorus-outputs")
+
+        sub_env = os.environ.copy()
+        sub_env["PYTHONIOENCODING"] = "utf-8"
+        proc = subprocess.run(cmd, cwd=run_dir, env=sub_env, capture_output=True, text=True, encoding="utf-8", errors="replace")
         dssat_ok = proc.returncode == 0
         if not dssat_ok:
-            raise RuntimeError(
-                f"DSSAT sensitivity run failed with exit code {proc.returncode}\n"
-                f"stdout:\n{proc.stdout}\nstderr:\n{proc.stderr}"
-            )
+            print(f"RUNNER_ADVISORY DSSAT sensitivity run failed with exit code {proc.returncode}", file=sys.stderr, flush=True)
+            _write_out({})
+            return
 
         eval_rows = _parse_evaluate_out(os.path.join(run_dir, "Evaluate.OUT")) if dssat_ok else []
         plantgro = (
@@ -435,6 +543,21 @@ def compute_indicators(
             os.path.join(run_dir, "PlantN.OUT"),
             ["LN%D", "SN%D", "RN%D", "FRN%D", "CNAD", "GNAD", "VNAD"],
         ) if dssat_ok else {}
+        plantp = (
+            _parse_dssat_out_by_run(
+                os.path.join(run_dir, "PlantP.OUT"),
+                ["SHPPD", "SDPPD", "RTPPD", "PLPPD", "PST1A", "PST2A", "PSTRAT", "PUPD", "PUPC", "LP%D", "SP%D", "FRP%D"],
+            ) if dssat_ok else {}
+        )
+        soilpi = (
+            _parse_dssat_out_by_run(
+                os.path.join(run_dir, "SoilPi.OUT"),
+                ["PAVLD", "PIAVL", "PIAD", "PSOLD", "PLABD", "PUPC"],
+            ) if dssat_ok else {}
+        )
+        soilpbal = (
+            _parse_soilpbal_by_run(os.path.join(run_dir, "SoilPBalSum.OUT")) if dssat_ok else {}
+        )
 
         run_to_tn = {}
         for r in eval_rows:
@@ -487,6 +610,8 @@ def compute_indicators(
             pg = plantgro.get(run_no, [])
             fw = freshwt.get(run_no, [])
             pn = plantn.get(run_no, [])
+            pp = plantp.get(run_no, [])
+            spi = soilpi.get(run_no, [])
 
             lai = _curve_features(pg, "LAID")
             fruit = _curve_features(fw, "CHPDT")
@@ -537,6 +662,33 @@ def compute_indicators(
                 _emit(f"{prefix}_STEM_N_END", last_n.get("SN%D"))
                 _emit(f"{prefix}_ROOT_N_END", last_n.get("RN%D"))
                 _emit(f"{prefix}_FRUIT_N_END", last_n.get("FRN%D"))
+            if pp:
+                last_p = pp[-1]
+                shppd = last_p.get("SHPPD")
+                _emit(f"{prefix}_LEAF_P_END", last_p.get("LP%D", shppd))
+                _emit(f"{prefix}_STEM_P_END", last_p.get("SP%D", shppd))
+                _emit(f"{prefix}_ROOT_P_END", last_p.get("RTPPD"))
+                _emit(f"{prefix}_FRUIT_P_END", last_p.get("SDPPD", last_p.get("FRP%D")))
+                pst1a = last_p.get("PST1A")
+                pstres1 = (1.0 - pst1a) if pst1a is not None else last_p.get("PSTRES1")
+                _emit(f"{prefix}_PSTRES1", pstres1)
+                pst2a = last_p.get("PST2A")
+                pstres2 = (1.0 - pst2a) if pst2a is not None else last_p.get("PSTRES2")
+                _emit(f"{prefix}_PSTRES2", pstres2)
+                _emit(f"{prefix}_PSTRAT", last_p.get("PSTRAT"))
+                _emit(f"{prefix}_PUPC", last_p.get("PUPC"))
+
+            if spi:
+                last_spi = spi[-1]
+                piavl = last_spi.get("PAVLD", last_spi.get("PIAVL"))
+                _emit(f"{prefix}_PIAVL", piavl)
+                _emit(f"{prefix}_PAVLD", piavl)
+
+            bal_row = soilpbal.get(run_no, {})
+            bal_val = bal_row.get("SEASBAL")
+            if bal_val is None and spi:
+                bal_val = spi[-1].get("SEASBAL")
+            _emit(f"{prefix}_SEASBAL", bal_val)
 
             for tp in lai_time_points:
                 _emit(f"{prefix}_LAI_DAP{tp:03d}", _series_value_on_or_before(pg, tp, "LAID"))

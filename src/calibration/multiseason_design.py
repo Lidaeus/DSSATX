@@ -65,6 +65,7 @@ class MultiSeasonDesign:
     seasons: tuple[SeasonSpec, ...]
     seasonal_parameterization: SeasonalParameterization | None = None
     nitrogen_response_objective: dict[str, Any] | None = None
+    nitrogen_dose_gradient_objective: dict[str, Any] | None = None
     water_response_objective: dict[str, Any] | None = None
     harvest_dry_objective: dict[str, Any] | None = None
     harvest_fresh_objective: dict[str, Any] | None = None
@@ -277,6 +278,23 @@ class MultiSeasonDesign:
                             "NSE-weighted nitrogen_response_objective requires positive nse_lambda"
                         )
 
+        nitrogen_dose_gradient_objective = raw.get("nitrogen_dose_gradient_objective")
+        if nitrogen_dose_gradient_objective is not None:
+            if not isinstance(nitrogen_dose_gradient_objective, dict):
+                raise MultiSeasonDesignError("nitrogen_dose_gradient_objective must be an object")
+            if bool(nitrogen_dose_gradient_objective.get("enabled", False)):
+                source_variable = str(nitrogen_dose_gradient_objective.get("source_variable", "CHFPW")).strip().upper()
+                if source_variable not in {"CHPDT", "CHFPW"}:
+                    raise MultiSeasonDesignError("nitrogen_dose_gradient_objective source_variable must be CHPDT or CHFPW")
+                if not str(nitrogen_dose_gradient_objective.get("mapping_csv", "")).strip():
+                    raise MultiSeasonDesignError("enabled nitrogen_dose_gradient_objective requires mapping_csv")
+                if float(nitrogen_dose_gradient_objective.get("sigma_floor", 0.05)) <= 0:
+                    raise MultiSeasonDesignError("nitrogen_dose_gradient_objective sigma_floor must be positive")
+                gradient_seasons = {str(value) for value in nitrogen_dose_gradient_objective.get("seasons", [])}
+                known_seasons = {season.season_id for season in seasons}
+                if not gradient_seasons or not gradient_seasons <= known_seasons:
+                    raise MultiSeasonDesignError("nitrogen_dose_gradient_objective seasons must be a non-empty subset of design seasons")
+
         water_response_objective = raw.get("water_response_objective")
         if water_response_objective is not None:
             if not isinstance(water_response_objective, dict):
@@ -454,6 +472,7 @@ class MultiSeasonDesign:
             seasons=tuple(seasons),
             seasonal_parameterization=seasonal_parameterization,
             nitrogen_response_objective=nitrogen_response_objective,
+            nitrogen_dose_gradient_objective=nitrogen_dose_gradient_objective,
             water_response_objective=water_response_objective,
             harvest_dry_objective=harvest_dry_objective,
             harvest_fresh_objective=harvest_fresh_objective,

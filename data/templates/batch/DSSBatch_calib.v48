@@ -1,0 +1,15 @@
+$BATCH(TOMATO_CAL)
+!
+! Calibration Batch: 25SP Extremes (4) + 26SP Contrasts (4: W2N0, W2N3, W1N0, W1N3)
+! Generated for CROPGRO-Eggplant Phase 1 & Phase 2 Staged Calibration
+! Total Runs: 8
+!
+@FILEX                                                                                        TRTNO     RP     SQ     OP     CO
+XXQL2501.TMX                                                                                     2      1      0      0      0
+XXQL2501.TMX                                                                                     5      1      0      0      0
+XXQL2501.TMX                                                                                    10      1      0      0      0
+XXQL2501.TMX                                                                                    13      1      0      0      0
+XXQL2601.TMX                                                                                     2      1      0      0      0
+XXQL2601.TMX                                                                                     3      1      0      0      0
+XXQL2601.TMX                                                                                    11      1      0      0      0
+XXQL2601.TMX                                                                                    12      1      0      0      0

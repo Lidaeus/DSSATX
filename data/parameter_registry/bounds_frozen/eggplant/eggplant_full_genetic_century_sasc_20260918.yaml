@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_genetic_century_sasc_20260918"
+crop: "eggplant"
+created_at: "2026-09-17T23:23:44Z"
+approved_at: "2026-09-17T23:23:44Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_genetic_century_sasc_20260918.csv"
+derived_from_sha256: "1247792317e203b49f8de3998dd9b06a50cebc417aa4ec6651275476d301b8de"
+bounds_sha256: "e878bb62ea089e0f7897fcd260a65fad8cd2171e982ff042cf9bbf926272c87a"
+parameter_count: 164
+automatic_repairs: 0
+notes: "CENTURY MESOM=P SASC calibration in [0.75, 0.95] (init 0.88), ICNS_26SP fixed to 0.70, SOIL_SLNF fixed to 1.00, 100cm SRGF, iter5_real113 champion genetic baseline"

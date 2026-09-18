@@ -33,12 +33,23 @@ BUNDLES = [
     "xxql2601_v20260917_refresh",
     "xxql2502_v20260917_refresh",
 ]
+ALL_ACTIVE_BUNDLES = [
+    "xxql2501_v20260917_refresh",
+    "xxql2601_v20260917_refresh",
+    "xxql2502_v20260917_refresh",
+    "XXQL2501",
+    "XXQL2601",
+    "XXQL2502",
+    "xxql2501_unified_20260914",
+    "xxql2601_unified_20260914",
+    "xxql2502_unified_20260914",
+]
 DSSAT_EXE = Path(r"C:\DSSAT48\DSCSM048.EXE")
 
 
-@pytest.mark.parametrize("bundle_name", BUNDLES)
+@pytest.mark.parametrize("bundle_name", ALL_ACTIVE_BUNDLES)
 def test_manifest_integrity(bundle_name: str):
-    """Every refreshed bundle must pass the strict input manifest integrity check."""
+    """Every active bundle must pass the strict input manifest integrity check."""
     bundle_dir = ROOT / "data/user/experiments" / bundle_name
     assert bundle_dir.is_dir(), f"{bundle_name} does not exist"
     manifest = verify_manifest_integrity(bundle_dir)
@@ -98,15 +109,68 @@ def test_25sp_plant_n_in_filea_and_filet():
     assert (valid_t_snam > 0).all()
 
 
+def parse_soil_layers(text: str, soil_id: str) -> dict[int, tuple[float, float]]:
+    """Parse SLB -> (SLLL, SRGF) for a given profile."""
+    layers = {}
+    in_profile = False
+    in_layer_section = False
+    for line in text.splitlines():
+        if line.startswith(f"*{soil_id}"):
+            in_profile = True
+            in_layer_section = False
+        elif in_profile and line.startswith("*"):
+            break
+        elif in_profile and line.strip().startswith("@  SLB"):
+            in_layer_section = True
+        elif in_profile and in_layer_section and line.strip() and not line.startswith(("@", "!")):
+            parts = line.split()
+            if len(parts) >= 6:
+                try:
+                    slb = int(float(parts[0]))
+                    if slb > 0:
+                        slll = float(parts[2])
+                        srgf = float(parts[5])
+                        layers[slb] = (slll, srgf)
+                except ValueError:
+                    pass
+    return layers
+
+
 def test_soil_sol_profiles():
-    """SOIL.SOL must contain XXSL2501 and XXSL2601 with complete 10L-B schema."""
-    sol_path = ROOT / "data/raw/soil/SOIL.SOL"
-    text = sol_path.read_text(encoding="utf-8")
-    assert "*XXSL2501" in text
-    assert "*XXSL2601" in text
-    # Exactly one occurrence of each
-    assert text.count("*XXSL2501") == 1
-    assert text.count("*XXSL2601") == 1
+    """SOIL.SOL must contain XXSL2501 and XXSL2601 with 100cm root cutoff and calibrated SLLL."""
+    target_slll = {
+        2: 0.142, 4: 0.142, 15: 0.142, 30: 0.149, 40: 0.152,
+        60: 0.171, 80: 0.157, 100: 0.167, 140: 0.165, 180: 0.160
+    }
+    target_srgf = {
+        2: 1.000, 4: 1.000, 15: 1.000, 30: 0.900, 40: 0.800,
+        60: 0.650, 80: 0.200, 100: 0.200, 140: 0.050, 180: 0.000
+    }
+
+    sol_paths = [
+        ROOT / "data/raw/soil/SOIL.SOL",
+        Path(r"C:\DSSAT48\Soil\SOIL.SOL"),
+    ] + [ROOT / "data/user/experiments" / b / "SOIL.SOL" for b in ALL_ACTIVE_BUNDLES]
+
+    for sol_p in sol_paths:
+        assert sol_p.is_file(), f"Missing SOIL.SOL at {sol_p}"
+        text = sol_p.read_text(encoding="utf-8")
+        assert "*XXSL2501" in text, f"Missing XXSL2501 in {sol_p}"
+        assert "*XXSL2601" in text, f"Missing XXSL2601 in {sol_p}"
+
+        for soil_id in ["XXSL2501", "XXSL2601"]:
+            layers = parse_soil_layers(text, soil_id)
+            assert len(layers) == 10, f"Expected 10 layers for {soil_id} in {sol_p}, got {len(layers)}"
+            # Verify 80cm and 100cm extension (SRGF=0.200)
+            assert layers[80][1] == pytest.approx(0.200, abs=1e-3), f"{soil_id} 80cm SRGF mismatch in {sol_p}"
+            assert layers[100][1] == pytest.approx(0.200, abs=1e-3), f"{soil_id} 100cm SRGF mismatch in {sol_p}"
+            # Verify deep truncation (SRGF=0.050 at 140cm, 0.000 at 180cm)
+            assert layers[140][1] == pytest.approx(0.050, abs=1e-3), f"{soil_id} 140cm SRGF mismatch in {sol_p}"
+            assert layers[180][1] == pytest.approx(0.000, abs=1e-3), f"{soil_id} 180cm SRGF mismatch in {sol_p}"
+            # Verify SLLL preserved at calibrated values
+            for slb, expected_slll in target_slll.items():
+                assert layers[slb][0] == pytest.approx(expected_slll, abs=1e-3), f"{soil_id} SLLL({slb}) mismatch in {sol_p}"
+                assert layers[slb][1] == pytest.approx(target_srgf[slb], abs=1e-3), f"{soil_id} SRGF({slb}) mismatch in {sol_p}"
 
 
 @pytest.mark.parametrize("bundle_name", BUNDLES)

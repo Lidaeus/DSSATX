@@ -1,0 +1,454 @@
+{
+  "profile_id": "eggplant_wnp_multiseason_outputs_20260914",
+  "title": "CROPGRO-Eggplant Phase 1 Multi-Season W-N-P Global Sensitivity Analysis Output Profile",
+  "crop": "eggplant",
+  "model": "CROPGRO-Tomato TMGRO048",
+  "version": "20260914",
+  "description": "Unified multi-season sensitivity output profile covering 25SP, 25FA, and 26SP with coupled canopy, yield, biomass, nitrogen, and phosphorus indicators.",
+  "treatments": [
+    2,
+    3,
+    4,
+    5,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+  ],
+  "features": [
+    "ADAPS",
+    "PDFPS",
+    "LAIXS",
+    "LAI_AUC",
+    "LAI_PEAK",
+    "LAI_END",
+    "CWAMS",
+    "LEAF_END_LWAD",
+    "STEM_END_SWAD",
+    "AGB_END_CWAD",
+    "HI_END_HIAD",
+    "YIELD_HWAMS",
+    "FRUITD_END",
+    "CUMHARVEST_DAP50",
+    "LEAF_N_END",
+    "STEM_N_END",
+    "ROOT_N_END",
+    "FRUIT_N_END",
+    "LEAF_P_END",
+    "STEM_P_END",
+    "ROOT_P_END",
+    "FRUIT_P_END",
+    "PSTRES1",
+    "PSTRES2",
+    "SEASBAL",
+    "PIAVL"
+  ],
+  "lai_time_points": [
+    45,
+    67,
+    95,
+    119
+  ],
+  "fruit_time_points": [],
+  "include_treatment_mean": true,
+  "response_groups": {
+    "phenology": [
+      "ADAPS",
+      "PDFPS"
+    ],
+    "canopy": [
+      "LAIXS",
+      "LAI_AUC",
+      "LAI_PEAK",
+      "LAI_END",
+      "LAI_DAP"
+    ],
+    "biomass": [
+      "CWAMS",
+      "LEAF_END_LWAD",
+      "STEM_END_SWAD",
+      "AGB_END_CWAD",
+      "HI_END_HIAD"
+    ],
+    "yield_harvest": [
+      "YIELD_HWAMS",
+      "FRUITD_END",
+      "CUMHARVEST_DAP50"
+    ],
+    "organ_n": [
+      "LEAF_N_END",
+      "STEM_N_END",
+      "ROOT_N_END",
+      "FRUIT_N_END"
+    ],
+    "organ_p": [
+      "LEAF_P_END",
+      "STEM_P_END",
+      "ROOT_P_END",
+      "FRUIT_P_END"
+    ],
+    "p_stress_balance": [
+      "PSTRES1",
+      "PSTRES2",
+      "SEASBAL",
+      "PIAVL"
+    ],
+    "water_response": [
+      "WATER_LAI_AUC",
+      "WATER_AGB_END_CWAD",
+      "WATER_FRUITD_END",
+      "WATER_CUMHARVEST_DAP50"
+    ],
+    "nitrogen_response": [
+      "NITROGEN_LAI_AUC",
+      "NITROGEN_AGB_END_CWAD",
+      "NITROGEN_FRUITD_END",
+      "NITROGEN_CUMHARVEST_DAP50"
+    ],
+    "water_nitrogen_interaction": [
+      "INTERACTION_LAI_AUC",
+      "INTERACTION_AGB_END_CWAD",
+      "INTERACTION_FRUITD_END",
+      "INTERACTION_CUMHARVEST_DAP50"
+    ]
+  },
+  "water_nitrogen_design": {
+    "contrast_features": [
+      "LAI_AUC",
+      "AGB_END_CWAD",
+      "FRUITD_END",
+      "CUMHARVEST_DAP50"
+    ],
+    "water_pairs": {
+      "N3": [
+        2,
+        10
+      ],
+      "N2": [
+        3,
+        11
+      ],
+      "N1": [
+        4,
+        12
+      ],
+      "N0": [
+        5,
+        13
+      ]
+    },
+    "nitrogen_series": {
+      "W3": [
+        {
+          "treatment": 5,
+          "n_kg_ha": 0
+        },
+        {
+          "treatment": 4,
+          "n_kg_ha": 130
+        },
+        {
+          "treatment": 3,
+          "n_kg_ha": 271
+        },
+        {
+          "treatment": 2,
+          "n_kg_ha": 399
+        }
+      ],
+      "W1": [
+        {
+          "treatment": 13,
+          "n_kg_ha": 0
+        },
+        {
+          "treatment": 12,
+          "n_kg_ha": 130
+        },
+        {
+          "treatment": 11,
+          "n_kg_ha": 271
+        },
+        {
+          "treatment": 10,
+          "n_kg_ha": 399
+        }
+      ]
+    }
+  },
+  "seasons": {
+    "25SP": {
+      "experiment": "XXQL2501",
+      "bundle": "xxql2501_unified_20260914",
+      "season_name": "2025_spring",
+      "role": "calibration_training",
+      "treatments": [
+        2,
+        3,
+        4,
+        5,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "lai_time_points": [
+        45,
+        67,
+        95,
+        119
+      ],
+      "fruit_time_points": [],
+      "water_nitrogen_design": {
+        "contrast_features": [
+          "LAI_AUC",
+          "AGB_END_CWAD",
+          "FRUITD_END",
+          "CUMHARVEST_DAP50"
+        ],
+        "water_pairs": {
+          "N3": [
+            2,
+            10
+          ],
+          "N2": [
+            3,
+            11
+          ],
+          "N1": [
+            4,
+            12
+          ],
+          "N0": [
+            5,
+            13
+          ]
+        },
+        "nitrogen_series": {
+          "W3": [
+            {
+              "treatment": 5,
+              "n_kg_ha": 0
+            },
+            {
+              "treatment": 4,
+              "n_kg_ha": 130
+            },
+            {
+              "treatment": 3,
+              "n_kg_ha": 271
+            },
+            {
+              "treatment": 2,
+              "n_kg_ha": 399
+            }
+          ],
+          "W1": [
+            {
+              "treatment": 13,
+              "n_kg_ha": 0
+            },
+            {
+              "treatment": 12,
+              "n_kg_ha": 130
+            },
+            {
+              "treatment": 11,
+              "n_kg_ha": 271
+            },
+            {
+              "treatment": 10,
+              "n_kg_ha": 399
+            }
+          ]
+        }
+      }
+    },
+    "25FA": {
+      "experiment": "XXQL2502",
+      "bundle": "xxql2502_unified_20260914",
+      "season_name": "2025_autumn",
+      "role": "independent_validation_quarantine",
+      "treatments": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "lai_time_points": [
+        45,
+        67,
+        95,
+        117
+      ],
+      "fruit_time_points": [],
+      "water_nitrogen_design": {
+        "contrast_features": [
+          "LAI_AUC",
+          "AGB_END_CWAD",
+          "FRUITD_END",
+          "CUMHARVEST_DAP50"
+        ],
+        "water_pairs": {
+          "N3": [
+            1,
+            3
+          ],
+          "N2": [
+            6,
+            4
+          ],
+          "N1": [
+            7,
+            9
+          ],
+          "N0": [
+            12,
+            10
+          ]
+        },
+        "nitrogen_series": {
+          "W3": [
+            {
+              "treatment": 12,
+              "n_kg_ha": 0
+            },
+            {
+              "treatment": 7,
+              "n_kg_ha": 150
+            },
+            {
+              "treatment": 6,
+              "n_kg_ha": 300
+            },
+            {
+              "treatment": 1,
+              "n_kg_ha": 450
+            }
+          ],
+          "W1": [
+            {
+              "treatment": 10,
+              "n_kg_ha": 0
+            },
+            {
+              "treatment": 9,
+              "n_kg_ha": 150
+            },
+            {
+              "treatment": 4,
+              "n_kg_ha": 300
+            },
+            {
+              "treatment": 3,
+              "n_kg_ha": 450
+            }
+          ]
+        }
+      }
+    },
+    "26SP": {
+      "experiment": "XXQL2601",
+      "bundle": "xxql2601_unified_20260914",
+      "season_name": "2026_spring",
+      "role": "calibration_contrast_evaluation",
+      "treatments": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "lai_time_points": [
+        45,
+        67,
+        95,
+        119
+      ],
+      "fruit_time_points": [],
+      "water_nitrogen_design": {
+        "contrast_features": [
+          "LAI_AUC",
+          "AGB_END_CWAD",
+          "FRUITD_END",
+          "CUMHARVEST_DAP50"
+        ],
+        "water_pairs": {
+          "N3": [
+            1,
+            3
+          ],
+          "N2": [
+            4,
+            6
+          ],
+          "N1": [
+            7,
+            9
+          ],
+          "N0": [
+            10,
+            12
+          ]
+        },
+        "nitrogen_series": {
+          "W3": [
+            {
+              "treatment": 10,
+              "n_kg_ha": 0
+            },
+            {
+              "treatment": 7,
+              "n_kg_ha": 140
+            },
+            {
+              "treatment": 4,
+              "n_kg_ha": 280
+            },
+            {
+              "treatment": 1,
+              "n_kg_ha": 420
+            }
+          ],
+          "W1": [
+            {
+              "treatment": 12,
+              "n_kg_ha": 0
+            },
+            {
+              "treatment": 9,
+              "n_kg_ha": 140
+            },
+            {
+              "treatment": 6,
+              "n_kg_ha": 280
+            },
+            {
+              "treatment": 3,
+              "n_kg_ha": 420
+            }
+          ]
+        }
+      }
+    }
+  }
+}

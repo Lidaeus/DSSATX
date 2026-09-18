@@ -42,17 +42,34 @@ _ZERO_RANGE = "zero_range"        # NRMSE_range denominator
 _CONSTANT_SERIES = "constant_series"  # NSE / R denominator (no variance)
 
 
-def _clean_pairs(observed, simulated) -> tuple[np.ndarray, np.ndarray, str]:
-    """Drop -99 missing values and non-finite pairs.  Returns status if all dropped."""
+def valid_pair_mask(observed, simulated, *, value_kind: str = "raw") -> np.ndarray:
+    """Validate pairs BEFORE unit conversion or subtraction.
+
+    raw: finite input values, excluding the DSSAT -99 sentinel (roundoff tolerant).
+    state: nonnegative physical states/harvest quantities.
+    signed: already-derived contrasts/changes; even -99 can be a real difference.
+    Missing source values must become NaN before forming signed differences.
+    """
     o = np.asarray(observed, dtype=float)
     s = np.asarray(simulated, dtype=float)
     if o.shape != s.shape:
         raise ValueError(
             f"observed and simulated must have the same shape, got {o.shape} vs {s.shape}"
         )
-    finite = np.isfinite(o) & np.isfinite(s)
-    non_missing = (o > -90.0) & (s > -90.0)
-    mask = finite & non_missing
+    mask = np.isfinite(o) & np.isfinite(s)
+    if value_kind == "state":
+        return mask & (o >= 0) & (s >= 0)
+    if value_kind == "signed":
+        return mask
+    if value_kind != "raw":
+        raise ValueError(f"Unknown value_kind: {value_kind!r}")
+    return mask & ~np.isclose(o, MISSING_VALUE, rtol=0, atol=1e-6) & ~np.isclose(s, MISSING_VALUE, rtol=0, atol=1e-6)
+
+
+def _clean_pairs(observed, simulated, *, value_kind="raw") -> tuple[np.ndarray, np.ndarray, str]:
+    o = np.asarray(observed, dtype=float)
+    s = np.asarray(simulated, dtype=float)
+    mask = valid_pair_mask(o, s, value_kind=value_kind)
     if not mask.any():
         return o[mask], s[mask], _EMPTY if o.size == 0 else _NON_FINITE
     return o[mask], s[mask], _OK
@@ -81,14 +98,14 @@ def _ols(obs: np.ndarray, sim: np.ndarray) -> tuple[float, float, np.ndarray]:
     return a, b, sim_hat
 
 
-def compute_metrics(observed, simulated) -> dict[str, Any]:
+def compute_metrics(observed, simulated, *, value_kind: str = "raw") -> dict[str, Any]:
     """Compute the full metric set for one comparison group.
 
     Always returns every key; inapplicable metrics are ``np.nan`` with a
     ``status``/``na_reason`` explaining why.  Residual sign is
     ``simulated - observed``.
     """
-    obs, sim, status = _clean_pairs(observed, simulated)
+    obs, sim, status = _clean_pairs(observed, simulated, value_kind=value_kind)
     n = int(obs.size)
     result: dict[str, Any] = {
         "n": n,
@@ -197,6 +214,8 @@ def compute_metrics_grouped(
     group_cols: list[str],
     observed_col: str = "observed",
     simulated_col: str = "simulated",
+    *,
+    value_kind: str = "raw",
 ) -> pd.DataFrame:
     """Compute metrics for each group, returning one row per group.
 
@@ -217,10 +236,10 @@ def compute_metrics_grouped(
         if not isinstance(keys, tuple):
             keys = (keys,)
         record = dict(zip(group_cols, keys))
-        metrics = compute_metrics(sub[observed_col].to_numpy(), sub[simulated_col].to_numpy())
+        metrics = compute_metrics(sub[observed_col].to_numpy(), sub[simulated_col].to_numpy(), value_kind=value_kind)
         record.update(metrics)
         rows.append(record)
     return pd.DataFrame(rows)
 
 
-__all__ = ["compute_metrics", "compute_metrics_grouped"]
+__all__ = ["compute_metrics", "compute_metrics_grouped", "valid_pair_mask"]

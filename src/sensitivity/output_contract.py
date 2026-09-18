@@ -10,9 +10,36 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_PROFILE = PROJECT_ROOT / "configs" / "sa" / "eggplant_p1_outputs.json"
 
 
-def load_output_contract(path: str | Path = DEFAULT_PROFILE) -> dict[str, object]:
+def load_output_contract(
+    path: str | Path = DEFAULT_PROFILE,
+    season: str | None = None,
+    bundle_name: str | None = None,
+) -> dict[str, object]:
     profile_path = Path(path).resolve()
     contract = json.loads(profile_path.read_text(encoding="utf-8"))
+
+    # Multi-season contract resolution: if a specific season or input bundle is targeted,
+    # resolve the corresponding season block (treatments, time points, water_nitrogen_design)
+    if "seasons" in contract and isinstance(contract["seasons"], dict):
+        selected_season_data = None
+        if season and season in contract["seasons"]:
+            selected_season_data = contract["seasons"][season]
+        elif bundle_name:
+            for s_key, s_data in contract["seasons"].items():
+                if isinstance(s_data, dict):
+                    if s_data.get("bundle") == bundle_name or s_key.lower() in bundle_name.lower():
+                        selected_season_data = s_data
+                        break
+        if selected_season_data and isinstance(selected_season_data, dict):
+            if "treatments" in selected_season_data:
+                contract["treatments"] = selected_season_data["treatments"]
+            if "lai_time_points" in selected_season_data:
+                contract["lai_time_points"] = selected_season_data["lai_time_points"]
+            if "fruit_time_points" in selected_season_data:
+                contract["fruit_time_points"] = selected_season_data["fruit_time_points"]
+            if "water_nitrogen_design" in selected_season_data:
+                contract["water_nitrogen_design"] = selected_season_data["water_nitrogen_design"]
+
     treatments = [int(value) for value in contract.get("treatments", [])]
     features = [str(value).strip().upper() for value in contract.get("features", []) if str(value).strip()]
     legacy_time_points = [int(value) for value in contract.get("time_points", [])]

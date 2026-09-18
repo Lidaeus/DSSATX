@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_genetic_98pct_v9_20260917"
+crop: "eggplant"
+created_at: "2026-09-17T14:49:42Z"
+approved_at: "2026-09-17T14:49:42Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_genetic_98pct_v8_20260917.csv"
+derived_from_sha256: "186a61734cc372990fb6f30757782b16a795366b4fc69b3340a2b1e8a6501188"
+bounds_sha256: "186a61734cc372990fb6f30757782b16a795366b4fc69b3340a2b1e8a6501188"
+parameter_count: 163
+automatic_repairs: 0
+notes: "V9 calibration: 100cm root cutoff verified, lnref [4.60, 5.20], sizlf <= 380, xfrt <= 0.95, fnpgn2 in [4.0, 5.2], icns_26sp in [0.30, 0.45], nstfac in [0.60, 0.85]"

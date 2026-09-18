@@ -1,4 +1,24 @@
-build_model_performance <- function(comparison, variables, profile, is_demo = FALSE) {
+build_model_performance <- function(comparison, variables, profile, is_demo = FALSE,
+                                    facet_columns = 2L) {
+  # Explicit season metadata only: never infer season from treatment numbers.
+  if ("season_id" %in% names(comparison) && length(unique(comparison$season_id)) > 1L) {
+    if (anyNA(comparison$season_id) || any(!nzchar(comparison$season_id))) stop("Missing season_id")
+    seasons <- unique(as.character(comparison$season_id))
+    parts <- lapply(seasons, function(season) {
+      part <- build_model_performance(comparison[comparison$season_id == season, , drop = FALSE],
+                                      variables, profile, is_demo, facet_columns = 4L)
+      part$metrics$season_id <- season
+      part$plot <- part$plot + patchwork::plot_annotation(title = season)
+      part
+    })
+    return(list(plot = patchwork::wrap_plots(lapply(parts, `[[`, "plot"), ncol = 1L) +
+                  patchwork::plot_annotation(
+                    caption = if (isTRUE(is_demo)) "DEMO: layout QA only; not scientific evidence" else NULL,
+                    theme = ggplot2::theme(plot.caption = ggplot2::element_text(size = 5))),
+                source = do.call(rbind, lapply(parts, `[[`, "source")),
+                metrics = do.call(rbind, lapply(parts, `[[`, "metrics")),
+                height_mm = min(profile$max_height_mm, 78 * length(parts))))
+  }
   data <- comparison[comparison$variable %in% variables, , drop = FALSE]
   if (nrow(data) == 0) stop("No requested model-performance variables are available")
   inferential <- data$dataset_role %in% c("calibration", "validation")
@@ -14,7 +34,21 @@ build_model_performance <- function(comparison, variables, profile, is_demo = FA
   palette <- profile$palette
   panels <- lapply(variables[variables %in% unique(data$variable)], function(variable) {
     frame <- data[data$variable == variable, , drop = FALSE]
-    values <- c(frame$observed, frame$simulated)
+    if (!"observed_se" %in% names(frame)) frame$observed_se <- NA_real_
+    se_values <- if ("observed_se" %in% names(frame) && !is.null(frame$observed_se)) {
+      valid_se <- is.finite(frame$observed_se) & frame$observed_se >= 0 & is.finite(frame$observed)
+      if (any(valid_se)) {
+        c(frame$observed[valid_se] - frame$observed_se[valid_se],
+          frame$observed[valid_se] + frame$observed_se[valid_se])
+      } else {
+        numeric(0)
+      }
+    } else {
+      numeric(0)
+    }
+    values <- c(frame$observed, frame$simulated, se_values)
+    values <- values[is.finite(values)]
+    if (length(values) == 0) values <- c(0, 1)
     padding <- max(diff(range(values)), 1) * 0.05
     limits <- c(min(0, min(values)) - padding, max(values) + padding)
     metric <- metrics[metrics$variable == variable, ]
@@ -29,6 +63,10 @@ build_model_performance <- function(comparison, variables, profile, is_demo = FA
     suffix <- if (nzchar(unit)) paste0(" (", unit, ")") else ""
     ggplot2::ggplot(frame, ggplot2::aes(observed, simulated)) +
       ggplot2::geom_abline(slope = 1, intercept = 0, colour = "#333333", linewidth = 0.45) +
+      ggplot2::geom_errorbar(
+        data = frame[is.finite(frame$observed_se) & frame$observed_se >= 0, , drop = FALSE],
+        ggplot2::aes(xmin = observed - observed_se, xmax = observed + observed_se),
+        orientation = "y", width = 0, linewidth = 0.3, colour = "#666666") +
       ggplot2::geom_point(ggplot2::aes(colour = dataset_role, shape = dataset_role),
                           size = 1.7, stroke = 0.55, fill = "white", alpha = 0.9) +
       ggplot2::annotate("label", x = limits[[1]] + 0.04 * diff(limits),
@@ -48,11 +86,12 @@ build_model_performance <- function(comparison, variables, profile, is_demo = FA
                                              legacy_unsplit = "Legacy unsplit", diagnostic = "Diagnostic"),
                                   drop = FALSE) +
       ggplot2::coord_equal(xlim = limits, ylim = limits, expand = FALSE) +
-      ggplot2::labs(title = frame$variable_label[[1]], x = paste0("Observed", suffix),
+      ggplot2::labs(title = paste(if ("season_id" %in% names(frame)) frame$season_id[[1]] else "",
+                                  frame$variable_label[[1]]), x = paste0("Observed", suffix),
                     y = paste0("Simulated", suffix)) +
       theme_q1(profile)
   })
-  columns <- min(2L, length(panels))
+  columns <- min(facet_columns, length(panels))
   plot <- patchwork::wrap_plots(panels, ncol = columns, guides = "collect") +
     patchwork::plot_annotation(tag_levels = "a", caption = demo_caption(is_demo),
       theme = ggplot2::theme(plot.tag = ggplot2::element_text(face = "bold"),

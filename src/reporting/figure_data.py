@@ -76,6 +76,7 @@ VARIABLE_SPECS: dict[str, dict[str, str]] = {
     "FRESH_INC": {"label": "Incremental fresh harvest", "unit": "kg ha⁻¹", "domain": "harvest"},
     "DRY_CUM": {"label": "Cumulative dry harvest", "unit": "kg ha⁻¹", "domain": "harvest"},
     "FRESH_CUM": {"label": "Cumulative fresh harvest", "unit": "kg ha⁻¹", "domain": "harvest"},
+    "LN%D": {"label": "Leaf nitrogen concentration", "unit": "%", "domain": "nitrogen"},
 }
 
 
@@ -100,7 +101,7 @@ def validate_comparison_table(data: pd.DataFrame) -> pd.DataFrame:
     for column in OPTIONAL_COMPARISON_COLUMNS:
         if column not in data:
             data[column] = np.nan
-    result = data[COMPARISON_COLUMNS].copy()
+    result = data[COMPARISON_COLUMNS + (["season_id"] if "season_id" in data else [])].copy()
     allowed_roles = {"calibration", "validation", "diagnostic", "legacy_unsplit"}
     invalid_roles = set(result["dataset_role"].astype(str)) - allowed_roles
     if invalid_roles:
@@ -114,8 +115,14 @@ def validate_comparison_table(data: pd.DataFrame) -> pd.DataFrame:
     ]
     for column in numeric_columns:
         result[column] = _numeric(result[column])
-    valid = np.isfinite(result["observed"]) & np.isfinite(result["simulated"])
-    valid &= (result["observed"] > -90) & (result["simulated"] > -90)
+    from src.reporting.metrics import valid_pair_mask
+    # Known state/harvest variables are nonnegative. Unknown raw variables
+    # retain legitimate negative values; signed contrasts have no -99 sentinel.
+    valid = np.zeros(len(result), dtype=bool)
+    for variable, indices in result.groupby("variable").indices.items():
+        signed = str(variable).upper().startswith(("N_RESPONSE", "W_RESPONSE")) or str(variable).upper().endswith(("_CHANGE", "_DIFF"))
+        kind = "signed" if signed else ("state" if variable in VARIABLE_SPECS else "raw")
+        valid[indices] = valid_pair_mask(result.iloc[indices]["observed"], result.iloc[indices]["simulated"], value_kind=kind)
     result = result.loc[valid].reset_index(drop=True)
     if result.empty:
         raise ValueError("Comparison table has no finite observed-simulated pairs")
@@ -151,7 +158,7 @@ def _legacy_records(
             simulated = pd.to_numeric(frame.at[index, sim_col], errors="coerce")
             if not np.isfinite(observed) or not np.isfinite(simulated):
                 continue
-            if float(observed) <= -90.0 or float(simulated) <= -90.0:
+            if float(observed) < 0.0 or float(simulated) < 0.0:
                 continue
             date_value = raw_date.loc[index]
             date_code = float(date_value) if np.isfinite(date_value) else np.nan
@@ -213,14 +220,16 @@ def validate_treatment_metadata(data: pd.DataFrame) -> pd.DataFrame:
     missing = set(TREATMENT_METADATA_COLUMNS) - set(data.columns)
     if missing:
         raise ValueError(f"Treatment metadata missing columns: {sorted(missing)}")
-    result = data[TREATMENT_METADATA_COLUMNS].copy()
-    for column in TREATMENT_METADATA_COLUMNS:
+    cols = (["season_id"] if "season_id" in data.columns else []) + list(TREATMENT_METADATA_COLUMNS)
+    result = data[cols].copy()
+    for column in cols:
         if result[column].isna().any() or (result[column].astype(str).str.strip() == "").any():
             raise ValueError(f"Treatment metadata requires non-empty {column}")
         result[column] = result[column].astype(str).str.strip()
     result["treatment"] = result["treatment"].map(_normalise_treatment)
-    if result["treatment"].duplicated().any():
-        duplicated = sorted(result.loc[result["treatment"].duplicated(), "treatment"].unique())
+    subset = ["season_id", "treatment"] if "season_id" in result.columns else ["treatment"]
+    if result.duplicated(subset=subset).any():
+        duplicated = sorted(result.loc[result.duplicated(subset=subset), "treatment"].unique())
         raise ValueError(f"Treatment metadata has duplicate treatments: {duplicated}")
     return result.reset_index(drop=True)
 
@@ -310,7 +319,10 @@ def read_dssat_trajectories(
     run_dir = Path(run_dir)
     roles = {_normalise_treatment(key): value for key, value in (role_by_treatment or {}).items()}
     sources = [
-        (run_dir / "PlantGro.OUT", {"LAID": "LAID", "LWAD": "LWAD", "SWAD": "SWAD", "CWAD": "CWAD"}),
+        (
+            run_dir / "PlantGro.OUT",
+            {"LAID": "LAID", "LWAD": "LWAD", "SWAD": "SWAD", "CWAD": "CWAD", "LN%D": "LN%D"},
+        ),
         (run_dir / "FreshWt.OUT", {"CHPDT": "DRY_CUM", "CHFPW": "FRESH_CUM"}),
     ]
     records: list[dict[str, Any]] = []

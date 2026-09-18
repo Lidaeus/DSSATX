@@ -138,6 +138,7 @@ def test_spe_parameter_baseline_lower_upper_readback_and_hash(
         assert _sha256(baseline_path) != baseline_hash
 
 
+@pytest.mark.skipif(not NRESP_SPE.exists(), reason="windows_nresp_20260803 was cleaned up in repository purification")
 def test_custom_nresp_parameters_use_custom_spe_and_exact_readback(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """The two N-response parameters must be injected into the custom SPE row."""
     monkeypatch.chdir(tmp_path)

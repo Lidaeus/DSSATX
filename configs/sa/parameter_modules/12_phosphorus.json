@@ -1,0 +1,393 @@
+{
+  "module_id": "phosphorus",
+  "display_name_en": "Phosphorus Dynamics & Tissue Concentrations",
+  "display_name_zh": "磷素动力学与组织浓度",
+  "priority": "conditional",
+  "required_observations": [
+    "leaf_phosphorus_concentration",
+    "stem_phosphorus_concentration",
+    "fruit_phosphorus_concentration"
+  ],
+  "parameters": [
+    {
+      "name": "OPTLFP_EM",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00342, 0.00418],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 147, pos 1 (peanut baseline anchor 0.0038)",
+      "units": "g P / g DW",
+      "scientific_note": "Optimum leaf P concentration at emergence.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "OPTLFP_FF",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00297, 0.00363],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 147, pos 2 (peanut baseline anchor 0.0033)",
+      "units": "g P / g DW",
+      "scientific_note": "Optimum leaf P concentration at first flower.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "OPTLFP_FS",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00198, 0.00242],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 147, pos 3 (peanut baseline anchor 0.0022)",
+      "units": "g P / g DW",
+      "scientific_note": "Optimum leaf P concentration at full seed/fruit.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "OPTSTP_EM",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00252, 0.00308],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 148, pos 1 (peanut baseline anchor 0.0028)",
+      "units": "g P / g DW",
+      "scientific_note": "Optimum stem P concentration at emergence.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "OPTSTP_FF",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00225, 0.00275],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 148, pos 2 (peanut baseline anchor 0.0025)",
+      "units": "g P / g DW",
+      "scientific_note": "Optimum stem P concentration at first flower.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "OPTSTP_FS",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00171, 0.00209],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 148, pos 3 (peanut baseline anchor 0.0019)",
+      "units": "g P / g DW",
+      "scientific_note": "Optimum stem P concentration at full seed/fruit.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "OPTRTP_EM",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00189, 0.00231],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 149, pos 1 (peanut baseline anchor 0.0021)",
+      "units": "g P / g DW",
+      "scientific_note": "Optimum root P concentration at emergence.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "OPTRTP_FF",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00162, 0.00198],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 149, pos 2 (peanut baseline anchor 0.0018)",
+      "units": "g P / g DW",
+      "scientific_note": "Optimum root P concentration at first flower.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "OPTRTP_FS",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00135, 0.00165],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 149, pos 3 (peanut baseline anchor 0.0015)",
+      "units": "g P / g DW",
+      "scientific_note": "Optimum root P concentration at full seed/fruit.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "OPTSDP_FF",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00360, 0.00440],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 151, pos 2 (peanut baseline anchor 0.0040)",
+      "units": "g P / g DW",
+      "scientific_note": "Optimum fruit/seed P concentration at first flower.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "OPTSDP_FS",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00396, 0.00484],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 151, pos 3 (peanut baseline anchor 0.0044)",
+      "units": "g P / g DW",
+      "scientific_note": "Optimum fruit/seed P concentration at full seed/fruit.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "MINLFP_EM",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00243, 0.00297],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 154, pos 1 (peanut baseline anchor 0.0027)",
+      "units": "g P / g DW",
+      "scientific_note": "Minimum survival leaf P concentration at emergence.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "MINLFP_FF",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00198, 0.00242],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 154, pos 2 (peanut baseline anchor 0.0022)",
+      "units": "g P / g DW",
+      "scientific_note": "Minimum survival leaf P concentration at first flower.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "MINLFP_FS",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00153, 0.00187],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 154, pos 3 (peanut baseline anchor 0.0017)",
+      "units": "g P / g DW",
+      "scientific_note": "Minimum survival leaf P concentration at full seed/fruit.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "MINSTP_EM",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00153, 0.00187],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 155, pos 1 (peanut baseline anchor 0.0017)",
+      "units": "g P / g DW",
+      "scientific_note": "Minimum survival stem P concentration at emergence.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "MINSTP_FF",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00117, 0.00143],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 155, pos 2 (peanut baseline anchor 0.0013)",
+      "units": "g P / g DW",
+      "scientific_note": "Minimum survival stem P concentration at first flower.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "MINSTP_FS",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00090, 0.00110],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 155, pos 3 (peanut baseline anchor 0.0010)",
+      "units": "g P / g DW",
+      "scientific_note": "Minimum survival stem P concentration at full seed/fruit.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "MINRTP_EM",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00099, 0.00121],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 156, pos 1 (peanut baseline anchor 0.0011)",
+      "units": "g P / g DW",
+      "scientific_note": "Minimum survival root P concentration at emergence.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "MINRTP_FF",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00099, 0.00121],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 156, pos 2 (peanut baseline anchor 0.0011)",
+      "units": "g P / g DW",
+      "scientific_note": "Minimum survival root P concentration at first flower.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "MINRTP_FS",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00099, 0.00121],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 156, pos 3 (peanut baseline anchor 0.0011)",
+      "units": "g P / g DW",
+      "scientific_note": "Minimum survival root P concentration at full seed/fruit.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "MINSDP_FF",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00297, 0.00363],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 158, pos 2 (peanut baseline anchor 0.0033)",
+      "units": "g P / g DW",
+      "scientific_note": "Minimum survival fruit/seed P concentration at first flower.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "MINSDP_FS",
+      "location": "SPE",
+      "physical_bounds": [0.0001, 0.0200],
+      "default_bounds": [0.00297, 0.00363],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 158, pos 3 (peanut baseline anchor 0.0033)",
+      "units": "g P / g DW",
+      "scientific_note": "Minimum survival fruit/seed P concentration at full seed/fruit.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "ROOTRAD",
+      "location": "SPE",
+      "physical_bounds": [0.0005, 0.0100],
+      "default_bounds": [0.00225, 0.00275],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 165 (peanut baseline anchor 0.0025)",
+      "units": "m",
+      "scientific_note": "Radius of cylinder around roots from which soil P can be extracted.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "FRACPMOBIL",
+      "location": "SPE",
+      "physical_bounds": [0.01, 0.50],
+      "default_bounds": [0.180, 0.220],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 164 (peanut baseline anchor 0.20)",
+      "units": "fraction/d",
+      "scientific_note": "Maximum fraction of P which can be mobilized from leaf & stem per day.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "SRATPHOTO",
+      "location": "SPE",
+      "physical_bounds": [0.10, 1.00],
+      "default_bounds": [0.567, 0.693],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 163, pos 1 (peanut baseline anchor 0.63)",
+      "units": "fraction",
+      "scientific_note": "P stress ratio threshold below which canopy photosynthesis is throttled.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    },
+    {
+      "name": "SRATPART",
+      "location": "SPE",
+      "physical_bounds": [0.10, 1.00],
+      "default_bounds": [0.747, 0.913],
+      "role": "scalar",
+      "init_source": "TMGRO048.SPE line 163, pos 2 (peanut baseline anchor 0.83)",
+      "units": "fraction",
+      "scientific_note": "P stress ratio threshold below which assimilate partitioning to root is favored.",
+      "calibration_stage": "S4",
+      "existing_v4": false
+    }
+  ],
+  "constraints": [
+    {
+      "constraint_id": "p_optlfp_gt_minlfp_em",
+      "constraint_type": "ordering",
+      "parameters": ["MINLFP_EM", "OPTLFP_EM"],
+      "expression": "MINLFP_EM.init < OPTLFP_EM.init"
+    },
+    {
+      "constraint_id": "p_optlfp_gt_minlfp_ff",
+      "constraint_type": "ordering",
+      "parameters": ["MINLFP_FF", "OPTLFP_FF"],
+      "expression": "MINLFP_FF.init < OPTLFP_FF.init"
+    },
+    {
+      "constraint_id": "p_optlfp_gt_minlfp_fs",
+      "constraint_type": "ordering",
+      "parameters": ["MINLFP_FS", "OPTLFP_FS"],
+      "expression": "MINLFP_FS.init < OPTLFP_FS.init"
+    },
+    {
+      "constraint_id": "p_optstp_gt_minstp_em",
+      "constraint_type": "ordering",
+      "parameters": ["MINSTP_EM", "OPTSTP_EM"],
+      "expression": "MINSTP_EM.init < OPTSTP_EM.init"
+    },
+    {
+      "constraint_id": "p_optstp_gt_minstp_ff",
+      "constraint_type": "ordering",
+      "parameters": ["MINSTP_FF", "OPTSTP_FF"],
+      "expression": "MINSTP_FF.init < OPTSTP_FF.init"
+    },
+    {
+      "constraint_id": "p_optstp_gt_minstp_fs",
+      "constraint_type": "ordering",
+      "parameters": ["MINSTP_FS", "OPTSTP_FS"],
+      "expression": "MINSTP_FS.init < OPTSTP_FS.init"
+    },
+    {
+      "constraint_id": "p_optrtp_gt_minrtp_em",
+      "constraint_type": "ordering",
+      "parameters": ["MINRTP_EM", "OPTRTP_EM"],
+      "expression": "MINRTP_EM.init < OPTRTP_EM.init"
+    },
+    {
+      "constraint_id": "p_optrtp_gt_minrtp_ff",
+      "constraint_type": "ordering",
+      "parameters": ["MINRTP_FF", "OPTRTP_FF"],
+      "expression": "MINRTP_FF.init < OPTRTP_FF.init"
+    },
+    {
+      "constraint_id": "p_optrtp_gt_minrtp_fs",
+      "constraint_type": "ordering",
+      "parameters": ["MINRTP_FS", "OPTRTP_FS"],
+      "expression": "MINRTP_FS.init < OPTRTP_FS.init"
+    },
+    {
+      "constraint_id": "p_optsdp_gt_minsdp_ff",
+      "constraint_type": "ordering",
+      "parameters": ["MINSDP_FF", "OPTSDP_FF"],
+      "expression": "MINSDP_FF.init < OPTSDP_FF.init"
+    },
+    {
+      "constraint_id": "p_optsdp_gt_minsdp_fs",
+      "constraint_type": "ordering",
+      "parameters": ["MINSDP_FS", "OPTSDP_FS"],
+      "expression": "MINSDP_FS.init < OPTSDP_FS.init"
+    }
+  ]
+}

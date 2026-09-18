@@ -26,6 +26,10 @@ from src.sensitivity.treatment_factor_attribution import fertilizer_n_total_kg_h
 
 
 PEST_N_RESPONSE_FILE = "PestNResponse.OUT"
+# Non-N0 nitrogen dose-gradient output.  This is deliberately separate from
+# N_RESPONSE (Nk-N0): it constrains N2-N1, N3-N2 and the N1:N3 spread without
+# duplicating the common N0 reference residuals.
+PEST_N_DOSE_GRADIENT_FILE = "PestNDoseGradient.OUT"
 # Water-response contrast output: same-nitrogen W3 vs W1 yield difference.
 PEST_W_RESPONSE_FILE = "PestWResponse.OUT"
 _HNO = re.compile(r"(?:@HNO@|HNO)\s+(?P<hno>\d+)")
@@ -481,6 +485,167 @@ def write_simulated_n_response(
     return target
 
 
+def _positive_cv(values: Iterable[float]) -> float:
+    """Population coefficient of variation for non-negative yield levels."""
+    data = [float(value) for value in values]
+    mean = sum(data) / len(data)
+    if mean <= 0:
+        return 0.0
+    variance = sum((value - mean) ** 2 for value in data) / len(data)
+    return math.sqrt(variance) / mean
+
+
+def build_observed_n_dose_gradient_rows(
+    harvest: pd.DataFrame,
+    mapping: pd.DataFrame,
+    *,
+    seasons: Iterable[str] = ("26SP",),
+    sigma_floor: float = 0.05,
+    response_target: str = "monotone_plateau",
+    harvest_scope: str = "all",
+    source_variable: str = "CHFPW",
+) -> pd.DataFrame:
+    """Build non-N0 nitrogen-gradient targets within water and harvest strata.
+
+    Three dimensionless targets are emitted for each complete N1/N2/N3 group:
+    log(N2+1)-log(N1+1), log(N3+1)-log(N2+1), and the population CV of
+    N1:N3.  ``monotone_plateau`` clamps only the *observed target* upward;
+    simulated values are never clamped, so a simulated yield inversion keeps
+    its negative adjacent-gradient residual and is penalized by PEST.
+    """
+    target_mode = str(response_target).strip().lower()
+    if target_mode not in {"observed_shape", "monotone_plateau"}:
+        raise ValueError("response_target must be observed_shape or monotone_plateau")
+    scope = str(harvest_scope).strip().lower()
+    if scope not in {"all", "terminal"}:
+        raise ValueError("harvest_scope must be all or terminal")
+    selected_seasons = {str(value).strip() for value in seasons}
+    if not selected_seasons:
+        raise ValueError("n-dose-gradient seasons must not be empty")
+    measured_col, _, _ = _response_source(source_variable)
+    required = {"@RUN", "TN", "HNO", "DATE", measured_col, "season"}
+    missing = required - set(harvest.columns)
+    if missing:
+        raise ValueError(f"harvest table lacks N-dose-gradient inputs: {sorted(missing)}")
+    joined = harvest.merge(
+        mapping[["season_id", "treatment", "water_level", "nitrogen_level"]],
+        left_on=["season", "TN"], right_on=["season_id", "treatment"],
+        how="inner", validate="many_to_one",
+    )
+    joined = joined.loc[joined["season"].astype(str).isin(selected_seasons)].copy()
+    rows: list[dict[str, object]] = []
+    for (season, hno, date, water), group in joined.groupby(
+        ["season", "HNO", "DATE", "water_level"], sort=True
+    ):
+        by_n = group.set_index("nitrogen_level")
+        if not {"N1", "N2", "N3"} <= set(by_n.index):
+            continue
+        raw = [float(by_n.loc[level, measured_col]) for level in ("N1", "N2", "N3")]
+        if any(value < 0 for value in raw):
+            continue
+        target = list(raw)
+        if target_mode == "monotone_plateau":
+            target[1] = max(target[1], target[0])
+            target[2] = max(target[2], target[1])
+        common = {
+            "@RUN": int(by_n.loc["N3", "@RUN"]),
+            "TN": int(by_n.loc["N3", "TN"]),
+            "HNO": int(hno),
+            "DATE": int(date),
+            "season": str(season),
+            "water_level": str(water),
+            "nitrogen_level": "N1_N2_N3",
+            "response_target": target_mode,
+        }
+        metric_values = {
+            "NG12": math.log1p(target[1]) - math.log1p(target[0]),
+            "NG23": math.log1p(target[2]) - math.log1p(target[1]),
+            "NGCV": _positive_cv(target),
+        }
+        # The generic PEST instruction builder has a strict row contract: one
+        # measured/simulated observation pair per physical output line.  Do not
+        # combine the three gradient metrics in one dataframe row; doing so
+        # makes the generated word offsets point at the following @TAG@ token.
+        for metric, value in metric_values.items():
+            row = dict(common)
+            row.update({
+                "NG12M": -99.0, "NG12S": -99.0,
+                "NG23M": -99.0, "NG23S": -99.0,
+                "NGCVM": -99.0, "NGCVS": -99.0,
+                "gradient_metric": metric,
+                f"{metric}M": value,
+                f"{metric}M_SIGMA": float(sigma_floor),
+                f"{metric}M_SIGMA_SOURCE": "dimensionless_static_floor",
+            })
+            rows.append(row)
+    result = pd.DataFrame(rows)
+    if result.empty:
+        raise ValueError("N-dose-gradient objective produced no complete N1/N2/N3 groups")
+    if scope == "terminal":
+        terminal = result.groupby(["season", "water_level"], sort=False)["HNO"].transform("max")
+        result = result.loc[result["HNO"].eq(terminal)].reset_index(drop=True)
+    return result
+
+
+def write_simulated_n_dose_gradient(
+    harvest_output: str | Path,
+    output_path: str | Path,
+    mapping: pd.DataFrame,
+    *,
+    seasons: Iterable[str] = ("26SP",),
+    harvest_scope: str = "all",
+    source_variable: str = "CHFPW",
+) -> Path:
+    """Write un-clamped simulated N2-N1, N3-N2 and N1:N3 CV values."""
+    _, _, tagged = _response_source(source_variable)
+    selected_seasons = {str(value).strip() for value in seasons}
+    scope = str(harvest_scope).strip().lower()
+    if scope not in {"all", "terminal"}:
+        raise ValueError("harvest_scope must be all or terminal")
+    lookup = {
+        int(row.global_run): (
+            str(row.season_id), str(row.water_level), str(row.nitrogen_level), int(row.treatment)
+        )
+        for row in mapping.itertuples(index=False)
+    }
+    values: dict[tuple[str, int, int, str, str], tuple[int, int, float]] = {}
+    for line in Path(harvest_output).read_text(encoding="utf-8").splitlines():
+        match = tagged.search(line)
+        if match is None or int(match.group("run")) not in lookup:
+            continue
+        run = int(match.group("run"))
+        season, water, nitrogen, treatment = lookup[run]
+        if season not in selected_seasons:
+            continue
+        values[(season, int(match.group("hno")), int(match.group("date")), water, nitrogen)] = (
+            run, treatment, float(match.group("value"))
+        )
+    groups = sorted({key[:4] for key in values})
+    if scope == "terminal":
+        terminal: dict[tuple[str, str], tuple[int, int]] = {}
+        for season, hno, date, water in groups:
+            terminal[(season, water)] = max(terminal.get((season, water), (-1, -1)), (hno, date))
+        groups = [g for g in groups if (g[1], g[2]) == terminal[(g[0], g[3])]]
+    lines: list[str] = []
+    for season, hno, date, water in groups:
+        cells = [values.get((season, hno, date, water, level)) for level in ("N1", "N2", "N3")]
+        if any(cell is None for cell in cells):
+            continue
+        n1, n2, n3 = (float(cell[2]) for cell in cells if cell is not None)
+        run, treatment, _ = cells[2]  # type: ignore[misc]
+        common = f"RUN {run} TN {treatment} @HNO@ {hno} DATE {date}"
+        lines.extend([
+            f"{common} @NG12S@ {math.log1p(n2) - math.log1p(n1):.12g}",
+            f"{common} @NG23S@ {math.log1p(n3) - math.log1p(n2):.12g}",
+            f"{common} @NGCVS@ {_positive_cv((n1, n2, n3)):.12g}",
+        ])
+    if not lines:
+        raise ValueError("could not derive simulated N-dose-gradient targets")
+    target = Path(output_path)
+    target.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return target
+
+
 def build_observed_water_response_rows(
     harvest: pd.DataFrame,
     mapping: pd.DataFrame,
@@ -717,13 +882,16 @@ def write_simulated_water_response(
 
 
 __all__ = [
+    "PEST_N_DOSE_GRADIENT_FILE",
     "PEST_N_RESPONSE_FILE",
     "PEST_W_RESPONSE_FILE",
+    "build_observed_n_dose_gradient_rows",
     "build_observed_n_response_rows",
     "build_observed_water_response_rows",
     "derive_filex_water_n_mapping",
     "load_n_response_mapping",
     "validate_mapping_against_filex",
+    "write_simulated_n_dose_gradient",
     "write_simulated_n_response",
     "write_simulated_water_response",
 ]

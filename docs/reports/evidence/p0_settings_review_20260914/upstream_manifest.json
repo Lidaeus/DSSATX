@@ -1,0 +1,71 @@
+{
+  "commit": "d6556cca9f926c40eddffd9adcf77e970db7511b",
+  "retrieved_date": "2026-09-14",
+  "files": [
+    {
+      "file": "InputModule__IPSIM.for",
+      "sha256": "9d8394ecd91cc3f37c954037b6e7ed64256cee5dcc704dc1eaa9ef0dcd98874b",
+      "url": "https://github.com/DSSAT/dssat-csm-os/blob/d6556cca9f926c40eddffd9adcf77e970db7511b/InputModule/IPSIM.for"
+    },
+    {
+      "file": "InputModule__IPSLIN.for",
+      "sha256": "bec5394985e6b20fcb6da72a2fd6c1dc80133c4c76e749175c0b4a2051979e55",
+      "url": "https://github.com/DSSAT/dssat-csm-os/blob/d6556cca9f926c40eddffd9adcf77e970db7511b/InputModule/IPSLIN.for"
+    },
+    {
+      "file": "InputModule__IPSOIL_Inp.for",
+      "sha256": "16cbfddbdf501efee2bf8eaf55e16428c5ae44304f4cc00524dde5a02410d42e",
+      "url": "https://github.com/DSSAT/dssat-csm-os/blob/d6556cca9f926c40eddffd9adcf77e970db7511b/InputModule/IPSOIL_Inp.for"
+    },
+    {
+      "file": "InputModule__IPTILL.for",
+      "sha256": "4155aa9677b1b4b828f28c818ae202912046066dcc3723298e9c3b9119119307",
+      "url": "https://github.com/DSSAT/dssat-csm-os/blob/d6556cca9f926c40eddffd9adcf77e970db7511b/InputModule/IPTILL.for"
+    },
+    {
+      "file": "InputModule__input_sub.for",
+      "sha256": "20bc5d7def9aedf6ac4eb4200f494071f4253fa1c0bd8e30fc3d77769d43a654",
+      "url": "https://github.com/DSSAT/dssat-csm-os/blob/d6556cca9f926c40eddffd9adcf77e970db7511b/InputModule/input_sub.for"
+    },
+    {
+      "file": "InputModule__ipexp.for",
+      "sha256": "f7701c58d24f147cac5facb6b25d5c9608bc4faea95231b12a238fad1bfdc4df",
+      "url": "https://github.com/DSSAT/dssat-csm-os/blob/d6556cca9f926c40eddffd9adcf77e970db7511b/InputModule/ipexp.for"
+    },
+    {
+      "file": "Plant__CROPGRO__CROPGRO.for",
+      "sha256": "04495915dfc189e433916879da7500b3fb4aaf67a4c3975e0d059ec31a9d79b3",
+      "url": "https://github.com/DSSAT/dssat-csm-os/blob/d6556cca9f926c40eddffd9adcf77e970db7511b/Plant/CROPGRO/CROPGRO.for"
+    },
+    {
+      "file": "Plant__CROPGRO__GROW.for",
+      "sha256": "75fef1024a1bae1b1e0fdfc3ca6cd5d44c5febe7ae190e8d3bf60f20ef97fb6e",
+      "url": "https://github.com/DSSAT/dssat-csm-os/blob/d6556cca9f926c40eddffd9adcf77e970db7511b/Plant/CROPGRO/GROW.for"
+    },
+    {
+      "file": "Plant__CROPGRO__Ipphenol.for",
+      "sha256": "fd3c4db41b213e786ab17494c325a8a82e053dbeceba756534a7e257d561387c",
+      "url": "https://github.com/DSSAT/dssat-csm-os/blob/d6556cca9f926c40eddffd9adcf77e970db7511b/Plant/CROPGRO/Ipphenol.for"
+    },
+    {
+      "file": "Plant__CROPGRO__PHENOL.for",
+      "sha256": "ca9f184e1fcac002c740caa732774b81502b3fb75d5379ef29fe4838ae266b02",
+      "url": "https://github.com/DSSAT/dssat-csm-os/blob/d6556cca9f926c40eddffd9adcf77e970db7511b/Plant/CROPGRO/PHENOL.for"
+    },
+    {
+      "file": "Plant__CROPGRO__ROOTS.for",
+      "sha256": "dd2e9b75476f8aed9eaf641488359a45cb16da68aead49a016ad1b0ef83287ef",
+      "url": "https://github.com/DSSAT/dssat-csm-os/blob/d6556cca9f926c40eddffd9adcf77e970db7511b/Plant/CROPGRO/ROOTS.for"
+    },
+    {
+      "file": "Plant__Generic-PlantP__P_IPPLNT.for",
+      "sha256": "cac85a5cde48d51188b2d6bbc727299ec3fbed1d632d1048b34ff825dcf6f425",
+      "url": "https://github.com/DSSAT/dssat-csm-os/blob/d6556cca9f926c40eddffd9adcf77e970db7511b/Plant/Generic-PlantP/P_IPPLNT.for"
+    },
+    {
+      "file": "Soil__Inorganic_P__SoilPi_init.for",
+      "sha256": "f02ad2e4c3864b8874a283b748f4b9f80ee3a7862e05ac2e325e40d31c39a567",
+      "url": "https://github.com/DSSAT/dssat-csm-os/blob/d6556cca9f926c40eddffd9adcf77e970db7511b/Soil/Inorganic_P/SoilPi_init.for"
+    }
+  ]
+}

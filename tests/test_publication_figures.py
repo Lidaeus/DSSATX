@@ -348,9 +348,9 @@ def test_make_all_selected_sa_figures_need_no_calibration_trajectory():
 def test_daily_dssat_trajectory_uses_treatment_and_dap(tmp_path):
     (tmp_path / "PlantGro.OUT").write_text(
         "*RUN   1 : demo\n TREATMENT  2 : demo\n"
-        "@YEAR DOY DAS DAP LAID LWAD SWAD CWAD\n"
-        " 2025 075 8 0 0.1 1 2 3\n"
-        " 2025 076 9 1 0.2 2 3 5\n",
+        "@YEAR DOY DAS DAP LAID LWAD SWAD CWAD LN%D\n"
+        " 2025 075 8 0 0.1 1 2 3 4.5\n"
+        " 2025 076 9 1 0.2 2 3 5 4.6\n",
         encoding="utf-8",
     )
     (tmp_path / "FreshWt.OUT").write_text(
@@ -366,7 +366,7 @@ def test_daily_dssat_trajectory_uses_treatment_and_dap(tmp_path):
         data_status="science_validated",
         role_by_treatment={"2": "calibration"},
     )
-    assert {"LAID", "LWAD", "SWAD", "CWAD", "DRY_CUM", "FRESH_CUM"}.issubset(
+    assert {"LAID", "LWAD", "SWAD", "CWAD", "DRY_CUM", "FRESH_CUM", "LN%D"}.issubset(
         set(trajectory["variable"])
     )
     assert set(trajectory["treatment"]) == {"2"}
@@ -428,3 +428,17 @@ def test_supplementary_r_modules_keep_residual_and_smoothing_definitions_explici
     assert "geom_smooth" not in residuals
     assert "monotone_cumulative_curve" in all_treatments
     assert "Visual interpolation only" in all_treatments
+
+
+def test_leaf_nitrogen_figure_module_contract():
+    leaf_n = Path("paper/R/fig_leaf_nitrogen.R").read_text(encoding="utf-8")
+    entry = Path("paper/R/make_all.R").read_text(encoding="utf-8")
+    registry = Path("configs/figures/figure_registry.csv").read_text(encoding="utf-8")
+
+    assert "geom_smooth" not in leaf_n
+    assert "nitrogen_level" in leaf_n
+    assert "water_level" in leaf_n
+    assert "LN%D" in leaf_n
+    assert "build_leaf_nitrogen" in leaf_n
+    assert "fig_leaf_nitrogen" in entry
+    assert "FigLeafN" in registry

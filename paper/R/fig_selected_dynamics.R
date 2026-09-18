@@ -4,14 +4,30 @@ attach_treatment_metadata <- function(data, treatment_metadata, treatments) {
   }
   data$treatment <- as.character(data$treatment)
   treatment_metadata$treatment <- as.character(treatment_metadata$treatment)
-  result <- merge(data, treatment_metadata, by = "treatment", all.x = TRUE, sort = FALSE)
+
+  if (!"season_id" %in% names(data) && "season_id" %in% names(treatment_metadata)) {
+    if ("year" %in% names(data) && any(!is.na(data$year))) {
+      data$season_id <- ifelse(data$year == 2025, "25SP", ifelse(data$year == 2026, "26SP", NA_character_))
+    } else if ("date_code" %in% names(data) && any(!is.na(data$date_code))) {
+      data$season_id <- ifelse(data$date_code < 26000, "25SP", "26SP")
+    }
+  }
+
+  by_cols <- if ("season_id" %in% names(data) && "season_id" %in% names(treatment_metadata)) {
+    c("season_id", "treatment")
+  } else {
+    "treatment"
+  }
+
+  result <- merge(data, treatment_metadata, by = by_cols, all.x = TRUE, sort = FALSE)
   missing <- result[is.na(result$water_level) | is.na(result$nitrogen_level), "treatment"]
   if (length(missing) > 0) {
     stop("Missing water/nitrogen metadata for treatments: ",
          paste(unique(missing), collapse = ", "), call. = FALSE)
   }
-  labels <- treatment_metadata$treatment_label[match(treatments, treatment_metadata$treatment)]
-  result$treatment_label <- factor(result$treatment_label, levels = labels)
+  present_labels <- unique(as.character(result$treatment_label))
+  ordered_labels <- unique(treatment_metadata$treatment_label[treatment_metadata$treatment_label %in% present_labels])
+  result$treatment_label <- factor(result$treatment_label, levels = ordered_labels)
   result
 }
 
@@ -143,7 +159,7 @@ build_harvest_dynamics <- function(comparison, treatment_metadata, increment_var
 
   p_cumulative <- ggplot2::ggplot(cumulative, ggplot2::aes(x = time)) +
     ggplot2::geom_line(
-      ggplot2::aes(y = simulated, colour = nitrogen_level, group = treatment),
+      ggplot2::aes(y = simulated, colour = nitrogen_level, group = treatment_label),
       linewidth = profile$data_linewidth_pt, lineend = "round"
     ) +
     ggplot2::geom_point(
@@ -172,7 +188,14 @@ build_harvest_dynamics <- function(comparison, treatment_metadata, increment_var
 }
 
 monotone_cumulative_curve <- function(daily) {
-  groups <- split(daily, interaction(daily$variable, daily$treatment, drop = TRUE))
+  split_key <- if ("treatment_label" %in% names(daily)) {
+    interaction(daily$variable, daily$treatment_label, drop = TRUE)
+  } else if ("season_id" %in% names(daily)) {
+    interaction(daily$variable, daily$treatment, daily$season_id, drop = TRUE)
+  } else {
+    interaction(daily$variable, daily$treatment, drop = TRUE)
+  }
+  groups <- split(daily, split_key)
   curves <- lapply(groups, function(frame) {
     frame <- frame[order(frame$time), , drop = FALSE]
     frame <- frame[!duplicated(frame$time), , drop = FALSE]
@@ -396,7 +419,7 @@ build_cumulative_smooth <- function(comparison, trajectory, treatment_metadata,
   plot <- ggplot2::ggplot() +
     ggplot2::geom_line(
       data = curve,
-      ggplot2::aes(x = time, y = simulated, colour = nitrogen_level, group = treatment),
+      ggplot2::aes(x = time, y = simulated, colour = nitrogen_level, group = treatment_label),
       linewidth = profile$data_linewidth_pt, lineend = "round"
     ) +
     ggplot2::geom_point(

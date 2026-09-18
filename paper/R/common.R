@@ -136,7 +136,8 @@ validate_treatment_metadata <- function(data) {
     data[[column]] <- trimws(as.character(data[[column]]))
     if (any(!nzchar(data[[column]]))) stop("Treatment metadata has blank ", column)
   }
-  if (anyDuplicated(data$treatment)) stop("Treatment metadata has duplicate treatment identifiers")
+  dup_cols <- if ("season_id" %in% names(data)) c("season_id", "treatment") else "treatment"
+  if (anyDuplicated(data[, dup_cols])) stop("Treatment metadata has duplicate treatment identifiers")
   data
 }
 

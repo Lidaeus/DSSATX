@@ -1,0 +1,30 @@
+﻿group,transform,offset,reference,sigma,sigma_source,model_sigma,sigma_floor,group_multiplier,n_eff,phi_role,note
+PDAPM,raw,0,1,,,0.0,1.0,1.0,,diagnostic_only,Planting date retained for audit only
+ADAPM,raw,0,1,,,0.0,1.0,1.0,,diagnostic_only,Anthesis date diagnostic only in first design
+MDAPM,raw,0,1,,,0.0,1.0,1.0,,diagnostic_only,Maturity date diagnostic only in first design
+LAIXM,raw,0,1,,,0.2,0.1,1.0,,diagnostic_only,Forbidden from Phi; retained only for diagnostic plots
+LAIDM,raw,0,1,,,0.5,0.2,1.0,,calibration,Measured multi-date LAI state constraint
+LWADM,raw,0,1,,,20.0,10.0,1.0,,diagnostic_only,Raw leaf state is represented by increment and terminal pairs
+SWADM,raw,0,1,,,25.0,10.0,1.0,,diagnostic_only,Raw stem state is represented by increment and terminal pairs
+LAIDDM,raw,0,1,,,0.0,0.0,1.0,,calibration,Adjacent measured-date LAI increment
+LWADDM,raw,0,1,,,0.0,0.0,1.0,,calibration,Adjacent measured-date leaf dry-mass increment
+SWADDM,raw,0,1,,,0.0,0.0,1.0,,calibration,Adjacent measured-date stem dry-mass increment
+LAIETM,raw,0,1,,,0.0,0.0,1.0,,calibration,Last observed LAI paired with simulation on the exact same date
+LWETM,raw,0,1,,,0.0,0.0,1.0,,calibration,Terminal leaf dry mass
+SWETM,raw,0,1,,,0.0,0.0,1.0,,calibration,Terminal stem dry mass
+CHTDM,raw,0,1,,,0.05,0.02,1.0,,calibration,Plant height active in v47; separate Phi family budget is 0.45 per season
+SNAMM,raw,0,1,,,5.0,2.0,1.0,,unavailable_by_data,Stem nitrogen mass; no SNAM observations in current calibration treatments
+LNAMM,raw,0,1,,,5.0,2.0,1.0,,unavailable_by_data,Leaf nitrogen mass; no LNAM observations in current calibration treatments
+CNAMM,raw,0,1,,,5.0,2.0,1.0,,diagnostic_only,Combined nitrogen mass diagnostic only
+CHFPWM,raw,0,1,,,500.0,200.0,1.0,,calibration,Fresh cumulative harvest calibration target
+CHFPWM_T,log,1,1,,harvest_sigma_relative_20pct,0.0,0.0,1.0,,calibration,Intermediate fresh cumulative trend
+HFPOWM,raw,0,1,,,200.0,100.0,1.0,,calibration,Fresh event-harvest increment calibration target
+CHPDTM,raw,0,1,,,25.0,15.0,1.0,,calibration,Exactly one terminal cumulative dry harvest per treatment
+CHPDTM_T,log,1,1,,harvest_sigma_relative_20pct,0.0,0.0,1.0,,diagnostic_only,No double counting with terminal cumulative dry harvest
+HPODWM,raw,0,1,,,25.0,15.0,1.0,,calibration,Event dry-harvest increment
+HIAMM,raw,0,1,0.1,assumption,0.02,0.01,1.0,,sensitivity_only,Not part of the first formal objective
+PWADM,raw,0,1,250.0,assumption,30.0,20.0,1.0,,diagnostic_only,Legacy cumulative token diagnostic only
+PWAIM,raw,0,1,250.0,assumption,30.0,20.0,1.0,,diagnostic_only,Legacy incremental token diagnostic only
+NRESPM,raw,0,1,50.0,assumption,50.0,50.0,1.0,,calibration,Same-water N3 minus N0 response; season and stratum SST are separate
+WRESPM,raw,0,1,50.0,assumption,50.0,50.0,1.0,,calibration,25SP W3 minus W1; 26SP W3 minus W1; season and stratum SST are separate
+SOIL_WATER,raw,0,1,,,,,,,calibration,Post-initial audited soil-water observations only

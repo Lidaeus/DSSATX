@@ -143,7 +143,7 @@ def main():
     if port <= 0:
         port = _choose_free_port()
 
-    host = args.host or socket.gethostname()
+    host = args.host or "127.0.0.1"
 
     agents_root = os.path.join(run_dir, args.agents_dir)
     os.makedirs(agents_root, exist_ok=True)

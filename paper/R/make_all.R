@@ -22,7 +22,8 @@ for (module in c(
   "fig_all_treatment_dynamics.R", "fig_phi_convergence.R", "fig_posterior_demo.R",
   "fig_spearman_demo.R", "fig_equifinality_demo.R", "fig_sa_morris.R",
   "fig_sa_sobol.R", "fig_sa_interaction.R", "fig_sa_selection.R",
-  "fig_water_nitrogen_response.R", "fig_standing_fruit_balance.R"
+  "fig_water_nitrogen_response.R", "fig_standing_fruit_balance.R",
+  "fig_leaf_nitrogen.R"
 )) source_utf8(module)
 
 check_r_dependencies()
@@ -60,7 +61,7 @@ is_conditional_request <- any(requested_ids %in% c(
 if (sum(c(is_t4_request, is_sa_request, is_sobol_request, is_conditional_request)) > 1) {
   stop("Morris SA, Sobol SA, T4, and conditional-ensemble figures require separate frozen bundles", call. = FALSE)
 }
-standard_ids <- c("fig2_phi", "fig3_performance", "figs3_residuals", "fig4_dynamics", "figs4_all_treatments")
+standard_ids <- c("fig2_phi", "fig3_performance", "figs3_residuals", "fig4_dynamics", "figs4_all_treatments", "fig_leaf_nitrogen")
 if (is_conditional_request && any(requested_ids %in% standard_ids)) {
   stop("Conditional-ensemble figures require a dedicated bundle and cannot be mixed with standard paper figures", call. = FALSE)
 }
@@ -79,8 +80,8 @@ if (is_sobol_request) {
     stop("Sobol figures require a dedicated bundle and cannot be mixed with calibration figures", call. = FALSE)
   }
 }
-needs_trajectory <- selected("fig4_dynamics") || selected("figs4_all_treatments")
-needs_treatment_metadata <- selected("figs3_residuals") || selected("fig4_dynamics") || selected("figs4_all_treatments")
+needs_trajectory <- selected("fig4_dynamics") || selected("figs4_all_treatments") || (selected("fig_leaf_nitrogen") && figure_ids != "all")
+needs_treatment_metadata <- selected("figs3_residuals") || selected("fig4_dynamics") || selected("figs4_all_treatments") || (selected("fig_leaf_nitrogen") && figure_ids != "all")
 
 bundle <- if (is_t4_request) {
   read_t4_demo_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
@@ -329,7 +330,7 @@ if (needs_treatment_metadata && is.null(bundle$treatment_metadata)) {
 supplement_treatments <- if (!is.null(args$supplement_treatments)) {
   split_csv_arg(args$supplement_treatments)
 } else if (!is.null(bundle$treatment_metadata)) {
-  as.character(bundle$treatment_metadata$treatment)
+  unique(as.character(bundle$treatment_metadata$treatment))
 } else {
   character()
 }
@@ -549,6 +550,26 @@ if (selected("fig2_phi") && !is.null(bundle$phi)) {
   utils::write.csv(convergence$source, convergence_source, row.names = FALSE, fileEncoding = "UTF-8")
   utils::write.csv(convergence$summary, convergence_summary, row.names = FALSE, fileEncoding = "UTF-8")
   artifacts <- c(artifacts, convergence_source, convergence_summary)
+}
+
+if (selected("fig_leaf_nitrogen")) {
+  if (!is.null(bundle$comparison) && "LN%D" %in% bundle$comparison$variable &&
+      !is.null(bundle$trajectory) && "LN%D" %in% bundle$trajectory$variable) {
+    leaf_n_res <- build_leaf_nitrogen(bundle$comparison, bundle$trajectory,
+                                      bundle$treatment_metadata, profile, bundle$is_demo)
+    leaf_n_base <- file.path(out_dir, paste0(stem, if (bundle$is_demo) "_leaf_nitrogen" else "LeafN_leaf_nitrogen"))
+    artifacts <- c(artifacts, save_figure_set(leaf_n_res$plot, leaf_n_base, profile,
+                                             profile$double_column_width_mm, leaf_n_res$height_mm))
+    leaf_n_source <- paste0(leaf_n_base, ".source.csv")
+    leaf_n_metrics <- paste0(leaf_n_base, ".metrics.csv")
+    leaf_n_daily <- paste0(leaf_n_base, ".daily_simulation.csv")
+    utils::write.csv(leaf_n_res$source, leaf_n_source, row.names = FALSE, fileEncoding = "UTF-8")
+    utils::write.csv(leaf_n_res$metrics, leaf_n_metrics, row.names = FALSE, fileEncoding = "UTF-8")
+    utils::write.csv(leaf_n_res$daily, leaf_n_daily, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, leaf_n_source, leaf_n_metrics, leaf_n_daily)
+  } else if (figure_ids != "all") {
+    stop("fig_leaf_nitrogen requested but LN%D data not present in bundle", call. = FALSE)
+  }
 }
 
 manifest <- list(

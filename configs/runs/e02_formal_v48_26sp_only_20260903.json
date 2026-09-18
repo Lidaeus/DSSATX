@@ -1,0 +1,262 @@
+{
+  "schema_version": 1,
+  "status": "approved_for_execution",
+  "executable": true,
+  "design_id": "e02_formal_v48_26sp_only_20260903",
+  "cultivar_identity": "TM0008",
+  "purpose": "v47 follow-up adding a directional 26SP non-N0 N-dose/CV family, doubled W response, and targeted boundary relaxations. [26SP-only diagnostic single-season derivation: 25SP season removed, season-scoped 25SP parameters disabled]",
+  "source_design": "configs/runs/e02_formal_v47_free_nscale_20260901.json",
+  "source_design_id": "e02_formal_v48_n_gradient_water2x_20260902",
+  "parameter_anchor": {
+    "member": 23,
+    "selection": "v47 final-iteration lowest Phi",
+    "parameter_csv": "workspace/reports/e02_formal_v47_free_nscale_20260902_candidates/lowest_phi_params.csv"
+  },
+  "bounds_id": "eggplant_e02_v48_26sp_only_formal_20260903",
+  "bounds_proposal": "workspace/reports/e02_formal_v46_page_penv_n034_20260901/seedling_parameter_bounds_proposal.csv",
+  "bounds_id_after_approval": "eggplant_e02_v46_page_penv_n034_formal_20260901",
+  "observation_policy": "configs/runs/e02_formal_v47_free_nscale_observation_policy_20260901.csv",
+  "group_policy": "configs/runs/e02_formal_v48_n_gradient_water2x_group_policy_20260902.csv",
+  "initial_condition_policy": {
+    "25SP": {
+      "source_bundle": "data/user/experiments/xxql2501_scheme4_double_n_20260831",
+      "initial_mineral_n": "unchanged from the Dias-2026 double-N bundle"
+    },
+    "26SP": {
+      "source_bundle": "workspace/reports/e02_v46_26sp_soil_n_scale_sweep_20260901/bundles_v2/s0p34",
+      "initial_mineral_n": "SNH4/SNO3 in DSSAT layers <=60 cm scaled by 0.34; deeper layers unchanged",
+      "source_xlsx": "data/user/ref/26SP硝态氮铵态氮校准值.xlsx",
+      "bundle_manifest_sha256": "29deeb4d878ed6a423f004eaed1d887d02f121804faa05f5982256b35615e637"
+    }
+  },
+  "seedling_parameterization": {
+    "enabled_after_runner_update": true,
+    "parameter_count": 4,
+    "reference_season_id": "26SP",
+    "transform": "direct season-scoped FileX parameters",
+    "terms": [
+      {
+        "name": "PAGE_26SP",
+        "season_role": "26SP direct value",
+        "init": 34.0,
+        "lower": 24.0,
+        "upper": 60.0,
+        "unit": "d"
+      },
+      {
+        "name": "PENV_26SP",
+        "season_role": "26SP direct value",
+        "init": 19.0,
+        "lower": 8.0,
+        "upper": 20.0,
+        "unit": "degC"
+      }
+    ],
+    "projection": {
+      "25SP": {
+        "PAGE": "PAGE_25SP",
+        "PENV": "PENV_25SP"
+      },
+      "26SP": {
+        "PAGE": "PAGE_26SP",
+        "PENV": "PENV_26SP"
+      }
+    },
+    "expected_initial_projection": {
+      "25SP": {
+        "PAGE": 60,
+        "PENV": 20
+      },
+      "26SP": {
+        "PAGE": 34,
+        "PENV": 19
+      }
+    },
+    "filex_scope": "Planting Details PAGE/PENV only; preserve PLWT, PLDP, PLPH, SPRL and all fixed-width columns",
+    "implementation_gate": "Current runner injects PLWT/PLDP but not PAGE/PENV. Add and test a FileX injector before building the PST."
+  },
+  "seasonal_parameterization_after_approval": {
+    "enabled": true,
+    "mode": "direct_season_scoped_filex",
+    "terms": [
+      "PAGE_26SP",
+      "PENV_26SP"
+    ],
+    "season_columns": {
+      "26SP": {
+        "PAGE": "PAGE_26SP",
+        "PENV": "PENV_26SP"
+      }
+    }
+  },
+  "nitrogen_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_mapping_26sp_w2_w1_20260830.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 3.0,
+    "sigma_floor": 50.0,
+    "contrast": "N3_minus_N0_within_same_water",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "source_variable": "CHFPW",
+    "harvest_scope": "all",
+    "sst_scope": "season_x_response_stratum",
+    "response_strength_multiplier_vs_v46": 3.0
+  },
+  "water_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_mapping_26sp_w2_w1_20260830.csv",
+    "weighting": "season_nse",
+    "nse_lambda": 3.0,
+    "sigma_floor": 50.0,
+    "contrast": "W_high_minus_W_low_within_same_nitrogen",
+    "contrast_scale": "raw_difference",
+    "response_target": "observed_shape",
+    "source_variable": "CHFPW",
+    "nitrogen_levels": [
+      "N0",
+      "N3"
+    ],
+    "harvest_scope": "all",
+    "season_contrasts": {
+      "26SP": {
+        "high_water": "W2",
+        "low_water": "W1"
+      }
+    },
+    "sst_scope": "season_x_response_stratum",
+    "response_strength_multiplier_vs_v46": 3.0,
+    "response_strength_multiplier_vs_v47": 2.0
+  },
+  "harvest_dry_objective": {
+    "enabled": false
+  },
+  "harvest_fresh_objective": {
+    "enabled": true,
+    "mode": "increment_plus_terminal",
+    "increment_source": "measured_hfpow",
+    "variable": "CHFPW",
+    "terminal_weighting": "season_rrmse",
+    "rrmse_lambda": 750.0,
+    "acceptance_metric": "RRMSE_pct",
+    "acceptance_threshold_pct": 25.0,
+    "acceptance_enforcement": "deterministic_postrun_hard_gate"
+  },
+  "process_state_objective": {
+    "enabled": true,
+    "mode": "signed_difference_plus_terminal",
+    "variables": [
+      "LAID",
+      "LWAD",
+      "SWAD"
+    ],
+    "CHTD": "calibration_separate_budget"
+  },
+  "objective_interpretation": {
+    "yield_priority": "Use the existing season-balanced terminal fresh-yield RRMSE objective and hard gates; do not replace it with terminal-yield NSE.",
+    "why_not_literal_45_45_score": "The cited 45/45+5/5 expression is a deterministic selection score, not the audited PEST Phi contract and conflicts with the project decision to assess terminal treatment yield by RRMSE.",
+    "cht_d_weight": "CANOPY_HEIGHT budget 0.45 per season",
+    "season_balance": "HARVEST_FRESH season_rrmse uses an independent per-season denominator; N/W response NSE uses season x stratum SST.",
+    "response_strength": "N_RESPONSE lambda 3.0; W_RESPONSE lambda 3.0; 26SP N_DOSE_GRADIENT static budget 1.5"
+  },
+  "seasons": [
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "workspace/reports/e02_v46_26sp_soil_n_scale_sweep_20260901/bundles_v2/s0p34",
+      "bundle_manifest_sha256": "29deeb4d878ed6a423f004eaed1d887d02f121804faa05f5982256b35615e637",
+      "role": "calibration",
+      "treatments": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    }
+  ],
+  "acceptance": {
+    "prebuild": [
+      "Frozen bounds audit passes after the four PAGE/PENV rows are promoted",
+      "PST contains exactly 118 active parameters (existing 114 plus four seedling terms)",
+      "25SP and 26SP projection audit recovers the four expected PAGE/PENV values at the initial vector",
+      "Fixed-width FileX regression tests pass and no PLWT/SPRL/other planting fields change"
+    ],
+    "science": [
+      "terminal fresh-yield RRMSE <=25% in each spring season",
+      "absolute terminal fresh-yield PBIAS <=15% in each spring season",
+      "cumulative fresh-yield NSE >=0.75 in each spring season (descriptive guard)",
+      "LAI NSE >=0.60 in each spring season",
+      "N_RESPONSE and W_RESPONSE remain season/stratum auditable and do not regress materially",
+      "among gate-passing candidates, rank season-balanced terminal RRMSE before Phi; CHTD is diagnostic only"
+    ]
+  },
+  "pest_ies": {
+    "num_reals": 200,
+    "noptmax": 4,
+    "agents": 6,
+    "random_seed": 43,
+    "executable_command": "build_pest.py --mode eggplant_stage2 --noptmax 4 --ies-num-reals 200 --batch DSSBatch.v48 --harvest-var CHFPW --param-review-mode off"
+  },
+  "approval_blockers": [
+    "Promote the four-row seedling bounds proposal into a new frozen bounds CSV; do not point calibration at bounds_proposals.",
+    "Implement/test PAGE/PENV FileX injection and seasonal projection before the formal build.",
+    "After approval, build and audit the PST before starting PEST++ IES."
+  ],
+  "prepared_from_proposal": "configs\\runs\\e02_formal_v46_page_penv_n034_20260901_proposal.json",
+  "bounds_sha256": "82f4d9c948e63ef8c42821b6e8ffa0f11621bce2734243b977c6e437b1feedfa",
+  "initial_nitrogen_scaling": {
+    "parameterization": "season-wide multiplicative scaling of both SNH4 and SNO3 in FileX *INITIAL CONDITIONS",
+    "bounds": [
+      0.15,
+      1.2
+    ],
+    "dssat_safe_floors": {
+      "SNH4": 0.1,
+      "SNO3": 0.5
+    },
+    "parameters": {
+      "26SP": "ICNS_26SP"
+    },
+    "measured_profile_depth_scope_cm": {
+      "26SP": 60
+    },
+    "anchors": {
+      "26SP": "existing 26SP s0p34 bundle values"
+    },
+    "no_compounding": true
+  },
+  "source_run": "workspace/runs/e02_formal_v47_free_nscale_200x6_20260901_r2",
+  "nitrogen_dose_gradient_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_mapping_26sp_w2_w1_20260830.csv",
+    "seasons": [
+      "26SP"
+    ],
+    "source_variable": "CHFPW",
+    "levels": [
+      "N1",
+      "N2",
+      "N3"
+    ],
+    "metrics": [
+      "log_N2_minus_N1",
+      "log_N3_minus_N2",
+      "cv_N1_N2_N3"
+    ],
+    "response_target": "monotone_plateau",
+    "harvest_scope": "all",
+    "weighting": "static",
+    "sigma_floor": 0.05,
+    "phi_budget": 1.5,
+    "direction_contract": "observed target is non-decreasing; simulated adjacent gradients are not clamped"
+  },
+  "diagnostic_single_season": true
+}

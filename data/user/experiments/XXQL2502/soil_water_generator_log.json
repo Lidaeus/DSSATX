@@ -1,0 +1,39 @@
+{
+  "season_id": "25FA",
+  "excode": "XXQL2502",
+  "generator": "tools/soil/build_soil_water_tables_20260917.py",
+  "generator_sha256": "9b0f69ecc3db8624b6e94d1a7e7384f2c0fb1d9e837e50a30872c9cae0916097",
+  "spec_compliance": "docs/reports/2025春_2026春数据重构与双地块土壤方案执行方案_20260917.md (D7=A, D11=A)",
+  "source_files": {
+    "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025秋\\2025 2号棚秋季取土.xlsx": "213e47c26f13b230334587872fceabd0db4656f7631266dc8ab10ba4ceb4a73b"
+  },
+  "qa_metrics": {
+    "plots": 12,
+    "dates": 2,
+    "depths": 5,
+    "total_observations": 108,
+    "phi_observations": 48,
+    "initial_condition_observations": 60,
+    "soil_id": "XXSL2601",
+    "dssat_layer_bottoms_cm": [
+      5.0,
+      15.0,
+      30.0,
+      40.0,
+      50.0,
+      60.0,
+      70.0,
+      80.0,
+      100.0,
+      120.0,
+      140.0,
+      160.0,
+      180.0
+    ]
+  },
+  "output_files": [
+    "soil_water_observations.csv",
+    "soil_water_layer_mapping.csv",
+    "soil_water_match_audit.csv"
+  ]
+}

@@ -67,14 +67,15 @@ conditional_matrix_panel_labels <- function(treatment_metadata, season) {
     water_level = part$water_level,
     nitrogen_level = part$nitrogen_level,
     tn_role = paste0("TN", part$treatment, " [",
-                     ifelse(part$dataset_role == "calibration", "Cal", "Val"), "]")
+                     ifelse(part$dataset_role == "calibration", "Cal",
+                            ifelse(part$dataset_role == "validation", "Val", "Diag")), "]")
   )
 }
 
 conditional_matrix_plot <- function(data, events, panel_labels, y_limits, y_label, title,
                                     profile, is_demo, ribbons = TRUE,
                                     water_levels = c("W3", "W2", "W1", "CK"),
-                                    show_legend = TRUE) {
+                                    show_legend = TRUE, incremental = FALSE) {
   nitrogen <- unlist(profile$nitrogen_colors, use.names = TRUE)
   water <- unlist(profile$water_shapes, use.names = TRUE)
   nitrogen_levels <- c("N3", "N2", "N1", "N0")
@@ -89,7 +90,7 @@ conditional_matrix_plot <- function(data, events, panel_labels, y_limits, y_labe
   }
 
   plot <- ggplot2::ggplot()
-  if (ribbons) {
+  if (ribbons && !incremental) {
     # Two-tier conditional interval: the 25-75% band sits on top of the
     # lighter 95% band so narrow DEMO ensembles remain readable at print size.
     plot <- plot +
@@ -106,7 +107,11 @@ conditional_matrix_plot <- function(data, events, panel_labels, y_limits, y_labe
         alpha = 0.42, colour = NA
       )
   }
-  plot <- plot +
+  if (incremental) {
+    plot <- plot + ggplot2::geom_segment(
+      data = data, ggplot2::aes(x = dap, xend = dap, y = 0, yend = sim_median,
+                                colour = nitrogen_level), linewidth = 0.45)
+  } else plot <- plot +
     ggplot2::geom_line(
       data = data,
       ggplot2::aes(x = dap, y = sim_median, colour = nitrogen_level, group = treatment),
@@ -187,15 +192,23 @@ build_all_treatment_dynamics_conditional <- function(prediction, trajectory, tre
       }
       if (nrow(season_events) > 0) {
         season_values <- c(season_values, season_events$observed, season_events$sim_q975)
+        if ("observed_se" %in% names(season_events)) {
+          valid <- is.finite(season_events$observed_se) & season_events$observed_se >= 0
+          season_values <- c(season_values, season_events$observed[valid] - season_events$observed_se[valid],
+                             season_events$observed[valid] + season_events$observed_se[valid])
+        }
       }
-      y_limits <- c(0, max(season_values, na.rm = TRUE) * 1.04)
+      season_values <- season_values[is.finite(season_values)]
+      if (!length(season_values)) stop("No finite values for dynamic axis limits")
+      y_limits <- c(min(0, min(season_values)), max(1e-6, max(season_values)) * 1.04)
       season_water_levels <- if (season == "26SP") c("W3", "W2", "W1") else c("W3", "W2", "W1", "CK")
       plot <- conditional_matrix_plot(
         source_frame, season_events, labels, y_limits, y_label,
         paste0(season, " | ", unique(source_frame$variable_label)[[1]], " | all treatments"),
         profile, is_demo, ribbons = nrow(source_frame) > 0,
         water_levels = season_water_levels,
-        show_legend = length(season_plots) == 0
+        show_legend = length(season_plots) == 0,
+        incremental = variable %in% c("DRY_INC", "FRESH_INC")
       )
       season_plots[[length(season_plots) + 1]] <- plot
       observations_out[[season]] <- season_events
@@ -260,7 +273,7 @@ build_all_treatment_harvest <- function(comparison, trajectory, treatment_metada
 
   p_event <- ggplot2::ggplot(cumulative, ggplot2::aes(x = time)) +
     ggplot2::geom_line(
-      ggplot2::aes(y = simulated, colour = nitrogen_level, group = treatment),
+      ggplot2::aes(y = simulated, colour = nitrogen_level, group = treatment_label),
       linewidth = profile$data_linewidth_pt, lineend = "round"
     ) +
     ggplot2::geom_point(
@@ -282,7 +295,7 @@ build_all_treatment_harvest <- function(comparison, trajectory, treatment_metada
   p_smooth <- ggplot2::ggplot() +
     ggplot2::geom_line(
       data = smooth_curve,
-      ggplot2::aes(x = time, y = simulated, colour = nitrogen_level, group = treatment),
+      ggplot2::aes(x = time, y = simulated, colour = nitrogen_level, group = treatment_label),
       linewidth = profile$data_linewidth_pt, lineend = "round"
     ) +
     ggplot2::geom_point(
