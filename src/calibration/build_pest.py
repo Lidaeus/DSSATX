@@ -1191,6 +1191,8 @@ def apply_bounds_review_csv(params, csv_path, cultivar=None, ecotype=None, mode=
     applied = 0
     missing_names = []
     for p in params:
+        if p.get("filex_seedling") or p.get("filex_initial_n_scale") or p.get("filex_sasc"):
+            continue
         if str(p.get("pargp", "")).strip().lower() in {"soil", "initial_conditions"}:
             continue
         k = str(p.get("name", "")).strip().lower()
@@ -1842,7 +1844,9 @@ def _parse_filex_seedling_params(bounds_path, *, names=None):
         return []
     wanted = {str(x).strip().upper() for x in (names or {
         "PAGE_25SP", "PENV_25SP", "PAGE_26SP", "PENV_26SP",
+        "PAGE_25FA", "PENV_25FA",
         "ICNS_25SP", "ICNS_26SP",
+        "SASC_RATIO", "SASC_FRAC", "SASC_25SP", "SASC_26SP", "SASC_25FA",
     })}
     params = []
     with open(bounds_path, "r", encoding="utf-8-sig", newline="") as handle:
@@ -1851,8 +1855,8 @@ def _parse_filex_seedling_params(bounds_path, *, names=None):
             if name not in wanted:
                 continue
             location = str(row.get("location", "")).strip().upper()
-            if location not in {"IC", "INIT"}:
-                raise ValueError(f"{name}: season-scoped FileX term must use location=IC/INIT")
+            if location not in {"IC", "INIT", "SOIL", "SA"}:
+                raise ValueError(f"{name}: season-scoped FileX term must use location=IC/INIT/SOIL/SA")
             try:
                 init = float(row["init"])
                 lower = float(row["lower"])
@@ -1869,6 +1873,9 @@ def _parse_filex_seedling_params(bounds_path, *, names=None):
                                else lower < upper and lower <= init <= upper)
             if not valid:
                 raise ValueError(f"{name}: invalid FileX bounds [{lower:g}, {upper:g}] init={init:g} status={status}")
+            pargp_val = str(row.get("pargp", "")).strip()
+            if not pargp_val:
+                pargp_val = "initial_conditions" if name.startswith(("ICNS", "PAGE", "PENV")) else "SOIL_Chemical"
             params.append({
                 "name": name,
                 "init": init,
@@ -1876,9 +1883,10 @@ def _parse_filex_seedling_params(bounds_path, *, names=None):
                 "upper": upper,
                 "idx": None,
                 "status": "none" if status == "active" else "fixed",
-                "pargp": "initial_conditions",
+                "pargp": pargp_val,
                 "filex_seedling": name.startswith(("PAGE_", "PENV_")),
                 "filex_initial_n_scale": name.startswith("ICNS_"),
+                "filex_sasc": name.startswith("SASC"),
             })
     return params
 
@@ -4265,10 +4273,10 @@ if __name__ == "__main__":
 
     params = parse_cul_params(cultivar, allowed_params=allowed, allow_all_flagged=bool(args.bounds_id))
 
-    # Season-scoped FileX controls (PAGE/PENV and initial mineral-N scales)
+    # Season-scoped FileX controls (PAGE/PENV and initial mineral-N scales, SASC)
     # are not present in the CUL/ECO/SPE template maps.  Materialize frozen
     # declarations explicitly so the PST cannot silently omit them.
-    if multiseason_mode and _prevalidated_bounds:
+    if _prevalidated_bounds:
         params.extend(_parse_filex_seedling_params(_prevalidated_bounds))
 
     if extra_allowed is not None:
@@ -4285,7 +4293,8 @@ if __name__ == "__main__":
                 for _name, _row in _frozen_lookup.items():
                     _u = str(_name).strip().upper()
                     if _u in extra_allowed and _u not in SPE_DIRECT_BOUNDS_EGGPLANT:
-                        SPE_DIRECT_BOUNDS_EGGPLANT[_u] = (float(_row[0]), float(_row[1]))
+                        if not _u.startswith(("PAGE_", "PENV_", "ICNS_", "SASC", "SLPF_", "SOIL_")):
+                            SPE_DIRECT_BOUNDS_EGGPLANT[_u] = (float(_row[0]), float(_row[1]))
             except (OSError, ValueError, KeyError, TypeError):
                 pass
         params.extend(

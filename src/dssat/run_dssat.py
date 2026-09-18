@@ -24,6 +24,7 @@ from src.dssat.array_expander import (
     expand_leaf_area,
     expand_leaf_partition,
     expand_senpor,
+    expand_senmax,
     expand_stem_partition,
     expand_water_stress_curves,
     validate_partition_sum,
@@ -48,6 +49,7 @@ PARAM_CSV = "pest_params.csv"
 OBSERVATION_TRANSFORM_CONFIG = None
 KEEP_SOIL_WATER = False
 KEEP_NITROGEN_OUTPUTS = False
+KEEP_PHOSPHORUS_OUTPUTS = False
 
 OUTPUT_FILES = [
     "PlantGro.OUT",
@@ -97,9 +99,9 @@ def validate_candidate_parameters(param_dict):
             _runner_advisory(
                 f"parameter={name} value={value:g} safety_range=[0,10] action=continue_to_dssat"
             )
-        if name == "SOIL_SLPF" and not 0.0 <= value <= 1.0:
+        if (name == "SOIL_SLPF" or name.startswith("SLPF_") or name.startswith("SOIL_SLPF_")) and not 0.0 <= value <= 2.0:
             _runner_advisory(
-                f"parameter={name} value={value:g} safety_range=[0,1] action=continue_to_dssat"
+                f"parameter={name} value={value:g} safety_range=[0,2] action=continue_to_dssat"
             )
 
     if "XMAGE" in normalized and "XFPHT" in normalized and normalized["XMAGE"] >= normalized["XFPHT"]:
@@ -157,6 +159,7 @@ PEST_JOINT_FILE = "PestJoint.OUT"
 PEST_HARVEST_FILE = "PestHarvest.OUT"
 PEST_TMTGROW_FILE = "PestTmtGrow.OUT"
 PEST_SOILWAT_FILE = "PestSoilWat.OUT"
+PEST_WNCONTRAST_FILE = "PestWNContrast.OUT"
 
 
 def _get_pest_out_dir():
@@ -647,13 +650,29 @@ def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harv
         return
 
     base_dir = _run_base_dir()
-    filex_abs = _resolve_filex_from_batch(batch_file, base_dir)
-    if not tmt_path:
-        excode = _infer_excode_from_filex(filex_abs or entries[0]["filex"])
-        filex_dir = os.path.dirname(os.path.abspath(filex_abs)) if filex_abs else base_dir
-        tmt_path = os.path.join(filex_dir, f"{excode}.TMT") if excode else None
+    harvest_cache = {}
+    default_events = {}
+    if tmt_path:
+        try:
+            default_events = _read_tmt_harvest_events(tmt_path)
+        except Exception:
+            default_events = {}
 
-    events_by_tn = _read_tmt_harvest_events(tmt_path)
+    def _resolve_entry_harvest_events(entry_dict):
+        fx = entry_dict.get("filex", "")
+        if not fx:
+            return default_events
+        stem = Path(fx).stem
+        if stem in harvest_cache:
+            return harvest_cache[stem]
+        for d in [base_dir, os.getcwd(), str(DATA_DIR / "raw" / "experiments")]:
+            cand = os.path.join(d, f"{stem}.TMT")
+            if os.path.isfile(cand):
+                harvest_cache[stem] = _read_tmt_harvest_events(cand)
+                return harvest_cache[stem]
+        harvest_cache[stem] = default_events
+        return default_events
+
     harvest_var = str(harvest_var or "CHPDT").strip().upper()
 
     # T10: read both CHFPW and CHPDT from FreshWt.OUT.
@@ -668,10 +687,12 @@ def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harv
     for e in entries:
         run_no = int(e["run"])
         tn = int(e.get("tn", -99))
+        events_by_tn = _resolve_entry_harvest_events(e)
         events = events_by_tn.get(tn, [])
         prev_cum = None
+        prev_fresh_cum = None
         prev_dry_cum = None
-        for ev in events:
+        for event_index, ev in enumerate(events):
             hno = int(ev["hno"])
             date = int(ev["date"])
             # T10 exact observation-date read.
@@ -694,6 +715,14 @@ def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harv
             if chpdt_raw != -99.0:
                 hpodw_raw = float(chpdt_raw) if prev_dry_cum is None else float(chpdt_raw) - float(prev_dry_cum)
                 prev_dry_cum = float(chpdt_raw)
+            fresh_inc_raw = -99.0
+            if chfpw_raw != -99.0:
+                fresh_inc_raw = (
+                    float(chfpw_raw)
+                    if prev_fresh_cum is None
+                    else float(chfpw_raw) - float(prev_fresh_cum)
+                )
+                prev_fresh_cum = float(chfpw_raw)
             # Legacy differenced path for PWADS/PWAIS.
             sim_date = _yyddd_add_days(date, 1)
             sim_val = _nearest_on_or_before(legacy_by_run.get(run_no, {}), sim_date)
@@ -706,14 +735,15 @@ def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harv
                 else:
                     sim_inc = float(sim_val) - float(prev_cum)
                 prev_cum = float(sim_val)
+            is_terminal = event_index == len(events) - 1
+            fresh_tokens = (
+                f" @CHFPWS@ {float(chfpw_raw):0.3f} @HFPOWS@ {float(fresh_inc_raw):0.3f}"
+                if is_terminal
+                else f" @HFPOWS@ {float(fresh_inc_raw):0.3f} @CHFPWS_T@ {float(chfpw_raw):0.3f} @CHFPWS@ {float(chfpw_raw):0.3f}"
+            )
             new_lines.append(
                 f"RUN {run_no:d} TN {tn:d} HNO {hno:d} DATE {date:d}"
-                f" @CHFPWS@ {float(chfpw_raw):0.3f} @CHPDTS@ {float(chpdt_raw):0.3f}"
-                # Token order must match the .ins search order (CHFPWS ->
-                # HPODWS -> CHPDTS_T for intermediate harvests).  PEST
-                # instruction parsing advances a single forward cursor, so a
-                # token placed before an earlier-searched token is unreachable
-                # and the whole run is flagged failed.
+                f"{fresh_tokens} @CHPDTS@ {float(chpdt_raw):0.3f}"
                 f" @HPODWS@ {float(hpodw_raw):0.3f}"
                 f" @CHPDTS_T@ {float(chpdt_raw):0.3f}"
                 f" @PWADS@ {float(sim_val):0.3f} @PWAIS@ {float(sim_inc):0.3f}"
@@ -762,6 +792,48 @@ def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harv
         print(f"Warning: failed to write PestHarvest audit: {exc}")
 
 
+def _write_pest_wn_contrast_from_freshwt(batch_file, freshwt_path, output_path):
+    """Write PestWNContrast.OUT containing orthogonal W-N contrast and monotonic barrier values."""
+    entries = _parse_batch_entries(batch_file)
+    if not entries:
+        return
+    chfpw_by_run = _read_freshwt_var_by_run(freshwt_path, "CHFPW")
+    if not chfpw_by_run:
+        return
+
+    trt_to_run = {}
+    for e in entries:
+        fx = Path(e.get("filex", "")).stem.upper()
+        tn = int(e.get("tn", -99))
+        trt_to_run[(fx, tn)] = int(e["run"])
+
+    contrast_specs = [
+        (1, "XXQL2501", 2, 5),   # 25SP W3: N3 vs N0
+        (2, "XXQL2501", 10, 13), # 25SP W1: N3 vs N0
+        (3, "XXQL2601", 2, 11),  # 26SP W2: N3 vs N0
+        (4, "XXQL2601", 3, 12),  # 26SP W1: N3 vs N0
+    ]
+
+    lines = []
+    for hno, fx, n3_tn, n0_tn in contrast_specs:
+        run_n3 = trt_to_run.get((fx, n3_tn))
+        run_n0 = trt_to_run.get((fx, n0_tn))
+        if run_n3 is None or run_n0 is None:
+            continue
+        y_n3 = max(chfpw_by_run.get(run_n3, {0: 0.0}).values()) if run_n3 in chfpw_by_run else 0.0
+        y_n0 = max(chfpw_by_run.get(run_n0, {0: 0.0}).values()) if run_n0 in chfpw_by_run else 0.0
+        contrast = y_n3 - y_n0
+        penalty = max(0.0, y_n0 - y_n3)
+        lines.append(
+            f"RUN {run_n3} TN {n3_tn} @HNO@ {hno} DATE 0 @PEN_CTRS@ {contrast:.6f} @PEN_MONOS@ {penalty:.6f}"
+        )
+
+    if lines:
+        out_file = Path(output_path)
+        out_file.parent.mkdir(parents=True, exist_ok=True)
+        out_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def _write_pest_tmtgrow_from_tmt_and_plantgro(batch_file, plantgro_path, pest_tmtgrow_path, tmt_path=None, plantn_path=None):
     entries = _parse_batch_entries(batch_file)
     if not entries:
@@ -775,13 +847,29 @@ def _write_pest_tmtgrow_from_tmt_and_plantgro(batch_file, plantgro_path, pest_tm
         return
 
     base_dir = _run_base_dir()
-    filex_abs = _resolve_filex_from_batch(batch_file, base_dir)
-    if not tmt_path:
-        excode = _infer_excode_from_filex(filex_abs or entries[0]["filex"])
-        filex_dir = os.path.dirname(os.path.abspath(filex_abs)) if filex_abs else base_dir
-        tmt_path = os.path.join(filex_dir, f"{excode}.TMT") if excode else None
+    tmt_cache = {}
+    default_pts = {}
+    if tmt_path:
+        try:
+            default_pts = _read_tmt_process_points(tmt_path)
+        except Exception:
+            default_pts = {}
 
-    points_by_tn = _read_tmt_process_points(tmt_path)
+    def _resolve_entry_tmt_points(entry_dict):
+        fx = entry_dict.get("filex", "")
+        if not fx:
+            return default_pts
+        stem = Path(fx).stem
+        if stem in tmt_cache:
+            return tmt_cache[stem]
+        for d in [base_dir, os.getcwd(), str(DATA_DIR / "raw" / "experiments")]:
+            cand = os.path.join(d, f"{stem}.TMT")
+            if os.path.isfile(cand):
+                tmt_cache[stem] = _read_tmt_process_points(cand)
+                return tmt_cache[stem]
+        tmt_cache[stem] = default_pts
+        return default_pts
+
     vars_by_run = _read_plantgro_vars_by_run(plantgro_path, ["L#SD", "LAID", "LWAD", "SWAD", "CHTD"])
     n_by_run = _read_plantgro_vars_by_run(plantn_path, ["SNAD", "LNAD"]) if plantn_path else {}
 
@@ -790,6 +878,7 @@ def _write_pest_tmtgrow_from_tmt_and_plantgro(batch_file, plantgro_path, pest_tm
         for e in entries:
             run_no = int(e["run"])
             tn = int(e.get("tn", -99))
+            points_by_tn = _resolve_entry_tmt_points(e)
             pts = points_by_tn.get(tn, [])
             previous_state = None
             terminal_index = {}
@@ -1009,7 +1098,16 @@ def _resolve_filex_from_batch(batch_file, base_dir):
         return None
     if os.path.isabs(filex):
         return os.path.normpath(filex)
-    return os.path.normpath(os.path.join(base_dir, filex))
+    cand = os.path.normpath(os.path.join(base_dir, filex))
+    if os.path.exists(cand):
+        return cand
+    batch_path = _resolve_batch_path(batch_file, base_dir=base_dir)
+    if batch_path:
+        batch_dir = os.path.dirname(os.path.abspath(batch_path))
+        cand2 = os.path.normpath(os.path.join(batch_dir, filex))
+        if os.path.exists(cand2):
+            return cand2
+    return cand
 
 
 def _norm_abs_case(p):
@@ -1233,7 +1331,20 @@ def _normalize_filex_initial_conditions_boundary(filex_path):
         raise last_err
 
 
-def _write_local_batch(batch_src_path, batch_dst_path, filex_basename):
+def _update_filex_soil_id(filex_path, old_soil_id="IBTM910017", new_soil_id="IB26910017"):
+    if not filex_path or not os.path.isfile(filex_path):
+        return
+    try:
+        with open(filex_path, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
+    except Exception:
+        return
+    if old_soil_id in content:
+        content = content.replace(old_soil_id, new_soil_id)
+        _atomic_write_lines(filex_path, content.splitlines(keepends=True), n_tries=20, sleep_s=0.05)
+
+
+def _write_local_batch(batch_src_path, batch_dst_path, filex_basename=None):
     if not (batch_src_path and os.path.exists(batch_src_path)):
         return False
     try:
@@ -1241,6 +1352,17 @@ def _write_local_batch(batch_src_path, batch_dst_path, filex_basename):
             lines = f.readlines()
     except Exception:
         return False
+
+    # Check if multiple distinct experiment files are present in the batch
+    exp_stems = set()
+    for line in lines:
+        s = line.strip()
+        if not s or s.startswith(("$", "@", "!")):
+            continue
+        parts = s.split()
+        if parts:
+            exp_stems.add(os.path.basename(parts[0]).upper())
+    is_multi_exp = len(exp_stems) > 1
 
     out_lines = []
     for line in lines:
@@ -1257,9 +1379,11 @@ def _write_local_batch(batch_src_path, batch_dst_path, filex_basename):
         old_tok = m.group(2)
         rest = m.group(3)
 
-        new_tok = str(filex_basename)
+        new_tok = os.path.basename(old_tok) if is_multi_exp or not filex_basename else str(filex_basename)
         if len(new_tok) < len(old_tok):
             new_tok = new_tok + (" " * (len(old_tok) - len(new_tok)))
+        elif len(new_tok) > len(old_tok):
+            new_tok = new_tok[:len(old_tok)]
 
         out_lines.append(prefix + new_tok + rest + "\n")
 
@@ -1655,7 +1779,7 @@ def _infer_soil_id_from_filex(filex_path):
             return sid or None
     return None
 
-def cleanup(target_dir=".", keep_dssat_outputs=False, keep_soil_water=False, keep_nitrogen_outputs=False):
+def cleanup(target_dir=".", keep_dssat_outputs=False, keep_soil_water=False, keep_nitrogen_outputs=False, keep_phosphorus_outputs=False):
     """Clean up DSSAT transient output files.
 
     Parameters
@@ -1667,6 +1791,10 @@ def cleanup(target_dir=".", keep_dssat_outputs=False, keep_soil_water=False, kee
     keep_soil_water : bool
         If True, keep SoilWat.OUT (needed for the SOIL_WATER observation group
         in calibration mode; the file is large and should be off otherwise).
+    keep_nitrogen_outputs : bool
+        If True, keep PlantN.OUT, SoilNi.OUT, SoilN.OUT.
+    keep_phosphorus_outputs : bool
+        If True, keep PlantP.OUT, SoilPi.OUT, SoilP.OUT, SoilPBalSum.OUT, PlantPBal.OUT.
     """
     if not keep_dssat_outputs and not keep_soil_water:
         for file in (OUTPUT_FILES + ["Evaluate.OUT", "SoilWat.OUT"]):
@@ -1701,7 +1829,9 @@ def cleanup(target_dir=".", keep_dssat_outputs=False, keep_soil_water=False, kee
         PEST_HARVEST_FILE,
         PEST_TMTGROW_FILE,
         PEST_SOILWAT_FILE,
+        PEST_WNCONTRAST_FILE,
         "Evaluate.OUT",
+        "SoilPBalSum.OUT",
     }
     if keep_dssat_outputs:
         keep_out.update({"FreshWt.OUT", "PlantGro.OUT"})
@@ -1709,6 +1839,8 @@ def cleanup(target_dir=".", keep_dssat_outputs=False, keep_soil_water=False, kee
         keep_out.update({"SoilWat.OUT"})
     if keep_nitrogen_outputs:
         keep_out.update({"PlantN.OUT", "SoilNi.OUT", "SoilN.OUT"})
+    if keep_phosphorus_outputs or KEEP_PHOSPHORUS_OUTPUTS or os.environ.get("DSSAT_KEEP_PHOSPHORUS", "").lower() in ("1", "true", "yes"):
+        keep_out.update({"PlantP.OUT", "SoilPi.OUT", "SoilP.OUT", "SoilPBalSum.OUT", "PlantPBal.OUT"})
     for p in glob.glob(os.path.join(target_dir, "*.OUT")):
         if os.path.basename(p) in keep_out:
             continue
@@ -2430,7 +2562,10 @@ def update_spe_file(param_csv_path=PARAM_CSV):
         "XMPAGE",
         # Additional SPE fields used by the expanded sensitivity domain.
         "SENRTE",
+        "SENRT2",
         "SENDAY",
+        "ICMP",
+        "TCMP",
         "SETMAX",
         "SRMAX",
         "RFLWAB",
@@ -2460,6 +2595,7 @@ def update_spe_file(param_csv_path=PARAM_CSV):
         "STEM_PART_EARLY",
         "STEM_PART_LATE",
         "SENPOR_LATE",
+        "SENMAX_LATE",
         "FNSDT_OPT1",
         "FNSDT_OPT2",
         "SWFAC_REC",
@@ -2564,15 +2700,20 @@ def update_spe_file(param_csv_path=PARAM_CSV):
                 _write_prefix_values(ystem_idx, ystem_values, count=10)
 
         senpor_marker_idx = _find_line_index("SENPOR.........")
-        if senpor_marker_idx != -1 and "SENPOR_LATE" in param_dict:
+        if senpor_marker_idx != -1 and ("SENPOR_LATE" in param_dict or "SENMAX_LATE" in param_dict):
             senpor_values_idx = senpor_marker_idx + 1
             current_senpor_line = _read_prefix_values(senpor_values_idx, 8)
             if len(current_senpor_line) < 8:
                 raise ValueError("Could not read the SENPOR/SENMAX values from the SPE template")
-            expanded = expand_senpor(float(param_dict["SENPOR_LATE"]))
+            senpor_vals = current_senpor_line[:4]
+            senmax_vals = current_senpor_line[4:8]
+            if "SENPOR_LATE" in param_dict:
+                senpor_vals = expand_senpor(float(param_dict["SENPOR_LATE"])).y_values
+            if "SENMAX_LATE" in param_dict:
+                senmax_vals = expand_senmax(float(param_dict["SENMAX_LATE"])).y_values
             _write_prefix_values(
                 senpor_values_idx,
-                (*expanded.y_values, *current_senpor_line[4:8]),
+                (*senpor_vals, *senmax_vals),
                 count=8,
             )
 
@@ -2645,7 +2786,8 @@ def update_spe_file(param_csv_path=PARAM_CSV):
     _update_named_line("RTDEPI,RFAC1", ["RTDEPI", "RFAC1", "RTSEN", "RLDSM", "RTSDF", "RWUEP1", "RWUMX"])
     _update_named_line("RTNO3,RTNH4", ["RTNO3", "RTNH4", "PORMIN", "RTEXF"])
     _update_named_line("SETMAX,SRMAX", ["SETMAX", "SRMAX", "RFLWAB", "XMPAGE"])
-    _update_named_line("SENRTE,SENRT2", ["SENRTE", "_SENRT2", "SENDAY", "_FREEZ1", "_FREEZ2"])
+    _update_named_line("SENRTE,SENRT2", ["SENRTE", "SENRT2", "SENDAY", "_FREEZ1", "_FREEZ2"])
+    _update_named_line("ICMP,TCMP", ["ICMP", "TCMP"])
     _update_named_line("SLAMAX,SLAMIN", ["SLAMAX", "SLAMIN", "_SLAPAR", "TURSLA", "NSLA"])
     _update_named_line("PGEFF SCV KDIF", ["PGEFF", "_SCV", "KDIF", "LFANGB"])
     _update_named_line("DSWBAR,XFRMAX", ["DSWBAR", "XFRMAX", "SHLAG"])
@@ -2774,7 +2916,11 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
     if not param_dict:
         return
 
-    soil_keys = [k for k in param_dict.keys() if str(k).strip().upper().startswith("SOIL_")]
+    soil_keys = [
+        k for k in param_dict.keys()
+        if str(k).strip().upper().startswith("SOIL_")
+        or str(k).strip().upper() in {"SLPF_25SP", "SLPF_26SP"}
+    ]
     if not soil_keys:
         return
 
@@ -2888,15 +3034,23 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
             if data_idx is not None:
                 s = lines[data_idx].rstrip("\n")
                 matches = list(re.finditer(r"[-+]?\d*\.\d+|[-+]?\d+", s))
+                tokens = s.split()
+                offset = 1 if (tokens and re.match(r"^[-+]?\d", tokens[0])) else 0
                 replacements = []
-                for name, pos in want:
+                for name, base_pos in want:
+                    pos = base_pos + offset
                     key = f"SOIL_{name}"
+                    if name == "SLPF":
+                        if "SLPF_25SP" in param_dict:
+                            key = "SLPF_25SP"
+                        elif "SOIL_SLPF_25SP" in param_dict:
+                            key = "SOIL_SLPF_25SP"
                     if key not in param_dict:
                         continue
                     if pos >= len(matches):
                         continue
                     v = float(param_dict[key])
-                    ranges = {"SALB": (0.05, 0.35), "SLDR": (0.01, 5.00), "SLRO": (1.0, 99.0), "SLNF": (0.50, 3.00), "SLPF": (0.0, 1.0)}
+                    ranges = {"SALB": (0.05, 0.35), "SLDR": (0.01, 5.00), "SLRO": (1.0, 99.0), "SLNF": (0.50, 1.00), "SLPF": (0.0, 2.0)}
                     v2 = _recommended(v, *ranges[name], name=key) if name in ranges else v
                     if v2 is None:
                         continue
@@ -3010,8 +3164,74 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
 
             for start, end, new_tok in sorted(replacements, key=lambda x: x[0], reverse=True):
                 s = s[:start] + new_tok + s[end:]
+            lines[idx] = s.rstrip() + "\n"
 
-            lines[idx] = s + "\n"
+    # Ensure IB26910017 profile exists in SOIL.SOL if SLPF_26SP is specified
+    slpf_26_val = None
+    for k26 in ("SLPF_26SP", "SOIL_SLPF_26SP"):
+        if k26 in param_dict:
+            try:
+                slpf_26_val = float(param_dict[k26])
+                break
+            except Exception:
+                pass
+
+    if slpf_26_val is not None and sec_start is not None:
+        sec_26_start = None
+        for i, s in enumerate(lines):
+            if s.startswith("*"):
+                sid = s[1:].strip().split()[0] if s[1:].strip() else ""
+                if sid.upper() == "IB26910017":
+                    sec_26_start = i
+                    break
+        if sec_26_start is None:
+            prof_25_lines = list(lines[sec_start:sec_end])
+            if prof_25_lines:
+                prof_26_lines = list(prof_25_lines)
+                prof_26_lines[0] = "*IB26910017  SCS         -99     203 Orangeburg Sandy Loam (26SP)\n"
+                scom_26_idx = None
+                for idx_p, lp in enumerate(prof_26_lines):
+                    up = lp.strip().upper()
+                    if up.startswith("@") and "SCOM" in up and "SALB" in up:
+                        scom_26_idx = idx_p
+                        break
+                if scom_26_idx is not None and scom_26_idx + 1 < len(prof_26_lines):
+                    s26 = prof_26_lines[scom_26_idx + 1].rstrip("\n")
+                    m26 = list(re.finditer(r"[-+]?\d*\.\d+|[-+]?\d+", s26))
+                    tokens26 = s26.split()
+                    offset26 = 1 if (tokens26 and re.match(r"^[-+]?\d", tokens26[0])) else 0
+                    pos_slpf = 5 + offset26
+                    if pos_slpf < len(m26):
+                        m_target = m26[pos_slpf]
+                        orig_tok = s26[m_target.start():m_target.end()]
+                        formatted_26 = _format_to_width_preserve_space(slpf_26_val, len(orig_tok), orig_token=orig_tok)
+                        s26 = s26[:m_target.start()] + formatted_26 + s26[m_target.end():]
+                        prof_26_lines[scom_26_idx + 1] = s26.rstrip() + "\n"
+                lines.extend(["\n", *prof_26_lines])
+        else:
+            sec_26_end = len(lines)
+            for j in range(sec_26_start + 1, len(lines)):
+                if lines[j].startswith("*"):
+                    sec_26_end = j
+                    break
+            scom_26_idx = None
+            for j in range(sec_26_start, sec_26_end):
+                up = lines[j].strip().upper()
+                if up.startswith("@") and "SCOM" in up and "SALB" in up:
+                    scom_26_idx = j
+                    break
+            if scom_26_idx is not None and scom_26_idx + 1 < sec_26_end:
+                s26 = lines[scom_26_idx + 1].rstrip("\n")
+                m26 = list(re.finditer(r"[-+]?\d*\.\d+|[-+]?\d+", s26))
+                tokens26 = s26.split()
+                offset26 = 1 if (tokens26 and re.match(r"^[-+]?\d", tokens26[0])) else 0
+                pos_slpf = 5 + offset26
+                if pos_slpf < len(m26):
+                    m_target = m26[pos_slpf]
+                    orig_tok = s26[m_target.start():m_target.end()]
+                    formatted_26 = _format_to_width_preserve_space(slpf_26_val, len(orig_tok), orig_token=orig_tok)
+                    s26 = s26[:m_target.start()] + formatted_26 + s26[m_target.end():]
+                    lines[scom_26_idx + 1] = s26.rstrip() + "\n"
 
     lock_path = os.path.abspath(SOIL_FILE) + ".lock"
     lock_err = _acquire_file_lock(lock_path, timeout_s=180.0, poll_s=0.10, stale_s=900.0)
@@ -3210,12 +3430,33 @@ def _initial_n_key(prefix, excode, treatment, layer):
 
 
 def update_initial_soil_n_file(param_csv_path=PARAM_CSV, filex_path=None):
-    """Inject treatment/layer-specific SNH4 and SNO3 parameters into FileX."""
+    """Inject absolute or season-scaled initial SNH4/SNO3 into FileX.
+
+    ``ICNS_25SP`` and ``ICNS_26SP`` multiply both mineral-N species in every
+    treatment and layer of the matching season.  The multiseason scheduler
+    copies the authoritative bundle before each model evaluation, so scaling
+    is always relative to the bundle anchor and never compounds by iteration.
+    """
     if not os.path.exists(param_csv_path) or not filex_path or not os.path.exists(filex_path):
         return
     param_dict = _read_param_dict(param_csv_path)
-    if not any(k.startswith("IC_SNH4_") or k.startswith("IC_SNO3_") for k in param_dict):
+    filex_name = os.path.basename(str(filex_path)).upper()
+    season_tag = "25SP" if "2501" in filex_name else ("26SP" if "2601" in filex_name else None)
+    scale_key = f"ICNS_{season_tag}" if season_tag else "ICNS"
+    scale_max_depth = 100 if season_tag == "25SP" else (60 if season_tag == "26SP" else None)
+    scale = None
+    if scale_key in param_dict:
+        scale = float(param_dict[scale_key])
+        if not 0.01 <= scale <= 10.0:
+            raise ValueError(f"{scale_key}: initial mineral-N scale outside safety range: {scale:g}")
+    absolute_keys = any(k.startswith("IC_SNH4_") or k.startswith("IC_SNO3_") for k in param_dict)
+    if scale is None and not absolute_keys:
         return
+    if scale is not None and absolute_keys:
+        raise ValueError(
+            f"{scale_key}: season-wide initial-N scaling cannot be combined with "
+            "treatment/layer IC_SNH4_/IC_SNO3_ parameters"
+        )
 
     with open(filex_path, "r", encoding="utf-8", errors="ignore") as f:
         lines = f.readlines()
@@ -3258,6 +3499,25 @@ def update_initial_soil_n_file(param_csv_path=PARAM_CSV, filex_path=None):
             in_layer_table = False
             continue
         parts = s.split()
+        # Each treatment's PCR record is followed by its own ICBL table, but
+        # only the first PCR record has a repeated header.  Detect subsequent
+        # PCR records by their non-numeric crop-code field; otherwise the
+        # previous treatment id leaks into all following layer rows.
+        if len(parts) >= 3:
+            try:
+                pcr_tn = int(float(parts[0]))
+                float(parts[1])
+            except ValueError:
+                try:
+                    pcr_tn = int(float(parts[0]))
+                except ValueError:
+                    pcr_tn = None
+                if pcr_tn is not None:
+                    current_tn = pcr_tn
+                    layer_by_tn[current_tn] = 0
+                    table_cols = None
+                    in_layer_table = False
+                    continue
         if table_cols is None:
             # PCR data rows carry the treatment/ICNAME in the first column.
             if parts:
@@ -3280,7 +3540,7 @@ def update_initial_soil_n_file(param_csv_path=PARAM_CSV, filex_path=None):
         # semantic fields.
         snh4_key = _initial_n_key("IC_SNH4", excode, current_tn, layer)
         sno3_key = _initial_n_key("IC_SNO3", excode, current_tn, layer)
-        if snh4_key not in param_dict and sno3_key not in param_dict:
+        if scale is None and snh4_key not in param_dict and sno3_key not in param_dict:
             continue
         try:
             prefix_match = re.match(r"^\s*(\d+)\s+(\d+)", s)
@@ -3296,20 +3556,40 @@ def update_initial_soil_n_file(param_csv_path=PARAM_CSV, filex_path=None):
             sh2o_token, snh4_token, sno3_token = semantic[:3]
 
             def _fit_ic_field(value):
-                token = f"{float(value):.5g}"
-                if len(token) > 6:
-                    token = f"{float(value):.4g}"
-                if len(token) > 6:
+                # FileX's legacy parser requires a separating blank even
+                # though the nominal field is six characters wide.  Keep the
+                # numeric token at <=5 chars and omit the leading zero for
+                # fractions so adjacent fields never become ``0.280.1395``.
+                numeric = float(value)
+                token = f"{numeric:.2f}".rstrip("0").rstrip(".")
+                if token.startswith("0."):
+                    token = token[1:]
+                elif token.startswith("-0."):
+                    token = "-" + token[2:]
+                if len(token) > 5:
+                    token = f"{numeric:.4g}"
+                if token.startswith("0."):
+                    token = token[1:]
+                elif token.startswith("-0."):
+                    token = "-" + token[2:]
+                if len(token) > 5:
                     raise ValueError(f"initial-condition value does not fit FileX field: {value}")
                 return token
 
+            if scale is not None and (scale_max_depth is None or depth <= scale_max_depth):
+                # Preserve the project's established DSSAT-safe mineral-N
+                # floors used by the relative-scaling experiments.  Lower
+                # values can make the legacy soil initializer abort before
+                # Evaluate.OUT is written.
+                snh4_token = _fit_ic_field(max(0.1, float(snh4_token) * scale))
+                sno3_token = _fit_ic_field(max(0.5, float(sno3_token) * scale))
             if snh4_key in param_dict:
                 snh4_token = _fit_ic_field(param_dict[snh4_key])
             if sno3_key in param_dict:
                 sno3_token = _fit_ic_field(param_dict[sno3_key])
             lines[i] = (
-                f"{current_tn:3d}{depth:6d}"
-                f"{_fit_ic_field(sh2o_token).rjust(6)}"
+                f"{current_tn:2d}{depth:6d}"
+                f"{str(sh2o_token).rjust(6)}"
                 f"{_fit_ic_field(snh4_token).rjust(6)}"
                 f"{_fit_ic_field(sno3_token).rjust(6)}\n"
             )
@@ -3336,7 +3616,7 @@ def update_initial_soil_n_file(param_csv_path=PARAM_CSV, filex_path=None):
             # 6), but the three numeric values can overflow their nominal six-
             # character fields and become adjacent (e.g. ``.2121.7583``).
             # Parse the semantic numeric tokens after that stable prefix, then
-            # render every field back into the canonical 3/6/6/6/6 layout.
+            # render every field back into the canonical 2/6/6/6/6 layout.
             depth = 20 * layer
             sh2o_token = None
             snh4_token = None
@@ -3410,7 +3690,7 @@ def update_initial_soil_n_file(param_csv_path=PARAM_CSV, filex_path=None):
                 changed_fixed = True
             if changed_fixed:
                 lines[i] = (
-                    f"{current_tn:3d}{depth:6d}"
+                    f"{current_tn:2d}{depth:6d}"
                     f"{str(sh2o_token).rjust(6)}"
                     f"{str(snh4_token).rjust(6)}"
                     f"{str(sno3_token).rjust(6)}\n"
@@ -3430,7 +3710,7 @@ def update_initial_soil_n_file(param_csv_path=PARAM_CSV, filex_path=None):
             line_mod = True
             modified = True
         if line_mod:
-            lines[i] = f"{parts[0]:>3} {parts[1]:>6} {parts[2]:>6} {parts[3]:>6} {parts[4]:>6}\n"
+            lines[i] = f"{parts[0]:>2}{parts[1]:>6}{parts[2]:>6}{parts[3]:>6}{parts[4]:>6}\n"
 
     if not modified:
         return
@@ -3550,8 +3830,106 @@ def update_soil_analysis_n_file(param_csv_path=PARAM_CSV, filex_path=None):
     finally:
         _release_file_lock(lock_path)
 
+
+def update_soil_analysis_sasc_in_filex(param_csv_path=PARAM_CSV, filex_path=None):
+    """Inject stable organic carbon (SASC) into FileX *SOIL ANALYSIS table.
+
+    In CENTURY (MESOM = P), SASC initializes the passive organic matter pool SOM3.
+    SASC is read by DSSAT's IPSLAN subroutine at format (51X, F6.0) from the @A table.
+    When SASC_RATIO is provided (e.g. [0.75, 0.95]), SASC = SAOC * SASC_RATIO for each layer.
+    """
+    if not os.path.exists(param_csv_path) or not filex_path or not os.path.exists(filex_path):
+        return
+    param_dict = _read_param_dict(param_csv_path)
+
+    filex_name = os.path.basename(str(filex_path)).upper()
+    season_tag = "25SP" if "2501" in filex_name else ("26SP" if "2601" in filex_name else ("25FA" if "2502" in filex_name else None))
+
+    sasc_key = None
+    for cand in [f"SASC_{season_tag}" if season_tag else None, "SASC_RATIO", "SASC_FRAC", "SASC"]:
+        if cand and cand in param_dict:
+            sasc_key = cand
+            break
+    if not sasc_key:
+        return
+
+    sasc_ratio = float(param_dict[sasc_key])
+    if not (0.01 <= sasc_ratio <= 1.0):
+        raise ValueError(f"{sasc_key}: SASC ratio outside physical range [0.01, 1.0]: {sasc_ratio:g}")
+
+    with open(filex_path, "r", encoding="utf-8", errors="ignore") as f:
+        lines = f.readlines()
+
+    section_start = None
+    section_end = None
+    for i, line in enumerate(lines):
+        u = line.strip().upper()
+        if u.startswith("*SOIL ANALYSIS"):
+            section_start = i
+            continue
+        if section_start is not None and u.startswith("*") and not u.startswith("*SOIL ANALYSIS"):
+            section_end = i
+            break
+    if section_start is None:
+        return
+    if section_end is None:
+        section_end = len(lines)
+
+    # Fallback SLOC mapping for depths if SAOC == -99 (e.g. 25FA)
+    depth_sloc_fallback = {20: 0.93, 40: 0.65, 60: 0.44, 80: 0.20, 100: 0.15, 120: 0.10, 150: 0.10, 180: 0.10}
+
+    modified = False
+    in_layer_table = False
+    for i in range(section_start + 1, section_end):
+        s = lines[i].rstrip("\r\n")
+        u = s.strip().upper()
+        if not u or u.startswith("!"):
+            continue
+        if s.lstrip().startswith("@A") and "SABL" in u and "SAOC" in u:
+            in_layer_table = True
+            continue
+        if s.lstrip().startswith("@"):
+            in_layer_table = False
+            continue
+        if in_layer_table and s.strip():
+            parts = s.split()
+            if len(parts) >= 4:
+                try:
+                    sabl = int(float(parts[1]))
+                    saoc = float(parts[3])
+                except ValueError:
+                    continue
+                if saoc <= 0:
+                    saoc = depth_sloc_fallback.get(sabl, 0.50)
+                sasc_val = saoc * sasc_ratio
+                base_part = s[:51].ljust(51)
+                new_line = base_part + f"{sasc_val:5.2f}\n"
+                lines[i] = new_line
+                modified = True
+
+    if not modified:
+        return
+
+    lock_path = os.path.abspath(filex_path) + ".lock"
+    lock_err = _acquire_file_lock(lock_path, timeout_s=180.0, poll_s=0.10, stale_s=900.0)
+    if lock_err is not None:
+        raise lock_err
+    try:
+        last_err = _atomic_write_lines(filex_path, lines, n_tries=60, sleep_s=0.20)
+        if last_err is not None:
+            raise last_err
+    finally:
+        _release_file_lock(lock_path)
+
+
 def update_planting_details_file(param_csv_path=PARAM_CSV, filex_path=None):
-    """Inject PLWT (seedling biomass) and PLDP (planting depth) parameters into FileX."""
+    """Inject seedling/planting parameters into FileX Planting Details.
+
+    PAGE/PENV are season-scoped controls in the formal two-spring design
+    (PAGE_25SP/PENV_25SP and PAGE_26SP/PENV_26SP).  The season is inferred
+    from the localized FileX name, while generic PAGE/PENV remain supported
+    for single-season callers.  Only the intended columns are changed.
+    """
     if not os.path.exists(param_csv_path) or not filex_path or not os.path.exists(filex_path):
         return
     param_dict = _read_param_dict(param_csv_path)
@@ -3573,7 +3951,30 @@ def update_planting_details_file(param_csv_path=PARAM_CSV, filex_path=None):
             except Exception:
                 pass
 
-    if plwt_val is None and pldp_val is None:
+    season_tag = None
+    filex_name = os.path.basename(str(filex_path)).upper()
+    if "2501" in filex_name:
+        season_tag = "25SP"
+    elif "2601" in filex_name:
+        season_tag = "26SP"
+
+    def _seedling_value(base_name):
+        keys = []
+        if season_tag:
+            keys.append(f"{base_name}_{season_tag}")
+        keys.append(base_name)
+        for key in keys:
+            if key in param_dict:
+                try:
+                    return float(param_dict[key])
+                except Exception:
+                    continue
+        return None
+
+    page_val = _seedling_value("PAGE")
+    penv_val = _seedling_value("PENV")
+
+    if plwt_val is None and pldp_val is None and page_val is None and penv_val is None:
         return
 
     with open(filex_path, "r", encoding="utf-8", errors="ignore") as f:
@@ -3612,12 +4013,17 @@ def update_planting_details_file(param_csv_path=PARAM_CSV, filex_path=None):
                     plrd = parts[8]
                     curr_pldp = f"{int(round(pldp_val)):>1d}" if pldp_val is not None else parts[9]
                     curr_plwt = plwt_val if plwt_val is not None else float(parts[10])
-                    page = parts[11] if len(parts) > 11 else "60"
-                    penv = parts[12] if len(parts) > 12 else "25"
+                    page = int(round(page_val)) if page_val is not None else (parts[11] if len(parts) > 11 else "60")
+                    penv = int(round(penv_val)) if penv_val is not None else (parts[12] if len(parts) > 12 else "25")
                     plph = parts[13] if len(parts) > 13 else "1"
                     sprl = parts[14] if len(parts) > 14 else "8"
                     plname = "Eggplant"
-                    formatted = f" {int(p_code):1d} {pdate:5s} {edate:>5s}  {ppop:4.1f}  {ppoe:4.1f}     {plme:1s}     {plds:1s}    {plrs:>2s}    {plrd:>2s}     {curr_pldp:>1s}   {curr_plwt:3.1f}    {page:>2s}    {penv:>2s}     {plph:>1s}     {sprl:>1s}                        {plname:s}\n"
+                    curr_plwt_val = float(curr_plwt)
+                    curr_plwt_str = f"{curr_plwt_val:>4.0f}." if curr_plwt_val % 1 == 0 else f"{curr_plwt_val:>5.1f}"
+                    formatted = (
+                        f" {int(p_code):1d} {pdate:5s} {edate:>5s}  {ppop:4.1f}  {ppoe:4.1f}     {plme:1s}     {plds:1s}    {plrs:>2s}    {plrd:>2s}"
+                        f"     {curr_pldp:>1s} {curr_plwt_str:>5s}    {str(page):>2s}    {str(penv):>2s}     {plph:>1s}     {sprl:>1s}                        {plname:s}\n"
+                    )
                     lines[i] = formatted
                     changed = True
                 except Exception:
@@ -3666,55 +4072,72 @@ def run_model():
 
         cleanup(run_dir, keep_dssat_outputs=False)
 
-        exe_path = shutil.which(DSSAT_EXE)
-        if not exe_path:
-            candidate = os.path.normpath(os.path.join(cwd_script, "..", "..", DSSAT_EXE))
-            if os.path.exists(candidate):
-                exe_path = candidate
-            else:
-                workspace_candidate = os.path.join(run_dir, DSSAT_EXE)
-                if os.path.exists(workspace_candidate):
-                    exe_path = workspace_candidate
-                else:
-                    exe_path = DSSAT_EXE
+        exe_candidates = [
+            shutil.which(DSSAT_EXE),
+            os.path.join(run_dir, DSSAT_EXE),
+            os.path.normpath(os.path.join(cwd_script, "..", "..", "workspace", DSSAT_EXE)),
+            os.path.normpath(os.path.join(cwd_script, "..", "..", DSSAT_EXE)),
+            os.path.normpath(os.path.join(cwd_script, "..", "..", "..", DSSAT_EXE)),
+            os.path.normpath(os.path.join(cwd_script, "..", "..", "..", "workspace", DSSAT_EXE)),
+            os.path.join(os.environ.get("DSSAT48_HOME", r"C:\DSSAT48"), DSSAT_EXE),
+            r"C:\DSSAT48\DSCSM048.EXE",
+        ]
+        exe_path = next((p for p in exe_candidates if p and os.path.isfile(p)), DSSAT_EXE)
 
         dssat_root = os.path.normpath(os.path.join(cwd_script, "..", ".."))
-        local_dssatpro = os.path.join(run_dir, "DSSATPRO.v48")
-        dssatpro_src = local_dssatpro if os.path.exists(local_dssatpro) else os.path.join(dssat_root, "DSSATPRO.v48")
+        dssatpro_candidates = [
+            os.path.join(run_dir, "DSSATPRO.v48"),
+            os.path.join(dssat_root, "DSSATPRO.v48"),
+            os.path.normpath(os.path.join(dssat_root, "data", "templates", "DSSATPRO.v48")),
+            os.path.normpath(os.path.join(cwd_script, "..", "..", "data", "templates", "DSSATPRO.v48")),
+            r"C:\DSSAT48\DSSATPRO.v48",
+        ]
+        dssatpro_src = next((p for p in dssatpro_candidates if p and os.path.isfile(p)), None)
         dssatpro_dst = os.path.join(run_dir, "DSSATPRO.v48")
         wrote_dssatpro = False
         try:
-            if os.path.exists(dssatpro_src):
+            if dssatpro_src and os.path.exists(dssatpro_src):
                 wrote_dssatpro = _write_dssatpro_with_crd(dssatpro_src, dssatpro_dst, run_dir)
         except Exception:
             wrote_dssatpro = False
 
         if not wrote_dssatpro:
             try:
-                if os.path.exists(dssatpro_src):
+                if dssatpro_src and os.path.exists(dssatpro_src):
                     shutil.copy(dssatpro_src, dssatpro_dst)
             except Exception:
                 pass
 
-        localized_filex = _localize_experiment_files(filex_path, run_dir)
-        active_filex = localized_filex or filex_path
-        update_initial_conditions_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, filex_path=active_filex)
-        update_initial_soil_n_file(
-            param_csv_path=PARAM_CSV,
-            filex_path=active_filex,
-        )
-        update_soil_analysis_n_file(
-            param_csv_path=PARAM_CSV,
-            filex_path=active_filex,
-        )
-        update_planting_details_file(
-            param_csv_path=PARAM_CSV,
-            filex_path=active_filex,
-        )
-        # update_* functions intentionally preserve source line layout.  Apply
-        # the FileX boundary normalization once more after all injections so
-        # a wrapper-staged file cannot reintroduce the IPSLIN blank-line case.
-        _normalize_filex_initial_conditions_boundary(active_filex)
+        batch_entries = _parse_batch_entries(BATCH_FILE)
+        stems = []
+        for e in batch_entries:
+            fx = e.get("filex", "")
+            if fx:
+                s = Path(fx).stem
+                if s not in stems:
+                    stems.append(s)
+        if not stems and filex_path:
+            stems = [Path(filex_path).stem]
+
+        localized_filex = None
+        for stem in stems:
+            fx_cand = os.path.join(run_dir, f"{stem}.TMX")
+            if not os.path.isfile(fx_cand):
+                src_fx = filex_path if filex_path and stem in filex_path else None
+                _localize_experiment_files(src_fx or fx_cand, run_dir)
+            if os.path.isfile(fx_cand):
+                if localized_filex is None:
+                    localized_filex = fx_cand
+                update_initial_conditions_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, filex_path=fx_cand)
+                update_initial_soil_n_file(param_csv_path=PARAM_CSV, filex_path=fx_cand)
+                update_soil_analysis_n_file(param_csv_path=PARAM_CSV, filex_path=fx_cand)
+                update_soil_analysis_sasc_in_filex(param_csv_path=PARAM_CSV, filex_path=fx_cand)
+                update_planting_details_file(param_csv_path=PARAM_CSV, filex_path=fx_cand)
+                _normalize_filex_initial_conditions_boundary(fx_cand)
+                if "2601" in os.path.basename(fx_cand).upper() or stem.upper() == "XXQL2601":
+                    param_dict_fx = _read_param_dict(PARAM_CSV)
+                    if "SLPF_26SP" in param_dict_fx or "SOIL_SLPF_26SP" in param_dict_fx:
+                        _update_filex_soil_id(fx_cand, old_soil_id="IBTM910017", new_soil_id="IB26910017")
 
         batch_src = _resolve_batch_path(BATCH_FILE, base_dir=run_dir) or _resolve_batch_path(BATCH_FILE, base_dir=cwd_script)
 
@@ -3724,11 +4147,8 @@ def run_model():
         batch_dst = os.path.join(run_dir, batch_dst_name)
         try:
             if batch_src:
-                if localized_filex:
-                    wrote = _write_local_batch(batch_src, batch_dst, os.path.basename(localized_filex))
-                    if not wrote:
-                        shutil.copy(batch_src, batch_dst)
-                else:
+                wrote = _write_local_batch(batch_src, batch_dst, os.path.basename(localized_filex) if localized_filex else None)
+                if not wrote:
                     shutil.copy(batch_src, batch_dst)
         except Exception:
             pass
@@ -3772,6 +4192,8 @@ def run_model():
                 extra_outputs = ["Evaluate.OUT"]
                 if KEEP_NITROGEN_OUTPUTS:
                     extra_outputs.extend(["PlantN.OUT", "SoilNi.OUT", "SoilN.OUT"])
+                if KEEP_PHOSPHORUS_OUTPUTS or os.environ.get("DSSAT_KEEP_PHOSPHORUS", "").lower() in ("1", "true", "yes"):
+                    extra_outputs.extend(["PlantP.OUT", "SoilPi.OUT", "SoilP.OUT", "SoilPBalSum.OUT", "PlantPBal.OUT"])
                 _sync_outputs_from_filex_dir(BATCH_FILE, run_dir, OUTPUT_FILES + extra_outputs, dest_dir=run_dir)
 
                 _assert_fresh_nonempty("Evaluate.OUT", start_time)
@@ -3798,6 +4220,12 @@ def run_model():
                     )
                 except Exception as e:
                     print(f"Warning: failed to write {_harvest_pest_file()}: {e}")
+                try:
+                    _write_pest_wn_contrast_from_freshwt(
+                        BATCH_FILE, "FreshWt.OUT", _pest_path(PEST_WNCONTRAST_FILE)
+                    )
+                except Exception as e:
+                    print(f"Warning: failed to write {PEST_WNCONTRAST_FILE}: {e}")
                 try:
                     _write_pest_tmtgrow_from_tmt_and_plantgro(
                         BATCH_FILE, "PlantGro.OUT", _tmtgrow_pest_file(), plantn_path="PlantN.OUT"
@@ -3827,6 +4255,7 @@ def run_model():
             cleanup(
                 run_dir, keep_dssat_outputs=True, keep_soil_water=KEEP_SOIL_WATER,
                 keep_nitrogen_outputs=KEEP_NITROGEN_OUTPUTS,
+                keep_phosphorus_outputs=KEEP_PHOSPHORUS_OUTPUTS,
             )
 
     except Exception as e:
@@ -4034,6 +4463,8 @@ if __name__ == "__main__":
                         help="Keep SoilWat.OUT after run (needed for SOIL_WATER Phi).")
     parser.add_argument("--keep-nitrogen-outputs", action="store_true",
                         help="Keep PlantN.OUT/SoilNi.OUT for nitrogen engineering gates.")
+    parser.add_argument("--keep-phosphorus-outputs", action="store_true",
+                        help="Keep PlantP.OUT/SoilPi.OUT/SoilPBalSum.OUT for phosphorus analysis.")
     args, _ = parser.parse_known_args()
 
     BATCH_FILE = args.batch
@@ -4043,6 +4474,7 @@ if __name__ == "__main__":
     OBSERVATION_TRANSFORM_CONFIG = args.observation_transform_config
     KEEP_SOIL_WATER = bool(args.keep_soil_water)
     KEEP_NITROGEN_OUTPUTS = bool(args.keep_nitrogen_outputs)
+    KEEP_PHOSPHORUS_OUTPUTS = bool(args.keep_phosphorus_outputs)
 
     candidate_parameters = _read_param_dict(PARAM_CSV)
     validate_candidate_parameters(candidate_parameters)
@@ -4057,11 +4489,11 @@ if __name__ == "__main__":
             filex = _resolve_filex_from_batch(BATCH_FILE, cwd_script)
         cultivar = _infer_cultivar_from_filex(filex)
     if not cultivar:
-        cultivar = "TM0001"
+        cultivar = "TM0008"
 
     run_dir = os.getcwd()
     if os.path.normcase(os.path.abspath(run_dir)) == os.path.normcase(os.path.abspath(cwd_script)):
-        cleanup(cwd_script, keep_dssat_outputs=False)
+        cleanup(cwd_script, keep_dssat_outputs=False, keep_phosphorus_outputs=KEEP_PHOSPHORUS_OUTPUTS)
     update_cul_file(param_csv_path=args.param_csv, target_cultivar=cultivar)
     ecotype = _infer_ecotype_from_cul(CUL_FILE, cultivar) or "TM0001"
     update_eco_file(param_csv_path=args.param_csv, target_ecotype=ecotype)

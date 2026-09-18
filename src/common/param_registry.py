@@ -168,7 +168,12 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     # --- SPE parameter extension modules (docs/reference/参数拓展方案参考.MD) ---
     # Leaf senescence
     "SENRTE":  (0.0, 10.0),
+    "SENRT2":  (0.0,  0.20),
     "SENDAY":  (0.0,  1.0),
+    "ICMP":    (0.0, 5.0),
+    "TCMP":    (1.0, 300.0),
+    "SENPOR_LATE": (0.0, 1.0),
+    "SENMAX_LATE": (0.0, 1.0),
     # Fruit set
     "SETMAX":  (0.0,  1.0),
     "RFLWAB":  (0.0,  1.0),
@@ -192,6 +197,8 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     # Water stress
     "DSWBAR":  (1.0, 100.0),
     "XFRMAX":  (0.0,  1.0),
+    "YSWBAR_MID": (0.0, 1.0),
+    "SWBAR_REC":  (0.01, 1.0),
     # Root uptake & transplant initial state
     "PORMIN":  (0.0,  0.5),
     "RTDEPI":  (1.0,  50.0),
@@ -223,7 +230,70 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     # not a measured mineral-N concentration; it is calibrated here as the
     # explicit soil fertility index requested for the N-response subspace.
     "SOIL_SLPF": (0.0, 2.0),
-    "SOIL_SLNF": (0.0, 10.0),
+    "SLPF_25SP": (0.0, 2.0),
+    "SLPF_26SP": (0.0, 2.0),
+    "SOIL_SLNF": (0.0, 1.0),
+    "SLNF": (0.0, 1.0),
+    "SASC": (0.0, 1.0),
+    "SASC_RATIO": (0.0, 1.0),
+    "SASC_FRAC": (0.0, 1.0),
+    "SASC_25SP": (0.0, 1.0),
+    "SASC_26SP": (0.0, 1.0),
+    "SASC_25FA": (0.0, 1.0),
+    "ICNS": (0.01, 10.0),
+    "ICNS_25SP": (0.01, 10.0),
+    "ICNS_26SP": (0.01, 10.0),
+    "ICNS_25FA": (0.01, 10.0),
+    # --- SPE phosphorus (26 species P parameters) ---
+    "OPTLFP_EM":  (0.0001, 0.0200),
+    "OPTLFP_FF":  (0.0001, 0.0200),
+    "OPTLFP_FS":  (0.0001, 0.0200),
+    "OPTSTP_EM":  (0.0001, 0.0200),
+    "OPTSTP_FF":  (0.0001, 0.0200),
+    "OPTSTP_FS":  (0.0001, 0.0200),
+    "OPTRTP_EM":  (0.0001, 0.0200),
+    "OPTRTP_FF":  (0.0001, 0.0200),
+    "OPTRTP_FS":  (0.0001, 0.0200),
+    "OPTSDP_FF":  (0.0001, 0.0200),
+    "OPTSDP_FS":  (0.0001, 0.0200),
+    "MINLFP_EM":  (0.0001, 0.0200),
+    "MINLFP_FF":  (0.0001, 0.0200),
+    "MINLFP_FS":  (0.0001, 0.0200),
+    "MINSTP_EM":  (0.0001, 0.0200),
+    "MINSTP_FF":  (0.0001, 0.0200),
+    "MINSTP_FS":  (0.0001, 0.0200),
+    "MINRTP_EM":  (0.0001, 0.0200),
+    "MINRTP_FF":  (0.0001, 0.0200),
+    "MINRTP_FS":  (0.0001, 0.0200),
+    "MINSDP_FF":  (0.0001, 0.0200),
+    "MINSDP_FS":  (0.0001, 0.0200),
+    "ROOTRAD":    (0.0005, 0.0100),
+    "FRACPMOBIL": (0.01,   0.50),
+    "SRATPHOTO":  (0.10,   1.00),
+    "SRATPART":   (0.10,   1.00),
+    # Hyphenated aliases for species P parameters
+    "OPTLFP-EM":  (0.0001, 0.0200),
+    "OPTLFP-FF":  (0.0001, 0.0200),
+    "OPTLFP-FS":  (0.0001, 0.0200),
+    "OPTSTP-EM":  (0.0001, 0.0200),
+    "OPTSTP-FF":  (0.0001, 0.0200),
+    "OPTSTP-FS":  (0.0001, 0.0200),
+    "OPTRTP-EM":  (0.0001, 0.0200),
+    "OPTRTP-FF":  (0.0001, 0.0200),
+    "OPTRTP-FS":  (0.0001, 0.0200),
+    "OPTSDP-FF":  (0.0001, 0.0200),
+    "OPTSDP-FS":  (0.0001, 0.0200),
+    "MINLFP-EM":  (0.0001, 0.0200),
+    "MINLFP-FF":  (0.0001, 0.0200),
+    "MINLFP-FS":  (0.0001, 0.0200),
+    "MINSTP-EM":  (0.0001, 0.0200),
+    "MINSTP-FF":  (0.0001, 0.0200),
+    "MINSTP-FS":  (0.0001, 0.0200),
+    "MINRTP-EM":  (0.0001, 0.0200),
+    "MINRTP-FF":  (0.0001, 0.0200),
+    "MINRTP-FS":  (0.0001, 0.0200),
+    "MINSDP-FF":  (0.0001, 0.0200),
+    "MINSDP-FS":  (0.0001, 0.0200),
 }
 
 
@@ -233,7 +303,7 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
 DEFAULT_BOUNDS: dict[str, tuple[float, float]] = {
     # --- ECO ---
     "PL-EM":  (3.0,  12.0),
-    "EM-V1":  (10.0, 40.0),
+    "EM-V1":  (10.0, 38.5),
     "V1-JU":  (0.0,   0.0),
     "JU-R0":  (2.0,  20.0),
     # Structural sensitivity probe for indeterminate eggplant.  Calibration is
@@ -284,12 +354,29 @@ DEFAULT_BOUNDS: dict[str, tuple[float, float]] = {
     "SOIL_SALB": (0.05, 0.35),
     "SOIL_SLDR": (0.10, 2.00),
     "SOIL_SLRO": (40.0, 95.0),
+    "SOIL_SLPF": (0.70, 1.20),
+    "SLPF_25SP": (0.70, 1.20),
+    "SLPF_26SP": (0.70, 1.20),
+    "SOIL_SLNF": (0.50, 1.00),
+    "SLNF":      (0.50, 1.00),
+    "SASC":       (0.75, 0.95),
+    "SASC_RATIO": (0.75, 0.95),
+    "SASC_FRAC":  (0.75, 0.95),
+    "ICNS":       (0.50, 1.50),
+    "ICNS_25SP":  (0.50, 1.50),
+    "ICNS_26SP":  (0.50, 1.50),
     # --- SPE parameter extension defaults (docs/reference/参数拓展方案参考.MD) ---
     "NMOBMX":  (0.05, 0.35),
     "NVSMOB":  (0.20, 1.00),
     "NSTFAC":  (0.50, 1.00),
-    "SENRTE":  (0.5, 3.5),
-    "SENDAY":  (0.01, 0.05),
+    "SENRTE":  (0.5, 5.0),
+    "SENRT2":  (0.005, 0.05),
+    "SENDAY":  (0.005, 0.04),
+    "ICMP":    (0.01, 2.50),
+    "TCMP":    (10.0, 100.0),
+    "SENPOR_LATE": (0.12, 0.35),
+    "SENMAX_LATE": (0.20, 0.70),
+    "FL-LF":   (300.0, 550.0),
     "SETMAX":  (0.1, 0.5),
     "RFLWAB":  (0.05, 0.5),
     "SHLAG":   (0.05, 0.3),
@@ -306,6 +393,8 @@ DEFAULT_BOUNDS: dict[str, tuple[float, float]] = {
     "NSLOPE":  (0.1, 0.5),
     "DSWBAR":  (10.0, 30.0),
     "XFRMAX":  (0.0, 0.5),
+    "YSWBAR_MID": (0.10, 1.00),
+    "SWBAR_REC":  (0.05, 0.75),
     "PORMIN":  (0.02, 0.06),
     "RTDEPI":  (10.0, 20.0),
     "RWUMX":   (0.02, 0.06),
@@ -314,17 +403,18 @@ DEFAULT_BOUNDS: dict[str, tuple[float, float]] = {
     "CMOBMX":  (0.01, 0.05),
     "CADSTF":  (0.3, 0.9),
     "CADPR1":  (0.1, 0.5),
-    "PROLFI":  (0.2, 0.35),
-    "PROLFG":  (0.15, 0.3),
+    "SIZLF":   (100.0, 550.0),
+    "PROLFI":  (0.16, 0.35),
+    "PROLFG":  (0.15, 0.320),
     "PROLFF":  (0.05, 0.15),
     "PROSTI":  (0.145, 0.220),
-    "PROSTG":  (0.090, 0.140),
+    "PROSTG":  (0.090, 0.220),
     "PROSTF":  (0.040, 0.080),
     "PRORTI":  (0.1296, 0.1584),
     "PRORTG":  (0.1071, 0.1309),
     "PRORTF":  (0.0540, 0.0660),
-    "PROSHI":  (0.189, 0.231),
-    "PROSHG":  (0.135, 0.165),
+    "PROSHI":  (0.060, 0.140),
+    "PROSHG":  (0.060, 0.140),
     "PROSHF":  (0.099, 0.121),
     # A4 first-round working domain; NUPQ is intentionally fixed at 1.0 in
     # the initial calibration proposal per the A4 method note.
@@ -332,6 +422,56 @@ DEFAULT_BOUNDS: dict[str, tuple[float, float]] = {
     "NUPQ":    (0.50, 1.50),
     "NUPCMN":  (0.0, 2.0),
     "NUPAV":   (0.50, 1.00),
+    # --- SPE phosphorus (±10% floating interval around peanut baseline anchor) ---
+    "OPTLFP_EM":  (0.00342, 0.00418),
+    "OPTLFP_FF":  (0.00297, 0.00363),
+    "OPTLFP_FS":  (0.00198, 0.00242),
+    "OPTSTP_EM":  (0.00252, 0.00308),
+    "OPTSTP_FF":  (0.00225, 0.00275),
+    "OPTSTP_FS":  (0.00171, 0.00209),
+    "OPTRTP_EM":  (0.00189, 0.00231),
+    "OPTRTP_FF":  (0.00162, 0.00198),
+    "OPTRTP_FS":  (0.00135, 0.00165),
+    "OPTSDP_FF":  (0.00360, 0.00440),
+    "OPTSDP_FS":  (0.00396, 0.00484),
+    "MINLFP_EM":  (0.00243, 0.00297),
+    "MINLFP_FF":  (0.00198, 0.00242),
+    "MINLFP_FS":  (0.00153, 0.00187),
+    "MINSTP_EM":  (0.00153, 0.00187),
+    "MINSTP_FF":  (0.00117, 0.00143),
+    "MINSTP_FS":  (0.00090, 0.00110),
+    "MINRTP_EM":  (0.00099, 0.00121),
+    "MINRTP_FF":  (0.00099, 0.00121),
+    "MINRTP_FS":  (0.00099, 0.00121),
+    "MINSDP_FF":  (0.00297, 0.00363),
+    "MINSDP_FS":  (0.00297, 0.00363),
+    "ROOTRAD":    (0.00225, 0.00275),
+    "FRACPMOBIL": (0.180,   0.220),
+    "SRATPHOTO":  (0.567,   0.693),
+    "SRATPART":   (0.747,   0.913),
+    # Hyphenated aliases for species P parameters
+    "OPTLFP-EM":  (0.00342, 0.00418),
+    "OPTLFP-FF":  (0.00297, 0.00363),
+    "OPTLFP-FS":  (0.00198, 0.00242),
+    "OPTSTP-EM":  (0.00252, 0.00308),
+    "OPTSTP-FF":  (0.00225, 0.00275),
+    "OPTSTP-FS":  (0.00171, 0.00209),
+    "OPTRTP-EM":  (0.00189, 0.00231),
+    "OPTRTP-FF":  (0.00162, 0.00198),
+    "OPTRTP-FS":  (0.00135, 0.00165),
+    "OPTSDP-FF":  (0.00360, 0.00440),
+    "OPTSDP-FS":  (0.00396, 0.00484),
+    "MINLFP-EM":  (0.00243, 0.00297),
+    "MINLFP-FF":  (0.00198, 0.00242),
+    "MINLFP-FS":  (0.00153, 0.00187),
+    "MINSTP-EM":  (0.00153, 0.00187),
+    "MINSTP-FF":  (0.00117, 0.00143),
+    "MINSTP-FS":  (0.00090, 0.00110),
+    "MINRTP-EM":  (0.00099, 0.00121),
+    "MINRTP-FF":  (0.00099, 0.00121),
+    "MINRTP-FS":  (0.00099, 0.00121),
+    "MINSDP-FF":  (0.00297, 0.00363),
+    "MINSDP-FS":  (0.00297, 0.00363),
 }
 
 
@@ -350,23 +490,50 @@ def infer_parameter_group(name: str, location: str) -> str:
     n = str(name).strip().upper()
     loc = str(location).strip().upper()
 
-    if loc == "SOIL":
+    if loc in {"SOIL", "SA"}:
         if "SLLL" in n or "SDUL" in n or "SSAT" in n:
             return "SOIL_WatRet"
         if "SBDM" in n:
             return "SOIL_Phys"
-        if "SLOC" in n:
+        if "SLOC" in n or "SASC" in n:
             return "SOIL_Chem"
         if n in {"SOIL_SALB", "SOIL_SLDR", "SOIL_SLRO"}:
             return "SOIL_SfcHyd"
+        if n in {"SOIL_SLPF", "SLPF_25SP", "SLPF_26SP", "SOIL_SLPF_25SP", "SOIL_SLPF_26SP", "SOIL_SLNF", "SLNF"}:
+            return "SOIL_Fert"
         return "SOIL_Other"
 
     if loc == "IC":
         if n.startswith("IC_SH2O"):
             return "IC_InitWat"
+        if n.startswith("ICNS"):
+            return "IC_InitN"
+        if "SASC" in n:
+            return "SOIL_Chem"
         return "IC_Other"
 
     if loc == "SPE":
+        # Species phosphorus parameters
+        p_canon = n.replace("-", "_")
+        if (
+            p_canon in {
+                "OPTLFP_EM", "OPTLFP_FF", "OPTLFP_FS",
+                "OPTSTP_EM", "OPTSTP_FF", "OPTSTP_FS",
+                "OPTRTP_EM", "OPTRTP_FF", "OPTRTP_FS",
+                "OPTSDP_FF", "OPTSDP_FS",
+                "MINLFP_EM", "MINLFP_FF", "MINLFP_FS",
+                "MINSTP_EM", "MINSTP_FF", "MINSTP_FS",
+                "MINRTP_EM", "MINRTP_FF", "MINRTP_FS",
+                "MINSDP_FF", "MINSDP_FS",
+                "ROOTRAD", "FRACPMOBIL", "SRATPHOTO", "SRATPART",
+            }
+            or any(p_canon.startswith(prefix) for prefix in (
+                "OPTLFP", "OPTSTP", "OPTRTP", "OPTSDP",
+                "MINLFP", "MINSTP", "MINRTP", "MINSDP",
+                "OPTSHTP", "MINSHTP", "OPTSHLP", "MINSHLP",
+            ))
+        ):
+            return "SPE_Phos"
         if n in {"PARMAX", "PHTMAX", "KCAN", "KC_SLOPE"}:
             return "SPE_Photo"
         if n == "FRCNOD":
@@ -513,7 +680,11 @@ def _soil_bounds(name: str, init: float) -> tuple[float, float, str]:
         return lb, ub, "active" if lb != ub else "fixed"
     if n == "SOIL_SLNF":
         lb = max(0.5, init * 0.8)
-        ub = min(3.0, init * 1.3)
+        ub = min(1.0, init * 1.3)
+        return lb, ub, "active" if lb != ub else "fixed"
+    if n in ("SASC_RATIO", "SASC_FRAC", "SASC_25SP", "SASC_26SP", "SASC_25FA"):
+        lb = max(0.50, init * 0.85)
+        ub = min(0.99, init * 1.15)
         return lb, ub, "active" if lb != ub else "fixed"
     # 通用
     lb = max(0.0, init * 0.8)
