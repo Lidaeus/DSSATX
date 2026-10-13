@@ -218,6 +218,8 @@ def setup_source_trees(force_refresh: bool = False) -> None:
         ("MOBIL_CNC.FOR", "MOBIL.for"),
         ("GROW_CNC.FOR", "GROW.for"),
         ("DEMAND_CNC.FOR", "DEMAND.for"),
+        ("PODS_CNC.FOR", "PODS.for"),
+        ("FreshWt_CNC.FOR", "FreshWt.for"),
     ]
 
     for src_name, dst_name in patch_targets:

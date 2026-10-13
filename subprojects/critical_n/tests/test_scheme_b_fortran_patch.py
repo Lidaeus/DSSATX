@@ -27,6 +27,8 @@ def test_fortran_fixed_format_column_72_compliance():
         "MOBIL_CNC.FOR",
         "GROW_CNC.FOR",
         "DEMAND_CNC.FOR",
+        "PODS_CNC.FOR",
+        "FreshWt_CNC.FOR",
     ]:
         fpath = src_dir / fname
         assert fpath.is_file(), f"Missing patched Fortran source: {fname}"
@@ -48,6 +50,8 @@ def test_fortran_patches_exist_and_non_empty():
         "MOBIL.for.patch",
         "GROW.for.patch",
         "DEMAND.for.patch",
+        "PODS.for.patch",
+        "FreshWt.for.patch",
     ]:
         ppath = patch_dir / pname
         assert ppath.is_file()
@@ -148,6 +152,8 @@ def test_sandbox_patched_sources_match_scheme_b_source_files(tmp_path):
         ("MOBIL.for", "MOBIL.for.patch", "MOBIL_CNC.FOR"),
         ("GROW.for", "GROW.for.patch", "GROW_CNC.FOR"),
         ("DEMAND.for", "DEMAND.for.patch", "DEMAND_CNC.FOR"),
+        ("PODS.for", "PODS.for.patch", "PODS_CNC.FOR"),
+        ("FreshWt.for", "FreshWt.for.patch", "FreshWt_CNC.FOR"),
     ]
 
     for orig_name, patch_name, cnc_name in pairs:

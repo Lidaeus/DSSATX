@@ -625,6 +625,26 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
 !-----------------------------------------------------------------------
       AGRVG = AGRLF * FRLF + AGRRT * FRRT + AGRSTM * FRSTM
       AGRVG2 = AGRVG + (FRLF*PROLFI+FRRT*PRORTI+FRSTM*PROSTI)*RPROAV
+C       Phase R3: Allometric dynamic dilution for new vegetative tissue
+        IF (WEFF .GT. 0.0) THEN
+          IF (WEFF .LT. 1.00) THEN
+            NC_DEM = 4.85
+          ELSE
+            NC_DEM = 1.70 + (4.85 - 1.70) * (WEFF ** (-0.38))
+          ENDIF
+          FNINL = MIN(PROLFI * 0.16, MAX(PROLFF * 0.16, NC_DEM / 100.0))
+          IF (PROLFI .GT. PROLFF) THEN
+            FR_DIL = (FNINL - PROLFF * 0.16) / ((PROLFI-PROLFF) * 0.16)
+            FR_DIL = MAX(0.0, MIN(1.0, FR_DIL))
+          ELSE
+            FR_DIL = 1.0
+          ENDIF
+          FNINS = PROSTF * 0.16 + (PROSTI - PROSTF) * 0.16 * FR_DIL
+          FNINS = MAX(PROSTF * 0.16, MIN(PROSTI * 0.16, FNINS))
+        ELSE
+          FNINL = PROLFI * 0.16
+          FNINS = PROSTI * 0.16
+        ENDIF
 !-----------------------------------------------------------------------
 !    Compute N Demand for New Tissue, including reproductive and vegetative
 !-----------------------------------------------------------------------
@@ -642,26 +662,8 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
 !-----------------------------------------------------------------------
       IF (DAS .GT. NVEG0 .AND. DAS .LT. NR7 .AND.
      &          CNOLD .GT. 0.0) THEN
-C       Phase R2: Dynamic critical nitrogen dilution target
-        IF (WEFF .GT. 0.0) THEN
-          IF (WEFF .LT. 1.00) THEN
-            NC_DEM = 4.85
-          ELSE
-            NC_DEM = 1.70 + (4.85 - 1.70) * (WEFF ** (-0.38))
-          ENDIF
-          NVSTL = MIN(FNINL, MAX(PROLFF * 0.16, NC_DEM / 100.0))
-          IF (FNINL .GT. PROLFF * 0.16) THEN
-            FR_DIL = (NVSTL - PROLFF * 0.16) / (FNINL - PROLFF * 0.16)
-            FR_DIL = MAX(0.0, MIN(1.0, FR_DIL))
-          ELSE
-            FR_DIL = 1.0
-          ENDIF
-          NVSTS = PROSTF * 0.16 + (FNINS - PROSTF * 0.16) * FR_DIL
-          NVSTS = MAX(PROSTF * 0.16, MIN(FNINS, NVSTS))
-        ELSE
-          NVSTL = FNINL
-          NVSTS = FNINS
-        ENDIF
+        NVSTL = FNINL
+        NVSTS = FNINS
         NVSTR = FNINR
         IF (DXR57 .GT.0.0) THEN
            FRNLFT = (NRCVR + (1. - NRCVR) * (1. - DXR57**2))

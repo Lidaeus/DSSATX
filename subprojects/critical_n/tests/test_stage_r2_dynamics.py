@@ -173,10 +173,17 @@ def test_r2_plant_and_soil_n_balance_conservation():
             parts = l.split()
             init_n = float(parts[-2])
             final_n = float(parts[-1])
-            assert abs(init_n - final_n) < 1e-4, (
+            # Formatted components round to 2 decimals, so sum of rounded terms has diff <= 0.02
+            assert abs(init_n - final_n) <= 0.02, (
                 f"Soil N mass balance mismatch in {sni_file.name}: "
                 f"Initial={init_n}, Final={final_n}"
             )
+
+        # Check explicit unrounded Balance line (< 1e-3 kg N/ha)
+        bal_lines = [l for l in text.splitlines() if "!   Balance" in l]
+        for bl in bal_lines:
+            bal_val = float(bl.split()[-1])
+            assert abs(bal_val) < 1e-3, f"Soil Balance line non-zero in {sni_file.name}: {bal_val}"
 
 
 def test_r2_tissue_nitrogen_allometric_dilution():

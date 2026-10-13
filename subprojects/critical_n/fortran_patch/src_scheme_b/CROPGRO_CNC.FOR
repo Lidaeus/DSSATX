@@ -182,6 +182,8 @@ C=======================================================================
       REAL NNI_CUR, PCNL_C, NC_CUR, WEFF_C
 !     Phase R2: Cumulative harvest pod dry weight & effective biomass
       REAL CUM_HPODWT, WEFF
+!     Phase R3: Cumulative harvested fruit total nitrogen & pod N
+      REAL CHPDTN, HPODN, FNINL0
 
 !-----------------------------------------------------------------------
 !     Define constructed variable types based on definitions in
@@ -275,6 +277,7 @@ C-----------------------------------------------------------------------
           PROLFG = 0.220
         ENDIF
       ENDIF
+      FNINL0 = PROLFI * 0.16
 
       KTRANS = KEP
       KSEVAP = -99.   !Defaults to old method of light
@@ -357,13 +360,13 @@ C-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
         CALL PODS(RUNINIT, 
      &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input
-     &    FILEGC,FILEIO, FNINL, FNINSD, FNINSH, GDMSD,    !Input
+     &    FILEGC,FILEIO, FNINL0, FNINSD, FNINSH, GDMSD,   !Input
      &    GRRAT1, ISWWAT, LL, NAVL, NDSET, NLAYR, NRUSSH, !Input
      &    CRUSSH,                                         !Input
      &    NSTRES, PGAVL, PHTHRS, PHTIM, PNTIM, PUNCSD,    !Input
      &    PUNCTR, RNITP, SDDES, SDGR, SHELWT, SW, SWFAC,  !Input
      &    TDUMX, TGRO, TURADD, XFRT, YRDOY, YRNR1, YRNR2, !Input
-     &    PStres2, YRPLT,                                 !Input
+     &    PStres2, YRPLT, CHPDTN,                         !Input
      &    AGRSD3, LAGSD, LNGPEG, NGRSD, NGRSH, PCTMAT,    !Output
      &    PODNO, POTCAR, POTLIP, SDNO, SDVAR, SEEDNO,     !Output
      &    SHELN, SHVAR, WSDDTN, WSHDTN, WTABRT, WTSD,     !Output
@@ -548,6 +551,8 @@ C     Initialize pest coupling point and damage variables
 !         FRRT, and FRSTM for use in those routines)  chp 9/22/98
 !-----------------------------------------------------------------------
       CUM_HPODWT = 0.0
+      CHPDTN = 0.0
+      HPODN = 0.0
       WEFF = 0.0
       CALL DEMAND(SEASINIT, CONTROL,
      &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
@@ -644,13 +649,13 @@ C     Initialize pest coupling point and damage variables
 !-----------------------------------------------------------------------
       CALL PODS(SEASINIT, 
      &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input
-     &    FILEGC,FILEIO, FNINL, FNINSD, FNINSH, GDMSD,    !Input
+     &    FILEGC,FILEIO, FNINL0, FNINSD, FNINSH, GDMSD,   !Input
      &    GRRAT1, ISWWAT, LL, NAVL, NDSET, NLAYR, NRUSSH, !Input
      &    CRUSSH,                                         !Input
      &    NSTRES, PGAVL, PHTHRS, PHTIM, PNTIM, PUNCSD,    !Input
      &    PUNCTR, RNITP, SDDES, SDGR, SHELWT, SW, SWFAC,  !Input
      &    TDUMX, TGRO, TURADD, XFRT, YRDOY, YRNR1, YRNR2, !Input
-     &    PStres2, YRPLT,                                 !Input
+     &    PStres2, YRPLT, CHPDTN,                         !Input
      &    AGRSD3, LAGSD, LNGPEG, NGRSD, NGRSH, PCTMAT,    !Output
      &    PODNO, POTCAR, POTLIP, SDNO, SDVAR, SEEDNO,     !Output
      &    SHELN, SHVAR, WSDDTN, WSHDTN, WTABRT, WTSD,     !Output
@@ -890,13 +895,13 @@ C-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
       CALL PODS(EMERG, 
      &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input
-     &    FILEGC,FILEIO, FNINL, FNINSD, FNINSH, GDMSD,    !Input
+     &    FILEGC,FILEIO, FNINL0, FNINSD, FNINSH, GDMSD,   !Input
      &    GRRAT1, ISWWAT, LL, NAVL, NDSET, NLAYR, NRUSSH, !Input
      &    CRUSSH,                                         !Input
      &    NSTRES, PGAVL, PHTHRS, PHTIM, PNTIM, PUNCSD,    !Input
      &    PUNCTR, RNITP, SDDES, SDGR, SHELWT, SW, SWFAC,  !Input
      &    TDUMX, TGRO, TURADD, XFRT, YRDOY, YRNR1, YRNR2, !Input
-     &    PStres2, YRPLT,                                 !Input
+     &    PStres2, YRPLT, CHPDTN,                         !Input
      &    AGRSD3, LAGSD, LNGPEG, NGRSD, NGRSH, PCTMAT,    !Output
      &    PODNO, POTCAR, POTLIP, SDNO, SDVAR, SEEDNO,     !Output
      &    SHELN, SHVAR, WSDDTN, WSHDTN, WTABRT, WTSD,     !Output
@@ -1163,13 +1168,13 @@ C     Call routine to compute actual seed and shell growth
 C-----------------------------------------------------------------------
       CALL PODS(INTEGR, 
      &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input
-     &    FILEGC,FILEIO, FNINL, FNINSD, FNINSH, GDMSD,    !Input
+     &    FILEGC,FILEIO, FNINL0, FNINSD, FNINSH, GDMSD,   !Input
      &    GRRAT1, ISWWAT, LL, NAVL, NDSET, NLAYR, NRUSSH, !Input
      &    CRUSSH,                                         !Input
      &    NSTRES, PGAVL, PHTHRS, PHTIM, PNTIM, PUNCSD,    !Input
      &    PUNCTR, RNITP, SDDES, SDGR, SHELWT, SW, SWFAC,  !Input
      &    TDUMX, TGRO, TURADD, XFRT, YRDOY, YRNR1, YRNR2, !Input
-     &    PStres2, YRPLT,                                 !Input
+     &    PStres2, YRPLT, CHPDTN,                         !Input
      &    AGRSD3, LAGSD, LNGPEG, NGRSD, NGRSH, PCTMAT,    !Output
      &    PODNO, POTCAR, POTLIP, SDNO, SDVAR, SEEDNO,     !Output
      &    SHELN, SHVAR, WSDDTN, WSHDTN, WTABRT, WTSD,     !Output
@@ -1327,6 +1332,11 @@ C-----------------------------------------------------------------------
      &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)           !Output
 C     Phase R2: Accumulate harvested pod weight
       CUM_HPODWT = CUM_HPODWT + HPODWT
+C     Phase R3: Explicit tracking of cumulative harvested fruit total N
+      IF (HPODWT .GT. 0.0) THEN
+        HPODN = HSDWT * (PCNSD / 100.0) + HSHELWT * (PCNSH / 100.0)
+        CHPDTN = CHPDTN + HPODN * 10.0
+      ENDIF
       
       IF ((WTLF+STMWT).GT. 0.0001) THEN
         PCNVEG = (WTNLF+WTNST)/(WTLF+STMWT)*100.
@@ -1366,13 +1376,13 @@ C     Phase R2: Accumulate harvested pod weight
 
         CALL PODS(DYNAMIC, 
      &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input
-     &    FILEGC,FILEIO, FNINL, FNINSD, FNINSH, GDMSD,    !Input
+     &    FILEGC,FILEIO, FNINL0, FNINSD, FNINSH, GDMSD,   !Input
      &    GRRAT1, ISWWAT, LL, NAVL, NDSET, NLAYR, NRUSSH, !Input
      &    CRUSSH,                                         !Input
      &    NSTRES, PGAVL, PHTHRS, PHTIM, PNTIM, PUNCSD,    !Input
      &    PUNCTR, RNITP, SDDES, SDGR, SHELWT, SW, SWFAC,  !Input
      &    TDUMX, TGRO, TURADD, XFRT, YRDOY, YRNR1, YRNR2, !Input
-     &    PStres2, YRPLT,                                 !Input
+     &    PStres2, YRPLT, CHPDTN,                         !Input
      &    AGRSD3, LAGSD, LNGPEG, NGRSD, NGRSH, PCTMAT,    !Output
      &    PODNO, POTCAR, POTLIP, SDNO, SDVAR, SEEDNO,     !Output
      &    SHELN, SHVAR, WSDDTN, WSHDTN, WTABRT, WTSD,     !Output
