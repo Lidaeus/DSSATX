@@ -26,6 +26,7 @@ def test_fortran_fixed_format_column_72_compliance():
         "CROPGRO_CNC.FOR",
         "MOBIL_CNC.FOR",
         "GROW_CNC.FOR",
+        "DEMAND_CNC.FOR",
     ]:
         fpath = src_dir / fname
         assert fpath.is_file(), f"Missing patched Fortran source: {fname}"
@@ -46,6 +47,7 @@ def test_fortran_patches_exist_and_non_empty():
         "CROPGRO.for.patch",
         "MOBIL.for.patch",
         "GROW.for.patch",
+        "DEMAND.for.patch",
     ]:
         ppath = patch_dir / pname
         assert ppath.is_file()
@@ -114,9 +116,21 @@ def test_sandbox_patch_application_isolated(tmp_path):
     assert "NRUSLF_SAFE * 1.0" in patched_grow_content
     assert "NRUSLF_STR/0.16" in patched_grow_content
 
+    # Test DEMAND patch in sandbox
+    orig_demand = ORIG_SRC_DIR / "DEMAND.for"
+    patch_demand = patch_dir / "DEMAND.for.patch"
+    patched_demand_file = apply_patch_in_sandbox(orig_demand, patch_demand, sandbox_dir=tmp_path)
+    assert patched_demand_file.is_file()
+    patched_demand_content = patched_demand_file.read_text(encoding="latin-1")
+    assert "WEFF" in patched_demand_content
+    assert "NC_DEM" in patched_demand_content
+    assert "4.85" in patched_demand_content
+
     # Verify original files were completely untouched
     orig_cg_content = orig_cropgro.read_text(encoding="latin-1")
     assert "NNI_CUR" not in orig_cg_content
+    orig_dem_content = orig_demand.read_text(encoding="latin-1")
+    assert "NC_DEM" not in orig_dem_content
 
 
 def test_sandbox_patched_sources_match_scheme_b_source_files(tmp_path):
@@ -133,6 +147,7 @@ def test_sandbox_patched_sources_match_scheme_b_source_files(tmp_path):
         ("CROPGRO.for", "CROPGRO.for.patch", "CROPGRO_CNC.FOR"),
         ("MOBIL.for", "MOBIL.for.patch", "MOBIL_CNC.FOR"),
         ("GROW.for", "GROW.for.patch", "GROW_CNC.FOR"),
+        ("DEMAND.for", "DEMAND.for.patch", "DEMAND_CNC.FOR"),
     ]
 
     for orig_name, patch_name, cnc_name in pairs:

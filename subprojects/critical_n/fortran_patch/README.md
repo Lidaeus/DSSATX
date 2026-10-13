@@ -1,8 +1,8 @@
-# Fortran Patch Specification: CROPGRO Stage R1 (三方联动核心动力学解耦与衰老阻断)
+# Fortran Patch Specification: CROPGRO Stage R1 + R2 (核心动力学解耦与需求端动态稀释)
 
-**Standard**: Phase 2 CROPGRO Stage R1 Technical Specification  
+**Standard**: Phase 2 CROPGRO Stage R1 + Stage R2 Technical Specification  
 **Model Base**: DSSAT CSM v4.8.2 / v4.8.6.0 (`Plant/CROPGRO/`)  
-**Target Routines**: `MOBIL.for`, `SENES.for`, `GROW.for`, `CROPGRO.for`, `PHOTO.for`  
+**Target Routines**: `DEMAND.for`, `CROPGRO.for`, `MOBIL.for`, `SENES.for`, `GROW.for`, `PHOTO.for`  
 **Compliance**: Strict Fixed-Form Fortran 77/90 (Columns 7–72, zero line overflow)  
 **Safety & Isolation**: All patches and source files are strictly sandboxed within `subprojects/critical_n/fortran_patch/` and never touch production `C:\DSSAT48\`.
 
@@ -130,17 +130,31 @@ All patched code adheres strictly to fixed-form Fortran 77/90 rules:
   ```
 
 ### 3.4 `CROPGRO.for` (`CROPGRO_CNC.FOR` / `patches/CROPGRO.for.patch`)
-- Reads `PROLFG` at `RUNINIT` from `FILECC` (with safe fallback to `PROLFI * 0.815` or `0.220`).
-- Routes `NRUSLF_SAFE` and `NRUSLF_STR` from `CALL MOBIL` to `CALL SENES` and `CALL GROW`.
+- **Stage R1**: Reads `PROLFG` at `RUNINIT` from `FILECC` (with safe fallback to `PROLFI * 0.815` or `0.220`).
+- **Stage R1**: Routes `NRUSLF_SAFE` and `NRUSLF_STR` from `CALL MOBIL` to `CALL SENES` and `CALL GROW`.
+- **Stage R2**: Tracks cumulative fruit harvest pod weight `CUM_HPODWT` across harvests and passes strictly continuous effective biomass `WEFF = (TOPWT + CUM_HPODWT) / 100.0` (t DM/ha) to `CALL DEMAND`.
+- **Stage R2**: Eliminates single-day `HPODWT` sawteeth in `RATE` acclimation calculation `WEFF_C`.
 
-### 3.5 `PHOTO.for` (`PHOTO_CNC.FOR` / `patches/PHOTO.for.patch`)
+### 3.5 `DEMAND.for` (`DEMAND_CNC.FOR` / `patches/DEMAND.for.patch`)
+- **Stage R2 Dynamic Old Tissue Demand Reconstruction**:
+  Replaces fixed constant target concentration $NVSTL = FNINL \approx 4.8\%$ with the asymptotic lower-bound critical dilution curve:
+  $$N_c(W_{\text{eff}}) = N_{c,\infty} + (a - N_{c,\infty}) \cdot [\max(W_0, W_{\text{eff}})]^{-b}$$
+  ($a = 4.85\%$, $b = 0.38$, $W_0 = 1.00\text{ t DM/ha}$, $N_{c,\infty} = 1.70\%$).
+- Leaf target concentration:
+  $$NVSTL(t) = \max\left(\text{PROLFF} \cdot 0.16, \; \frac{N_c(W_{\text{eff}}(t))}{100.0}\right)$$
+- Stem target concentration allometrically coordinated with leaf dilution:
+  $$NVSTS(t) = \max\left(\text{PROSTF} \cdot 0.16, \; \text{PROSTF} \cdot 0.16 + (FNINS - \text{PROSTF} \cdot 0.16) \cdot \phi\right)$$
+  where $\phi = \max\left(0.0, \; \min\left(1.0, \; \frac{NVSTL - \text{PROLFF} \cdot 0.16}{FNINL - \text{PROLFF} \cdot 0.16}\right)\right)$.
+- When $DXR57 > 0$, reproductive decline scales smoothly from current diluted concentrations towards maintenance protein.
+
+### 3.6 `PHOTO.for` (`PHOTO_CNC.FOR` / `patches/PHOTO.for.patch`)
 - Continuous NNI coupling for photosynthetic acclimation.
 
 ---
 
 ## 4. Sandboxed Compilation & Verification Guide
 
-To build and verify the custom DSSAT binary with Stage R1:
+To build and verify the custom DSSAT binary with Stage R1 + Stage R2:
 
 ```bash
 # Automated compilation and full verification suite
@@ -148,5 +162,6 @@ python subprojects/critical_n/scripts/build_and_verify_dssat.py
 
 # Run specific unit and regression tests
 python -m pytest subprojects/critical_n/tests/test_stage_r1_dynamics.py -v
+python -m pytest subprojects/critical_n/tests/test_stage_r2_dynamics.py -v
 python -m pytest subprojects/critical_n/tests/test_scheme_b_fortran_patch.py -v
 ```

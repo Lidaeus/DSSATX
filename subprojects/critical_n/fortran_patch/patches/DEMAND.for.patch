@@ -1,0 +1,63 @@
+--- Plant/CROPGRO/DEMAND.for
++++ Plant/CROPGRO/DEMAND.for
+@@ -20,6 +20,7 @@
+ C-----------------------------------------------------------------------
+ C  Called by:  PLANT
+ C  Calls:      SDCOMP, IPDMND
++C  Phase R2: Dynamic critical nitrogen dilution (Nc) for old tissue demand
+ C=======================================================================
+ 
+       SUBROUTINE DEMAND(DYNAMIC, CONTROL,
+@@ -31,6 +32,7 @@
+      &  TAVG, TDUMX, TDUMX2, TGRO, TURFAC, VSTAGE, WCRLF, !Input
+      &  WCRRT, WCRST, WNRLF, WNRRT, WNRSH, WNRST, WTLF,   !Input
+      &  WTSD, WTSHE, XPOD, NVEG0, NR1, NR2, NR5, NR7,     !Input
++     &  WEFF,                                             !Input
+ 
+      &  AGRSD1, AGRSD2, AGRVG, AGRVG2, CDMREP, CropStatus,!Output
+      &  F, FNINL, FNINR, FNINS, FNINSD, FRLF, FRRT, FRSTM,!Output
+@@ -61,6 +63,8 @@
+       REAL REDPUN,TMPFCS,PAGE,REDSHL,SDMAX,CDMSH,GDMSH,ADDSHL
+       REAL TEMXFR,CAVTOT,GDMSDO,CNOLD
+       REAL NVSTL,NVSTS,NVSTR,FRNLFT
++!     Phase R2: Dynamic critical nitrogen dilution variables
++      REAL WEFF, NC_DEM, FR_DIL
+       REAL TABEX,CURV
+       REAL POTLIP, POTCAR
+ 
+@@ -638,13 +642,31 @@
+ !-----------------------------------------------------------------------
+       IF (DAS .GT. NVEG0 .AND. DAS .LT. NR7 .AND.
+      &          CNOLD .GT. 0.0) THEN
+-        NVSTL = FNINL
+-        NVSTS = FNINS
++C       Phase R2: Dynamic critical nitrogen dilution target
++        IF (WEFF .GT. 0.0) THEN
++          IF (WEFF .LT. 1.00) THEN
++            NC_DEM = 4.85
++          ELSE
++            NC_DEM = 1.70 + (4.85 - 1.70) * (WEFF ** (-0.38))
++          ENDIF
++          NVSTL = MAX(PROLFF * 0.16, NC_DEM / 100.0)
++          IF (FNINL .GT. PROLFF * 0.16) THEN
++            FR_DIL = (NVSTL - PROLFF * 0.16) / (FNINL - PROLFF * 0.16)
++            FR_DIL = MAX(0.0, MIN(1.0, FR_DIL))
++          ELSE
++            FR_DIL = 1.0
++          ENDIF
++          NVSTS = PROSTF * 0.16 + (FNINS - PROSTF * 0.16) * FR_DIL
++          NVSTS = MAX(PROSTF * 0.16, MIN(FNINS, NVSTS))
++        ELSE
++          NVSTL = FNINL
++          NVSTS = FNINS
++        ENDIF
+         NVSTR = FNINR
+         IF (DXR57 .GT.0.0) THEN
+            FRNLFT = (NRCVR + (1. - NRCVR) * (1. - DXR57**2))
+-           NVSTL = PROLFF*0.16 + (FNINL-PROLFF*0.16) * FRNLFT
+-           NVSTS = PROSTF*0.16 + (FNINS-PROSTF*0.16) * FRNLFT
++           NVSTL = PROLFF*0.16 + (NVSTL-PROLFF*0.16) * FRNLFT
++           NVSTS = PROSTF*0.16 + (NVSTS-PROSTF*0.16) * FRNLFT
+            NVSTR = PRORTF*0.16 + (FNINR-PRORTF*0.16) * FRNLFT
+         ENDIF
+         NDMOLD = (WTLF  - WCRLF) * MAX(0.0,(NVSTL - PCNL /100.))

@@ -180,6 +180,8 @@ C=======================================================================
       REAL KSTRES
 !     Scheme B: Critical Nitrogen Dilution & Photosynthetic Acclimation
       REAL NNI_CUR, PCNL_C, NC_CUR, WEFF_C
+!     Phase R2: Cumulative harvest pod dry weight & effective biomass
+      REAL CUM_HPODWT, WEFF
 
 !-----------------------------------------------------------------------
 !     Define constructed variable types based on definitions in
@@ -321,6 +323,7 @@ C-----------------------------------------------------------------------
      &  TAVG, TDUMX, TDUMX2, TGRO, TURFAC, VSTAGE, WCRLF, !Input
      &  WCRRT, WCRST, WNRLF, WNRRT, WNRSH, WNRST, WTLF,   !Input
      &  WTSD, WTSHE, XPOD, NVEG0, NR1, NR2, NR5, NR7,     !Input
+     &  0.0,                                              !Input
      &  AGRSD1, AGRSD2, AGRVG, AGRVG2, CDMREP, CropStatus,!Output
      &  F, FNINL, FNINR, FNINS, FNINSD, FRLF, FRRT, FRSTM,!Output
      &  GDMSD, GRRAT1, NDMNEW,  NDMOLD, NDMREP, NDMSDR,   !Output
@@ -441,6 +444,8 @@ C-----------------------------------------------------------------------
      &  WTNUP, WTRO, WTSDO, WTSHO, WTSO, XLAI, XPOD,      !Output
      &  ShutMob, RootMob, ShelMob,                        !Output
      &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)           !Output
+C     Phase R2: Accumulate harvested pod weight
+      CUM_HPODWT = CUM_HPODWT + HPODWT
       
       CALL OPGROW(CONTROL, ISWITCH, SoilProp, 
      &    CADLF, CADST, CANHT, CANWH, CMINEA, DWNOD, GROWTH,  
@@ -544,6 +549,8 @@ C     Initialize pest coupling point and damage variables
 !         to INCOMP and GROW (need to initialize values of F, FRLF,
 !         FRRT, and FRSTM for use in those routines)  chp 9/22/98
 !-----------------------------------------------------------------------
+      CUM_HPODWT = 0.0
+      WEFF = 0.0
       CALL DEMAND(SEASINIT, CONTROL,
      &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
      &  FILECC, FILEGC, FILEIO, FNINSH, FRACDN, LAGSD,    !Input
@@ -553,6 +560,7 @@ C     Initialize pest coupling point and damage variables
      &  TAVG, TDUMX, TDUMX2, TGRO, TURFAC, VSTAGE, WCRLF, !Input
      &  WCRRT, WCRST, WNRLF, WNRRT, WNRSH, WNRST, WTLF,   !Input
      &  WTSD, WTSHE, XPOD, NVEG0, NR1, NR2, NR5, NR7,     !Input
+     &  0.0,                                              !Input
      &  AGRSD1, AGRSD2, AGRVG, AGRVG2, CDMREP, CropStatus,!Output
      &  F, FNINL, FNINR, FNINS, FNINSD, FRLF, FRRT, FRSTM,!Output
      &  GDMSD, GRRAT1, NDMNEW,  NDMOLD, NDMREP, NDMSDR,   !Output
@@ -777,7 +785,7 @@ C         Scheme B: Dynamic NNI for photosynthetic acclimation
           ELSE
             PCNL_C = 4.85
           ENDIF
-          WEFF_C = MAX(0.001, (TOPWT + HPODWT) / 100.0)
+          WEFF_C = MAX(0.001, (TOPWT + CUM_HPODWT) / 100.0)
           IF (WEFF_C .LT. 1.00) THEN
             NC_CUR = 4.85
           ELSE
@@ -864,6 +872,7 @@ C-----------------------------------------------------------------------
 
 !-----------------------------------------------------------------------
 !       DYNAMIC = EMERG (not INTEGR) here
+        WEFF = MAX(0.0, TOPWT / 100.0)
         CALL DEMAND(EMERG, CONTROL, 
      &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
      &  FILECC, FILEGC, FILEIO, FNINSH, FRACDN, LAGSD,    !Input
@@ -873,6 +882,7 @@ C-----------------------------------------------------------------------
      &  TAVG, TDUMX, TDUMX2, TGRO, TURFAC, VSTAGE, WCRLF, !Input
      &  WCRRT, WCRST, WNRLF, WNRRT, WNRSH, WNRST, WTLF,   !Input
      &  WTSD, WTSHE, XPOD, NVEG0, NR1, NR2, NR5, NR7,     !Input
+     &  WEFF,                                             !Input
      &  AGRSD1, AGRSD2, AGRVG, AGRVG2, CDMREP, CropStatus,!Output
      &  F, FNINL, FNINR, FNINS, FNINSD, FRLF, FRRT, FRSTM,!Output
      &  GDMSD, GRRAT1, NDMNEW,  NDMOLD, NDMREP, NDMSDR,   !Output
@@ -994,6 +1004,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C    Call Subroutine to calculate Nitrogen and Carbon Demand for new growth
 C-----------------------------------------------------------------------
+      WEFF = MAX(0.0, (TOPWT + CUM_HPODWT) / 100.0)
       CALL DEMAND(INTEGR, CONTROL, 
      &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
      &  FILECC, FILEGC, FILEIO, FNINSH, FRACDN, LAGSD,    !Input
@@ -1003,6 +1014,7 @@ C-----------------------------------------------------------------------
      &  TAVG, TDUMX, TDUMX2, TGRO, TURFAC, VSTAGE, WCRLF, !Input
      &  WCRRT, WCRST, WNRLF, WNRRT, WNRSH, WNRST, WTLF,   !Input
      &  WTSD, WTSHE, XPOD, NVEG0, NR1, NR2, NR5, NR7,     !Input
+     &  WEFF,                                             !Input
      &  AGRSD1, AGRSD2, AGRVG, AGRVG2, CDMREP, CropStatus,!Output
      &  F, FNINL, FNINR, FNINS, FNINSD, FRLF, FRRT, FRSTM,!Output
      &  GDMSD, GRRAT1, NDMNEW,  NDMOLD, NDMREP, NDMSDR,   !Output

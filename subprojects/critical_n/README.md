@@ -71,7 +71,24 @@ In Stage R1, the underlying mechanism triggering the defoliation avalanche is ro
    - Line 1051 leaf area shrinkage: Area is deducted solely for stress mobilization $(NRUSLF_{\text{stress}} / 0.16) \cdot SLA$ (safe buffer mobilization does not shrink leaf area).
 4. **`CROPGRO.for`**: Routes $\text{PROLFG}$ and decoupled fluxes smoothly across subroutines.
 
-### 2.4 Strict Analytical Mass Balance Conservation (`mass_balance.py`)
+### 2.4 Stage R2 Dynamic Demand Dilution Reconstruction (`DEMAND.for` + `CROPGRO.for`)
+In Stage R2, the root cause of organ nitrogen flat-lining across the season is solved on the demand side:
+1. **`DEMAND.for` (Dynamic Critical Nitrogen Dilution Targets)**:
+   In native CROPGRO, old tissue refill demand $NDMOLD$ locks target concentrations to fixed initial constants: $NVSTL = FNINL \approx 4.8\%$, forcing leaves back to 4.8% every day if root uptake is adequate.
+   Stage R2 reconstructs old tissue demand targets to dilute dynamically with cumulative effective biomass $W_{\text{eff}}$:
+   $$N_c(W_{\text{eff}}) = N_{c,\infty} + (a - N_{c,\infty}) \cdot [\max(W_0, W_{\text{eff}})]^{-b}$$
+   ($a = 4.85\%$, $b = 0.38$, $W_0 = 1.00\text{ t DM/ha}$, $N_{c,\infty} = 1.70\%$).
+   - Leaf refill target:
+     $$NVSTL(t) = \max\left(\text{PROLFF} \cdot 0.16, \; \frac{N_c(W_{\text{eff}}(t))}{100.0}\right)$$
+   - Stem refill target (allometrically coordinated with leaf dilution):
+     $$NVSTS(t) = \max\left(\text{PROSTF} \cdot 0.16, \; \text{PROSTF} \cdot 0.16 + (FNINS - \text{PROSTF} \cdot 0.16) \cdot \phi\right)$$
+     where $\phi = \max\left(0.0, \; \min\left(1.0, \; \frac{NVSTL - \text{PROLFF} \cdot 0.16}{FNINL - \text{PROLFF} \cdot 0.16}\right)\right)$.
+2. **`CROPGRO.for` (Cumulative Harvest Pod Tracking & $W_{\text{eff}}$ Coordination)**:
+   - Tracks cumulative harvested fruit pod dry weight `CUM_HPODWT` across daily harvests.
+   - Computes continuous effective biomass $W_{\text{eff}} = \frac{\text{TOPWT} + \text{CUM\_HPODWT}}{100.0}$ (t DM/ha) and passes it directly to `CALL DEMAND`.
+   - Eliminates single-day `HPODWT` spikes in canopy photosynthesis acclimation `WEFF_C`.
+
+### 2.5 Strict Analytical Mass Balance Conservation (`mass_balance.py`)
 Plant nitrogen balance follows the exact telescoping identity:
 $$\Delta \text{Storage} \equiv \sum \text{Inputs} - \sum \text{Outputs}$$
 $$\text{Storage} = WTNLF + WTNST + WTNRT + WTNPOD$$
@@ -114,15 +131,22 @@ subprojects/critical_n/
 ├── fortran_patch/                     # [Phase 2 Fortran Specifications & Patches]
 │   ├── README.md                      # Detailed compilation, signature changes, and coding rules
 │   ├── patches/
-│   │   ├── PHOTO.for.patch            # Clean unified diff patch for PHOTO.for
-│   │   ├── SENES.for.patch            # Clean unified diff patch for SENES.for
-│   │   └── CROPGRO.for.patch          # Clean unified diff patch for CROPGRO.for
+│   │   ├── DEMAND.for.patch           # Clean unified diff patch for DEMAND.for (Stage R2 dynamic dilution)
+│   │   ├── CROPGRO.for.patch          # Clean unified diff patch for CROPGRO.for (Stage R1 + R2 coupling)
+│   │   ├── MOBIL.for.patch            # Clean unified diff patch for MOBIL.for (Stage R1 safe buffer N)
+│   │   ├── SENES.for.patch            # Clean unified diff patch for SENES.for (Stage R1 stress senescence)
+│   │   ├── GROW.for.patch             # Clean unified diff patch for GROW.for (Stage R1 corrected deductions)
+│   │   └── PHOTO.for.patch            # Clean unified diff patch for PHOTO.for (Scheme B NNI acclimation)
 │   └── src_scheme_b/                  # Drop-in patched Fortran source files ready for compilation
-│       ├── PHOTO_CNC.FOR              # PHOTO with NNI_IN acclimation coupling
-│       ├── SENES_CNC.FOR              # SENES with WLDOTN senescence limiter
-│       └── CROPGRO_CNC.FOR            # CROPGRO linking NNI to PHOTO and WLDOTN to SENES
+│       ├── DEMAND_CNC.FOR             # DEMAND with dynamic critical dilution NVSTL & NVSTS
+│       ├── CROPGRO_CNC.FOR            # CROPGRO with cumulative harvest pod tracking & Weff routing
+│       ├── MOBIL_CNC.FOR              # MOBIL with decoupled safe buffer N mining
+│       ├── SENES_CNC.FOR              # SENES with stress mobilization driver
+│       ├── GROW_CNC.FOR               # GROW with safe buffer mass & area preservation
+│       └── PHOTO_CNC.FOR              # PHOTO with NNI_IN acclimation coupling
 ├── scripts/
 │   ├── __init__.py
+│   ├── build_and_verify_dssat.py      # Automated compiler detection, CMake/Ninja build & regression QA
 │   ├── run_cnc_postprocessor.py       # Standalone CLI tool to post-process DSSAT run outputs (Scheme A)
 │   ├── demo_cnc_evaluation.py         # End-to-end runnable demo validating against DSSAT run data (Scheme A)
 │   ├── compare_nni_trajectories.py    # Diagnostic script showing standing vs cumulative trajectories (Scheme A)
@@ -142,7 +166,9 @@ subprojects/critical_n/
     ├── test_scheme_b_senescence.py    # Scheme B senescence governor, avalanche prevention, ALFDOT >= 0
     ├── test_scheme_b_mass_balance.py  # Strict mass balance audit (C & N closure < 1e-10 g N/m^2)
     ├── test_scheme_b_fortran_patch.py # Fortran 72-column compliance (0 violations) & sandboxed patch application
-    └── test_scheme_b_simulation.py    # Multi-treatment simulation comparisons and DataFrame exports
+    ├── test_scheme_b_simulation.py    # Multi-treatment simulation comparisons and DataFrame exports
+    ├── test_stage_r1_dynamics.py      # Stage R1 decoupled mobilization, senescence & mass balance tests
+    └── test_stage_r2_dynamics.py      # Stage R2 dynamic demand dilution & allometric dynamics tests
 ```
 
 ---
