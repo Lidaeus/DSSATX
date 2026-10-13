@@ -1,0 +1,80 @@
+--- Plant/CROPGRO/CROPGRO.for
++++ Plant/CROPGRO/CROPGRO_CNC.for
+@@ -174,6 +174,8 @@
+ 
+ !     K model (not yet implemented)
+       REAL KSTRES
++!     Scheme B: Critical Nitrogen Dilution & Photosynthetic Acclimation
++      REAL NNI_CUR, PCNL_C, NC_CUR, WEFF_C
+ 
+ !-----------------------------------------------------------------------
+ !     Define constructed variable types based on definitions in
+@@ -247,6 +249,7 @@
+      &    BETN, CO2, DXR57, EXCESS, KCAN, KC_SLOPE,       !Input
+      &    NR5, PAR, PStres1, SLPF, RNITP, SLAAD,          !Input
+      &    SWFAC, TDAY, XHLAI, XPOD,                       !Input
++     &    1.0,                                            !Input
+      &    AGEFAC, PG)                                     !Output
+       ENDIF
+ 
+@@ -360,6 +363,7 @@
+         CALL SENES(RUNINIT, 
+      &    FILECC, CLW, DTX, KCAN, NR7, NRUSLF, PAR,       !Input
+      &    RHOL, SLAAD, STMWT, SWFAC, VSTAGE, WTLF, XLAI,  !Input
++     &    0.0,                                            !Input
+      &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
+ 
+ C-----------------------------------------------------------------------
+@@ -470,6 +474,7 @@
+      &    BETN, CO2, DXR57, EXCESS, KCAN, KC_SLOPE,       !Input
+      &    NR5, PAR, PStres1, SLPF, RNITP, SLAAD,          !Input
+      &    SWFAC, TDAY, XHLAI, XPOD,                       !Input
++     &    1.0,                                            !Input
+      &    AGEFAC, PG)                                     !Output
+         ENDIF
+       ENDIF
+@@ -629,6 +634,7 @@
+       CALL SENES(SEASINIT, 
+      &    FILECC, CLW, DTX, KCAN, NR7, NRUSLF, PAR,       !Input
+      &    RHOL, SLAAD, STMWT, SWFAC, VSTAGE, WTLF, XLAI,  !Input
++     &    0.0,                                            !Input
+      &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
+ 
+ C-----------------------------------------------------------------------
+@@ -727,10 +733,28 @@
+           CALL GET('SPAM', 'AGEFAC', AGEFAC)
+           CALL GET('SPAM', 'PG'    , PG)
+         ELSEIF (MEPHO .EQ. 'C') THEN
++C         Scheme B: Dynamic NNI for photosynthetic acclimation
++          IF (WTLF .GT. 0.0) THEN
++            PCNL_C = (WTNLF / WTLF) * 100.0
++          ELSE
++            PCNL_C = 4.85
++          ENDIF
++          WEFF_C = MAX(0.001, (TOPWT + HPODWT) / 100.0)
++          IF (WEFF_C .LT. 1.00) THEN
++            NC_CUR = 4.85
++          ELSE
++            NC_CUR = 4.85 * (WEFF_C ** (-0.38))
++          ENDIF
++          IF (NC_CUR .GT. 0.0) THEN
++            NNI_CUR = PCNL_C / NC_CUR
++          ELSE
++            NNI_CUR = 1.0
++          ENDIF
+           CALL PHOTO(CONTROL, 
+      &    BETN, CO2, DXR57, EXCESS, KCAN, KC_SLOPE,       !Input
+      &    NR5, PAR, PStres1, SLPF, RNITP, SLAAD,          !Input
+      &    SWFAC, TDAY, XHLAI, XPOD,                       !Input
++     &    NNI_CUR,                                        !Input
+      &    AGEFAC, PG)                                     !Output
+         ENDIF
+       ENDIF
+@@ -1171,6 +1195,7 @@
+       CALL SENES(INTEGR, 
+      &    FILECC, CLW, DTX, KCAN, NR7, NRUSLF, PAR,       !Input
+      &    RHOL, SLAAD, STMWT, SWFAC, VSTAGE, WTLF, XLAI,  !Input
++     &    WLDOTN,                                         !Input
+      &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
+ 
+ C-----------------------------------------------------------------------

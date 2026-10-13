@@ -1,0 +1,35 @@
+--- Plant/CROPGRO/PHOTO.for
++++ Plant/CROPGRO/PHOTO_CNC.for
+@@ -25,6 +25,7 @@
+      &    BETN, CO2, DXR57, EXCESS, KCAN, KC_SLOPE,       !Input
+      &    NR5, PAR, PStres1, SLPF, RNITP, SLAAD,          !Input
+      &    SWFAC, TDAY, XHLAI, XPOD,                       !Input
++     &    NNI_IN,                                         !Input
+      &  AGEFAC, PG)                                       !Output
+ 
+ !-----------------------------------------------------------------------
+@@ -42,6 +43,7 @@
+       INTEGER DAS, NR5
+ 
+       REAL AGEFAC, AGEFCC, AGEREF, A0, BETN, CCEFF, CCK, CCMAX, 
++     &  NNI_IN, S_NNI, ARG_NNI, 
+      &  CCMP, CO2, COLDSTR, CUMSTR, CURV, DXR57, EXCESS,
+      &  KCAN, KCANR, KC_SLOPE, LMXSTD, LNREF, PAR, PARMAX, PG, PGFAC, 
+      &  SLPF, PGLFMX, PGREF, PGSLW, PHTHRS10, PHTMAX, PRATIO, 
+@@ -140,6 +142,16 @@
+ C     need to scale effect back on daily canopy version.
+ C-----------------------------------------------------------------------
+       AGEFCC = (1.0 - EXP(-2.0 * AGEFAC)) / (1. - EXP(-2.0 * 1.0))
++C-----------------------------------------------------------------------
++C     Scheme B: Continuous NNI photosynthetic acclimation coupling
++C-----------------------------------------------------------------------
++      IF (NNI_IN .GT. 0.0) THEN
++        ARG_NNI = -4.0 * (NNI_IN - 1.0) / 0.65
++        ARG_NNI = MAX(-50.0, MIN(50.0, ARG_NNI))
++        S_NNI = 0.30 + (1.05 - 0.30) / (1.0 + EXP(ARG_NNI))
++        S_NNI = MAX(0.30, MIN(1.05, S_NNI))
++        AGEFCC = AGEFCC * S_NNI
++      ENDIF
+ 
+ C-----------------------------------------------------------------------
+ C     Compute canopy pg response to changes in specific leaf weight.

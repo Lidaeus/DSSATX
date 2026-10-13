@@ -1,0 +1,24 @@
+# Build artifacts, clone trees, and binaries for critical_n subproject
+dssat_csm/
+dssat_csm_cnc/
+build/
+bin/*.exe
+verification_runs/
+runs/
+scratch/
+
+# Python cache & testing artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.mypy_cache/
+
+# Temporary / OS files
+*.tmp
+*.log
+Thumbs.db
+.DS_Store

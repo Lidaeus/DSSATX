@@ -1,0 +1,29 @@
+--- Plant/CROPGRO/SENES.for
++++ Plant/CROPGRO/SENES_CNC.for
+@@ -19,6 +19,7 @@
+       SUBROUTINE SENES(DYNAMIC,
+      &    FILECC, CLW, DTX, KCAN, NR7, NRUSLF, PAR,       !Input
+      &    RHOL, SLAAD, STMWT, SWFAC, VSTAGE, WTLF, XLAI,  !Input
++     &    WLDOTN,                                         !Input
+      &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
+ 
+ C-----------------------------------------------------------------------
+@@ -42,6 +43,7 @@
+ 
+       REAL DTX, NRUSLF, PAR, RATTP, RHOL, SLAAD
+       REAL STMWT, VSTAGE, CLW, WTLF, XLAI
++      REAL WLDOTN
+       REAL SLDOT, SLNDOT, SSDOT, SSNDOT
+       REAL ICMP, KCAN, PORPT, SENDAY
+       REAL SENRT2, SENRTE, TCMP
+@@ -196,6 +198,10 @@
+ C     leaves and petioles is different from canopy average.
+ C-----------------------------------------------------------------------
+         LFSEN = SENRTE * NRUSLF / 0.16
++C       Scheme B: Senescence limiter to prevent defoliation avalanche
++        IF (WLDOTN .GE. 0.0) THEN
++          LFSEN = MIN(LFSEN, 0.90 * WLDOTN + 0.015 * WTLF)
++        ENDIF
+         LFSEN = MIN(WTLF,LFSEN)
+         SLDOT = SLDOT + LFSEN
+         SLDOT = MIN(WTLF,SLDOT)
