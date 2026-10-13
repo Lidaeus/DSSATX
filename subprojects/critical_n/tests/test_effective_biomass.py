@@ -142,3 +142,42 @@ def test_explicit_chpdtn_strict_continuity_at_harvest():
     # 3. Delta NNI_cum must be strictly 0
     delta_nni = s_post.nni_val - s_pre.nni_val
     assert abs(delta_nni) < 1e-12, f"Delta NNI_cum must be 0, got {delta_nni}"
+
+
+def test_sequential_multi_harvest_strict_continuity():
+    """Verify strict continuity Delta W_eff == 0, Delta N_act,cum == 0 across sequential multi-harvests."""
+    tracker = CumulativeStateTracker(cnc_a=4.85, cnc_b=0.38, cnc_w0=1.0, cnc_nc_inf=1.70)
+
+    # Day 69: pre-harvest 1
+    s1_pre = tracker.step(das=69, cwad=3500.0, cnad=140.0, direct_chpdt=0.0, direct_chpdtn=0.0)
+
+    # Day 70: Harvest 1 (500 kg DM fruit, 10.0 kg N removed)
+    s1_post = tracker.step(das=70, cwad=3000.0, cnad=130.0, direct_chpdt=500.0, direct_chpdtn=10.0)
+    assert abs(s1_post.w_eff - s1_pre.w_eff) < 1e-12
+    assert abs(s1_post.n_act_cum - s1_pre.n_act_cum) < 1e-12
+    assert abs(s1_post.nni_val - s1_pre.nni_val) < 1e-12
+
+    # Day 84: Growth continues between harvests
+    s2_pre = tracker.step(das=84, cwad=4200.0, cnad=165.0, direct_chpdt=500.0, direct_chpdtn=10.0)
+
+    # Day 85: Harvest 2 (additional 400 kg DM fruit, 8.0 kg N removed -> cumulative 900 kg DM, 18.0 kg N)
+    s2_post = tracker.step(das=85, cwad=3800.0, cnad=157.0, direct_chpdt=900.0, direct_chpdtn=18.0)
+    assert abs(s2_post.w_eff - s2_pre.w_eff) < 1e-12
+    assert abs(s2_post.n_act_cum - s2_pre.n_act_cum) < 1e-12
+    assert abs(s2_post.nni_val - s2_pre.nni_val) < 1e-12
+    assert s2_post.chpdtn == 18.0
+
+    # Also verify using verify_sawtooth_elimination with initial_cum_dm
+    res_h2 = verify_sawtooth_elimination(
+        pre_harvest_cwad=4200.0,
+        pre_harvest_cnad=165.0,
+        fruit_dm=400.0,
+        fruit_n=8.0,
+        post_harvest_cwad=3800.0,
+        post_harvest_cnad=157.0,
+        initial_cum_dm=500.0,
+        initial_cum_n=10.0,
+    )
+    assert abs(res_h2["cum_delta_w"]) < 1e-12
+    assert abs(res_h2["cum_delta_n_act"]) < 1e-12
+    assert abs(res_h2["cum_delta_nni"]) < 1e-12

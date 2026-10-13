@@ -271,9 +271,12 @@ def verify_sawtooth_elimination(
     cnc_b: float = DEFAULT_CNC_B,
     cnc_w0: float = DEFAULT_CNC_W0,
     cnc_nc_inf: float = DEFAULT_CNC_NC_INF,
+    initial_cum_dm: float = 0.0,
+    initial_cum_n: float = 0.0,
 ) -> dict[str, float]:
     """Analytical verification of sawtooth jump elimination across harvest.
 
+    Supports initial cumulative harvest states for multi-harvest sequences (harvest 1, 2, ...).
     Returns comparison dictionary of raw jumps vs cumulative jumps.
     """
     # 1. Standing raw metrics
@@ -292,10 +295,10 @@ def verify_sawtooth_elimination(
     standing_delta_nni = nni_post - nni_pre
 
     # 2. Cumulative effective metrics with explicit fruit CHPDTN
-    cum_dm_pre = 0.0
-    cum_n_pre = 0.0
-    cum_dm_post = fruit_dm
-    cum_n_post = fruit_n
+    cum_dm_pre = initial_cum_dm
+    cum_n_pre = initial_cum_n
+    cum_dm_post = initial_cum_dm + fruit_dm
+    cum_n_post = initial_cum_n + fruit_n
 
     w_eff_pre = (pre_harvest_cwad + cum_dm_pre) / 1000.0
     w_eff_post = (post_harvest_cwad + cum_dm_post) / 1000.0

@@ -36,6 +36,7 @@ from subprojects.critical_n.calibration.cnc_builder import (
 from subprojects.critical_n.core.dilution_curve import (
     DEFAULT_CNC_A,
     DEFAULT_CNC_B,
+    DEFAULT_CNC_NC_INF,
     DEFAULT_CNC_W0,
 )
 from subprojects.critical_n.core.effective_biomass import (
@@ -59,7 +60,7 @@ def run_demo(run_dir: Path) -> int:
         ins_file = tmp_dir / "PestCNC.OUT.ins"
 
         print("\n[1/5] Exporting PestCNC.OUT...")
-        export_pest_cnc(run_dir, out_file=out_file)
+        export_pest_cnc(run_dir, out_file=out_file, include_r_tol=True)
         lines = out_file.read_text(encoding="utf-8").splitlines()
         print(f"  -> Generated {len(lines)} lines")
         print(f"  -> Header line 1: {lines[0]}")

@@ -40,6 +40,13 @@ def test_frozen_invariant_protocol_enforcement():
     with pytest.raises(InvariantViolationError, match="collinearity"):
         validate_no_active_cnc_params(illegal_df3)
 
+    # Case 4: Case-insensitive parameter check (lowercase name)
+    illegal_df4 = pd.DataFrame([
+        {"name": "cnc_nc_inf", "status": "active"},  # Lowercase FORBIDDEN!
+    ])
+    with pytest.raises(InvariantViolationError, match="collinearity"):
+        validate_no_active_cnc_params(illegal_df4)
+
 
 def test_create_frozen_cnc_records():
     """Verify generated frozen bounds records comply with standard frozen CSV format."""

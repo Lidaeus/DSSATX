@@ -229,11 +229,11 @@ def compute_cnc_objective_penalty(
         w_sq = w ** 2
 
         for idx, nni_val in enumerate(nni_series):
-            # Skip invalid/sentinel values
+            # Skip invalid / pre-emergence sentinel values (< 0.0 or -99.0)
             if (
                 math.isnan(nni_val)
                 or math.isinf(nni_val)
-                or nni_val <= 0.0
+                or nni_val < 0.0
                 or nni_val == -99.0
             ):
                 continue

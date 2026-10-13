@@ -42,6 +42,7 @@ class FreshWtRecord:
     chfpw: float = 0.0  # Cumulative fresh fruit weight (kg/ha)
     hpodw: float = 0.0  # Daily harvested pod weight (kg/ha)
     chpdtn: float = 0.0  # Cumulative harvested mature fruit total N (kg N/ha)
+    has_chpdtn: bool = False
 
 
 @dataclass(frozen=True)
@@ -57,6 +58,7 @@ class DailyMergedRecord:
     hpodw: float = 0.0
     has_fresh_wt: bool = False
     chpdtn: float = 0.0  # Cumulative harvested mature fruit total N (kg N/ha)
+    has_chpdtn: bool = False
 
 
 def parse_plant_gro_stream(file_path: Union[str, Path]) -> dict[int, dict[int, PlantGroRecord]]:
@@ -228,9 +230,17 @@ def parse_fresh_wt_stream(file_path: Union[str, Path]) -> dict[int, dict[int, Fr
                     doy = int(parts[idx_doy]) if idx_doy is not None else 0
                     chfpw = float(parts[idx_chfpw]) if (idx_chfpw is not None and len(parts) > idx_chfpw) else 0.0
                     hpodw = float(parts[idx_hpodw]) if (idx_hpodw is not None and len(parts) > idx_hpodw) else 0.0
-                    chpdtn = float(parts[idx_chpdtn]) if (idx_chpdtn is not None and len(parts) > idx_chpdtn) else 0.0
+                    has_chpdtn = idx_chpdtn is not None and len(parts) > idx_chpdtn
+                    chpdtn = float(parts[idx_chpdtn]) if has_chpdtn else 0.0
                     fresh_data[current_run][das] = FreshWtRecord(
-                        year=year, doy=doy, das=das, chpdt=chpdt, chfpw=chfpw, hpodw=hpodw, chpdtn=chpdtn
+                        year=year,
+                        doy=doy,
+                        das=das,
+                        chpdt=chpdt,
+                        chfpw=chfpw,
+                        hpodw=hpodw,
+                        chpdtn=chpdtn,
+                        has_chpdtn=has_chpdtn,
                     )
                 except (ValueError, IndexError):
                     pass
@@ -303,6 +313,7 @@ def load_merged_nitrogen_series(
             chpdt = fresh_rec.chpdt if fresh_rec else 0.0
             hpodw = fresh_rec.hpodw if fresh_rec else 0.0
             chpdtn = fresh_rec.chpdtn if fresh_rec else 0.0
+            has_chpdtn = fresh_rec.has_chpdtn if fresh_rec else False
 
             records.append(
                 DailyMergedRecord(
@@ -317,6 +328,7 @@ def load_merged_nitrogen_series(
                     hpodw=hpodw,
                     has_fresh_wt=has_fresh_wt,
                     chpdtn=chpdtn,
+                    has_chpdtn=has_chpdtn,
                 )
             )
         merged[run_id] = records

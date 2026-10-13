@@ -14,6 +14,7 @@ Guarantees:
 from __future__ import annotations
 
 import os
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Optional, Union
 
@@ -100,7 +101,8 @@ def export_pest_cnc(
     cnc_nc_inf: float = DEFAULT_CNC_NC_INF,
     default_fruit_n_pct: float = 1.78,
     include_r_tol: bool = False,
-    treatment_n_levels: Optional[Mapping[int, str]] = None,
+    treatment_n_levels: Optional[Union[Mapping[int, str], str, Path, pd.DataFrame]] = None,
+    strict_treatment_mapping: bool = False,
 ) -> Path:
     """Parse DSSAT outputs in `run_dir` and write `PestCNC.OUT`.
 
@@ -116,8 +118,11 @@ def export_pest_cnc(
         Fruit dry-basis N concentration percentage (%), default 1.78%.
     include_r_tol : bool, optional
         If True, appends column R_TOL using physiological tolerance intervals.
-    treatment_n_levels : Mapping[int, str], optional
+    treatment_n_levels : Mapping, DataFrame, Path, or str, optional
         Mapping of treatment_id -> nitrogen level ('N0', 'N1', 'N2', 'N3').
+        Auto-discovered from treatment_metadata.csv if None.
+    strict_treatment_mapping : bool, optional
+        If True, raises ValueError if a treatment has no N level mapping when include_r_tol is True.
 
     Returns
     -------
@@ -155,7 +160,14 @@ def export_pest_cnc(
         default_fruit_n_pct=default_fruit_n_pct,
     )
 
-    n_map = treatment_n_levels or {}
+    if include_r_tol:
+        if treatment_n_levels is None or not isinstance(treatment_n_levels, Mapping):
+            from subprojects.critical_n.calibration.cnc_builder import resolve_treatment_n_levels
+            n_map = resolve_treatment_n_levels(dir_path, treatment_n_levels)
+        else:
+            n_map = {int(k): str(v) for k, v in treatment_n_levels.items()}
+    else:
+        n_map = {}
 
     for run_id in sorted(runs_data.keys()):
         tracker.reset()
@@ -167,13 +179,21 @@ def export_pest_cnc(
                 cwad=rec.cwad,
                 cnad=rec.cnad,
                 direct_chpdt=rec.chpdt if rec.has_fresh_wt else None,
-                direct_chpdtn=rec.chpdtn if (rec.has_fresh_wt and rec.chpdtn > 0.0) else None,
+                direct_chpdtn=rec.chpdtn if (rec.has_fresh_wt and rec.has_chpdtn) else None,
             )
 
             r_tol_val: Optional[float] = None
             if include_r_tol:
-                if step_res.is_valid and step_res.nni_val > 0:
-                    n_level = n_map.get(rec.treatment_id, "N2")
+                if step_res.is_valid and step_res.nni_val >= 0.0:
+                    if rec.treatment_id not in n_map:
+                        if strict_treatment_mapping:
+                            raise ValueError(
+                                f"Treatment {rec.treatment_id} has no nitrogen level mapping in {n_map}. "
+                                f"Silent fallback to 'N2' is prohibited by R0 protocol."
+                            )
+                        n_level = "N2"
+                    else:
+                        n_level = n_map[rec.treatment_id]
                     lo, hi = PHYSIOLOGICAL_NNI_INTERVALS.get(n_level, (0.85, 1.15))
                     r_tol_val = relaxed_pseudo_huber_residual(step_res.nni_val, lo, hi)
                 else:
@@ -205,10 +225,22 @@ def export_cnc_dataframe(
     cnc_w0: float = DEFAULT_CNC_W0,
     cnc_nc_inf: float = DEFAULT_CNC_NC_INF,
     default_fruit_n_pct: float = 1.78,
+    treatment_n_levels: Optional[Union[Mapping[int, str], str, Path, pd.DataFrame]] = None,
 ) -> pd.DataFrame:
     """Parse DSSAT outputs and return a tidy DataFrame of CNC trajectory states."""
+    from subprojects.critical_n.core.objective_penalty import (
+        PHYSIOLOGICAL_NNI_INTERVALS,
+        relaxed_pseudo_huber_residual,
+    )
+
     dir_path = Path(run_dir)
     runs_data = load_merged_nitrogen_series(dir_path)
+
+    if treatment_n_levels is None or not isinstance(treatment_n_levels, Mapping):
+        from subprojects.critical_n.calibration.cnc_builder import resolve_treatment_n_levels
+        n_map = resolve_treatment_n_levels(dir_path, treatment_n_levels)
+    else:
+        n_map = {int(k): str(v) for k, v in treatment_n_levels.items()}
 
     rows = []
     tracker = CumulativeStateTracker(
@@ -227,8 +259,15 @@ def export_cnc_dataframe(
                 cwad=rec.cwad,
                 cnad=rec.cnad,
                 direct_chpdt=rec.chpdt if rec.has_fresh_wt else None,
-                direct_chpdtn=rec.chpdtn if (rec.has_fresh_wt and rec.chpdtn > 0.0) else None,
+                direct_chpdtn=rec.chpdtn if (rec.has_fresh_wt and rec.has_chpdtn) else None,
             )
+
+            r_tol_val: float = -99.0
+            if step_res.is_valid and step_res.nni_val >= 0.0:
+                n_level = n_map.get(rec.treatment_id, "N2")
+                lo, hi = PHYSIOLOGICAL_NNI_INTERVALS.get(n_level, (0.85, 1.15))
+                r_tol_val = relaxed_pseudo_huber_residual(step_res.nni_val, lo, hi)
+
             rows.append(
                 {
                     "run_id": rec.run_id,
@@ -241,12 +280,14 @@ def export_cnc_dataframe(
                     "cum_harvest_dm": step_res.cum_harvest_dm,
                     "cum_harvest_n": step_res.cum_harvest_n,
                     "chpdtn": step_res.chpdtn,
+                    "has_chpdtn": rec.has_chpdtn,
                     "w_standing": step_res.w_standing,
                     "w_eff": step_res.w_eff,
                     "n_act_standing": step_res.n_act_standing,
                     "n_act_cum": step_res.n_act_cum,
                     "nc_crit": step_res.nc_crit,
                     "nni": step_res.nni_val,
+                    "r_tol": r_tol_val,
                     "is_valid": step_res.is_valid,
                 }
             )

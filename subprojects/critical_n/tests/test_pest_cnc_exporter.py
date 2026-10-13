@@ -110,8 +110,44 @@ def test_export_cnc_dataframe_columns(tmp_path):
     df = export_cnc_dataframe(tmp_path)
     assert len(df) == 1
     assert set(df.columns).issuperset({
-        "run_id", "treatment_id", "das", "cwad", "chpdtn", "w_eff", "n_act_cum", "nc_crit", "nni", "is_valid"
+        "run_id", "treatment_id", "das", "cwad", "chpdtn", "has_chpdtn", "w_eff", "n_act_cum", "nc_crit", "nni", "r_tol", "is_valid"
     })
     assert df["w_eff"].iloc[0] == 1.0
     assert df["chpdtn"].iloc[0] == 0.0
+    assert bool(df["has_chpdtn"].iloc[0]) is False
     assert bool(df["is_valid"].iloc[0]) is True
+
+
+def test_export_pest_cnc_treatment_resolution_and_strict_mapping(tmp_path):
+    """Verify metadata resolution, strict mapping enforcement, and exact zero r_tol for N3 luxury."""
+    gro = tmp_path / "PlantGro.OUT"
+    gro.write_text(
+        "*RUN 1\n TREATMENT 2\n@YEAR DOY DAS CWAD\n 2025 100 33 1000.0\n", encoding="utf-8"
+    )
+    n = tmp_path / "PlantN.OUT"
+    n.write_text(
+        "*RUN 1\n@YEAR DOY DAS CNAD\n 2025 100 33 50.0\n", encoding="utf-8"
+    )
+    # Write treatment_metadata.csv
+    meta = tmp_path / "treatment_metadata.csv"
+    meta.write_text(
+        "treatment,treatment_label,water_level,nitrogen_level\n2,TN2,W3,N3\n", encoding="utf-8"
+    )
+
+    # 1. Auto-discovery from treatment_metadata.csv when treatment_n_levels=None
+    out = export_pest_cnc(tmp_path, include_r_tol=True, treatment_n_levels=None)
+    lines = out.read_text(encoding="utf-8").splitlines()
+    assert len(lines) == 3
+    # NNI for DAS 33: W=1.0 t/ha, Nc=4.85, N_act=5.0%, NNI=5.0/4.85=1.031
+    # 1.031 is in [1.00, 1.30] (N3 luxury interval) -> R_TOL must be strictly 0.000!
+    r_tol_str = lines[2][64:74].strip()
+    assert float(r_tol_str) == 0.0, f"Expected 0.0 for N3 luxury, got {r_tol_str}"
+
+    # 2. Strict mapping raises ValueError if treatment not in map
+    with pytest.raises(ValueError, match="prohibited by R0 protocol"):
+        export_pest_cnc(
+            tmp_path,
+            include_r_tol=True,
+            treatment_n_levels={999: "N3"},  # treatment 2 is missing
+            strict_treatment_mapping=True,
+        )

@@ -81,16 +81,19 @@ def test_stream_parser_basic_synthetic(tmp_path):
     assert run1[0].treatment_id == 2
 
     assert run1[0].has_fresh_wt is True
+    assert run1[0].has_chpdtn is True
     assert run1[2].das == 33
     assert run1[2].cwad == 500.0
     assert run1[2].cnad == 20.0
     assert run1[2].chpdt == 150.0
     assert run1[2].chpdtn == 2.7
+    assert run1[2].has_chpdtn is True
 
     run2 = merged[2]
     assert len(run2) == 2
     assert run2[0].treatment_id == 3
     assert run2[1].cwad == 600.0
+    assert run2[1].has_chpdtn is True
 
 
 def test_stream_parser_whitespace_and_colon_tolerance(tmp_path):
@@ -143,3 +146,27 @@ def test_missing_and_corrupt_files_handled_gracefully(tmp_path):
     corrupt_gro.write_text("gibberish without run or headers\n@YEAR DOY\n bad bad", encoding="utf-8")
     res_corrupt = parse_plant_gro_stream(corrupt_gro)
     assert res_corrupt == {}
+
+
+def test_stream_parser_unpatched_fresh_wt_has_chpdtn_false(tmp_path):
+    """Verify unpatched FreshWt without CHPDTN column sets has_chpdtn=False."""
+    gro = tmp_path / "PlantGro.OUT"
+    gro.write_text(
+        "*RUN 1\n TREATMENT 1\n@YEAR DOY DAS CWAD\n 2025 100 33 500.0\n", encoding="utf-8"
+    )
+    n = tmp_path / "PlantN.OUT"
+    n.write_text(
+        "*RUN 1\n@YEAR DOY DAS CNAD\n 2025 100 33 20.0\n", encoding="utf-8"
+    )
+    # FreshWt without CHPDTN column (standard unpatched DSSAT v4.8)
+    fresh = tmp_path / "FreshWt.OUT"
+    fresh.write_text(
+        "*Fresh Weight Output File\n*RUN 1\n@YEAR DOY DAS DAP CHPDT CHFPW HPODW\n 2025 100 33 25 120.0 1000.0 40.0\n",
+        encoding="utf-8",
+    )
+    merged = load_merged_nitrogen_series(tmp_path)
+    rec = merged[1][0]
+    assert rec.has_fresh_wt is True
+    assert rec.has_chpdtn is False
+    assert rec.chpdtn == 0.0
+    assert rec.chpdt == 120.0

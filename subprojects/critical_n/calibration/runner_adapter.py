@@ -18,6 +18,7 @@ from subprojects.critical_n.adapters.pest_cnc_exporter import (
 from subprojects.critical_n.core.dilution_curve import (
     DEFAULT_CNC_A,
     DEFAULT_CNC_B,
+    DEFAULT_CNC_NC_INF,
     DEFAULT_CNC_W0,
 )
 
@@ -29,7 +30,10 @@ def post_process_dssat_cnc(
     cnc_a: float = DEFAULT_CNC_A,
     cnc_b: float = DEFAULT_CNC_B,
     cnc_w0: float = DEFAULT_CNC_W0,
+    cnc_nc_inf: float = DEFAULT_CNC_NC_INF,
     default_fruit_n_pct: float = 1.78,
+    include_r_tol: bool = False,
+    treatment_n_levels: Optional[Any] = None,
     raise_on_error: bool = False,
 ) -> Optional[Path]:
     """Execute post-processing on DSSAT outputs to generate PestCNC.OUT.
@@ -38,10 +42,14 @@ def post_process_dssat_cnc(
     ----------
     run_dir : Path or str
         DSSAT execution directory.
-    cnc_a, cnc_b, cnc_w0 : float, optional
+    cnc_a, cnc_b, cnc_w0, cnc_nc_inf : float, optional
         Critical nitrogen dilution parameters (default frozen invariants).
     default_fruit_n_pct : float, optional
         Default fruit dry basis N percentage (1.78%).
+    include_r_tol : bool, optional
+        If True, includes R_TOL relaxed Pseudo-Huber residual column.
+    treatment_n_levels : optional
+        Treatment -> nitrogen level mapping.
     raise_on_error : bool, optional
         If True, re-raises any exception encountered during post-processing.
         Default False (logs warning, does not crash execution).
@@ -65,7 +73,10 @@ def post_process_dssat_cnc(
             cnc_a=cnc_a,
             cnc_b=cnc_b,
             cnc_w0=cnc_w0,
+            cnc_nc_inf=cnc_nc_inf,
             default_fruit_n_pct=default_fruit_n_pct,
+            include_r_tol=include_r_tol,
+            treatment_n_levels=treatment_n_levels,
         )
         return out_path
     except Exception as exc:
@@ -82,6 +93,9 @@ def wrap_dssat_execution(
     cnc_a: float = DEFAULT_CNC_A,
     cnc_b: float = DEFAULT_CNC_B,
     cnc_w0: float = DEFAULT_CNC_W0,
+    cnc_nc_inf: float = DEFAULT_CNC_NC_INF,
+    include_r_tol: bool = False,
+    treatment_n_levels: Optional[Any] = None,
     **kwargs: Any,
 ) -> Any:
     """Wrap a DSSAT run invocation to automatically post-process CNC outputs.
@@ -90,5 +104,13 @@ def wrap_dssat_execution(
     then triggers post_process_dssat_cnc(run_dir).
     """
     result = runner_func(*args, **kwargs)
-    post_process_dssat_cnc(run_dir, cnc_a=cnc_a, cnc_b=cnc_b, cnc_w0=cnc_w0)
+    post_process_dssat_cnc(
+        run_dir,
+        cnc_a=cnc_a,
+        cnc_b=cnc_b,
+        cnc_w0=cnc_w0,
+        cnc_nc_inf=cnc_nc_inf,
+        include_r_tol=include_r_tol,
+        treatment_n_levels=treatment_n_levels,
+    )
     return result

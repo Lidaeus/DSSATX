@@ -26,14 +26,14 @@ To solve these pathologies without disrupting ongoing production calibration wor
                                             │
         ┌───────────────────────────────────┴───────────────────────────────────┐
         ▼                                                                       ▼
-【Phase 1: 方案 A - 后验软约束正则化】                  【Phase 2: 方案 B - 内源动态光合耦合与衰老限幅器】
-(Scheme A: Posterior Soft-Constraint)                 (Scheme B: Dynamic Acclimation & Senescence Limiter)
-· 零代码侵入、零编译依赖、即插即用                     · 纯沙箱 Fortran 补丁规范与源码实现
-· 累积有效生物量 W_eff 消除采收锯齿波                  · 连续平滑 NNI 光合门控 S(NNI) 阻断爆长与矮化
-· 刚性 PestCNC.OUT 导出 (<15 ms)                      · 衰老限幅器 LFSEN_actual = min(LFSEN, gamma*WLDOTN)
-· 对称生理区间罚项 J_CNC 规避极端异构                 · 彻底消除落叶雪崩死亡螺旋，保证 ALFDOT >= 0
-· 冻结外生不变量协议 (CNC_A/B/W0 fixed)                · 机器精度全流程碳氮质量守恒验证 (< 1e-10 g N/m^2)
-· 适用于：当前生产环境自动化参数率定                   · 适用于：机理深化推演、消融试验与下一代模型研发
+【Phase 1: 方案 A - 后验软约束正则化与状态补齐 (Stage R0 生产基准)】    【Phase 2: 方案 B - 内源动态光合耦合与衰老限幅器 (科研原型)】
+(Scheme A: Posterior Soft-Constraint & State Harmonization)              (Scheme B: Dynamic Acclimation & Senescence Limiter Prototype)
+· 零代码侵入、零编译依赖、即插即用                                       · 纯沙箱 Fortran 补丁规范与源码原型
+· 累积果实氮显式状态 CHPDTN 与有效生物量 W_eff，采摘日 Delta NNI = 0       · 连续平滑 NNI 光合门控 S(NNI) 探索性调控
+· 渐近下限临界氮曲线 Nc(W) = Nc_inf + (a - Nc_inf)*[max(W0, W)]^(-b)    · 衰老限幅器 LFSEN_actual = min(LFSEN, gamma*WLDOTN + delta*WTLF)
+· PEST++ 零残差单侧松弛投影算子 r_tol 与 Pseudo-Huber 平滑变换           · 原型离散时间代理模型质量守恒审计
+· 冻结外生不变量协议 (CNC_A/B/W0/NC_INF fixed)                           · 适用于：机理深化推演、消融试验与下一代模型研发
+· 适用于：当前生产环境自动化参数率定与生理弹性区间约束                   · 状态：受审科研原型（待真实 DSSAT 逐日通量审计与功能库深化）
 ```
 
 ---
@@ -43,7 +43,9 @@ To solve these pathologies without disrupting ongoing production calibration wor
 ### 2.1 Dynamic Internal Photosynthetic Acclimation Coupling (`PHOTO.for`)
 In native CROPGRO, leaf nitrogen concentration modulates photosynthesis via `AGEFAC` / `AGEFCC`. In Scheme B, this response is coupled with the macroscopic Nitrogen Nutrition Index:
 $$NNI = \frac{\text{PCNL}}{N_c(W_{\text{eff}})}$$
-where $W_{\text{eff}} = \frac{CWAD + \sum \text{HARVEST\_DRY}}{1000.0}$ (t DM/ha), and $N_c(W_{\text{eff}}) = a \cdot [\max(W_0, W_{\text{eff}})]^{-b}$ ($a = 4.85\%$, $b = 0.38$, $W_0 = 1.00\text{ t DM/ha}$).
+where $W_{\text{eff}} = \frac{CWAD + \sum \text{HARVEST\_DRY}}{1000.0}$ (t DM/ha), and the upgraded asymptotic lower-bound critical dilution curve is:
+$$N_c(W_{\text{eff}}) = N_{c,\infty} + (a - N_{c,\infty}) \cdot [\max(W_0, W_{\text{eff}})]^{-b}$$
+($a = 4.85\%$, $b = 0.38$, $W_0 = 1.00\text{ t DM/ha}$, $N_{c,\infty} = 1.70\%$).
 
 The coupled photosynthesis factor is defined as:
 $$AGEFAC_{\text{CNC}} = AGEFAC_{\text{native}} \cdot \mathcal{S}(NNI)$$
@@ -61,7 +63,7 @@ $$LFSEN_{\text{actual}} = \min\left(LFSEN_{\text{native}}, \; \gamma_{\text{sen}
 where $\gamma_{\text{sen}} \in [0.85, 0.95]$ (default $0.90$), and $\delta_{\text{sen}} \in [0.0, 0.015]$ (default $0.015$ in Fortran patch for basal canopy turnover when $WLDOTN = 0$).
 - **Mathematical Invariant**:
   $$ALFDOT_{\text{net}} = WLDOTN - LFSEN_{\text{actual}} \ge (1.0 - \gamma_{\text{sen}}) \cdot WLDOTN - \delta_{\text{sen}} \cdot WTLF$$
-  Under active vegetative growth, this mathematically guarantees that daily nitrogen mobilization cannot exceed $(1 - \gamma)$ of daily new leaf growth, preserving canopy leaf area index (LAI) and preventing the premature defoliation death spiral. When new leaf growth ceases ($WLDOTN = 0$), the standing buffer $\delta \cdot WTLF$ prevents unnatural freezing of mobilization senescence.
+  Under active vegetative growth, this mathematically guarantees that daily nitrogen mobilization cannot exceed $(1 - \gamma)$ of daily new leaf growth, preserving canopy leaf area index (LAI) and preventing the premature defoliation death spiral. When new leaf growth ceases ($WLDOTN = 0$), the standing buffer $\delta \cdot WTLF$ prevents unnatural freezing of mobilization senescence. (Note: Subject to Stage R1-R3 physiological audit regarding functional leaf protein vs storage pool separation).
 
 ### 2.3 Strict Analytical Mass Balance Conservation (`mass_balance.py`)
 Plant nitrogen balance follows the exact telescoping identity:
@@ -218,7 +220,7 @@ Verification suite executed by `build_and_verify_dssat.py`:
 
 ## 5. Verification & QA Status
 
-- **Subproject Unit & Integration Tests**: All 67 tests in `subprojects/critical_n/tests/` PASS (66 passed, 1 skipped, 0 failed).
+- **Subproject Unit & Integration Tests**: Comprehensive tests in `subprojects/critical_n/tests/` PASS (75+ tests covering asymptotic CNC, strict harvest continuity Delta NNI = 0, PEST++ zero-residual relaxation, PyEMU Pst attachment, and end-to-end PEST++ ies binary execution).
 - **Fortran Fixed-Format Compliance**: All patched Fortran files (`PHOTO_CNC.FOR`, `SENES_CNC.FOR`, `CROPGRO_CNC.FOR`) verified against 72-column limits (**0 violations**).
 - **Toolchain & Compilation Health**: GNU Fortran 16.2.0, CMake 4.4.2, Ninja 1.13.2 verified via `test_dssat_compiler_and_binary.py`.
 - **Sandbox Binaries**: `dscsm048_vanilla.exe` and `dscsm048_cnc.exe` compiled and verified in `subprojects/critical_n/bin/`.

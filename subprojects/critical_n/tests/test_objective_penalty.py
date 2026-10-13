@@ -164,3 +164,18 @@ def test_pseudo_huber_method_in_compute_cnc_objective_penalty():
     expected = 2.0 * pseudo_huber_loss(1.40 - 1.30, delta=0.50)
     assert loss_out == pytest.approx(expected, rel=1e-6)
     assert comps[0].relaxed_residual == pytest.approx(relaxed_pseudo_huber_residual(1.40, 1.00, 1.30, delta=0.50), rel=1e-6)
+
+
+def test_zero_nni_penalized_and_sentinels_skipped():
+    """Verify nni_val == 0.0 (severe starvation) is penalized, whereas sentinels are skipped."""
+    # N0 target interval is [0.40, 0.70].
+    # nni_val == 0.0 must be penalized: violation = 0.40 - 0.0 = 0.40, quadratic loss = 0.16.
+    loss_zero, comps_zero = compute_cnc_objective_penalty({"N0": [0.0]}, default_weight=1.0)
+    assert len(comps_zero) == 1
+    assert loss_zero == pytest.approx(0.40 ** 2, rel=1e-6)
+    assert comps_zero[0].relaxed_residual < 0.0
+
+    # Negative sentinel (-99.0 or -1.0) must be skipped:
+    loss_sentinel, comps_sentinel = compute_cnc_objective_penalty({"N0": [-99.0, -1.0]}, default_weight=1.0)
+    assert len(comps_sentinel) == 0
+    assert loss_sentinel == 0.0

@@ -22,6 +22,7 @@ from subprojects.critical_n.adapters.pest_cnc_exporter import export_pest_cnc
 from subprojects.critical_n.core.dilution_curve import (
     DEFAULT_CNC_A,
     DEFAULT_CNC_B,
+    DEFAULT_CNC_NC_INF,
     DEFAULT_CNC_W0,
 )
 
@@ -61,10 +62,26 @@ def parse_args() -> argparse.Namespace:
         help=f"Biomass dilution threshold in t DM/ha (default: {DEFAULT_CNC_W0})",
     )
     parser.add_argument(
+        "--cnc-nc-inf",
+        type=float,
+        default=DEFAULT_CNC_NC_INF,
+        help=f"Asymptotic lower-bound nitrogen concentration (default: {DEFAULT_CNC_NC_INF})",
+    )
+    parser.add_argument(
         "--fruit-n-pct",
         type=float,
         default=1.78,
         help="Fruit dry basis N percentage (default: 1.78)",
+    )
+    parser.add_argument(
+        "--include-r-tol",
+        action="store_true",
+        help="Include R_TOL relaxed Pseudo-Huber residual column (default: False)",
+    )
+    parser.add_argument(
+        "--strict-treatment-mapping",
+        action="store_true",
+        help="Raise error if a treatment has no N level mapping (default: False)",
     )
     return parser.parse_args()
 
@@ -83,7 +100,10 @@ def main() -> int:
             cnc_a=args.cnc_a,
             cnc_b=args.cnc_b,
             cnc_w0=args.cnc_w0,
+            cnc_nc_inf=args.cnc_nc_inf,
             default_fruit_n_pct=args.fruit_n_pct,
+            include_r_tol=args.include_r_tol,
+            strict_treatment_mapping=args.strict_treatment_mapping,
         )
         line_count = len(out_path.read_text(encoding="utf-8").splitlines())
         print(f"Successfully generated {out_path} ({line_count} lines)")

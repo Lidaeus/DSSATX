@@ -70,7 +70,7 @@ def validate_no_active_cnc_params(
     found_invariants: list[str] = []
 
     for _, row in df.iterrows():
-        p_name = str(row["name"]).strip()
+        p_name = str(row["name"]).strip().upper()
         status = str(row["status"]).strip().lower()
         if p_name in cnc_params:
             if status == "active":
