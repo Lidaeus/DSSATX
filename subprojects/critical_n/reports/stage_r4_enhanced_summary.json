@@ -1,0 +1,109 @@
+{
+  "label": "X_0.88_TB2_10.7_FR_0.86_SL_168_SN_0.285_PG_0.062",
+  "score": 169.94382211921283,
+  "26SP": {
+    "term_yield_nrmse": 5.819916061627409,
+    "term_yield_r2": 0.6552915998710375,
+    "term_yield_nse": 0.5774742483461621,
+    "term_yield_d": 0.869553234696906,
+    "term_dry_nrmse": 13.287524926636186,
+    "all_yield_nrmse": 11.964649172156797,
+    "all_yield_nse": 0.9549225010368971,
+    "all_yield_d": 0.9887932121503419,
+    "lai_nrmse": 26.721204270998204,
+    "lai_r2": 0.8639795817700381,
+    "lai_nse": 0.7946312530317854,
+    "lai_d": 0.9374902081506853,
+    "lwad_nrmse": 21.159366177062125,
+    "lwad_nse": 0.8649608334839057,
+    "swad_nrmse": 22.943192791680364,
+    "swad_nse": 0.88013242883649,
+    "leaf_n_nrmse": 9.891130223229416,
+    "leaf_n_nse": -0.6320906503826236,
+    "stem_n_nrmse": 23.57716093531675,
+    "stem_n_nse": -1.1118663392636696,
+    "vwc_nrmse": 15.050307028430264,
+    "vwc_nse": 0.2817639320132912,
+    "final_lai_sim": 2.783
+  },
+  "25SP": {
+    "term_yield_nrmse": 17.78742524880028,
+    "term_yield_r2": 0.6786051113131106,
+    "term_yield_nse": -4.383369260854016,
+    "term_yield_d": 0.4996118132972859,
+    "term_dry_nrmse": 16.34860682978713,
+    "all_yield_nrmse": 35.94478356515891,
+    "all_yield_nse": 0.5679209317128924,
+    "all_yield_d": 0.8907763001793578,
+    "lai_nrmse": 35.543241201346845,
+    "lai_r2": 0.9423872964088151,
+    "lai_nse": 0.7009320496520419,
+    "lai_d": 0.9039049704154036,
+    "lwad_nrmse": 25.273799733106507,
+    "lwad_nse": 0.825789742061315,
+    "swad_nrmse": 24.256817255755827,
+    "swad_nse": 0.8960210879469006,
+    "leaf_n_nrmse": 13.240617789750923,
+    "leaf_n_nse": -13.223461297895673,
+    "stem_n_nrmse": 38.87532311459258,
+    "stem_n_nse": -57.03756856988895,
+    "vwc_nrmse": 15.83853387458081,
+    "vwc_nse": -0.07072596808508402,
+    "final_lai_sim": NaN
+  },
+  "25FA": {
+    "term_yield_nrmse": 154.38844723657255,
+    "term_yield_r2": 0.6272791653270757,
+    "term_yield_nse": -189.15075772121594,
+    "term_yield_d": 0.11282209520371167,
+    "term_dry_nrmse": 168.3029840537614,
+    "all_yield_nrmse": 145.6224541813186,
+    "all_yield_nse": -14.424817126237032,
+    "all_yield_d": 0.4336176264745565,
+    "lai_nrmse": 72.59551054773604,
+    "lai_r2": 0.8608691019905237,
+    "lai_nse": -1.6337471229036322,
+    "lai_d": 0.5660292815106371,
+    "lwad_nrmse": 81.7768230309831,
+    "lwad_nse": -0.68827929873768,
+    "swad_nrmse": 48.53320395473911,
+    "swad_nse": 0.32484032233264515,
+    "leaf_n_nrmse": 5.621962506091411,
+    "leaf_n_nse": -0.05227981450436103,
+    "stem_n_nrmse": 7.764744333169281,
+    "stem_n_nse": -0.1734508018902574,
+    "vwc_nrmse": 16.267148488055092,
+    "vwc_nse": -1.790343715294429,
+    "final_lai_sim": NaN
+  },
+  "key_parameters_changed": {
+    "XFRT": {
+      "stage_r4_value": 0.926654,
+      "enhanced_value": 0.88
+    },
+    "TB2": {
+      "stage_r4_value": 10.6878,
+      "enhanced_value": 10.688
+    },
+    "FRSTMF": {
+      "stage_r4_value": 0.86,
+      "enhanced_value": 0.86
+    },
+    "FRLFF": {
+      "stage_r4_value": 0.118127,
+      "enhanced_value": 0.135
+    },
+    "SLAVR": {
+      "stage_r4_value": 167.95,
+      "enhanced_value": 168.0
+    },
+    "SENPOR_LATE": {
+      "stage_r4_value": 0.285,
+      "enhanced_value": 0.285
+    },
+    "PGEFF": {
+      "stage_r4_value": 0.0624424,
+      "enhanced_value": 0.0624
+    }
+  }
+}
