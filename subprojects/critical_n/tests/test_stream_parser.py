@@ -52,13 +52,13 @@ def _write_sample_plant_n(path: Path) -> Path:
 def _write_sample_fresh_wt(path: Path) -> Path:
     content = """*Fresh Weight Output File
 *RUN   1        : CRGRO048 XXQL2501 2
-@YEAR DOY   DAS   DAP    CHPDT    CHFPW    HPODW
- 2025 075     8     0      0.0      0.0      0.0
- 2025 100    33    25    150.0   1200.0     50.0
+@YEAR DOY   DAS   DAP    CHPDT    CHFPW    HPODW   CHPDTN
+ 2025 075     8     0      0.0      0.0      0.0      0.0
+ 2025 100    33    25    150.0   1200.0     50.0      2.7
 *RUN   2        : CRGRO048 XXQL2501 3
-@YEAR DOY   DAS   DAP    CHPDT    CHFPW    HPODW
- 2025 075     8     0      0.0      0.0      0.0
- 2025 100    33    25    180.0   1400.0     60.0
+@YEAR DOY   DAS   DAP    CHPDT    CHFPW    HPODW   CHPDTN
+ 2025 075     8     0      0.0      0.0      0.0      0.0
+ 2025 100    33    25    180.0   1400.0     60.0      3.2
 """
     path.write_text(content, encoding="utf-8")
     return path
@@ -85,6 +85,7 @@ def test_stream_parser_basic_synthetic(tmp_path):
     assert run1[2].cwad == 500.0
     assert run1[2].cnad == 20.0
     assert run1[2].chpdt == 150.0
+    assert run1[2].chpdtn == 2.7
 
     run2 = merged[2]
     assert len(run2) == 2

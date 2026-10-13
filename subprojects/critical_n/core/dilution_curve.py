@@ -18,6 +18,8 @@ from typing import Optional, Union
 DEFAULT_CNC_A: float = 4.85      # Baseline critical N at W <= W0 (%)
 DEFAULT_CNC_B: float = 0.38      # Dilution exponent slope (dimensionless)
 DEFAULT_CNC_W0: float = 1.00     # Canopy closure threshold (t DM/ha)
+DEFAULT_CNC_NC_INF: float = 1.70 # Asymptotic lower bound for multi-harvest crops (%)
+DEFAULT_CNC_C_INF: float = 1.70  # Standard alias
 DEFAULT_CNC_GAMMA: float = 0.65  # Scheme B photo-response slope
 DEFAULT_CNC_NNIMIN: float = 0.30 # Scheme B minimum photo floor
 SENTINEL_VALUE: float = -99.0    # Fixed-column missing/pre-emergence sentinel
@@ -28,8 +30,12 @@ def critical_n_concentration(
     a: float = DEFAULT_CNC_A,
     b: float = DEFAULT_CNC_B,
     w0: float = DEFAULT_CNC_W0,
+    nc_inf: float = DEFAULT_CNC_NC_INF,
 ) -> float:
-    """Compute Greenwood-Lemaire critical nitrogen concentration Nc (%).
+    """Compute critical nitrogen concentration Nc (%) with asymptotic lower bound.
+
+    Formulation:
+        Nc(W) = Nc_inf + (a - Nc_inf) * [max(W0, W)]^(-b)
 
     Parameters
     ----------
@@ -42,6 +48,10 @@ def critical_n_concentration(
     w0 : float, optional
         Canopy closure dry biomass threshold (t DM/ha) below which Nc remains constant at `a`.
         Default 1.00 t DM/ha.
+    nc_inf : float, optional
+        Asymptotic lower-bound nitrogen concentration (%), default 1.70%.
+        Guarantees that Nc(W) does not decay to zero under large cumulative yields.
+        When nc_inf == 0.0, reduces to the classic Greenwood-Lemaire power-law model.
 
     Returns
     -------
@@ -51,12 +61,24 @@ def critical_n_concentration(
     Raises
     ------
     ValueError
-        If w < 0, a <= 0, b < 0, or w0 <= 0.
+        If w < 0, a <= 0, b < 0, w0 <= 0, nc_inf < 0, nc_inf > a, or on NaN/Inf.
     """
-    if math.isnan(w) or math.isnan(a) or math.isnan(b) or math.isnan(w0):
-        raise ValueError(f"Parameters and inputs must not be NaN: w={w}, a={a}, b={b}, w0={w0}")
-    if math.isinf(w) or math.isinf(a) or math.isinf(b) or math.isinf(w0):
-        raise ValueError(f"Parameters and inputs must not be infinite: w={w}, a={a}, b={b}, w0={w0}")
+    if (
+        math.isnan(w)
+        or math.isnan(a)
+        or math.isnan(b)
+        or math.isnan(w0)
+        or math.isnan(nc_inf)
+    ):
+        raise ValueError(f"Parameters and inputs must not be NaN: w={w}, a={a}, b={b}, w0={w0}, nc_inf={nc_inf}")
+    if (
+        math.isinf(w)
+        or math.isinf(a)
+        or math.isinf(b)
+        or math.isinf(w0)
+        or math.isinf(nc_inf)
+    ):
+        raise ValueError(f"Parameters and inputs must not be infinite: w={w}, a={a}, b={b}, w0={w0}, nc_inf={nc_inf}")
     if w < 0.0:
         raise ValueError(f"Biomass w must be non-negative, got {w}")
     if a <= 0.0:
@@ -65,9 +87,13 @@ def critical_n_concentration(
         raise ValueError(f"Parameter b must be non-negative, got {b}")
     if w0 <= 0.0:
         raise ValueError(f"Threshold w0 must be positive, got {w0}")
+    if nc_inf < 0.0:
+        raise ValueError(f"Asymptotic limit nc_inf must be non-negative, got {nc_inf}")
+    if nc_inf > a:
+        raise ValueError(f"Asymptotic limit nc_inf ({nc_inf}) cannot exceed seedling maximum a ({a})")
 
     w_eff = max(w0, w)
-    return a * (w_eff ** (-b))
+    return nc_inf + (a - nc_inf) * (w_eff ** (-b))
 
 
 def nni(

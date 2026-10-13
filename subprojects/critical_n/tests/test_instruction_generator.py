@@ -55,6 +55,17 @@ def test_generate_pest_cnc_instructions_pyemu_validation(tmp_path):
     obs_names = pyemu.pst_utils.parse_ins_file(str(ins_file))
     assert obs_names == ["cnc_t1_d33", "cnc_t1_d73"]
 
+    # Test R_TOL column slice instruction generation
+    targets_rtol = [
+        CNCObservationTarget(obs_name="cnc_rtol_d33", run_id=1, treatment_id=1, das=33, variable="R_TOL"),
+    ]
+    ins_rtol_file = tmp_path / "PestCNC_rtol.ins"
+    generate_pest_cnc_instructions(tmp_path, targets_rtol, ins_rtol_file)
+    content_rtol = ins_rtol_file.read_text(encoding="utf-8")
+    assert "[cnc_rtol_d33]65:74" in content_rtol
+    obs_names_rtol = pyemu.pst_utils.parse_ins_file(str(ins_rtol_file))
+    assert obs_names_rtol == ["cnc_rtol_d33"]
+
 
 def test_pestpp_execution_and_extraction(tmp_path):
     """Verify that pestpp-ies executable executes and extracts exact NNI numbers via PestCNC.OUT.ins."""

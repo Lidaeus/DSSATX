@@ -123,6 +123,8 @@ def build_cnc_observation_targets(
     n_points_per_treatment: int = 4,
     weight: float = DEFAULT_VARIANCE_NORMALIZED_WEIGHT,
     group_name: str = "cnc_nni",
+    use_relaxation: bool = True,
+    strict_treatment_mapping: bool = True,
 ) -> list[CNCObservationTarget]:
     """Build sparse CNC observation targets for all treatments in run_dir.
 
@@ -132,13 +134,22 @@ def build_cnc_observation_targets(
         DSSAT run directory.
     treatment_n_levels : Mapping[int, str], str, Path, or DataFrame, optional
         Dict or metadata CSV mapping treatment_id -> nitrogen level ('N0', 'N1', 'N2', 'N3').
-        If None, attempts auto-discovery from treatment_metadata.csv, falling back to 'N2'.
+        If None, attempts auto-discovery from treatment_metadata.csv.
     n_points_per_treatment : int, optional
         Number of phenological subsampling dates per treatment, default 4 (3~5 range).
     weight : float, optional
         PEST observation weight w, default 0.25 (range [0.05, 0.50]).
     group_name : str, optional
         PEST observation group name, default 'cnc_nni'.
+    use_relaxation : bool, optional
+        If True (default for R0), implements zero-residual one-sided relaxation projection
+        operator: targets R_TOL with target_value = 0.000000. Within physiological tolerance
+        intervals (e.g. [1.00, 1.30] for N3 luxury, [0.40, 0.70] for N0 deficit), residual
+        is exactly 0.000000.
+        If False, targets NNI with fixed center point values.
+    strict_treatment_mapping : bool, optional
+        If True (default for R0), raises ValueError if a treatment has no N level mapping,
+        prohibiting silent fallback to 'N2'.
 
     Returns
     -------
@@ -156,8 +167,16 @@ def build_cnc_observation_targets(
         if not recs:
             continue
         trt_id = recs[0].treatment_id
-        n_level = n_map.get(trt_id, "N2")  # default to near-critical N2
-        target_val = STANDARD_TARGET_NNI.get(n_level, 1.00)
+
+        if trt_id not in n_map:
+            if strict_treatment_mapping:
+                raise ValueError(
+                    f"Treatment {trt_id} has no nitrogen level mapping in {n_map}. "
+                    f"Silent fallback to 'N2' is prohibited by R0 protocol."
+                )
+            n_level = "N2"
+        else:
+            n_level = n_map[trt_id]
 
         chosen_das = select_phenological_subsampling_dates(
             recs, n_points=n_points_per_treatment
@@ -165,13 +184,20 @@ def build_cnc_observation_targets(
 
         for das in chosen_das:
             obs_name = make_obs_name(trt_id, das)
+            if use_relaxation:
+                target_val = 0.0
+                obs_var = "R_TOL"
+            else:
+                target_val = STANDARD_TARGET_NNI.get(n_level, 1.00)
+                obs_var = "NNI"
+
             targets.append(
                 CNCObservationTarget(
                     obs_name=obs_name,
                     run_id=run_id,
                     treatment_id=trt_id,
                     das=das,
-                    variable="NNI",
+                    variable=obs_var,
                     target_value=target_val,
                     weight=weight,
                     group=group_name,

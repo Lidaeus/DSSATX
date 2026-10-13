@@ -28,6 +28,12 @@ def test_actual_cumulative_n_conc_calculation():
     )
     assert val == pytest.approx(3.6, rel=1e-5)
 
+    # With chpdtn explicitly supplied
+    val_explicit = actual_cumulative_n_conc(
+        cwad=2000.0, cnad=80.0, cum_harvest_dm=500.0, chpdtn=10.0
+    )
+    assert val_explicit == pytest.approx(3.6, rel=1e-5)
+
     # Pre-emergence (< 50 kg/ha DM) returns sentinel
     sentinel_val = actual_cumulative_n_conc(cwad=10.0, cnad=0.4)
     assert sentinel_val == SENTINEL_VALUE
@@ -35,6 +41,7 @@ def test_actual_cumulative_n_conc_calculation():
     # NaN returns sentinel
     assert actual_cumulative_n_conc(cwad=float("nan"), cnad=10.0) == SENTINEL_VALUE
     assert actual_cumulative_n_conc(cwad=100.0, cnad=float("nan")) == SENTINEL_VALUE
+    assert actual_cumulative_n_conc(cwad=100.0, cnad=1.0, chpdtn=float("nan")) == SENTINEL_VALUE
 
 
 def test_sawtooth_elimination_across_empirical_harvest():
@@ -108,3 +115,30 @@ def test_tracker_preserves_zero_harvest_during_vegetative_drop():
     assert s2.cum_harvest_dm == 0.0
     assert s2.cum_harvest_n == 0.0
     assert s2.w_eff == pytest.approx(0.45, rel=1e-5)
+
+
+def test_explicit_chpdtn_strict_continuity_at_harvest():
+    """Verify Delta W_eff == 0, Delta N_act,cum == 0, Delta NNI_cum == 0 at harvest day."""
+    tracker = CumulativeStateTracker(cnc_a=4.85, cnc_b=0.38, cnc_w0=1.0, cnc_nc_inf=1.70)
+
+    # Pre-harvest state: standing canopy has 3800 kg DM/ha, 170 kg N/ha
+    s_pre = tracker.step(das=70, cwad=3800.0, cnad=170.0, direct_chpdt=0.0, direct_chpdtn=0.0)
+    assert s_pre.chpdtn == 0.0
+
+    # Harvest event on day 71: 600 kg DM mature fruit removed containing 12.0 kg N
+    # Standing canopy drops to: CWAD = 3200 kg DM/ha, CNAD = 158.0 kg N/ha
+    # Cumulative harvested amounts: direct_chpdt = 600.0 kg/ha, direct_chpdtn = 12.0 kg N/ha
+    s_post = tracker.step(das=71, cwad=3200.0, cnad=158.0, direct_chpdt=600.0, direct_chpdtn=12.0)
+    assert s_post.chpdtn == 12.0
+
+    # 1. Delta W_eff must be strictly 0
+    delta_w_eff = s_post.w_eff - s_pre.w_eff
+    assert abs(delta_w_eff) < 1e-12, f"Delta W_eff must be 0, got {delta_w_eff}"
+
+    # 2. Delta N_act,cum must be strictly 0
+    delta_n_act = s_post.n_act_cum - s_pre.n_act_cum
+    assert abs(delta_n_act) < 1e-12, f"Delta N_act,cum must be 0, got {delta_n_act}"
+
+    # 3. Delta NNI_cum must be strictly 0
+    delta_nni = s_post.nni_val - s_pre.nni_val
+    assert abs(delta_nni) < 1e-12, f"Delta NNI_cum must be 0, got {delta_nni}"

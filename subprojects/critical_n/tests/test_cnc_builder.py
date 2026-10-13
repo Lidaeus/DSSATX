@@ -51,25 +51,48 @@ def test_build_cnc_observation_targets_and_attach_to_pst(tmp_path):
         encoding="utf-8",
     )
 
-    targets = build_cnc_observation_targets(
+    # Test 1: Default R0 one-sided relaxation targets (target_value = 0.0, variable = 'R_TOL')
+    targets_relaxed = build_cnc_observation_targets(
         tmp_path,
         treatment_n_levels={1: "N3"},
         n_points_per_treatment=3,
         weight=0.25,
+        use_relaxation=True,
     )
-    assert len(targets) == 3
-    assert targets[0].group == "cnc_nni"
-    assert targets[0].target_value == 1.10  # N3 target
-    assert targets[0].weight == 0.25
+    assert len(targets_relaxed) == 3
+    assert targets_relaxed[0].group == "cnc_nni"
+    assert targets_relaxed[0].target_value == 0.0  # Zero-residual target
+    assert targets_relaxed[0].variable == "R_TOL"
+    assert targets_relaxed[0].weight == 0.25
 
-    # Create test Pst
+    # Test 2: Legacy unrelaxed center targets (target_value = 1.10 for N3, variable = 'NNI')
+    targets_legacy = build_cnc_observation_targets(
+        tmp_path,
+        treatment_n_levels={1: "N3"},
+        n_points_per_treatment=3,
+        weight=0.25,
+        use_relaxation=False,
+    )
+    assert targets_legacy[0].target_value == 1.10
+    assert targets_legacy[0].variable == "NNI"
+
+    # Test 3: Strict mapping enforcement raises ValueError on missing treatment
+    with pytest.raises(ValueError, match="prohibited by R0 protocol"):
+        build_cnc_observation_targets(
+            tmp_path,
+            treatment_n_levels={},  # Empty mapping
+            strict_treatment_mapping=True,
+        )
+
+    # Create test Pst and attach relaxed targets
     pst = pyemu.Pst.from_par_obs_names(["p1"], ["o1"])
 
-    updated_pst = attach_cnc_to_pst(pst, targets)
+    updated_pst = attach_cnc_to_pst(pst, targets_relaxed)
     assert "PestCNC.OUT.ins" in updated_pst.instruction_files
     assert "PestCNC.OUT" in updated_pst.output_files
     assert len(updated_pst.observation_data) == 4  # 1 initial + 3 CNC
     assert "cnc_nni" in set(updated_pst.observation_data["obgnme"])
+    assert updated_pst.observation_data.loc[targets_relaxed[0].obs_name, "obsval"] == 0.0
 
 
 def test_select_phenological_subsampling_dates_boundaries():

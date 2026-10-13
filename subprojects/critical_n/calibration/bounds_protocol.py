@@ -25,6 +25,8 @@ CNC_PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     "CNC_A": (2.0, 8.0),       # Maximum seedling critical N percentage envelope (%)
     "CNC_B": (0.10, 0.70),     # Dilution exponent slope envelope
     "CNC_W0": (0.20, 3.00),    # Canopy closure dry biomass threshold (t DM/ha)
+    "CNC_NC_INF": (0.50, 3.00),# Asymptotic lower-bound nitrogen concentration (%)
+    "CNC_C_INF": (0.50, 3.00), # Standard alias for CNC_NC_INF
     "CNC_GAMMA": (0.05, 2.50), # Scheme B photosynthetic sensitivity slope
     "CNC_NNIMIN": (0.10, 0.60),# Scheme B minimum photosynthetic floor
 }
@@ -33,6 +35,8 @@ CNC_FROZEN_INVARIANTS: dict[str, float] = {
     "CNC_A": 4.85,
     "CNC_B": 0.38,
     "CNC_W0": 1.00,
+    "CNC_NC_INF": 1.70,
+    "CNC_C_INF": 1.70,
     "CNC_GAMMA": 0.65,
     "CNC_NNIMIN": 0.30,
 }

@@ -17,6 +17,7 @@ from typing import Optional, Sequence, Tuple
 from subprojects.critical_n.core.dilution_curve import (
     DEFAULT_CNC_A,
     DEFAULT_CNC_B,
+    DEFAULT_CNC_NC_INF,
     DEFAULT_CNC_W0,
     SENTINEL_VALUE,
     critical_n_concentration,
@@ -42,6 +43,7 @@ class BiomassStepResult:
     nc_crit: float          # Critical N concentration Nc(W_eff) (%) or SENTINEL_VALUE
     nni_val: float          # NNI = n_act_cum / nc_crit or SENTINEL_VALUE
     is_valid: bool          # True if W_eff >= MIN_CANOPY_BIOMASS_T_HA and CWAD > 0
+    chpdtn: float = 0.0     # Explicit state variable: cumulative mature fruit total N (kg N/ha)
 
 
 def effective_biomass(
@@ -78,6 +80,7 @@ def actual_cumulative_n_conc(
     cnad: float,
     cum_harvest_dm: float = 0.0,
     cum_harvest_n: float = 0.0,
+    chpdtn: Optional[float] = None,
 ) -> float:
     """Calculate cumulative aboveground total nitrogen concentration N_act,cum (%).
 
@@ -91,6 +94,9 @@ def actual_cumulative_n_conc(
         Cumulative removed harvested fruit dry weight (kg DM/ha).
     cum_harvest_n : float, optional
         Cumulative removed harvested fruit nitrogen (kg N/ha).
+    chpdtn : float, optional
+        Explicit cumulative harvested fruit nitrogen alias (kg N/ha).
+        Overrides cum_harvest_n if provided.
 
     Returns
     -------
@@ -102,13 +108,15 @@ def actual_cumulative_n_conc(
         or math.isnan(cnad)
         or math.isnan(cum_harvest_dm)
         or math.isnan(cum_harvest_n)
+        or (chpdtn is not None and math.isnan(chpdtn))
         or math.isinf(cwad)
         or math.isinf(cnad)
     ):
         return SENTINEL_VALUE
 
+    effective_harvest_n = chpdtn if chpdtn is not None else cum_harvest_n
     total_dm_kg = max(0.0, cwad) + max(0.0, cum_harvest_dm)
-    total_n_kg = max(0.0, cnad) + max(0.0, cum_harvest_n)
+    total_n_kg = max(0.0, cnad) + max(0.0, effective_harvest_n)
 
     if total_dm_kg < (MIN_CANOPY_BIOMASS_T_HA * 1000.0) or total_dm_kg <= 0.0:
         return SENTINEL_VALUE
@@ -124,11 +132,13 @@ class CumulativeStateTracker:
         cnc_a: float = DEFAULT_CNC_A,
         cnc_b: float = DEFAULT_CNC_B,
         cnc_w0: float = DEFAULT_CNC_W0,
+        cnc_nc_inf: float = DEFAULT_CNC_NC_INF,
         default_fruit_n_pct: float = 1.78,
     ) -> None:
         self.cnc_a = cnc_a
         self.cnc_b = cnc_b
         self.cnc_w0 = cnc_w0
+        self.cnc_nc_inf = cnc_nc_inf
         self.default_fruit_n_pct = default_fruit_n_pct
         self.cum_harvest_dm: float = 0.0
         self.cum_harvest_n: float = 0.0
@@ -150,6 +160,7 @@ class CumulativeStateTracker:
         harvest_dm: Optional[float] = None,
         harvest_n: Optional[float] = None,
         direct_chpdt: Optional[float] = None,
+        direct_chpdtn: Optional[float] = None,
     ) -> BiomassStepResult:
         """Advance by one daily time step and return full state metrics.
 
@@ -168,32 +179,43 @@ class CumulativeStateTracker:
         direct_chpdt : float, optional
             Direct cumulative harvested pod dry weight from FreshWt.OUT (kg DM/ha).
             If provided, overrides incremental harvest_dm accumulation.
+        direct_chpdtn : float, optional
+            Direct cumulative harvested pod N (kg N/ha) (CHPDTN explicit state).
+            If provided, directly sets cumulative fruit nitrogen state.
         """
-        # Handle harvest accumulation
+        # Handle dry matter harvest accumulation
         if direct_chpdt is not None:
             self.cum_harvest_dm = max(0.0, direct_chpdt)
+        elif harvest_dm is not None:
+            self.cum_harvest_dm += max(0.0, harvest_dm)
+        elif self._prev_cwad is not None and cwad < self._prev_cwad:
+            # Automatic harvest drop detection: if CWAD drops and no senescence shock
+            drop_dm = self._prev_cwad - cwad
+            if drop_dm > 20.0:  # harvest threshold
+                self.cum_harvest_dm += drop_dm
+
+        # Handle nitrogen harvest accumulation
+        if direct_chpdtn is not None:
+            self.cum_harvest_n = max(0.0, direct_chpdtn)
+        elif direct_chpdt is not None:
             # Estimate harvest N if not directly accumulated
             if harvest_n is not None:
                 self.cum_harvest_n += max(0.0, harvest_n)
             else:
                 self.cum_harvest_n = self.cum_harvest_dm * (self.default_fruit_n_pct / 100.0)
-        else:
-            if harvest_dm is not None:
-                self.cum_harvest_dm += max(0.0, harvest_dm)
-                if harvest_n is not None:
-                    self.cum_harvest_n += max(0.0, harvest_n)
+        elif harvest_dm is not None:
+            if harvest_n is not None:
+                self.cum_harvest_n += max(0.0, harvest_n)
+            else:
+                self.cum_harvest_n += max(0.0, harvest_dm) * (self.default_fruit_n_pct / 100.0)
+        elif self._prev_cwad is not None and cwad < self._prev_cwad:
+            drop_dm = self._prev_cwad - cwad
+            if drop_dm > 20.0:  # harvest threshold
+                drop_n = max(0.0, (self._prev_cnad or 0.0) - cnad)
+                if drop_n > 0.0:
+                    self.cum_harvest_n += drop_n
                 else:
-                    self.cum_harvest_n += max(0.0, harvest_dm) * (self.default_fruit_n_pct / 100.0)
-            elif self._prev_cwad is not None and cwad < self._prev_cwad:
-                # Automatic harvest drop detection: if CWAD drops and no senescence shock
-                drop_dm = self._prev_cwad - cwad
-                if drop_dm > 20.0:  # harvest threshold
-                    self.cum_harvest_dm += drop_dm
-                    drop_n = max(0.0, (self._prev_cnad or 0.0) - cnad)
-                    if drop_n > 0.0:
-                        self.cum_harvest_n += drop_n
-                    else:
-                        self.cum_harvest_n += drop_dm * (self.default_fruit_n_pct / 100.0)
+                    self.cum_harvest_n += drop_dm * (self.default_fruit_n_pct / 100.0)
 
         self._prev_cwad = cwad
         self._prev_cnad = cnad
@@ -215,7 +237,7 @@ class CumulativeStateTracker:
         is_valid = (w_eff >= MIN_CANOPY_BIOMASS_T_HA and cwad > 0 and n_act_cum != SENTINEL_VALUE)
 
         if is_valid:
-            nc_crit = critical_n_concentration(w_eff, self.cnc_a, self.cnc_b, self.cnc_w0)
+            nc_crit = critical_n_concentration(w_eff, self.cnc_a, self.cnc_b, self.cnc_w0, self.cnc_nc_inf)
             nni_val = nni(n_act_cum, nc_crit)
         else:
             nc_crit = SENTINEL_VALUE
@@ -234,6 +256,7 @@ class CumulativeStateTracker:
             nc_crit=nc_crit,
             nni_val=nni_val,
             is_valid=is_valid,
+            chpdtn=self.cum_harvest_n,
         )
 
 
@@ -247,6 +270,7 @@ def verify_sawtooth_elimination(
     cnc_a: float = DEFAULT_CNC_A,
     cnc_b: float = DEFAULT_CNC_B,
     cnc_w0: float = DEFAULT_CNC_W0,
+    cnc_nc_inf: float = DEFAULT_CNC_NC_INF,
 ) -> dict[str, float]:
     """Analytical verification of sawtooth jump elimination across harvest.
 
@@ -257,8 +281,8 @@ def verify_sawtooth_elimination(
     w_post = post_harvest_cwad / 1000.0
     n_act_pre = (pre_harvest_cnad / pre_harvest_cwad) * 100.0
     n_act_post = (post_harvest_cnad / post_harvest_cwad) * 100.0
-    nc_pre = critical_n_concentration(w_pre, cnc_a, cnc_b, cnc_w0)
-    nc_post = critical_n_concentration(w_post, cnc_a, cnc_b, cnc_w0)
+    nc_pre = critical_n_concentration(w_pre, cnc_a, cnc_b, cnc_w0, cnc_nc_inf)
+    nc_post = critical_n_concentration(w_post, cnc_a, cnc_b, cnc_w0, cnc_nc_inf)
     nni_pre = n_act_pre / nc_pre
     nni_post = n_act_post / nc_post
 
@@ -267,7 +291,7 @@ def verify_sawtooth_elimination(
     standing_delta_nc = nc_post - nc_pre
     standing_delta_nni = nni_post - nni_pre
 
-    # 2. Cumulative effective metrics
+    # 2. Cumulative effective metrics with explicit fruit CHPDTN
     cum_dm_pre = 0.0
     cum_n_pre = 0.0
     cum_dm_post = fruit_dm
@@ -277,8 +301,8 @@ def verify_sawtooth_elimination(
     w_eff_post = (post_harvest_cwad + cum_dm_post) / 1000.0
     n_eff_pre = ((pre_harvest_cnad + cum_n_pre) / (pre_harvest_cwad + cum_dm_pre)) * 100.0
     n_eff_post = ((post_harvest_cnad + cum_n_post) / (post_harvest_cwad + cum_dm_post)) * 100.0
-    nc_eff_pre = critical_n_concentration(w_eff_pre, cnc_a, cnc_b, cnc_w0)
-    nc_eff_post = critical_n_concentration(w_eff_post, cnc_a, cnc_b, cnc_w0)
+    nc_eff_pre = critical_n_concentration(w_eff_pre, cnc_a, cnc_b, cnc_w0, cnc_nc_inf)
+    nc_eff_post = critical_n_concentration(w_eff_post, cnc_a, cnc_b, cnc_w0, cnc_nc_inf)
     nni_eff_pre = n_eff_pre / nc_eff_pre
     nni_eff_post = n_eff_post / nc_eff_post
 

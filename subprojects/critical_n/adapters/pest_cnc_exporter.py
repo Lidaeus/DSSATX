@@ -26,6 +26,7 @@ from subprojects.critical_n.adapters.stream_parser import (
 from subprojects.critical_n.core.dilution_curve import (
     DEFAULT_CNC_A,
     DEFAULT_CNC_B,
+    DEFAULT_CNC_NC_INF,
     DEFAULT_CNC_W0,
     SENTINEL_VALUE,
 )
@@ -37,6 +38,7 @@ from subprojects.critical_n.core.effective_biomass import (
 PEST_CNC_FILENAME: str = "PestCNC.OUT"
 HEADER_TITLE: str = "*NITROGEN NUTRITION INDEX OBSERVATIONS\n"
 HEADER_COLUMNS: str = "@RUN TRT YEAR  DOY  DAS    CWAD_T     N_ACT   NC_CRIT        NNI\n"
+HEADER_COLUMNS_WITH_RTOL: str = "@RUN TRT YEAR  DOY  DAS    CWAD_T     N_ACT   NC_CRIT        NNI     R_TOL\n"
 
 
 def format_pest_cnc_line(
@@ -49,6 +51,7 @@ def format_pest_cnc_line(
     n_act: float,
     nc_crit: float,
     nni_val: float,
+    r_tol: Optional[float] = None,
 ) -> str:
     """Format a single record line into exact fixed-width fields.
 
@@ -62,6 +65,7 @@ def format_pest_cnc_line(
       n_act:  10 chars (35-44, 10.3f)
       nc_crit:10 chars (45-54, 10.3f)
       nni_val:10 chars (55-64, 10.3f)
+      r_tol:  10 chars (65-74, 10.3f, optional)
     """
     import math
 
@@ -70,7 +74,7 @@ def format_pest_cnc_line(
     safe_nc = -99.0 if (math.isnan(nc_crit) or math.isinf(nc_crit)) else nc_crit
     safe_nni = -99.0 if (math.isnan(nni_val) or math.isinf(nni_val)) else nni_val
 
-    return (
+    base_str = (
         f"{run_id:5d}"
         f"{trt_id:4d}"
         f"{year:5d}"
@@ -79,8 +83,12 @@ def format_pest_cnc_line(
         f"{safe_w:10.3f}"
         f"{safe_n:10.3f}"
         f"{safe_nc:10.3f}"
-        f"{safe_nni:10.3f}\n"
+        f"{safe_nni:10.3f}"
     )
+    if r_tol is not None:
+        safe_rtol = -99.0 if (math.isnan(r_tol) or math.isinf(r_tol)) else r_tol
+        return f"{base_str}{safe_rtol:10.3f}\n"
+    return f"{base_str}\n"
 
 
 def export_pest_cnc(
@@ -89,7 +97,10 @@ def export_pest_cnc(
     cnc_a: float = DEFAULT_CNC_A,
     cnc_b: float = DEFAULT_CNC_B,
     cnc_w0: float = DEFAULT_CNC_W0,
+    cnc_nc_inf: float = DEFAULT_CNC_NC_INF,
     default_fruit_n_pct: float = 1.78,
+    include_r_tol: bool = False,
+    treatment_n_levels: Optional[Mapping[int, str]] = None,
 ) -> Path:
     """Parse DSSAT outputs in `run_dir` and write `PestCNC.OUT`.
 
@@ -99,37 +110,52 @@ def export_pest_cnc(
         Directory containing PlantGro.OUT, PlantN.OUT, and optionally FreshWt.OUT.
     out_file : Path or str, optional
         Target path for output file. Default is `run_dir / "PestCNC.OUT"`.
-    cnc_a, cnc_b, cnc_w0 : float, optional
-        Critical dilution curve parameters. Default to frozen values (4.85, 0.38, 1.00).
+    cnc_a, cnc_b, cnc_w0, cnc_nc_inf : float, optional
+        Critical dilution curve parameters. Default to frozen values (4.85, 0.38, 1.00, 1.70).
     default_fruit_n_pct : float, optional
         Fruit dry-basis N concentration percentage (%), default 1.78%.
+    include_r_tol : bool, optional
+        If True, appends column R_TOL using physiological tolerance intervals.
+    treatment_n_levels : Mapping[int, str], optional
+        Mapping of treatment_id -> nitrogen level ('N0', 'N1', 'N2', 'N3').
 
     Returns
     -------
     Path
         Absolute path to the written PestCNC.OUT file.
     """
+    from subprojects.critical_n.core.objective_penalty import (
+        PHYSIOLOGICAL_NNI_INTERVALS,
+        relaxed_pseudo_huber_residual,
+    )
+
     dir_path = Path(run_dir)
     target_path = Path(out_file) if out_file else dir_path / PEST_CNC_FILENAME
 
     runs_data = load_merged_nitrogen_series(dir_path)
+    header_col = HEADER_COLUMNS_WITH_RTOL if include_r_tol else HEADER_COLUMNS
+
     if not runs_data:
         # Fallback empty rigid header with one sentinel row
+        sentinel_r_tol = -99.0 if include_r_tol else None
         target_path.write_text(
             HEADER_TITLE
-            + HEADER_COLUMNS
-            + format_pest_cnc_line(1, 1, -99, -99, -99, -99.0, -99.0, -99.0, -99.0),
+            + header_col
+            + format_pest_cnc_line(1, 1, -99, -99, -99, -99.0, -99.0, -99.0, -99.0, r_tol=sentinel_r_tol),
             encoding="utf-8",
         )
         return target_path
 
-    lines: list[str] = [HEADER_TITLE, HEADER_COLUMNS]
+    lines: list[str] = [HEADER_TITLE, header_col]
     tracker = CumulativeStateTracker(
         cnc_a=cnc_a,
         cnc_b=cnc_b,
         cnc_w0=cnc_w0,
+        cnc_nc_inf=cnc_nc_inf,
         default_fruit_n_pct=default_fruit_n_pct,
     )
+
+    n_map = treatment_n_levels or {}
 
     for run_id in sorted(runs_data.keys()):
         tracker.reset()
@@ -141,7 +167,17 @@ def export_pest_cnc(
                 cwad=rec.cwad,
                 cnad=rec.cnad,
                 direct_chpdt=rec.chpdt if rec.has_fresh_wt else None,
+                direct_chpdtn=rec.chpdtn if (rec.has_fresh_wt and rec.chpdtn > 0.0) else None,
             )
+
+            r_tol_val: Optional[float] = None
+            if include_r_tol:
+                if step_res.is_valid and step_res.nni_val > 0:
+                    n_level = n_map.get(rec.treatment_id, "N2")
+                    lo, hi = PHYSIOLOGICAL_NNI_INTERVALS.get(n_level, (0.85, 1.15))
+                    r_tol_val = relaxed_pseudo_huber_residual(step_res.nni_val, lo, hi)
+                else:
+                    r_tol_val = -99.0
 
             lines.append(
                 format_pest_cnc_line(
@@ -154,6 +190,7 @@ def export_pest_cnc(
                     n_act=step_res.n_act_cum,
                     nc_crit=step_res.nc_crit,
                     nni_val=step_res.nni_val,
+                    r_tol=r_tol_val,
                 )
             )
 
@@ -166,6 +203,7 @@ def export_cnc_dataframe(
     cnc_a: float = DEFAULT_CNC_A,
     cnc_b: float = DEFAULT_CNC_B,
     cnc_w0: float = DEFAULT_CNC_W0,
+    cnc_nc_inf: float = DEFAULT_CNC_NC_INF,
     default_fruit_n_pct: float = 1.78,
 ) -> pd.DataFrame:
     """Parse DSSAT outputs and return a tidy DataFrame of CNC trajectory states."""
@@ -177,6 +215,7 @@ def export_cnc_dataframe(
         cnc_a=cnc_a,
         cnc_b=cnc_b,
         cnc_w0=cnc_w0,
+        cnc_nc_inf=cnc_nc_inf,
         default_fruit_n_pct=default_fruit_n_pct,
     )
 
@@ -188,6 +227,7 @@ def export_cnc_dataframe(
                 cwad=rec.cwad,
                 cnad=rec.cnad,
                 direct_chpdt=rec.chpdt if rec.has_fresh_wt else None,
+                direct_chpdtn=rec.chpdtn if (rec.has_fresh_wt and rec.chpdtn > 0.0) else None,
             )
             rows.append(
                 {
@@ -200,6 +240,7 @@ def export_cnc_dataframe(
                     "cnad": rec.cnad,
                     "cum_harvest_dm": step_res.cum_harvest_dm,
                     "cum_harvest_n": step_res.cum_harvest_n,
+                    "chpdtn": step_res.chpdtn,
                     "w_standing": step_res.w_standing,
                     "w_eff": step_res.w_eff,
                     "n_act_standing": step_res.n_act_standing,

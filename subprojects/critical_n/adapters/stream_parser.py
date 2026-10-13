@@ -41,6 +41,7 @@ class FreshWtRecord:
     chpdt: float  # Cumulative harvested pod dry weight (kg/ha)
     chfpw: float = 0.0  # Cumulative fresh fruit weight (kg/ha)
     hpodw: float = 0.0  # Daily harvested pod weight (kg/ha)
+    chpdtn: float = 0.0  # Cumulative harvested mature fruit total N (kg N/ha)
 
 
 @dataclass(frozen=True)
@@ -55,6 +56,7 @@ class DailyMergedRecord:
     chpdt: float = 0.0
     hpodw: float = 0.0
     has_fresh_wt: bool = False
+    chpdtn: float = 0.0  # Cumulative harvested mature fruit total N (kg N/ha)
 
 
 def parse_plant_gro_stream(file_path: Union[str, Path]) -> dict[int, dict[int, PlantGroRecord]]:
@@ -186,7 +188,7 @@ def parse_fresh_wt_stream(file_path: Union[str, Path]) -> dict[int, dict[int, Fr
 
     fresh_data: dict[int, dict[int, FreshWtRecord]] = {}
     current_run: Optional[int] = None
-    idx_year = idx_doy = idx_das = idx_chpdt = idx_chfpw = idx_hpodw = None
+    idx_year = idx_doy = idx_das = idx_chpdt = idx_chfpw = idx_hpodw = idx_chpdtn = None
 
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         for line in f:
@@ -196,7 +198,7 @@ def parse_fresh_wt_stream(file_path: Union[str, Path]) -> dict[int, dict[int, Fr
                 run_token = parts[1].rstrip(":") if len(parts) > 1 else "1"
                 current_run = int(run_token) if run_token.isdigit() else 1
                 fresh_data[current_run] = {}
-                idx_year = idx_doy = idx_das = idx_chpdt = idx_chfpw = idx_hpodw = None
+                idx_year = idx_doy = idx_das = idx_chpdt = idx_chfpw = idx_hpodw = idx_chpdtn = None
                 continue
 
             if current_run is None:
@@ -210,6 +212,7 @@ def parse_fresh_wt_stream(file_path: Union[str, Path]) -> dict[int, dict[int, Fr
                 idx_chpdt = parts.index("CHPDT") if "CHPDT" in parts else None
                 idx_chfpw = parts.index("CHFPW") if "CHFPW" in parts else None
                 idx_hpodw = parts.index("HPODW") if "HPODW" in parts else None
+                idx_chpdtn = parts.index("CHPDTN") if "CHPDTN" in parts else None
                 continue
 
             if idx_chpdt is None or idx_das is None or line.startswith("*") or line.startswith("!"):
@@ -225,8 +228,9 @@ def parse_fresh_wt_stream(file_path: Union[str, Path]) -> dict[int, dict[int, Fr
                     doy = int(parts[idx_doy]) if idx_doy is not None else 0
                     chfpw = float(parts[idx_chfpw]) if (idx_chfpw is not None and len(parts) > idx_chfpw) else 0.0
                     hpodw = float(parts[idx_hpodw]) if (idx_hpodw is not None and len(parts) > idx_hpodw) else 0.0
+                    chpdtn = float(parts[idx_chpdtn]) if (idx_chpdtn is not None and len(parts) > idx_chpdtn) else 0.0
                     fresh_data[current_run][das] = FreshWtRecord(
-                        year=year, doy=doy, das=das, chpdt=chpdt, chfpw=chfpw, hpodw=hpodw
+                        year=year, doy=doy, das=das, chpdt=chpdt, chfpw=chfpw, hpodw=hpodw, chpdtn=chpdtn
                     )
                 except (ValueError, IndexError):
                     pass
@@ -298,6 +302,7 @@ def load_merged_nitrogen_series(
             fresh_rec = run_fresh.get(das)
             chpdt = fresh_rec.chpdt if fresh_rec else 0.0
             hpodw = fresh_rec.hpodw if fresh_rec else 0.0
+            chpdtn = fresh_rec.chpdtn if fresh_rec else 0.0
 
             records.append(
                 DailyMergedRecord(
@@ -311,6 +316,7 @@ def load_merged_nitrogen_series(
                     chpdt=chpdt,
                     hpodw=hpodw,
                     has_fresh_wt=has_fresh_wt,
+                    chpdtn=chpdtn,
                 )
             )
         merged[run_id] = records

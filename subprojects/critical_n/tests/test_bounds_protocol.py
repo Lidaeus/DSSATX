@@ -33,6 +33,13 @@ def test_frozen_invariant_protocol_enforcement():
     with pytest.raises(InvariantViolationError, match="collinearity"):
         validate_no_active_cnc_params(illegal_df)
 
+    # Case 3: Illegal active asymptotic CNC parameter CNC_NC_INF
+    illegal_df3 = pd.DataFrame([
+        {"name": "CNC_NC_INF", "status": "active"},  # FORBIDDEN!
+    ])
+    with pytest.raises(InvariantViolationError, match="collinearity"):
+        validate_no_active_cnc_params(illegal_df3)
+
 
 def test_create_frozen_cnc_records():
     """Verify generated frozen bounds records comply with standard frozen CSV format."""

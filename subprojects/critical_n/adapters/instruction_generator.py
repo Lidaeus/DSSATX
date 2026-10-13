@@ -31,6 +31,7 @@ COLUMN_SLICES = {
     "N_ACT": (35, 44),
     "NC_CRIT": (45, 54),
     "NNI": (55, 64),
+    "R_TOL": (65, 74),
 }
 
 

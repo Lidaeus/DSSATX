@@ -6,6 +6,7 @@ import pytest
 from subprojects.critical_n.core.dilution_curve import (
     DEFAULT_CNC_A,
     DEFAULT_CNC_B,
+    DEFAULT_CNC_NC_INF,
     DEFAULT_CNC_W0,
     SENTINEL_VALUE,
     critical_n_concentration,
@@ -16,16 +17,26 @@ from subprojects.critical_n.core.dilution_curve import (
 
 
 def test_standard_nc_evaluation():
-    """Verify critical N calculation at known reference values."""
-    # At W == W0 = 1.0, Nc = a * 1.0^(-b) = a
-    nc_w0 = critical_n_concentration(1.0, a=4.85, b=0.38, w0=1.0)
+    """Verify critical N calculation at known reference values with asymptotic lower bound."""
+    # At W == W0 = 1.0, Nc = nc_inf + (a - nc_inf) * 1.0^(-b) = a
+    nc_w0 = critical_n_concentration(1.0, a=4.85, b=0.38, w0=1.0, nc_inf=1.70)
     assert nc_w0 == pytest.approx(4.85, rel=1e-5)
 
-    # At W = 10.0 t/ha, Nc = 4.85 * (10.0)^(-0.38)
-    expected_10 = 4.85 * (10.0 ** (-0.38))
-    nc_10 = critical_n_concentration(10.0, a=4.85, b=0.38, w0=1.0)
+    # At W = 10.0 t/ha, Nc = 1.70 + (4.85 - 1.70) * (10.0)^(-0.38)
+    expected_10 = 1.70 + (4.85 - 1.70) * (10.0 ** (-0.38))
+    nc_10 = critical_n_concentration(10.0, a=4.85, b=0.38, w0=1.0, nc_inf=1.70)
     assert nc_10 == pytest.approx(expected_10, rel=1e-5)
     assert nc_10 < nc_w0, "Critical N must monotonically decrease with biomass W"
+
+    # Classic power law recovered when nc_inf == 0.0
+    classic_10 = 4.85 * (10.0 ** (-0.38))
+    nc_classic = critical_n_concentration(10.0, a=4.85, b=0.38, w0=1.0, nc_inf=0.0)
+    assert nc_classic == pytest.approx(classic_10, rel=1e-5)
+
+    # Asymptotic floor behavior: as W -> inf, Nc -> nc_inf (1.70%)
+    nc_large = critical_n_concentration(1e8, a=4.85, b=0.38, w0=1.0, nc_inf=1.70)
+    assert nc_large == pytest.approx(1.70, abs=1e-2)
+    assert nc_large >= 1.70, "Nc must never drop below asymptotic lower bound"
 
 
 def test_w_zero_boundary_singularity_clamp():
@@ -33,7 +44,7 @@ def test_w_zero_boundary_singularity_clamp():
     # Under unclamped formulation, Nc diverges to infinity as W -> 0
     w_zeros = [0.5, 0.1, 0.01, 1e-5, 0.0]
     for w in w_zeros:
-        val = critical_n_concentration(w, a=4.85, b=0.38, w0=1.0)
+        val = critical_n_concentration(w, a=4.85, b=0.38, w0=1.0, nc_inf=1.70)
         assert val == pytest.approx(4.85, rel=1e-5), f"W={w} must clamp to a=4.85"
 
 
@@ -50,6 +61,12 @@ def test_nc_parameter_validation():
 
     with pytest.raises(ValueError, match="Threshold w0 must be positive"):
         critical_n_concentration(2.0, w0=-1.0)
+
+    with pytest.raises(ValueError, match="nc_inf must be non-negative"):
+        critical_n_concentration(2.0, nc_inf=-0.5)
+
+    with pytest.raises(ValueError, match="cannot exceed seedling maximum"):
+        critical_n_concentration(2.0, a=3.0, nc_inf=3.5)
 
     with pytest.raises(ValueError, match="must not be NaN"):
         critical_n_concentration(float("nan"))

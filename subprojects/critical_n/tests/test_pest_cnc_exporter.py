@@ -42,6 +42,11 @@ def test_format_pest_cnc_line_exact_widths():
     assert len(nan_line) == 65
     assert nan_line[54:64] == "   -99.000"
 
+    # Line with explicit r_tol: exactly 74 chars + newline = 75 chars
+    rtol_line = format_pest_cnc_line(1, 2, 2025, 120, 45, 1.234, 4.567, 3.890, 1.174, r_tol=0.0)
+    assert len(rtol_line) == 75
+    assert rtol_line[64:74] == "     0.000"
+
 
 def test_export_pest_cnc_line_count_invariance(tmp_path):
     """Verify rigid line count preservation: emergence steps retain sentinel rows."""
@@ -81,6 +86,14 @@ def test_export_pest_cnc_line_count_invariance(tmp_path):
     nni_val = float(row3[54:64])
     assert nni_val > 0.0
 
+    # Also test include_r_tol=True
+    out_rtol_file = export_pest_cnc(tmp_path, out_file=tmp_path / "PestCNC_rtol.OUT", include_r_tol=True, treatment_n_levels={1: "N3"})
+    rtol_lines = out_rtol_file.read_text(encoding="utf-8").splitlines()
+    assert len(rtol_lines) == 5
+    assert "R_TOL" in rtol_lines[1]
+    # Post-emergence line length is 74 chars
+    assert len(rtol_lines[4]) == 74
+
 
 def test_export_cnc_dataframe_columns(tmp_path):
     """Verify DataFrame export schema and data types."""
@@ -97,7 +110,8 @@ def test_export_cnc_dataframe_columns(tmp_path):
     df = export_cnc_dataframe(tmp_path)
     assert len(df) == 1
     assert set(df.columns).issuperset({
-        "run_id", "treatment_id", "das", "cwad", "w_eff", "n_act_cum", "nc_crit", "nni", "is_valid"
+        "run_id", "treatment_id", "das", "cwad", "chpdtn", "w_eff", "n_act_cum", "nc_crit", "nni", "is_valid"
     })
     assert df["w_eff"].iloc[0] == 1.0
+    assert df["chpdtn"].iloc[0] == 0.0
     assert bool(df["is_valid"].iloc[0]) is True
