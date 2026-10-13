@@ -178,3 +178,97 @@ def test_stage_r4_production_environment_isolation():
     import hashlib
     current_hash = hashlib.sha256(PRODUCTION_EXE.read_bytes()).hexdigest()
     assert current_hash == PRODUCTION_HASH
+
+
+def test_stage_r4_observation_extraction_realism():
+    """Verify that observation extraction uses canonical extractors and is not mocked."""
+    from subprojects.critical_n.calibration.stage_r4_setup import (
+        StageR4Sandbox,
+        BIN_CNC,
+    )
+    sandbox_dir = PROJECT_ROOT / "subprojects/critical_n/runs/stage_r4_calibration"
+    assert sandbox_dir.exists(), "Stage R4 sandbox directory does not exist"
+
+    base_obs_file = PROJECT_ROOT / "configs/runs/eggplant_26sp_all12_robust_joint65_200x5_20261012/calibration_observations.csv"
+    tmt_file = PROJECT_ROOT / "configs/figures/treatment_metadata_xxql2601.csv"
+    obs_df, _ = create_stage_r4_objective_catalog(base_obs_file, tmt_file)
+
+    sandbox = StageR4Sandbox(sandbox_dir, binary_path=BIN_CNC)
+    comp = sandbox.extract_stage_r4_observations(obs_df)
+
+    assert len(comp) == 737
+    assert comp["simulated"].notna().all()
+
+    # 1. Soil water is realistic and depth-weighted (mean in [0.20, 0.35], NOT 0.487)
+    vwc = comp[comp["family"] == "SOIL_WATER"]["simulated"]
+    assert 0.20 <= vwc.mean() <= 0.35
+    assert vwc.std() > 0.01  # Not a constant!
+
+    # 2. Water balance is realistic (mean in [150.0, 220.0], NOT hardcoded 15.0!)
+    wb100 = comp[comp["family"] == "WATER_BALANCE_100CM"]["simulated"]
+    assert 150.0 <= wb100.mean() <= 220.0
+    assert wb100.std() > 5.0  # Not a constant!
+
+    # 3. Fruit nitrogen is realistic (mean in [1.60, 2.40], NOT hardcoded 1.78!)
+    fn = comp[comp["family"] == "FRUIT_N_CONCENTRATION"]["simulated"]
+    assert 1.60 <= fn.mean() <= 2.40
+    assert fn.std() > 0.05  # Not a constant!
+
+    # 4. Harvest dry early is realistic (mean in [1200, 2000], NOT final harvest 3500!)
+    hd = comp[comp["family"] == "HARVEST_DRY_CUMULATIVE_EARLY"]["simulated"]
+    assert 1200.0 <= hd.mean() <= 2000.0
+
+
+def test_stage_r4_best_parameters_invariants_and_purification():
+    """Verify that stage_r4_best_parameters.csv covers all 111 bounds parameters and invariants."""
+    reports_dir = CRITICAL_N_DIR / "reports"
+    bounds_file = reports_dir / "stage_r4_bounds.csv"
+    best_file = reports_dir / "stage_r4_best_parameters.csv"
+    assert bounds_file.is_file(), "stage_r4_bounds.csv not found"
+    assert best_file.is_file(), "stage_r4_best_parameters.csv not found"
+
+    b_df = pd.read_csv(bounds_file).set_index("name")
+    p_df = pd.read_csv(best_file).set_index("name")
+
+    # Invariants strictly locked
+    invariants = {
+        "CNC_A": 4.85,
+        "CNC_B": 0.38,
+        "CNC_W0": 1.00,
+        "CNC_NC_INF": 1.70,
+    }
+    for inv, expected in invariants.items():
+        assert inv in p_df.index, f"Invariant {inv} missing from best parameters"
+        assert math.isclose(float(p_df.loc[inv, "value"]), expected, rel_tol=1e-4)
+
+    # Ghost parameters fixed
+    for gp in STAGE_R4_GHOST_PARAMETERS:
+        assert gp in p_df.index, f"Ghost parameter {gp} missing from best parameters"
+        assert math.isclose(float(p_df.loc[gp, "value"]), float(b_df.loc[gp, "init"]), rel_tol=1e-4)
+
+
+def test_stage_r4_report_artifacts_integrity():
+    """Verify that all report artifacts exist and have valid non-empty contents."""
+    reports_dir = CRITICAL_N_DIR / "reports"
+    artifacts = [
+        "stage_r4_bounds.csv",
+        "stage_r4_objective_policy.csv",
+        "stage_r4_observations.csv",
+        "stage_r4_best_parameters.csv",
+        "stage_r4_comparison_metrics.csv",
+        "stage_r4_treatment_summary.csv",
+        "stage_r4_trajectories_all.csv",
+        "stage_r4_nitrogen_dilution_audit.csv",
+        "stage_r4_mass_balance_audit.csv",
+        "STAGE_R4_CALIBRATION_AND_EVALUATION_REPORT.md",
+    ]
+    for art in artifacts:
+        p = reports_dir / art
+        assert p.is_file(), f"Artifact {art} is missing"
+        assert p.stat().st_size > 0, f"Artifact {art} is empty"
+
+    # Verify comparison metrics file has realistic NRMSE% (not broken 104% on WB100)
+    m_df = pd.read_csv(reports_dir / "stage_r4_comparison_metrics.csv").set_index("family")
+    assert m_df.loc["WATER_BALANCE_100CM", "r4_nrmse_pct"] < 25.0
+    assert m_df.loc["SOIL_WATER", "r4_nrmse_pct"] < 25.0
+

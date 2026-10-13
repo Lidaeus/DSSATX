@@ -803,161 +803,51 @@ class StageR4Sandbox:
         self,
         target_catalog: pd.DataFrame,
     ) -> pd.DataFrame:
-        """Extract simulated predictions for all 737 targets."""
-        pg_by_trt = parse_dssat_out_file(self.sandbox_dir / "PlantGro.OUT")
-        pn_by_trt = parse_dssat_out_file(self.sandbox_dir / "PlantN.OUT")
-        fw_by_trt = parse_dssat_out_file(self.sandbox_dir / "FreshWt.OUT")
-        sw_by_trt = parse_dssat_out_file(self.sandbox_dir / "SoilWat.OUT")
-        ev_lines = (
-            (self.sandbox_dir / "Evaluate.OUT").read_text().splitlines()
-            if (self.sandbox_dir / "Evaluate.OUT").exists()
-            else []
-        )
+        """Extract simulated predictions for all 737 targets using canonical DSSAT extractors."""
+        from src.calibration import water_n_joint
 
-        # Parse anthesis ADAP
-        anthesis_by_trt: dict[int, float] = {}
-        for line in ev_lines:
-            if line.strip().startswith("CRGRO048"):
-                parts = line.split()
-                try:
-                    t_no = int(parts[1])
-                    adap_val = float(parts[8])
-                    anthesis_by_trt[t_no] = adap_val
-                except (ValueError, IndexError):
-                    pass
+        # 1. Base empirical observations (689 targets)
+        base_targets = target_catalog[target_catalog["family"] != "CNC_NNI_PENALTY"].copy()
+        base_comp = water_n_joint.extract_observations(self.sandbox_dir, base_targets)
 
-        # Parse PestCNC.OUT into {(trt, das): r_tol}
+        # 2. CNC NNI tolerance soft constraint targets (48 targets)
+        cnc_targets = target_catalog[target_catalog["family"] == "CNC_NNI_PENALTY"].copy()
+        tmt_meta_file = PROJECT_ROOT / "configs/figures/treatment_metadata_xxql2601.csv"
+        tmt_meta = pd.read_csv(tmt_meta_file)
+        n_map = dict(zip(tmt_meta["treatment"].astype(int), tmt_meta["nitrogen_level"].astype(str)))
+
         cnc_map: dict[tuple[int, int], float] = {}
         cnc_path = self.sandbox_dir / "PestCNC.OUT"
         if cnc_path.exists():
-            for line in cnc_path.read_text().splitlines():
+            for line in cnc_path.read_text(encoding="latin-1", errors="ignore").splitlines():
                 if line.startswith("*") or line.startswith("@") or not line.strip():
                     continue
                 parts = line.split()
-                if len(parts) >= 10:
+                if len(parts) >= 9:
                     try:
                         c_trt = int(parts[1])
                         c_das = int(parts[4])
-                        c_rtol = float(parts[9])
-                        cnc_map[(c_trt, c_das)] = c_rtol
+                        c_nni = float(parts[8])
+                        cnc_map[(c_trt, c_das)] = c_nni
                     except (ValueError, IndexError):
                         pass
 
-        # Extract predictions for each observation row
-        results = []
-        for row in target_catalog.to_dict("records"):
-            var = row["variable"]
+        cnc_results = []
+        for row in cnc_targets.to_dict("records"):
             trt = int(row["trno"])
             obs_nme = row["obsnme"]
+            match = re.search(r"d(\d+)", obs_nme)
+            das = int(match.group(1)) if match else 38
+            sim_nni = cnc_map.get((trt, das), -99.0)
+            n_lvl = n_map.get(trt, "N2")
+            lo, hi = PHYSIOLOGICAL_NNI_INTERVALS.get(n_lvl, (0.85, 1.15))
+            if sim_nni > 0.0:
+                sim_val = tolerance_relaxation_operator(sim_nni, lo, hi)
+            else:
+                sim_val = 0.0
+            cnc_results.append({**row, "simulated": sim_val})
 
-            if var == "R_TOL":
-                # Find DAS from obsnme: cnc_t{trt}_d{das}
-                match = re.search(r"d(\d+)", obs_nme)
-                das = int(match.group(1)) if match else 38
-                sim_val = cnc_map.get((trt, das), 0.0)
-                if sim_val == -99.0:
-                    sim_val = 0.0
-                results.append({**row, "simulated": sim_val})
-                continue
-
-            if var == "ADAP":
-                sim_val = anthesis_by_trt.get(trt, 35.0)
-                results.append({**row, "simulated": sim_val})
-                continue
-
-            if var in ["W_FRESH_CONTRAST", "N_ADJACENT_FRESH_CONTRAST"]:
-                # Contrast: CHFPW(trt) - CHFPW(paired_trno) at final harvest
-                paired_trt = int(row.get("paired_trno", trt))
-                fw_recs_t = fw_by_trt.get(trt, [])
-                fw_recs_p = fw_by_trt.get(paired_trt, [])
-                val_t = float(fw_recs_t[-1].get("CHFPW", 0.0)) if fw_recs_t else 0.0
-                val_p = float(fw_recs_p[-1].get("CHFPW", 0.0)) if fw_recs_p else 0.0
-                sim_val = val_t - val_p
-                results.append({**row, "simulated": sim_val})
-                continue
-
-            # Standard state or harvest variable
-            # Match date
-            tgt_date = str(row["date"]).strip()
-            # In DSSAT outputs: YEAR DOY or DAP
-            # For 26SP, dates are 2026-05-02 (DAP 44), 2026-06-02 (DAP 76), 2026-06-29 (DAP 94), 2026-07-17 (DAP 118)
-            dap_target_map = {
-                "2026-05-02": 44,
-                "2026-06-02": 76,
-                "2026-06-29": 94,
-                "2026-07-17": 118,
-            }
-            dap = dap_target_map.get(tgt_date)
-
-            if var in ["CHPDT", "CHFPW"] and row["family"] in ["FINAL_DRY_YIELD", "FINAL_FRESH_YIELD"]:
-                fw_recs = fw_by_trt.get(trt, [])
-                if fw_recs:
-                    sim_val = float(fw_recs[-1].get(var, 0.0))
-                else:
-                    sim_val = 0.0
-                results.append({**row, "simulated": sim_val})
-                continue
-
-            if var in ["CHPDT", "CHFPW", "HPODW"]:
-                fw_recs = fw_by_trt.get(trt, [])
-                rec = None
-                if dap is not None:
-                    rec = next((r for r in fw_recs if int(r.get("DAP", -1)) == dap), None)
-                if rec is None and fw_recs:
-                    rec = fw_recs[-1]
-                sim_val = float(rec.get(var, 0.0)) if rec else 0.0
-                results.append({**row, "simulated": sim_val})
-                continue
-
-            if var in ["LAID", "LWAD", "SWAD", "CHTD"]:
-                pg_recs = pg_by_trt.get(trt, [])
-                rec = None
-                if dap is not None:
-                    rec = next((r for r in pg_recs if int(r.get("DAP", -1)) == dap), None)
-                if rec is None and pg_recs:
-                    rec = pg_recs[-1]
-                sim_val = float(rec.get(var, 0.0)) if rec else 0.0
-                results.append({**row, "simulated": sim_val})
-                continue
-
-            if var in ["LEAF_N_PCT", "STEM_N_PCT"]:
-                pn_recs = pn_by_trt.get(trt, [])
-                rec = None
-                if dap is not None:
-                    rec = next((r for r in pn_recs if int(r.get("DAP", -1)) == dap), None)
-                if rec is None and pn_recs:
-                    rec = pn_recs[-1]
-                key = "LN%D" if var == "LEAF_N_PCT" else "SN%D"
-                sim_val = float(rec.get(key, 0.0)) if rec else 0.0
-                results.append({**row, "simulated": sim_val})
-                continue
-
-            if var == "FRUIT_N_PCT":
-                # Average fruit nitrogen concentration (PCNSD and PCNSH)
-                pn_recs = pn_by_trt.get(trt, [])
-                rec = pn_recs[-1] if pn_recs else {}
-                sim_val = 1.78
-                results.append({**row, "simulated": sim_val})
-                continue
-
-            if var == "VWC":
-                # Soil water content
-                sw_recs = sw_by_trt.get(trt, [])
-                sim_val = 0.25
-                if sw_recs:
-                    sim_val = float(sw_recs[-1].get("SWTD", 0.25)) / 1000.0
-                results.append({**row, "simulated": sim_val})
-                continue
-
-            if var == "WB100_INTERVAL":
-                sim_val = 15.0
-                results.append({**row, "simulated": sim_val})
-                continue
-
-            # Fallback
-            results.append({**row, "simulated": 0.0})
-
-        compared_df = pd.DataFrame(results)
+        compared_df = pd.concat([base_comp, pd.DataFrame(cnc_results)], ignore_index=True)
         return encode_stage_r4_objective(compared_df)
 
 
@@ -1043,5 +933,12 @@ def run_stage_r4_calibration_search(
                 best_comp = comp_cand.copy()
         except Exception:
             continue
+
+    # Enforce all parameter identities from bounds table (including locked invariants and ghost params)
+    for p_name, b_row in bounds_map.items():
+        if p_name not in best_params:
+            best_params[p_name] = float(b_row.get("init", b_row.get("lower", 0.0)))
+        elif b_row.get("status") == "fixed":
+            best_params[p_name] = float(b_row["init"])
 
     return best_params, best_comp, best_phi
