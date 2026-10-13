@@ -1,5 +1,5 @@
 --- Plant/CROPGRO/PHOTO.for
-+++ Plant/CROPGRO/PHOTO_CNC.for
++++ Plant/CROPGRO/PHOTO.for
 @@ -25,6 +25,7 @@
       &    BETN, CO2, DXR57, EXCESS, KCAN, KC_SLOPE,       !Input
       &    NR5, PAR, PStres1, SLPF, RNITP, SLAAD,          !Input

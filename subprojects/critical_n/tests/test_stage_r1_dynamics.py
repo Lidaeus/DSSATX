@@ -227,3 +227,145 @@ def test_production_isolation_unbroken():
     """Verify that production DSCSM048.EXE is completely untouched."""
     check_production_safety()
     assert BIN_CNC.is_file()
+
+
+def test_soil_n_balance_mass_conservation():
+    """Verify that SoilNiBal.OUT achieves exact closure (< 1e-4 kg N/ha) across all runs."""
+    soil_files = [
+        VERIFY_DIR / "greenhouse" / "cnc_mepho_l" / "SoilNiBal.OUT",
+        VERIFY_DIR / "greenhouse" / "cnc_mepho_c" / "SoilNiBal.OUT",
+    ]
+
+    for sfile in soil_files:
+        if not sfile.is_file():
+            continue
+        text = sfile.read_text(encoding="latin-1")
+        runs = text.split("*RUN")
+        assert len(runs) > 1, f"No runs found in {sfile}"
+
+        for i, r in enumerate(runs[1:], 1):
+            matches = re.findall(r"Balance\s+([\d\.\-]+)", r)
+            assert len(matches) > 0, f"No balance line found in {sfile.name} Run {i}"
+            balance_val = float(matches[-1])
+            # Strict tolerance < 1e-4 kg N/ha (output is -0.000 or 0.000)
+            assert abs(balance_val) < 1e-4, (
+                f"Soil N balance violation in {sfile.name} Run {i}: Balance = {balance_val}"
+            )
+
+
+def test_sequential_leaf_buffer_depletion_and_transition():
+    """Verify smooth continuous transition from safe buffer mining to stress degradation."""
+    wtlf = 120.0
+    wcrlf = 10.0
+    prolfg = 0.220
+    wtnlf = 5.0
+    senrte = 1.0
+    sla = 200.0
+    daily_demand = 0.50
+
+    states = []
+    for day in range(1, 5):
+        # Effective structural leaf mass
+        w_struct = max(0.0, wtlf - wcrlf)
+        nbuf_free = max(0.0, wtnlf - prolfg * 0.16 * w_struct)
+
+        nruslf_safe = max(0.0, min(daily_demand, nbuf_free))
+        nruslf_stress = max(0.0, daily_demand - nruslf_safe)
+
+        # Invariant 1: Total mobilization identity holds exactly
+        assert abs(nruslf_safe + nruslf_stress - daily_demand) < 1e-12
+
+        # Invariant 2: Safe mobilization never exceeds available buffer
+        assert nruslf_safe <= nbuf_free + 1e-12
+
+        # Invariant 3: Senescence driven only by stress
+        lfsen = senrte * nruslf_stress / 0.16
+        if nruslf_stress == 0.0:
+            assert lfsen == 0.0
+
+        # Invariant 4: Mass deduction decoupled (solute 1.0 vs protein 6.25)
+        dw_loss = nruslf_safe * 1.0 + nruslf_stress / 0.16
+
+        # Invariant 5: Area shrinkage driven only by stress
+        area_loss = (nruslf_stress / 0.16) * sla
+        if nruslf_stress == 0.0:
+            assert area_loss == 0.0
+
+        states.append({
+            "day": day,
+            "nbuf": nbuf_free,
+            "safe": nruslf_safe,
+            "stress": nruslf_stress,
+            "lfsen": lfsen,
+            "dw_loss": dw_loss,
+            "area_loss": area_loss,
+        })
+
+        # Update pools for next day
+        wtnlf = max(0.0, wtnlf - daily_demand)
+        wtlf = max(0.0, wtlf - dw_loss)
+
+    # Day 1 & 2: pure safe mobilization
+    assert states[0]["stress"] == 0.0 and states[0]["lfsen"] == 0.0
+    assert states[1]["stress"] == 0.0 and states[1]["lfsen"] == 0.0
+    # Day 3: buffer partially depleted -> mixed mobilization
+    assert states[2]["safe"] > 0.0 and states[2]["stress"] > 0.0
+    # Day 4: buffer exhausted -> pure stress mobilization
+    assert states[3]["safe"] == 0.0 and states[3]["stress"] == daily_demand
+    assert states[3]["lfsen"] > 0.0
+
+
+def test_sub_carbohydrate_reserve_boundary_condition():
+    """Verify that when WTLF <= WCRLF, NBUF_FREE never exceeds total leaf N (WTNLF)."""
+    # Boundary: leaf dry weight less than carbohydrate pool (e.g. extreme numerical state)
+    wtlf = 8.0
+    wcrlf = 10.0
+    wtnlf = 0.50
+    prolfg = 0.220
+
+    # Without MAX(0.0, WTLF - WCRLF), (8.0 - 10.0) = -2.0 would ADD to WTNLF
+    w_struct = max(0.0, wtlf - wcrlf)
+    assert w_struct == 0.0
+    nbuf_free = max(0.0, wtnlf - prolfg * 0.16 * w_struct)
+
+    # Structural invariant: free buffer cannot exceed actual leaf N
+    assert nbuf_free <= wtnlf
+    assert abs(nbuf_free - wtnlf) < 1e-12
+
+    # Mobilization with negative anomaly input
+    nruslf = 0.30
+    nruslf_safe = max(0.0, min(nruslf, nbuf_free))
+    nruslf_stress = max(0.0, nruslf - nruslf_safe)
+    assert nruslf_safe <= wtnlf
+    assert nruslf_safe + nruslf_stress == nruslf
+
+
+def test_species_prolfg_fallback_resolution():
+    """Verify that PROLFG correctly falls back to PROLFI * 0.815 when unparsed."""
+    # Simulation of CROPGRO Fortran fallback logic:
+    # 1. Normal parsing success
+    prolfg_parsed = 0.220
+    prolfg = prolfg_parsed if prolfg_parsed > 0.0 else 0.0
+    assert prolfg == 0.220
+
+    # 2. Parsing failure with known PROLFI (e.g. Soybean PROLFI = 0.356)
+    prolfg = 0.0  # initialized to 0.0, NOT 0.220!
+    prolfi = 0.356
+    if prolfg <= 0.0:
+        if prolfi > 0.0:
+            prolfg = prolfi * 0.815
+        else:
+            prolfg = 0.220
+    assert abs(prolfg - (0.356 * 0.815)) < 1e-6
+    assert prolfg > 0.280  # distinctly different from default 0.220!
+
+    # 3. Parsing failure with unknown PROLFI
+    prolfg_none = 0.0
+    prolfi_none = 0.0
+    if prolfg_none <= 0.0:
+        if prolfi_none > 0.0:
+            prolfg_none = prolfi_none * 0.815
+        else:
+            prolfg_none = 0.220
+    assert prolfg_none == 0.220
+

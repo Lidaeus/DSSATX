@@ -84,11 +84,11 @@ C-----------------------------------------------------------------------
 C        Phase R1: Decouple leaf N mobilization into safe vs stress
          IF (PROLFG .GT. 0.0) THEN
            NBUF_FREE = MAX(0.0,
-     &       WTNLF - PROLFG * 0.16 * (WTLF - WCRLF))
+     &       WTNLF - PROLFG * 0.16 * MAX(0.0, WTLF - WCRLF))
          ELSE
            NBUF_FREE = 0.0
          ENDIF
-         NRUSLF_SAFE = MIN(NRUSLF, NBUF_FREE)
+         NRUSLF_SAFE = MAX(0.0, MIN(NRUSLF, NBUF_FREE))
          NRUSLF_STR  = MAX(0.0, NRUSLF - NRUSLF_SAFE)
       ENDIF
 !***********************************************************************

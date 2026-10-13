@@ -200,10 +200,8 @@ C-----------------------------------------------------------------------
 C       Phase R1: Senescence driven only by stress mobilization
         LFSEN = SENRTE * NRUSLF_STR / 0.16
 C       Scheme B: Senescence limiter to prevent defoliation avalanche
-        IF (WLDOTN .GE. 0.0) THEN
-          LFSEN = MIN(LFSEN, 0.90 * WLDOTN + 0.015 * WTLF)
-        ENDIF
-        LFSEN = MIN(WTLF,LFSEN)
+        LFSEN = MIN(LFSEN, 0.90 * MAX(0.0, WLDOTN) + 0.015 * WTLF)
+        LFSEN = MAX(0.0, MIN(WTLF, LFSEN))
         SLDOT = SLDOT + LFSEN
         SLDOT = MIN(WTLF,SLDOT)
 C-----------------------------------------------------------------------

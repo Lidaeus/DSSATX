@@ -247,7 +247,7 @@ C=======================================================================
 C-----------------------------------------------------------------------
 C     Phase R1: Read PROLFG (normal growth leaf protein fraction)
 C-----------------------------------------------------------------------
-      PROLFG = 0.220
+      PROLFG = 0.0
       IF (FILECC .NE. ' ') THEN
         CALL GETLUN('FILEC', LUNCRP)
         OPEN (LUNCRP, FILE = FILECC, STATUS = 'OLD', IOSTAT = ERRNUM)

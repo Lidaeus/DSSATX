@@ -69,11 +69,11 @@ def test_sandbox_patch_application_isolated(tmp_path):
     assert patched_file.is_file()
     patched_content = patched_file.read_text(encoding="latin-1")
     assert "WLDOTN" in patched_content
-    assert "0.90 * WLDOTN" in patched_content
+    assert "0.90 * MAX(0.0, WLDOTN)" in patched_content
 
     # Verify original file was completely untouched
     orig_content = orig_senes.read_text(encoding="latin-1")
-    assert "0.90 * WLDOTN" not in orig_content
+    assert "0.90 * MAX(0.0, WLDOTN)" not in orig_content
 
     # Test PHOTO patch in sandbox
     orig_photo = ORIG_SRC_DIR / "PHOTO.for"
