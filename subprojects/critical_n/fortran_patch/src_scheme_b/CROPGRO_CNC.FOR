@@ -553,6 +553,7 @@ C     Initialize pest coupling point and damage variables
       CUM_HPODWT = 0.0
       CHPDTN = 0.0
       HPODN = 0.0
+      FNINL0 = PROLFI * 0.16
       WEFF = 0.0
       CALL DEMAND(SEASINIT, CONTROL,
      &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
@@ -1333,6 +1334,7 @@ C-----------------------------------------------------------------------
 C     Phase R2: Accumulate harvested pod weight
       CUM_HPODWT = CUM_HPODWT + HPODWT
 C     Phase R3: Explicit tracking of cumulative harvested fruit total N
+C     Note: HPODWT*(PCNPO/100) = HSDWT*(PCNSD/100) + HSHELWT*(PCNSH/100)
       IF (HPODWT .GT. 0.0) THEN
         HPODN = HSDWT * (PCNSD / 100.0) + HSHELWT * (PCNSH / 100.0)
         CHPDTN = CHPDTN + HPODN * 10.0

@@ -130,11 +130,34 @@ def test_sandbox_patch_application_isolated(tmp_path):
     assert "NC_DEM" in patched_demand_content
     assert "4.85" in patched_demand_content
 
+    # Test PODS patch in sandbox
+    orig_pods = ORIG_SRC_DIR / "PODS.for"
+    patch_pods = patch_dir / "PODS.for.patch"
+    patched_pods_file = apply_patch_in_sandbox(orig_pods, patch_pods, sandbox_dir=tmp_path)
+    assert patched_pods_file.is_file()
+    patched_pods_content = patched_pods_file.read_text(encoding="latin-1")
+    assert "CHPDTN" in patched_pods_content
+    assert "RNITPD = 1.0" in patched_pods_content
+    assert "FNINL - PROLFF * 0.16 .GT. 0.001" in patched_pods_content
+
+    # Test FreshWt patch in sandbox
+    orig_freshwt = ORIG_SRC_DIR / "FreshWt.for"
+    patch_freshwt = patch_dir / "FreshWt.for.patch"
+    patched_freshwt_file = apply_patch_in_sandbox(orig_freshwt, patch_freshwt, sandbox_dir=tmp_path)
+    assert patched_freshwt_file.is_file()
+    patched_freshwt_content = patched_freshwt_file.read_text(encoding="latin-1")
+    assert "CHPDTN" in patched_freshwt_content
+    assert "!CHPDTN Cum. har. pod total N" in patched_freshwt_content
+
     # Verify original files were completely untouched
     orig_cg_content = orig_cropgro.read_text(encoding="latin-1")
     assert "NNI_CUR" not in orig_cg_content
     orig_dem_content = orig_demand.read_text(encoding="latin-1")
     assert "NC_DEM" not in orig_dem_content
+    orig_pods_content = orig_pods.read_text(encoding="latin-1")
+    assert "CHPDTN" not in orig_pods_content
+    orig_freshwt_content = orig_freshwt.read_text(encoding="latin-1")
+    assert "CHPDTN" not in orig_freshwt_content
 
 
 def test_sandbox_patched_sources_match_scheme_b_source_files(tmp_path):

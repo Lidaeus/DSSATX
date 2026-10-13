@@ -78,7 +78,7 @@ def test_r3_mathematical_new_tissue_allometric_dilution_invariants():
             else:
                 nc_dem = nc_inf + (a_cnc - nc_inf) * (weff ** (-b_cnc))
 
-            fninl = min(fninl_max, max(prolff_16, nc_dem / 100.0))
+            fninl = min(fninl_max, max(prolff_16, 1.05 * nc_dem / 100.0))
             if prolfi > prolff:
                 fr_dil = (fninl - prolff_16) / ((prolfi - prolff) * 0.16)
                 fr_dil = max(0.0, min(1.0, fr_dil))
@@ -106,6 +106,8 @@ def test_r3_mathematical_new_tissue_allometric_dilution_invariants():
     nc_3, fninl_3, fnins_3, ndm_3 = calc_demand_n(3.0)
     assert nc_3 < a_cnc
     assert nc_3 > nc_inf
+    assert abs(fninl_3 - (1.05 * nc_3 / 100.0)) < 1e-6  # Follows 1.05 * Nc(Weff)
+    assert fninl_3 > (nc_3 / 100.0)  # 5% luxury headroom over critical curve
     assert fninl_3 < fninl_0
     assert fnins_3 < fnins_0
     assert ndm_3 < ndm_0
@@ -376,7 +378,7 @@ def test_r3_allometric_dilution_boundary_and_degenerate_conditions():
                 nc_dem = 4.85
             else:
                 nc_dem = 1.70 + (4.85 - 1.70) * (weff ** (-0.38))
-            fninl = min(pi * 0.16, max(pf * 0.16, nc_dem / 100.0))
+            fninl = min(pi * 0.16, max(pf * 0.16, 1.05 * nc_dem / 100.0))
             if pi > pf:
                 fr_dil = (fninl - pf * 0.16) / ((pi - pf) * 0.16)
                 fr_dil = max(0.0, min(1.0, fr_dil))

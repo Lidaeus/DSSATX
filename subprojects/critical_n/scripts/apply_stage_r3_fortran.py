@@ -1,4 +1,4 @@
-"""Script to apply Stage R3 modifications to CROPGRO, PODS, and FreshWt Fortran sources."""
+"""Script to apply Stage R3 modifications to DEMAND, CROPGRO, PODS, and FreshWt Fortran sources."""
 
 from pathlib import Path
 import re
@@ -18,11 +18,100 @@ PATCH_DIR = PROJECT_ROOT / "subprojects" / "critical_n" / "fortran_patch" / "pat
 UPSTREAM_CROPGRO_DIR = PROJECT_ROOT / "workspace" / "diagnostics" / "dssat-csm-os-v4.8.2-source" / "Plant" / "CROPGRO"
 
 
+def update_demand():
+    orig_path = UPSTREAM_CROPGRO_DIR / "DEMAND.for"
+    orig_text = orig_path.read_text(encoding="latin-1")
+    text = orig_text
+
+    # 1. Header comment
+    hdr_old = "C  Calls:      SDCOMP, IPDMND\n"
+    hdr_new = (
+        "C  Calls:      SDCOMP, IPDMND\n"
+        "C  Phase R2: Dynamic critical nitrogen dilution (Nc) for old tissue demand\n"
+    )
+    assert hdr_old in text, "Could not find hdr_old in DEMAND.for"
+    text = text.replace(hdr_old, hdr_new, 1)
+
+    # 2. Signature: add WEFF
+    sig_old = "     &  WTSD, WTSHE, XPOD, NVEG0, NR1, NR2, NR5, NR7,     !Input\n"
+    sig_new = (
+        "     &  WTSD, WTSHE, XPOD, NVEG0, NR1, NR2, NR5, NR7,     !Input\n"
+        "     &  WEFF,                                             !Input\n"
+    )
+    assert sig_old in text, "Could not find sig_old in DEMAND.for"
+    text = text.replace(sig_old, sig_new, 1)
+
+    # 3. Declarations: add WEFF, NC_DEM, FR_DIL
+    decl_old = "      REAL NVSTL,NVSTS,NVSTR,FRNLFT\n"
+    decl_new = (
+        "      REAL NVSTL,NVSTS,NVSTR,FRNLFT\n"
+        "!     Phase R2: Dynamic critical nitrogen dilution variables\n"
+        "      REAL WEFF, NC_DEM, FR_DIL\n"
+    )
+    assert decl_old in text, "Could not find decl_old in DEMAND.for"
+    text = text.replace(decl_old, decl_new, 1)
+
+    # 4. Dilution logic after AGRVG2 calculation
+    agrvg2_old = (
+        "      AGRVG = AGRLF * FRLF + AGRRT * FRRT + AGRSTM * FRSTM\n"
+        "      AGRVG2 = AGRVG + (FRLF*PROLFI+FRRT*PRORTI+FRSTM*PROSTI)*RPROAV\n"
+    )
+    dil_block = (
+        "C       Phase R3: Allometric dynamic dilution for new vegetative tissue\n"
+        "        IF (WEFF .GT. 0.0) THEN\n"
+        "          IF (WEFF .LT. 1.00) THEN\n"
+        "            NC_DEM = 4.85\n"
+        "          ELSE\n"
+        "            NC_DEM = 1.70 + (4.85 - 1.70) * (WEFF ** (-0.38))\n"
+        "          ENDIF\n"
+        "          FNINL = MIN(PROLFI * 0.16,\n"
+        "     &      MAX(PROLFF * 0.16, 1.05 * NC_DEM / 100.0))\n"
+        "          IF (PROLFI .GT. PROLFF) THEN\n"
+        "            FR_DIL = (FNINL - PROLFF * 0.16) / ((PROLFI-PROLFF) * 0.16)\n"
+        "            FR_DIL = MAX(0.0, MIN(1.0, FR_DIL))\n"
+        "          ELSE\n"
+        "            FR_DIL = 1.0\n"
+        "          ENDIF\n"
+        "          FNINS = PROSTF * 0.16 + (PROSTI - PROSTF) * 0.16 * FR_DIL\n"
+        "          FNINS = MAX(PROSTF * 0.16, MIN(PROSTI * 0.16, FNINS))\n"
+        "        ELSE\n"
+        "          FNINL = PROLFI * 0.16\n"
+        "          FNINS = PROSTI * 0.16\n"
+        "        ENDIF\n"
+    )
+    assert agrvg2_old in text, "Could not find agrvg2_old in DEMAND.for"
+    text = text.replace(agrvg2_old, agrvg2_old + dil_block, 1)
+
+    # 5. Old tissue NVSTL and NVSTS target
+    old_target = (
+        "           NVSTL = PROLFF*0.16 + (FNINL-PROLFF*0.16) * FRNLFT\n"
+        "           NVSTS = PROSTF*0.16 + (FNINS-PROSTF*0.16) * FRNLFT\n"
+    )
+    new_target = (
+        "           NVSTL = PROLFF*0.16 + (NVSTL-PROLFF*0.16) * FRNLFT\n"
+        "           NVSTS = PROSTF*0.16 + (NVSTS-PROSTF*0.16) * FRNLFT\n"
+    )
+    assert old_target in text, "Could not find old_target in DEMAND.for"
+    text = text.replace(old_target, new_target, 1)
+
+    dem_out = SRC_SCHEME_B_DIR / "DEMAND_CNC.FOR"
+    dem_out.write_text(text, encoding="latin-1")
+    v = validate_fortran_fixed_format(dem_out)
+    if v:
+        raise ValueError(f"Violations in DEMAND_CNC.FOR: {v}")
+    print("[+] DEMAND_CNC.FOR created successfully (0 violations).")
+
+    # Generate patch
+    patch = generate_unified_patch(orig_text, text, "Plant/CROPGRO/DEMAND.for", "Plant/CROPGRO/DEMAND.for")
+    (PATCH_DIR / "DEMAND.for.patch").write_text(patch, encoding="utf-8")
+    print("[+] DEMAND.for.patch generated successfully.")
+
+
 def update_cropgro():
     cg_path = SRC_SCHEME_B_DIR / "CROPGRO_CNC.FOR"
     text = cg_path.read_text(encoding="latin-1")
 
-    # 1. Declarations
+    # 1. Declarations (idempotent)
     decl_target = (
         "!     Phase R2: Cumulative harvest pod dry weight & effective biomass\n"
         "      REAL CUM_HPODWT, WEFF\n"
@@ -33,10 +122,10 @@ def update_cropgro():
         "!     Phase R3: Cumulative harvested fruit total nitrogen & pod N\n"
         "      REAL CHPDTN, HPODN, FNINL0\n"
     )
-    assert decl_target in text, "Could not find decl_target in CROPGRO_CNC.FOR"
-    text = text.replace(decl_target, decl_repl, 1)
+    if decl_target in text and "REAL CHPDTN, HPODN, FNINL0" not in text:
+        text = text.replace(decl_target, decl_repl, 1)
 
-    # 2. RUNINIT setting FNINL0
+    # 2. RUNINIT setting FNINL0 (idempotent)
     runinit_target = (
         "      IF (PROLFG .LE. 0.0) THEN\n"
         "        IF (PROLFI .GT. 0.0) THEN\n"
@@ -56,10 +145,10 @@ def update_cropgro():
         "      ENDIF\n"
         "      FNINL0 = PROLFI * 0.16\n"
     )
-    assert runinit_target in text, "Could not find runinit_target in CROPGRO_CNC.FOR"
-    text = text.replace(runinit_target, runinit_repl, 1)
+    if runinit_target in text and "FNINL0 = PROLFI * 0.16" not in text:
+        text = text.replace(runinit_target, runinit_repl, 1)
 
-    # 3. SEASINIT resetting CHPDTN
+    # 3. SEASINIT resetting CHPDTN and FNINL0 (idempotent)
     seasinit_target = (
         "      CUM_HPODWT = 0.0\n"
         "      WEFF = 0.0\n"
@@ -68,27 +157,30 @@ def update_cropgro():
         "      CUM_HPODWT = 0.0\n"
         "      CHPDTN = 0.0\n"
         "      HPODN = 0.0\n"
+        "      FNINL0 = PROLFI * 0.16\n"
         "      WEFF = 0.0\n"
     )
-    assert seasinit_target in text, "Could not find seasinit_target in CROPGRO_CNC.FOR"
-    text = text.replace(seasinit_target, seasinit_repl, 1)
+    if seasinit_target in text:
+        text = text.replace(seasinit_target, seasinit_repl, 1)
+    elif "FNINL0 = PROLFI * 0.16\n      WEFF = 0.0" not in text:
+        text = text.replace(
+            "      HPODN = 0.0\n      WEFF = 0.0\n",
+            "      HPODN = 0.0\n      FNINL0 = PROLFI * 0.16\n      WEFF = 0.0\n",
+            1
+        )
 
     # 4. In all 5 CALL PODS: change FNINL -> FNINL0, and add CHPDTN
-    # Target pattern in PODS call:
-    #      FILEGC,FILEIO, FNINL, FNINSD, FNINSH, GDMSD,    !Input
-    # ...
-    #      PStres2, YRPLT,                                 !Input
     old_input1 = "     &    FILEGC,FILEIO, FNINL, FNINSD, FNINSH, GDMSD,    !Input\n"
     new_input1 = "     &    FILEGC,FILEIO, FNINL0, FNINSD, FNINSH, GDMSD,   !Input\n"
-    assert text.count(old_input1) == 5, f"Expected 5 occurrences of old_input1, found {text.count(old_input1)}"
-    text = text.replace(old_input1, new_input1)
+    if old_input1 in text:
+        text = text.replace(old_input1, new_input1)
 
     old_input2 = "     &    PStres2, YRPLT,                                 !Input\n"
     new_input2 = "     &    PStres2, YRPLT, CHPDTN,                         !Input\n"
-    assert text.count(old_input2) == 5, f"Expected 5 occurrences of old_input2, found {text.count(old_input2)}"
-    text = text.replace(old_input2, new_input2)
+    if old_input2 in text:
+        text = text.replace(old_input2, new_input2)
 
-    # 5. After CALL GROW: accumulate CHPDTN
+    # 5. After CALL GROW: accumulate CHPDTN (idempotent)
     grow_target = (
         "C     Phase R2: Accumulate harvested pod weight\n"
         "      CUM_HPODWT = CUM_HPODWT + HPODWT\n"
@@ -97,13 +189,14 @@ def update_cropgro():
         "C     Phase R2: Accumulate harvested pod weight\n"
         "      CUM_HPODWT = CUM_HPODWT + HPODWT\n"
         "C     Phase R3: Explicit tracking of cumulative harvested fruit total N\n"
+        "C     Note: HPODWT*(PCNPO/100) = HSDWT*(PCNSD/100) + HSHELWT*(PCNSH/100)\n"
         "      IF (HPODWT .GT. 0.0) THEN\n"
         "        HPODN = HSDWT * (PCNSD / 100.0) + HSHELWT * (PCNSH / 100.0)\n"
         "        CHPDTN = CHPDTN + HPODN * 10.0\n"
         "      ENDIF\n"
     )
-    assert grow_target in text, "Could not find grow_target in CROPGRO_CNC.FOR"
-    text = text.replace(grow_target, grow_repl, 1)
+    if grow_target in text and "CHPDTN = CHPDTN + HPODN * 10.0" not in text:
+        text = text.replace(grow_target, grow_repl, 1)
 
     cg_path.write_text(text, encoding="latin-1")
     v = validate_fortran_fixed_format(cg_path)
@@ -223,6 +316,7 @@ def create_freshwt():
 
 
 if __name__ == "__main__":
+    update_demand()
     update_cropgro()
     create_pods()
     create_freshwt()

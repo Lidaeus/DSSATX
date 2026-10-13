@@ -632,7 +632,8 @@ C       Phase R3: Allometric dynamic dilution for new vegetative tissue
           ELSE
             NC_DEM = 1.70 + (4.85 - 1.70) * (WEFF ** (-0.38))
           ENDIF
-          FNINL = MIN(PROLFI * 0.16, MAX(PROLFF * 0.16, NC_DEM / 100.0))
+          FNINL = MIN(PROLFI * 0.16,
+     &      MAX(PROLFF * 0.16, 1.05 * NC_DEM / 100.0))
           IF (PROLFI .GT. PROLFF) THEN
             FR_DIL = (FNINL - PROLFF * 0.16) / ((PROLFI-PROLFF) * 0.16)
             FR_DIL = MAX(0.0, MIN(1.0, FR_DIL))

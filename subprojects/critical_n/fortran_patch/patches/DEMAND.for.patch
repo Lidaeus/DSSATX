@@ -25,7 +25,7 @@
        REAL TABEX,CURV
        REAL POTLIP, POTCAR
  
-@@ -621,6 +625,26 @@
+@@ -621,6 +625,27 @@
  !-----------------------------------------------------------------------
        AGRVG = AGRLF * FRLF + AGRRT * FRRT + AGRSTM * FRSTM
        AGRVG2 = AGRVG + (FRLF*PROLFI+FRRT*PRORTI+FRSTM*PROSTI)*RPROAV
@@ -36,7 +36,8 @@
 +          ELSE
 +            NC_DEM = 1.70 + (4.85 - 1.70) * (WEFF ** (-0.38))
 +          ENDIF
-+          FNINL = MIN(PROLFI * 0.16, MAX(PROLFF * 0.16, NC_DEM / 100.0))
++          FNINL = MIN(PROLFI * 0.16,
++     &      MAX(PROLFF * 0.16, 1.05 * NC_DEM / 100.0))
 +          IF (PROLFI .GT. PROLFF) THEN
 +            FR_DIL = (FNINL - PROLFF * 0.16) / ((PROLFI-PROLFF) * 0.16)
 +            FR_DIL = MAX(0.0, MIN(1.0, FR_DIL))
@@ -52,7 +53,7 @@
  !-----------------------------------------------------------------------
  !    Compute N Demand for New Tissue, including reproductive and vegetative
  !-----------------------------------------------------------------------
-@@ -643,8 +667,8 @@
+@@ -643,8 +668,8 @@
          NVSTR = FNINR
          IF (DXR57 .GT.0.0) THEN
             FRNLFT = (NRCVR + (1. - NRCVR) * (1. - DXR57**2))
