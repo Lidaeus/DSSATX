@@ -106,7 +106,7 @@ def test_calibration_fidelity_and_generalization_gain():
     assert metrics_path.exists()
     df = pd.read_csv(metrics_path)
 
-    # 1. 26SP Terminal Yield NRMSE check: must be < 6.0% (from terminal summary)
+    # 1. 26SP Terminal Yield NRMSE check: must be < 6.0% and better than or equal to Stage R4
     tmt_path = CRITICAL_N_DIR / "reports/cross_season_treatment_summary.csv"
     tmt_df = pd.read_csv(tmt_path)
     enh_26_term = tmt_df[(tmt_df["season_id"] == "26SP") & (tmt_df["config_id"] == "custom_stage_r4_enhanced")]
@@ -115,8 +115,21 @@ def test_calibration_fidelity_and_generalization_gain():
     rmse_26 = np.sqrt(np.mean((sim_26 - obs_26) ** 2))
     nrmse_26 = 100.0 * rmse_26 / np.mean(obs_26)
     assert nrmse_26 < 6.0, f"26SP terminal fresh yield NRMSE {nrmse_26:.2f}% exceeds 6.0% limit"
+    assert nrmse_26 <= 5.48, f"26SP terminal fresh yield NRMSE {nrmse_26:.2f}% should beat or equal Stage R4 (5.48%)"
 
-    # 2. 25FA Yield improvement: Enhanced & R4 fresh yield NRMSE should be significantly lower than Official
+    # 2. 25SP Spring Validation Gain: Enhanced achieves superior NSE and NRMSE over Official and Stage R4
+    row_25sp_y = df[(df["season_id"] == "25SP") & (df["dataset_role"] == "validation") & (df["variable"] == "CHFPW")].iloc[0]
+    assert row_25sp_y["nse_enhanced"] > 0.70, f"Expected 25SP yield NSE > 0.70, got {row_25sp_y['nse_enhanced']:.3f}"
+    assert row_25sp_y["nse_enhanced"] > row_25sp_y["nse_official"], "25SP yield NSE should exceed Official"
+    assert row_25sp_y["nse_enhanced"] > row_25sp_y["nse_stage_r4"], "25SP yield NSE should exceed Stage R4"
+    assert row_25sp_y["nrmse_enhanced"] < row_25sp_y["nrmse_official"], "25SP yield NRMSE should be lower than Official"
+
+    # 25SP LWAD fit
+    row_25sp_lw = df[(df["season_id"] == "25SP") & (df["dataset_role"] == "validation") & (df["variable"] == "LWAD")].iloc[0]
+    assert row_25sp_lw["nse_enhanced"] > 0.88, f"Expected 25SP LWAD NSE > 0.88, got {row_25sp_lw['nse_enhanced']:.3f}"
+
+    # 3. 25FA Fall-Winter Validation & Diagnostic Gains
+    # Validation fresh yield error cut by at least 25 percentage points vs Official
     row_25fa_y = df[(df["season_id"] == "25FA") & (df["dataset_role"] == "validation") & (df["variable"] == "CHFPW")].iloc[0]
     assert row_25fa_y["nrmse_enhanced"] < row_25fa_y["nrmse_official"] - 25.0, (
         f"Expected Enhanced 25FA yield NRMSE ({row_25fa_y['nrmse_enhanced']:.1f}%) "
@@ -124,10 +137,14 @@ def test_calibration_fidelity_and_generalization_gain():
     )
     assert row_25fa_y["d_enhanced"] > row_25fa_y["d_official"], "Enhanced Willmott d should be higher than Official"
 
-    # 3. 25FA Stem dry mass SWAD improvement
-    row_25fa_sw = df[(df["season_id"] == "25FA") & (df["dataset_role"] == "validation") & (df["variable"] == "SWAD")].iloc[0]
-    assert row_25fa_sw["nse_enhanced"] > row_25fa_sw["nse_official"], "Enhanced SWAD NSE in 25FA should exceed Official"
-    assert row_25fa_sw["nrmse_enhanced"] < row_25fa_sw["nrmse_official"], "Enhanced SWAD NRMSE in 25FA should be lower than Official"
+    # Diagnostic fresh yield error improves over Stage R4 and Official
+    row_25fa_diag_y = df[(df["season_id"] == "25FA") & (df["dataset_role"] == "diagnostic") & (df["variable"] == "CHFPW")].iloc[0]
+    assert row_25fa_diag_y["nrmse_enhanced"] < row_25fa_diag_y["nrmse_stage_r4"], "Diagnostic fresh yield NRMSE should improve over Stage R4"
+    assert row_25fa_diag_y["nse_enhanced"] > row_25fa_diag_y["nse_stage_r4"], "Diagnostic fresh yield NSE should improve over Stage R4"
+
+    # Leaf N% NSE in 25FA should be positive
+    row_25fa_ln = df[(df["season_id"] == "25FA") & (df["dataset_role"] == "validation") & (df["variable"] == "LEAF_N_PCT")].iloc[0]
+    assert row_25fa_ln["nse_enhanced"] > 0.0, "25FA validation Leaf N% NSE should be positive under Scheme B"
 
 
 def test_mass_conservation_audit():

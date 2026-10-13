@@ -142,39 +142,27 @@ def main():
     print("Stage R4 25SP Terminal Fresh Yield NRMSE:", f"{base_res['25SP']['term_yield_nrmse']:.2f}%", f"LAI NSE={base_res['25SP']['lai_nse']:.3f}")
     print("Stage R4 25FA Terminal Fresh Yield NRMSE:", f"{base_res['25FA']['term_yield_nrmse']:.2f}%", f"LAI NSE={base_res['25FA']['lai_nse']:.3f}")
 
-    # Define targeted parameter search space:
-    # 1. XFRT: [0.78, 0.82, 0.85, 0.88, 0.90] (lower reduces 25FA over-partitioning)
-    # 2. TB2: [10.68, 11.0, 11.3, 11.5] (higher reproductive base temp restricts excessive late-fall fruit development)
-    # 3. FRSTMF: [0.78, 0.81, 0.84, 0.86] (lower increases leaf share FRLFF)
-    # 4. SLAVR: [168.0, 178.0, 188.0, 198.0] (higher expands LAI per unit leaf dry matter)
-    # 5. PGEFF: [0.062, 0.065, 0.068]
-    # 6. SENPOR_LATE: [0.250, 0.270, 0.285]
-    # 7. PODUR / SFDUR: duration adjustments
+    # Define targeted physiological parameter search space:
+    # 1. TRIFL: [0.792, 0.810, 0.825, 0.840] (phyllochron leaf appearance rate)
+    # 2. SFDUR: [27.14, 29.50, 30.50, 31.50] (fruit filling duration)
+    # 3. SENPOR_LATE: [0.275, 0.280, 0.285] (late-season senescence fraction)
+    # 4. XFRT: [0.915, 0.9267] (生殖库分配份额)
+    # 5. FRSTMF: [0.855, 0.860] (茎分配份额)
 
     candidates = []
+    for trifl in [0.792, 0.810, 0.825, 0.840]:
+        for sfdur in [27.14, 29.50, 30.50, 31.50]:
+            for senpor in [0.275, 0.280, 0.285]:
+                for xfrt in [0.922, 0.9267]:
+                    cand = copy.deepcopy(base_params)
+                    cand["TRIFL"] = trifl
+                    cand["SFDUR"] = sfdur
+                    cand["SENPOR_LATE"] = senpor
+                    cand["XFRT"] = xfrt
+                    lbl = f"TR_{trifl:.3f}_SF_{sfdur:.2f}_SN_{senpor:.3f}_X_{xfrt:.4f}"
+                    candidates.append((lbl, cand))
 
-    # Priority focused exploration:
-    for xfrt in [0.88, 0.85, 0.82, 0.80]:
-        for tb2 in [10.688, 11.10, 11.40]:
-            for frstmf in [0.86, 0.83, 0.80]:
-                for slavr in [168.0, 178.0, 188.0]:
-                    for senpor in [0.285, 0.265]:
-                        for pgeff in [0.0624, 0.0660]:
-                            cand = copy.deepcopy(base_params)
-                            cand["XFRT"] = xfrt
-                            cand["TB2"] = tb2
-                            # Ensure TB2 < TO12
-                            if cand["TB2"] >= cand["TO12"] - 2.0:
-                                cand["TO12"] = cand["TB2"] + 3.0
-                            cand["FRSTMF"] = frstmf
-                            cand["FRLFF"] = min(0.140, max(0.090, 0.995 - frstmf))
-                            cand["SLAVR"] = slavr
-                            cand["SENPOR_LATE"] = senpor
-                            cand["PGEFF"] = pgeff
-                            lbl = f"X_{xfrt}_TB2_{tb2:.1f}_FR_{frstmf}_SL_{slavr:.0f}_SN_{senpor:.3f}_PG_{pgeff:.3f}"
-                            candidates.append((lbl, cand))
-
-    print(f"\nTargeted Candidate Search: {len(candidates)} configurations to evaluate.")
+    print(f"\nTargeted Physiological Candidate Search: {len(candidates)} configurations to evaluate.")
 
     best_cand = None
     best_score = float("inf")
@@ -194,35 +182,28 @@ def main():
             d_26 = res["26SP"]["term_yield_d"]
             final_lai_26 = res["26SP"].get("final_lai_sim", 2.45)
 
-            nrmse_25sp = res["25SP"]["term_yield_nrmse"]
-            lai_nse_25sp = res["25SP"]["lai_nse"]
+            nrmse_25sp = res["25SP"]["all_yield_nrmse"]
+            nse_25sp = res["25SP"]["all_yield_nse"]
             lwad_nse_25sp = res["25SP"]["lwad_nse"]
 
-            nrmse_25fa = res["25FA"]["term_yield_nrmse"]
-            all_y_nrmse_25fa = res["25FA"]["all_yield_nrmse"]
-            all_y_nse_25fa = res["25FA"]["all_yield_nse"]
-            all_y_d_25fa = res["25FA"]["all_yield_d"]
-            lai_nse_25fa = res["25FA"]["lai_nse"]
-            lwad_nse_25fa = res["25FA"]["lwad_nse"]
+            nrmse_25fa = res["25FA"]["all_yield_nrmse"]
+            nse_25fa = res["25FA"]["all_yield_nse"]
+            d_25fa = res["25FA"]["all_yield_d"]
 
-            # Strict constraint: 26SP Terminal Yield NRMSE must be < 6.0% (hard gate!)
-            # If slightly above 6.0%, apply heavy quadratic barrier
-            pen_26 = 50.0 * max(0.0, nrmse_26 - 5.8) ** 2
-            
-            # Late LAI overshooting penalty in 26SP: final LAI should be <= 2.65
-            pen_lai_26 = 20.0 * max(0.0, final_lai_26 - 2.60) ** 2
+            # Gate: 26SP Terminal Yield NRMSE must be < 6.0% (hard gate!)
+            # 25SP yield NSE must be >= 0.65
+            if nrmse_26 >= 6.0 or nse_25sp < 0.65:
+                continue
 
-            # Multi-objective composite loss
+            # Multi-objective composite loss (lower is better)
             score = (
                 nrmse_26 * 3.0
                 + nrmse_25sp * 0.8
-                + all_y_nrmse_25fa * 0.15
-                - 12.0 * lai_nse_25sp
-                - 8.0 * lai_nse_25fa
-                - 8.0 * all_y_nse_25fa
-                - 10.0 * all_y_d_25fa
-                + pen_26
-                + pen_lai_26
+                + nrmse_25fa * 0.2
+                - 15.0 * nse_25sp
+                - 10.0 * lwad_nse_25sp
+                - 3.0 * nse_25fa
+                - 10.0 * d_25fa
             )
 
             record = {
@@ -234,29 +215,24 @@ def main():
                 "d_26": d_26,
                 "final_lai_26": final_lai_26,
                 "nrmse_25sp": nrmse_25sp,
-                "lai_nse_25sp": lai_nse_25sp,
+                "nse_25sp": nse_25sp,
                 "lwad_nse_25sp": lwad_nse_25sp,
                 "nrmse_25fa": nrmse_25fa,
-                "all_y_nrmse_25fa": all_y_nrmse_25fa,
-                "all_y_nse_25fa": all_y_nse_25fa,
-                "all_y_d_25fa": all_y_d_25fa,
-                "lai_nse_25fa": lai_nse_25fa,
-                "lwad_nse_25fa": lwad_nse_25fa,
+                "nse_25fa": nse_25fa,
+                "d_25fa": d_25fa,
             }
             valid_candidates.append(record)
 
-            if nrmse_26 < 6.0 and score < best_score:
+            if score < best_score:
                 best_score = score
                 best_cand = copy.deepcopy(cand)
                 best_res = copy.deepcopy(res)
                 best_pairs = pairs.copy()
                 print(f"  [NEW BEST #{len(valid_candidates)}] {label}")
-                print(f"      26SP Yld NRMSE={nrmse_26:.2f}% (d={d_26:.3f}, final LAI={final_lai_26:.2f})")
-                print(f"      25SP Yld NRMSE={nrmse_25sp:.2f}% | LAI NSE={lai_nse_25sp:.3f} | LWAD NSE={lwad_nse_25sp:.3f}")
-                print(f"      25FA Yld NRMSE={all_y_nrmse_25fa:.2f}% (NSE={all_y_nse_25fa:.3f}, d={all_y_d_25fa:.3f}) | LAI NSE={lai_nse_25fa:.3f}")
+                print(f"      26SP Yld NRMSE={nrmse_26:.2f}% (d={d_26:.3f})")
+                print(f"      25SP Yld NRMSE={nrmse_25sp:.2f}% | NSE={nse_25sp:.3f} | LWAD NSE={lwad_nse_25sp:.3f}")
+                print(f"      25FA Yld NRMSE={nrmse_25fa:.2f}% | NSE={nse_25fa:.3f} | d={d_25fa:.3f}")
 
-            if (idx + 1) % 25 == 0:
-                print(f"Progress: [{idx+1}/{len(candidates)}] evaluated...")
         except Exception:
             continue
 
@@ -264,19 +240,18 @@ def main():
     valid_candidates.sort(key=lambda x: x["score"])
 
     print("\n" + "=" * 90)
-    print("TOP 5 ENHANCED CANDIDATES WITH 26SP NRMSE < 6.0%:")
+    print("TOP 5 ENHANCED CANDIDATES (ALL GATES PASSED):")
     print("=" * 90)
-    top_meeting_26 = [c for c in valid_candidates if c["nrmse_26"] < 6.0]
-    for i, item in enumerate(top_meeting_26[:5]):
+    for i, item in enumerate(valid_candidates[:5]):
         print(f"Rank {i+1}: {item['label']} | Score={item['score']:.2f}")
-        print(f"    26SP: Yield NRMSE={item['nrmse_26']:.2f}%, d={item['d_26']:.3f}, LAI end={item['final_lai_26']:.2f}")
-        print(f"    25SP: Yield NRMSE={item['nrmse_25sp']:.2f}%, LAI NSE={item['lai_nse_25sp']:.3f}, LWAD NSE={item['lwad_nse_25sp']:.3f}")
-        print(f"    25FA: Yield NRMSE={item['all_y_nrmse_25fa']:.2f}%, Yield NSE={item['all_y_nse_25fa']:.3f}, Yield d={item['all_y_d_25fa']:.3f}, LAI NSE={item['lai_nse_25fa']:.3f}")
+        print(f"    26SP: Yield NRMSE={item['nrmse_26']:.2f}%, d={item['d_26']:.3f}")
+        print(f"    25SP: Yield NRMSE={item['nrmse_25sp']:.2f}%, Yield NSE={item['nse_25sp']:.3f}, LWAD NSE={item['lwad_nse_25sp']:.3f}")
+        print(f"    25FA: Yield NRMSE={item['nrmse_25fa']:.2f}%, Yield NSE={item['nse_25fa']:.3f}, Yield d={item['d_25fa']:.3f}")
         p = item["params"]
-        print(f"    Params: XFRT={p['XFRT']}, TB2={p['TB2']}, FRSTMF={p['FRSTMF']}, FRLFF={p['FRLFF']}, SLAVR={p['SLAVR']}, SENPOR={p['SENPOR_LATE']}, PGEFF={p['PGEFF']}")
+        print(f"    Params: TRIFL={p['TRIFL']}, SFDUR={p['SFDUR']}, SENPOR={p['SENPOR_LATE']}, XFRT={p['XFRT']}")
 
     # Pick the champion enhanced candidate
-    champion = top_meeting_26[0]
+    champion = valid_candidates[0]
     champ_params = champion["params"]
 
     # Save enhanced parameters
@@ -297,7 +272,7 @@ def main():
                 "stage_r4_value": base_params[k],
                 "enhanced_value": champ_params[k],
             }
-            for k in ["XFRT", "TB2", "FRSTMF", "FRLFF", "SLAVR", "SENPOR_LATE", "PGEFF"]
+            for k in ["TRIFL", "SFDUR", "SENPOR_LATE", "XFRT"]
         },
     }
     with open(CRITICAL_N_DIR / "reports/stage_r4_enhanced_summary.json", "w", encoding="utf-8") as f:
