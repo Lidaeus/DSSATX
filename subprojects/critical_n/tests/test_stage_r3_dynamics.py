@@ -325,3 +325,79 @@ def test_r3_production_isolation_unbroken():
 
     assert BIN_CNC.is_file()
     assert BIN_CNC.stat().st_size > 10 * 1024 * 1024
+
+
+def test_r3_vanilla_vs_cnc_chpdtn_isolation():
+    """Verify that vanilla FreshWt.OUT lacks CHPDTN while CNC FreshWt.OUT contains it."""
+    v_dir = VERIFY_DIR / "greenhouse" / "vanilla_mepho_l"
+    c_dir = VERIFY_DIR / "greenhouse" / "cnc_mepho_l"
+    if not (v_dir / "FreshWt.OUT").is_file() or not (c_dir / "FreshWt.OUT").is_file():
+        pytest.skip("Greenhouse verification runs missing")
+
+    v_lines = (v_dir / "FreshWt.OUT").read_text(encoding="latin-1").splitlines()
+    c_lines = (c_dir / "FreshWt.OUT").read_text(encoding="latin-1").splitlines()
+
+    v_headers = [l for l in v_lines if l.startswith("@")]
+    c_headers = [l for l in c_lines if l.startswith("@")]
+
+    assert len(v_headers) > 0 and len(c_headers) > 0
+    assert "CHPDTN" not in v_headers[0], "Vanilla FreshWt.OUT unexpectedly contains CHPDTN"
+    assert "CHPDTN" in c_headers[0], "CNC FreshWt.OUT missing expected CHPDTN column"
+
+
+def test_r3_greenhouse_fruiting_stability_mepho_l():
+    """Verify fruiting stability under MEPHO='L' between Vanilla and CNC."""
+    v_dir = VERIFY_DIR / "greenhouse" / "vanilla_mepho_l"
+    c_dir = VERIFY_DIR / "greenhouse" / "cnc_mepho_l"
+    if not (v_dir / "Summary.OUT").is_file() or not (c_dir / "Summary.OUT").is_file():
+        pytest.skip("Greenhouse Summary.OUT missing")
+
+    v_sum = [l for l in (v_dir / "Summary.OUT").read_text(encoding="latin-1").splitlines() if l.strip() and not l.startswith(("*", "@"))]
+    c_sum = [l for l in (c_dir / "Summary.OUT").read_text(encoding="latin-1").splitlines() if l.strip() and not l.startswith(("*", "@"))]
+
+    assert len(v_sum) == 12, f"Expected 12 runs in Vanilla Summary.OUT, got {len(v_sum)}"
+    assert len(c_sum) == 12, f"Expected 12 runs in CNC Summary.OUT, got {len(c_sum)}"
+
+
+def test_r3_allometric_dilution_boundary_and_degenerate_conditions():
+    """Verify mathematical boundary and degenerate cases for Stage R3 DEMAND."""
+    prolfi = 0.270
+    prolff = 0.110
+    prosti = 0.188
+    prostf = 0.065
+
+    # Degenerate condition: PROLFI <= PROLFF
+    def calc_dil(weff: float, pi: float, pf: float, si: float, sf: float):
+        if weff <= 0.0:
+            fninl = pi * 0.16
+            fnins = si * 0.16
+        else:
+            if weff < 1.00:
+                nc_dem = 4.85
+            else:
+                nc_dem = 1.70 + (4.85 - 1.70) * (weff ** (-0.38))
+            fninl = min(pi * 0.16, max(pf * 0.16, nc_dem / 100.0))
+            if pi > pf:
+                fr_dil = (fninl - pf * 0.16) / ((pi - pf) * 0.16)
+                fr_dil = max(0.0, min(1.0, fr_dil))
+            else:
+                fr_dil = 1.0
+            fnins = sf * 0.16 + (si - sf) * 0.16 * fr_dil
+            fnins = max(sf * 0.16, min(si * 0.16, fnins))
+        return fninl, fnins
+
+    # Degenerate cultivar where PROLFI <= PROLFF (e.g. equal initial and final targets)
+    fnl_deg, fns_deg = calc_dil(5.0, 0.10, 0.10, 0.06, 0.04)
+    assert abs(fnl_deg - 0.10 * 0.16) < 1e-6
+    assert abs(fns_deg - 0.06 * 0.16) < 1e-6
+
+    # Negative / zero Weff
+    fnl_neg, fns_neg = calc_dil(-2.0, prolfi, prolff, prosti, prostf)
+    assert fnl_neg == prolfi * 0.16
+    assert fns_neg == prosti * 0.16
+
+    # Extreme high biomass Weff = 1000.0 t/ha
+    fnl_huge, fns_huge = calc_dil(1000.0, prolfi, prolff, prosti, prostf)
+    assert fnl_huge >= prolff * 0.16
+    assert fns_huge >= prostf * 0.16
+

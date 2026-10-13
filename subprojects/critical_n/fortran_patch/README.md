@@ -1,8 +1,8 @@
-# Fortran Patch Specification: CROPGRO Stage R1 + R2 (核心动力学解耦与需求端动态稀释)
+# Fortran Patch Specification: CROPGRO Stage R1 + R2 + R3 (核心动力学解耦、需求端动态稀释与采收果氮闭合)
 
-**Standard**: Phase 2 CROPGRO Stage R1 + Stage R2 Technical Specification  
+**Standard**: Phase 2 CROPGRO Stage R1 + Stage R2 + Stage R3 Technical Specification  
 **Model Base**: DSSAT CSM v4.8.2 / v4.8.6.0 (`Plant/CROPGRO/`)  
-**Target Routines**: `DEMAND.for`, `CROPGRO.for`, `MOBIL.for`, `SENES.for`, `GROW.for`, `PHOTO.for`  
+**Target Routines**: `DEMAND.for`, `CROPGRO.for`, `MOBIL.for`, `SENES.for`, `GROW.for`, `PHOTO.for`, `PODS.for`, `FreshWt.for`  
 **Compliance**: Strict Fixed-Form Fortran 77/90 (Columns 7–72, zero line overflow)  
 **Safety & Isolation**: All patches and source files are strictly sandboxed within `subprojects/critical_n/fortran_patch/` and never touch production `C:\DSSAT48\`.
 
@@ -134,27 +134,43 @@ All patched code adheres strictly to fixed-form Fortran 77/90 rules:
 - **Stage R1**: Routes `NRUSLF_SAFE` and `NRUSLF_STR` from `CALL MOBIL` to `CALL SENES` and `CALL GROW`.
 - **Stage R2**: Tracks cumulative fruit harvest pod weight `CUM_HPODWT` across harvests and passes strictly continuous effective biomass `WEFF = (TOPWT + CUM_HPODWT) / 100.0` (t DM/ha) to `CALL DEMAND`.
 - **Stage R2**: Eliminates single-day `HPODWT` sawteeth in `RATE` acclimation calculation `WEFF_C`.
+- **Stage R3**: Explicitly integrates cumulative harvested fruit total nitrogen `CHPDTN = CHPDTN + HPODN * 10.0` where `HPODN = HSDWT * (PCNSD / 100.0) + HSHELWT * (PCNSH / 100.0)`.
+- **Stage R3**: Passes unperturbed cultivar potential `FNINL0 = PROLFI * 0.16` and cumulative `CHPDTN` into `CALL PODS`.
 
 ### 3.5 `DEMAND.for` (`DEMAND_CNC.FOR` / `patches/DEMAND.for.patch`)
 - **Stage R2 Dynamic Old Tissue Demand Reconstruction**:
   Replaces fixed constant target concentration $NVSTL = FNINL \approx 4.8\%$ with the asymptotic lower-bound critical dilution curve:
   $$N_c(W_{\text{eff}}) = N_{c,\infty} + (a - N_{c,\infty}) \cdot [\max(W_0, W_{\text{eff}})]^{-b}$$
   ($a = 4.85\%$, $b = 0.38$, $W_0 = 1.00\text{ t DM/ha}$, $N_{c,\infty} = 1.70\%$).
-- Leaf target concentration:
-  $$NVSTL(t) = \max\left(\text{PROLFF} \cdot 0.16, \; \frac{N_c(W_{\text{eff}}(t))}{100.0}\right)$$
-- Stem target concentration allometrically coordinated with leaf dilution:
-  $$NVSTS(t) = \max\left(\text{PROSTF} \cdot 0.16, \; \text{PROSTF} \cdot 0.16 + (FNINS - \text{PROSTF} \cdot 0.16) \cdot \phi\right)$$
-  where $\phi = \max\left(0.0, \; \min\left(1.0, \; \frac{NVSTL - \text{PROLFF} \cdot 0.16}{FNINL - \text{PROLFF} \cdot 0.16}\right)\right)$.
-- When $DXR57 > 0$, reproductive decline scales smoothly from current diluted concentrations towards maintenance protein.
+- **Stage R3 New Vegetative Tissue Allometric Dilution**:
+  Extends allometric dilution to new vegetative tissue synthesis:
+  $$FNINL(t) = \min\left(PROLFI \cdot 0.16, \; \max\left(PROLFF \cdot 0.16, \; \frac{N_c(W_{\text{eff}}(t))}{100.0}\right)\right)$$
+  $$FNINS(t) = PROSTF \cdot 0.16 + (PROSTI - PROSTF) \cdot 0.16 \cdot \phi$$
+  where $\phi = \max\left(0.0, \; \min\left(1.0, \; \frac{FNINL - PROLFF \cdot 0.16}{(PROLFI - PROLFF) \cdot 0.16}\right)\right)$.
+  Harmonizes new tissue synthesis demand `NDMVEG` and old tissue refill targets `NVSTL = FNINL`, `NVSTS = FNINS`.
 
 ### 3.6 `PHOTO.for` (`PHOTO_CNC.FOR` / `patches/PHOTO.for.patch`)
 - Continuous NNI coupling for photosynthetic acclimation.
+
+### 3.7 `PODS.for` (`PODS_CNC.FOR` / `patches/PODS.for.patch`)
+- **Stage R3 Singularity Guard**:
+  At line 747, native pod addition scaling factor $RNITPD = \frac{RNITP \cdot 0.01 - PROLFF \cdot 0.16}{FNINL - PROLFF \cdot 0.16}$ has a division-by-zero singularity when $FNINL \to PROLFF \cdot 0.16$.
+  Guarded by `IF (FNINL - PROLFF * 0.16 .GT. 0.001)`, defaulting safely to 1.0, clamped in $[0.1, 1.1]$.
+- **Stage R3 Decoupled Fruiting Potential**:
+  Receives `FNINL0 = PROLFI * 0.16` from `CROPGRO` to ensure flowering rhythm and fruit addition (`ADDSHL`) remain undisturbed by demand-side dilution.
+- **Stage R3 Routine Routing**:
+  Routes `CHPDTN` safely to `FRESHWT` on every call.
+
+### 3.8 `FreshWt.for` (`FreshWt_CNC.FOR` / `patches/FreshWt.for.patch`)
+- **Stage R3 Harvest Fruit Nitrogen Tracking**:
+  Receives `CHPDTN` as cumulative fruit nitrogen state.
+  Appends `CHPDTN` to `FreshWt.OUT` variable definitions (`!CHPDTN Cum. har. pod total N of mat. fruits (kg[N]/ha)`) and daily output records, ensuring native mass balance closure across indeterminate harvests.
 
 ---
 
 ## 4. Sandboxed Compilation & Verification Guide
 
-To build and verify the custom DSSAT binary with Stage R1 + Stage R2:
+To build and verify the custom DSSAT binary with Stage R1 + Stage R2 + Stage R3:
 
 ```bash
 # Automated compilation and full verification suite
@@ -163,5 +179,6 @@ python subprojects/critical_n/scripts/build_and_verify_dssat.py
 # Run specific unit and regression tests
 python -m pytest subprojects/critical_n/tests/test_stage_r1_dynamics.py -v
 python -m pytest subprojects/critical_n/tests/test_stage_r2_dynamics.py -v
+python -m pytest subprojects/critical_n/tests/test_stage_r3_dynamics.py -v
 python -m pytest subprojects/critical_n/tests/test_scheme_b_fortran_patch.py -v
 ```

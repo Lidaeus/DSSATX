@@ -88,7 +88,27 @@ In Stage R2, the root cause of organ nitrogen flat-lining across the season is s
    - Computes continuous effective biomass $W_{\text{eff}} = \frac{\text{TOPWT} + \text{CUM\_HPODWT}}{100.0}$ (t DM/ha) and passes it directly to `CALL DEMAND`.
    - Eliminates single-day `HPODWT` spikes in canopy photosynthesis acclimation `WEFF_C`.
 
-### 2.5 Strict Analytical Mass Balance Conservation (`mass_balance.py`)
+### 2.5 Stage R3 Coupling & Fruiting Protection (`DEMAND.for` + `FreshWt.for` + `CROPGRO.for` + `PODS.for`)
+In Stage R3, the allometric demand dilution is extended to newly synthesized vegetative tissues, and cumulative harvested fruit total nitrogen is tracked to ensure native mass balance closure:
+1. **`DEMAND.for` (Dynamic Demand Dilution for New Vegetative Tissues)**:
+   - Newly synthesized leaf and stem tissues dilute their maximum synthesis target concentrations with cumulative effective biomass $W_{\text{eff}}$:
+     $$\text{FNINL}(t) = \min\left(\text{PROLFI} \cdot 0.16, \; \max\left(\text{PROLFF} \cdot 0.16, \; \frac{N_c(W_{\text{eff}}(t))}{100.0}\right)\right)$$
+   - Stem synthesis target $\text{FNINS}(t)$ is coordinated allometrically via dilution fraction:
+     $$\phi = \max\left(0.0, \; \min\left(1.0, \; \frac{\text{FNINL} - \text{PROLFF} \cdot 0.16}{(\text{PROLFI} - \text{PROLFF}) \cdot 0.16}\right)\right)$$
+     $$\text{FNINS}(t) = \text{PROSTF} \cdot 0.16 + (\text{PROSTI} - \text{PROSTF}) \cdot 0.16 \cdot \phi$$
+   - New vegetative synthesis demand $\text{NDMVEG}$ and old tissue refill targets $\text{NVSTL}$, $\text{NVSTS}$ are simultaneously harmonized.
+2. **`FreshWt.for` & `CROPGRO.for` (Native Tracking of Cumulative Harvest Fruit Nitrogen)**:
+   - Daily harvest pod nitrogen is calculated explicitly:
+     $$\text{HPODN} = \text{HSDWT} \cdot \frac{\text{PCNSD}}{100.0} + \text{HSHELWT} \cdot \frac{\text{PCNSH}}{100.0} \quad (\text{g[N]/m}^2)$$
+   - Accumulated into cumulative fruit harvest nitrogen state:
+     $$\text{CHPDTN} = \text{CHPDTN} + \text{HPODN} \times 10.0 \quad (\text{kg[N]/ha})$$
+   - Formatted into `FreshWt.OUT` as the closing column `CHPDTN`, maintaining monotonically non-decreasing running totals across the entire season.
+3. **`PODS.for` (Singularity Protection & Fruiting Decoupling)**:
+   - Line 747 pod addition factor $\text{RNITPD} = \frac{\text{RNITP} \cdot 0.01 - \text{PROLFF} \cdot 0.16}{\text{FNINL} - \text{PROLFF} \cdot 0.16}$ contains a potential division-by-zero singularity when $\text{FNINL} \to \text{PROLFF} \cdot 0.16$.
+   - Guarded by $\text{IF} (\text{FNINL} - \text{PROLFF} \cdot 0.16 > 0.001)$, defaulting safely to 1.0.
+   - Decoupled cultivar reference $\text{FNINL0} = \text{PROLFI} \cdot 0.16$ is supplied to `CALL PODS` to preserve flowering rhythm and fruit addition ($\text{ADDSHL}$) independently of demand-side dilution.
+
+### 2.6 Strict Analytical Mass Balance Conservation (`mass_balance.py`)
 Plant nitrogen balance follows the exact telescoping identity:
 $$\Delta \text{Storage} \equiv \sum \text{Inputs} - \sum \text{Outputs}$$
 $$\text{Storage} = WTNLF + WTNST + WTNRT + WTNPOD$$
@@ -131,22 +151,27 @@ subprojects/critical_n/
 ├── fortran_patch/                     # [Phase 2 Fortran Specifications & Patches]
 │   ├── README.md                      # Detailed compilation, signature changes, and coding rules
 │   ├── patches/
-│   │   ├── DEMAND.for.patch           # Clean unified diff patch for DEMAND.for (Stage R2 dynamic dilution)
-│   │   ├── CROPGRO.for.patch          # Clean unified diff patch for CROPGRO.for (Stage R1 + R2 coupling)
+│   │   ├── DEMAND.for.patch           # Clean unified diff patch for DEMAND.for (Stage R2/R3 dynamic dilution)
+│   │   ├── CROPGRO.for.patch          # Clean unified diff patch for CROPGRO.for (Stage R1/R2/R3 coupling)
 │   │   ├── MOBIL.for.patch            # Clean unified diff patch for MOBIL.for (Stage R1 safe buffer N)
 │   │   ├── SENES.for.patch            # Clean unified diff patch for SENES.for (Stage R1 stress senescence)
 │   │   ├── GROW.for.patch             # Clean unified diff patch for GROW.for (Stage R1 corrected deductions)
-│   │   └── PHOTO.for.patch            # Clean unified diff patch for PHOTO.for (Scheme B NNI acclimation)
+│   │   ├── PHOTO.for.patch            # Clean unified diff patch for PHOTO.for (Scheme B NNI acclimation)
+│   │   ├── PODS.for.patch             # Clean unified diff patch for PODS.for (Stage R3 singularity guard)
+│   │   └── FreshWt.for.patch          # Clean unified diff patch for FreshWt.for (Stage R3 CHPDTN output)
 │   └── src_scheme_b/                  # Drop-in patched Fortran source files ready for compilation
-│       ├── DEMAND_CNC.FOR             # DEMAND with dynamic critical dilution NVSTL & NVSTS
-│       ├── CROPGRO_CNC.FOR            # CROPGRO with cumulative harvest pod tracking & Weff routing
+│       ├── DEMAND_CNC.FOR             # DEMAND with dynamic critical dilution NVSTL, NVSTS & FNINL/S
+│       ├── CROPGRO_CNC.FOR            # CROPGRO with CHPDTN tracking & Weff routing
 │       ├── MOBIL_CNC.FOR              # MOBIL with decoupled safe buffer N mining
 │       ├── SENES_CNC.FOR              # SENES with stress mobilization driver
 │       ├── GROW_CNC.FOR               # GROW with safe buffer mass & area preservation
-│       └── PHOTO_CNC.FOR              # PHOTO with NNI_IN acclimation coupling
+│       ├── PHOTO_CNC.FOR              # PHOTO with NNI_IN acclimation coupling
+│       ├── PODS_CNC.FOR               # PODS with singularity guard and FNINL0 fruiting rhythm preservation
+│       └── FreshWt_CNC.FOR            # FreshWt with CHPDTN output column
 ├── scripts/
 │   ├── __init__.py
 │   ├── build_and_verify_dssat.py      # Automated compiler detection, CMake/Ninja build & regression QA
+│   ├── apply_stage_r3_fortran.py      # Automated patch generation & scheme_b sync for Stage R3
 │   ├── run_cnc_postprocessor.py       # Standalone CLI tool to post-process DSSAT run outputs (Scheme A)
 │   ├── demo_cnc_evaluation.py         # End-to-end runnable demo validating against DSSAT run data (Scheme A)
 │   ├── compare_nni_trajectories.py    # Diagnostic script showing standing vs cumulative trajectories (Scheme A)
@@ -168,7 +193,9 @@ subprojects/critical_n/
     ├── test_scheme_b_fortran_patch.py # Fortran 72-column compliance (0 violations) & sandboxed patch application
     ├── test_scheme_b_simulation.py    # Multi-treatment simulation comparisons and DataFrame exports
     ├── test_stage_r1_dynamics.py      # Stage R1 decoupled mobilization, senescence & mass balance tests
-    └── test_stage_r2_dynamics.py      # Stage R2 dynamic demand dilution & allometric dynamics tests
+    ├── test_stage_r2_dynamics.py      # Stage R2 dynamic demand dilution & allometric dynamics tests
+    └── test_stage_r3_dynamics.py      # Stage R3 dynamic allometric dilution, CHPDTN & fruiting stability tests
+```
 ```
 
 ---
