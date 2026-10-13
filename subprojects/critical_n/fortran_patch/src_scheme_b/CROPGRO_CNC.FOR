@@ -55,7 +55,7 @@ C=======================================================================
       EXTERNAL DEMAND, FREEZE, GROW, HRES_CGRO, INCOMP, IPPLNT, MOBIL,
      &  NFIX, NUPTAK, OPGROW, OPHARV, P_CGRO, PEST, PHENOL,
      &  PHOTO, PLANTNBAL, PODDET, PODS, RESPIR, ROOTS, SENES,
-     &  VEGGR
+     &  VEGGR, FIND, GETLUN, IGNORE
       SAVE
 !-----------------------------------------------------------------------
       CHARACTER*1 DETACH, IDETO, ISWNIT, ISWSYM,
@@ -102,6 +102,10 @@ C=======================================================================
      &    NMINEP, NMOBR, NDTH, NFIXN, NODGR
       REAL NAVL, NRUSSH, NGRSD, NGRSH
       REAL NRUSLF, NRUSRT, NRUSST
+      REAL PROLFG, NRUSLF_SAFE, NRUSLF_STR, PROLFG_IN
+      INTEGER LUNCRP, LNUM, LINC, FOUND, ISECT, ERRNUM
+      CHARACTER*6 SECTION
+      CHARACTER*80 C80
       REAL POTLIP, POTCAR, PPLTD,
      &    PAR, PCNL, PCNRT, PCNST, PCTMAT
       REAL PLIGLF, PLIGNO, PLIGRT, PLIGST
@@ -240,6 +244,36 @@ C=======================================================================
      &  R30C2, RCH2O, RES30C, RFIXN, RLIG, RLIP, RMIN,    !Output
      &  RNH4C, RNO3C, ROA, RPRO, RWUEP1, RWUMX, TTFIX)    !Output
 
+C-----------------------------------------------------------------------
+C     Phase R1: Read PROLFG (normal growth leaf protein fraction)
+C-----------------------------------------------------------------------
+      PROLFG = 0.220
+      IF (FILECC .NE. ' ') THEN
+        CALL GETLUN('FILEC', LUNCRP)
+        OPEN (LUNCRP, FILE = FILECC, STATUS = 'OLD', IOSTAT = ERRNUM)
+        IF (ERRNUM .EQ. 0) THEN
+          LNUM = 0
+          SECTION = '!*PLAN'
+          CALL FIND(LUNCRP, SECTION, LINC, FOUND)
+          IF (FOUND .EQ. 1) THEN
+            LNUM = LNUM + LINC
+            CALL IGNORE(LUNCRP, LNUM, ISECT, C80)
+            READ(C80, '(6X,F6.0)', IOSTAT = ERRNUM) PROLFG_IN
+            IF (ERRNUM .EQ. 0 .AND. PROLFG_IN .GT. 0.0) THEN
+              PROLFG = PROLFG_IN
+            ENDIF
+          ENDIF
+          CLOSE(LUNCRP)
+        ENDIF
+      ENDIF
+      IF (PROLFG .LE. 0.0) THEN
+        IF (PROLFI .GT. 0.0) THEN
+          PROLFG = PROLFI * 0.815
+        ELSE
+          PROLFG = 0.220
+        ENDIF
+      ENDIF
+
       KTRANS = KEP
       KSEVAP = -99.   !Defaults to old method of light
                       !  extinction calculation for soil evap.
@@ -361,7 +395,7 @@ C-----------------------------------------------------------------------
 C     Call leaf senescence routine for initialization
 C-----------------------------------------------------------------------
         CALL SENES(RUNINIT, 
-     &    FILECC, CLW, DTX, KCAN, NR7, NRUSLF, PAR,       !Input
+     &    FILECC, CLW, DTX, KCAN, NR7, 0.0, PAR,          !Input
      &    RHOL, SLAAD, STMWT, SWFAC, VSTAGE, WTLF, XLAI,  !Input
      &    0.0,                                            !Input
      &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
@@ -383,6 +417,7 @@ C-----------------------------------------------------------------------
      &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
      &  NGRSD, NGRSH, NGRST, NMINEA, NODGR, NOUTDO,       !Input
      &  NPLTD, NRUSLF, NRUSRT, NRUSSH, NRUSST,            !Input
+     &  0.0, 0.0,                                         !Input
      &  POTCAR, POTLIP, PPLTD, SDIDOT, SDPROR,            !Input
      &  SENNOD, SENRT, SLDOT, SLNDOT, SRDOT, SSDOT,       !Input
      &  SSNDOT, TRNH4U, TRNO3U, TRNU,                     !Input
@@ -543,6 +578,7 @@ C     Initialize pest coupling point and damage variables
      &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
      &  NGRSD, NGRSH, NGRST, NMINEA, NODGR, NOUTDO,       !Input
      &  NPLTD, NRUSLF, NRUSRT, NRUSSH, NRUSST,            !Input
+     &  0.0, 0.0,                                         !Input
      &  POTCAR, POTLIP, PPLTD, SDIDOT, SDPROR,            !Input
      &  SENNOD, SENRT, SLDOT, SLNDOT, SRDOT, SSDOT,       !Input
      &  SSNDOT, TRNH4U, TRNO3U, TRNU,                     !Input
@@ -585,9 +621,11 @@ C     Initialize pest coupling point and damage variables
 
 !-----------------------------------------------------------------------
       CALL MOBIL(SEASINIT,
-     &    NDMNEW, NMINEP, NMOBR, RPRO, TRNU,              !Input
-     &    WNRLF, WNRRT, WNRSH, WNRST,                     !Input
-     &    NMINEA, NRUSLF, NRUSRT, NRUSSH, NRUSST)         !Output
+     &    NDMNEW, NMINEP, NMOBR, PROLFG, RPRO, TRNU,      !Input
+     &    WCRLF, WNRLF, WNRRT, WNRSH, WNRST,              !Input
+     &    WTLF, WTNLF,                                    !Input
+     &    NMINEA, NRUSLF, NRUSRT, NRUSSH, NRUSST,         !Output
+     &    NRUSLF_SAFE, NRUSLF_STR)                        !Output
 
 !-----------------------------------------------------------------------
       CALL NFIX(SEASINIT,
@@ -632,7 +670,7 @@ C     Initialize pest coupling point and damage variables
 C     Call leaf senescence routine for initialization
 C-----------------------------------------------------------------------
       CALL SENES(SEASINIT, 
-     &    FILECC, CLW, DTX, KCAN, NR7, NRUSLF, PAR,       !Input
+     &    FILECC, CLW, DTX, KCAN, NR7, 0.0, PAR,          !Input
      &    RHOL, SLAAD, STMWT, SWFAC, VSTAGE, WTLF, XLAI,  !Input
      &    0.0,                                            !Input
      &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
@@ -791,6 +829,7 @@ C         Scheme B: Dynamic NNI for photosynthetic acclimation
      &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
      &  NGRSD, NGRSH, NGRST, NMINEA, NODGR, NOUTDO,       !Input
      &  NPLTD, NRUSLF, NRUSRT, NRUSSH, NRUSST,            !Input
+     &  0.0, 0.0,                                         !Input
      &  POTCAR, POTLIP, PPLTD, SDIDOT, SDPROR,            !Input
      &  SENNOD, SENRT, SLDOT, SLNDOT, SRDOT, SSDOT,       !Input
      &  SSNDOT, TRNH4U, TRNO3U, TRNU,                     !Input
@@ -1014,9 +1053,11 @@ C    CALL Nitrogen mobilization subroutine
 C    to compute availability of N from other tissue (NMINEA)
 C-----------------------------------------------------------------------
       CALL MOBIL(INTEGR,
-     &    NDMNEW, NMINEP, NMOBR, RPRO, TRNU,              !Input
-     &    WNRLF, WNRRT, WNRSH, WNRST,                     !Input
-     &    NMINEA, NRUSLF, NRUSRT, NRUSSH, NRUSST)         !Output
+     &    NDMNEW, NMINEP, NMOBR, PROLFG, RPRO, TRNU,      !Input
+     &    WCRLF, WNRLF, WNRRT, WNRSH, WNRST,              !Input
+     &    WTLF, WTNLF,                                    !Input
+     &    NMINEA, NRUSLF, NRUSRT, NRUSSH, NRUSST,         !Output
+     &    NRUSLF_SAFE, NRUSLF_STR)                        !Output
 
 C-----------------------------------------------------------------------
 !       Plant phosphorus module
@@ -1193,7 +1234,7 @@ C-----------------------------------------------------------------------
 C     Call leaf senescence routine to compute leaf loss variables
 C-----------------------------------------------------------------------
       CALL SENES(INTEGR, 
-     &    FILECC, CLW, DTX, KCAN, NR7, NRUSLF, PAR,       !Input
+     &    FILECC, CLW, DTX, KCAN, NR7, NRUSLF_STR, PAR,   !Input
      &    RHOL, SLAAD, STMWT, SWFAC, VSTAGE, WTLF, XLAI,  !Input
      &    WLDOTN,                                         !Input
      &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
@@ -1250,6 +1291,7 @@ C-----------------------------------------------------------------------
      &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
      &  NGRSD, NGRSH, NGRST, NMINEA, NODGR, NOUTDO,       !Input
      &  NPLTD, NRUSLF, NRUSRT, NRUSSH, NRUSST,            !Input
+     &  NRUSLF_SAFE, NRUSLF_STR,                          !Input
      &  POTCAR, POTLIP, PPLTD, SDIDOT, SDPROR,            !Input
      &  SENNOD, SENRT, SLDOT, SLNDOT, SRDOT, SSDOT,       !Input
      &  SSNDOT, TRNH4U, TRNO3U, TRNU,                     !Input

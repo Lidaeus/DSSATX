@@ -1,0 +1,45 @@
+--- Plant/CROPGRO/GROW.for
++++ Plant/CROPGRO/GROW.for
+@@ -32,6 +32,7 @@
+      &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
+      &  NGRSD, NGRSH, NGRST, NMINEA, NODGR, NOUTDO,       !Input
+      &  NPLTD, NRUSLF, NRUSRT, NRUSSH, NRUSST,            !Input
++     &  NRUSLF_SAFE, NRUSLF_STR,                          !Input
+      &  POTCAR, POTLIP, PPLTD, SDIDOT, SDPROR,            !Input
+      &  SENNOD, SENRT, SLDOT, SLNDOT, SRDOT, SSDOT,       !Input
+      &  SSNDOT, TRNH4U, TRNO3U, TRNU,                     !Input
+@@ -104,6 +105,7 @@
+       REAL WTNLF,  WTNST,  WTNRT,  WTNSH,  WTNSD
+       REAL NLDOT,  NSDOT,  NRDOT,  NSHDOT, NSDDOT
+       REAL NRUSLF, NRUSST, NRUSRT, NRUSSH
++      REAL NRUSLF_SAFE, NRUSLF_STR
+       REAL CRUSLF, CRUSST, CRUSRT, CRUSSH
+       REAL ALPHL,  ALPHS,  ALPHR,  ALPHSH
+       REAL RHOL,   RHOS,   RHOR,   RHOSH
+@@ -479,11 +481,14 @@
+ C-----------------------------------------------------------------------
+ C       WLDOT = Net leaf growth rate
+ C-----------------------------------------------------------------------
+-      WLDOT = WLDOTN - SLDOT - WLIDOT - WLFDOT - NRUSLF/0.16 - CRUSLF
++C     Phase R1: Decoupled mass deduction (safe vs stress mobilization)
++      WLDOT = WLDOTN - SLDOT - WLIDOT - WLFDOT
++     &        - (NRUSLF_SAFE * 1.0 + NRUSLF_STR / 0.16) - CRUSLF
+ 
+ !     ShutMob is amount of leaf mass lost due to N and C mobilization
+ !     A positive value represents leaf mass lost. (kg/ha)
+-      ShutMob = (NRUSLF/0.16 + CRUSLF) * 10.      !kg/ha
++      ShutMob = ((NRUSLF_SAFE * 1.0 + NRUSLF_STR / 0.16)
++     &           + CRUSLF) * 10.      !kg/ha
+ 
+       IF (WTLF > 1.E-4) THEN
+         WLDOT = WLDOT + (CADLF+NADLF/0.16) *
+@@ -1048,7 +1053,8 @@
+ C     Leaf Area, Specific Leaf Area Calculations
+ C     Calculate Area Growth rate and Update Leaf Area (AREALF, XLAI)
+ C-----------------------------------------------------------------------
+-      ALFDOT = WLDOTN*F - (SLDOT+WLIDOT+WLFDOT+NRUSLF/0.16)*SLA
++C     Phase R1: Area shrinkage driven only by stress mobilization
++      ALFDOT = WLDOTN*F - (SLDOT+WLIDOT+WLFDOT+NRUSLF_STR/0.16)*SLA
+       IF (WTLF > 1.E-4) THEN
+          ALFDOT = ALFDOT + SLA * (NADLF/0.16) *
+      &   (1. - MIN(1.0,(SLDOT+WLIDOT+WLFDOT)/WTLF))

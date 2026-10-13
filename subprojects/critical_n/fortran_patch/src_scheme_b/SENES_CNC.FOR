@@ -17,7 +17,7 @@ C  Calls  : ERROR, FIND, IGNORE
 C========================================================================
 
       SUBROUTINE SENES(DYNAMIC,
-     &    FILECC, CLW, DTX, KCAN, NR7, NRUSLF, PAR,       !Input
+     &    FILECC, CLW, DTX, KCAN, NR7, NRUSLF_STR, PAR,   !Input
      &    RHOL, SLAAD, STMWT, SWFAC, VSTAGE, WTLF, XLAI,  !Input
      &    WLDOTN,                                         !Input
      &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
@@ -41,7 +41,7 @@ C-----------------------------------------------------------------------
       INTEGER NSWAB
       PARAMETER (NSWAB = 5)
 
-      REAL DTX, NRUSLF, PAR, RATTP, RHOL, SLAAD
+      REAL DTX, NRUSLF_STR, PAR, RATTP, RHOL, SLAAD
       REAL STMWT, VSTAGE, CLW, WTLF, XLAI
       REAL WLDOTN
       REAL SLDOT, SLNDOT, SSDOT, SSNDOT
@@ -197,7 +197,8 @@ C     be recalculated since senescing leaves and petioles are assumed
 C     to contain no more mineable Protein--i.e., N content of senesced
 C     leaves and petioles is different from canopy average.
 C-----------------------------------------------------------------------
-        LFSEN = SENRTE * NRUSLF / 0.16
+C       Phase R1: Senescence driven only by stress mobilization
+        LFSEN = SENRTE * NRUSLF_STR / 0.16
 C       Scheme B: Senescence limiter to prevent defoliation avalanche
         IF (WLDOTN .GE. 0.0) THEN
           LFSEN = MIN(LFSEN, 0.90 * WLDOTN + 0.015 * WTLF)

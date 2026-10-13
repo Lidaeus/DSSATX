@@ -215,6 +215,8 @@ def setup_source_trees(force_refresh: bool = False) -> None:
         ("PHOTO_CNC.FOR", "PHOTO.for"),
         ("SENES_CNC.FOR", "SENES.for"),
         ("CROPGRO_CNC.FOR", "CROPGRO.for"),
+        ("MOBIL_CNC.FOR", "MOBIL.for"),
+        ("GROW_CNC.FOR", "GROW.for"),
     ]
 
     for src_name, dst_name in patch_targets:

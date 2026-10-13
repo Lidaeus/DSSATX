@@ -61,11 +61,17 @@ Bounded strictly within $[S_{\min}, S_{\max}] = [0.30, 1.05]$. Three continuous 
 To prevent the lethal defoliation avalanche when nitrogen is mobilized for fruit growth, Scheme B injects a mandatory senescence rate limiter:
 $$LFSEN_{\text{actual}} = \min\left(LFSEN_{\text{native}}, \; \gamma_{\text{sen}} \cdot WLDOTN + \delta_{\text{sen}} \cdot WTLF\right)$$
 where $\gamma_{\text{sen}} \in [0.85, 0.95]$ (default $0.90$), and $\delta_{\text{sen}} \in [0.0, 0.015]$ (default $0.015$ in Fortran patch for basal canopy turnover when $WLDOTN = 0$).
-- **Mathematical Invariant**:
-  $$ALFDOT_{\text{net}} = WLDOTN - LFSEN_{\text{actual}} \ge (1.0 - \gamma_{\text{sen}}) \cdot WLDOTN - \delta_{\text{sen}} \cdot WTLF$$
-  Under active vegetative growth, this mathematically guarantees that daily nitrogen mobilization cannot exceed $(1 - \gamma)$ of daily new leaf growth, preserving canopy leaf area index (LAI) and preventing the premature defoliation death spiral. When new leaf growth ceases ($WLDOTN = 0$), the standing buffer $\delta \cdot WTLF$ prevents unnatural freezing of mobilization senescence. (Note: Subject to Stage R1-R3 physiological audit regarding functional leaf protein vs storage pool separation).
 
-### 2.3 Strict Analytical Mass Balance Conservation (`mass_balance.py`)
+### 2.3 Stage R1 Three-Way Decoupled Reconstruction (MOBIL + SENES + GROW)
+In Stage R1, the underlying mechanism triggering the defoliation avalanche is root-solved at the source:
+1. **`MOBIL.for`**: Defines leaf safe buffer nitrogen $N_{\text{buf, free}} = \max(0.0, \; WTNLF - \text{PROLFG} \cdot 0.16 \cdot (WTLF - WCRLF))$. Mobilization is decoupled into safe buffer flux $NRUSLF_{\text{safe}} = \min(NRUSLF, N_{\text{buf, free}})$ and stress mobilization $NRUSLF_{\text{stress}} = \max(0.0, NRUSLF - NRUSLF_{\text{safe}})$.
+2. **`SENES.for`**: Defoliation senescence is driven solely by stress mobilization: $LFSEN = SENRTE \cdot NRUSLF_{\text{stress}} / 0.16$ (safe buffer mobilization has a senescence factor of 0).
+3. **`GROW.for`**: Fixes the double-deduction and area penalty bugs:
+   - Line 482 leaf dry weight deduction: $NRUSLF_{\text{safe}} \cdot 1.0 + NRUSLF_{\text{stress}} / 0.16$ (safe buffer N is solute mass, not $6.25\times$ protein structure loss).
+   - Line 1051 leaf area shrinkage: Area is deducted solely for stress mobilization $(NRUSLF_{\text{stress}} / 0.16) \cdot SLA$ (safe buffer mobilization does not shrink leaf area).
+4. **`CROPGRO.for`**: Routes $\text{PROLFG}$ and decoupled fluxes smoothly across subroutines.
+
+### 2.4 Strict Analytical Mass Balance Conservation (`mass_balance.py`)
 Plant nitrogen balance follows the exact telescoping identity:
 $$\Delta \text{Storage} \equiv \sum \text{Inputs} - \sum \text{Outputs}$$
 $$\text{Storage} = WTNLF + WTNST + WTNRT + WTNPOD$$

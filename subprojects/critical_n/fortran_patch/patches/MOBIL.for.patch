@@ -1,0 +1,104 @@
+--- Plant/CROPGRO/MOBIL.for
++++ Plant/CROPGRO/MOBIL.for
+@@ -2,20 +2,24 @@
+ C  MOBIL, Subroutine, G. Hoogenboom, J.W. Jones, and K.J.Boote
+ C-----------------------------------------------------------------------
+ C  Calculating of the Mobilization of N
++C  Phase R1: Decoupled safe buffer mobilization vs stress mobilization
+ C-----------------------------------------------------------------------
+ C  REVISION       HISTORY
+ C  01/09/1989 GH  Written
+ C  04/02/1996 KJB Mobilization modified
+ C  08/15/1998 CHP Modified for modular format
+ C  05/10/1990 GH  Incorporated in CROPGRO
++C  10/13/2026 R1  Decoupled safe buffer N mining from defoliation stress
+ C-----------------------------------------------------------------------
+ !  Called by:  PLANT
+ !  Calls:      None
+ C=======================================================================
+       SUBROUTINE MOBIL(DYNAMIC,                           !Control
+-     &    NDMNEW, NMINEP, NMOBR, RPRO, TRNU,              !Input
+-     &    WNRLF, WNRRT, WNRSH, WNRST,                     !Input
+-     &    NMINEA, NRUSLF, NRUSRT, NRUSSH, NRUSST)         !Output
++     &    NDMNEW, NMINEP, NMOBR, PROLFG, RPRO, TRNU,      !Input
++     &    WCRLF, WNRLF, WNRRT, WNRSH, WNRST,              !Input
++     &    WTLF, WTNLF,                                    !Input
++     &    NMINEA, NRUSLF, NRUSRT, NRUSSH, NRUSST,         !Output
++     &    NRUSLF_SAFE, NRUSLF_STR)                        !Output
+ 
+ !-----------------------------------------------------------------------
+       USE ModuleDefs     !Definitions of constructed variable types, 
+@@ -29,6 +33,8 @@
+       REAL CNMINE, NDMNEW, NMINEA, NMINEP, NMINER, NMOBR
+       REAL NRUSLF, NRUSRT, NRUSSH, NRUSST, RPRO
+       REAL TRNU, WNRLF, WNRRT, WNRSH, WNRST
++      REAL PROLFG, WCRLF, WTLF, WTNLF
++      REAL NRUSLF_SAFE, NRUSLF_STR, NBUF_FREE
+ 
+ !***********************************************************************
+ !***********************************************************************
+@@ -42,6 +48,8 @@
+       NRUSST = 0.0         !
+       NRUSRT = 0.0         !
+       NRUSSH = 0.0         !
++      NRUSLF_SAFE = 0.0
++      NRUSLF_STR  = 0.0
+ 
+ !***********************************************************************
+ !***********************************************************************
+@@ -55,6 +63,8 @@
+       NRUSST = 0.0
+       NRUSRT = 0.0
+       NRUSSH = 0.0
++      NRUSLF_SAFE = 0.0
++      NRUSLF_STR  = 0.0
+ 
+ C-----------------------------------------------------------------------
+ !    Leave MOBIL with N Mined from Leaf, Stem,Root, Shell, and
+@@ -70,6 +80,16 @@
+          NRUSRT = NMINER * WNRRT
+          NRUSSH = NMINER * WNRSH
+          CNMINE = NMINEA / 0.16 * RPRO        !Not used
++
++C        Phase R1: Decouple leaf N mobilization into safe vs stress
++         IF (PROLFG .GT. 0.0) THEN
++           NBUF_FREE = MAX(0.0,
++     &       WTNLF - PROLFG * 0.16 * (WTLF - WCRLF))
++         ELSE
++           NBUF_FREE = 0.0
++         ENDIF
++         NRUSLF_SAFE = MIN(NRUSLF, NBUF_FREE)
++         NRUSLF_STR  = MAX(0.0, NRUSLF - NRUSLF_SAFE)
+       ENDIF
+ !***********************************************************************
+ !***********************************************************************
+@@ -79,29 +99,3 @@
+ !***********************************************************************
+       RETURN
+       END ! SUBROUTINE MOBIL
+-
+-!-----------------------------------------------------------------------
+-! CNMINE  Protein re-synthesis cost (g[CH2O] / m2)
+-! NDMNEW  Total N demand for new growth (g[N] / m2 / d)
+-! NMINEA  Actual Nitrogen mined from existing tissue (g[N] / m2 / d)
+-! NMINEP  Potential N mobilization from storage (g[N] / m2 / d)
+-! NMINER  Total N actually mobilized from plant in a day (g[N]/m2-d)
+-! NMOBR   Stage dependent N mining rate 
+-! NRUSLF  N actually mobilized from leaves in a day (g[N]/m2-d)
+-! NRUSRT  N actually mobilized from roots in a day (g[N]/m2-d)
+-! NRUSSH  N actually mobilized from shells in a day (g[N]/m2-d)
+-! NRUSST  N actually mobilized from stems in a day (g[N]/m2-d)
+-! RPRO    Respiration required for re-synthesizing protein from mobilized N
+-!           (g[CH2O] / g[protein])
+-! TRNU    Total N uptake in a day (g[N] / m2 / d)
+-! WNRLF   N available for mobilization from leaves above lower limit of 
+-!           mining (g[N] / m2)
+-! WNRRT   N available for mobilization from roots above lower limit of 
+-!           mining (g[N] / m2)
+-! WNRSH   N available for mobilization from shells above lower limit of 
+-!           mining (g[N] / m2)
+-! WNRST   N available for mobilization from stems above lower limit of 
+-!           mining (g[N] / m2)
+-!-----------------------------------------------------------------------
+-!      END SUBROUTINE MOBIL
+-!-----------------------------------------------------------------------
