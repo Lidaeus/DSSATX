@@ -649,7 +649,7 @@ C       Phase R2: Dynamic critical nitrogen dilution target
           ELSE
             NC_DEM = 1.70 + (4.85 - 1.70) * (WEFF ** (-0.38))
           ENDIF
-          NVSTL = MAX(PROLFF * 0.16, NC_DEM / 100.0)
+          NVSTL = MIN(FNINL, MAX(PROLFF * 0.16, NC_DEM / 100.0))
           IF (FNINL .GT. PROLFF * 0.16) THEN
             FR_DIL = (NVSTL - PROLFF * 0.16) / (FNINL - PROLFF * 0.16)
             FR_DIL = MAX(0.0, MIN(1.0, FR_DIL))

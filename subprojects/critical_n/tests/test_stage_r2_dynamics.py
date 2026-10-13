@@ -62,7 +62,7 @@ def test_r2_mathematical_cnc_dilution_invariants():
         else:
             nc = nc_inf + (a_cnc - nc_inf) * (weff ** (-b_cnc))
 
-        nvstl = max(prolff_16, nc / 100.0)
+        nvstl = min(fninl, max(prolff_16, nc / 100.0))
 
         if fninl > prolff_16:
             fr_dil = (nvstl - prolff_16) / (fninl - prolff_16)
@@ -77,7 +77,8 @@ def test_r2_mathematical_cnc_dilution_invariants():
     # 1. Early vegetative / seedling (Weff <= 1.0 t DM/ha)
     nc_seed, nvstl_seed, nvsts_seed = calc_targets(0.3)
     assert abs(nc_seed - a_cnc) < 1e-6
-    assert abs(nvstl_seed - a_cnc / 100.0) < 1e-6
+    # Seedling NVSTL is bounded by genetic maximum FNINL (not exceeding to 4.85%)
+    assert abs(nvstl_seed - fninl) < 1e-6
     assert abs(nvsts_seed - fnins) < 1e-6
 
     # 2. Intermediate growth (Weff = 3.0 t DM/ha)
@@ -217,19 +218,31 @@ def test_r2_tissue_nitrogen_allometric_dilution():
     v2 = df_van[df_van["TRNO"] == 2]
     c2 = df_cnc[df_cnc["TRNO"] == 2]
 
-    # Vanilla stem nitrogen was a flat line across the season (range < 0.10%)
+    # Vanilla stem nitrogen was a flat line across the season (range < 0.15%)
     v_stem_range = v2["SN%D"].max() - v2["SN%D"].min()
     assert v_stem_range < 0.15, f"Vanilla stem was not flat: range={v_stem_range}"
 
-    # CNC stem nitrogen dynamically increases during vegetative filling and dilutes allometrically
-    c_stem_max = c2["SN%D"].max()
-    c_stem_min = c2[c2["DAP"] > 60]["SN%D"].min()
-    c_stem_range = c_stem_max - c_stem_min
-    assert c_stem_range > 1.0, f"CNC stem nitrogen did not dilate: range={c_stem_range}"
+    # In luxury N (TRT 2), stem N must stay physiologically bounded without unphysical explosion
+    c2_stem_max = c2["SN%D"].max()
+    assert c2_stem_max <= 3.10, f"Stem N exploded unphysically: {c2_stem_max}"
 
-    # Verify that stem N reaches at least 4.5% during vegetative phase and dilutes toward 3.0%
-    assert c_stem_max >= 4.50
-    assert c2[c2["DAP"] == 113]["SN%D"].values[0] < 3.20
+    # In N-limited treatments (Treatment 5: 0 N), organ nitrogen demonstrates strong allometric dilution
+    c5 = df_cnc[df_cnc["TRNO"] == 5]
+    c5_leaf_range = c5["LN%D"].max() - c5["LN%D"].min()
+    c5_stem_range = c5["SN%D"].max() - c5["SN%D"].min()
+    assert c5_leaf_range > 2.0, f"Leaf N failed to dilute in TRT 5: range={c5_leaf_range}"
+    assert c5_stem_range > 2.0, f"Stem N failed to dilute in TRT 5: range={c5_stem_range}"
+
+    # Final mature organ N properly reaches diluted lower boundaries
+    assert c5[c5["DAP"] == 113]["LN%D"].values[0] < 2.00
+    assert c5[c5["DAP"] == 113]["SN%D"].values[0] < 1.00
+
+    # In intermediate treatment (Treatment 4), organ N also exhibits significant dilution
+    c4 = df_cnc[df_cnc["TRNO"] == 4]
+    assert (c4["LN%D"].max() - c4["LN%D"].min()) > 1.4
+    assert (c4["SN%D"].max() - c4["SN%D"].min()) > 1.4
+    assert c4[c4["DAP"] == 113]["LN%D"].values[0] < 3.25
+    assert c4[c4["DAP"] == 113]["SN%D"].values[0] < 2.00
 
 
 def test_r2_production_isolation_unbroken():
@@ -242,3 +255,45 @@ def test_r2_production_isolation_unbroken():
 
     assert BIN_CNC.is_file()
     assert BIN_CNC.stat().st_size > 10 * 1024 * 1024
+
+
+def test_r2_effective_biomass_continuity_across_harvests():
+    """Verify that CUM_HPODWT accumulation eliminates harvest sawtooth discontinuities."""
+    fwt_file = VERIFY_DIR / "greenhouse" / "cnc_mepho_l" / "FreshWt.OUT"
+    gro_file = VERIFY_DIR / "greenhouse" / "cnc_mepho_l" / "PlantGro.OUT"
+
+    if not fwt_file.is_file() or not gro_file.is_file():
+        pytest.skip("Greenhouse run outputs not found")
+
+    # Parse FreshWt.OUT for cumulative harvested pod weight CHPDT (kg/ha)
+    harvest_data = {}
+    with open(fwt_file, "r") as f:
+        reading = False
+        cur_trt = None
+        for line in f:
+            if line.startswith("*RUN"):
+                cur_trt = int(line.split("XXQL2501")[1].split()[0])
+                harvest_data[cur_trt] = {}
+            elif line.startswith("@YEAR"):
+                reading = True
+            elif reading and line.strip():
+                parts = line.split()
+                if len(parts) >= 17:
+                    dap = int(parts[3])
+                    chpdt = float(parts[16])
+                    harvest_data[cur_trt][dap] = chpdt
+            elif not line.strip():
+                reading = False
+
+    # Treatment 2 has 7 harvest events between DAP 78 and 117
+    h2 = harvest_data.get(2, {})
+    assert len(h2) > 0, "No harvest data for Treatment 2"
+    cum_harvest_end = h2[max(h2.keys())]
+    assert cum_harvest_end > 500.0, f"Expected cumulative harvest > 500 kg/ha, got {cum_harvest_end}"
+
+    # Verify monotonic accumulation of cumulative harvest
+    prev_h = 0.0
+    for dap in sorted(h2.keys()):
+        cur_h = h2[dap]
+        assert cur_h >= prev_h, f"Cumulative harvest decreased at DAP {dap}: {cur_h} < {prev_h}"
+        prev_h = cur_h

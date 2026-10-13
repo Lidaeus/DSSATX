@@ -444,8 +444,6 @@ C-----------------------------------------------------------------------
      &  WTNUP, WTRO, WTSDO, WTSHO, WTSO, XLAI, XPOD,      !Output
      &  ShutMob, RootMob, ShelMob,                        !Output
      &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)           !Output
-C     Phase R2: Accumulate harvested pod weight
-      CUM_HPODWT = CUM_HPODWT + HPODWT
       
       CALL OPGROW(CONTROL, ISWITCH, SoilProp, 
      &    CADLF, CADST, CANHT, CANWH, CMINEA, DWNOD, GROWTH,  
@@ -789,7 +787,7 @@ C         Scheme B: Dynamic NNI for photosynthetic acclimation
           IF (WEFF_C .LT. 1.00) THEN
             NC_CUR = 4.85
           ELSE
-            NC_CUR = 4.85 * (WEFF_C ** (-0.38))
+            NC_CUR = 1.70 + (4.85 - 1.70) * (WEFF_C ** (-0.38))
           ENDIF
           IF (NC_CUR .GT. 0.0) THEN
             NNI_CUR = PCNL_C / NC_CUR
@@ -872,7 +870,7 @@ C-----------------------------------------------------------------------
 
 !-----------------------------------------------------------------------
 !       DYNAMIC = EMERG (not INTEGR) here
-        WEFF = MAX(0.0, TOPWT / 100.0)
+        WEFF = MAX(0.0, (TOPWT + CUM_HPODWT) / 100.0)
         CALL DEMAND(EMERG, CONTROL, 
      &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
      &  FILECC, FILEGC, FILEIO, FNINSH, FRACDN, LAGSD,    !Input
@@ -1327,6 +1325,8 @@ C-----------------------------------------------------------------------
      &  WTNUP, WTRO, WTSDO, WTSHO, WTSO, XLAI, XPOD,      !Output
      &  ShutMob, RootMob, ShelMob,                        !Output
      &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)           !Output
+C     Phase R2: Accumulate harvested pod weight
+      CUM_HPODWT = CUM_HPODWT + HPODWT
       
       IF ((WTLF+STMWT).GT. 0.0001) THEN
         PCNVEG = (WTNLF+WTNST)/(WTLF+STMWT)*100.

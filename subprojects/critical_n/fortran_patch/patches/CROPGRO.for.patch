@@ -103,16 +103,7 @@
       &  POTCAR, POTLIP, PPLTD, SDIDOT, SDPROR,            !Input
       &  SENNOD, SENRT, SLDOT, SLNDOT, SRDOT, SSDOT,       !Input
       &  SSNDOT, TRNH4U, TRNO3U, TRNU,                     !Input
-@@ -402,6 +444,8 @@
-      &  WTNUP, WTRO, WTSDO, WTSHO, WTSO, XLAI, XPOD,      !Output
-      &  ShutMob, RootMob, ShelMob,                        !Output
-      &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)           !Output
-+C     Phase R2: Accumulate harvested pod weight
-+      CUM_HPODWT = CUM_HPODWT + HPODWT
-       
-       CALL OPGROW(CONTROL, ISWITCH, SoilProp, 
-      &    CADLF, CADST, CANHT, CANWH, CMINEA, DWNOD, GROWTH,  
-@@ -470,6 +514,7 @@
+@@ -470,6 +512,7 @@
       &    BETN, CO2, DXR57, EXCESS, KCAN, KC_SLOPE,       !Input
       &    NR5, PAR, PStres1, SLPF, RNITP, SLAAD,          !Input
       &    SWFAC, TDAY, XHLAI, XPOD,                       !Input
@@ -120,7 +111,7 @@
       &    AGEFAC, PG)                                     !Output
          ENDIF
        ENDIF
-@@ -504,6 +549,8 @@
+@@ -504,6 +547,8 @@
  !         to INCOMP and GROW (need to initialize values of F, FRLF,
  !         FRRT, and FRSTM for use in those routines)  chp 9/22/98
  !-----------------------------------------------------------------------
@@ -129,7 +120,7 @@
        CALL DEMAND(SEASINIT, CONTROL,
       &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
       &  FILECC, FILEGC, FILEIO, FNINSH, FRACDN, LAGSD,    !Input
-@@ -513,6 +560,7 @@
+@@ -513,6 +558,7 @@
       &  TAVG, TDUMX, TDUMX2, TGRO, TURFAC, VSTAGE, WCRLF, !Input
       &  WCRRT, WCRST, WNRLF, WNRRT, WNRSH, WNRST, WTLF,   !Input
       &  WTSD, WTSHE, XPOD, NVEG0, NR1, NR2, NR5, NR7,     !Input
@@ -137,7 +128,7 @@
       &  AGRSD1, AGRSD2, AGRVG, AGRVG2, CDMREP, CropStatus,!Output
       &  F, FNINL, FNINR, FNINS, FNINSD, FRLF, FRRT, FRSTM,!Output
       &  GDMSD, GRRAT1, NDMNEW,  NDMOLD, NDMREP, NDMSDR,   !Output
-@@ -538,6 +586,7 @@
+@@ -538,6 +584,7 @@
       &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
       &  NGRSD, NGRSH, NGRST, NMINEA, NODGR, NOUTDO,       !Input
       &  NPLTD, NRUSLF, NRUSRT, NRUSSH, NRUSST,            !Input
@@ -145,7 +136,7 @@
       &  POTCAR, POTLIP, PPLTD, SDIDOT, SDPROR,            !Input
       &  SENNOD, SENRT, SLDOT, SLNDOT, SRDOT, SSDOT,       !Input
       &  SSNDOT, TRNH4U, TRNO3U, TRNU,                     !Input
-@@ -580,9 +629,11 @@
+@@ -580,9 +627,11 @@
  
  !-----------------------------------------------------------------------
        CALL MOBIL(SEASINIT,
@@ -160,7 +151,7 @@
  
  !-----------------------------------------------------------------------
        CALL NFIX(SEASINIT,
-@@ -627,8 +678,9 @@
+@@ -627,8 +676,9 @@
  C     Call leaf senescence routine for initialization
  C-----------------------------------------------------------------------
        CALL SENES(SEASINIT, 
@@ -171,7 +162,7 @@
       &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
  
  C-----------------------------------------------------------------------
-@@ -727,10 +779,28 @@
+@@ -727,10 +777,28 @@
            CALL GET('SPAM', 'AGEFAC', AGEFAC)
            CALL GET('SPAM', 'PG'    , PG)
          ELSEIF (MEPHO .EQ. 'C') THEN
@@ -185,7 +176,7 @@
 +          IF (WEFF_C .LT. 1.00) THEN
 +            NC_CUR = 4.85
 +          ELSE
-+            NC_CUR = 4.85 * (WEFF_C ** (-0.38))
++            NC_CUR = 1.70 + (4.85 - 1.70) * (WEFF_C ** (-0.38))
 +          ENDIF
 +          IF (NC_CUR .GT. 0.0) THEN
 +            NNI_CUR = PCNL_C / NC_CUR
@@ -200,7 +191,7 @@
       &    AGEFAC, PG)                                     !Output
          ENDIF
        ENDIF
-@@ -767,6 +837,7 @@
+@@ -767,6 +835,7 @@
       &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
       &  NGRSD, NGRSH, NGRST, NMINEA, NODGR, NOUTDO,       !Input
       &  NPLTD, NRUSLF, NRUSRT, NRUSSH, NRUSST,            !Input
@@ -208,15 +199,15 @@
       &  POTCAR, POTLIP, PPLTD, SDIDOT, SDPROR,            !Input
       &  SENNOD, SENRT, SLDOT, SLNDOT, SRDOT, SSDOT,       !Input
       &  SSNDOT, TRNH4U, TRNO3U, TRNU,                     !Input
-@@ -801,6 +872,7 @@
+@@ -801,6 +870,7 @@
  
  !-----------------------------------------------------------------------
  !       DYNAMIC = EMERG (not INTEGR) here
-+        WEFF = MAX(0.0, TOPWT / 100.0)
++        WEFF = MAX(0.0, (TOPWT + CUM_HPODWT) / 100.0)
          CALL DEMAND(EMERG, CONTROL, 
       &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
       &  FILECC, FILEGC, FILEIO, FNINSH, FRACDN, LAGSD,    !Input
-@@ -810,6 +882,7 @@
+@@ -810,6 +880,7 @@
       &  TAVG, TDUMX, TDUMX2, TGRO, TURFAC, VSTAGE, WCRLF, !Input
       &  WCRRT, WCRST, WNRLF, WNRRT, WNRSH, WNRST, WTLF,   !Input
       &  WTSD, WTSHE, XPOD, NVEG0, NR1, NR2, NR5, NR7,     !Input
@@ -224,7 +215,7 @@
       &  AGRSD1, AGRSD2, AGRVG, AGRVG2, CDMREP, CropStatus,!Output
       &  F, FNINL, FNINR, FNINS, FNINSD, FRLF, FRRT, FRSTM,!Output
       &  GDMSD, GRRAT1, NDMNEW,  NDMOLD, NDMREP, NDMSDR,   !Output
-@@ -931,6 +1004,7 @@
+@@ -931,6 +1002,7 @@
  C-----------------------------------------------------------------------
  C    Call Subroutine to calculate Nitrogen and Carbon Demand for new growth
  C-----------------------------------------------------------------------
@@ -232,7 +223,7 @@
        CALL DEMAND(INTEGR, CONTROL, 
       &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
       &  FILECC, FILEGC, FILEIO, FNINSH, FRACDN, LAGSD,    !Input
-@@ -940,6 +1014,7 @@
+@@ -940,6 +1012,7 @@
       &  TAVG, TDUMX, TDUMX2, TGRO, TURFAC, VSTAGE, WCRLF, !Input
       &  WCRRT, WCRST, WNRLF, WNRRT, WNRSH, WNRST, WTLF,   !Input
       &  WTSD, WTSHE, XPOD, NVEG0, NR1, NR2, NR5, NR7,     !Input
@@ -240,7 +231,7 @@
       &  AGRSD1, AGRSD2, AGRVG, AGRVG2, CDMREP, CropStatus,!Output
       &  F, FNINL, FNINR, FNINS, FNINSD, FRLF, FRRT, FRSTM,!Output
       &  GDMSD, GRRAT1, NDMNEW,  NDMOLD, NDMREP, NDMSDR,   !Output
-@@ -990,9 +1065,11 @@
+@@ -990,9 +1063,11 @@
  C    to compute availability of N from other tissue (NMINEA)
  C-----------------------------------------------------------------------
        CALL MOBIL(INTEGR,
@@ -255,7 +246,7 @@
  
  C-----------------------------------------------------------------------
  !       Plant phosphorus module
-@@ -1169,8 +1246,9 @@
+@@ -1169,8 +1244,9 @@
  C     Call leaf senescence routine to compute leaf loss variables
  C-----------------------------------------------------------------------
        CALL SENES(INTEGR, 
@@ -266,7 +257,7 @@
       &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
  
  C-----------------------------------------------------------------------
-@@ -1225,6 +1303,7 @@
+@@ -1225,6 +1301,7 @@
       &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
       &  NGRSD, NGRSH, NGRST, NMINEA, NODGR, NOUTDO,       !Input
       &  NPLTD, NRUSLF, NRUSRT, NRUSSH, NRUSST,            !Input
@@ -274,3 +265,12 @@
       &  POTCAR, POTLIP, PPLTD, SDIDOT, SDPROR,            !Input
       &  SENNOD, SENRT, SLDOT, SLNDOT, SRDOT, SSDOT,       !Input
       &  SSNDOT, TRNH4U, TRNO3U, TRNU,                     !Input
+@@ -1248,6 +1325,8 @@
+      &  WTNUP, WTRO, WTSDO, WTSHO, WTSO, XLAI, XPOD,      !Output
+      &  ShutMob, RootMob, ShelMob,                        !Output
+      &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)           !Output
++C     Phase R2: Accumulate harvested pod weight
++      CUM_HPODWT = CUM_HPODWT + HPODWT
+       
+       IF ((WTLF+STMWT).GT. 0.0001) THEN
+         PCNVEG = (WTNLF+WTNST)/(WTLF+STMWT)*100.
