@@ -681,6 +681,54 @@ def parse_dssat_out_file(file_path: Path) -> dict[int, list[dict[str, str]]]:
     return data_by_trt
 
 
+def inject_critical_nitrogen(
+    spe_file: Union[str, Path],
+    params: Mapping[str, float],
+) -> None:
+    """Inject dynamic CNC_A, CNC_B, CNC_W0, CNC_NC_INF into TMGRO048.SPE."""
+    spe_path = Path(spe_file)
+    if not spe_path.is_file():
+        return
+    cnc_keys = ["CNC_A", "CNC_B", "CNC_W0", "CNC_NC_INF"]
+    if not any(k in params for k in cnc_keys):
+        return
+
+    a_val = float(params.get("CNC_A", 4.85))
+    b_val = float(params.get("CNC_B", 0.38))
+    w0_val = float(params.get("CNC_W0", 1.00))
+    inf_val = float(params.get("CNC_NC_INF", 1.70))
+
+    content = spe_path.read_text(encoding="latin-1")
+    lines = content.splitlines()
+
+    crit_idx = -1
+    for i, line in enumerate(lines):
+        if line.startswith("!*CRITICAL NITROGEN DILUTION"):
+            crit_idx = i
+            break
+
+    data_line = f"{a_val:6.2f}{b_val:6.2f}{w0_val:6.2f}{inf_val:6.2f}               CNC_A,CNC_B,CNC_W0,CNC_NC_INF"
+
+    if crit_idx != -1:
+        replaced = False
+        for j in range(crit_idx + 1, min(crit_idx + 6, len(lines))):
+            s = lines[j].strip()
+            if s.startswith("!") or s.startswith("@") or not s:
+                continue
+            lines[j] = data_line
+            replaced = True
+            break
+        if not replaced:
+            lines.insert(crit_idx + 2, data_line)
+    else:
+        lines.append("")
+        lines.append("!*CRITICAL NITROGEN DILUTION PARAMETERS")
+        lines.append("@ CNC_A  CNC_B CNC_W0 CNC_NC_INF")
+        lines.append(data_line)
+
+    spe_path.write_text("\n".join(lines) + "\n", encoding="latin-1")
+
+
 class StageR4Sandbox:
     """Isolated execution sandbox for Stage R4 DSSAT simulations."""
 
@@ -763,6 +811,7 @@ class StageR4Sandbox:
             runner.update_eco_file(param_csv_path="parameters.csv", target_ecotype=ecotype)
             runner.update_spe_file(param_csv_path="parameters.csv")
             inject_phosphorus(runner.SPE_FILE, params)
+            inject_critical_nitrogen(runner.SPE_FILE, params)
             inject_environment(self.sandbox_dir, params)
         finally:
             os.chdir(orig_cwd)
