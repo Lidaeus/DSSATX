@@ -11,18 +11,18 @@
     "vanilla": "D:\\Tomato_Cal\\subprojects\\critical_n\\bin\\dscsm048_vanilla.exe",
     "vanilla_size": 14910127,
     "cnc": "D:\\Tomato_Cal\\subprojects\\critical_n\\bin\\dscsm048_cnc.exe",
-    "cnc_size": 14932817
+    "cnc_size": 14935787
   },
   "ctest_results": {
     "vanilla": {
       "passed": true,
-      "elapsed_sec": 11.74,
-      "output_tail": "l_n/build/baseline\n    Start 1: dssat_smoke_help\n1/4 Test #1: dssat_smoke_help .................   Passed    0.06 sec\n    Start 2: dssat_official_tomato\n2/4 Test #2: dssat_official_tomato ............   Passed    1.09 sec\n    Start 3: dssat_official_maize\n3/4 Test #3: dssat_official_maize .............   Passed    7.96 sec\n    Start 4: dssat_greenhouse_simulation\n4/4 Test #4: dssat_greenhouse_simulation ......   Passed    2.58 sec\n\n100% tests passed out of 4\n\nTotal Test time (real) =  11.70 sec\n"
+      "elapsed_sec": 17.82,
+      "output_tail": "l_n/build/baseline\n    Start 1: dssat_smoke_help\n1/4 Test #1: dssat_smoke_help .................   Passed    0.07 sec\n    Start 2: dssat_official_tomato\n2/4 Test #2: dssat_official_tomato ............   Passed    1.26 sec\n    Start 3: dssat_official_maize\n3/4 Test #3: dssat_official_maize .............   Passed   13.74 sec\n    Start 4: dssat_greenhouse_simulation\n4/4 Test #4: dssat_greenhouse_simulation ......   Passed    2.70 sec\n\n100% tests passed out of 4\n\nTotal Test time (real) =  17.78 sec\n"
     },
     "cnc": {
       "passed": true,
-      "elapsed_sec": 12.82,
-      "output_tail": "cal_n/build/custom\n    Start 1: dssat_smoke_help\n1/4 Test #1: dssat_smoke_help .................   Passed    0.85 sec\n    Start 2: dssat_official_tomato\n2/4 Test #2: dssat_official_tomato ............   Passed    1.12 sec\n    Start 3: dssat_official_maize\n3/4 Test #3: dssat_official_maize .............   Passed    8.25 sec\n    Start 4: dssat_greenhouse_simulation\n4/4 Test #4: dssat_greenhouse_simulation ......   Passed    2.55 sec\n\n100% tests passed out of 4\n\nTotal Test time (real) =  12.77 sec\n"
+      "elapsed_sec": 17.98,
+      "output_tail": "cal_n/build/custom\n    Start 1: dssat_smoke_help\n1/4 Test #1: dssat_smoke_help .................   Passed    0.08 sec\n    Start 2: dssat_official_tomato\n2/4 Test #2: dssat_official_tomato ............   Passed    1.65 sec\n    Start 3: dssat_official_maize\n3/4 Test #3: dssat_official_maize .............   Passed   13.37 sec\n    Start 4: dssat_greenhouse_simulation\n4/4 Test #4: dssat_greenhouse_simulation ......   Passed    2.80 sec\n\n100% tests passed out of 4\n\nTotal Test time (real) =  17.91 sec\n"
     }
   },
   "official_benchmarks": {
@@ -31,7 +31,7 @@
         "batch_name": "Tomato.v48",
         "crop_model": "CRGRO048",
         "returncode": 0,
-        "elapsed_sec": 0.7,
+        "elapsed_sec": 0.79,
         "out_files_count": 20,
         "has_summary": true,
         "summary_lines": 12,
@@ -43,7 +43,7 @@
         "batch_name": "Tomato.v48",
         "crop_model": "CRGRO048",
         "returncode": 0,
-        "elapsed_sec": 0.7,
+        "elapsed_sec": 0.85,
         "out_files_count": 20,
         "has_summary": true,
         "summary_lines": 12,
@@ -57,7 +57,7 @@
         "batch_name": "Maize.v48",
         "crop_model": "DEFAULT",
         "returncode": 0,
-        "elapsed_sec": 7.45,
+        "elapsed_sec": 13.46,
         "out_files_count": 35,
         "has_summary": true,
         "summary_lines": 80,
@@ -69,7 +69,7 @@
         "batch_name": "Maize.v48",
         "crop_model": "DEFAULT",
         "returncode": 0,
-        "elapsed_sec": 7.48,
+        "elapsed_sec": 12.97,
         "out_files_count": 35,
         "has_summary": true,
         "summary_lines": 80,
@@ -83,7 +83,7 @@
         "batch_name": "Potato.v48",
         "crop_model": "DEFAULT",
         "returncode": 0,
-        "elapsed_sec": 5.54,
+        "elapsed_sec": 10.2,
         "out_files_count": 29,
         "has_summary": true,
         "summary_lines": 59,
@@ -95,7 +95,7 @@
         "batch_name": "Potato.v48",
         "crop_model": "DEFAULT",
         "returncode": 0,
-        "elapsed_sec": 5.29,
+        "elapsed_sec": 8.75,
         "out_files_count": 29,
         "has_summary": true,
         "summary_lines": 59,
@@ -109,7 +109,7 @@
         "batch_name": "Rice.v48",
         "crop_model": "DEFAULT",
         "returncode": 0,
-        "elapsed_sec": 4.72,
+        "elapsed_sec": 5.89,
         "out_files_count": 28,
         "has_summary": true,
         "summary_lines": 73,
@@ -121,7 +121,7 @@
         "batch_name": "Rice.v48",
         "crop_model": "DEFAULT",
         "returncode": 0,
-        "elapsed_sec": 4.71,
+        "elapsed_sec": 5.84,
         "out_files_count": 28,
         "has_summary": true,
         "summary_lines": 73,
@@ -136,7 +136,7 @@
       "vanilla": {
         "mepho": "L",
         "returncode": 0,
-        "elapsed_sec": 2.19,
+        "elapsed_sec": 2.85,
         "has_plantgro": true,
         "plantgro_lines": 1497,
         "has_summary": true,
@@ -148,7 +148,7 @@
       "cnc": {
         "mepho": "L",
         "returncode": 0,
-        "elapsed_sec": 2.16,
+        "elapsed_sec": 2.2,
         "has_plantgro": true,
         "plantgro_lines": 1497,
         "has_summary": true,
@@ -162,7 +162,7 @@
       "vanilla": {
         "mepho": "C",
         "returncode": 0,
-        "elapsed_sec": 2.1,
+        "elapsed_sec": 3.5,
         "has_plantgro": true,
         "plantgro_lines": 1497,
         "has_summary": true,
@@ -174,7 +174,7 @@
       "cnc": {
         "mepho": "C",
         "returncode": 0,
-        "elapsed_sec": 2.69,
+        "elapsed_sec": 2.2,
         "has_plantgro": true,
         "plantgro_lines": 1497,
         "has_summary": true,

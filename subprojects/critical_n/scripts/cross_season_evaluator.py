@@ -238,9 +238,10 @@ class CrossSeasonSandbox:
 
         # Split specials (ADAP, WB100_INTERVAL) vs standard outputs
         standard_cat = season_cat[~season_cat["variable"].isin(["ADAP", "WB100_INTERVAL"])].copy()
-        extracted_df = legacy.extract_evaluation_observations(self.sandbox_dir, standard_cat.drop(columns=["simulated"], errors="ignore"))
-
-        records = extracted_df.to_dict("records")
+        records = []
+        if len(standard_cat) > 0:
+            extracted_df = legacy.extract_evaluation_observations(self.sandbox_dir, standard_cat.drop(columns=["simulated"], errors="ignore"))
+            records = extracted_df.to_dict("records")
 
         # Handle WB100_INTERVAL if present
         wb_cat = season_cat[season_cat["variable"] == "WB100_INTERVAL"].copy()
@@ -270,19 +271,48 @@ class CrossSeasonSandbox:
         # Handle ADAP if present
         adap_cat = season_cat[season_cat["variable"] == "ADAP"].copy()
         if len(adap_cat) > 0:
-            pe_path = self.sandbox_dir / "PestEval.OUT"
             eval_path = self.sandbox_dir / "Evaluate.OUT"
-            adap_val = 37.0  # default
-            if pe_path.exists():
-                for line in pe_path.read_text().splitlines():
-                    if "ADAPS" in line:
-                        parts = line.split()
-                        try:
-                            adap_val = float(parts[-1])
-                        except ValueError:
-                            pass
+            run_adap_map: dict[int, float] = {}
+            trno_adap_map: dict[int, float] = {}
+            if eval_path.is_file():
+                header = None
+                for line in eval_path.read_text(encoding="latin-1", errors="ignore").splitlines():
+                    line_str = line.strip()
+                    if line_str.startswith("@RUN"):
+                        header = [c.lstrip("@") for c in line_str.split()]
+                    elif header and line_str and line_str.split()[0].isdigit():
+                        parts = line_str.split()
+                        if len(parts) >= len(header):
+                            row_dict = dict(zip(header, parts))
+                            try:
+                                r_num = int(row_dict.get("RUN", parts[0]))
+                                t_num = int(row_dict.get("TN", row_dict.get("TRNO", r_num)))
+                                val_str = row_dict.get("ADAPS", row_dict.get("ADAP"))
+                                if val_str is not None:
+                                    val = float(val_str)
+                                    if val > 0:
+                                        run_adap_map[r_num] = val
+                                        trno_adap_map[t_num] = val
+                            except (ValueError, KeyError):
+                                pass
+
             for row in adap_cat.to_dict("records"):
-                records.append({**row, "simulated": adap_val, "comparison_status": "matched"})
+                trno = int(row["trno"]) if "trno" in row and pd.notna(row["trno"]) else None
+                run = int(row["run"]) if "run" in row and pd.notna(row["run"]) else None
+                sim_val = np.nan
+                if run is not None and run in run_adap_map:
+                    sim_val = run_adap_map[run]
+                elif trno is not None and trno in trno_adap_map:
+                    sim_val = trno_adap_map[trno]
+                elif run is not None and run in trno_adap_map:
+                    sim_val = trno_adap_map[run]
+                elif trno is not None and trno in run_adap_map:
+                    sim_val = run_adap_map[trno]
+
+                if np.isfinite(sim_val):
+                    records.append({**row, "simulated": sim_val, "comparison_status": "matched"})
+                else:
+                    records.append({**row, "simulated": np.nan, "comparison_status": "missing"})
 
         res_df = pd.DataFrame(records)
         res_df["residual"] = res_df["simulated"] - res_df["observed"]

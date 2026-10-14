@@ -36,7 +36,30 @@ def parse_whitespace_line(line: str) -> list[str]:
     return line.strip().split()
 
 
-def parse_dssat_out_file(file_path: Path) -> dict[int, list[dict[str, str]]]:
+RUN_TO_TRNO_25SP: dict[int, int] = {
+    1: 2,
+    2: 3,
+    3: 4,
+    4: 5,
+    5: 10,
+    6: 11,
+    7: 12,
+    8: 13,
+}
+
+
+def map_run_to_trno(season_id: str | None, run_num: int) -> int:
+    """Explicit RUN to TRNO mapping across seasons.
+
+    For 25SP: RUN 1..8 correspond to treatments 2, 3, 4, 5, 10, 11, 12, 13.
+    For 26SP and 25FA: RUN 1..12 correspond to treatments 1..12.
+    """
+    if season_id == "25SP":
+        return RUN_TO_TRNO_25SP.get(run_num, run_num)
+    return run_num
+
+
+def parse_dssat_out_file(file_path: Path, season_id: str | None = None) -> dict[int, list[dict[str, str]]]:
     """Parses multi-treatment DSSAT output file into {trt_no: [records]}."""
     if not file_path.exists():
         return {}
@@ -53,7 +76,8 @@ def parse_dssat_out_file(file_path: Path) -> dict[int, list[dict[str, str]]]:
         if sline.startswith("*RUN"):
             parts = sline.split()
             try:
-                current_trt = int(parts[1])
+                run_no = int(parts[1])
+                current_trt = map_run_to_trno(season_id, run_no)
                 data_by_trt[current_trt] = []
             except (ValueError, IndexError):
                 current_trt = None
@@ -86,16 +110,19 @@ def audit_mass_balance(sandbox_dir: Path, season_id: str, config_id: str) -> lis
     if pnb_file.exists():
         lines = pnb_file.read_text(encoding="latin-1", errors="ignore").splitlines()
         curr_run = None
+        curr_trt = None
         curr_out = None
         for line in lines:
             if line.startswith("*RUN"):
                 parts = line.split()
                 try:
                     curr_run = int(parts[1])
+                    curr_trt = map_run_to_trno(season_id, curr_run)
                 except (ValueError, IndexError):
-                    pass
+                    curr_run = None
+                    curr_trt = None
                 curr_out = None
-            elif "TOTAL N" in line and curr_run is not None:
+            elif "TOTAL N" in line and curr_trt is not None:
                 parts = line.split()
                 try:
                     val = float(parts[-1])
@@ -108,7 +135,7 @@ def audit_mass_balance(sandbox_dir: Path, season_id: str, config_id: str) -> lis
                         records.append({
                             "config_id": config_id,
                             "season_id": season_id,
-                            "treatment": curr_run,
+                            "treatment": curr_trt,
                             "balance_type": "PlantNBal",
                             "n_input_kgha": curr_in,
                             "n_output_kgha": curr_out,
@@ -123,14 +150,17 @@ def audit_mass_balance(sandbox_dir: Path, season_id: str, config_id: str) -> lis
     if snb_file.exists():
         lines = snb_file.read_text(encoding="latin-1", errors="ignore").splitlines()
         curr_run = None
+        curr_trt = None
         for line in lines:
             if line.startswith("*RUN"):
                 parts = line.split()
                 try:
                     curr_run = int(parts[1])
+                    curr_trt = map_run_to_trno(season_id, curr_run)
                 except (ValueError, IndexError):
-                    pass
-            elif curr_run is not None and ("Balance" in line or "BAL" in line.upper()) and not line.startswith("@"):
+                    curr_run = None
+                    curr_trt = None
+            elif curr_trt is not None and ("Balance" in line or "BAL" in line.upper()) and not line.startswith("@"):
                 vals = line.split()
                 if len(vals) >= 4:
                     try:
@@ -138,7 +168,7 @@ def audit_mass_balance(sandbox_dir: Path, season_id: str, config_id: str) -> lis
                         records.append({
                             "config_id": config_id,
                             "season_id": season_id,
-                            "treatment": curr_run,
+                            "treatment": curr_trt,
                             "balance_type": "SoilNiBal",
                             "n_input_kgha": float(vals[-3]) if len(vals) >= 3 else 0.0,
                             "n_output_kgha": float(vals[-2]) if len(vals) >= 2 else 0.0,
@@ -267,8 +297,8 @@ def main():
             pn_file = sb_dir / "PlantN.OUT"
             pg_file = sb_dir / "PlantGro.OUT"
             if pn_file.exists() and pg_file.exists():
-                pn = parse_dssat_out_file(pn_file)
-                pg = parse_dssat_out_file(pg_file)
+                pn = parse_dssat_out_file(pn_file, season_id=season_id)
+                pg = parse_dssat_out_file(pg_file, season_id=season_id)
                 for trt in sorted(pn.keys()):
                     p_recs = pn[trt]
                     g_recs = pg.get(trt, [])
@@ -299,10 +329,10 @@ def main():
     for cfg_id, _, _, _ in configs:
         for season_id in ["26SP", "25SP", "25FA"]:
             sb_dir = eval_root / cfg_id / season_id
-            pg = parse_dssat_out_file(sb_dir / "PlantGro.OUT")
-            pn = parse_dssat_out_file(sb_dir / "PlantN.OUT")
-            fw = parse_dssat_out_file(sb_dir / "FreshWt.OUT")
-            sw = parse_dssat_out_file(sb_dir / "SoilWat.OUT")
+            pg = parse_dssat_out_file(sb_dir / "PlantGro.OUT", season_id=season_id)
+            pn = parse_dssat_out_file(sb_dir / "PlantN.OUT", season_id=season_id)
+            fw = parse_dssat_out_file(sb_dir / "FreshWt.OUT", season_id=season_id)
+            sw = parse_dssat_out_file(sb_dir / "SoilWat.OUT", season_id=season_id)
 
             for trt in sorted(pg.keys()):
                 pg_recs = pg[trt]

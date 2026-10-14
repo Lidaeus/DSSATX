@@ -68,7 +68,7 @@ def test_spe_dynamic_reading_in_simulation(tmp_path):
         content += (
             "\n!*CRITICAL NITROGEN DILUTION PARAMETERS\n"
             "@ CNC_A  CNC_B CNC_W0 CNC_NC_INF\n"
-            "   4.85   0.38   1.00       1.70\n"
+            "  4.85  0.38  1.00  1.70\n"
         )
         spe_file.write_text(content, encoding="latin-1")
 

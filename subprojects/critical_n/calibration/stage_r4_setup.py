@@ -893,7 +893,7 @@ class StageR4Sandbox:
             if sim_nni > 0.0:
                 sim_val = tolerance_relaxation_operator(sim_nni, lo, hi)
             else:
-                sim_val = 0.0
+                sim_val = 999.0
             cnc_results.append({**row, "simulated": sim_val})
 
         compared_df = pd.concat([base_comp, pd.DataFrame(cnc_results)], ignore_index=True)

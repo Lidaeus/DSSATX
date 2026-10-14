@@ -1,5 +1,5 @@
---- a/Plant/CROPGRO/DEMAND.for
-+++ b/Plant/CROPGRO/DEMAND.for
+--- Plant/CROPGRO/DEMAND.for
++++ Plant/CROPGRO/DEMAND.for
 @@ -20,6 +20,7 @@
  C-----------------------------------------------------------------------
  C  Called by:  PLANT
@@ -96,7 +96,7 @@
        REAL CARMIN, FINREF, FRLFF, FRLFMX, FRSTMF,
       &  LIPOPT, LIPTB, NMOBMX, NRCVR, NVSMOB,
       &  PLIGSD, PMINSD, POASD, PROLFF,
-@@ -958,6 +990,29 @@
+@@ -958,6 +990,54 @@
          CALL IGNORE(LUNCRP,LNUM,ISECT,C80)
          READ(C80,'(4F6.0)',IOSTAT=ERR)(YTRFAC(II),II = 1,4)
          IF (ERR .NE. 0) CALL ERROR(ERRKEY,ERR,FILECC,LNUM)
@@ -108,21 +108,46 @@
 +      LNUM = 0
 +      SECTION = '!*CRIT'
 +      CALL FIND(LUNCRP, SECTION, LINC, FOUND)
-+      IF (FOUND .EQ. 0) THEN
-+        CNC_A = 4.85
-+        CNC_B = 0.38
-+        CNC_W0 = 1.00
-+        CNC_NC_INF = 1.70
-+      ELSE
++      CNC_A = 4.85
++      CNC_B = 0.38
++      CNC_W0 = 1.00
++      CNC_NC_INF = 1.70
++      IF (FOUND .NE. 0) THEN
 +        LNUM = LNUM + LINC
 +        CALL IGNORE(LUNCRP,LNUM,ISECT,C80)
 +        READ(C80,'(4F6.0)',IOSTAT=ERR) CNC_A_IN, CNC_B_IN, CNC_W0_IN,
 +     &       CNC_NC_INF_IN
 +        IF (ERR .NE. 0) CALL ERROR(ERRKEY,ERR,FILECC,LNUM)
-+        IF (CNC_A_IN .GT. 0.0) CNC_A = CNC_A_IN
-+        IF (CNC_B_IN .GT. 0.0) CNC_B = CNC_B_IN
-+        IF (CNC_W0_IN .GT. 0.0) CNC_W0 = CNC_W0_IN
-+        IF (CNC_NC_INF_IN .GT. 0.0) CNC_NC_INF = CNC_NC_INF_IN
++        IF (CNC_A_IN .GE. 2.0 .AND. CNC_A_IN .LE. 8.0) THEN
++          CNC_A = CNC_A_IN
++        ELSE
++          MSG(1) = 'Invalid CNC_A in species file; using default 4.85'
++          CALL WARNING(1, ERRKEY, MSG)
++        ENDIF
++        IF (CNC_B_IN .GE. 0.05 .AND. CNC_B_IN .LE. 1.50) THEN
++          CNC_B = CNC_B_IN
++        ELSE
++          MSG(1) = 'Invalid CNC_B in species file; using default 0.38'
++          CALL WARNING(1, ERRKEY, MSG)
++        ENDIF
++        IF (CNC_W0_IN .GE. 0.05 .AND. CNC_W0_IN .LE. 5.00) THEN
++          CNC_W0 = CNC_W0_IN
++        ELSE
++          MSG(1) = 'Invalid CNC_W0 in species file; using default 1.00'
++          CALL WARNING(1, ERRKEY, MSG)
++        ENDIF
++        IF (CNC_NC_INF_IN .GE. 0.50 .AND. CNC_NC_INF_IN .LE. 3.50) THEN
++          CNC_NC_INF = CNC_NC_INF_IN
++        ELSE
++          MSG(1) = 'Invalid CNC_NC_INF; using default 1.70'
++          CALL WARNING(1, ERRKEY, MSG)
++        ENDIF
++        IF (CNC_A .LE. CNC_NC_INF) THEN
++          MSG(1) = 'CNC_A <= CNC_NC_INF invalid; reset to 4.85 / 1.70'
++          CALL WARNING(1, ERRKEY, MSG)
++          CNC_A = 4.85
++          CNC_NC_INF = 1.70
++        ENDIF
        ENDIF
  !-----------------------------------------------------------------------
        CLOSE(LUNCRP)

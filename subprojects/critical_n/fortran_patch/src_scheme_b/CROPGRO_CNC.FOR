@@ -157,7 +157,7 @@ C=======================================================================
       REAL PNTIM(NCOHORTS)
       
       REAL TOSHMINE,TOCHMINE
-      REAL HPODWT,HSDWT,HSHELWT
+      REAL HPODWT,HSDWT,HSHELWT,HPODN_FLUX
 
       REAL FLWN(NCOHORTS)
 
@@ -466,7 +466,8 @@ C-----------------------------------------------------------------------
      &  WTNSDO, WTNSH, WTNSHA, WTNSHO, WTNSO, WTNST,      !Output
      &  WTNUP, WTRO, WTSDO, WTSHO, WTSO, XLAI, XPOD,      !Output
      &  ShutMob, RootMob, ShelMob,                        !Output
-     &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)           !Output
+     &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT,           !Output
+     &  HPODN_FLUX)                                       !Output
       
       CALL OPGROW(CONTROL, ISWITCH, SoilProp, 
      &    CADLF, CADST, CANHT, CANWH, CMINEA, DWNOD, GROWTH,  
@@ -633,7 +634,8 @@ C     Initialize pest coupling point and damage variables
      &  WTNSDO, WTNSH, WTNSHA, WTNSHO, WTNSO, WTNST,      !Output
      &  WTNUP, WTRO, WTSDO, WTSHO, WTSO, XLAI, XPOD,      !Output
      &  ShutMob, RootMob, ShelMob,                        !Output
-     &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)           !Output
+     &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT,           !Output
+     &  HPODN_FLUX)                                       !Output
 !-----------------------------------------------------------------------
       CALL NUPTAK(SEASINIT, 
      &    DLAYR, DUL, FILECC, KG2PPM, LL, NDMSDR, NDMTOT, !Input
@@ -885,7 +887,8 @@ C         Scheme B: Dynamic NNI for photosynthetic acclimation
      &  WTNSDO, WTNSH, WTNSHA, WTNSHO, WTNSO, WTNST,      !Output
      &  WTNUP, WTRO, WTSDO, WTSHO, WTSO, XLAI, XPOD,      !Output
      &  ShutMob, RootMob, ShelMob,                        !Output
-     &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)           !Output      
+     &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT,           !Output
+     &  HPODN_FLUX)                                       !Output      
 C-----------------------------------------------------------------------
 C     Call to root growth and rooting depth routine
 C-----------------------------------------------------------------------
@@ -1351,13 +1354,14 @@ C-----------------------------------------------------------------------
      &  WTNSDO, WTNSH, WTNSHA, WTNSHO, WTNSO, WTNST,      !Output
      &  WTNUP, WTRO, WTSDO, WTSHO, WTSO, XLAI, XPOD,      !Output
      &  ShutMob, RootMob, ShelMob,                        !Output
-     &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)           !Output
+     &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT,           !Output
+     &  HPODN_FLUX)                                       !Output
 C     Phase R2: Accumulate harvested pod weight
       CUM_HPODWT = CUM_HPODWT + HPODWT
 C     Phase R3: Explicit tracking of cumulative harvested fruit total N
-C     Note: HPODWT*(PCNPO/100) = HSDWT*(PCNSD/100) + HSHELWT*(PCNSH/100)
-      IF (HPODWT .GT. 0.0) THEN
-        HPODN = HSDWT * (PCNSD / 100.0) + HSHELWT * (PCNSH / 100.0)
+C     Phase 1: Shared instantaneous harvest nitrogen flux from GROW
+      IF (HPODWT .GT. 0.0 .OR. HPODN_FLUX .GT. 0.0) THEN
+        HPODN = HPODN_FLUX
         CHPDTN = CHPDTN + HPODN * 10.0
       ENDIF
       

@@ -57,7 +57,8 @@ C=======================================================================
      &  WTNSDO, WTNSH, WTNSHA, WTNSHO, WTNSO, WTNST,      !Output
      &  WTNUP, WTRO, WTSDO, WTSHO, WTSO, XLAI, XPOD,      !Output
      &  ShutMob, RootMob, ShelMob,                        !Output
-     &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)           !Output
+     &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT,           !Output
+     &  HPODN_FLUX)                                       !Output
 
 !-----------------------------------------------------------------------
       USE ModuleDefs     !Definitions of constructed variable types, 
@@ -160,7 +161,7 @@ C=======================================================================
       REAL ShutMob, RootMob, ShelMob
 
       REAL TOSHMINE, TOCHMINE
-      REAL HPODWT,HSDWT,HSHELWT
+      REAL HPODWT,HSDWT,HSHELWT, HPODN_FLUX
       REAL NHSHWT, NHSDWT
 !-----------------------------------------------------------------------
 !     Constructed variable types defined in ModuleDefs.for.
@@ -349,6 +350,7 @@ C-----------------------------------------------------------------------
       NHSHWT = 0.0    !CHP - N loss due to Multi-Harvest for shell wt
       NHSDWT = 0.0    !CHP - N loss due to Multi-Harvest for seed wt
       NLPEST = 0.0    !CHP - N loss due to pest damage
+      HPODN_FLUX = 0.0
 
 !-----------------------------------------------------------------------
 ! KJB 02/12/03 Set SLA to zero until emergence
@@ -462,6 +464,7 @@ C***********************************************************************
       ELSEIF (DYNAMIC == INTEGR) THEN
 C-----------------------------------------------------------------------
       NLPEST = 0.0    !CHP - N loss due to pest damage
+      HPODN_FLUX = 0.0
 
       GROWTH = WLDOTN + WSDOTN + WRDOTN + WSHDTN + WSDDTN + NODGR
   
@@ -780,10 +783,15 @@ C-----------------------------------------------------------------------
 C     Seed nitrogen senescence, abortion and pest damage loss
 C-----------------------------------------------------------------------
       NSDOFF = (SWIDOT+HSDWT) * (PCNSD/100.)
-      NHSDWT = NHSDWT + HSDWT * PCNSH/100.
+      NHSDWT = NHSDWT + HSDWT * PCNSD/100.
       IF (NSDOFF < 0.0) THEN
          NSDOFF = 0.0
       ENDIF
+
+C-----------------------------------------------------------------------
+C     Instantaneous harvest nitrogen flux synchronization
+C-----------------------------------------------------------------------
+      HPODN_FLUX = HSDWT * (PCNSD/100.) + HSHELWT * (PCNSH/100.)
 
 C-----------------------------------------------------------------------
 C     Net growth rate of nitrogen in seeds
