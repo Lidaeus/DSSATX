@@ -101,7 +101,8 @@ C=======================================================================
       REAL WLDOTN, WSDOTN, WRDOTN,         WSDDTN, WSHDTN
       REAL NGRLF,  NGRST,  NGRRT,  NGRSH,  NGRSD
       REAL WTLF,   STMWT,  RTWT,   SHELWT, SDWT
-      REAL PROLFF, PROSTF, PRORTF, PROSHF
+      REAL PROLFF, PROSTF, PRORTF, PROSHF, PROLFG, PROSTG
+      REAL NDEF_FUNC, NADLF_FUNC, NADLF_BUF, ADD_LFDM
       REAL PCNL,   PCNST,  PCNRT,  PCNSH,  PCNSD
       REAL WTNLF,  WTNST,  WTNRT,  WTNSH,  WTNSD
       REAL NLDOT,  NSDOT,  NRDOT,  NSHDOT, NSDDOT
@@ -199,7 +200,7 @@ C=======================================================================
      &  PMINLF, PMINST, PMINRT, PMINSH, PMINSD, PMINNO,         !Output
      &  POALF,  POAST,  POART,  POASH,  POASD,  POANO,          !Output
      &  PROLFF, PROSTF, PRORTF, PROSHF,                 PRONOD, !Output
-     &  PROLFI, PROSTI, PRORTI,                                 !Output
+     &  PROLFI, PROSTI, PRORTI, PROLFG, PROSTG,                 !Output
      &  PLTPOP, ROWSPC, RMIN,   PLME,   SDWTPL,                 !Output
      &  SDLIP,  SDPRO,  WTFSD,  WTPSD,   XPODF)                 !Output
 
@@ -243,6 +244,10 @@ C-----------------------------------------------------------------------
       ELSEIF (DYNAMIC == SEASINIT) THEN
 !-----------------------------------------------------------------------
       ALFDOT = 0.0
+      NDEF_FUNC  = 0.0
+      NADLF_FUNC = 0.0
+      NADLF_BUF  = 0.0
+      ADD_LFDM   = 0.0
       AREALF = 0.0
       AREAH  = 0.0
       CANWAA = 0.0
@@ -484,23 +489,30 @@ C     to account for mass, N and C lost this way in sections below
 C-----------------------------------------------------------------------
 C       WLDOT = Net leaf growth rate
 C-----------------------------------------------------------------------
-C     Phase R1: Decoupled mass deduction (safe vs stress mobilization)
+C     Phase 2: Decoupled mass deduction with beta_sol = 4.4 symmetry
       WLDOT = WLDOTN - SLDOT - WLIDOT - WLFDOT
-     &        - (NRUSLF_SAFE * 1.0 + NRUSLF_STR / 0.16) - CRUSLF
+     &        - (NRUSLF_SAFE * 4.4 + NRUSLF_STR / 0.16) - CRUSLF
 
 !     ShutMob is amount of leaf mass lost due to N and C mobilization
 !     A positive value represents leaf mass lost. (kg/ha)
-      ShutMob = ((NRUSLF_SAFE * 1.0 + NRUSLF_STR / 0.16)
+      ShutMob = ((NRUSLF_SAFE * 4.4 + NRUSLF_STR / 0.16)
      &           + CRUSLF) * 10.      !kg/ha
 
       IF (WTLF > 1.E-4) THEN
-        WLDOT = WLDOT + (CADLF+NADLF/0.16) *
+        IF (PROLFG .LE. 0.0) PROLFG = PROLFI * 0.815
+        NDEF_FUNC = MAX(0.0,
+     &    PROLFG * 0.16 * MAX(0.0, WTLF - WCRLF) - WTNLF)
+        NADLF_FUNC = MIN(NADLF, NDEF_FUNC)
+        NADLF_BUF  = MAX(0.0, NADLF - NADLF_FUNC)
+        ADD_LFDM   = NADLF_FUNC / 0.16 + NADLF_BUF * 4.4
+        WLDOT = WLDOT + (CADLF + ADD_LFDM) *
      &    (1. - MIN(1.0,(SLDOT+WLIDOT+WLFDOT)/WTLF))
-        ADD = (CADLF+NADLF/0.16) *
+        ADD = (CADLF + ADD_LFDM) *
      &    (1. - MIN(1.0,(SLDOT+WLIDOT+WLFDOT)/WTLF))
         ShutMob = ShutMob - ADD * 10.             !kg/ha
       ELSE
         ADD = 0.0
+        NADLF_FUNC = 0.0
       ENDIF
       IF (WLDOT < 0.0) THEN
         WLDOT = MAX(WLDOT, -WTLF)
@@ -1061,10 +1073,11 @@ C-----------------------------------------------------------------------
 C     Leaf Area, Specific Leaf Area Calculations
 C     Calculate Area Growth rate and Update Leaf Area (AREALF, XLAI)
 C-----------------------------------------------------------------------
-C     Phase R1: Area shrinkage driven only by stress mobilization
+C     Phase 2: Area shrinkage driven only by stress mobilization
+C              Area refill restored only by functional protein
       ALFDOT = WLDOTN*F - (SLDOT+WLIDOT+WLFDOT+NRUSLF_STR/0.16)*SLA
       IF (WTLF > 1.E-4) THEN
-         ALFDOT = ALFDOT + SLA * (NADLF/0.16) *
+         ALFDOT = ALFDOT + SLA * (NADLF_FUNC/0.16) *
      &   (1. - MIN(1.0,(SLDOT+WLIDOT+WLFDOT)/WTLF))
       ENDIF
 
@@ -1255,7 +1268,7 @@ C=======================================================================
      &  PMINLF, PMINST, PMINRT, PMINSH, PMINSD, PMINNO,   !Output
      &  POALF,  POAST,  POART,  POASH,  POASD,  POANO,    !Output
      &  PROLFF, PROSTF, PRORTF, PROSHF,         PRONOD,   !Output
-     &  PROLFI, PROSTI, PRORTI,                           !Output
+     &  PROLFI, PROSTI, PRORTI, PROLFG, PROSTG,           !Output
      &  PLTPOP, ROWSPC, RMIN,   PLME,   SDWTPL,           !Output
      &  SDLIP,  SDPRO,  WTFSD,  WTPSD,   XPODF)           !Output
 
@@ -1280,7 +1293,7 @@ C=======================================================================
      &  SDPRO, SDLIP, SDWTPL,
      &  ALPHL,  ALPHS,  ALPHR,  ALPHSH,
      &  PROLFF, PROSTF, PRORTF, PROSHF,                 PRONOD,
-     &  PROLFI, PROSTI, PRORTI,
+     &  PROLFI, PROSTI, PRORTI, PROLFG, PROSTG,
      &  PCARLF, PCARST, PCARRT, PCARSH, PCARSD, PCARNO,
      &  PLIPLF, PLIPST, PLIPRT, PLIPSH,                 PLIPNO,
      &  PLIGLF, PLIGST, PLIGRT, PLIGSH, PLIGSD, PLIGNO,
@@ -1371,9 +1384,11 @@ C-GH      READ(LUNIO,'(24X,F6.1,5X,A1,6X,F6.0,12X,F6.0)',IOSTAT=ERR)
           CALL ERROR(SECTION, 42, FILECC, LNUM)
         ELSE
           CALL IGNORE(LUNCRP,LNUM,ISECT,C80)
-          READ(C80,'(F6.0,6X,2F6.0,6X,F6.0)',IOSTAT=ERR)
-     &                    PROLFI, PROLFF, PROSTI, PROSTF
+          READ(C80,'(6F6.0)',IOSTAT=ERR)
+     &                    PROLFI, PROLFG, PROLFF, PROSTI, PROSTG, PROSTF
           IF (ERR .NE. 0) CALL ERROR(ERRKEY,ERR,FILECC,LNUM)
+          IF (PROLFG .LE. 0.0) PROLFG = PROLFI * 0.815
+          IF (PROSTG .LE. 0.0) PROSTG = PROSTI * 0.723
   
           CALL IGNORE(LUNCRP,LNUM,ISECT,C80)
           READ(C80,'(F6.0,6X,F6.0,12X,F6.0)',IOSTAT=ERR)
@@ -1686,7 +1701,7 @@ C=======================================================================
 ! SDLIP    Maximum lipid composition in seed (fraction)
 ! SDNPL    Seed N (g[N] / m2)
 ! SDPDOT   Daily seed puncture damage (not yet implemented) 
-! SDPRO    Seed protein fraction at 25ºC (g[protein] / g[seed])
+! SDPRO    Seed protein fraction at 25ÂºC (g[protein] / g[seed])
 ! SDPROR   Ratio to adjust lipid and carbohydrate proportions when seed 
 !            protein differs from protein composition of standard cultivar 
 !            (SDPROS) 

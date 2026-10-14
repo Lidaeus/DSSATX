@@ -265,7 +265,7 @@ def compute_nni_from_states(
     # Cumulative effective biomass (t DM/ha)
     w_eff = (cwad + cum_harvest_dry) / 1000.0
     w_calc = max(cnc_w0, w_eff)
-    nc = cnc_a * (w_calc ** (-cnc_b))
+    nc = cnc_a * ((w_calc / cnc_w0) ** (-cnc_b))
 
     pcnl = (wtnlf / wtlf) * 100.0
     nni = pcnl / nc if nc > 0.0 else 1.0

@@ -27,7 +27,23 @@
        REAL TABEX,CURV
        REAL POTLIP, POTCAR
  
-@@ -137,7 +143,8 @@
+@@ -85,7 +91,7 @@
+      &  NVSMOB,
+      &  PAR, PCNL, PCNRT, PCNST,
+      &  PGAVL, PLIGSD, PLTPOP, PMINSD, POASD,
+-     &  PROLFF, PROLFI,
++     &  PROLFF, PROLFI, PROLFG, PROSTG,
+      &  PRORTF, PRORTI, PROSTF, PROSTI, RCH2O,
+      &  RLIG, RLIP, RMIN, RNO3C,
+      &  ROA, RPRO, RPROAV, RTWT, SDGR,
+@@ -131,13 +137,15 @@
+      &  FRSTMF, LIPOPT, LIPTB, LNGSH, NMOBMX,             !Output
+      &  NRCVR, NVSMOB, PLIGSD, PMINSD, POASD,             !Output
+      &  PROLFF, PROLFI, PRORTF, PRORTI, PROSTF, PROSTI,   !Output
++     &  PROLFG, PROSTG,                                   !Output
+      &  RCH2O, RLIG, RLIP, RMIN, RNO3C, ROA,              !Output
+      &  RPRO, SDLIP, SDPRO, SHLAG, SLAMAX, SLAMIN,        !Output
+      &  SLAPAR, SLAREF, SLAVAR, SLOSUM, SIZELF, SIZREF,   !Output
       &  SRMAX, THRESH, TURSLA, TYPSDT, VSSINK, XFRMAX,    !Output
       &  XFRUIT, XLEAF, XSLATM, XTRFAC, XVGROW, XXFTEM,    !Output
       &  YLEAF, YSLATM, YSTEM, YTRFAC, YVREF, YXFTEM,      !Output
@@ -37,20 +53,22 @@
  
  !***********************************************************************
  !***********************************************************************
-@@ -621,6 +628,28 @@
+@@ -621,6 +629,31 @@
  !-----------------------------------------------------------------------
        AGRVG = AGRLF * FRLF + AGRRT * FRRT + AGRSTM * FRSTM
        AGRVG2 = AGRVG + (FRLF*PROLFI+FRRT*PRORTI+FRSTM*PROSTI)*RPROAV
-+C       Phase R3: Allometric dynamic dilution for new vegetative tissue
++C       Phase 2: Allometric dynamic dilution with F1 safeguard
 +        IF (WEFF .GT. 0.0) THEN
 +          IF (WEFF .LT. CNC_W0) THEN
 +            NC_DEM = CNC_A
 +          ELSE
 +            NC_DEM = CNC_NC_INF + (CNC_A - CNC_NC_INF) * 
-+     &               (WEFF ** (-CNC_B))
++     &               ((WEFF / CNC_W0) ** (-CNC_B))
 +          ENDIF
++          IF (PROLFG .LE. 0.0) PROLFG = PROLFI * 0.815
++          IF (PROSTG .LE. 0.0) PROSTG = PROSTI * 0.723
 +          FNINL = MIN(PROLFI * 0.16,
-+     &      MAX(PROLFF * 0.16, 1.05 * NC_DEM / 100.0))
++     &      MAX(PROLFG * 0.16 + 0.002, 1.05 * NC_DEM / 100.0))
 +          IF (PROLFI .GT. PROLFF) THEN
 +            FR_DIL = (FNINL - PROLFF * 0.16) / ((PROLFI-PROLFF) * 0.16)
 +            FR_DIL = MAX(0.0, MIN(1.0, FR_DIL))
@@ -58,7 +76,8 @@
 +            FR_DIL = 1.0
 +          ENDIF
 +          FNINS = PROSTF * 0.16 + (PROSTI - PROSTF) * 0.16 * FR_DIL
-+          FNINS = MAX(PROSTF * 0.16, MIN(PROSTI * 0.16, FNINS))
++          FNINS = MIN(PROSTI * 0.16, FNINS)
++          FNINS = MAX(PROSTG * 0.16 + 0.001, FNINS)
 +        ELSE
 +          FNINL = PROLFI * 0.16
 +          FNINS = PROSTI * 0.16
@@ -66,7 +85,7 @@
  !-----------------------------------------------------------------------
  !    Compute N Demand for New Tissue, including reproductive and vegetative
  !-----------------------------------------------------------------------
-@@ -643,8 +672,8 @@
+@@ -643,8 +676,8 @@
          NVSTR = FNINR
          IF (DXR57 .GT.0.0) THEN
             FRNLFT = (NRCVR + (1. - NRCVR) * (1. - DXR57**2))
@@ -77,7 +96,14 @@
             NVSTR = PRORTF*0.16 + (FNINR-PRORTF*0.16) * FRNLFT
          ENDIF
          NDMOLD = (WTLF  - WCRLF) * MAX(0.0,(NVSTL - PCNL /100.))
-@@ -708,7 +737,8 @@
+@@ -702,13 +735,15 @@
+      &  FRSTMF, LIPOPT, LIPTB, LNGSH, NMOBMX,             !Output
+      &  NRCVR, NVSMOB, PLIGSD, PMINSD, POASD,             !Output
+      &  PROLFF, PROLFI, PRORTF, PRORTI, PROSTF, PROSTI,   !Output
++     &  PROLFG, PROSTG,                                   !Output
+      &  RCH2O, RLIG, RLIP, RMIN, RNO3C, ROA,              !Output
+      &  RPRO, SDLIP, SDPRO, SHLAG, SLAMAX, SLAMIN,        !Output
+      &  SLAPAR, SLAREF, SLAVAR, SLOSUM, SIZELF, SIZREF,   !Output
       &  SRMAX, THRESH, TURSLA, TYPSDT, VSSINK, XFRMAX,    !Output
       &  XFRUIT, XLEAF, XSLATM, XTRFAC, XVGROW, XXFTEM,    !Output
       &  YLEAF, YSLATM, YSTEM, YTRFAC, YVREF, YXFTEM,      !Output
@@ -87,7 +113,7 @@
  
  !-----------------------------------------------------------------------
        IMPLICIT NONE
-@@ -728,6 +758,8 @@
+@@ -728,10 +763,13 @@
        INTEGER LUNCRP, LUNIO, LUNECO, ERR, LINC, LNUM, FOUND, ISECT
        INTEGER I, II
  
@@ -96,7 +122,27 @@
        REAL CARMIN, FINREF, FRLFF, FRLFMX, FRSTMF,
       &  LIPOPT, LIPTB, NMOBMX, NRCVR, NVSMOB,
       &  PLIGSD, PMINSD, POASD, PROLFF,
-@@ -958,6 +990,54 @@
+      &  PROLFI, PRORTF, PRORTI, PROSTF, PROSTI,
++     &  PROLFG, PROSTG,
+      &  RCH2O, RLIG, RLIP, RMIN, RNO3C, ROA,
+      &  RPRO, SHLAG, SLAMAX, SLAMIN, SLAPAR,
+      &  SLAREF, SLAVAR, SLOSUM, SIZELF, SIZREF,
+@@ -805,9 +843,11 @@
+         CALL ERROR(SECTION, 42, FILECC, LNUM)
+       ELSE
+         CALL IGNORE(LUNCRP,LNUM,ISECT,C80)
+-        READ(C80,'(F6.0,6X,2F6.0,6X,F6.0)',IOSTAT=ERR)
+-     &          PROLFI, PROLFF, PROSTI, PROSTF
+-        IF (ERR .NE. 0) CALL ERROR(ERRKEY,ERR,FILECC,LNUM)
++        READ(C80,'(6F6.0)',IOSTAT=ERR)
++     &          PROLFI, PROLFG, PROLFF, PROSTI, PROSTG, PROSTF
++        IF (ERR .NE. 0) CALL ERROR(ERRKEY,ERR,FILECC,LNUM)
++        IF (PROLFG .LE. 0.0) PROLFG = PROLFI * 0.815
++        IF (PROSTG .LE. 0.0) PROSTG = PROSTI * 0.723
+ 
+         CALL IGNORE(LUNCRP,LNUM,ISECT,C80)
+         READ(C80,'(F6.0,6X,F6.0)',IOSTAT=ERR) PRORTI, PRORTF
+@@ -958,6 +998,54 @@
          CALL IGNORE(LUNCRP,LNUM,ISECT,C80)
          READ(C80,'(4F6.0)',IOSTAT=ERR)(YTRFAC(II),II = 1,4)
          IF (ERR .NE. 0) CALL ERROR(ERRKEY,ERR,FILECC,LNUM)

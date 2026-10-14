@@ -93,7 +93,7 @@ def critical_n_concentration(
         raise ValueError(f"Asymptotic limit nc_inf ({nc_inf}) cannot exceed seedling maximum a ({a})")
 
     w_eff = max(w0, w)
-    return nc_inf + (a - nc_inf) * (w_eff ** (-b))
+    return nc_inf + (a - nc_inf) * ((w_eff / w0) ** (-b))
 
 
 def nni(

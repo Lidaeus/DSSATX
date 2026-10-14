@@ -89,7 +89,8 @@ def test_sandbox_patch_application_isolated(tmp_path):
     assert patched_photo_file.is_file()
     patched_photo_content = patched_photo_file.read_text(encoding="latin-1")
     assert "NNI_IN" in patched_photo_content
-    assert "S_NNI" in patched_photo_content
+    # Phase 2: S_NNI purged to eliminate toxic 0.675 multiplier
+    assert "S_NNI" not in patched_photo_content
 
     # Test CROPGRO patch in sandbox
     orig_cropgro = ORIG_SRC_DIR / "CROPGRO.for"
@@ -117,7 +118,7 @@ def test_sandbox_patch_application_isolated(tmp_path):
     patched_grow_file = apply_patch_in_sandbox(orig_grow, patch_grow, sandbox_dir=tmp_path)
     assert patched_grow_file.is_file()
     patched_grow_content = patched_grow_file.read_text(encoding="latin-1")
-    assert "NRUSLF_SAFE * 1.0" in patched_grow_content
+    assert "NRUSLF_SAFE * 4.4" in patched_grow_content
     assert "NRUSLF_STR/0.16" in patched_grow_content
 
     # Test DEMAND patch in sandbox

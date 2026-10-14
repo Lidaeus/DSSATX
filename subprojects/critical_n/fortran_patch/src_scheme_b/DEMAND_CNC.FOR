@@ -91,7 +91,7 @@ C=======================================================================
      &  NVSMOB,
      &  PAR, PCNL, PCNRT, PCNST,
      &  PGAVL, PLIGSD, PLTPOP, PMINSD, POASD,
-     &  PROLFF, PROLFI,
+     &  PROLFF, PROLFI, PROLFG, PROSTG,
      &  PRORTF, PRORTI, PROSTF, PROSTI, RCH2O,
      &  RLIG, RLIP, RMIN, RNO3C,
      &  ROA, RPRO, RPROAV, RTWT, SDGR,
@@ -137,6 +137,7 @@ C=======================================================================
      &  FRSTMF, LIPOPT, LIPTB, LNGSH, NMOBMX,             !Output
      &  NRCVR, NVSMOB, PLIGSD, PMINSD, POASD,             !Output
      &  PROLFF, PROLFI, PRORTF, PRORTI, PROSTF, PROSTI,   !Output
+     &  PROLFG, PROSTG,                                   !Output
      &  RCH2O, RLIG, RLIP, RMIN, RNO3C, ROA,              !Output
      &  RPRO, SDLIP, SDPRO, SHLAG, SLAMAX, SLAMIN,        !Output
      &  SLAPAR, SLAREF, SLAVAR, SLOSUM, SIZELF, SIZREF,   !Output
@@ -628,16 +629,18 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
 !-----------------------------------------------------------------------
       AGRVG = AGRLF * FRLF + AGRRT * FRRT + AGRSTM * FRSTM
       AGRVG2 = AGRVG + (FRLF*PROLFI+FRRT*PRORTI+FRSTM*PROSTI)*RPROAV
-C       Phase R3: Allometric dynamic dilution for new vegetative tissue
+C       Phase 2: Allometric dynamic dilution with F1 safeguard
         IF (WEFF .GT. 0.0) THEN
           IF (WEFF .LT. CNC_W0) THEN
             NC_DEM = CNC_A
           ELSE
             NC_DEM = CNC_NC_INF + (CNC_A - CNC_NC_INF) * 
-     &               (WEFF ** (-CNC_B))
+     &               ((WEFF / CNC_W0) ** (-CNC_B))
           ENDIF
+          IF (PROLFG .LE. 0.0) PROLFG = PROLFI * 0.815
+          IF (PROSTG .LE. 0.0) PROSTG = PROSTI * 0.723
           FNINL = MIN(PROLFI * 0.16,
-     &      MAX(PROLFF * 0.16, 1.05 * NC_DEM / 100.0))
+     &      MAX(PROLFG * 0.16 + 0.002, 1.05 * NC_DEM / 100.0))
           IF (PROLFI .GT. PROLFF) THEN
             FR_DIL = (FNINL - PROLFF * 0.16) / ((PROLFI-PROLFF) * 0.16)
             FR_DIL = MAX(0.0, MIN(1.0, FR_DIL))
@@ -645,7 +648,8 @@ C       Phase R3: Allometric dynamic dilution for new vegetative tissue
             FR_DIL = 1.0
           ENDIF
           FNINS = PROSTF * 0.16 + (PROSTI - PROSTF) * 0.16 * FR_DIL
-          FNINS = MAX(PROSTF * 0.16, MIN(PROSTI * 0.16, FNINS))
+          FNINS = MIN(PROSTI * 0.16, FNINS)
+          FNINS = MAX(PROSTG * 0.16 + 0.001, FNINS)
         ELSE
           FNINL = PROLFI * 0.16
           FNINS = PROSTI * 0.16
@@ -731,6 +735,7 @@ C       Phase R3: Allometric dynamic dilution for new vegetative tissue
      &  FRSTMF, LIPOPT, LIPTB, LNGSH, NMOBMX,             !Output
      &  NRCVR, NVSMOB, PLIGSD, PMINSD, POASD,             !Output
      &  PROLFF, PROLFI, PRORTF, PRORTI, PROSTF, PROSTI,   !Output
+     &  PROLFG, PROSTG,                                   !Output
      &  RCH2O, RLIG, RLIP, RMIN, RNO3C, ROA,              !Output
      &  RPRO, SDLIP, SDPRO, SHLAG, SLAMAX, SLAMIN,        !Output
      &  SLAPAR, SLAREF, SLAVAR, SLOSUM, SIZELF, SIZREF,   !Output
@@ -764,6 +769,7 @@ C       Phase R3: Allometric dynamic dilution for new vegetative tissue
      &  LIPOPT, LIPTB, NMOBMX, NRCVR, NVSMOB,
      &  PLIGSD, PMINSD, POASD, PROLFF,
      &  PROLFI, PRORTF, PRORTI, PROSTF, PROSTI,
+     &  PROLFG, PROSTG,
      &  RCH2O, RLIG, RLIP, RMIN, RNO3C, ROA,
      &  RPRO, SHLAG, SLAMAX, SLAMIN, SLAPAR,
      &  SLAREF, SLAVAR, SLOSUM, SIZELF, SIZREF,
@@ -837,9 +843,11 @@ C       Phase R3: Allometric dynamic dilution for new vegetative tissue
         CALL ERROR(SECTION, 42, FILECC, LNUM)
       ELSE
         CALL IGNORE(LUNCRP,LNUM,ISECT,C80)
-        READ(C80,'(F6.0,6X,2F6.0,6X,F6.0)',IOSTAT=ERR)
-     &          PROLFI, PROLFF, PROSTI, PROSTF
+        READ(C80,'(6F6.0)',IOSTAT=ERR)
+     &          PROLFI, PROLFG, PROLFF, PROSTI, PROSTG, PROSTF
         IF (ERR .NE. 0) CALL ERROR(ERRKEY,ERR,FILECC,LNUM)
+        IF (PROLFG .LE. 0.0) PROLFG = PROLFI * 0.815
+        IF (PROSTG .LE. 0.0) PROSTG = PROSTI * 0.723
 
         CALL IGNORE(LUNCRP,LNUM,ISECT,C80)
         READ(C80,'(F6.0,6X,F6.0)',IOSTAT=ERR) PRORTI, PRORTF

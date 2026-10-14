@@ -347,7 +347,7 @@ def main():
             sn_pct = float(r_pn.get("SN%D", 0.0))
 
             # Dilution theoretical critical Nc
-            nc_crit = DEFAULT_CNC_A if weff <= DEFAULT_CNC_W0 else DEFAULT_CNC_NC_INF + (DEFAULT_CNC_A - DEFAULT_CNC_NC_INF) * (weff ** (-DEFAULT_CNC_B))
+            nc_crit = DEFAULT_CNC_A if weff <= DEFAULT_CNC_W0 else DEFAULT_CNC_NC_INF + (DEFAULT_CNC_A - DEFAULT_CNC_NC_INF) * ((weff / DEFAULT_CNC_W0) ** (-DEFAULT_CNC_B))
 
             dilution_rows.append({
                 "treatment": trt,
