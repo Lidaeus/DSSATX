@@ -63,8 +63,10 @@ C=======================================================================
       REAL REDPUN,TMPFCS,PAGE,REDSHL,SDMAX,CDMSH,GDMSH,ADDSHL
       REAL TEMXFR,CAVTOT,GDMSDO,CNOLD
       REAL NVSTL,NVSTS,NVSTR,FRNLFT
-!     Phase R2: Dynamic critical nitrogen dilution variables
+!     Phase R2/R4: Dynamic critical nitrogen dilution parameters
       REAL WEFF, NC_DEM, FR_DIL
+      REAL CNC_A, CNC_B, CNC_W0, CNC_NC_INF
+      DATA CNC_A /4.85/, CNC_B /0.38/, CNC_W0 /1.00/, CNC_NC_INF /1.70/
       REAL TABEX,CURV
       REAL POTLIP, POTCAR
 
@@ -141,7 +143,8 @@ C=======================================================================
      &  SRMAX, THRESH, TURSLA, TYPSDT, VSSINK, XFRMAX,    !Output
      &  XFRUIT, XLEAF, XSLATM, XTRFAC, XVGROW, XXFTEM,    !Output
      &  YLEAF, YSLATM, YSTEM, YTRFAC, YVREF, YXFTEM,      !Output
-     &  XFPHT, XFINT, NSLA)                               !Output
+     &  XFPHT, XFINT, NSLA,                               !Output
+     &  CNC_A, CNC_B, CNC_W0, CNC_NC_INF)                 !Output
 
 !***********************************************************************
 !***********************************************************************
@@ -627,10 +630,11 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
       AGRVG2 = AGRVG + (FRLF*PROLFI+FRRT*PRORTI+FRSTM*PROSTI)*RPROAV
 C       Phase R3: Allometric dynamic dilution for new vegetative tissue
         IF (WEFF .GT. 0.0) THEN
-          IF (WEFF .LT. 1.00) THEN
-            NC_DEM = 4.85
+          IF (WEFF .LT. CNC_W0) THEN
+            NC_DEM = CNC_A
           ELSE
-            NC_DEM = 1.70 + (4.85 - 1.70) * (WEFF ** (-0.38))
+            NC_DEM = CNC_NC_INF + (CNC_A - CNC_NC_INF) * 
+     &               (WEFF ** (-CNC_B))
           ENDIF
           FNINL = MIN(PROLFI * 0.16,
      &      MAX(PROLFF * 0.16, 1.05 * NC_DEM / 100.0))
@@ -733,7 +737,8 @@ C       Phase R3: Allometric dynamic dilution for new vegetative tissue
      &  SRMAX, THRESH, TURSLA, TYPSDT, VSSINK, XFRMAX,    !Output
      &  XFRUIT, XLEAF, XSLATM, XTRFAC, XVGROW, XXFTEM,    !Output
      &  YLEAF, YSLATM, YSTEM, YTRFAC, YVREF, YXFTEM,      !Output
-     &  XFPHT, XFINT, NSLA)                               !Output
+     &  XFPHT, XFINT, NSLA,                               !Output
+     &  CNC_A, CNC_B, CNC_W0, CNC_NC_INF)                 !Output
 
 !-----------------------------------------------------------------------
       IMPLICIT NONE
@@ -753,6 +758,8 @@ C       Phase R3: Allometric dynamic dilution for new vegetative tissue
       INTEGER LUNCRP, LUNIO, LUNECO, ERR, LINC, LNUM, FOUND, ISECT
       INTEGER I, II
 
+      REAL CNC_A, CNC_B, CNC_W0, CNC_NC_INF
+      REAL CNC_A_IN, CNC_B_IN, CNC_W0_IN, CNC_NC_INF_IN
       REAL CARMIN, FINREF, FRLFF, FRLFMX, FRSTMF,
      &  LIPOPT, LIPTB, NMOBMX, NRCVR, NVSMOB,
      &  PLIGSD, PMINSD, POASD, PROLFF,
@@ -983,6 +990,29 @@ C       Phase R3: Allometric dynamic dilution for new vegetative tissue
         CALL IGNORE(LUNCRP,LNUM,ISECT,C80)
         READ(C80,'(4F6.0)',IOSTAT=ERR)(YTRFAC(II),II = 1,4)
         IF (ERR .NE. 0) CALL ERROR(ERRKEY,ERR,FILECC,LNUM)
+      ENDIF
+!-----------------------------------------------------------------------
+!    Find and Read Critical Nitrogen Dilution Parameters
+!-----------------------------------------------------------------------
+      REWIND(LUNCRP)
+      LNUM = 0
+      SECTION = '!*CRIT'
+      CALL FIND(LUNCRP, SECTION, LINC, FOUND)
+      IF (FOUND .EQ. 0) THEN
+        CNC_A = 4.85
+        CNC_B = 0.38
+        CNC_W0 = 1.00
+        CNC_NC_INF = 1.70
+      ELSE
+        LNUM = LNUM + LINC
+        CALL IGNORE(LUNCRP,LNUM,ISECT,C80)
+        READ(C80,'(4F6.0)',IOSTAT=ERR) CNC_A_IN, CNC_B_IN, CNC_W0_IN,
+     &       CNC_NC_INF_IN
+        IF (ERR .NE. 0) CALL ERROR(ERRKEY,ERR,FILECC,LNUM)
+        IF (CNC_A_IN .GT. 0.0) CNC_A = CNC_A_IN
+        IF (CNC_B_IN .GT. 0.0) CNC_B = CNC_B_IN
+        IF (CNC_W0_IN .GT. 0.0) CNC_W0 = CNC_W0_IN
+        IF (CNC_NC_INF_IN .GT. 0.0) CNC_NC_INF = CNC_NC_INF_IN
       ENDIF
 !-----------------------------------------------------------------------
       CLOSE(LUNCRP)

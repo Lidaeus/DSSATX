@@ -1,5 +1,5 @@
---- Plant/CROPGRO/CROPGRO.for
-+++ Plant/CROPGRO/CROPGRO.for
+--- a/Plant/CROPGRO/CROPGRO.for
++++ b/Plant/CROPGRO/CROPGRO.for
 @@ -55,7 +55,7 @@
        EXTERNAL DEMAND, FREEZE, GROW, HRES_CGRO, INCOMP, IPPLNT, MOBIL,
       &  NFIX, NUPTAK, OPGROW, OPHARV, P_CGRO, PEST, PHENOL,
@@ -20,7 +20,7 @@
        REAL POTLIP, POTCAR, PPLTD,
       &    PAR, PCNL, PCNRT, PCNST, PCTMAT
        REAL PLIGLF, PLIGNO, PLIGRT, PLIGST
-@@ -174,6 +178,12 @@
+@@ -174,6 +178,16 @@
  
  !     K model (not yet implemented)
        REAL KSTRES
@@ -30,10 +30,14 @@
 +      REAL CUM_HPODWT, WEFF
 +!     Phase R3: Cumulative harvested fruit total nitrogen & pod N
 +      REAL CHPDTN, HPODN, FNINL0
++!     Phase R4: Dynamic critical nitrogen dilution parameters from .SPE
++      REAL CNC_A, CNC_B, CNC_W0, CNC_NC_INF
++      REAL CNC_A_IN, CNC_B_IN, CNC_W0_IN, CNC_NC_INF_IN
++      DATA CNC_A /4.85/, CNC_B /0.38/, CNC_W0 /1.00/, CNC_NC_INF /1.70/
  
  !-----------------------------------------------------------------------
  !     Define constructed variable types based on definitions in
-@@ -238,6 +248,37 @@
+@@ -238,6 +252,53 @@
       &  R30C2, RCH2O, RES30C, RFIXN, RLIG, RLIP, RMIN,    !Output
       &  RNH4C, RNO3C, ROA, RPRO, RWUEP1, RWUMX, TTFIX)    !Output
  
@@ -56,6 +60,22 @@
 +              PROLFG = PROLFG_IN
 +            ENDIF
 +          ENDIF
++          REWIND(LUNCRP)
++          LNUM = 0
++          SECTION = '!*CRIT'
++          CALL FIND(LUNCRP, SECTION, LINC, FOUND)
++          IF (FOUND .EQ. 1) THEN
++            LNUM = LNUM + LINC
++            CALL IGNORE(LUNCRP, LNUM, ISECT, C80)
++            READ(C80, '(4F6.0)', IOSTAT = ERRNUM) 
++     &        CNC_A_IN, CNC_B_IN, CNC_W0_IN, CNC_NC_INF_IN
++            IF (ERRNUM .EQ. 0) THEN
++              IF (CNC_A_IN .GT. 0.0) CNC_A = CNC_A_IN
++              IF (CNC_B_IN .GT. 0.0) CNC_B = CNC_B_IN
++              IF (CNC_W0_IN .GT. 0.0) CNC_W0 = CNC_W0_IN
++              IF (CNC_NC_INF_IN .GT. 0.0) CNC_NC_INF = CNC_NC_INF_IN
++            ENDIF
++          ENDIF
 +          CLOSE(LUNCRP)
 +        ENDIF
 +      ENDIF
@@ -71,7 +91,7 @@
        KTRANS = KEP
        KSEVAP = -99.   !Defaults to old method of light
                        !  extinction calculation for soil evap.
-@@ -247,6 +288,7 @@
+@@ -247,6 +308,7 @@
       &    BETN, CO2, DXR57, EXCESS, KCAN, KC_SLOPE,       !Input
       &    NR5, PAR, PStres1, SLPF, RNITP, SLAAD,          !Input
       &    SWFAC, TDAY, XHLAI, XPOD,                       !Input
@@ -79,7 +99,7 @@
       &    AGEFAC, PG)                                     !Output
        ENDIF
  
-@@ -284,6 +326,7 @@
+@@ -284,6 +346,7 @@
       &  TAVG, TDUMX, TDUMX2, TGRO, TURFAC, VSTAGE, WCRLF, !Input
       &  WCRRT, WCRST, WNRLF, WNRRT, WNRSH, WNRST, WTLF,   !Input
       &  WTSD, WTSHE, XPOD, NVEG0, NR1, NR2, NR5, NR7,     !Input
@@ -87,7 +107,7 @@
       &  AGRSD1, AGRSD2, AGRVG, AGRVG2, CDMREP, CropStatus,!Output
       &  F, FNINL, FNINR, FNINS, FNINSD, FRLF, FRRT, FRSTM,!Output
       &  GDMSD, GRRAT1, NDMNEW,  NDMOLD, NDMREP, NDMSDR,   !Output
-@@ -317,13 +360,13 @@
+@@ -317,13 +380,13 @@
  !-----------------------------------------------------------------------
          CALL PODS(RUNINIT, 
       &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input
@@ -103,7 +123,7 @@
       &    AGRSD3, LAGSD, LNGPEG, NGRSD, NGRSH, PCTMAT,    !Output
       &    PODNO, POTCAR, POTLIP, SDNO, SDVAR, SEEDNO,     !Output
       &    SHELN, SHVAR, WSDDTN, WSHDTN, WTABRT, WTSD,     !Output
-@@ -358,8 +401,9 @@
+@@ -358,8 +421,9 @@
  C     Call leaf senescence routine for initialization
  C-----------------------------------------------------------------------
          CALL SENES(RUNINIT, 
@@ -114,7 +134,7 @@
       &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
  
  C-----------------------------------------------------------------------
-@@ -379,6 +423,7 @@
+@@ -379,6 +443,7 @@
       &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
       &  NGRSD, NGRSH, NGRST, NMINEA, NODGR, NOUTDO,       !Input
       &  NPLTD, NRUSLF, NRUSRT, NRUSSH, NRUSST,            !Input
@@ -122,7 +142,7 @@
       &  POTCAR, POTLIP, PPLTD, SDIDOT, SDPROR,            !Input
       &  SENNOD, SENRT, SLDOT, SLNDOT, SRDOT, SSDOT,       !Input
       &  SSNDOT, TRNH4U, TRNO3U, TRNU,                     !Input
-@@ -470,6 +515,7 @@
+@@ -470,6 +535,7 @@
       &    BETN, CO2, DXR57, EXCESS, KCAN, KC_SLOPE,       !Input
       &    NR5, PAR, PStres1, SLPF, RNITP, SLAAD,          !Input
       &    SWFAC, TDAY, XHLAI, XPOD,                       !Input
@@ -130,7 +150,7 @@
       &    AGEFAC, PG)                                     !Output
          ENDIF
        ENDIF
-@@ -504,6 +550,11 @@
+@@ -504,6 +570,11 @@
  !         to INCOMP and GROW (need to initialize values of F, FRLF,
  !         FRRT, and FRSTM for use in those routines)  chp 9/22/98
  !-----------------------------------------------------------------------
@@ -142,7 +162,7 @@
        CALL DEMAND(SEASINIT, CONTROL,
       &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
       &  FILECC, FILEGC, FILEIO, FNINSH, FRACDN, LAGSD,    !Input
-@@ -513,6 +564,7 @@
+@@ -513,6 +584,7 @@
       &  TAVG, TDUMX, TDUMX2, TGRO, TURFAC, VSTAGE, WCRLF, !Input
       &  WCRRT, WCRST, WNRLF, WNRRT, WNRSH, WNRST, WTLF,   !Input
       &  WTSD, WTSHE, XPOD, NVEG0, NR1, NR2, NR5, NR7,     !Input
@@ -150,7 +170,7 @@
       &  AGRSD1, AGRSD2, AGRVG, AGRVG2, CDMREP, CropStatus,!Output
       &  F, FNINL, FNINR, FNINS, FNINSD, FRLF, FRRT, FRSTM,!Output
       &  GDMSD, GRRAT1, NDMNEW,  NDMOLD, NDMREP, NDMSDR,   !Output
-@@ -538,6 +590,7 @@
+@@ -538,6 +610,7 @@
       &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
       &  NGRSD, NGRSH, NGRST, NMINEA, NODGR, NOUTDO,       !Input
       &  NPLTD, NRUSLF, NRUSRT, NRUSSH, NRUSST,            !Input
@@ -158,7 +178,7 @@
       &  POTCAR, POTLIP, PPLTD, SDIDOT, SDPROR,            !Input
       &  SENNOD, SENRT, SLDOT, SLNDOT, SRDOT, SSDOT,       !Input
       &  SSNDOT, TRNH4U, TRNO3U, TRNU,                     !Input
-@@ -580,9 +633,11 @@
+@@ -580,9 +653,11 @@
  
  !-----------------------------------------------------------------------
        CALL MOBIL(SEASINIT,
@@ -173,7 +193,7 @@
  
  !-----------------------------------------------------------------------
        CALL NFIX(SEASINIT,
-@@ -595,13 +650,13 @@
+@@ -595,13 +670,13 @@
  !-----------------------------------------------------------------------
        CALL PODS(SEASINIT, 
       &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input
@@ -189,7 +209,7 @@
       &    AGRSD3, LAGSD, LNGPEG, NGRSD, NGRSH, PCTMAT,    !Output
       &    PODNO, POTCAR, POTLIP, SDNO, SDVAR, SEEDNO,     !Output
       &    SHELN, SHVAR, WSDDTN, WSHDTN, WTABRT, WTSD,     !Output
-@@ -627,8 +682,9 @@
+@@ -627,8 +702,9 @@
  C     Call leaf senescence routine for initialization
  C-----------------------------------------------------------------------
        CALL SENES(SEASINIT, 
@@ -200,7 +220,7 @@
       &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
  
  C-----------------------------------------------------------------------
-@@ -727,10 +783,28 @@
+@@ -727,10 +803,29 @@
            CALL GET('SPAM', 'AGEFAC', AGEFAC)
            CALL GET('SPAM', 'PG'    , PG)
          ELSEIF (MEPHO .EQ. 'C') THEN
@@ -208,13 +228,14 @@
 +          IF (WTLF .GT. 0.0) THEN
 +            PCNL_C = (WTNLF / WTLF) * 100.0
 +          ELSE
-+            PCNL_C = 4.85
++            PCNL_C = CNC_A
 +          ENDIF
 +          WEFF_C = MAX(0.001, (TOPWT + CUM_HPODWT) / 100.0)
-+          IF (WEFF_C .LT. 1.00) THEN
-+            NC_CUR = 4.85
++          IF (WEFF_C .LT. CNC_W0) THEN
++            NC_CUR = CNC_A
 +          ELSE
-+            NC_CUR = 1.70 + (4.85 - 1.70) * (WEFF_C ** (-0.38))
++            NC_CUR = CNC_NC_INF + (CNC_A - CNC_NC_INF) * 
++     &               (WEFF_C ** (-CNC_B))
 +          ENDIF
 +          IF (NC_CUR .GT. 0.0) THEN
 +            NNI_CUR = PCNL_C / NC_CUR
@@ -229,7 +250,7 @@
       &    AGEFAC, PG)                                     !Output
          ENDIF
        ENDIF
-@@ -767,6 +841,7 @@
+@@ -767,6 +862,7 @@
       &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
       &  NGRSD, NGRSH, NGRST, NMINEA, NODGR, NOUTDO,       !Input
       &  NPLTD, NRUSLF, NRUSRT, NRUSSH, NRUSST,            !Input
@@ -237,7 +258,7 @@
       &  POTCAR, POTLIP, PPLTD, SDIDOT, SDPROR,            !Input
       &  SENNOD, SENRT, SLDOT, SLNDOT, SRDOT, SSDOT,       !Input
       &  SSNDOT, TRNH4U, TRNO3U, TRNU,                     !Input
-@@ -801,6 +876,7 @@
+@@ -801,6 +897,7 @@
  
  !-----------------------------------------------------------------------
  !       DYNAMIC = EMERG (not INTEGR) here
@@ -245,7 +266,7 @@
          CALL DEMAND(EMERG, CONTROL, 
       &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
       &  FILECC, FILEGC, FILEIO, FNINSH, FRACDN, LAGSD,    !Input
-@@ -810,6 +886,7 @@
+@@ -810,6 +907,7 @@
       &  TAVG, TDUMX, TDUMX2, TGRO, TURFAC, VSTAGE, WCRLF, !Input
       &  WCRRT, WCRST, WNRLF, WNRRT, WNRSH, WNRST, WTLF,   !Input
       &  WTSD, WTSHE, XPOD, NVEG0, NR1, NR2, NR5, NR7,     !Input
@@ -253,7 +274,7 @@
       &  AGRSD1, AGRSD2, AGRVG, AGRVG2, CDMREP, CropStatus,!Output
       &  F, FNINL, FNINR, FNINS, FNINSD, FRLF, FRRT, FRSTM,!Output
       &  GDMSD, GRRAT1, NDMNEW,  NDMOLD, NDMREP, NDMSDR,   !Output
-@@ -819,13 +896,13 @@
+@@ -819,13 +917,13 @@
  !-----------------------------------------------------------------------
        CALL PODS(EMERG, 
       &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input
@@ -269,7 +290,7 @@
       &    AGRSD3, LAGSD, LNGPEG, NGRSD, NGRSH, PCTMAT,    !Output
       &    PODNO, POTCAR, POTLIP, SDNO, SDVAR, SEEDNO,     !Output
       &    SHELN, SHVAR, WSDDTN, WSHDTN, WTABRT, WTSD,     !Output
-@@ -931,6 +1008,7 @@
+@@ -931,6 +1029,7 @@
  C-----------------------------------------------------------------------
  C    Call Subroutine to calculate Nitrogen and Carbon Demand for new growth
  C-----------------------------------------------------------------------
@@ -277,7 +298,7 @@
        CALL DEMAND(INTEGR, CONTROL, 
       &  AGRLF, AGRRT, AGRSH2, AGRSTM, CROP, DRPP, DXR57,  !Input
       &  FILECC, FILEGC, FILEIO, FNINSH, FRACDN, LAGSD,    !Input
-@@ -940,6 +1018,7 @@
+@@ -940,6 +1039,7 @@
       &  TAVG, TDUMX, TDUMX2, TGRO, TURFAC, VSTAGE, WCRLF, !Input
       &  WCRRT, WCRST, WNRLF, WNRRT, WNRSH, WNRST, WTLF,   !Input
       &  WTSD, WTSHE, XPOD, NVEG0, NR1, NR2, NR5, NR7,     !Input
@@ -285,7 +306,7 @@
       &  AGRSD1, AGRSD2, AGRVG, AGRVG2, CDMREP, CropStatus,!Output
       &  F, FNINL, FNINR, FNINS, FNINSD, FRLF, FRRT, FRSTM,!Output
       &  GDMSD, GRRAT1, NDMNEW,  NDMOLD, NDMREP, NDMSDR,   !Output
-@@ -990,9 +1069,11 @@
+@@ -990,9 +1090,11 @@
  C    to compute availability of N from other tissue (NMINEA)
  C-----------------------------------------------------------------------
        CALL MOBIL(INTEGR,
@@ -300,7 +321,7 @@
  
  C-----------------------------------------------------------------------
  !       Plant phosphorus module
-@@ -1088,13 +1169,13 @@
+@@ -1088,13 +1190,13 @@
  C-----------------------------------------------------------------------
        CALL PODS(INTEGR, 
       &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input
@@ -316,7 +337,7 @@
       &    AGRSD3, LAGSD, LNGPEG, NGRSD, NGRSH, PCTMAT,    !Output
       &    PODNO, POTCAR, POTLIP, SDNO, SDVAR, SEEDNO,     !Output
       &    SHELN, SHVAR, WSDDTN, WSHDTN, WTABRT, WTSD,     !Output
-@@ -1169,8 +1250,9 @@
+@@ -1169,8 +1271,9 @@
  C     Call leaf senescence routine to compute leaf loss variables
  C-----------------------------------------------------------------------
        CALL SENES(INTEGR, 
@@ -327,7 +348,7 @@
       &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
  
  C-----------------------------------------------------------------------
-@@ -1225,6 +1307,7 @@
+@@ -1225,6 +1328,7 @@
       &  NADLF, NADRT, NADST, NDTH, NFIXN, NGRLF, NGRRT,   !Input
       &  NGRSD, NGRSH, NGRST, NMINEA, NODGR, NOUTDO,       !Input
       &  NPLTD, NRUSLF, NRUSRT, NRUSSH, NRUSST,            !Input
@@ -335,7 +356,7 @@
       &  POTCAR, POTLIP, PPLTD, SDIDOT, SDPROR,            !Input
       &  SENNOD, SENRT, SLDOT, SLNDOT, SRDOT, SSDOT,       !Input
       &  SSNDOT, TRNH4U, TRNO3U, TRNU,                     !Input
-@@ -1248,6 +1331,14 @@
+@@ -1248,6 +1352,14 @@
       &  WTNUP, WTRO, WTSDO, WTSHO, WTSO, XLAI, XPOD,      !Output
       &  ShutMob, RootMob, ShelMob,                        !Output
       &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)           !Output
@@ -350,7 +371,7 @@
        
        IF ((WTLF+STMWT).GT. 0.0001) THEN
          PCNVEG = (WTNLF+WTNST)/(WTLF+STMWT)*100.
-@@ -1287,13 +1378,13 @@
+@@ -1287,13 +1399,13 @@
  
          CALL PODS(DYNAMIC, 
       &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input

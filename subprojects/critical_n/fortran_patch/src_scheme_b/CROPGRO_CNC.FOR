@@ -184,6 +184,10 @@ C=======================================================================
       REAL CUM_HPODWT, WEFF
 !     Phase R3: Cumulative harvested fruit total nitrogen & pod N
       REAL CHPDTN, HPODN, FNINL0
+!     Phase R4: Dynamic critical nitrogen dilution parameters from .SPE
+      REAL CNC_A, CNC_B, CNC_W0, CNC_NC_INF
+      REAL CNC_A_IN, CNC_B_IN, CNC_W0_IN, CNC_NC_INF_IN
+      DATA CNC_A /4.85/, CNC_B /0.38/, CNC_W0 /1.00/, CNC_NC_INF /1.70/
 
 !-----------------------------------------------------------------------
 !     Define constructed variable types based on definitions in
@@ -265,6 +269,22 @@ C-----------------------------------------------------------------------
             READ(C80, '(6X,F6.0)', IOSTAT = ERRNUM) PROLFG_IN
             IF (ERRNUM .EQ. 0 .AND. PROLFG_IN .GT. 0.0) THEN
               PROLFG = PROLFG_IN
+            ENDIF
+          ENDIF
+          REWIND(LUNCRP)
+          LNUM = 0
+          SECTION = '!*CRIT'
+          CALL FIND(LUNCRP, SECTION, LINC, FOUND)
+          IF (FOUND .EQ. 1) THEN
+            LNUM = LNUM + LINC
+            CALL IGNORE(LUNCRP, LNUM, ISECT, C80)
+            READ(C80, '(4F6.0)', IOSTAT = ERRNUM) 
+     &        CNC_A_IN, CNC_B_IN, CNC_W0_IN, CNC_NC_INF_IN
+            IF (ERRNUM .EQ. 0) THEN
+              IF (CNC_A_IN .GT. 0.0) CNC_A = CNC_A_IN
+              IF (CNC_B_IN .GT. 0.0) CNC_B = CNC_B_IN
+              IF (CNC_W0_IN .GT. 0.0) CNC_W0 = CNC_W0_IN
+              IF (CNC_NC_INF_IN .GT. 0.0) CNC_NC_INF = CNC_NC_INF_IN
             ENDIF
           ENDIF
           CLOSE(LUNCRP)
@@ -787,13 +807,14 @@ C         Scheme B: Dynamic NNI for photosynthetic acclimation
           IF (WTLF .GT. 0.0) THEN
             PCNL_C = (WTNLF / WTLF) * 100.0
           ELSE
-            PCNL_C = 4.85
+            PCNL_C = CNC_A
           ENDIF
           WEFF_C = MAX(0.001, (TOPWT + CUM_HPODWT) / 100.0)
-          IF (WEFF_C .LT. 1.00) THEN
-            NC_CUR = 4.85
+          IF (WEFF_C .LT. CNC_W0) THEN
+            NC_CUR = CNC_A
           ELSE
-            NC_CUR = 1.70 + (4.85 - 1.70) * (WEFF_C ** (-0.38))
+            NC_CUR = CNC_NC_INF + (CNC_A - CNC_NC_INF) * 
+     &               (WEFF_C ** (-CNC_B))
           ENDIF
           IF (NC_CUR .GT. 0.0) THEN
             NNI_CUR = PCNL_C / NC_CUR
