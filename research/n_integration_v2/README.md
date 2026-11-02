@@ -1,6 +1,6 @@
 # 4.8.6.4 氮机制 v2 分阶段开发准备
 
-本目录包含准备、P0b追踪及五阶段氮机制的实现/工程验证。**新机制已接通，当前参数未率定，原生bug按用户要求延期统一处理。**
+本目录包含准备、P0b追踪及五阶段氮机制的实现/工程验证。**新机制已接通；小型联合率定入口见下，原生bug按用户要求延期统一处理。工程smoke不代表正式参数率定或机制有效性验证。**
 
 ## 当前入口：五阶段实现
 
@@ -10,7 +10,21 @@
 - 29项原生检查、8配置×12处理工程运行；原版43类输出数值一致，新Q日/季账独立闭合。原生有机N/C差额另外保留。
 - 果实氮没有新增稀释；V15借鉴登记仍为零。
 
-**没有配置时新执行体仍走原版模式。启用新机制必须将NIntegration.nml放入实际运行目录，或显式设置DSSAT_N_CONFIG。单独切换DSSAT_CUSTOM_EXE不能保证启用了新机制。** 当前没有修改主PEST参数注册/模板/观测提取，后续率定前须接入并冻结配置及其哈希。
+**没有配置时新执行体仍走原版模式。启用新机制必须将NIntegration.nml放入实际运行目录，或显式设置DSSAT_N_CONFIG。单独切换DSSAT_CUSTOM_EXE不能保证启用了新机制。** 主项目的PEST注册/模板保持不变；新入口通过隔离适配器接通并冻结氮配置、局部边界、目标、原生输入和运行代码。
+
+## 阶段5的小型PEST-IES联合率定
+
+`calibration_smoke.py`真实调用PEST++ IES，24成员×2次更新、6个并行；26SP 12处理，沿用既有612个直接观测目标。联合调整8个新氮参数和6个原生生长／物候参数，不采用V15机制或其最佳参数。新参数只用窄幅工程先验，其余机制参数固定；这不是正式的全参数率定。每个原生调用显式指定独立的NIntegration.nml，核查新库收支、名义库容、根层交接和完整日覆盖，保留原生有机N/C残差。
+
+```powershell
+python research/n_integration_v2/calibration_smoke.py --out D:/new_unique_smoke_directory
+python research/n_integration_v2/test_smoke_adapter.py
+python research/n_integration_v2/audit_smoke_receipts.py --run D:/completed_smoke_directory
+```
+
+工具拒绝覆盖已有批次。运行前逐一扰动14个活动字段以证明接线；运行后确认实际完成2次更新、24个最终成员、独立重跑最低Phi实际评估向量。每轮PEST会测试3种默认步长，实际原生调用数大于成员数×更新次数，不把线搜索隐藏为额外更新。输出包括Markdown报告、逐目标比较、最佳参数、逐类指标、评估和冻结文件收据。`--resume`仅用于已准备好但尚未创建manager的批次，不能作为失败批次自动重启机制。
+
+当前运行证据目录：`D:/Tomato_Cal/subprojects/critical_n/runs/n4864_p5_smoke14_24x2_r1_20261102`；状态以其中`execution_status.json`、`final_audit.json`和`smoke测试结果报告.md`为准。旧的无机氮尚未进入原生LN%D/SN%D，暂时沿用既有观测算子；在消解法对硝态氮回收口径核定前，不宣称总氮拟合已获验证。
 
 ```powershell
 python research/n_integration_v2/run_stages.py --out D:/new_isolated_run --exe build/bin/dscsm048.exe --stages 0 1 2 3 4 5
