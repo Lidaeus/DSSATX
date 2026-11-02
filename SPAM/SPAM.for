@@ -45,6 +45,7 @@ C=======================================================================
 !-----------------------------------------------------------------------
       USE ModuleDefs
       USE ModuleData
+      USE CG_P0Trace
       USE FloodModule
 
       IMPLICIT NONE
@@ -102,6 +103,7 @@ C=======================================================================
 !     Transfer values from constructed data types into local variables.
       CROP    = CONTROL % CROP
       DYNAMIC = CONTROL % DYNAMIC
+      CALL P0_CONTEXT(CONTROL)
 
       DLAYR  = SOILPROP % DLAYR
       DUL    = SOILPROP % DUL
@@ -452,6 +454,33 @@ C=======================================================================
       CALL PUT('SPAM', 'EOP', EOP)
       CALL PUT('SPAM', 'EVAP',EVAP)
       CALL PUT('SPAM', 'UH2O',RWU)
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'spam_rate',
+     &    'EP,EOP,TRWU,TRWUP',
+     &    (/EP,EOP,TRWU,TRWUP/))
+        CALL P0_L(CONTROL,'spam_rate','RWU',
+     &    RWU,NLAYR)
+        CALL P0_L(CONTROL,'spam_rate','SW',
+     &    SW,NLAYR)
+        CALL P0_L(CONTROL,'spam_rate','LL',
+     &    LL,NLAYR)
+        CALL P0_L(CONTROL,'spam_rate','SW_AVAIL',
+     &    SW_AVAIL,NLAYR)
+        CALL P0_L(CONTROL,'spam_rate','SWDELTS',
+     &    SWDELTS,NLAYR)
+        CALL P0_L(CONTROL,'spam_rate','SWDELTU',
+     &    SWDELTU,NLAYR)
+        CALL P0_L(CONTROL,'spam_rate','SWDELTX',
+     &    SWDELTX,NLAYR)
+        CALL P0_L(CONTROL,'spam_rate','RLV',
+     &    RLV,NLAYR)
+        CALL P0_L(CONTROL,'spam_rate','DLAYR',
+     &    DLAYR,NLAYR)
+        CALL P0_TEXT(CONTROL,'spam_rate','MEPHO',MEPHO)
+        CALL P0_TEXT(CONTROL,'spam_rate','MEEVP',MEEVP)
+        CALL P0_TEXT(CONTROL,'spam_rate','ISWWAT',ISWWAT)
+      ENDIF
 
 !***********************************************************************
 !***********************************************************************

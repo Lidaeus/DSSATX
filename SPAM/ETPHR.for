@@ -450,6 +450,7 @@ C========================================================================
      &  CO2QE, AGEQE)                                     !Output
 
       USE MODULEDATA
+      USE CG_P0Trace, ONLY: P0_LEAF
 	
       IMPLICIT NONE
       EXTERNAL TABEX, CURV
@@ -574,6 +575,9 @@ C     Calculate QEFF and LFMAX at ambient conditions.
 
       QEFF = QEREF * CO2QE * AGEQE * BETAMX
       LFMAX = LXREF * SLWMAX * TEMPMX * AGEMXL * CO2MAX * CHILL * BETAMX
+!     P0b observes actual leaf N responses; no feedback is added.
+      CALL P0_LEAF(RNITP,SLW,SLWREF,LNREF,AGEMXL,AGEQE,
+     &    LFMAX,QEFF)
 
       RETURN
       END SUBROUTINE PGLFEQ

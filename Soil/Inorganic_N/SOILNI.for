@@ -70,6 +70,7 @@ C=======================================================================
       USE GHG_mod 
       USE FertType_mod
       USE ModuleData
+      USE CG_P0Trace
       USE FloodModule
       USE ModSoilMix
       IMPLICIT  NONE
@@ -346,6 +347,22 @@ C=======================================================================
       DLTSNO3 = 0.0 
       DLTSNH4 = 0.0 
 
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'soil_debit_before',
+     &    'WTNUP',
+     &    (/WTNUP/))
+        CALL P0_L(CONTROL,'soil_debit_before','SNO3',
+     &    SNO3,NLAYR)
+        CALL P0_L(CONTROL,'soil_debit_before','SNH4',
+     &    SNH4,NLAYR)
+        CALL P0_L(CONTROL,'soil_debit_before','UREA',
+     &    UREA,NLAYR)
+        CALL P0_L(CONTROL,'soil_debit_before','UNO3',
+     &    UNO3,NLAYR)
+        CALL P0_L(CONTROL,'soil_debit_before','UNH4',
+     &    UNH4,NLAYR)
+      ENDIF
       DO L = 1, NLAYR
 !       Update with yesterday's plant N uptake
         SNO3(L) = SNO3(L) - UNO3(L)
@@ -357,6 +374,18 @@ C=======================================================================
         WTNUP = WTNUP + (UNO3(L) + UNH4(L)) / 10.    !g[N]/m2 cumul.
       ENDDO
 
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'soil_debit_after',
+     &    'WTNUP',
+     &    (/WTNUP/))
+        CALL P0_L(CONTROL,'soil_debit_after','SNO3',
+     &    SNO3,NLAYR)
+        CALL P0_L(CONTROL,'soil_debit_after','SNH4',
+     &    SNH4,NLAYR)
+        CALL P0_L(CONTROL,'soil_debit_after','UREA',
+     &    UREA,NLAYR)
+      ENDIF
 !     Check for fertilizer added today or active slow release fertilizers 
       IF (FERTDAY == YRDOY .OR. NActiveSR .GT. 0) THEN
         SUMFERT = 0.0
@@ -908,6 +937,21 @@ C=======================================================================
      &    ALI, TOTAML)                                    !Output
       ENDIF
 
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_L(CONTROL,'soil_integr_before','SNO3',
+     &    SNO3,NLAYR)
+        CALL P0_L(CONTROL,'soil_integr_before','SNH4',
+     &    SNH4,NLAYR)
+        CALL P0_L(CONTROL,'soil_integr_before','UREA',
+     &    UREA,NLAYR)
+        CALL P0_L(CONTROL,'soil_integr_before','DLTSNO3',
+     &    DLTSNO3,NLAYR)
+        CALL P0_L(CONTROL,'soil_integr_before','DLTSNH4',
+     &    DLTSNH4,NLAYR)
+        CALL P0_L(CONTROL,'soil_integr_before','DLTUREA',
+     &    DLTUREA,NLAYR)
+      ENDIF
 !     Loop through soil layers for integration
       DO L = 1, NLAYR
         SNO3(L) = SNO3(L) + DLTSNO3(L)
@@ -997,12 +1041,46 @@ C=======================================================================
 
       NO3_plant = NO3
       NH4_plant = NH4
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'soil_integr_end',
+     &    'WTNUP',
+     &    (/WTNUP/))
+        CALL P0_L(CONTROL,'soil_integr_end','SNO3',
+     &    SNO3,NLAYR)
+        CALL P0_L(CONTROL,'soil_integr_end','SNH4',
+     &    SNH4,NLAYR)
+        CALL P0_L(CONTROL,'soil_integr_end','UREA',
+     &    UREA,NLAYR)
+        CALL P0_L(CONTROL,'soil_integr_end','NO3_plant',
+     &    NO3_plant,NLAYR)
+        CALL P0_L(CONTROL,'soil_integr_end','NH4_plant',
+     &    NH4_plant,NLAYR)
+      ENDIF
 
 !***********************************************************************
 !***********************************************************************
 !     OUTPUT
 !***********************************************************************
       ELSEIF (DYNAMIC .EQ. OUTPUT .OR. DYNAMIC .EQ. SEASEND) THEN
+      IF (DYNAMIC .EQ. SEASEND) THEN
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'soil_season_end',
+     &    'WTNUP,CNUPTAKE',
+     &    (/WTNUP,CNUPTAKE/))
+        CALL P0_L(CONTROL,'soil_season_end','SNO3',
+     &    SNO3,NLAYR)
+        CALL P0_L(CONTROL,'soil_season_end','SNH4',
+     &    SNH4,NLAYR)
+        CALL P0_L(CONTROL,'soil_season_end','UREA',
+     &    UREA,NLAYR)
+        CALL P0_L(CONTROL,'soil_season_end','UNO3',
+     &    UNO3,NLAYR)
+        CALL P0_L(CONTROL,'soil_season_end','UNH4',
+     &    UNH4,NLAYR)
+      ENDIF
+      ENDIF
 C-----------------------------------------------------------------------
       IF (INDEX('N',ISWNIT) > 0) RETURN
 

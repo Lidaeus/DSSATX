@@ -56,6 +56,7 @@ C=======================================================================
 !-----------------------------------------------------------------------
       USE ModuleDefs     !Definitions of constructed variable types, 
       USE ModuleData
+      USE CG_P0Trace
 
       IMPLICIT NONE
       EXTERNAL DEMAND, FREEZE, GROW, HRES_CGRO, INCOMP, IPPLNT, MOBIL,
@@ -151,6 +152,7 @@ C=======================================================================
       REAL DLAYR(NL), DS(NL), DUL(NL), KG2PPM(NL), LL(NL), 
      &    SAT(NL), SW(NL), ST(NL), RLV(NL), WR(NL)
       REAL NH4(NL), NO3(NL), UNH4(NL), UNO3(NL)
+      REAL P0_RWU(NL), P0_EP
       REAL PHTHRS(20)
       REAL TGRO(TS)
       REAL SDDES(NCOHORTS)
@@ -698,6 +700,27 @@ C-----------------------------------------------------------------------
 !     DAILY RATE CALCULATIONS
 !***********************************************************************
       ELSE IF (DYNAMIC .EQ. RATE) THEN
+!     P0b private reads verify the actual shared-cache interface.
+      IF (P0_ENABLED()) THEN
+        CALL GET('SPAM','UH2O',P0_RWU)
+        CALL GET('SPAM','EP',P0_EP)
+        CALL P0_V(CONTROL,'cg_cache','EP',(/P0_EP/))
+        CALL P0_L(CONTROL,'cg_cache','RWU',P0_RWU,NLAYR)
+      ENDIF
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_L(CONTROL,'cg_rate','SW',
+     &    SW,NLAYR)
+        CALL P0_L(CONTROL,'cg_rate','NO3',
+     &    NO3,NLAYR)
+        CALL P0_L(CONTROL,'cg_rate','NH4',
+     &    NH4,NLAYR)
+        CALL P0_L(CONTROL,'cg_rate','RLV',
+     &    RLV,NLAYR)
+        CALL P0_TEXT(CONTROL,'cg_rate','MEPHO',MEPHO)
+        CALL P0_TEXT(CONTROL,'cg_rate','ISWWAT',ISWWAT)
+        CALL P0_TEXT(CONTROL,'cg_rate','ISWNIT',ISWNIT)
+      ENDIF
 !***********************************************************************
       IF (YRDOY .GT. YREMRG .AND. YREMRG .GT. 0 
      &                    .AND. ISWWAT .EQ. 'Y') THEN
@@ -900,6 +923,18 @@ C     Skip growth processes and N and C balances before plants emerge
 C-----------------------------------------------------------------------
       IF (DAS .GE. NVEG0) THEN
 !-----------------------------------------------------------------------
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'cg_begin',
+     &    'WTNLF,WTNST,WTNRT,WTNSH,WTNSD,WTNNOD,WTNLO,WTNSO,WTN'//
+     &    'RO,WTNSHO,WTNSDO,WTNNO,SDNPL,SEEDNI,WTNUP,WTNFX,TNLE'//
+     &    'AK,WTLF,STMWT,RTWT,WCRLF,WCRST,WCRRT,RNITP,PCNL,PCNS'//
+     &    'T,XLAI,RPROAV,PG,CMOBMX,DTX,DXR57',
+     &    (/WTNLF,WTNST,WTNRT,WTNSH,WTNSD,WTNNOD,WTNLO,WTNSO,
+     &      WTNRO,WTNSHO,WTNSDO,WTNNO,SDNPL,SEEDNI,WTNUP,WTNFX,
+     &      TNLEAK,WTLF,STMWT,RTWT,WCRLF,WCRST,WCRRT,RNITP,
+     &      PCNL,PCNST,XLAI,RPROAV,PG,CMOBMX,DTX,DXR57/))
+      ENDIF
 !     Initialize available N and C for beginning of daily calcs.
 !-----------------------------------------------------------------------
       NAVL = 0.0
@@ -970,6 +1005,16 @@ C-----------------------------------------------------------------------
      &  NDMTOT, NDMVEG, NMINEP, NMOBR, PHTIM, PNTIM,      !Output
      &  POTCAR, POTLIP, SDGR, TURADD, XFRT, YREND)        !Output
 
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'cg_demand',
+     &    'PGAVL,MAINR,CMINEP,NDMNEW,NDMOLD,NDMTOT,NDMSDR,NMINE'//
+     &    'P,NMOBR,FNINL,FNINS,FNINR,RPROAV,AGRVG2,AGRSD2,AGRSH'//
+     &    '2',
+     &    (/PGAVL,MAINR,CMINEP,NDMNEW,NDMOLD,NDMTOT,NDMSDR,
+     &      NMINEP,NMOBR,FNINL,FNINS,FNINR,RPROAV,AGRVG2,
+     &      AGRSD2,AGRSH2/))
+      ENDIF
       IF (YRDOY == YREND) RETURN
 
 C-----------------------------------------------------------------------
@@ -988,6 +1033,12 @@ C-----------------------------------------------------------------------
 C    If ISWNIT = Y - Call soil N routines. Balance Available C and N
 C    If ISWNIT = N - Do not call soil N routines, N assumed to be limited by C
 C-----------------------------------------------------------------------
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'cg_seed',
+     &    'NAVL,SDNPL,PGAVL',
+     &    (/NAVL,SDNPL,PGAVL/))
+      ENDIF
       IF (ISWNIT .EQ. 'Y') THEN
         CALL NUPTAK(INTEGR, 
      &    DLAYR, DUL, FILECC, KG2PPM, LL, NDMSDR, NDMTOT, !Input
@@ -997,6 +1048,24 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C    Account for C Used to reduce N Uptake to protein
 C-----------------------------------------------------------------------
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'cg_uptake',
+     &    'TRNU,TRNO3U,TRNH4U,PGAVL,RNO3C,RNH4C',
+     &    (/TRNU,TRNO3U,TRNH4U,PGAVL,RNO3C,RNH4C/))
+        CALL P0_L(CONTROL,'cg_uptake','UNO3',
+     &    UNO3,NLAYR)
+        CALL P0_L(CONTROL,'cg_uptake','UNH4',
+     &    UNH4,NLAYR)
+        CALL P0_L(CONTROL,'cg_uptake','SW',
+     &    SW,NLAYR)
+        CALL P0_L(CONTROL,'cg_uptake','NO3',
+     &    NO3,NLAYR)
+        CALL P0_L(CONTROL,'cg_uptake','NH4',
+     &    NH4,NLAYR)
+        CALL P0_L(CONTROL,'cg_uptake','RLV',
+     &    RLV,NLAYR)
+      ENDIF
         RSPNO3 = TRNO3U/0.16 * RNO3C
         RSPNH4 = TRNH4U/0.16 * RNH4C
         IF (PGAVL .LT. (RSPNO3+RSPNH4)) THEN
@@ -1008,6 +1077,12 @@ C-----------------------------------------------------------------------
 C       Accumulate nitrogen for today's growth, NAVL
 C-----------------------------------------------------------------------
         NAVL = NAVL + TRNU
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'cg_N_cost',
+     &    'RSPNO3,RSPNH4,PGAVL,NAVL',
+     &    (/RSPNO3,RSPNH4,PGAVL,NAVL/))
+      ENDIF
       ENDIF
 C-----------------------------------------------------------------------
 C    CALL Nitrogen mobilization subroutine
@@ -1042,6 +1117,12 @@ C-----------------------------------------------------------------------
          PGAVL = 0.0
       ENDIF
       NAVL   = NAVL + NMINEA
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'cg_mobil',
+     &    'NMINEA,NRUSLF,NRUSST,NRUSRT,NRUSSH,RPRO,PGAVL,NAVL',
+     &    (/NMINEA,NRUSLF,NRUSST,NRUSRT,NRUSSH,RPRO,PGAVL,NAVL/))
+      ENDIF
 C-----------------------------------------------------------------------
 C     Allow some of today's PG to be used for N fixation, depending
 C     on N uptake and mining, and on demand for N.
@@ -1107,6 +1188,12 @@ C-----------------------------------------------------------------------
          PGAVL = 0.0
       ENDIF
       NAVL = NAVL + NFIXN
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'cg_fix',
+     &    'NFIXN,CNOD,PGAVL,NAVL',
+     &    (/NFIXN,CNOD,PGAVL,NAVL/))
+      ENDIF
 C-----------------------------------------------------------------------
 C     Call routine to compute actual seed and shell growth
 C-----------------------------------------------------------------------
@@ -1156,6 +1243,14 @@ C-----------------------------------------------------------------------
       NAVL   = NAVL - (NGRSD + NGRSH)
       PGAVL  = MAX(0.0,PGAVL)
       NAVL   = MAX(0.0,NAVL)
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'cg_repro',
+     &    'CGRSD,CGRSH,NGRSD,NGRSH,PGAVL,NAVL,HPODWT,HSDWT,HSHE'//
+     &    'LWT',
+     &    (/CGRSD,CGRSH,NGRSD,NGRSH,PGAVL,NAVL,HPODWT,HSDWT,
+     &      HSHELWT/))
+      ENDIF
 
 !-----------------------------------------------------------------------
 C     CSAVEV is a faction of PG for vegetative growth that is stored
@@ -1164,6 +1259,12 @@ C     as CH2O.  Increase this as plant moves from R1 into seed fill.
 C-----------------------------------------------------------------------
       CSAVEV = CADPR1 * PGAVL * FRACDN
       PGAVL = PGAVL - CSAVEV
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'cg_before_veg',
+     &    'CSAVEV,PGAVL,NAVL,TNLEAK',
+     &    (/CSAVEV,PGAVL,NAVL,TNLEAK/))
+      ENDIF
 
 C-----------------------------------------------------------------------
 C     Call routine to compute actual vegetative growth, C to mine or add
@@ -1185,10 +1286,26 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Compute C required for LF, ST, and RT growth, and remaining C and N
 C-----------------------------------------------------------------------
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'cg_veg',
+     &    'AGRVG,WLDOTN,WSDOTN,WRDOTN,NGRLF,NGRST,NGRRT,NADLF,N'//
+     &    'ADST,NADRT,CADLF,CADST,PCH2O,CMINEA,TNLEAK,NSTRES,EX'//
+     &    'CESS,FRLF,FRSTM,FRRT',
+     &    (/AGRVG,WLDOTN,WSDOTN,WRDOTN,NGRLF,NGRST,NGRRT,NADLF,
+     &      NADST,NADRT,CADLF,CADST,PCH2O,CMINEA,TNLEAK,NSTRES,
+     &      EXCESS,FRLF,FRSTM,FRRT/))
+      ENDIF
       PGAVL = PGAVL - AGRVG * (WLDOTN + WSDOTN + WRDOTN)
       NAVL = NAVL - (NGRLF + NGRST + NGRRT)
       NAVL = NAVL - (NADLF + NADST + NADRT)
       PGAVL = PGAVL - (CADST + CADLF) * PCH2O
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'cg_ledger_end',
+     &    'PGAVL,NAVL',
+     &    (/PGAVL,NAVL/))
+      ENDIF
 C-----------------------------------------------------------------------
 C     Call leaf senescence routine to compute leaf loss variables
 C-----------------------------------------------------------------------
@@ -1241,6 +1358,14 @@ C-----------------------------------------------------------------------
       AGRSH2=  PROSHI*RPROAV + PLIPSH*RLIP + PLIGSH*RLIG + POASH*ROA
      &         + PMINSH*RMIN + PCARSH*RCH2O
       AGRVG2 = AGRVG + (FRLF*PROLFI+FRRT*PRORTI+FRSTM*PROSTI)*RPROAV
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'cg_source_next',
+     &    'RPROAV,RPRO,RFIXN,TRNU,NMINEA,NFIXN,RSPNO3,RSPNH4,AG'//
+     &    'RVG2,AGRSD2,AGRSH2',
+     &    (/RPROAV,RPRO,RFIXN,TRNU,NMINEA,NFIXN,RSPNO3,RSPNH4,
+     &      AGRVG2,AGRSD2,AGRSH2/))
+      ENDIF
 C-----------------------------------------------------------------------
 C     Call routine to integrate growth and damage
 C-----------------------------------------------------------------------
@@ -1274,6 +1399,18 @@ C-----------------------------------------------------------------------
      &  ShutMob, RootMob, ShelMob,                        !Output
      &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)           !Output
       
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'cg_end',
+     &    'WTNLF,WTNST,WTNRT,WTNSH,WTNSD,WTNNOD,WTNLO,WTNSO,WTN'//
+     &    'RO,WTNSHO,WTNSDO,WTNNO,SDNPL,SEEDNI,WTNUP,WTNFX,TNLE'//
+     &    'AK,WTLF,STMWT,RTWT,WCRLF,WCRST,WCRRT,RNITP,PCNL,PCNS'//
+     &    'T,XLAI',
+     &    (/WTNLF,WTNST,WTNRT,WTNSH,WTNSD,WTNNOD,WTNLO,WTNSO,
+     &      WTNRO,WTNSHO,WTNSDO,WTNNO,SDNPL,SEEDNI,WTNUP,WTNFX,
+     &      TNLEAK,WTLF,STMWT,RTWT,WCRLF,WCRST,WCRRT,RNITP,
+     &      PCNL,PCNST,XLAI/))
+      ENDIF
       IF ((WTLF+STMWT).GT. 0.0001) THEN
         PCNVEG = (WTNLF+WTNST)/(WTLF+STMWT)*100.
       ELSE
@@ -1389,6 +1526,36 @@ C-----------------------------------------------------------------------
 !***********************************************************************
       ENDIF
 !***********************************************************************
+      IF (DYNAMIC .EQ. SEASINIT) THEN
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'cg_reset',
+     &    'WTNUP,TNLEAK',
+     &    (/WTNUP,TNLEAK/))
+        CALL P0_L(CONTROL,'cg_reset','UNO3',
+     &    UNO3,NLAYR)
+        CALL P0_L(CONTROL,'cg_reset','UNH4',
+     &    UNH4,NLAYR)
+        CALL P0_TEXT(CONTROL,'cg_reset','MEPHO',MEPHO)
+      ENDIF
+      ELSEIF (DYNAMIC .EQ. SEASEND) THEN
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'cg_season_end',
+     &    'WTNLF,WTNST,WTNRT,WTNSH,WTNSD,WTNNOD,WTNLO,WTNSO,WTN'//
+     &    'RO,WTNSHO,WTNSDO,WTNNO,SDNPL,SEEDNI,WTNUP,WTNFX,TNLE'//
+     &    'AK,WTLF,STMWT,RTWT,WCRLF,WCRST,WCRRT,RNITP,PCNL,PCNS'//
+     &    'T,XLAI',
+     &    (/WTNLF,WTNST,WTNRT,WTNSH,WTNSD,WTNNOD,WTNLO,WTNSO,
+     &      WTNRO,WTNSHO,WTNSDO,WTNNO,SDNPL,SEEDNI,WTNUP,WTNFX,
+     &      TNLEAK,WTLF,STMWT,RTWT,WCRLF,WCRST,WCRRT,RNITP,
+     &      PCNL,PCNST,XLAI/))
+        CALL P0_L(CONTROL,'cg_season_end','UNO3',
+     &    UNO3,NLAYR)
+        CALL P0_L(CONTROL,'cg_season_end','UNH4',
+     &    UNH4,NLAYR)
+      ENDIF
+      ENDIF
 !     Store plant module data for use in ETPHOT.
       Call PUT('PLANT', 'CANHT',  CANHT)
       Call PUT('PLANT', 'CANWH',  CANWH)

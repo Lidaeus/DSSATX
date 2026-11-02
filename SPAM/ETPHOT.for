@@ -62,6 +62,7 @@ C         previous three output lines added by Bruce Kimball on 2DEC14
 C-----------------------------------------------------------------------
       USE ModuleDefs     !Definitions of constructed variable types,
       USE ModuleData
+      USE CG_P0Trace
 
       IMPLICIT NONE
       EXTERNAL ETIND, ETINP, ETPHR, OPETPHOT, OPSTEMP, PGIND, PGINP, 
@@ -780,6 +781,16 @@ C         Post-processing for some stress effects (duplicated in PHOTO).
 !     Store PG and AGEFAC for use by PLANT routine.
       CALL PUT('SPAM', 'AGEFAC', AGEFAC)
       CALL PUT('SPAM', 'PG'    , PG)
+      IF (DYNAMIC .EQ. RATE .AND. MEPHO .EQ. 'L') THEN
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'etphot_rate',
+     &    'RNITP,PG,AGEFAC,EP,EOP,XLAI,EXCESS,PCNLSL,PCNLSH,SLW'//
+     &    'SLN,SLWSHN,PNLSLN,PNLSHN,LMXSLN,LMXSHN',
+     &    (/RNITP,PG,AGEFAC,EP,EOP,XLAI,EXCESS,PCNLSL,PCNLSH,
+     &      SLWSLN,SLWSHN,PNLSLN,PNLSHN,LMXSLN,LMXSHN/))
+      ENDIF
+      ENDIF
 
 C       If the method to compute ET is energy balance, then
 C       grow the plants at canopy temperature. Else grow them

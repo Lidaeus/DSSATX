@@ -60,6 +60,7 @@ C=======================================================================
      &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)           !Output
 
 !-----------------------------------------------------------------------
+      USE CG_P0Trace
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
                          ! parameters, hourly weather data.
@@ -733,6 +734,14 @@ C-----------------------------------------------------------------------
 C     Leaf nitrogen senescence and pest damage loss
 C-----------------------------------------------------------------------
 !              senesc. + pest   + freeze  
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'grow_N_before',
+     &    'PCNSD,PCNSH,NHSHWT,NHSDWT,WTNLF,WTNST,WTNRT,WTNSH,WT'//
+     &    'NSD',
+     &    (/PCNSD,PCNSH,NHSHWT,NHSDWT,WTNLF,WTNST,WTNRT,WTNSH,
+     &      WTNSD/))
+      ENDIF
       NLOFF  = (SLNDOT + WLIDOT + WLFDOT) * (PCNL/100.) +
      &         (SLDOT-SLNDOT) * PROLFF * 0.16
       NLPEST = NLPEST + WLIDOT * PCNL/100.
@@ -822,6 +831,12 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Total nitrogen in the leaves
 C-----------------------------------------------------------------------
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'grow_N_rates_raw',
+     &    'NLDOT,NSDOT,NRDOT,NSHDOT,NSDDOT',
+     &    (/NLDOT,NSDOT,NRDOT,NSHDOT,NSDDOT/))
+      ENDIF
       IF ((NLDOT < 0.0) .AND. (ABS(NLDOT) > WTNLF)) THEN
          NLDOT = - WTNLF
       ENDIF
@@ -1048,6 +1063,16 @@ C-----------------------------------------------------------------------
       SenE(0,1) = NLOFF + NSOFF + NSHOFF - NLPEST  
 C     Convert from g/m2 to kg/ha with a factor of 10.
       SenE(0,1) = AMAX1 (SenE(0,1),0.) * 10.0             !kg[N]/ha
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'grow_losses',
+     &    'NLOFF,NSOFF,NROFF,NSHOFF,NSDOFF,NLDOT,NSDOT,NRDOT,NS'//
+     &    'HDOT,NSDDOT,NADLF,NADST,NADRT,HPODWT,HSDWT,HSHELWT,P'//
+     &    'CNSD,PCNSH,NHSHWT,NHSDWT,NLPEST',
+     &    (/NLOFF,NSOFF,NROFF,NSHOFF,NSDOFF,NLDOT,NSDOT,NRDOT,
+     &      NSHDOT,NSDDOT,NADLF,NADST,NADRT,HPODWT,HSDWT,
+     &      HSHELWT,PCNSD,PCNSH,NHSHWT,NHSDWT,NLPEST/))
+      ENDIF
 
 C-----------------------------------------------------------------------
 C     Surface phosphorus senescence.  - do this is P routine
@@ -1075,6 +1100,12 @@ C-----------------------------------------------------------------------
       ENDDO
 
 C-----------------------------------------------------------------------
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'grow_residue','surface_N',
+     &    (/SenE(0,1)/))
+        CALL P0_L(CONTROL,'grow_residue','root_N',
+     &    SenE(1:NL,1),NLAYR)
+      ENDIF
 C     Leaf Area, Specific Leaf Area Calculations
 C     Calculate Area Growth rate and Update Leaf Area (AREALF, XLAI)
 C-----------------------------------------------------------------------

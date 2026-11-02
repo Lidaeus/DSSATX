@@ -1,6 +1,21 @@
 # 4.8.6.4 氮机制 v2 分阶段开发准备
 
-本目录只包含执行准备、接口约定和基线回放工具；**尚未实现新根吸收、无机氮库或同化模块**。
+本目录包含执行准备、接口约定、基线回放工具及P0b只读原生追踪；**尚未实现新根吸收、无机氮库或有限同化模块**。
+
+## P0b状态（2026-11-02）
+
+已实现可关闭的 `DSSAT_P0_TRACE=0/1` 诊断，默认关闭；仅输出 `P0Trace.csv`，所有生理赋值保持官方原样。最终运行证据：`D:/Tomato_Cal/subprojects/critical_n/reports/p0b_trace_4864_20261102/run03`，最终分析在 `audit_final/`。
+
+26SP 12处理的追踪关闭/开启回放通过：8类选定输出均与冻结官方参照数值一致，43类有数值行的原生OUT在开关之间完全一致。跨日吸氮、RWU缓存、初始化、RPROAV与L光合路线已追踪。原生预算存在已定位问题，不将其标记为物理预算全部通过；详见本次执行报告。
+
+```powershell
+python research/n_integration_v2/run_p0b.py --out D:/Tomato_Cal/subprojects/critical_n/reports/p0b_trace_4864_20261102/new_run --exe build/bin/dscsm048.exe
+python research/n_integration_v2/analyze_p0b.py --run D:/Tomato_Cal/subprojects/critical_n/reports/p0b_trace_4864_20261102/new_run
+```
+
+输出路径须全新。诊断CSV若已存在会报错，避免把不同执行混在同一账本。分析只验证本次26SP单季批处理，未将其扩称轮作或跨季节验证。下文准备阶段P0清单作为历史任务定义保留，T01—T07状态见更新后的测试矩阵。
+
+用户要求：V15 S1经验或机制的借鉴必须先汇报并经其审批。本阶段没有采用V15机制；使用的是前阶段已经冻结的历史base输入作官方回归，不是V15最优组，也没有读取/迁移V15源码。
 
 - 官方起点：`25c93b9a2f73f8ec45bf441b198dac5fb7b22849` / `v4.8.6.4`。
 - 独立分支：`codex/n-integration-v2-20261102`。

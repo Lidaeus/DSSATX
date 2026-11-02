@@ -41,6 +41,7 @@ C========================================================================
      &    TNLEAK, WLDOTN, WRDOTN, WSDOTN)                 !Output
 
 !-----------------------------------------------------------------------
+      USE CG_P0Trace
       USE ModuleDefs
       USE ModuleData
       IMPLICIT NONE
@@ -306,6 +307,11 @@ C-----------------------------------------------------------------------
       NGRRTG = WRDOTN * FNINRG
       NGRVGG = NGRLFG + NGRSTG + NGRRTG
 
+      IF (P0_ENABLED()) THEN
+        CALL P0_LOCAL('veg_potential',
+     &    'AGRVG,NGRVEG,NGRVGG,NAVL,VGRDEM,PGAVL',
+     &    (/AGRVG,NGRVEG,NGRVGG,NAVL,VGRDEM,PGAVL/))
+      ENDIF
       NRATIO = 1.0
       IF (NAVL .LT. NGRVGG) THEN
 C-----------------------------------------------------------------------
@@ -372,6 +378,11 @@ C     Compute C and N remaining to add to reserves
 C-----------------------------------------------------------------------
       PGLEFT = MAX(0.0,PGAVL - ((WLDOTN + WSDOTN + WRDOTN) * AGRVG))
       IF (PGLEFT < 1.E-5) PGLEFT = 0.0
+      IF (P0_ENABLED()) THEN
+        CALL P0_LOCAL('veg_after_N',
+     &    'AGRVG,NRATIO,PGAVL,PGLEFT',
+     &    (/AGRVG,NRATIO,PGAVL,PGLEFT/))
+      ENDIF
 C-----------------------------------------------------------------------
 C     Scales to 1.0 if PGLEFT is small fraction, and to 0.2 if large
 C     fraction.  Used 0.04, so minor PGLEFT has no effect.  Used square

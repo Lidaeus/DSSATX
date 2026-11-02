@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "preparation_only_no_physiology_implementation",
+  "status": "P0b_trace_complete_native_budget_issues_reported_no_new_physiology",
   "base_tag": "v4.8.6.4",
   "base_sha": "25c93b9a2f73f8ec45bf441b198dac5fb7b22849",
   "crop": "eggplant_using_TMGRO048",
@@ -8,11 +8,57 @@
   "forbid_25FA": true,
   "forbid_calendar_or_season_growth_guardrails": true,
   "forbid_executable_replacement": true,
-  "root_modes": {"0": "official", "1": "mass_flow_only_ablation", "2": "mass_flow_effective_diffusion_single_MM"},
-  "assim_modes": {"0": "official", "1": "bounded_inorganic_storage_finite_assimilation", "2": "assimilation_with_replacement_N_feedback"},
-  "planned_valid_combinations": [[0, 0], [0, 1], [1, 1], [2, 1], [2, 2]],
+  "root_modes": {
+    "0": "official",
+    "1": "mass_flow_only_ablation",
+    "2": "mass_flow_effective_diffusion_single_MM"
+  },
+  "assim_modes": {
+    "0": "official",
+    "1": "bounded_inorganic_storage_finite_assimilation",
+    "2": "assimilation_with_replacement_N_feedback"
+  },
+  "planned_valid_combinations": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      1
+    ],
+    [
+      2,
+      1
+    ],
+    [
+      2,
+      2
+    ]
+  ],
   "implemented_new_combinations": [],
-  "reject_combinations": [[1, 0], [2, 0], [0, 2], [1, 2]],
+  "reject_combinations": [
+    [
+      1,
+      0
+    ],
+    [
+      2,
+      0
+    ],
+    [
+      0,
+      2
+    ],
+    [
+      1,
+      2
+    ]
+  ],
   "observed_baseline_photosynthesis_route": "L",
   "new_feedback_L_route_status": "not_implemented_gate_before_assim_mode_2",
   "units": {
@@ -59,15 +105,56 @@
   "parameter_missing_policy": "new_modes_fail_validation_before_run; mode_0_does_not_require_new_parameters",
   "calibration_policy": "no_new_parameters_or_objectives_until_mechanism_budget_gates_pass; frozen_bounds_only",
   "required_diagnostics": [
-    "run", "year_doy", "dynamic_stage", "flux_origin_day", "debit_day", "RWU_snapshot_day",
-    "SW_RATE", "SW_INTEGR", "NO3_plant_RATE", "NH4_plant_RATE", "RLV_used",
-    "UNO3_final", "UNH4_final", "soil_debit_applied", "pending_debit",
-    "QNO3_begin", "QNO3_end", "QNH4_begin", "QNH4_end", "QMAX_begin", "QMAX_end",
-    "A_old_committed", "ANO3", "ANH4", "NASSIMD", "organic_acceptance_actual",
-    "C_NASS", "C_mobilization", "PGAVL_before", "PGAVL_after", "RPROAV",
-    "TNLEAK_daily_from_cumulative_difference", "N_harvest_inorg", "N_litter_inorg",
-    "N_residual_plant", "N_residual_combined_pending_corrected", "C_residual",
-    "N_ref_min", "N_ref_crit", "N_ref_max", "NNI_raw", "pool_occupancy",
-    "photosynthesis_route", "legacy_N_feedback_active", "new_N_feedback_active"
-  ]
+    "run",
+    "year_doy",
+    "dynamic_stage",
+    "flux_origin_day",
+    "debit_day",
+    "RWU_snapshot_day",
+    "SW_RATE",
+    "SW_INTEGR",
+    "NO3_plant_RATE",
+    "NH4_plant_RATE",
+    "RLV_used",
+    "UNO3_final",
+    "UNH4_final",
+    "soil_debit_applied",
+    "pending_debit",
+    "QNO3_begin",
+    "QNO3_end",
+    "QNH4_begin",
+    "QNH4_end",
+    "QMAX_begin",
+    "QMAX_end",
+    "A_old_committed",
+    "ANO3",
+    "ANH4",
+    "NASSIMD",
+    "organic_acceptance_actual",
+    "C_NASS",
+    "C_mobilization",
+    "PGAVL_before",
+    "PGAVL_after",
+    "RPROAV",
+    "TNLEAK_daily_from_cumulative_difference",
+    "N_harvest_inorg",
+    "N_litter_inorg",
+    "N_residual_plant",
+    "N_residual_combined_pending_corrected",
+    "C_residual",
+    "N_ref_min",
+    "N_ref_crit",
+    "N_ref_max",
+    "NNI_raw",
+    "pool_occupancy",
+    "photosynthesis_route",
+    "legacy_N_feedback_active",
+    "new_N_feedback_active"
+  ],
+  "v15_reference_policy": "user_approval_required_before_any_mechanism_or_successful_design_adoption",
+  "v15_mechanisms_adopted": false,
+  "P0b_evidence": "D:/Tomato_Cal/subprojects/critical_n/reports/p0b_trace_4864_20261102/run03",
+  "P0b_pending_and_RWU_interface_verified": true,
+  "P0b_raw_native_N_C_budgets_closed": false,
+  "P1_gate": "resolve_native_harvest_residue_retention_and_growth_cost_issues_with_separate_minimal_changes_before_new_pool"
 }

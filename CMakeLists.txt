@@ -115,6 +115,7 @@ set(
     	"${OSDefinitions}"
         "Utilities/CSMVersion.for"
         "Utilities/ModuleDefs.for"
+        "Utilities/CG_P0Trace.f90"
         "Utilities/DATES.for"
         "Utilities/ERROR.for"
         "Utilities/Info.for"

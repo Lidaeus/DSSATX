@@ -51,6 +51,7 @@
 
 !     ------------------------------------------------------------------
       USE ModuleDefs
+      USE CG_P0Trace
       USE FloodModule             
       USE ModSoilMix
       USE GHG_mod
@@ -501,6 +502,19 @@
       ENDIF   !End of IF block on ResDat == YRDOY
 
 !     Add the senesced plant material to the soil as residues.
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'century_residue_before',
+     &    'SENESSUMN',
+     &    (/SENESSUMN/))
+      ENDIF
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'century_residue_input',
+     &    'surface_N,root_N,residue_DM',
+     &    (/SENESCE%ResE(0,N),
+     &      SUM(SENESCE%ResE(1:NLAYR,N)),
+     &      SUM(SENESCE%ResWt(0:NLAYR))/))
+      ENDIF
       CALL SENESADD_C (RATE,
      &  AMINRL, CEDAM, CESTR, CROP, DLAYR, FRDAE,         !Input
      &  FRMETI, FRMETS, N_ELEMS, NLAYR, RESDAX,           !Input
@@ -508,6 +522,12 @@
      &  ADDMETABEFLAG, DLTLIGC, DLTMETABC, DLTMETABE,     !Output
      &  DLTSTRUCC, DLTSTRUCE, FRMETFLAG, IMMOB, MULCH,    !Output
      &  SENESSUMC, SENESSUMN, SENESSUMP)                  !Output
+!     P0b read-only trace; no model state is assigned.
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'century_residue_after',
+     &    'SENESSUMN',
+     &    (/SENESSUMN/))
+      ENDIF
 
       IF (FERTDAY == YRDOY) THEN
         FERDEPTH = FERTDATA % FERDEPTH
