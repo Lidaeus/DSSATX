@@ -42,6 +42,7 @@ C========================================================================
 
 !-----------------------------------------------------------------------
       USE CG_P0Trace
+      USE CG_Nitrogen, ONLY: NI_CURVES
       USE ModuleDefs
       USE ModuleData
       IMPLICIT NONE
@@ -67,6 +68,7 @@ C========================================================================
       REAL WTLF, XLAI
 
       REAL AGRVG, CADLF, CADST, CANHT, CANWH, CMINEA
+      REAL NIMINL, NIMINS
       REAL CRUSLF, CRUSRT, CRUSST, CRUSSH, CUMTUR
       REAL EXCESS, FRLF, FRRT, FRSTM, NADLF, NADRT, NADST
       REAL NGRLF, NGRRT, NGRST, NSTRES, PGAVL
@@ -232,6 +234,14 @@ C========================================================================
 !     DAILY RATE/INTEGRATION
 !***********************************************************************
       ELSEIF (DYNAMIC .EQ. INTEGR) THEN
+      NIMINL=PROLFG
+      NIMINS=PROSTG
+      IF (NI_CURVES()) THEN
+        NIMINL=FNINL/0.16*MIN(1.,PROLFG/PROLFI)
+        NIMINS=FNINS/0.16*MIN(1.,PROSTG/PROSTI)
+        FNINLG=NIMINL*0.16
+        FNINSG=NIMINS*0.16
+      ENDIF
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
 C     Partitioning is modified by water stress and nitrogen stress
@@ -331,9 +341,9 @@ C-----------------------------------------------------------------------
 C     Adjust conversion costs to account for composition of tissue at
 C       lower N concentration
 C-----------------------------------------------------------------------
-            AGRVG = AGRLF * FRLF * (1.0 - (PROLFG - PROLFI)/(1.0 -
+            AGRVG = AGRLF * FRLF * (1.0 - (NIMINL - PROLFI)/(1.0 -
      &       PROLFI))+ AGRRT * FRRT * (1.0 - (PRORTG - PRORTI)/(1.0 -
-     &       PRORTI)) + AGRSTM * FRSTM * (1.0 - (PROSTG - PROSTI)/
+     &       PRORTI)) + AGRSTM * FRSTM * (1.0 - (NIMINS - PROSTI)/
      &       (1.0 - PROSTI))
          ENDIF
       ELSE

@@ -39,6 +39,8 @@ C=======================================================================
      &  POTCAR, POTLIP, SDGR, TURADD, XFRT, YREND)        !Output
 
 !-----------------------------------------------------------------------
+      USE CG_Nitrogen, ONLY: NI_CURVES, NI_TARGETS,
+     &  NI_REFERENCES
       USE ModuleDefs
       USE ModuleData
       IMPLICIT NONE
@@ -109,6 +111,7 @@ C=======================================================================
       REAL PHTIM(NCOHORTS), PNTIM(NCOHORTS)
 
       REAL TURFSL, NSLA
+      REAL NIUPL, NIUPS
       REAL CUMNSF,NFSL
 
 !CHP - puncture variables, not functional
@@ -619,6 +622,7 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
 !     Compute CH2O cost per g of tissue, excluding cost for protein (AGRVG)
 !     and total CH2O cost per g of veg tissue (AGRVG2)
 !-----------------------------------------------------------------------
+      IF (NI_CURVES()) CALL NI_TARGETS(WTLF,STMWT,FNINL,FNINS)
       AGRVG = AGRLF * FRLF + AGRRT * FRRT + AGRSTM * FRSTM
       AGRVG2 = AGRVG + (FRLF*PROLFI+FRRT*PRORTI+FRSTM*PROSTI)*RPROAV
 !-----------------------------------------------------------------------
@@ -647,9 +651,19 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
            NVSTS = PROSTF*0.16 + (FNINS-PROSTF*0.16) * FRNLFT
            NVSTR = PRORTF*0.16 + (FNINR-PRORTF*0.16) * FRNLFT
         ENDIF
+        IF (NI_CURVES()) THEN
+          CALL NI_REFERENCES(NIUPL,NIUPS)
+          NVSTL=NIUPL
+          NVSTS=NIUPS
+        ENDIF
         NDMOLD = (WTLF  - WCRLF) * MAX(0.0,(NVSTL - PCNL /100.))
      &         + (STMWT - WCRST) * MAX(0.0,(NVSTS - PCNST/100.))
      &         + (RTWT  - WCRRT) * MAX(0.0,(NVSTR - PCNRT/100.))
+        IF (NI_CURVES()) THEN
+          NDMOLD=WTLF*MAX(0.,NVSTL-PCNL/100.)
+     &      +STMWT*MAX(0.,NVSTS-PCNST/100.)
+     &      +(RTWT-WCRRT)*MAX(0.,NVSTR-PCNRT/100.)
+        ENDIF
         IF (NDMOLD .GT. (CNOLD/RNO3C*0.16)) THEN
           NDMOLD = CNOLD/RNO3C*0.16
         ENDIF

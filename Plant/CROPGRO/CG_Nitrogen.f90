@@ -8,7 +8,7 @@ module CG_Nitrogen
   implicit none
   private
   integer, parameter :: dp=real64
-  integer, parameter :: implemented_stage=3
+  integer, parameter :: implemented_stage=4
   integer, save :: ni_stage=0, root_mode=0, output_unit=0
   logical, save :: loaded=.false., opened=.false., ready=.false., water_ready=.false.
   real(dp), save :: q_no3_max=-1, q_nh4_max=-1
