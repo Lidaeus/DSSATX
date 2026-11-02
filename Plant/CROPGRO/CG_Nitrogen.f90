@@ -80,6 +80,10 @@ contains
       if(NI_ENABLED()) then
         if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
           error stop 'NI: mixed or unsupported crop/switch batch'
+        if(NI_ROOT_MODE()>0.and.(switch%ISWWAT/='Y'.or.switch%MEEVP=='Z')) &
+          error stop 'NI: unsupported water route in later treatment'
+        if(ni_stage>=5.and.(switch%MEPHO/='L'.or.switch%MEEVP=='Z')) &
+          error stop 'NI: replacement feedback requires the verified non-Z L route'
       end if
       return
     end if
@@ -131,7 +135,8 @@ contains
       if(max(leaf_a,stem_a)*max_ratio>=1) error stop 'NI: reference N fraction must remain below one'
     end if
     if(ni_stage>=5) then
-      if(switch%MEPHO/='L') error stop 'NI: new functional feedback currently supports verified L route only'
+      if(switch%MEPHO/='L'.or.switch%MEEVP=='Z') &
+        error stop 'NI: new functional feedback currently supports verified non-Z L route only'
       if(photo_floor<0.or.photo_floor>=1.or.photo_gamma<=0.or.growth_tau<=0) &
         error stop 'NI: explicit bounded functional response parameters required'
     end if

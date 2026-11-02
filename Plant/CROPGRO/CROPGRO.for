@@ -463,6 +463,7 @@ C-----------------------------------------------------------------------
 !     Seasonal initialization - run once per season
 !***********************************************************************
       ELSEIF (DYNAMIC .EQ. SEASINIT) THEN
+      CALL NI_LOAD(CONTROL,ISWITCH)
       CALL NI_RESET()
 !***********************************************************************
 !     The following statements came from INPLNT
