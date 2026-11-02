@@ -95,7 +95,7 @@ contains
     mob_accept=min(max(0._dp,real(demand,dp)),ratio*max(0._dp,real(pg,dp)))
     gap=min(max(0._dp,real(demand-supply,dp)), &
       max(0._dp,ratio*real(pg,dp)-real(supply,dp))/(1+ratio*paid))
-    mob_gap=gap;z=day_veg_z
+    mob_gap=gap;z=day_growth ! shared smoothed C1 state; no second severity clock
     if(remob_severity==0) z=0
     call NI_REMOB_KERNEL(real(n,dp),real(w,dp),cmin,ccrit,real(legacy,dp),real(rate,dp), &
       remob_tau,slow_ratio,protect_beta,z,gap,real(pg,dp),paid,mob_safe,mob_func)
