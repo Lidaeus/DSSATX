@@ -50,7 +50,7 @@ for a,var,title in zip(axs,['phi','W2_N3_minus_N0_t_ha'],['相同参数下的总
  a.set_xticks(range(len(p.columns)),[f'{x:g}'for x in p.columns]);a.set_yticks(range(len(p.index)),p.index)
  a.set(xlabel='W0（t DM/ha）',ylabel='Nmin/Ncrit / Nmax/Ncrit',title=title)
  for i in range(len(p.index)):
-  for j in range(len(p.columns)):a.text(j,i,f'{p.iloc[i,j]:.2f}',ha='center',va='center',color='white',fontsize=9)
+  for j in range(len(p.columns)):a.text(j,i,f'{p.iloc[i,j]:.2f}',ha='center',va='center',color='black'if im.norm(p.iloc[i,j])>.65 else'white',fontsize=9)
  fig.colorbar(im,ax=a,shrink=.8)
 fig.suptitle('固定参数的受控对照；不是各结构分别率定后的优劣比较',fontsize=10)
 fig.tight_layout(rect=[0,0,1,.93]);fig.savefig(dest/'diagnostic_curve_grid.png',dpi=160);plt.close(fig)

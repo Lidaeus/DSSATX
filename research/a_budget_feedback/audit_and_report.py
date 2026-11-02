@@ -66,6 +66,28 @@ def main():
     b=bounds.copy();b['best_value']=b.name.map(best);b['relative_position']=(b.best_value-b.lower)/(b.upper-b.lower)
     b['near_working_bound_1pct']=(b.relative_position<=.01)|(b.relative_position>=.99)
     b.to_csv(DATA/'best_parameter_positions.csv',index=False)
+    definitions={
+      'q_no3_max':('g N/g carrier DM','硝态库容量；carrier为显式支持代理，不等于观测干重'),
+      'assim_no3_v':('g N/(g carrier DM·d)','比同化潜力；实际总潜力再乘carrier，并受底物、温度、C和接纳限制'),
+      'assim_no3_k':('g N/g carrier DM','比硝态底物半饱和浓度'),
+      'root_v':('g N/(m root·d)','单支米氏硝态膜运输潜力'),
+      'root_k':('mg N/L water','硝态根表运输半饱和浓度'),
+      'diffusion_k':('L water/(m root·d)','有效根际扩散系数；进入供给-膜运输闭环，不与主动通量重复相加'),
+      'pool_beta':('1','无机库占用对吸收的反馈强度'),
+      'leaf_a':('g N/g leaf DM','叶幂函数幅度系数；数学1 t/ha参照'),
+      'stem_a':('g N/g stem DM','茎幂函数幅度系数；数学1 t/ha参照'),
+      'leaf_b':('1','叶稀释指数'), 'stem_b':('1','茎稀释指数'),
+      'min_ratio':('1','叶/茎共同的下软参考与临界之比'),
+      'max_ratio':('1','叶/茎共同的上软参考与临界之比'),
+      'photo_gamma':('1','功能面积N响应指数'),
+      'growth_tau':('d','统一生长状态恢复时间尺度'),
+      'photo_slw_ref':('g DM/cm² leaf','功能面积N参考的比叶重尺度；乘10000换算g DM/m²叶'),
+      'curve_w0':('t DM/ha','站存叶+茎DM的稀释起点'),
+    }
+    new=b[(b.pargp=='new_n')&(b.status=='active')][['name','init','lower','upper','best_value']].copy()
+    assert set(new.name)==set(definitions)
+    new['unit']=new.name.map(lambda k:definitions[k][0]);new['definition']=new.name.map(lambda k:definitions[k][1])
+    new.to_csv(DATA/'NI_parameter_definitions_and_bounds.csv',index=False)
     # Accepted final-member objective, independent of PEST's rounded summary.
     ob=pd.read_csv(ROOT/'manager/smoke.4.obs.csv',index_col=0)
     weights=pd.read_csv(d['observations']).set_index('obsnme').final_weight
@@ -205,7 +227,11 @@ A将可动员叶/茎N的剩余参照改为动态Nmin；在原40%下参考较低�
 
 用户指定76参数表逐字节快照、SHA和适配说明见`parameter_reference/`。58个兼容原生活动参数保留原lower/upper，包含物候、ICMP/TCMP及TRIFL≤0.85。4个旧CNC、9个NB、RTNO3、旧FNPGN1/2/LNREF及25春SLPF没有按名称直接替换到新版。新增17个NI活动参数独立定义/冻结，共75活动。
 
-全部75项通过原生扰动：TCMP在ICMP=2.5的交互环境下显示作用，保持活动；PM06远端点没有当天成熟果，失败保留，另一端点证实接线有效，原范围未缩。单点有响应只证明接线，不等于可识别。
+全部75项通过原生扰动：TCMP在ICMP=2.5的交互环境下显示作用，保持活动；PM06远端点没有当天成熟果，失败保留，另一端点证实接线有效，原范围未缩。单点有响应只证明接线，不等于可识别。KEP尚未列入主注册表物理硬域，本轮保留用户0.76—0.9工作域并做局部工程核查，未新增全局物理硬限。
+
+新增NI定义、初值、边界、最佳值和单位完整保存在`analysis/NI_parameter_definitions_and_bounds.csv`。尤其assim_no3_v是按carrier归一的g N/(g carrier DM·d)，需再乘carrier；不是固定的g N/m²/d。新工作域属于工程先验，不冒充成熟生理硬边界。17项简表如下：
+
+{md(new[['name','lower','upper','best_value','unit']].rename(columns={'name':'NI参数','lower':'下界','upper':'上界','best_value':'最佳值','unit':'单位'}))}
 
 率定固定26春、12处理、612个原有直接观测及权重；NSTFAC/NRCVR/SENRT2固定，FL-VS=100。未加日期/季节生长护栏或SPAD/光合替代目标。初始80组在冻结全域内取起点±12%全域宽度的局部均匀分布，seed=20261102；全边界仍供IES更新。使用真实PEST++5.2.16，6个独立原生工作进程。
 
