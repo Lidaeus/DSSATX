@@ -17,6 +17,7 @@ C  03/04/2005 CHP wrote based on SoilNBal
       USE GHG_mod
       USE FertType_mod
       USE Interface_SoilNBalSum
+      USE CG_Nitrogen, ONLY: NI_ENABLED, NI_SOIL_INPUT
       IMPLICIT NONE
       EXTERNAL GETLUN, HEADER, INCDAT, YR_DOY
       SAVE
@@ -53,6 +54,7 @@ C  03/04/2005 CHP wrote based on SoilNBal
 
       REAL N2OY, N2Y, NOY
       REAL UnreleasedN  !Slow release fertilizer
+      REAL NIINPUTY, NIINPUT
 
 !     ------------------------------------------------------------------
 !     Return if detail not requested.
@@ -78,6 +80,7 @@ C  03/04/2005 CHP wrote based on SoilNBal
 !     Seasonal Initialization phase
 !***********************************************************************
       IF (DYNAMIC == SEASINIT) THEN
+      NIINPUTY=0.
 !     ------------------------------------------------------------------
 !     Initialize output file
       CALL GETLUN(SNiBAL, LUNSNC)
@@ -202,6 +205,11 @@ C  03/04/2005 CHP wrote based on SoilNBal
       TOTSTATE = TNO3 + TNH4 + TUREA + ALGFIX + TOTFLOODN 
      &         + TNGSoil + UnreleasedN
       TOTADD   = AMTFERTODAY + MINERTODAY
+      IF (NI_ENABLED()) THEN
+        NIINPUT=NI_SOIL_INPUT()
+        TOTADD=TOTADD+NIINPUT-NIINPUTY
+        NIINPUTY=NIINPUT
+      ENDIF
       TOTSUB   = IMMOBTODAY + LCHTODAY + CNUPTAKETODAY + FNROTODAY 
      &         + AMLTODAY + N2Otoday + N2today + NOtoday
      &         + NTILEDRTODAY !HJ added
@@ -262,6 +270,7 @@ C  03/04/2005 CHP wrote based on SoilNBal
 !       TALLN. SEEDNI is not needed, because for the plant the NBAL
 !       only deals with N uptake from the soil.
         TALLNI  = TALLNI + AMTFER + CMINERN !Initial + add
+        IF (NI_ENABLED()) TALLNI=TALLNI+NI_SOIL_INPUT()
 
 !       For slow release fertilizers, keep track of unreleased N
         UnreleasedN = 0.0
@@ -328,6 +337,9 @@ C  03/04/2005 CHP wrote based on SoilNBal
           WRITE(LUNSNC,700) CUMFNRO
         ENDIF
 
+        IF (NI_ENABLED()) WRITE(LUNSNC,
+     &    '(A,F14.6)') " Inorganic tissue return input kg N/ha: ",
+     &    NI_SOIL_INPUT()
         WRITE(LUNSNC,800) TALLNI, TALLN
         BALANCE = TALLN - TALLNI
         WRITE(LUNSNC,900) BALANCE

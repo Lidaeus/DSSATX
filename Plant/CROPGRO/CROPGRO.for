@@ -57,6 +57,7 @@ C=======================================================================
       USE ModuleDefs     !Definitions of constructed variable types, 
       USE ModuleData
       USE CG_P0Trace
+      USE CG_Nitrogen
 
       IMPLICIT NONE
       EXTERNAL DEMAND, FREEZE, GROW, HRES_CGRO, INCOMP, IPPLNT, MOBIL,
@@ -153,6 +154,8 @@ C=======================================================================
      &    SAT(NL), SW(NL), ST(NL), RLV(NL), WR(NL)
       REAL NH4(NL), NO3(NL), UNH4(NL), UNO3(NL)
       REAL P0_RWU(NL), P0_EP
+      REAL NASSIMD, NFORGROW, NIUNUSED, NIREFUND, NILEAK0
+      REAL NISHARE
       REAL PHTHRS(20)
       REAL TGRO(TS)
       REAL SDDES(NCOHORTS)
@@ -244,6 +247,7 @@ C=======================================================================
 !     Run Initialization - Called once per simulation
 !***********************************************************************
       IF (DYNAMIC .EQ. RUNINIT) THEN
+      CALL NI_LOAD(CONTROL,ISWITCH)
 !-----------------------------------------------------------------------
 !     Call input routine for CROPGRO module parameters
 !-----------------------------------------------------------------------
@@ -459,6 +463,7 @@ C-----------------------------------------------------------------------
 !     Seasonal initialization - run once per season
 !***********************************************************************
       ELSEIF (DYNAMIC .EQ. SEASINIT) THEN
+      CALL NI_RESET()
 !***********************************************************************
 !     The following statements came from INPLNT
 !-----------------------------------------------------------------------
@@ -935,6 +940,10 @@ C-----------------------------------------------------------------------
      &      TNLEAK,WTLF,STMWT,RTWT,WCRLF,WCRST,WCRRT,RNITP,
      &      PCNL,PCNST,XLAI,RPROAV,PG,CMOBMX,DTX,DXR57/))
       ENDIF
+      IF (NI_ENABLED()) THEN
+        CALL NI_BEGIN((/WTLF,STMWT,RTWT/))
+        NILEAK0=TNLEAK
+      ENDIF
 !     Initialize available N and C for beginning of daily calcs.
 !-----------------------------------------------------------------------
       NAVL = 0.0
@@ -1040,6 +1049,22 @@ C-----------------------------------------------------------------------
      &    (/NAVL,SDNPL,PGAVL/))
       ENDIF
       IF (ISWNIT .EQ. 'Y') THEN
+      IF (NI_ENABLED()) THEN
+        IF (NI_ROOT_MODE().GT.0) THEN
+          CALL NI_ROOT_UPTAKE(CONTROL,NLAYR,SOILPROP%BD,
+     &      DLAYR,LL,DUL,SAT,NO3,NH4,KG2PPM,UNO3,UNH4)
+        ELSE
+          CALL NUPTAK(INTEGR,
+     &      DLAYR,DUL,FILECC,KG2PPM,LL,NDMSDR,NDMTOT,
+     &      NH4,NO3,NLAYR,RLV,SAT,SW,
+     &      TRNH4U,TRNO3U,TRNU,UNH4,UNO3)
+        ENDIF
+        CALL NI_ACCEPT_UPTAKE(UNO3,UNH4,NLAYR,
+     &    TRNO3U,TRNH4U,TRNU)
+        CALL NI_ASSIMILATE(PGAVL,MAX(0.,NDMTOT-NAVL),DTX,
+     &    RNO3C,RNH4C,NASSIMD,RSPNO3,RSPNH4)
+        NAVL=NAVL+NASSIMD
+      ELSE
         CALL NUPTAK(INTEGR, 
      &    DLAYR, DUL, FILECC, KG2PPM, LL, NDMSDR, NDMTOT, !Input
      &    NH4, NO3, NLAYR, RLV, SAT, SW,                  !Input
@@ -1084,12 +1109,15 @@ C-----------------------------------------------------------------------
      &    (/RSPNO3,RSPNH4,PGAVL,NAVL/))
       ENDIF
       ENDIF
+      ENDIF
 C-----------------------------------------------------------------------
 C    CALL Nitrogen mobilization subroutine
 C    to compute availability of N from other tissue (NMINEA)
 C-----------------------------------------------------------------------
+      NFORGROW=TRNU
+      IF (NI_ENABLED()) NFORGROW=NASSIMD
       CALL MOBIL(INTEGR,
-     &    NDMNEW, NMINEP, NMOBR, RPRO, TRNU,              !Input
+     &    NDMNEW, NMINEP, NMOBR, RPRO, NFORGROW,              !Input
      &    WNRLF, WNRRT, WNRSH, WNRST,                     !Input
      &    NMINEA, NRUSLF, NRUSRT, NRUSSH, NRUSST)         !Output
 
@@ -1275,7 +1303,7 @@ C-----------------------------------------------------------------------
      &    FNINS, KCAN, NAVL, NDMNEW, NDMOLD,              !Input
      &    NFIXN, NMINEA, NR1, PAR, PCH2O, PG, PGAVL,      !Input
      &    PStres2, ROWSPC, RVSTGE, STMWT, TGRO,           !Input
-     &    TRNU, TURFAC, VSTAGE, WCRLF, WCRRT, WCRSH,      !Input
+     &    NFORGROW, TURFAC, VSTAGE, WCRLF, WCRRT, WCRSH,      !Input
      &    WCRST, WTLF, XLAI, YRDOY, YREMRG,               !Input
      &    AGRVG, FRLF, FRRT, FRSTM,                       !I/O
      &    CADLF, CADST, CANHT, CANWH, CMINEA, CRUSLF,     !Output
@@ -1295,6 +1323,17 @@ C-----------------------------------------------------------------------
      &    (/AGRVG,WLDOTN,WSDOTN,WRDOTN,NGRLF,NGRST,NGRRT,NADLF,
      &      NADST,NADRT,CADLF,CADST,PCH2O,CMINEA,TNLEAK,NSTRES,
      &      EXCESS,FRLF,FRSTM,FRRT/))
+      ENDIF
+      IF (NI_ENABLED()) THEN
+        NIUNUSED=MIN(NASSIMD,MAX(0.,TNLEAK-NILEAK0))
+        CALL NI_SETTLE(NIUNUSED,RSPNO3,RSPNH4,NASSIMD,NIREFUND)
+        TNLEAK=TNLEAK-NIUNUSED
+        NAVL=NAVL-NIUNUSED
+        PGAVL=PGAVL+NIREFUND
+        NISHARE=MAX(0.,WTLF)/MAX(1.E-12,WTLF+STMWT)
+        CADLF=CADLF+NIREFUND/PCH2O*NISHARE
+        CADST=CADST+NIREFUND/PCH2O*(1.-NISHARE)
+        NFORGROW=NASSIMD
       ENDIF
       PGAVL = PGAVL - AGRVG * (WLDOTN + WSDOTN + WRDOTN)
       NAVL = NAVL - (NGRLF + NGRST + NGRRT)
@@ -1343,11 +1382,20 @@ C-----------------------------------------------------------------------
 C       Calculate the respiration required for seed, shell, and veg tissue
 C       depending on the source of N uptake
 C-----------------------------------------------------------------------
+      IF (NI_ENABLED()) THEN
+        IF ((NFORGROW+NFIXN+NMINEA).GT.1.E-4) THEN
+          RPROAV=((RSPNO3+RSPNH4)*0.16+NFIXN*RFIXN
+     &      +NMINEA*RPRO)/(NFORGROW+NFIXN+NMINEA)
+        ELSE
+          RPROAV=(RNO3C+RNH4C)/2.
+        ENDIF
+      ELSE
       IF ((TRNU + NFIXN + NMINEA) .GT. 1.E-4) THEN
          RPROAV = ((RSPNO3 + RSPNH4) * 0.16 + NFIXN * RFIXN + NMINEA
      &        * RPRO) / (TRNU + NFIXN + NMINEA)
       ELSE
          RPROAV = (RNO3C + RNH4C) / 2.
+      ENDIF
       ENDIF
 C-----------------------------------------------------------------------
 C     AGRSD2 = SDPRO*RPROAV + PMINSD*RMIN + PLIGSD*RLIG + POASD*ROA
@@ -1410,6 +1458,11 @@ C-----------------------------------------------------------------------
      &      WTNRO,WTNSHO,WTNSDO,WTNNO,SDNPL,SEEDNI,WTNUP,WTNFX,
      &      TNLEAK,WTLF,STMWT,RTWT,WCRLF,WCRST,WCRRT,RNITP,
      &      PCNL,PCNST,XLAI/))
+      ENDIF
+      IF (NI_ENABLED()) THEN
+        CALL NI_END(CONTROL,(/WTLF,STMWT,RTWT/),
+     &    (/SLDOT+WLIDOT+WLFDOT,SSDOT+WSIDOT,SRDOT+WRIDOT/),
+     &    SENRT,NLAYR,(/WTNLF,WTNST,WTNRT/),XLAI,WCRLF)
       ENDIF
       IF ((WTLF+STMWT).GT. 0.0001) THEN
         PCNVEG = (WTNLF+WTNST)/(WTLF+STMWT)*100.

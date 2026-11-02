@@ -71,6 +71,7 @@ C=======================================================================
       USE FertType_mod
       USE ModuleData
       USE CG_P0Trace
+      USE CG_Nitrogen, ONLY: NI_RETURN_LITTER
       USE FloodModule
       USE ModSoilMix
       IMPLICIT  NONE
@@ -363,6 +364,7 @@ C=======================================================================
         CALL P0_L(CONTROL,'soil_debit_before','UNH4',
      &    UNH4,NLAYR)
       ENDIF
+      CALL NI_RETURN_LITTER(SNO3,SNH4,NLAYR)
       DO L = 1, NLAYR
 !       Update with yesterday's plant N uptake
         SNO3(L) = SNO3(L) - UNO3(L)
