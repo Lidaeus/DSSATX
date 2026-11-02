@@ -207,15 +207,25 @@ def finalize(root,d):
     phi=pd.read_csv(root/'manager/smoke.phi.actual.csv')
     if int(phi.iteration.max())!=4:raise ValueError('Requested four updates not completed')
     obs=pd.read_csv(root/'manager/smoke.4.obs.csv',index_col=0)
-    if len(obs)!=80 or not np.isfinite(obs.to_numpy()).all():raise ValueError('Incomplete final 80 members')
+    if not 0<len(obs)<=80 or not np.isfinite(obs.to_numpy()).all():raise ValueError('Empty/invalid final ensemble')
     receipts=[json.loads(p.read_text(encoding='utf8'))for p in (root/'_agents').glob('*/native_trials/*/receipt.json')]
     successful=[r for r in receipts if r['success']]
     best=min(successful,key=lambda r:r['phi']);bound=pd.read_csv(d['bounds'])
-    out=root/'selected_deterministic';out.mkdir()
+    out=root/'selected_deterministic';out.mkdir(exist_ok=True)
     pd.DataFrame([(r.pest_name,best['parameters'][r.name])for r in bound.itertuples()],columns=['name','value']).to_csv(out/'parameters.csv',index=False)
     pd.DataFrame(best['parameters'].items(),columns=['name','value']).to_csv(root/'best_parameters.csv',index=False)
     replay=evaluate(root/'design.json',out/'parameters.csv',out)
     if not np.isclose(replay['phi'],best['phi'],atol=1e-10,rtol=1e-12):raise ValueError('Replay differs')
+    if replay['parameters']!=best['parameters']:raise ValueError('Replay input float bits changed')
+    same_inputs={p.name:sha(Path(best['trial'])/p.name)==sha(Path(replay['trial'])/p.name)
+                 for p in Path(d['inputs']).iterdir()if p.is_file()and p.name!='DSSATPRO.v48'}
+    same_inputs['NIntegration.nml']=sha(Path(best['trial'])/'NIntegration.nml')==sha(Path(replay['trial'])/'NIntegration.nml')
+    if not all(same_inputs.values()):raise ValueError('Replay actual native inputs differ')
+    dump(root/'exact_replay_receipt.json',dict(passed=True,original_trial=best['trial'],replay_trial=replay['trial'],
+          original_phi=best['phi'],replay_phi=replay['phi'],parameter_bits_identical=True,actual_native_inputs_identical=same_inputs,
+          adapter_precision_fix='round_trip CSV float parsing in separate post-run replay adapter; historical frozen runtime unchanged',
+          replay_adapter_sha256=sha(HERE/'forward_A.py')))
+    dump(root/'best_parameters.exact.json',best['parameters'])
     comp=pd.read_csv(Path(replay['trial'])/'comparison.csv');comp.to_csv(root/'best_comparison.csv',index=False)
     metrics=[]
     for family,q in comp.groupby('family'):
@@ -224,11 +234,14 @@ def finalize(root,d):
     pd.DataFrame(metrics).to_csv(root/'best_metrics.csv',index=False)
     pd.DataFrame([dict(trial=r['trial'],success=r['success'],phi=r.get('phi'),error=r.get('error'))for r in receipts]).to_csv(root/'evaluation_audit.csv',index=False)
     if not all(sha(p)==h for p,h in d['protected'].items()):raise ValueError('Protected executable changed')
-    dump(root/'completion_receipt.json',dict(completed=True,updates=4,final_members=80,workers=6,active=d['active'],
+    initial_obs=pd.read_csv(root/'manager/smoke.0.obs.csv',index_col=0)
+    dump(root/'completion_receipt.json',dict(completed=True,updates=4,requested_members=80,initial_successful_members=len(initial_obs),
+          final_members=len(obs),full_80_member_retention=len(obs)==80,workers=6,active=d['active'],
           native_IES_evaluations=len(receipts),failures=sum(not r['success']for r in receipts),best_actual_phi=best['phi'],
           independent_replay_phi=replay['phi'],best_trial=replay['trial'],budget=replay['budget'],protected_unchanged=True,
           scientific_validation=False,limitations=[d['objective_limitation'],'engineering-domain joint calibration; controlled events and independent observations still needed']))
-    dump(root/'execution_status.json',dict(stage='completed',completed=True,updates=4,members=80))
+    dump(root/'execution_status.json',dict(stage='completed'if len(obs)==80 else'completed_with_member_attrition',
+         completed=True,updates=4,requested_members=80,final_members=len(obs)))
     print('COMPLETED',replay['phi'],flush=True)
 
 

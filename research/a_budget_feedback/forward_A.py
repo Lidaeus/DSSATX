@@ -114,9 +114,10 @@ def evaluate(design_path,parameters,out):
     try:
         for p,h in d.get('frozen_hashes',{}).items():
             if sha(p)!=h:raise ValueError('Frozen dependency changed: '+p)
-        bounds=pd.read_csv(d['bounds']);frame=pd.read_csv(parameters)
+        bounds=pd.read_csv(d['bounds']);frame=pd.read_csv(parameters,float_precision='round_trip')
         if frame.name.duplicated().any()or set(frame.name)!=set(bounds.pest_name):raise ValueError('Parameter identity')
         raw=frame.set_index('name').value.to_dict();values={r.name:float(raw[r.pest_name])for r in bounds.itertuples()}
+        receipt['parameters']=values
         for r in bounds.itertuples():
             if not np.isfinite(values[r.name])or not r.lower-1e-12<=values[r.name]<=r.upper+1e-12:raise ValueError('Bound '+r.name)
             if r.status=='fixed'and abs(values[r.name]-r.init)>1e-12:raise ValueError('Fixed '+r.name)
@@ -126,12 +127,14 @@ def evaluate(design_path,parameters,out):
         natives={k:v for k,v in values.items()if k not in d['nitrogen_names']}
         receipt['injection']=inject(work,natives,Path(d['runtime']))
         config=dict(ni_stage=5,root_mode=2,budget_revision=1,**{k:values[k]for k in d['nitrogen_names']})
+        receipt['nitrogen_config']=config
         (work/'NIntegration.nml').write_text('&NINTEGRATION\n'+''.join(f' {k}={v:.17g}\n'for k,v in config.items())+'/\n',encoding='ascii')
         env=os.environ.copy();env['DSSAT_N_CONFIG']=str(work/'NIntegration.nml');env['DSSAT_P0_TRACE']='0'
         with(work/'stdout.log').open('wb')as so,(work/'stderr.log').open('wb')as se:
             p=subprocess.run([d['binary'],'B','DSSBatch.v48'],cwd=work,env=env,stdout=so,stderr=se,timeout=180)
         if p.returncode or not re.search(r'Normal end of run\s+12\b',(work/'INFO.OUT').read_text(encoding='utf8')):raise RuntimeError('Native failed: '+(work/'stderr.log').read_text(encoding='utf8')[-800:])
         budget=audit_A(work,config)
+        receipt['budget']=budget
         comp=extract(work,pd.read_csv(d['observations']).fillna(''),Path(d['runtime']))
         comp.to_csv(work/'comparison.csv',index=False)
         receipt.update(success=True,parameters=values,nitrogen_config=config,budget=budget,phi=float(comp.phi_contribution.sum()),binary_sha256=sha(d['binary']))

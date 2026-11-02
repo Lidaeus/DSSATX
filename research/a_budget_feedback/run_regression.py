@@ -46,7 +46,7 @@ def case(name, changes=None, trace=False, binary=None):
         p=subprocess.run([str(binary or OUT/'bin/dscsm048_A_development.exe'),'B','DSSBatch.v48'],cwd=w,env=env,stdout=so,stderr=se,timeout=240)
     info=(w/'INFO.OUT').read_text(encoding='utf8') if(w/'INFO.OUT').exists()else''
     r=dict(case=name,success=p.returncode==0 and bool(re.search(r'Normal end of run\s+12\b',info)),returncode=p.returncode,
-           config=cfg,binary_sha256=sha(OUT/'bin/dscsm048_A_development.exe'),elapsed_seconds=time.monotonic()-started)
+           config=cfg,binary_sha256=sha(binary or OUT/'bin/dscsm048_A_development.exe'),elapsed_seconds=time.monotonic()-started)
     if r['success'] and cfg['ni_stage']==0:
         reference=CN/'reports/n_integration_v2_readiness_20261102/baseline_verified/reference_26SP'
         # These inputs are r020, not BASE; comparison belongs to a dedicated
@@ -58,9 +58,13 @@ def case(name, changes=None, trace=False, binary=None):
         for organ in ['leaf','stem']:a[organ+'_a']=cfg[organ+'_a']*cfg.get('curve_w0',1.)**(-cfg[organ+'_b'])
         r['budget']=audit(w,a)
         r['budget']['legacy_bugs_deferred']=cfg.get('budget_revision',0)==0
-        comp=extract(w,pd.read_csv(d['observations']).fillna(''),Path(d['runtime']))
-        comp.to_csv(w/'comparison.csv',index=False)
-        r['phi']=float(comp.phi_contribution.sum())
+        try:
+            comp=extract(w,pd.read_csv(d['observations']).fillna(''),Path(d['runtime']))
+            comp.to_csv(w/'comparison.csv',index=False)
+            r['phi']=float(comp.phi_contribution.sum())
+        except ValueError as error:
+            if not name.startswith('diagnostic_'):raise
+            r['objective_not_available']=str(error)
         if name=='revision_zero':r['numeric_equal']={f:numeric_records(w/f)==numeric_records(original/f)for f in COMPARE_FILES}
     dump(w/'receipt.json',r)
     print(name,r['success'],r.get('phi'),(w/'stderr.log').read_text(encoding='utf8')[-450:],flush=True)
