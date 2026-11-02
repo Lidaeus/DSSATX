@@ -155,6 +155,7 @@ C=======================================================================
       REAL NH4(NL), NO3(NL), UNH4(NL), UNO3(NL)
       REAL P0_RWU(NL), P0_EP
       REAL NASSIMD, NFORGROW, NIUNUSED, NIREFUND, NILEAK0
+      REAL NIV3FLUX(4),NIV3RETURN,NIV3REFUND,NIV3CPRED
       REAL NISHARE, NIOLDN, NIVGC0
       REAL PHTHRS(20)
       REAL TGRO(TS)
@@ -1031,6 +1032,7 @@ C-----------------------------------------------------------------------
      &      NMINEP,NMOBR,FNINL,FNINS,FNINR,RPROAV,AGRVG2,
      &      AGRSD2,AGRSH2/))
       ENDIF
+      NIV3CPRED=PGAVL
       IF (YRDOY == YREND) RETURN
 
 C-----------------------------------------------------------------------
@@ -1133,10 +1135,22 @@ C    to compute availability of N from other tissue (NMINEA)
 C-----------------------------------------------------------------------
       NFORGROW=TRNU
       IF (NI_ENABLED()) NFORGROW=NASSIMD
+      IF (NI_REMOB_ON()) THEN
+        CALL NI_REMOB_PLAN(NDMNEW,NAVL,PGAVL,NIV3CPRED,
+     &    (/WTNLF,WTNST,WTNRT,WTNSH/),
+     &    (/WTLF,STMWT,RTWT,SHELWT/),
+     &    (/WNRLF,WNRST,WNRRT,WNRSH/),NMOBR,RPRO,
+     &    NMINEA,NIV3FLUX)
+        NRUSLF=NIV3FLUX(1)
+        NRUSST=NIV3FLUX(2)
+        NRUSRT=NIV3FLUX(3)
+        NRUSSH=NIV3FLUX(4)
+      ELSE
       CALL MOBIL(INTEGR,
      &    NDMNEW, NMINEP, NMOBR, RPRO, NFORGROW,              !Input
      &    WNRLF, WNRRT, WNRSH, WNRST,                     !Input
      &    NMINEA, NRUSLF, NRUSRT, NRUSSH, NRUSST)         !Output
+      ENDIF
 
 C-----------------------------------------------------------------------
 !       Plant phosphorus module
@@ -1302,6 +1316,7 @@ C     CSAVEV is a faction of PG for vegetative growth that is stored
 C     as CH2O.  Increase this as plant moves from R1 into seed fill.
 !  These two statements came from the VEGGR subroutine - chp
 C-----------------------------------------------------------------------
+      CALL NI_REMOB_REPRO(NGRSD+NGRSH)
       CSAVEV = CADPR1 * PGAVL * FRACDN
       PGAVL = PGAVL - CSAVEV
 !     P0b read-only trace; no model state is assigned.
@@ -1345,6 +1360,20 @@ C-----------------------------------------------------------------------
      &      EXCESS,FRLF,FRSTM,FRRT/))
       ENDIF
       IF (NI_ENABLED()) THEN
+        IF (NI_REMOB_ON()) THEN
+          NIV3FLUX=(/NRUSLF,NRUSST,NRUSRT,NRUSSH/)
+          CALL NI_REMOB_SETTLE(MAX(0.,TNLEAK-NILEAK0),
+     &      NGRLF+NGRST+NGRRT,RPRO,NMINEA,NIV3FLUX,
+     &      NIV3RETURN,NIV3REFUND)
+          NRUSLF=NIV3FLUX(1)
+          NRUSST=NIV3FLUX(2)
+          NRUSRT=NIV3FLUX(3)
+          NRUSSH=NIV3FLUX(4)
+          TNLEAK=TNLEAK-NIV3RETURN
+          NAVL=NAVL-NIV3RETURN
+          PGAVL=PGAVL+NIV3REFUND
+          CADST=CADST+NIV3REFUND/PCH2O
+        ENDIF
         NIUNUSED=MIN(NASSIMD,MAX(0.,TNLEAK-NILEAK0))
         CALL NI_SETTLE(NIUNUSED,RSPNO3,RSPNH4,NASSIMD,NIREFUND,
      &    UNO3,UNH4,NLAYR,TRNO3U,TRNH4U,TRNU)

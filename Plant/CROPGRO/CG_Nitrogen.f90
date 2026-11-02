@@ -15,6 +15,13 @@ module CG_Nitrogen
   integer, save :: v3_unit=0
   logical,save :: day_valid=.false.,v3_opened=.false.
   real(dp),save :: z_end(2)=0,day_z(2)=0,day_growth=1
+  integer,save :: remob_mode=0,remob_severity=1
+  real(dp),save :: remob_tau=-1,protect_beta=-1,slow_ratio=-1
+  real(dp),save :: veg_z_end=1,day_veg_z=1
+  real(dp),save :: mob_safe(4)=0,mob_func(4)=0,mob_plan(4)=0,mob_returned(4)=0
+  real(dp),save :: mob_gap=0,mob_accept=0,mob_new_used=0,mob_c_paid=0
+  integer,save :: mob_unit=0
+  logical,save :: mob_opened=.false.
   real(dp), save :: curve_w0=1, photo_slw_ref=.0028_dp
   real(dp), save :: org_start(3)=0, donor_n(3)=0, donor_c(3)=0
   real(dp), save :: org_end_stock=0,org_end_off=0,seed_end=0,leak_end=0
@@ -53,7 +60,106 @@ module CG_Nitrogen
   public :: NI_REVISED, NI_VEG_RECONCILE, NI_REFILL, NI_DONORS, NI_RETAIN
   public :: NI_EXPANSION, NI_AREA_REFILL, NI_MINIMUM
   public :: NI_OPEN_DAY, NI_SYNC_STATE, NI_PODS, NI_POD_FACTOR, NI_POD_KERNEL
+  public :: NI_REMOB_ON, NI_REMOB_KERNEL, NI_REMOB_PLAN, NI_REMOB_SETTLE, NI_REMOB_REPRO
 contains
+  logical function NI_REMOB_ON()
+    NI_REMOB_ON=remob_mode==1
+  end function
+  pure subroutine NI_REMOB_KERNEL(n,w,cm,cc,legacy,rate,tau,slow,beta,z,gap,carbon,cost,safe,func)
+    real(dp),intent(in)::n(4),w(4),cm(2),cc(2),legacy(4),rate,tau,slow,beta,z,gap,carbon,cost
+    real(dp),intent(out)::safe(4),func(4)
+    real(dp)::available(2),protect(2),remaining,total,factor
+    protect=w(1:2)*(cm+beta*(cc-cm))
+    available=max(0._dp,n(1:2)-cc*w(1:2))
+    safe=0;func=0
+    safe(1:2)=available*(1-exp(-1/tau))
+    ! Keep the native root/shell donor paths, never increase their rate.
+    safe(3:4)=min(max(0._dp,n(3:4)),max(0._dp,legacy(3:4)))*max(0._dp,min(1._dp,rate))
+    available=max(0._dp,min(n(1:2),cc*w(1:2))-protect)
+    func(1:2)=available*(1-exp(-1/(tau*slow)))*(1-max(0._dp,min(1._dp,z)))**2
+    remaining=max(0._dp,gap)
+    if(cost>0) remaining=min(remaining,max(0._dp,carbon)/cost)
+    total=sum(safe);factor=min(1._dp,remaining/max(total,1.e-30_dp));safe=safe*factor
+    remaining=max(0._dp,remaining-sum(safe))
+    total=sum(func);factor=min(1._dp,remaining/max(total,1.e-30_dp));func=func*factor
+  end subroutine
+  subroutine NI_REMOB_PLAN(demand,supply,pg,cdemand,n,w,legacy,rate,rpro,nmine,flux)
+    real,intent(in)::demand,supply,pg,cdemand,n(4),w(4),legacy(4),rate,rpro
+    real,intent(out)::nmine,flux(4)
+    real(dp)::ratio,gap,paid,z,factor,total
+    integer::i
+    ! Conservative C/N acceptance predictor, not a replay of stateful PODS.
+    ! The final accepted amount is reconciled against actual growth below.
+    ratio=max(0._dp,real(demand,dp))/max(real(cdemand,dp),1.e-12_dp)
+    paid=max(0._dp,real(rpro,dp))/.16_dp
+    mob_accept=min(max(0._dp,real(demand,dp)),ratio*max(0._dp,real(pg,dp)))
+    gap=min(max(0._dp,real(demand-supply,dp)), &
+      max(0._dp,ratio*real(pg,dp)-real(supply,dp))/(1+ratio*paid))
+    mob_gap=gap;z=day_veg_z
+    if(remob_severity==0) z=0
+    call NI_REMOB_KERNEL(real(n,dp),real(w,dp),cmin,ccrit,real(legacy,dp),real(rate,dp), &
+      remob_tau,slow_ratio,protect_beta,z,gap,real(pg,dp),paid,mob_safe,mob_func)
+    mob_plan=mob_safe+mob_func
+    ! Round down once at the host boundary; retain source components.
+    do i=1,4
+      flux(i)=flux32(mob_plan(i))
+    end do
+    do i=1,4
+      total=mob_plan(i);factor=real(flux(i),dp)/max(total,1.e-30_dp)
+      mob_safe(i)=mob_safe(i)*factor;mob_func(i)=mob_func(i)*factor
+    end do
+    mob_plan=real(flux,dp);mob_returned=0;mob_new_used=0
+    nmine=sum(flux);mob_c_paid=real(nmine,dp)*paid
+    if(mob_c_paid>real(pg,dp)+1.e-6_dp) error stop 'NI v3: unaffordable mobilization'
+  end subroutine
+  subroutine NI_REMOB_REPRO(used)
+    real,intent(in)::used
+    if(NI_REMOB_ON()) mob_new_used=max(0._dp,real(used,dp))
+  end subroutine
+  subroutine NI_REMOB_SETTLE(unused,veg_used,rpro,nmine,flux,returned,refund)
+    real,intent(in)::unused,veg_used,rpro
+    real,intent(inout)::nmine,flux(4)
+    real,intent(out)::returned,refund
+    real(dp)::left,total,take(4),part(4),amount,factor,old
+    integer::j,k
+    left=max(0._dp,real(unused,dp));mob_new_used=mob_new_used+max(0._dp,real(veg_used,dp))
+    ! Shell mining is integrated into cohorts/harvest inside PODS. It stays
+    ! on the native path and is never undone after those irreversible calls.
+    if(mob_plan(4)>mob_new_used+1.e-6_dp) error stop 'NI v3: native shell export has no growth recipient'
+    old=real(nmine,dp);take=0
+    do k=1,2
+      if(k==1) then
+        part=mob_func
+      else
+        part=mob_safe
+      endif
+      part(4)=0
+      total=sum(part);amount=min(left,total);factor=amount/max(total,1.e-30_dp)
+      do j=1,3
+        if(k==1) then
+          mob_func(j)=mob_func(j)*(1-factor)
+        else
+          mob_safe(j)=mob_safe(j)*(1-factor)
+        endif
+        take(j)=take(j)+part(j)*factor
+      enddo
+      left=max(0._dp,left-amount)
+    enddo
+    do j=1,3
+      total=mob_safe(j)+mob_func(j)
+      flux(j)=flux32(total)
+      factor=real(flux(j),dp)/max(total,1.e-30_dp)
+      mob_safe(j)=mob_safe(j)*factor;mob_func(j)=mob_func(j)*factor
+    enddo
+    nmine=sum(flux)
+    returned=real(max(0._dp,old-real(nmine,dp)))
+    refund=returned/.16*max(0.,rpro)
+    mob_returned=mob_plan-real(flux,dp)
+    mob_c_paid=real(nmine,dp)*max(0._dp,real(rpro,dp))/.16_dp
+    if(real(returned,dp)>real(unused,dp)+1.e-6_dp) error stop 'NI v3: cancellation exceeds unaccepted supply'
+    if(real(nmine,dp)>mob_new_used+1.e-6_dp) error stop 'NI v3: internal export not used by new growth'
+    donor_n=real(flux(1:3),dp)
+  end subroutine
   logical function NI_PODS()
     NI_PODS=pods_n_state==1.and.day_valid
   end function
@@ -71,10 +177,10 @@ contains
     if(day_run==control%RUN.and.day_date==control%YRDOY) return
     day_run=control%RUN;day_date=control%YRDOY
     day_valid=ready.and.end_run==control%RUN
-    day_source=-1;day_z=0;day_growth=1
+    day_source=-1;day_z=0;day_growth=1;day_veg_z=1
     if(day_valid) then
       if(end_day>=control%YRDOY) error stop 'NI v3: current/future state in day snapshot'
-      day_source=end_day;day_z=z_end;day_growth=growth_factor
+      day_source=end_day;day_z=z_end;day_growth=growth_factor;day_veg_z=veg_z_end
     end if
   end subroutine
   subroutine NI_SYNC_STATE(control,nstres)
@@ -152,6 +258,9 @@ contains
     room=max(0._dp,(target*mass-stock)/max(1.e-6_dp,1-target/.16_dp))
     where(mass<=1.e-4_dp) room=0
     total=sum(room);amount=min(max(0._dp,real(available,dp)),total)
+    ! Internal growth credit must not be consumed by luxury or same-pool
+    ! refill. Cancel its unused reservation before accepting external surplus.
+    if(NI_REMOB_ON()) amount=min(max(0._dp,real(available,dp)-sum(mob_plan)),total)
     nad=0
     if(total>0) nad=real(amount*room/total)
     unused=max(0.,available-sum(nad))
@@ -193,7 +302,7 @@ contains
       assim_no3_v,assim_nh4_v,assim_no3_k,assim_nh4_k, &
       root_v,root_k,diffusion_k,pool_beta,leaf_a,leaf_b,stem_a,stem_b, &
       min_ratio,max_ratio,photo_floor,photo_gamma,growth_tau,budget_revision,curve_w0,photo_slw_ref, &
-      state_timing,pods_n_state
+      state_timing,pods_n_state,remob_mode,remob_severity,remob_tau,protect_beta,slow_ratio
     if(loaded) then
       if(NI_ENABLED()) then
         if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
@@ -230,6 +339,13 @@ contains
       error stop 'NI v3: state switches must be 0 or 1'
     if(max(state_timing,pods_n_state)>0.and.(ni_stage/=5.or.budget_revision/=1)) &
       error stop 'NI v3: state changes require stage5 and A budget'
+    if(remob_mode<0.or.remob_mode>1.or.remob_severity<0.or.remob_severity>1) &
+      error stop 'NI v3: invalid remobilization switch'
+    if(NI_REMOB_ON()) then
+      if(state_timing/=1.or.pods_n_state/=1) error stop 'NI v3: remobilization requires C1 state modes'
+      if(.not.all(ieee_is_finite([remob_tau,protect_beta,slow_ratio]))) error stop 'NI v3: nonfinite remob parameters'
+      if(remob_tau<=0.or.slow_ratio<1.or.protect_beta<0.or.protect_beta>1) error stop 'NI v3: invalid remob parameters'
+    endif
     if(.not.ieee_is_finite(curve_w0).or.curve_w0<=0.or..not.ieee_is_finite(photo_slw_ref).or.photo_slw_ref<=0) &
       error stop 'NI: invalid curve breakpoint or functional leaf reference'
     if(.not.all(ieee_is_finite([q_no3_max,q_nh4_max,assim_no3_v,assim_nh4_v,assim_no3_k,assim_nh4_k, &
@@ -272,6 +388,7 @@ contains
     cmin=0; ccrit=0; cmax=0; d_pending=0
     end_run=-1;end_day=-1;day_run=-1;day_date=-1;day_source=-1
     day_valid=.false.;z_end=0;day_z=0;day_growth=1
+    veg_z_end=1;day_veg_z=1;mob_safe=0;mob_func=0;mob_plan=0;mob_returned=0
   end subroutine
   subroutine NI_BEGIN(weights)
     real,intent(in)::weights(3)
@@ -284,6 +401,7 @@ contains
     d_cost=0; d_refund=0; d_litter=0
     old_a3=0;old_a4=0;old_rsp3=0;old_rsp4=0
     r_mf=0;r_diff=0;r_mem=0;r_cr=0;r_bulk=0;r_candidate3=0;r_candidate4=0;r_final3=0;r_final4=0
+    mob_safe=0;mob_func=0;mob_plan=0;mob_returned=0;mob_gap=0;mob_accept=0;mob_new_used=0;mob_c_paid=0
   end subroutine
   subroutine NI_ORG_BEGIN(stocks,off,seed,leak)
     real,intent(in)::stocks(6),off(6),seed,leak
@@ -488,6 +606,8 @@ contains
     if(NI_CURVES()) then
       call references(real(weights,dp))
       z_end=(real(org_n(1:2),dp)/max(real(weights(1:2),dp),1.e-12_dp)-cmin)/(ccrit-cmin)
+      veg_z_end=(sum(real(org_n(1:2),dp))-sum(real(weights(1:2),dp)*cmin))/ &
+        max(sum(real(weights(1:2),dp)*(ccrit-cmin)),1.e-12_dp)
       nraw=(real(org_n(1),dp)/max(real(weights(1),dp),1.e-12_dp)-cmin(1))/(ccrit(1)-cmin(1))
       target=min(1._dp,max(0._dp,nraw))
       if(.not.ready) then
@@ -511,6 +631,20 @@ contains
         NI_POD_KERNEL(day_z(1)),growth_factor,z_end
     end if
     end_run=control%RUN;end_day=control%YRDOY
+    if(NI_REMOB_ON()) then
+      if(.not.mob_opened) then
+        open(newunit=mob_unit,file='PlantNRemob.csv',status='new',action='write',iostat=ios)
+        if(ios/=0) error stop 'NI v3: cannot create remobilization ledger'
+        write(mob_unit,'(A)')'run,yrdoy,remob_mode,tau,protect_beta,slow_ratio,severity,veg_z_day,'// &
+          'gap,acceptance_prediction,new_growth_N_actual,C_remob_actual,'// &
+          'plan_leaf,plan_stem,plan_root,plan_shell,returned_leaf,returned_stem,returned_root,returned_shell,'// &
+          'safe_leaf,safe_stem,safe_root,safe_shell,function_leaf,function_stem,function_root,function_shell'
+        mob_opened=.true.
+      endif
+      write(mob_unit,'(3(I0,","),24(ES24.15E3,","),ES24.15E3)') control%RUN,control%YRDOY, &
+        remob_mode,remob_tau,protect_beta,slow_ratio,real(remob_severity,dp),day_veg_z,mob_gap,mob_accept,mob_new_used, &
+        mob_c_paid,mob_plan,mob_returned,mob_safe,mob_func
+    endif
     if(NI_REVISED()) then
       if(.not.audit_opened) then
         open(newunit=audit_unit,file='PlantABudget.csv',status='new',action='write',iostat=ios)
