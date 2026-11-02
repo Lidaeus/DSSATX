@@ -479,6 +479,18 @@ C***********************************************************************
 C     Daily integration
 C***********************************************************************
       ELSEIF (DYNAMIC == INTEGR) THEN
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'c4_grow_begin',
+     &    'W_leaf,W_stem,W_root,W_shell,W_seed,'//
+     &    'PODWT,TOPWT,TOTWT,Q_leaf,Q_stem,'//
+     &    'Q_root,Q_shell,N_leaf,N_stem,N_root,'//
+     &    'N_shell,N_seed,AREA,SLA,SLAAD',
+     &    (/ 
+     &    WTLF,STMWT,RTWT,SHELWT,SDWT,
+     &    PODWT,TOPWT,TOTWT,WCRLF,WCRST,
+     &    WCRRT,WCRSH,WTNLF,WTNST,WTNRT,
+     &    WTNSH,WTNSD,AREALF,SLA,SLAAD/))
+      ENDIF
 C-----------------------------------------------------------------------
       NLPEST = 0.0    !CHP - N loss due to pest damage
 
@@ -1224,6 +1236,38 @@ C-----------------------------------------------------------------------
         ENDIF
       ENDIF
 
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'c4_grow_end',
+     &    'W_leaf,W_stem,W_root,W_shell,W_seed,'//
+     &    'PODWT,TOPWT,TOTWT,Q_leaf,Q_stem,'//
+     &    'Q_root,Q_shell,N_leaf,N_stem,N_root,'//
+     &    'N_shell,N_seed,AREA,SLA,SLAAD',
+     &    (/ 
+     &    WTLF,STMWT,RTWT,SHELWT,SDWT,
+     &    PODWT,TOPWT,TOTWT,WCRLF,WCRST,
+     &    WCRRT,WCRSH,WTNLF,WTNST,WTNRT,
+     &    WTNSH,WTNSD,AREALF,SLA,SLAAD/))
+      ENDIF
+      IF (P0_ENABLED()) THEN
+        CALL P0_V(CONTROL,'c4_grow_flux',
+     &    'Wnew_leaf,Wnew_stem,Wnew_root,Wnew_shell,Wnew_seed,'//
+     &    'loss_leaf,loss_stem,loss_root,loss_shell,loss_seed,'//
+     &    'Nloss_leaf,Nloss_stem,Nloss_root,Nloss_shell,Nloss_seed,'//
+     &    'Nmobile_leaf,Nmobile_stem,Nmobile_root,Nmobile_shell,Cmobile_leaf,'//
+     &    'Cmobile_stem,Cmobile_root,Cmobile_shell,Nadd_leaf,Nadd_stem,'//
+     &    'Nadd_root,Cadd_leaf,Cadd_stem,alpha_leaf,alpha_stem,'//
+     &    'alpha_root,alpha_shell,mature_shell,TOSHMINE,ALFDOT,'//
+     &    'F,SLDOT,SSDOT,SRDOT',
+     &    (/ 
+     &    WLDOTN,WSDOTN,WRDOTN,WSHDTN,WSDDTN,
+     &    SLDOT+WLIDOT+WLFDOT,SSDOT+WSIDOT,SRDOT+WRIDOT,WTABRT+WSHIDT+HSHELWT,SWIDOT+HSDWT,
+     &    NLOFF,NSOFF,NROFF,NSHOFF,NSDOFF,
+     &    NRUSLF,NRUSST,NRUSRT,NRUSSH,CRUSLF,
+     &    CRUSST,CRUSRT,CRUSSH,NADLF,NADST,
+     &    NADRT,CADLF,CADST,ALPHL,ALPHS,
+     &    ALPHR,ALPHSH,WTSHMT,TOSHMINE,ALFDOT,
+     &    F,SLDOT,SSDOT,SRDOT/))
+      ENDIF
       SENESCE % ResWt  = SenWt
       SENESCE % ResLig = SenLig
       DO L = 0, NLAYR

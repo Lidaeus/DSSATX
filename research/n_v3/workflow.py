@@ -5,7 +5,7 @@ import pandas as pd
 
 REPO = Path(__file__).resolve().parents[2]
 CN = Path('D:/Tomato_Cal/subprojects/critical_n')
-OUT = CN/'reports/n_v3_execution_20261103'
+OUT = CN/'reports/n_v3_c4_execution_20261103'
 BASE = CN/'reports/A_budget_feedback_20261102/best_native_trace'
 RUN = CN/'runs/n4864_A_joint80x4_20261102_r1'
 OLD = CN/'runs/n4864_p5_r2_explicit_smoke14_24x2_20261102'
