@@ -1,0 +1,254 @@
+{
+  "created_utc": "2026-11-02T04:29:28.653825+00:00",
+  "purpose": "unmodified official baseline readiness, not mechanism validation",
+  "plan": {
+    "path": "D:\\Tomato_Cal\\subprojects\\DSSAT_4.8.6.4_根系吸收_氮同化与分配一体化改进方案_v2.md",
+    "sha256": "0b5aa2b903c84e268d56c41192fe4b003eac79e8c1f466850ff0f4d15105f72e"
+  },
+  "official_base_sha": "25c93b9a2f73f8ec45bf441b198dac5fb7b22849",
+  "development_worktree": "D:\\Tomato_Cal_worktrees\\dssat4864-n-integration-v2-20261102",
+  "development_branch": "codex/n-integration-v2-20261102",
+  "development_head_at_run": "25c93b9a2f73f8ec45bf441b198dac5fb7b22849",
+  "source_hashes": {
+    "CSM_Main/CSM.for": "98607b4a6d492e1849519a375330c56f558b3036e9f655b6b2d79f171193bd1d",
+    "CSM_Main/LAND.for": "cdcd4254a07a5118bb9e780c5c042ce3592f17b0098859cb4d4bce62bfc37cdf",
+    "SPAM/SPAM.for": "b17f49a4f37810516847d31c730ecf63c89e925455f9972112896517e509da47",
+    "SPAM/SPSUBS.for": "c4085dadddb867565c0b949b44179bc66b927067a33c7a6c3abd9455da7ff4c6",
+    "Utilities/ModuleDefs.for": "0cb2e13b285cc97707ee578f2a9358dd12f534b2b5fb479a97dcd3b3d6981db8",
+    "Soil/Inorganic_N/SoilNi.for": "1a96be6d782aef36bd2b8ecbebd6ba64e001ee1ed0a6938afa4931dbb0456a50",
+    "CMakeLists.txt": "ecf999cb4d698e7e028c161580e76185e11fb0106d4b0ecacb0a3702023a316d",
+    "Plant/CROPGRO/CROPGRO.for": "1170758aa60350e12fa601bb3ff660ecc0a150110fed5ac7e5f899ba01a7f5c0",
+    "Plant/CROPGRO/DEMAND.for": "a16e7c0b76493417f5573d8f85e570828693a58c116712eaaaaa31ba0a01f709",
+    "Plant/CROPGRO/NUPTAK.for": "d15c66747d6caa0ed69ef69ea9b00edbe17bde46beb395f98370412eabe38dbe",
+    "Plant/CROPGRO/MOBIL.for": "a0e0b8d4207e3696f98db9d32cad4b212c667a30859822328d329c7c9bf2d20f",
+    "Plant/CROPGRO/VEGGR.for": "cfeafcc5fb1692b70ca5d410bd489fa0f12a4c5c8007fb019696c11478ee6390",
+    "Plant/CROPGRO/GROW.for": "55baa37a3a72b66157c17354d2219f450168e90bfe327f5086b5f4329bc486e0",
+    "Plant/CROPGRO/PHOTO.for": "d73d57687744ce0371b900223b69a7291056387c16ee27fe0055e9d6b5df1bdb",
+    "Plant/CROPGRO/PlantNBal.for": "9376e0e53b839c5c423b391cfaa590497f5989675545a4945dcd56137f78d6ec",
+    "Plant/CROPGRO/FreshWt.for": "c1841a56857d83b3cafdf959c8750cce8bd38bdcb0d8fc2f48e2347fac68d1d5"
+  },
+  "source_input_run": "D:\\Tomato_Cal\\subprojects\\critical_n\\runs\\official_4864_compat_20261101\\o4864\\26SP",
+  "input_parameter_role": "frozen historical preflight BASE vector, NOT V15 best",
+  "scope": "26SP 12 treatments; no 25FA; no calibration",
+  "protected_executables_before": {
+    "C:\\DSSAT48\\DSCSM048.EXE": "92173d5f63bc60d58839630b9a29f57632a19b373cab0faa8ad70362d98f5c7a",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\dssat_csm_os_4864\\build\\bin\\dscsm048.exe": "29c69d9b6115860178252ddb2060308ae102612dd36b62c99094d8f0f72c53ba",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\bin\\dscsm048_cnc.exe": "0d0fe26423c5f95610ccab0db0f2f4f294785b26b247103ec1738679b2a0f74f",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\bin\\v15_s1_interface.exe": "107ec95f443af66eb30d53769496836414131d6befd6ab2f34cd00ef98b137fc"
+  },
+  "unmodified_source_status_before": "",
+  "diagnostic_status": "not_instrumented_pending_P0_trace",
+  "frozen_input_hashes": {
+    "DATA.CDE": "01df7311b56facaf16d33b21976c16f57ae5082cb8f697970401e27ef12b4a94",
+    "DETAIL.CDE": "026abc527a4d15f582387b6a6bfca4e6568320a9503c81386a0389b3d1b9ffa1",
+    "DSSATPRO.v48": "f98d29e431bf7d8ab745bd7f544cbeb6efca9baf67bc59d3cceb6e3a537764ec",
+    "DSSBatch.v48": "c8196718057c91ce57683903a41287f385d62a0c4f2527e35f89a81b784b8299",
+    "ECONOMIC.CDE": "db2abdc821f20ee401806edf6bfeed3b08c09011830f561b84c32a02929ccd8c",
+    "GCOEFF.CDE": "94a8fb795a993e7d2db20ce03034f8988000b99b3794b0145a06e5b043965eb5",
+    "GRSTAGE.CDE": "8a0aa69bf591a7b4f4c14766ad35594619c73372a141579232a3ad40f73db39b",
+    "JDATE.CDE": "2e5d9902fa71575cbf16a537db704e12c7ca2fde229911fc52d63e24d72b4e22",
+    "OUTPUT.CDE": "1a009a6932dd65d65cbaec5ea8470df14e97e3e04f587b6f15884fbb8a066292",
+    "PEST.CDE": "160d4c21c50942134a8a9c640638f86a38e936cf598cf2bdbb4650186d0dc3c6",
+    "SIMULATION.CDE": "8c779399372b22c1f653fe78c84c306c57e37fe9d50d4db1d8779398a8389405",
+    "SOIL.CDE": "327acada3ff407d4157d98f8fed932aaa4b1f5905155320cdc1f22f50b7ecee4",
+    "SOIL.SOL": "8f007cc63f95503dd7877af13a60906535f60b865eafc873f9bccd6119e34c89",
+    "TMGRO048.CUL": "031de8660d044384e186003ab4ce9f36f8cf5eb092ebfb8086572c36b8f9b886",
+    "TMGRO048.ECO": "3d24c22baaf3c64e97e3c75ec1a099878ed3255b5eb879fa264827cd0bd28224",
+    "TMGRO048.SPE": "2228d5d04664f836a5dac1f4ddc82c31ede354c96a1caf2181419598eb1afe83",
+    "WEATHER.CDE": "c4739d8054e1c125282f3eb14344a388a9db98b8996d6ac82fa28b41414f4bfb",
+    "XXQL2601.TMA": "70a2ab0866982ad192941481cf99e9e30306df2169d30267adfef14bfe93356f",
+    "XXQL2601.TMT": "8f4497aea6cc7b57e4e7947f9fe279ffae52a3e9430b0579eeb0b46e754fc08c",
+    "XXQL2601.TMX": "cf612bcd9d65c3c1bd670a3a0aac1f43165bc436bb28936c8d48468cee27d3db",
+    "XXTW2403.WTH": "8dbc5f13b54bca7a0e5b33a9ba03383397c9da552a8a38ab0d37ae28beb944f8"
+  },
+  "frozen_reference_hashes": {
+    "ET.OUT": "a7307e6a59512f009d1feb781c5fe4a8aedf2f11bdd2ee59af0e1106077c77e6",
+    "FreshWt.OUT": "3c35fe6f16bbe1b05e37fd962a98702e12183d9a35042b3bbec70afabb3017c4",
+    "PlantGro.OUT": "07a2ba6880479b9ab9a4aec5428e388220620584a588b44bc4b2101e85b038ec",
+    "PlantN.OUT": "517fc471b8b5d855fe516ec63bd325cd05348be0cae34b8cc885aafa58a41d83",
+    "PlantNBal.OUT": "99f9e09b9f8872bdb969f17bd092a7affdcea73ff4e281bd5072a62ad48b1518",
+    "SoilNiBal.OUT": "563310e8fe90e9510e4fe77572d0a42fe9eb1bbf593b9c44f743aab54557ac11",
+    "SoilWat.OUT": "e59e4079dc1d879cabe4351fb4e8c490b9c7bb8c69f3da5040cec07fe11116a3",
+    "Summary.OUT": "376a6c98258f57666f64d09370c1fd4b989cb9fd2779cdedb316dd154b2d7587"
+  },
+  "copied_binary_hashes": {
+    "development4864_unmodified.exe": "87963f1910902c61521c8bff871e7645adea7049aa2291ecb0c7f3bf9a5ff6ca",
+    "official4864.exe": "29c69d9b6115860178252ddb2060308ae102612dd36b62c99094d8f0f72c53ba"
+  },
+  "runs": {
+    "official": {
+      "command": [
+        "D:\\Tomato_Cal\\subprojects\\critical_n\\reports\\n_integration_v2_readiness_20261102\\baseline_verified\\bin\\official4864.exe",
+        "B",
+        "DSSBatch.v48"
+      ],
+      "returncode": 0,
+      "normal_end_12": true,
+      "input_hashes": {
+        "DATA.CDE": "01df7311b56facaf16d33b21976c16f57ae5082cb8f697970401e27ef12b4a94",
+        "DETAIL.CDE": "026abc527a4d15f582387b6a6bfca4e6568320a9503c81386a0389b3d1b9ffa1",
+        "DSSATPRO.v48": "2d0b61911a93f1e0f0e603ef6baa5f60e5806a16b0c6aa9305709507a109aee1",
+        "DSSBatch.v48": "c8196718057c91ce57683903a41287f385d62a0c4f2527e35f89a81b784b8299",
+        "ECONOMIC.CDE": "db2abdc821f20ee401806edf6bfeed3b08c09011830f561b84c32a02929ccd8c",
+        "GCOEFF.CDE": "94a8fb795a993e7d2db20ce03034f8988000b99b3794b0145a06e5b043965eb5",
+        "GRSTAGE.CDE": "8a0aa69bf591a7b4f4c14766ad35594619c73372a141579232a3ad40f73db39b",
+        "JDATE.CDE": "2e5d9902fa71575cbf16a537db704e12c7ca2fde229911fc52d63e24d72b4e22",
+        "OUTPUT.CDE": "1a009a6932dd65d65cbaec5ea8470df14e97e3e04f587b6f15884fbb8a066292",
+        "PEST.CDE": "160d4c21c50942134a8a9c640638f86a38e936cf598cf2bdbb4650186d0dc3c6",
+        "SIMULATION.CDE": "8c779399372b22c1f653fe78c84c306c57e37fe9d50d4db1d8779398a8389405",
+        "SOIL.CDE": "327acada3ff407d4157d98f8fed932aaa4b1f5905155320cdc1f22f50b7ecee4",
+        "SOIL.SOL": "8f007cc63f95503dd7877af13a60906535f60b865eafc873f9bccd6119e34c89",
+        "TMGRO048.CUL": "031de8660d044384e186003ab4ce9f36f8cf5eb092ebfb8086572c36b8f9b886",
+        "TMGRO048.ECO": "3d24c22baaf3c64e97e3c75ec1a099878ed3255b5eb879fa264827cd0bd28224",
+        "TMGRO048.SPE": "2228d5d04664f836a5dac1f4ddc82c31ede354c96a1caf2181419598eb1afe83",
+        "WEATHER.CDE": "c4739d8054e1c125282f3eb14344a388a9db98b8996d6ac82fa28b41414f4bfb",
+        "XXQL2601.TMA": "70a2ab0866982ad192941481cf99e9e30306df2169d30267adfef14bfe93356f",
+        "XXQL2601.TMT": "8f4497aea6cc7b57e4e7947f9fe279ffae52a3e9430b0579eeb0b46e754fc08c",
+        "XXQL2601.TMX": "cf612bcd9d65c3c1bd670a3a0aac1f43165bc436bb28936c8d48468cee27d3db",
+        "XXTW2403.WTH": "8dbc5f13b54bca7a0e5b33a9ba03383397c9da552a8a38ab0d37ae28beb944f8"
+      },
+      "comparison": {
+        "Summary.OUT": {
+          "reference_numeric_rows": 12,
+          "replayed_numeric_rows": 12,
+          "numeric_rows_exactly_equal": true,
+          "output_sha256": "c3ee26abe43cd819826c4277c18221075bb326eade1c8dc52b3f450c4fba0685"
+        },
+        "PlantGro.OUT": {
+          "reference_numeric_rows": 1512,
+          "replayed_numeric_rows": 1512,
+          "numeric_rows_exactly_equal": true,
+          "output_sha256": "3af4ca73ddb333ec72c8154818cc67de714419ac203f25330d75c749bce89776"
+        },
+        "PlantN.OUT": {
+          "reference_numeric_rows": 1512,
+          "replayed_numeric_rows": 1512,
+          "numeric_rows_exactly_equal": true,
+          "output_sha256": "6e549f9120a0c1cf80cb361266ca047c45a1533f40283791ba9d89ee7e6bbc38"
+        },
+        "FreshWt.OUT": {
+          "reference_numeric_rows": 1032,
+          "replayed_numeric_rows": 1032,
+          "numeric_rows_exactly_equal": true,
+          "output_sha256": "33ae0f6f19becb480b4a07c73d54676f89f28366e8d81d88e47bdf0135ef750d"
+        },
+        "ET.OUT": {
+          "reference_numeric_rows": 1536,
+          "replayed_numeric_rows": 1536,
+          "numeric_rows_exactly_equal": true,
+          "output_sha256": "49844ad0ca1aee9dbdc17c3d25bff1bc27d706d76adf959bd7c76868b72196ca"
+        },
+        "SoilWat.OUT": {
+          "reference_numeric_rows": 1548,
+          "replayed_numeric_rows": 1548,
+          "numeric_rows_exactly_equal": true,
+          "output_sha256": "195f5212dc8e88b7e1a3c45b3727bdc8a6facea8a9ab29aaf662d14138d2e5f1"
+        },
+        "SoilNiBal.OUT": {
+          "reference_numeric_rows": 1548,
+          "replayed_numeric_rows": 1548,
+          "numeric_rows_exactly_equal": true,
+          "output_sha256": "714c1f6ef65d124578784560c7b2dd555ceb3cd396bc46049ae5b64f9230ca28"
+        },
+        "PlantNBal.OUT": {
+          "reference_numeric_rows": 156,
+          "replayed_numeric_rows": 156,
+          "numeric_rows_exactly_equal": true,
+          "output_sha256": "aeff6f252f844f8069d87e5c502ff60d7ad3668509abdbb0eb445e25fe17bd3b"
+        }
+      }
+    },
+    "development": {
+      "command": [
+        "D:\\Tomato_Cal\\subprojects\\critical_n\\reports\\n_integration_v2_readiness_20261102\\baseline_verified\\bin\\development4864_unmodified.exe",
+        "B",
+        "DSSBatch.v48"
+      ],
+      "returncode": 0,
+      "normal_end_12": true,
+      "input_hashes": {
+        "DATA.CDE": "01df7311b56facaf16d33b21976c16f57ae5082cb8f697970401e27ef12b4a94",
+        "DETAIL.CDE": "026abc527a4d15f582387b6a6bfca4e6568320a9503c81386a0389b3d1b9ffa1",
+        "DSSATPRO.v48": "af4c285cbbb5430672b985744c967e71d732ec680980b5fc0c585dc64bffda10",
+        "DSSBatch.v48": "c8196718057c91ce57683903a41287f385d62a0c4f2527e35f89a81b784b8299",
+        "ECONOMIC.CDE": "db2abdc821f20ee401806edf6bfeed3b08c09011830f561b84c32a02929ccd8c",
+        "GCOEFF.CDE": "94a8fb795a993e7d2db20ce03034f8988000b99b3794b0145a06e5b043965eb5",
+        "GRSTAGE.CDE": "8a0aa69bf591a7b4f4c14766ad35594619c73372a141579232a3ad40f73db39b",
+        "JDATE.CDE": "2e5d9902fa71575cbf16a537db704e12c7ca2fde229911fc52d63e24d72b4e22",
+        "OUTPUT.CDE": "1a009a6932dd65d65cbaec5ea8470df14e97e3e04f587b6f15884fbb8a066292",
+        "PEST.CDE": "160d4c21c50942134a8a9c640638f86a38e936cf598cf2bdbb4650186d0dc3c6",
+        "SIMULATION.CDE": "8c779399372b22c1f653fe78c84c306c57e37fe9d50d4db1d8779398a8389405",
+        "SOIL.CDE": "327acada3ff407d4157d98f8fed932aaa4b1f5905155320cdc1f22f50b7ecee4",
+        "SOIL.SOL": "8f007cc63f95503dd7877af13a60906535f60b865eafc873f9bccd6119e34c89",
+        "TMGRO048.CUL": "031de8660d044384e186003ab4ce9f36f8cf5eb092ebfb8086572c36b8f9b886",
+        "TMGRO048.ECO": "3d24c22baaf3c64e97e3c75ec1a099878ed3255b5eb879fa264827cd0bd28224",
+        "TMGRO048.SPE": "2228d5d04664f836a5dac1f4ddc82c31ede354c96a1caf2181419598eb1afe83",
+        "WEATHER.CDE": "c4739d8054e1c125282f3eb14344a388a9db98b8996d6ac82fa28b41414f4bfb",
+        "XXQL2601.TMA": "70a2ab0866982ad192941481cf99e9e30306df2169d30267adfef14bfe93356f",
+        "XXQL2601.TMT": "8f4497aea6cc7b57e4e7947f9fe279ffae52a3e9430b0579eeb0b46e754fc08c",
+        "XXQL2601.TMX": "cf612bcd9d65c3c1bd670a3a0aac1f43165bc436bb28936c8d48468cee27d3db",
+        "XXTW2403.WTH": "8dbc5f13b54bca7a0e5b33a9ba03383397c9da552a8a38ab0d37ae28beb944f8"
+      },
+      "comparison": {
+        "Summary.OUT": {
+          "reference_numeric_rows": 12,
+          "replayed_numeric_rows": 12,
+          "numeric_rows_exactly_equal": true,
+          "output_sha256": "966db2fde5dd32260b0134471ca973b31de859a38493d4bba2e68fa5ddbca737"
+        },
+        "PlantGro.OUT": {
+          "reference_numeric_rows": 1512,
+          "replayed_numeric_rows": 1512,
+          "numeric_rows_exactly_equal": true,
+          "output_sha256": "40a10b6317cc81b4e8f52e9c23eb4b8e77ccc09d34f18c8dd54db1f3639d4b51"
+        },
+        "PlantN.OUT": {
+          "reference_numeric_rows": 1512,
+          "replayed_numeric_rows": 1512,
+          "numeric_rows_exactly_equal": true,
+          "output_sha256": "48cd49a9a3b23a8940464da6f67763300bc2585c65c32071fa257e46c6653b6c"
+        },
+        "FreshWt.OUT": {
+          "reference_numeric_rows": 1032,
+          "replayed_numeric_rows": 1032,
+          "numeric_rows_exactly_equal": true,
+          "output_sha256": "31fa67b3530beab00053040f8f5654a3efaa1db13b100bc6c0501d303fa1a1e0"
+        },
+        "ET.OUT": {
+          "reference_numeric_rows": 1536,
+          "replayed_numeric_rows": 1536,
+          "numeric_rows_exactly_equal": true,
+          "output_sha256": "5836377b3529cba8fdcb69d82922e477cb24ca9c2a093d6416a29e7a85177226"
+        },
+        "SoilWat.OUT": {
+          "reference_numeric_rows": 1548,
+          "replayed_numeric_rows": 1548,
+          "numeric_rows_exactly_equal": true,
+          "output_sha256": "c9c3e720f169bc663948da28b6e32a13e73028a925c8ea414dd5c4e7503983e9"
+        },
+        "SoilNiBal.OUT": {
+          "reference_numeric_rows": 1548,
+          "replayed_numeric_rows": 1548,
+          "numeric_rows_exactly_equal": true,
+          "output_sha256": "7816b877436889b3e5e1e6de5d88f4609bf19fd89a04301fe770c79ed69b9819"
+        },
+        "PlantNBal.OUT": {
+          "reference_numeric_rows": 156,
+          "replayed_numeric_rows": 156,
+          "numeric_rows_exactly_equal": true,
+          "output_sha256": "a25918572f5a5999d874f57daf567b21eeec308873d22d17c9886148e0a9e9c9"
+        }
+      }
+    }
+  },
+  "protected_executables_after": {
+    "C:\\DSSAT48\\DSCSM048.EXE": "92173d5f63bc60d58839630b9a29f57632a19b373cab0faa8ad70362d98f5c7a",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\dssat_csm_os_4864\\build\\bin\\dscsm048.exe": "29c69d9b6115860178252ddb2060308ae102612dd36b62c99094d8f0f72c53ba",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\bin\\dscsm048_cnc.exe": "0d0fe26423c5f95610ccab0db0f2f4f294785b26b247103ec1738679b2a0f74f",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\bin\\v15_s1_interface.exe": "107ec95f443af66eb30d53769496836414131d6befd6ab2f34cd00ef98b137fc"
+  },
+  "protected_executables_unchanged": true,
+  "unmodified_source_status_after": "",
+  "all_selected_numeric_records_exact": true,
+  "passed": true
+}
