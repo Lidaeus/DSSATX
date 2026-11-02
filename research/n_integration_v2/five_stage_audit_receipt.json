@@ -1,0 +1,267 @@
+{
+  "passed": true,
+  "official_mode_numeric_comparisons": {
+    "EnvSum.OUT": {
+      "rows": 12,
+      "exact": true
+    },
+    "ET.OUT": {
+      "rows": 1536,
+      "exact": true
+    },
+    "ETPhot.OUT": {
+      "rows": 1536,
+      "exact": true
+    },
+    "Evaluate.OUT": {
+      "rows": 12,
+      "exact": true
+    },
+    "FreshWt.OUT": {
+      "rows": 1032,
+      "exact": true
+    },
+    "GHG.OUT": {
+      "rows": 1536,
+      "exact": true
+    },
+    "INFO.OUT": {
+      "rows": 1993,
+      "exact": true
+    },
+    "Methane.OUT": {
+      "rows": 1536,
+      "exact": true
+    },
+    "MgmtEvent.OUT": {
+      "rows": 684,
+      "exact": true
+    },
+    "MgmtOps.OUT": {
+      "rows": 1536,
+      "exact": true
+    },
+    "Mulch.OUT": {
+      "rows": 1548,
+      "exact": true
+    },
+    "N2O.OUT": {
+      "rows": 1536,
+      "exact": true
+    },
+    "OVERVIEW.OUT": {
+      "rows": 120,
+      "exact": true
+    },
+    "PlantC.OUT": {
+      "rows": 1512,
+      "exact": true
+    },
+    "PlantGro.OUT": {
+      "rows": 1512,
+      "exact": true
+    },
+    "PlantN.OUT": {
+      "rows": 1512,
+      "exact": true
+    },
+    "PlantNBal.OUT": {
+      "rows": 156,
+      "exact": true
+    },
+    "PlantP.OUT": {
+      "rows": 1512,
+      "exact": true
+    },
+    "PlantPBal.OUT": {
+      "rows": 1512,
+      "exact": true
+    },
+    "RunList.OUT": {
+      "rows": 12,
+      "exact": true
+    },
+    "SoilCBal.OUT": {
+      "rows": 1536,
+      "exact": true
+    },
+    "SoilCBalSum.OUT": {
+      "rows": 12,
+      "exact": true
+    },
+    "SoilDyn.OUT": {
+      "rows": 1536,
+      "exact": true
+    },
+    "SoilNBalSum.OUT": {
+      "rows": 12,
+      "exact": true
+    },
+    "SoilNi.OUT": {
+      "rows": 1548,
+      "exact": true
+    },
+    "SoilNiBal.OUT": {
+      "rows": 1548,
+      "exact": true
+    },
+    "SoilNoBal.OUT": {
+      "rows": 1548,
+      "exact": true
+    },
+    "SoilOrg.OUT": {
+      "rows": 1548,
+      "exact": true
+    },
+    "SoilPBalSum.OUT": {
+      "rows": 13,
+      "exact": true
+    },
+    "SoilPi.OUT": {
+      "rows": 1548,
+      "exact": true
+    },
+    "SoilPiBal.OUT": {
+      "rows": 1548,
+      "exact": true
+    },
+    "SoilPoBal.OUT": {
+      "rows": 1548,
+      "exact": true
+    },
+    "SoilTemp.OUT": {
+      "rows": 1536,
+      "exact": true
+    },
+    "SoilWat.OUT": {
+      "rows": 1548,
+      "exact": true
+    },
+    "SoilWatBal.OUT": {
+      "rows": 1548,
+      "exact": true
+    },
+    "SoilWater.OUT": {
+      "rows": 1536,
+      "exact": true
+    },
+    "SOMLIT1.OUT": {
+      "rows": 21686,
+      "exact": true
+    },
+    "SOMLITC.OUT": {
+      "rows": 1548,
+      "exact": true
+    },
+    "SOMLITN.OUT": {
+      "rows": 1548,
+      "exact": true
+    },
+    "SOMLITP.OUT": {
+      "rows": 1548,
+      "exact": true
+    },
+    "Summary.OUT": {
+      "rows": 12,
+      "exact": true
+    },
+    "SWBalSum.OUT": {
+      "rows": 12,
+      "exact": true
+    },
+    "Weather.OUT": {
+      "rows": 1536,
+      "exact": true
+    }
+  },
+  "new_incremental_N_ledgers_passed": true,
+  "native_organic_and_C_residuals_not_cancelled": true,
+  "cases": [
+    {
+      "case": "stage1",
+      "days": 1512,
+      "Q_residual_max_gN_m2": 1.13841228110978e-16,
+      "QNO3_max_gN_m2": 0.27099002121898,
+      "QNH4_max_gN_m2": 0.00462996861462137,
+      "raw_organic_N_residual_max_abs_gN_m2": 0.001096077263355259,
+      "raw_growth_C_overrun_max_gCH2O_m2": 0.1632423400878906,
+      "leaf_actual_above_max_days": null,
+      "leaf_actual_below_min_days": null,
+      "ledger_sha256": "7930d7430da752bd79722e71d65acc12e0e2230c5e90d549f493c52d833be28d"
+    },
+    {
+      "case": "stage2",
+      "days": 1512,
+      "Q_residual_max_gN_m2": 1.0321604682062e-16,
+      "QNO3_max_gN_m2": 0.3311309156651086,
+      "QNH4_max_gN_m2": 0.003869623356942309,
+      "raw_organic_N_residual_max_abs_gN_m2": 0.001088917255401615,
+      "raw_growth_C_overrun_max_gCH2O_m2": 0.1482892036437988,
+      "leaf_actual_above_max_days": null,
+      "leaf_actual_below_min_days": null,
+      "ledger_sha256": "7c05ef67e43db5ca063289ab7cebebdea7575d0ee4e28c0cde9db469bbaf2c05"
+    },
+    {
+      "case": "stage3",
+      "days": 1512,
+      "Q_residual_max_gN_m2": 1.561251128379126e-16,
+      "QNO3_max_gN_m2": 0.4056502670108216,
+      "QNH4_max_gN_m2": 0.007241648918491632,
+      "raw_organic_N_residual_max_abs_gN_m2": 0.001110795885324478,
+      "raw_growth_C_overrun_max_gCH2O_m2": 0.1145806312561035,
+      "leaf_actual_above_max_days": null,
+      "leaf_actual_below_min_days": null,
+      "ledger_sha256": "489c34cb666e45a3d8ac77192cb5cc3083bed133b8c852e92bb0eb9ec70373a2"
+    },
+    {
+      "case": "stage4",
+      "days": 1512,
+      "Q_residual_max_gN_m2": 1.46150452851046e-16,
+      "QNO3_max_gN_m2": 0.43535324990193,
+      "QNH4_max_gN_m2": 0.007832946736107429,
+      "raw_organic_N_residual_max_abs_gN_m2": 0.001187004148960114,
+      "raw_growth_C_overrun_max_gCH2O_m2": 0.1348075866699219,
+      "leaf_actual_above_max_days": 0,
+      "leaf_actual_below_min_days": 0,
+      "ledger_sha256": "e11bb1c9533c87d87da1ec8345381cbd4a71bf8eb326ea97a9d0b6b6fb500bfc"
+    },
+    {
+      "case": "stage5",
+      "days": 1512,
+      "Q_residual_max_gN_m2": 1.765081136806401e-16,
+      "QNO3_max_gN_m2": 0.5818654794386585,
+      "QNH4_max_gN_m2": 0.01163777036669093,
+      "raw_organic_N_residual_max_abs_gN_m2": 0.002375174313783639,
+      "raw_growth_C_overrun_max_gCH2O_m2": 0.290977954864502,
+      "leaf_actual_above_max_days": 127,
+      "leaf_actual_below_min_days": 0,
+      "ledger_sha256": "d0bbe75268cd7859d37c4b27635045e17d1a125e1cbe63df8828af8166c18b1e"
+    },
+    {
+      "case": "R1",
+      "days": 1512,
+      "Q_residual_max_gN_m2": 9.952975943416931e-17,
+      "QNO3_max_gN_m2": 0.2544695322074759,
+      "QNH4_max_gN_m2": 0.006410606419472163,
+      "raw_organic_N_residual_max_abs_gN_m2": 0.0009380988776683807,
+      "raw_growth_C_overrun_max_gCH2O_m2": 0.1105117797851562,
+      "leaf_actual_above_max_days": null,
+      "leaf_actual_below_min_days": null,
+      "ledger_sha256": "5d9744b83f7324e5303b75d5eb7716e311b8ae25267a28dd3ebca3b2e2016069"
+    },
+    {
+      "case": "feedback_R0",
+      "days": 1512,
+      "Q_residual_max_gN_m2": 1.604619215278547e-16,
+      "QNO3_max_gN_m2": 0.4581577855034167,
+      "QNH4_max_gN_m2": 0.005995103716437592,
+      "raw_organic_N_residual_max_abs_gN_m2": 0.003282792866230011,
+      "raw_growth_C_overrun_max_gCH2O_m2": 0.2732477188110352,
+      "leaf_actual_above_max_days": 126,
+      "leaf_actual_below_min_days": 0,
+      "ledger_sha256": "7a3745c53a2ae1494b271a99625332136ade804a737aa5b3a2fe08b3ebf7dccc"
+    }
+  ],
+  "status": "engineering_integration_only_not_calibrated",
+  "v15_adopted": false
+}

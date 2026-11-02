@@ -1,0 +1,24 @@
+! ENGINEERING TEST ONLY. UNCALIBRATED. Not recommended crop coefficients.
+&NINTEGRATION
+ ni_stage=2
+ root_mode=0
+ q_no3_max=0.003
+ q_nh4_max=0.0001
+ assim_no3_v=0.003
+ assim_nh4_v=0.006
+ assim_no3_k=0.001
+ assim_nh4_k=5e-05
+ root_v=0.0002
+ root_k=10.0
+ diffusion_k=0.005
+ pool_beta=1.0
+ leaf_a=0.042
+ leaf_b=0.3
+ stem_a=0.025
+ stem_b=0.35
+ min_ratio=0.4
+ max_ratio=1.25
+ photo_floor=0.05
+ photo_gamma=1.0
+ growth_tau=2.0
+/

@@ -1,6 +1,23 @@
 # 4.8.6.4 氮机制 v2 分阶段开发准备
 
-本目录包含执行准备、接口约定、基线回放工具及P0b只读原生追踪；**尚未实现新根吸收、无机氮库或有限同化模块**。
+本目录包含准备、P0b追踪及五阶段氮机制的实现/工程验证。**新机制已接通，当前参数未率定，原生bug按用户要求延期统一处理。**
+
+## 当前入口：五阶段实现
+
+- 机制代码提交：`240ed59d`，依次接通库存、有限同化、独立根吸收、茎叶软曲线及L路线替换反馈。
+- 规格：`integrated_mechanism_spec.zh.md`；原生bug台账：`deferred_bug_ledger.md`。
+- 最终证据：`D:/Tomato_Cal/subprojects/critical_n/reports/n_integration_stages_20261102/accepted_all`、`accepted_r1`、`accepted_feedback_r0`、`accepted_unit`、`final_audit`。
+- 29项原生检查、8配置×12处理工程运行；原版43类输出数值一致，新Q日/季账独立闭合。原生有机N/C差额另外保留。
+- 果实氮没有新增稀释；V15借鉴登记仍为零。
+
+**没有配置时新执行体仍走原版模式。启用新机制必须将NIntegration.nml放入实际运行目录，或显式设置DSSAT_N_CONFIG。单独切换DSSAT_CUSTOM_EXE不能保证启用了新机制。** 当前没有修改主PEST参数注册/模板/观测提取，后续率定前须接入并冻结配置及其哈希。
+
+```powershell
+python research/n_integration_v2/run_stages.py --out D:/new_isolated_run --exe build/bin/dscsm048.exe --stages 0 1 2 3 4 5
+python research/n_integration_v2/run_native_tests.py --out D:/new_isolated_unit
+```
+
+`stage*_engineering.nml`仅作工程测试，不是推荐生理参数。`integrate_nitrogen.py`是初始P1/P2历史接线工具，`instrument_p0b.py`是历史P0一次性插入工具；完整当前实现以Git提交为准，不要在已接入源码上重复运行这些工具。下文P0与准备记录保留为历史。
 
 ## P0b状态（2026-11-02）
 

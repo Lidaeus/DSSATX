@@ -1,6 +1,6 @@
 {
-  "schema_version": 1,
-  "status": "P0b_trace_complete_native_budget_issues_reported_no_new_physiology",
+  "schema_version": 2,
+  "status": "five_stages_connected_engineering_verified_not_calibrated_native_bugs_deferred",
   "base_tag": "v4.8.6.4",
   "base_sha": "25c93b9a2f73f8ec45bf441b198dac5fb7b22849",
   "crop": "eggplant_using_TMGRO048",
@@ -15,52 +15,49 @@
   },
   "assim_modes": {
     "0": "official",
-    "1": "bounded_inorganic_storage_finite_assimilation",
-    "2": "assimilation_with_replacement_N_feedback"
+    "1": "bounded_instant_stage1",
+    "2": "finite_stages2_to5"
   },
-  "planned_valid_combinations": [
-    [
-      0,
-      0
-    ],
-    [
-      0,
-      1
-    ],
-    [
-      1,
-      1
-    ],
-    [
-      2,
-      1
-    ],
-    [
-      2,
-      2
-    ]
-  ],
-  "implemented_new_combinations": [],
-  "reject_combinations": [
-    [
-      1,
-      0
-    ],
-    [
-      2,
-      0
-    ],
-    [
-      0,
-      2
-    ],
-    [
-      1,
-      2
-    ]
+  "implemented_new_combinations": [
+    {
+      "ni_stage": 1,
+      "root_modes": [
+        0
+      ]
+    },
+    {
+      "ni_stage": 2,
+      "root_modes": [
+        0
+      ]
+    },
+    {
+      "ni_stage": 3,
+      "root_modes": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "ni_stage": 4,
+      "root_modes": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "ni_stage": 5,
+      "root_modes": [
+        0,
+        1,
+        2
+      ]
+    }
   ],
   "observed_baseline_photosynthesis_route": "L",
-  "new_feedback_L_route_status": "not_implemented_gate_before_assim_mode_2",
+  "new_feedback_L_route_status": "implemented_and_engineering_tested; C_and_Z_not_supported",
   "units": {
     "soil_NO3_NH4": "mg_N_kg_dry_soil-1",
     "RWU_saved_SPAM_UH2O": "cm_water_d-1",
@@ -87,21 +84,14 @@
   "systemic_alpha": 0.0,
   "root_kinetic_components_initial": 1,
   "root_density_contact_factor_initial": 1.0,
-  "inorganic_organ_partition": null,
-  "initial_QNO3": null,
-  "initial_QNH4": null,
-  "q_NO3_max": null,
-  "q_NH4_max": null,
-  "assimilation_Vmax": null,
-  "assimilation_Km": null,
-  "K_D_reference": null,
-  "root_Vmax": null,
-  "root_Km": null,
-  "capacity_shrink_loss_mapping": null,
+  "inorganic_organ_partition": "fast_shared_buffer_partition_by_explicit_leaf_stem_root_carrier_proxy",
+  "initial_QNO3": 0,
+  "initial_QNH4": 0,
+  "capacity_shrink_loss_mapping": "physical_leaf_stem_root_loss_fraction_to_pending_species_litter_then_soil_next_RATE",
   "NH4_potential_branch_policy": "isolate_original_species_potential_from_total_ANDEM_rescaling; single_final_debit",
   "organic_acceptance_policy": "must_verify_actual_downstream_allocation_after_carbon_and_remobilization; no_silent_TNLEAK_disposal",
   "curve_semantics": "biomass_dependent_min_crit_max_are_soft_references; actual_organ_N_is_not_clipped_to_curves",
-  "curve_implementation_status": "not_implemented_requires_matching_biomass_and_N_analysis_basis",
+  "curve_implementation_status": "leaf_stem_three_soft_power_laws; standing_leaf_plus_stem_DM; plateau_below_1_t_ha",
   "parameter_missing_policy": "new_modes_fail_validation_before_run; mode_0_does_not_require_new_parameters",
   "calibration_policy": "no_new_parameters_or_objectives_until_mechanism_budget_gates_pass; frozen_bounds_only",
   "required_diagnostics": [
@@ -156,5 +146,68 @@
   "P0b_evidence": "D:/Tomato_Cal/subprojects/critical_n/reports/p0b_trace_4864_20261102/final_run",
   "P0b_pending_and_RWU_interface_verified": true,
   "P0b_raw_native_N_C_budgets_closed": false,
-  "P1_gate": "resolve_native_harvest_residue_retention_and_growth_cost_issues_with_separate_minimal_changes_before_new_pool"
+  "P1_gate": "user_overrode_prior_native_bug_fix_gate; new_incremental_budgets_strict; native_residuals_separate",
+  "stage_modes": {
+    "0": "official",
+    "1": "bounded_pool_instant_test_assimilation",
+    "2": "finite_assimilation_shared_two_half_steps",
+    "3": "root_delivery",
+    "4": "leaf_stem_soft_curves",
+    "5": "replacement_L_functional_feedback"
+  },
+  "curve_biomass": "(WTLF+STMWT)/100 t_DM_ha; fruit excluded",
+  "fruit_N_policy": "official design unchanged; no fruit dilution curve or fruit inorganic pool",
+  "parameter_policy": "19 engineering-only continuous values, not calibrated or active in PEST",
+  "final_code_commit": "240ed59d4ad83469c522d321d1fd8be68060e931",
+  "evidence": "D:/Tomato_Cal/subprojects/critical_n/reports/n_integration_stages_20261102/final_audit/audit_receipt.json",
+  "historical_planned_valid_combinations": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      1
+    ],
+    [
+      2,
+      1
+    ],
+    [
+      2,
+      2
+    ]
+  ],
+  "historical_reject_combinations": [
+    [
+      1,
+      0
+    ],
+    [
+      2,
+      0
+    ],
+    [
+      0,
+      2
+    ],
+    [
+      1,
+      2
+    ]
+  ],
+  "engineering_configurations": "stage0_engineering.nml through stage5_engineering.nml; not calibrated",
+  "calibration_values_not_frozen": {
+    "q_NO3_max": null,
+    "q_NH4_max": null,
+    "assimilation_Vmax": null,
+    "assimilation_Km": null,
+    "K_D_reference": null,
+    "root_Vmax": null,
+    "root_Km": null
+  }
 }

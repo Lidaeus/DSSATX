@@ -1,4 +1,8 @@
-"""One-time staged integration into the P0b branch. No V15 sources are read."""
+"""Historical initial P1/P2 patch generator (14905c94), not a current rebuild tool.
+
+Use the current Git tree for the complete integration. Do not replay this older
+API against later module versions. No V15 sources are read.
+"""
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 def once(s,a,b):
