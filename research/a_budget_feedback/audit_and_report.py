@@ -105,6 +105,17 @@ def main():
             contrasts.append(dict(water=water,nitrogen=nitrogen,observed_delta_t_ha=(ys.loc[tr,'observed']-ys.loc[control,'observed'])/1000,
                                   simulated_delta_t_ha=(ys.loc[tr,'simulated']-ys.loc[control,'simulated'])/1000))
     pd.DataFrame(contrasts).to_csv(DATA/'best_N_response_contrasts.csv',index=False)
+    from src.calibration.single_season_n import read_native
+    stage_rows=[]
+    stage_cases={'old_r020':OUT.parents[1]/'runs/early_n_r020_diag_20261102/cases/baseline',
+                 'A_fixed':OUT/'regression/A_verified','best_fit':OUT/'best_native_trace'}
+    for name,path in stage_cases.items():
+        g=read_native(path/'PlantGro.OUT').reset_index()
+        for tr,q in g.groupby('trno'):
+            for threshold,label in [(1,'R1'),(5,'R5')]:
+                first=q[q.GSTD.ge(threshold)].iloc[0]
+                stage_rows.append(dict(case=name,trno=tr,stage=label,GSTD_threshold=threshold,date=first.date,DAP=first.DAP))
+    pd.DataFrame(stage_rows).to_csv(DATA/'R1_R5_native_stage_check.csv',index=False)
     # Preserve a portable exact replay adapter without modifying historical runtime.
     replaydir=ROOT/'exact_replay_runtime';replaydir.mkdir(exist_ok=True)
     shutil.copy2(REPO/'research/a_budget_feedback/forward_A.py',replaydir/'forward_A.py')
@@ -206,6 +217,7 @@ A将可动员叶/茎N的剩余参照改为动态Nmin；在原40%下参考较低�
 5. 采收果肉N从残体回土通量剔除（L01）；种子采收N累计改用PCNSD（L04）。额外发现采收N输出超过可用库存的日期，按实际N库存结算输出，保留原果实N需求/组成设计，不做果实稀释。
 6. 根残体按实际NROFF返回各土层，消除更新前后浓度混用。组织损失先受可用N约束，不以负库存保护掩盖超支。
 7. 新增PlantABudget.csv，给出实际有机N前后库存、损失、同化、叶扩展和营养生长C付款；新Q库、土层吸收交接仍独立审计。
+8. 原诊断图将GSTD≥5标为R1，实际为R5。新诊断不复用该标记；R1按GSTD≥1/原生开花输出核对，逐处理日期见`analysis/R1_R5_native_stage_check.csv`。率定一直使用原生开花输出，并未以错误图标日期作目标。
 
 旧模式revision=0与官方mode=0各8类输出精确复现，A重复运行8类输出一致；29项原生核心检查及9项A检查通过。12组最终曲线对照全部正常完成12处理并通过新账本检查。
 
@@ -240,6 +252,8 @@ A将可动员叶/茎N的剩余参照改为动态Nmin；在原40%下参考较低�
 PEST主程序运行19.27分钟，原生IES评估779次：744次成功、35次失败；失败均为7月2日某处理商品成熟果浓度无法定义，独立复核这35次的1512处理日N/营养生长C账仍通过。没有运行超时、预算断言失败、补零、上一日替代或陈旧目标复用。
 
 初始18成员失效，更新阶段继续丢失，最终56成员。失败候选剔除是[PEST++官方手册§9.2.7](https://github.com/usgs/pestpp/blob/master/documentation/pestpp_users_manual.md#s13-2-7)所述行为；本轮不是80个完整后验样本，不能把初始规模写成最终保留数，也不据其给出管理不确定性结论。
+
+PEST正常结束后，后处理最初因“最终必须仍有80成员”的假设中断；现分开记录请求80、实际56及`full_80_member_retention=false`，收尾状态为`completed_with_member_attrition`。这修复了状态汇报，不表示补齐成员；没有因此重启率定、放松预算或改写失败观测。
 
 已核查一个失败原生案例：7月1日采走成熟果干重585.4 kg/ha；7月2日MTDSH/MTDSD均0，仍有未成熟果肉46.8 kg/ha；7月3日又出现成熟果肉14.7 kg/ha。FreshWt在当前日按PAGE≥XMAGE累积成熟果并采收，**不是提取器把当日采收后的零值误当采收前库存**。实际7月2日另摘商品果这一事实要求后续审查商品成熟定义、果实cohort形成和采收选择性；本次没有挪动采样日、删目标或杜撰浓度。
 
