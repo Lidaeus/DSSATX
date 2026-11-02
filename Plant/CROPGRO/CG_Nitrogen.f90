@@ -8,7 +8,7 @@ module CG_Nitrogen
   implicit none
   private
   integer, parameter :: dp=real64
-  integer, parameter :: implemented_stage=2
+  integer, parameter :: implemented_stage=3
   integer, save :: ni_stage=0, root_mode=0, output_unit=0
   logical, save :: loaded=.false., opened=.false., ready=.false., water_ready=.false.
   real(dp), save :: q_no3_max=-1, q_nh4_max=-1
@@ -24,12 +24,14 @@ module CG_Nitrogen
   real(dp), save :: d_q_begin=0, d_u3=0, d_u4=0, d_a3=0, d_a4=0
   real(dp), save :: d_cost=0, d_refund=0, d_litter=0, d_residual=0
   real(dp), save :: legacy_nh4=-1, d_pending=0
+  real(dp), save :: old_a3=0,old_a4=0,old_rsp3=0,old_rsp4=0
   public :: NI_LOAD, NI_RESET, NI_ENABLED, NI_CURVES, NI_FEEDBACK
   public :: NI_BEGIN, NI_ACCEPT_UPTAKE, NI_ASSIMILATE, NI_SETTLE, NI_END
   public :: NI_RETURN_LITTER, NI_SOIL_INPUT, NI_SET_NH4
   public :: NI_CAPTURE_WATER, NI_ROOT_MODE, NI_ROOT_UPTAKE
   public :: NI_TARGETS, NI_REFERENCES, NI_GROWTH, NI_LEAF_FACTOR
   public :: NI_TOTAL_Q, NI_CURVE_KERNEL, NI_ROOT_KERNEL, NI_ASSIM_KERNEL
+  public :: NI_PREASSIM, NI_MERGE_OLD
 contains
   logical function NI_ENABLED()
     NI_ENABLED=ni_stage>0
@@ -129,6 +131,7 @@ contains
     carrier=max(carrier,w_begin)
     d_q_begin=sum(q3)+sum(q4); d_u3=0; d_u4=0; d_a3=0; d_a4=0
     d_cost=0; d_refund=0; d_litter=0
+    old_a3=0;old_a4=0;old_rsp3=0;old_rsp4=0
   end subroutine
   real function flux32(value)
     real(dp),intent(in)::value
@@ -192,20 +195,23 @@ contains
     factor=min(1._dp,max(0._dp,carbon)/max(cost,1.e-30_dp))
     a3=a3*factor; a4=a4*factor
   end subroutine
-  subroutine NI_ASSIMILATE(pg,accept,temperature,rno3,rnh4,nassim,rsp3,rsp4)
+  subroutine NI_ASSIMILATE(pg,accept,temperature,rno3,rnh4,nassim,rsp3,rsp4,time_fraction)
     real,intent(inout)::pg
     real,intent(in)::accept,temperature,rno3,rnh4
     real,intent(out)::nassim,rsp3,rsp4
-    real(dp)::a3,a4,cost3,cost4,factor,capacity,wref
+    real,intent(in),optional::time_fraction
+    real(dp)::a3,a4,cost3,cost4,factor,capacity,wref,dt
     cost3=real(rno3,dp)/.16_dp; cost4=real(rnh4,dp)/.16_dp
     capacity=max(0._dp,real(accept,dp)); wref=sum(carrier)
+    dt=1
+    if(present(time_fraction)) dt=real(time_fraction,dp)
     if(ni_stage==1) then
       a3=sum(q3); a4=sum(q4)
       factor=min(1._dp,capacity/max(a3+a4,1.e-30_dp)); a3=a3*factor; a4=a4*factor
       factor=min(1._dp,max(0._dp,real(pg,dp))/max(a3*cost3+a4*cost4,1.e-30_dp))
       a3=a3*factor; a4=a4*factor
     else
-      call NI_ASSIM_KERNEL(sum(q3),sum(q4),wref,assim_no3_v,assim_nh4_v,assim_no3_k,assim_nh4_k, &
+      call NI_ASSIM_KERNEL(sum(q3),sum(q4),wref,assim_no3_v*dt,assim_nh4_v*dt,assim_no3_k,assim_nh4_k, &
           max(0._dp,min(1._dp,real(temperature,dp))),real(pg,dp),capacity,cost3,cost4,a3,a4)
     end if
     ! Co-limit predicted growth demand by the carbon remaining after assimilation.
@@ -220,17 +226,59 @@ contains
     if(d_cost>real(pg,dp)+1.e-6_dp) error stop 'NI: shared carbon budget exceeded'
     pg=max(0.,pg-rsp3-rsp4)
   end subroutine
-  subroutine NI_SETTLE(unaccepted,rsp3,rsp4,nassim,refund_c)
+  subroutine NI_PREASSIM(pg,accept,temperature,rno3,rnh4,n_old)
+    real,intent(inout)::pg
+    real,intent(in)::accept,temperature,rno3,rnh4
+    real,intent(out)::n_old
+    real::rsp3,rsp4
+    call NI_ASSIMILATE(pg,accept,temperature,rno3,rnh4,n_old,rsp3,rsp4,.5)
+    old_a3=d_a3;old_a4=d_a4;old_rsp3=real(rsp3,dp);old_rsp4=real(rsp4,dp)
+    d_a3=0;d_a4=0;d_cost=0
+  end subroutine
+  subroutine NI_MERGE_OLD(nassim,rsp3,rsp4)
+    real,intent(out)::nassim
+    real,intent(inout)::rsp3,rsp4
+    d_a3=d_a3+old_a3;d_a4=d_a4+old_a4
+    rsp3=rsp3+real(old_rsp3);rsp4=rsp4+real(old_rsp4)
+    d_cost=real(rsp3,dp)+real(rsp4,dp);nassim=real(d_a3+d_a4)
+  end subroutine
+  subroutine NI_SETTLE(unaccepted,rsp3,rsp4,nassim,refund_c,uno3,unh4,nlayr,tr3,tr4,trnu)
     real,intent(in)::unaccepted
     real,intent(inout)::rsp3,rsp4,nassim
     real,intent(out)::refund_c
-    real(dp)::fraction,ret3,ret4,cost_old
+    integer,intent(in)::nlayr
+    real,intent(inout)::uno3(:),unh4(:),tr3,tr4,trnu
+    real(dp)::fraction,ret3,ret4,cost_old,excess,scale,new_u,total
+    integer::l
     fraction=min(1._dp,max(0._dp,real(unaccepted,dp))/max(d_a3+d_a4,1.e-30_dp))
     if(unaccepted>=real(d_a3+d_a4)) fraction=1
     ret3=d_a3*fraction; ret4=d_a4*fraction
     ! Return provisional, unassimilated substrate; no organic stock was committed.
-    call spread(q3,ret3,q_no3_max*carrier)
-    call spread(q4,ret4,q_nh4_max*carrier)
+    ! Old-stock conversion can free provisional room. If allocation rejects it,
+    ! roll back the STILL UNPUBLISHED layer uptake, not soil already debited.
+    excess=max(0._dp,sum(q3)+ret3-q_no3_max*sum(carrier))
+    if(excess>d_u3+1.e-10_dp) error stop 'NI: NO3 receiver cannot reconcile candidate uptake'
+    if(d_u3>0.and.excess>0) then
+      scale=max(0._dp,1-excess/d_u3)
+      do l=1,nlayr
+        uno3(l)=flux32(real(uno3(l),dp)*scale)
+      end do
+    end if
+    new_u=sum(real(uno3(1:nlayr),dp))/10
+    total=sum(q3)+ret3-(d_u3-new_u)
+    q3=max(0._dp,total)*carrier/max(sum(carrier),1.e-30_dp); d_u3=new_u
+    excess=max(0._dp,sum(q4)+ret4-q_nh4_max*sum(carrier))
+    if(excess>d_u4+1.e-10_dp) error stop 'NI: NH4 receiver cannot reconcile candidate uptake'
+    if(d_u4>0.and.excess>0) then
+      scale=max(0._dp,1-excess/d_u4)
+      do l=1,nlayr
+        unh4(l)=flux32(real(unh4(l),dp)*scale)
+      end do
+    end if
+    new_u=sum(real(unh4(1:nlayr),dp))/10
+    total=sum(q4)+ret4-(d_u4-new_u)
+    q4=max(0._dp,total)*carrier/max(sum(carrier),1.e-30_dp);d_u4=new_u
+    tr3=real(d_u3);tr4=real(d_u4);trnu=tr3+tr4;d_pending=d_u3+d_u4
     d_a3=d_a3-ret3; d_a4=d_a4-ret4
     cost_old=real(rsp3,dp)+real(rsp4,dp)
     rsp3=real(real(rsp3,dp)*(1-fraction)); rsp4=real(real(rsp4,dp)*(1-fraction))

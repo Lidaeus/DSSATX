@@ -155,7 +155,7 @@ C=======================================================================
       REAL NH4(NL), NO3(NL), UNH4(NL), UNO3(NL)
       REAL P0_RWU(NL), P0_EP
       REAL NASSIMD, NFORGROW, NIUNUSED, NIREFUND, NILEAK0
-      REAL NISHARE
+      REAL NISHARE, NIOLDN
       REAL PHTHRS(20)
       REAL TGRO(TS)
       REAL SDDES(NCOHORTS)
@@ -1050,7 +1050,10 @@ C-----------------------------------------------------------------------
       ENDIF
       IF (ISWNIT .EQ. 'Y') THEN
       IF (NI_ENABLED()) THEN
+        NIOLDN=0.
         IF (NI_ROOT_MODE().GT.0) THEN
+          CALL NI_PREASSIM(PGAVL,MAX(0.,NDMTOT-NAVL),DTX,
+     &      RNO3C,RNH4C,NIOLDN)
           CALL NI_ROOT_UPTAKE(CONTROL,NLAYR,SOILPROP%BD,
      &      DLAYR,LL,DUL,SAT,NO3,NH4,KG2PPM,UNO3,UNH4)
         ELSE
@@ -1061,8 +1064,15 @@ C-----------------------------------------------------------------------
         ENDIF
         CALL NI_ACCEPT_UPTAKE(UNO3,UNH4,NLAYR,
      &    TRNO3U,TRNH4U,TRNU)
+        IF (NI_ROOT_MODE().GT.0) THEN
+          CALL NI_ASSIMILATE(PGAVL,
+     &      MAX(0.,NDMTOT-NAVL-NIOLDN),DTX,RNO3C,RNH4C,
+     &      NASSIMD,RSPNO3,RSPNH4,0.5)
+          CALL NI_MERGE_OLD(NASSIMD,RSPNO3,RSPNH4)
+        ELSE
         CALL NI_ASSIMILATE(PGAVL,MAX(0.,NDMTOT-NAVL),DTX,
      &    RNO3C,RNH4C,NASSIMD,RSPNO3,RSPNH4)
+        ENDIF
         NAVL=NAVL+NASSIMD
       ELSE
         CALL NUPTAK(INTEGR, 
@@ -1326,7 +1336,8 @@ C-----------------------------------------------------------------------
       ENDIF
       IF (NI_ENABLED()) THEN
         NIUNUSED=MIN(NASSIMD,MAX(0.,TNLEAK-NILEAK0))
-        CALL NI_SETTLE(NIUNUSED,RSPNO3,RSPNH4,NASSIMD,NIREFUND)
+        CALL NI_SETTLE(NIUNUSED,RSPNO3,RSPNH4,NASSIMD,NIREFUND,
+     &    UNO3,UNH4,NLAYR,TRNO3U,TRNH4U,TRNU)
         TNLEAK=TNLEAK-NIUNUSED
         NAVL=NAVL-NIUNUSED
         PGAVL=PGAVL+NIREFUND

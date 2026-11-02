@@ -46,6 +46,7 @@ C=======================================================================
       USE ModuleDefs
       USE ModuleData
       USE CG_P0Trace
+      USE CG_Nitrogen, ONLY: NI_ENABLED, NI_CAPTURE_WATER
       USE FloodModule
 
       IMPLICIT NONE
@@ -454,6 +455,12 @@ C=======================================================================
       CALL PUT('SPAM', 'EOP', EOP)
       CALL PUT('SPAM', 'EVAP',EVAP)
       CALL PUT('SPAM', 'UH2O',RWU)
+      IF (NI_ENABLED()) THEN
+        CALL NI_CAPTURE_WATER(CONTROL,NLAYR,RWU(1:NLAYR),
+     &    MAX(0.,SW_AVAIL(1:NLAYR)+LL(1:NLAYR)-
+     &    0.5*RWU(1:NLAYR)/MAX(1.E-9,DLAYR(1:NLAYR))),
+     &    RLV(1:NLAYR))
+      ENDIF
 !     P0b read-only trace; no model state is assigned.
       IF (P0_ENABLED()) THEN
         CALL P0_V(CONTROL,'spam_rate',

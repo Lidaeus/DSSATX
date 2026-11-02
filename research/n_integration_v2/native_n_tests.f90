@@ -49,7 +49,7 @@ program native_n_tests
   call NI_ASSIMILATE(pg,.1,1.,.16,.16,nass,rsp3,rsp4)
   call check(nass>0.and.nass<=.1,'finite accepted provisional supply')
   trnu=nass
-  call NI_SETTLE(trnu,rsp3,rsp4,nass,refund)
+  call NI_SETTLE(trnu,rsp3,rsp4,nass,refund,un3,un4,1,tr3,tr4,pg)
   call check(abs(NI_TOTAL_Q()-q_before)<1.e-6.and.nass==0,'unused provisional substrate returned once')
   call NI_END(c,w,loss,rw,1,n,1.,0.)
   call check(all(n==.01),'actual organ N can be below soft minimum without projection')
