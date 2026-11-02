@@ -17,6 +17,7 @@ def main():
     root = a.run.resolve()
     d = json.loads((root / 'design.json').read_text())
     final = json.loads((root / 'final_audit.json').read_text())
+    history = pd.read_csv(root / 'manager/smoke.phi.actual.csv')
     obs = pd.read_csv(d['observations'])
     bounds = pd.read_csv(d['bounds'])
     ensemble = pd.read_csv(root / 'manager/smoke.2.obs.csv', index_col=0)
@@ -53,10 +54,20 @@ def main():
     receipts = [json.loads(path.read_text()) for path in paths]
     successful = [r for r in receipts if r['success']]
     for r in successful:
-        if r['binary_sha256'] != d['binary_sha256'] or r['targets'] != 612 or r['nitrogen_config']['ni_stage'] != 5:
+        if (r['binary_sha256'] != d['binary_sha256'] or r['targets'] != 612
+                or r['nitrogen_config']['ni_stage'] != 5 or r['nitrogen_config']['root_mode'] != 2):
             raise ValueError('Native execution mismatch')
         if not r['budget']['passed'] or r['imputed']:
             raise ValueError('Native audit failure or imputed member')
+        if d.get('required_mode'):
+            activation = r['mode_activation']
+            config = Path(r['trial']) / 'NIntegration.nml'
+            if Path(activation['DSSAT_N_CONFIG']).resolve() != config.resolve():
+                raise ValueError('Configuration was not isolated to the native working directory')
+            if sha(config) != activation['configuration_sha256']:
+                raise ValueError('Actual configuration changed after execution')
+            if r['budget']['R2_diffusion_treatments'] != 12 or r['budget']['R2_diffusion_rows'] <= 0:
+                raise ValueError('Missing native R2 activation evidence')
     preflight = sum('/preflight/' in r['trial'].replace('\\', '/') for r in receipts)
     replay = sum('/selected_deterministic/' in r['trial'].replace('\\', '/') for r in receipts)
     pest = len(receipts) - preflight - replay
@@ -74,6 +85,8 @@ def main():
     matrix = pars[active.pest_name].to_numpy()
     scaled = (matrix - matrix.mean(axis=0)) / (active.upper - active.lower).to_numpy()
     run_hashes = {str(p.relative_to(root)): sha(p) for p in (root / 'template').iterdir() if p.is_file()}
+    check_file = root / 'adapter_test_receipt.json'
+    checks = json.loads(check_file.read_text()) if check_file.exists() else {}
     audit = dict(passed=True, final_retained_best_realization=winner,
                  retained_best_phi_from_rounded_PEST_obs=float(actual_phi.min()),
                  final_ensemble_mean_phi=float(actual_phi.mean()),
@@ -87,9 +100,9 @@ def main():
                  Q_native_residual_max_all=float(max(r['budget']['Q_native_residual_max'] for r in receipts)),
                  Q_independent_residual_max_all=float(max(r['budget']['Q_independent_residual_max'] for r in receipts)),
                  native_launch_files=run_hashes,
-                 adapter_tests_passed=3,
-                 corrected_engineering_issues=['six-column writer initially overflowed SLAVR=220.00; rejected before native/PEST launch, fixed and rerun in r1',
-                    'pandas.to_markdown optional tabulate missing; removed dependency and finalized without relaunching IES'],
+                 adapter_tests_passed=checks.get('tests_passed'),
+                 corrected_engineering_issues=d.get('corrected_engineering_issues', []),
+                 every_native_call_verifies_own_config_and_R2_diffusion=bool(d.get('required_mode')),
                  unmodified_model_mechanism=True)
     dump(root / 'independent_audit.json', audit)
     calls = []
@@ -107,10 +120,16 @@ def main():
                         f'原生评估共{len(receipts)}次（预检{preflight}次、PEST调度{pest}次、独立重跑{replay}次），失败0次。')
     text = text.split('\n## 独立复核与发现的问题')[0]
     text += '\n## 独立复核与发现的问题\n\n'
-    text += f'最终保留集合的最佳成员为 **{winner}**，与本次选择的最佳参数向量一致。集合平均Phi依次为383.197→228.344→166.051；最佳单成员为128.963414，不能把集合均值与最佳单成员Phi混用。每轮默认测试3种步长，所以真实PEST原生调用为24＋72＋72＝168次；这不表示168个独立后验样本。最终集合24个独特向量，活动参数矩阵秩为{audit["final_ensemble_rank"]}。\n\n'
+    mean_sequence = '→'.join(f'{v:.3f}' for v in history['mean'])
+    text += f'最终保留集合的最佳成员为 **{winner}**，与本次选择的最佳参数向量一致。集合平均Phi依次为{mean_sequence}；最佳单成员为{final["replay_phi"]:.8f}，不能把集合均值与最佳单成员Phi混用。每轮默认测试3种步长，所以真实PEST原生调用为24＋72＋72＝168次；这不表示168个独立后验样本。最终集合24个独特向量，活动参数矩阵秩为{audit["final_ensemble_rank"]}。\n\n'
     text += '最佳向量有' + str(len(audit['active_parameter_bound_hits'])) + '个活动参数命中边界：' + '、'.join(audit['active_parameter_bound_hits']) + '。因此本次窄先验smoke尚未形成可解释的正式参数估计，不据此立即扩展边界。详见selected_parameter_diagnostics.csv。\n\n'
-    text += '启动前检出新适配器固定两位小数使SLAVR字段溢出，立即拒绝，尚未运行DSSAT或PEST；修复六列写入后在r1重新冻结运行。另在率定完成后检出Markdown导出的可选tabulate依赖缺失，已移除依赖并单独完成后处理，未重启PEST。3项适配器检查通过，失败时旧目标被清除且没有数值填补。上述均为本轮新工具问题，不冒充已修复原生L01—L04。\n\n'
-    text += '工程结论：本次范围内的完整率定链路通过；拟合仍不足。最终鲜产量NRMSE约15.41%，但跨处理NSE为−1.96；叶氮／茎氮NRMSE约24.29%／33.17%，NSE均为负。总体量级改善不能证明水氮处理差异已得到正确响应。\n\n'
+    if checks:
+        text += f'适配器检查通过{checks.get("tests_passed")}项，包含错误阶段／根模式拒绝、固定列宽和失败时清除旧目标；没有数值填补。\n\n'
+    if d.get('required_mode'):
+        text += '每次原生调用均核对阶段5、root_mode=2、本次工作目录的显式DSSAT_N_CONFIG路径及配置哈希，并要求12个处理均有R2专属扩散通量证据。仅有请求开关或执行体文件名不足以通过检查。\n\n'
+    metrics = pd.read_csv(root / 'best_metrics.csv').set_index('family')
+    fy, ln, sn = [metrics.loc[k] for k in ['FINAL_FRESH_YIELD', 'LEAF_N_CONCENTRATION', 'STEM_N_CONCENTRATION']]
+    text += f'工程结论：本次范围内的完整率定链路通过；拟合仍不足。最终鲜产量NRMSE为{fy.nrmse_pct:.2f}%，跨处理NSE为{fy.nse:.2f}；叶氮／茎氮NRMSE为{ln.nrmse_pct:.2f}%／{sn.nrmse_pct:.2f}%，NSE为{ln.nse:.2f}／{sn.nse:.2f}。总体量级改善不能证明水氮处理差异已得到正确响应。\n\n'
     text += '工作顺序建议：先统一核算并处理L01采收果氮返土、L02缺氮生长碳成本超支、L03实际有机氮接受／负库存账及L04累计果氮拼写问题，完成各自隔离回归；同步核实实测氮消解口径，明确有机氮与总氮算子；再做受控供氮梯度、恢复、脉冲、富氮／低碳及消融；最后按可识别性调整参数组和先验、开展正式联合率定。本轮只完成smoke及记录，不越过用户任务直接修复这些生理代码。\n'
     report.write_text(text, encoding='utf8')
     dump(root / 'postprocessing_code_receipt.json', {p.name: sha(p) for p in [Path(__file__), Path(__file__).with_name('calibration_smoke.py'), Path(__file__).with_name('test_smoke_adapter.py')]})

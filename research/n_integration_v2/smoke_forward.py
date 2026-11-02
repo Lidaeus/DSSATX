@@ -112,7 +112,13 @@ def extract(work, catalog, runtime):
     return records
 
 
+def require_stage5_r2(config):
+    if config.get('ni_stage') != 5 or config.get('root_mode') != 2:
+        raise ValueError('This smoke requires explicit ni_stage=5 and root_mode=2')
+
+
 def audit(work, config):
+    require_stage5_r2(config)
     n = pd.read_csv(work / 'PlantNIntegration.csv', float_precision='round_trip')
     r = pd.read_csv(work / 'LayerNIntegration.csv', float_precision='round_trip')
     if len(n) != 1512 or not n.stage.eq(5).all() or set(n.run) != set(range(1, 13)):
@@ -121,6 +127,13 @@ def audit(work, config):
         raise ValueError('Invalid daily nitrogen ledger')
     if not np.isfinite(r.to_numpy()).all() or r.duplicated(['run', 'yrdoy', 'layer']).any():
         raise ValueError('Invalid root layer ledger')
+    # The unchanged Fortran sets r_diff only in root_mode=2. Positive native
+    # diffusion is evidence of execution, rather than an echo of a requested
+    # switch. This activation check is specific to this frozen 26SP smoke.
+    diffusion = r.Diff_potential_gN_m2 > 0
+    diffusion_runs = set(r.loc[diffusion, 'run'])
+    if diffusion_runs != set(range(1, 13)):
+        raise ValueError('Missing actual R2 diffusion evidence in a treatment')
     # Check independent Q stock-flow identity, not just the native residual.
     old_q = n.groupby('run')[['QNO3', 'QNH4']].shift().fillna(0).sum(axis=1)
     residual = old_q + n.U_NO3 + n.U_NH4 - n.A_NO3 - n.A_NH4 - n.inorg_litter - n.QNO3 - n.QNH4
@@ -145,6 +158,8 @@ def audit(work, config):
     if n[['QNO3', 'QNH4', 'A_NO3', 'A_NH4', 'U_NO3', 'U_NH4']].min().min() < -1e-12:
         raise ValueError('Negative new N state/flux')
     return dict(passed=True, days=len(n), stage=5, root_mode=2,
+                R2_diffusion_rows=int(diffusion.sum()), R2_diffusion_treatments=len(diffusion_runs),
+                R2_execution_evidence='positive native diffusion set exclusively by root_mode=2',
                 Q_native_residual_max=float(n.Q_residual.abs().max()),
                 Q_independent_residual_max=float(residual.abs().max()),
                 capacity_excess_max=excess, root_handoff_max=root_error,
@@ -186,12 +201,16 @@ def evaluate(design_path, parameters, out):
         redirect(trial / 'DSSATPRO.v48', trial)
         actual = inject_cultivar(trial, values, d['cultivar_fields'])
         config = {'ni_stage': 5, 'root_mode': 2, **{k: values[k] for k in d['nitrogen_names']}}
+        require_stage5_r2(config)
         (trial / 'NIntegration.nml').write_text('&NINTEGRATION\n' + ''.join(f' {k}={v:.17g}\n' for k, v in config.items()) + '/\n', encoding='ascii')
         dump(trial / 'injection_receipt.json', dict(requested=values, cultivar_parsed=actual,
                                                   nitrogen_config=config, executable_sha256=sha(d['binary'])))
         env = os.environ.copy()
         env['DSSAT_P0_TRACE'] = '0'
         env['DSSAT_N_CONFIG'] = str(trial / 'NIntegration.nml')
+        receipt['mode_activation'] = dict(required_ni_stage=5, required_root_mode=2,
+                                           native_cwd=str(trial), DSSAT_N_CONFIG=env['DSSAT_N_CONFIG'],
+                                           configuration_sha256=sha(trial / 'NIntegration.nml'))
         with (trial / 'native_stdout.log').open('wb') as stdout, (trial / 'native_stderr.log').open('wb') as stderr:
             r = subprocess.run([d['binary'], 'B', 'DSSBatch.v48'], cwd=trial, env=env, stdout=stdout, stderr=stderr, timeout=120)
         if r.returncode != 0 or not re.search(r'Normal end of run\s+12\b', (trial / 'INFO.OUT').read_text()):

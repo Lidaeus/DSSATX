@@ -4,10 +4,20 @@ import json
 import tempfile
 import unittest
 
-from smoke_forward import evaluate, inject_cultivar
+from smoke_forward import evaluate, inject_cultivar, require_stage5_r2
 
 
 class AdapterChecks(unittest.TestCase):
+    def test_official_mode_cannot_be_mislabeled_as_stage5_smoke(self):
+        with self.assertRaisesRegex(ValueError, 'ni_stage=5'):
+            require_stage5_r2({'ni_stage': 0, 'root_mode': 2})
+
+    def test_native_or_r1_root_mode_cannot_pass_r2_smoke(self):
+        for root_mode in [0, 1]:
+            with self.assertRaisesRegex(ValueError, 'root_mode=2'):
+                require_stage5_r2({'ni_stage': 5, 'root_mode': root_mode})
+        require_stage5_r2({'ni_stage': 5, 'root_mode': 2})
+
     def test_fixed_width_preserves_identity_and_unselected_fields(self):
         with tempfile.TemporaryDirectory() as temp:
             work = Path(temp)

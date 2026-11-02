@@ -86,6 +86,7 @@ def prepare(root):
     immutable += list((root / 'inputs').glob('*'))
     immutable += [p for p in runtime.rglob('*') if p.is_file()]
     d = dict(schema='n4864_stage5_smoke_v1', members=24, updates=2, workers=6, seed=20261102,
+             required_mode={'ni_stage': 5, 'root_mode': 2},
              season='26SP', treatments=list(range(1, 13)), targets=612, active=14,
              bounds=str(bounds_file), binary=str(root / 'bin/dscsm048_p5.exe'), binary_sha256=sha(engine),
              observations=str(root / 'observations.csv'), inputs=str(root / 'inputs'), runtime=str(runtime),
