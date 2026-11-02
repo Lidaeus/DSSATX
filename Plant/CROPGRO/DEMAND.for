@@ -40,7 +40,7 @@ C=======================================================================
 
 !-----------------------------------------------------------------------
       USE CG_Nitrogen, ONLY: NI_CURVES, NI_TARGETS,
-     &  NI_REFERENCES, NI_FEEDBACK, NI_GROWTH
+     &  NI_REFERENCES, NI_FEEDBACK, NI_GROWTH, NI_REVISED
       USE ModuleDefs
       USE ModuleData
       IMPLICIT NONE
@@ -542,6 +542,10 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
 !     check units!!! fraction vs percentage
 !     FRLF = FRLF - FRLF/(FRLF+FRSTM) * (extra root value)
 !     FRSTM= FRSTM - FRSTM/(FRLF+FRSTM) * (extra root value)
+      IF (NI_REVISED().AND.FRLF+FRSTM.GT.0.98) THEN
+        FRLF=FRLF*0.98/(FRLF+FRSTM)
+        FRSTM=0.98-FRLF
+      ENDIF
       FRRT = 1. - FRLF - FRSTM
 
 !-----------------------------------------------------------------------
@@ -563,7 +567,12 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
       IF (NSLA .GT. 1.2) THEN                      !To limit NSLA to 1.2
           NSLA=1.2 
       ENDIF
-      IF (NI_FEEDBACK()) THEN
+      IF (NI_REVISED()) THEN
+        ! A applies the N signal to leaf DM and area together in VEGGR;
+        ! do not apply it a second time to SLA/thickness here.
+        NFSL=1.
+        CUMNSF=1.
+      ELSE IF (NI_FEEDBACK()) THEN
         NFSL=NI_GROWTH()
         CUMNSF=NFSL
       ELSE

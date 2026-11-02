@@ -1312,6 +1312,8 @@ C-----------------------------------------------------------------------
 C     Call routine to compute actual vegetative growth, C to mine or add
 C-----------------------------------------------------------------------
       IF (NI_ENABLED()) NIVGC0=PGAVL
+      IF (NI_REVISED()) CALL NI_DONORS(
+     &  (/NRUSLF,NRUSST,NRUSRT/),(/0.,0.,0./))
       CALL VEGGR(INTEGR, 
      &    AGRLF, AGRRT, AGRSTM, CMINEP, CSAVEV, DTX,      !Input
      &    DXR57, ECONO, FILECC, FILEGC, FNINL, FNINR,     !Input

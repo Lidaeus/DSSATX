@@ -9,7 +9,13 @@ module CG_Nitrogen
   private
   integer, parameter :: dp=real64
   integer, parameter :: implemented_stage=5
-  integer, save :: ni_stage=0, root_mode=0, output_unit=0
+  integer, save :: ni_stage=0, root_mode=0, output_unit=0, budget_revision=0
+  real(dp), save :: curve_w0=1, photo_slw_ref=.0028_dp
+  real(dp), save :: org_start(3)=0, donor_n(3)=0, donor_c(3)=0
+  real(dp), save :: org_end_stock=0,org_end_off=0,seed_end=0,leak_end=0
+  real(dp), save :: veg_available=0,veg_cost=0,leaf_gate=1,refill_n(3)=0
+  integer,save::audit_unit=0
+  logical,save::audit_opened=.false.
   logical, save :: loaded=.false., opened=.false., ready=.false., water_ready=.false.
   real(dp), save :: q_no3_max=-1, q_nh4_max=-1
   real(dp), save :: assim_no3_v=-1, assim_nh4_v=-1, assim_no3_k=-1, assim_nh4_k=-1
@@ -39,7 +45,83 @@ module CG_Nitrogen
   public :: NI_PREASSIM, NI_MERGE_OLD
   public :: NI_ORG_BEGIN, NI_ORG_END
   public :: NI_SPLIT
+  public :: NI_REVISED, NI_VEG_RECONCILE, NI_REFILL, NI_DONORS, NI_RETAIN
+  public :: NI_EXPANSION, NI_AREA_REFILL, NI_MINIMUM
 contains
+  logical function NI_REVISED()
+    NI_REVISED=ni_stage>=4.and.budget_revision==1
+  end function
+  subroutine NI_DONORS(nmobil,cmobil)
+    real,intent(in)::nmobil(3),cmobil(3)
+    donor_n=max(0._dp,real(nmobil,dp)); donor_c=max(0._dp,real(cmobil,dp))
+  end subroutine
+  real function NI_RETAIN(loss_fraction)
+    real,intent(in)::loss_fraction
+    NI_RETAIN=1-min(1.,max(0.,loss_fraction))
+    ! A allocates refills to today's surviving receiver, after old tissue
+    ! loss. They must not be debited a second time by a survival fraction.
+    if(NI_REVISED()) NI_RETAIN=1.
+  end function
+  real function NI_EXPANSION(dm,nnew)
+    real,intent(in)::dm,nnew
+    real(dp)::concentration,x
+    concentration=max(0._dp,org_start(1)-donor_n(1)+real(nnew,dp))/ &
+      max(1.e-12_dp,w_begin(1)-donor_n(1)/.16_dp-donor_c(1)+real(dm,dp))
+    x=max(0._dp,min(1._dp,(concentration-cmin(1))/(ccrit(1)-cmin(1))))
+    ! Fast inhibition near the lower reference, slower recovery retained.
+    NI_EXPANSION=real(min(growth_factor,x))
+  end function
+  real function NI_AREA_REFILL(nad)
+    real,intent(in)::nad
+    NI_AREA_REFILL=nad
+    if(NI_REVISED()) NI_AREA_REFILL=real(min(real(nad,dp), &
+      max(0._dp,ccrit(1)*w_begin(1)-org_start(1)+donor_n(1))))
+  end function
+  subroutine NI_MINIMUM(wl,ws,ml,ms)
+    real,intent(in)::wl,ws
+    real,intent(out)::ml,ms
+    call references([real(wl,dp),real(ws,dp),0._dp])
+    ml=real(cmin(1));ms=real(cmin(2))
+  end subroutine
+  subroutine NI_VEG_RECONCILE(pg,cost,dm,nn,agrs,proi)
+    real,intent(in)::pg,agrs(3),proi(3)
+    real,intent(inout)::cost,dm(3),nn(3)
+    real(dp)::scale,total,oldtotal,unitcost(3),composition(3)
+    if(.not.NI_REVISED()) return
+    veg_available=real(pg,dp);veg_cost=0;leaf_gate=1
+    oldtotal=sum(real(dm,dp))
+    if(oldtotal<=0) return
+    ! Preserve the actual N composition selected by VEGGR. Reduce potential
+    ! leaf DM and its associated N together; unused N goes to independent
+    ! existing-tissue refill, rather than being destroyed.
+    composition=real(nn,dp)/max(.16_dp*real(dm,dp),1.e-30_dp)
+    unitcost=real(agrs,dp)*(1-(composition-real(proi,dp))/(1-real(proi,dp)))
+    scale=real(NI_EXPANSION(dm(1),nn(1)),dp)
+    leaf_gate=scale
+    dm(1)=real(real(dm(1),dp)*scale);nn(1)=real(real(nn(1),dp)*scale)
+    total=sum(real(dm,dp))
+    if(total>0) cost=real(sum(real(dm,dp)*unitcost)/total)
+    scale=min(1._dp,max(0._dp,real(pg,dp))/max(total*real(cost,dp),1.e-30_dp))
+    dm=real(real(dm,dp)*scale);nn=real(real(nn,dp)*scale)
+    veg_available=real(pg,dp);veg_cost=sum(real(dm,dp))*real(cost,dp)
+  end subroutine
+  subroutine NI_REFILL(available,dm,nn,cad,cr,root_target,nad,unused)
+    real,intent(in)::available,dm(3),nn(3),cad(3),cr(3),root_target
+    real,intent(out)::nad(3),unused
+    real(dp)::mass(3),stock(3),target(3),room(3),total,amount
+    mass=max(0._dp,w_begin+real(dm,dp)+real(cad,dp)-donor_n/.16_dp-real(cr,dp))
+    stock=max(0._dp,org_start+real(nn,dp)-donor_n)
+    target=[cmax(1),cmax(2),real(root_target,dp)]
+    ! Refill adds protein mass NAD/0.16 as well as N: solve receiver space
+    ! with that mass explicitly, independently of new-growth fractions.
+    room=max(0._dp,(target*mass-stock)/max(1.e-6_dp,1-target/.16_dp))
+    where(mass<=1.e-4_dp) room=0
+    total=sum(room);amount=min(max(0._dp,real(available,dp)),total)
+    nad=0
+    if(total>0) nad=real(amount*room/total)
+    unused=max(0.,available-sum(nad))
+    refill_n=real(nad,dp)
+  end subroutine
   logical function NI_ENABLED()
     NI_ENABLED=ni_stage>0
   end function
@@ -75,7 +157,7 @@ contains
     namelist /NINTEGRATION/ ni_stage,root_mode,q_no3_max,q_nh4_max, &
       assim_no3_v,assim_nh4_v,assim_no3_k,assim_nh4_k, &
       root_v,root_k,diffusion_k,pool_beta,leaf_a,leaf_b,stem_a,stem_b, &
-      min_ratio,max_ratio,photo_floor,photo_gamma,growth_tau
+      min_ratio,max_ratio,photo_floor,photo_gamma,growth_tau,budget_revision,curve_w0,photo_slw_ref
     if(loaded) then
       if(NI_ENABLED()) then
         if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
@@ -107,6 +189,9 @@ contains
     if(ni_stage<0.or.ni_stage>5) error stop 'NI: stage must be 0..5'
     if(ni_stage>implemented_stage) error stop 'NI: requested integration stage is not connected in this build'
     if(.not.NI_ENABLED()) return
+    if(budget_revision<0.or.budget_revision>1) error stop 'NI: budget_revision must be 0 or 1'
+    if(.not.ieee_is_finite(curve_w0).or.curve_w0<=0.or..not.ieee_is_finite(photo_slw_ref).or.photo_slw_ref<=0) &
+      error stop 'NI: invalid curve breakpoint or functional leaf reference'
     if(.not.all(ieee_is_finite([q_no3_max,q_nh4_max,assim_no3_v,assim_nh4_v,assim_no3_k,assim_nh4_k, &
         root_v,root_k,diffusion_k,pool_beta,leaf_a,leaf_b,stem_a,stem_b,min_ratio,max_ratio, &
         photo_floor,photo_gamma,growth_tau]))) error stop 'NI: non-finite configuration value'
@@ -160,6 +245,7 @@ contains
   end subroutine
   subroutine NI_ORG_BEGIN(stocks,off,seed,leak)
     real,intent(in)::stocks(6),off(6),seed,leak
+    org_start=real(stocks(1:3),dp)
     org_begin=sum(real(stocks,dp))+real(seed,dp)
     org_off_begin=sum(real(off,dp));leak_begin=real(leak,dp)
   end subroutine
@@ -168,6 +254,13 @@ contains
     legacy_n_res=sum(real(stocks,dp))+real(seed,dp)-org_begin+sum(real(off,dp))-org_off_begin &
       +real(leak,dp)-leak_begin-d_a3-d_a4
     legacy_c_overrun=real(c_overrun,dp)
+    org_end_stock=sum(real(stocks,dp))+real(seed,dp)
+    org_end_off=sum(real(off,dp));seed_end=real(seed,dp);leak_end=real(leak,dp)
+    if(NI_REVISED()) then
+      if(abs(legacy_n_res)>1.e-5_dp+2.e-6_dp*max(org_begin,sum(real(stocks,dp)))) &
+        error stop 'NI A: committed organic nitrogen budget failure'
+      if(legacy_c_overrun>2.e-5_dp) error stop 'NI A: vegetative carbon overrun'
+    end if
   end subroutine
   real function flux32(value)
     real(dp),intent(in)::value
@@ -362,6 +455,20 @@ contains
       structural_fraction=max(0._dp,real(weights(1)-wcrlf,dp))/max(real(weights(1),dp),1.e-12_dp)
     end if
     ready=.true.
+    if(NI_REVISED()) then
+      if(.not.audit_opened) then
+        open(newunit=audit_unit,file='PlantABudget.csv',status='new',action='write',iostat=ios)
+        if(ios/=0) error stop 'NI A: cannot create actual acceptance ledger'
+        write(audit_unit,'(A)') 'run,yrdoy,budget_revision,curve_w0,photo_slw_ref,'// &
+          'organic_begin_including_seed,organic_end_including_seed,cumulative_loss_begin,cumulative_loss_end,'// &
+          'leak_begin,leak_end,A_committed,organic_residual,veg_C_available,veg_C_actual,leaf_expansion_factor,'// &
+          'refill_leaf,refill_stem,refill_root,mobilized_leaf,mobilized_stem,mobilized_root'
+        audit_opened=.true.
+      end if
+      write(audit_unit,'(I0,2(",",I0),19(",",ES24.15E3))') control%RUN,control%YRDOY,budget_revision, &
+        curve_w0,photo_slw_ref,org_begin,org_end_stock,org_off_begin,org_end_off,leak_begin,leak_end, &
+        d_a3+d_a4,legacy_n_res,veg_available,veg_cost,leaf_gate,refill_n,donor_n
+    end if
     nniraw=0;nnifun=0;deficit=0;surplus=0
     if(NI_CURVES()) then
       nniraw=real(org_n(1:2),dp)/max(real(weights(1:2),dp)*ccrit,1.e-12_dp)
@@ -488,17 +595,21 @@ contains
     r_candidate3(1:nlayr)=real(uno3(1:nlayr),dp)/10
     r_candidate4(1:nlayr)=real(unh4(1:nlayr),dp)/10
   end subroutine
-  pure subroutine NI_CURVE_KERNEL(w,a,b,rmin,rmax,lower,critical,upper)
+  pure subroutine NI_CURVE_KERNEL(w,a,b,rmin,rmax,lower,critical,upper,w0)
     real(dp),intent(in)::w,a,b,rmin,rmax
     real(dp),intent(out)::lower,critical,upper
-    critical=a*max(1._dp,w)**(-b); lower=rmin*critical; upper=rmax*critical
+    real(dp),intent(in),optional::w0
+    real(dp)::breakpoint
+    breakpoint=1
+    if(present(w0)) breakpoint=w0
+    critical=a*max(breakpoint,w)**(-b); lower=rmin*critical; upper=rmax*critical
   end subroutine
   subroutine references(weights)
     real(dp),intent(in)::weights(3)
     real(dp)::w
     w=max(0._dp,weights(1)+weights(2))/100 ! g DM/m2 -> t DM/ha; standing vegetative shoot
-    call NI_CURVE_KERNEL(w,leaf_a,leaf_b,min_ratio,max_ratio,cmin(1),ccrit(1),cmax(1))
-    call NI_CURVE_KERNEL(w,stem_a,stem_b,min_ratio,max_ratio,cmin(2),ccrit(2),cmax(2))
+    call NI_CURVE_KERNEL(w,leaf_a,leaf_b,min_ratio,max_ratio,cmin(1),ccrit(1),cmax(1),curve_w0)
+    call NI_CURVE_KERNEL(w,stem_a,stem_b,min_ratio,max_ratio,cmin(2),ccrit(2),cmax(2),curve_w0)
   end subroutine
   subroutine NI_TARGETS(wleaf,wstem,fnil,fnis)
     real,intent(in)::wleaf,wstem
@@ -519,6 +630,11 @@ contains
     real(dp)::functional,reference,ratio
     functional=max(0._dp,(real(rnitp,dp)/100*structural_fraction-cmin(1))*real(slw,dp))
     reference=(ccrit(1)-cmin(1))*real(slwref,dp)
+    if(NI_REVISED()) then
+      ! Organic N above critical is reserve, not proportional Pmax gain.
+      functional=min(functional,(ccrit(1)-cmin(1))*real(slw,dp))
+      reference=(ccrit(1)-cmin(1))*photo_slw_ref
+    end if
     ratio=max(0._dp,min(1._dp,functional/max(reference,1.e-15_dp)))
     NI_LEAF_FACTOR=real(photo_floor+(1-photo_floor)*ratio**photo_gamma)
   end function

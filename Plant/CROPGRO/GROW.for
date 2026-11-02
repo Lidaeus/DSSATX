@@ -60,6 +60,8 @@ C=======================================================================
      &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)           !Output
 
 !-----------------------------------------------------------------------
+      USE CG_Nitrogen, ONLY: NI_REVISED, NI_RETAIN,
+     &  NI_AREA_REFILL, NI_MINIMUM
       USE CG_P0Trace
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
@@ -91,6 +93,7 @@ C=======================================================================
       REAL WNDOT,  WPDOT,  WDOT,WRCLDT,WRCSDT,WRCRDT
 
       REAL NLOFF,  NSOFF,  NROFF,  NSHOFF, NSDOFF, NNOFF
+      REAL NIHSHN, NIML, NIMS, NIROOTN, NISDOFF, NISHOFF
       REAL WTLO,   WTSO,   WTRO,   WTSHO,  WTSDO,  WTNOO
       REAL WTCO
       REAL NLALL,  NSALL,  NRALL,  NSHALL, NSDALL
@@ -505,9 +508,9 @@ C-----------------------------------------------------------------------
 
       IF (WTLF > 1.E-4) THEN
         WLDOT = WLDOT + (CADLF+NADLF/0.16) *
-     &    (1. - MIN(1.0,(SLDOT+WLIDOT+WLFDOT)/WTLF))
+     &    NI_RETAIN((SLDOT+WLIDOT+WLFDOT)/WTLF)
         ADD = (CADLF+NADLF/0.16) *
-     &    (1. - MIN(1.0,(SLDOT+WLIDOT+WLFDOT)/WTLF))
+     &    NI_RETAIN((SLDOT+WLIDOT+WLFDOT)/WTLF)
         ShutMob = ShutMob - ADD * 10.             !kg/ha
       ELSE
         ADD = 0.0
@@ -524,9 +527,9 @@ C-----------------------------------------------------------------------
 
       IF (STMWT > 1.E-4) THEN
          WSDOT = WSDOT + (CADST+NADST/0.16) *
-     &   (1. - MIN(1.0,(SSDOT+WSIDOT)/STMWT))
+     &   NI_RETAIN((SSDOT+WSIDOT)/STMWT)
         ADD = (CADST+NADST/0.16) *
-     &    (1. - MIN(1.0,(SSDOT+WSIDOT)/STMWT))
+     &    NI_RETAIN((SSDOT+WSIDOT)/STMWT)
         ShutMob = ShutMob - ADD * 10.                         !kg/ha
       ELSE
          ADD = 0.
@@ -542,9 +545,9 @@ C-----------------------------------------------------------------------
 
       IF (RTWT > 1.E-4) THEN
          WRDOT = WRDOT + (NADRT/0.16) *
-     &   (1. - MIN(1.0,(SRDOT+WRIDOT)/RTWT))
+     &   NI_RETAIN((SRDOT+WRIDOT)/RTWT)
         ADD = (NADRT/0.16) *
-     &    (1. - MIN(1.0,(SRDOT+WRIDOT)/RTWT))
+     &    NI_RETAIN((SRDOT+WRIDOT)/RTWT)
         RootMob = RootMob - ADD * 10.             !kg/ha
       ELSE
         ADD = 0.0
@@ -659,13 +662,13 @@ C-----------------------------------------------------------------------
       WRCLDT = ALPHL * WLDOTN - CRUSLF - RHOL*(SLNDOT+WLIDOT+WLFDOT)
       IF (WTLF > 1.E-4) THEN
          WRCLDT = WRCLDT + CADLF *
-     &     (1. - MIN(1.0,(SLDOT+WLIDOT+WLFDOT)/WTLF))
+     &     NI_RETAIN((SLDOT+WLIDOT+WLFDOT)/WTLF)
       ENDIF
 
       WRCSDT = ALPHS * WSDOT - CRUSST - RHOS * SSNDOT
       IF (STMWT > 1.E-4) THEN
          WRCSDT = WRCSDT + CADST *
-     &     (1. - MIN(1.0,(SSDOT+WSIDOT)/STMWT))
+     &     NI_RETAIN((SSDOT+WSIDOT)/STMWT)
       ENDIF
 
       WRCRDT = ALPHR * WRDOT - CRUSRT - RHOR * SRDOT
@@ -752,10 +755,12 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Net growth rate of nitrogen in the leaves
 C-----------------------------------------------------------------------
+      IF (NI_REVISED()) NLOFF=MIN(NLOFF,
+     &  MAX(0.,WTNLF+NGRLF+NADLF-NRUSLF))
       NLDOT = NGRLF - NLOFF - NRUSLF
       IF (WTLF > 1.E-4) THEN
          NLDOT = NLDOT + NADLF *
-     &                  (1. - MIN(1.0,(SLDOT + WLIDOT + WLFDOT) / WTLF))
+     &                  NI_RETAIN((SLDOT + WLIDOT + WLFDOT)/WTLF)
       ENDIF
 
 C-----------------------------------------------------------------------
@@ -772,10 +777,12 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Net growth rate of nitrogen in the stems
 C-----------------------------------------------------------------------
+      IF (NI_REVISED()) NSOFF=MIN(NSOFF,
+     &  MAX(0.,WTNST+NGRST+NADST-NRUSST))
       NSDOT = NGRST - NSOFF - NRUSST
       IF (STMWT > 1.E-4) THEN
          NSDOT = NSDOT + NADST * 
-     &                  (1. - MIN(1.0,(SSDOT + WSIDOT) / STMWT))
+     &                  NI_RETAIN((SSDOT + WSIDOT)/STMWT)
       ENDIF
 
 C-----------------------------------------------------------------------
@@ -789,17 +796,26 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Net growth rate of nitrogen in the roots
 C-----------------------------------------------------------------------
+      IF (NI_REVISED()) NROFF=MIN(NROFF,
+     &  MAX(0.,WTNRT+NGRRT+NADRT-NRUSRT))
+      NIROOTN=MAX(0.,NROFF-WRIDOT*PCNRT/100.)
       NRDOT = NGRRT - NROFF - NRUSRT
       IF (RTWT > 1.E-4) THEN
          NRDOT = NRDOT + NADRT * 
-     &                  (1. - MIN(1.0,(SRDOT + WRIDOT) / RTWT))
+     &                  NI_RETAIN((SRDOT + WRIDOT)/RTWT)
       ENDIF
 
 C-----------------------------------------------------------------------
 C     Shell nitrogen senescence, abortion and pest damage loss
 C-----------------------------------------------------------------------
       NSHOFF = (WTABRT+WSHIDT+HSHELWT) * (PCNSH/100.)
-      NHSHWT = NHSHWT + HSHELWT * PCNSH/100.
+      NIHSHN=HSHELWT*PCNSH/100.
+      IF (NI_REVISED()) THEN
+        NISHOFF=NSHOFF
+        NSHOFF=MIN(NSHOFF,MAX(0.,WTNSH+NGRSH-NRUSSH))
+        IF (NISHOFF.GT.0.) NIHSHN=NIHSHN*NSHOFF/NISHOFF
+      ENDIF
+      NHSHWT = NHSHWT + NIHSHN
       NLPEST = NLPEST + WSHIDT * PCNSH/100.
       IF (NSHOFF < 0.0) THEN
         NSHOFF = 0.0
@@ -814,7 +830,15 @@ C-----------------------------------------------------------------------
 C     Seed nitrogen senescence, abortion and pest damage loss
 C-----------------------------------------------------------------------
       NSDOFF = (SWIDOT+HSDWT) * (PCNSD/100.)
-      NHSDWT = NHSDWT + HSDWT * PCNSH/100.
+      IF (NI_REVISED()) THEN
+        NISDOFF=NSDOFF
+        NSDOFF=MIN(NSDOFF,MAX(0.,WTNSD+NGRSD))
+        IF (NISDOFF.GT.0.) THEN
+          NHSDWT=NHSDWT+HSDWT*PCNSD/100.*NSDOFF/NISDOFF
+        ENDIF
+      ELSE
+        NHSDWT = NHSDWT + HSDWT * PCNSH/100.
+      ENDIF
       IF (NSDOFF < 0.0) THEN
          NSDOFF = 0.0
       ENDIF
@@ -914,21 +938,21 @@ C-----------------------------------------------------------------------
       NLALL = NGRLF - NRUSLF 
       IF (WTLF > 1.E-4) THEN
         NLALL = NLALL + NADLF * 
-     &                (1. - MIN(1.0,(SLDOT + WLIDOT + WLFDOT) / WTLF))
+     &                NI_RETAIN((SLDOT + WLIDOT + WLFDOT)/WTLF)
       ENDIF
 
 !     Stem
       NSALL = NGRST - NRUSST 
       IF (STMWT > 1.E-4) THEN
         NSALL = NSALL + NADST * 
-     &                  (1. - MIN(1.0,(SSDOT + WSIDOT) / STMWT))
+     &                  NI_RETAIN((SSDOT + WSIDOT)/STMWT)
       ENDIF
 
 !     Root
       NRALL = NGRRT - NRUSRT
       IF (RTWT > 1.E-4) THEN
         NRALL = NRALL + NADRT * 
-     &                  (1. - MIN(1.0,(SRDOT + WRIDOT) / RTWT))
+     &                  NI_RETAIN((SRDOT + WRIDOT)/RTWT)
       ENDIF
 
 !     Shell and seed
@@ -1043,6 +1067,11 @@ C-----------------------------------------------------------------------
       ENDIF
 
 C-----------------------------------------------------------------------
+      IF (NI_REVISED()) THEN
+        CALL NI_MINIMUM(WTLF,STMWT,NIML,NIMS)
+        WNRLF=MAX(0.,WTNLF-NIML*WTLF)
+        WNRST=MAX(0.,WTNST-NIMS*STMWT)
+      ENDIF
 C     This section added to provide senescence parameters to the 
 C     Soil N routines (senescence and freeze values are added to soil
 C     residue; pest damage components are lost from the system)
@@ -1060,7 +1089,8 @@ C-----------------------------------------------------------------------
 C     Surface nitrogen includes nitrogen losses computed above minus the
 C       pest damage components. 
 C-----------------------------------------------------------------------
-      SenE(0,1) = NLOFF + NSOFF + NSHOFF - NLPEST  
+      SenE(0,1) = NLOFF + NSOFF + NSHOFF - NLPEST
+      IF (NI_REVISED()) SenE(0,1)=SenE(0,1)-NIHSHN
 C     Convert from g/m2 to kg/ha with a factor of 10.
       SenE(0,1) = AMAX1 (SenE(0,1),0.) * 10.0             !kg[N]/ha
 !     P0b read-only trace; no model state is assigned.
@@ -1097,6 +1127,11 @@ C-----------------------------------------------------------------------
         !SenE(L,1) = (SENRT(L)* PRORTF + SENNOD(L) * PRONOD) * 0.16 
 !       01/19/2006 CHP Root senescence at current N% (per KJB and JWJ)
         SenE(L,1) = SENRT(L) * PCNRT / 100. + SENNOD(L) * PRONOD * 0.16 
+        IF (NI_REVISED()) THEN
+          SenE(L,1)=0.
+          IF (SUM(SENRT(1:NLAYR)).GT.0.) SenE(L,1)=
+     &      10.*NIROOTN*SENRT(L)/SUM(SENRT(1:NLAYR))
+        ENDIF
       ENDDO
 
 C-----------------------------------------------------------------------
@@ -1111,8 +1146,8 @@ C     Calculate Area Growth rate and Update Leaf Area (AREALF, XLAI)
 C-----------------------------------------------------------------------
       ALFDOT = WLDOTN*F - (SLDOT+WLIDOT+WLFDOT+NRUSLF/0.16)*SLA
       IF (WTLF > 1.E-4) THEN
-         ALFDOT = ALFDOT + SLA * (NADLF/0.16) *
-     &   (1. - MIN(1.0,(SLDOT+WLIDOT+WLFDOT)/WTLF))
+         ALFDOT = ALFDOT + SLA * (NI_AREA_REFILL(NADLF)/0.16) *
+     &   NI_RETAIN((SLDOT+WLIDOT+WLFDOT)/WTLF)
       ENDIF
 
       AREALF = AREALF + ALFDOT

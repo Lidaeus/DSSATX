@@ -42,7 +42,8 @@ C========================================================================
 
 !-----------------------------------------------------------------------
       USE CG_P0Trace
-      USE CG_Nitrogen, ONLY: NI_CURVES, NI_FEEDBACK, NI_GROWTH
+      USE CG_Nitrogen, ONLY: NI_CURVES, NI_FEEDBACK, NI_GROWTH,
+     &  NI_REVISED, NI_VEG_RECONCILE, NI_REFILL, NI_EXPANSION
       USE ModuleDefs
       USE ModuleData
       IMPLICIT NONE
@@ -68,7 +69,7 @@ C========================================================================
       REAL WTLF, XLAI
 
       REAL AGRVG, CADLF, CADST, CANHT, CANWH, CMINEA
-      REAL NIMINL, NIMINS
+      REAL NIMINL, NIMINS, NIDM(3), NIN(3), NINA(3), NILEFT
       REAL CRUSLF, CRUSRT, CRUSST, CRUSSH, CUMTUR
       REAL EXCESS, FRLF, FRRT, FRSTM, NADLF, NADRT, NADST
       REAL NGRLF, NGRRT, NGRST, NSTRES, PGAVL
@@ -280,6 +281,7 @@ C     to shift partitioning between leaf and stem toward leaf,
 C     especially after drought is released.
 C     Sort of 20-day rolling average
 C-----------------------------------------------------------------------
+      IF (NI_REVISED()) FRRT=MIN(0.98,MAX(0.,FRRT))
       CUMTUR = 0.95*CUMTUR + 0.05*TURFAC
       IF (CUMTUR < 1.E-7) CUMTUR = 0.0    !prevent underflow
 C-----------------------------------------------------------------------
@@ -391,6 +393,18 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Compute C and N remaining to add to reserves
 C-----------------------------------------------------------------------
+      IF (NI_REVISED()) THEN
+        NIDM=(/WLDOTN,WSDOTN,WRDOTN/)
+        NIN=(/NGRLF,NGRST,NGRRT/)
+        CALL NI_VEG_RECONCILE(PGAVL,AGRVG,NIDM,NIN,
+     &    (/AGRLF,AGRSTM,AGRRT/),(/PROLFI,PROSTI,PRORTI/))
+        WLDOTN=NIDM(1)
+        WSDOTN=NIDM(2)
+        WRDOTN=NIDM(3)
+        NGRLF=NIN(1)
+        NGRST=NIN(2)
+        NGRRT=NIN(3)
+      ENDIF
       PGLEFT = MAX(0.0,PGAVL - ((WLDOTN + WSDOTN + WRDOTN) * AGRVG))
       IF (PGLEFT < 1.E-5) PGLEFT = 0.0
       IF (P0_ENABLED()) THEN
@@ -459,12 +473,29 @@ C-----------------------------------------------------------------------
       ENDIF
       CADLF = CADLF + CSAVEV/PCH2O * LSTR
       CADST = CADST + CSAVEV * (1. - LSTR)/PCH2O
+      IF (NI_REVISED()) THEN
+        ! Leaf reserve DM can dilute N too. Keep unaccepted carbohydrate
+        ! in the native stem C reserve, with the same PCH2O payment.
+        NILEFT=CADLF*(1.-NI_EXPANSION(CADLF,0.))
+        CADLF=CADLF-NILEFT
+        CADST=CADST+NILEFT
+      ENDIF
 
 C-----------------------------------------------------------------------
 C    Calculate Increase in Remobilizable N Due to a C shortage,
 C      add to Nitrogen pool
 C-----------------------------------------------------------------------
       NLEFT  = MAX(0.0,NAVL  -  (NGRLF  + NGRST  + NGRRT))
+      IF (NI_REVISED()) THEN
+        CALL NI_REFILL(NLEFT,(/WLDOTN,WSDOTN,WRDOTN/),
+     &    (/NGRLF,NGRST,NGRRT/),(/CADLF,CADST,0./),
+     &    (/CRUSLF,CRUSST,CRUSRT/),FNINR,
+     &    NINA,NILEFT)
+        NADLF=NINA(1)
+        NADST=NINA(2)
+        NADRT=NINA(3)
+        TNLEAK=TNLEAK+NILEFT
+      ELSE
       IF (NLEFT .GT. 0.0) THEN
          IF (NLEFT .GT. NDMOLD) THEN
             NLEAK  = NLEFT  - NDMOLD
@@ -489,6 +520,7 @@ C     Subroutine CANOPY calculates height and width of the canopy as a
 C     function of VSTAGE, air temperature, drought stress (TURFAC),
 C     daylenght and radiation (PAR).
 C-----------------------------------------------------------------------
+      ENDIF
       CALL CANOPY(INTEGR,
      &    ECONO, FILECC, FILEGC, KCAN, PAR, ROWSPC,       !Input
      &    RVSTGE, TGRO, TURFAC, VSTAGE, XLAI, NSTRES,     !Input
