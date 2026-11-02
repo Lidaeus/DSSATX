@@ -5,6 +5,7 @@ program native_v3_tests
   integer::i,checks=0
   real(real64)::z,f,old
   real(real64)::n(4),w(4),cm(2),cc(2),legacy(4),safe(4),func(4),safe2(4),func2(4)
+  real(real64)::a(2)
   call check(NI_POD_KERNEL(-2._real64)==0,'negative functional state bounded')
   call check(NI_POD_KERNEL(2._real64)==1,'surplus does not amplify set')
   call check(abs(NI_POD_KERNEL(.5_real64)-.75_real64)<1.e-14_real64,'response midpoint')
@@ -41,6 +42,22 @@ program native_v3_tests
   legacy(3:4)=10
   call budget(0._real64,10._real64,100._real64,2._real64,safe,func)
   call check(all(safe(3:4)<=n(3:4)),'native root shell paths bounded by physical stock')
+  call NI_LATE_KERNEL([2._real64,1._real64],[.2_real64,.1_real64],0._real64, &
+    [16._real64,15._real64],1._real64,a)
+  call check(sum(a)==0,'late conversion cannot run without discretionary C')
+  call NI_LATE_KERNEL([2._real64,1._real64],[0._real64,0._real64],100._real64, &
+    [16._real64,15._real64],1._real64,a)
+  call check(sum(a)==0,'late conversion cannot create second daily enzyme capacity')
+  call NI_LATE_KERNEL([2._real64,1._real64],[.2_real64,.1_real64],100._real64, &
+    [16._real64,15._real64],0._real64,a)
+  call check(sum(a)==0,'late conversion needs a real organic receiver')
+  call NI_LATE_KERNEL([2._real64,1._real64],[.2_real64,.1_real64],.5_real64, &
+    [16._real64,15._real64],1._real64,a)
+  call check(sum(a*[16._real64,15._real64])<=.5_real64+1.e-14_real64,'late shared carbon constraint')
+  call check(all(a<=[.2_real64,.1_real64]),'late species conversion stays within unused envelope')
+  call NI_LATE_KERNEL([.001_real64,0._real64],[.2_real64,.1_real64],100._real64, &
+    [16._real64,15._real64],1._real64,a)
+  call check(abs(a(1)-.001_real64)<1.e-15_real64.and.a(2)==0,'late conversion respects actual substrate')
   write(*,'(A,I0)')'NATIVE_V3_CHECKS_PASSED=',checks
 contains
   subroutine budget(z,gap,c,cost,safe,func)

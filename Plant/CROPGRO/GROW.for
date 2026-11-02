@@ -61,7 +61,7 @@ C=======================================================================
 
 !-----------------------------------------------------------------------
       USE CG_Nitrogen, ONLY: NI_REVISED, NI_RETAIN,
-     &  NI_AREA_REFILL, NI_MINIMUM
+     &  NI_AREA_REFILL, NI_MINIMUM, NI_LUX_ON, NI_REDUCTION_RESP
       USE CG_P0Trace
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
@@ -484,10 +484,16 @@ C-----------------------------------------------------------------------
 
       GROWTH = WLDOTN + WSDOTN + WRDOTN + WSHDTN + WSDDTN + NODGR
   
+      IF (NI_LUX_ON()) THEN
+        GRWRES=WLDOTN*CPFLF+WSDOTN*CPFSTM+WRDOTN*CPFRT+
+     &    NODGR*CPFNOD+WSHDTN*CPFSH1+WSDDTN*CPFSD1+
+     &    NI_REDUCTION_RESP(TRNO3U,TRNH4U,NFIXN)
+      ELSE
       GRWRES = WLDOTN*CPFLF + WSDOTN*CPFSTM + WRDOTN*CPFRT +
      &         NODGR*CPFNOD + WSHDTN*CPFSH1 + WSDDTN*CPFSD1 +
      &         30./44*(TRNO3U/0.16 * 1.798 + TRNH4U/0.16 * 0.462 +
      &         NFIXN/0.16 * 1.798)
+      ENDIF
 
 C-----------------------------------------------------------------------
 C    Use 1982 Penning de Vries book, p. 125, composition of tissue,

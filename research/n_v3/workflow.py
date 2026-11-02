@@ -39,12 +39,13 @@ def build(label):
     print('BUILT',label,sha(exe),flush=True)
     return exe
 
-def case(name,exe,changes=None,trace=True):
+def case(name,exe,changes=None,trace=True,input_modifier=None):
     work=OUT/'cases'/name;work.mkdir(parents=True,exist_ok=False)
     design=json.loads((RUN/'design.json').read_text(encoding='utf8'))
     for p in Path(design['inputs']).iterdir():
         if p.is_file(): shutil.copy2(BASE/p.name,work/p.name)
     redirect(work/'DSSATPRO.v48',work)
+    if input_modifier is not None: input_modifier(work)
     cfg=json.loads((RUN/'selected_deterministic/last_success.json').read_text(encoding='utf8'))['nitrogen_config']
     cfg.update(changes or {})
     (work/'NIntegration.nml').write_text('&NINTEGRATION\n'+''.join(f' {k}={v:.17g}\n'for k,v in cfg.items())+'/\n',encoding='ascii')

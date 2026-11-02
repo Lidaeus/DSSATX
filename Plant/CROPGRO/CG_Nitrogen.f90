@@ -22,6 +22,10 @@ module CG_Nitrogen
   real(dp),save :: mob_gap=0,mob_accept=0,mob_new_used=0,mob_c_paid=0
   integer,save :: mob_unit=0
   logical,save :: mob_opened=.false.
+  integer,save :: luxury_priority=0,lux_unit=0
+  logical,save :: lux_opened=.false.
+  real(dp),save :: kinetic_cap(2)=0,late_a(2)=0,late_cost=0,late_c_budget=0,late_func=0,late_lux=0
+  real(dp),save :: late_unit_cost(2)=0,late_c_before=0,late_c_after=0,late_c_reserved=0,late_nad(2)=0
   real(dp), save :: curve_w0=1, photo_slw_ref=.0028_dp
   real(dp), save :: org_start(3)=0, donor_n(3)=0, donor_c(3)=0
   real(dp), save :: org_end_stock=0,org_end_off=0,seed_end=0,leak_end=0
@@ -61,9 +65,84 @@ module CG_Nitrogen
   public :: NI_EXPANSION, NI_AREA_REFILL, NI_MINIMUM
   public :: NI_OPEN_DAY, NI_SYNC_STATE, NI_PODS, NI_POD_FACTOR, NI_POD_KERNEL
   public :: NI_REMOB_ON, NI_REMOB_KERNEL, NI_REMOB_PLAN, NI_REMOB_SETTLE, NI_REMOB_REPRO
+  public :: NI_CORE_DEMAND, NI_LUXURY, NI_LATE_KERNEL, NI_REDUCTION_RESP
+  public :: NI_LUX_ON
 contains
+  logical function NI_LUX_ON()
+    NI_LUX_ON=ni_stage==5.and.budget_revision==1.and.luxury_priority==1
+  end function
+  real function NI_CORE_DEMAND(total,new_n,root_target)
+    real,intent(in)::total,new_n,root_target
+    real(dp)::target(3),room(3)
+    NI_CORE_DEMAND=total
+    if(luxury_priority/=1) return
+    target=[ccrit(1),ccrit(2),real(root_target,dp)]
+    room=max(0._dp,(target*w_begin-org_start)/max(1.e-6_dp,1-target/.16_dp))
+    where(w_begin<=1.e-4_dp)room=0
+    NI_CORE_DEMAND=real(min(max(0._dp,real(total,dp)),max(0._dp,real(new_n,dp))+sum(room)))
+  end function
+  pure subroutine NI_LATE_KERNEL(q,remaining,carbon,cost,receiver,a)
+    real(dp),intent(in)::q(2),remaining(2),carbon,cost(2),receiver
+    real(dp),intent(out)::a(2)
+    real(dp)::f
+    a=min(max(0._dp,q),max(0._dp,remaining))
+    f=min(1._dp,max(0._dp,receiver)/max(sum(a),1.e-30_dp));a=a*f
+    f=min(1._dp,max(0._dp,carbon)/max(sum(a*cost),1.e-30_dp));a=a*f
+  end subroutine
+  subroutine NI_LUXURY(pg,dm,nn,cr,pch,csave,cad,nad,navl,nassim,rsp3,rsp4)
+    real,intent(inout)::pg,cad(2),nad(3),navl,nassim,rsp3,rsp4
+    real,intent(in)::dm(3),nn(3),cr(3),pch,csave
+    real(dp)::mass(2),stock(2),room(2),repair(2),a(2),cost(2),spare,f,amount,take(2),extra(2),previous(2)
+    if(luxury_priority/=1) return
+    ! Existing growth, core repairs and native reserved CSAVEV keep priority.
+    spare=max(0._dp,sum(real(cad,dp))*real(pch,dp)-max(0._dp,real(csave,dp)))
+    late_c_budget=spare
+    late_c_before=sum(real(cad,dp))*real(pch,dp);late_c_reserved=max(0._dp,real(csave,dp))
+    previous=real(cad,dp)
+    f=min(1._dp,spare/max(sum(previous)*real(pch,dp),1.e-30_dp))
+    ! A conservative receiver excludes ALL discretionary C storage before
+    ! determining space; later actual spending can only increase that space.
+    mass=max(0._dp,w_begin(1:2)+real(dm(1:2),dp)+previous*(1-f)- &
+      donor_n(1:2)/.16_dp-real(cr(1:2),dp)+real(nad(1:2),dp)/.16_dp)
+    stock=max(0._dp,org_start(1:2)+real(nn(1:2),dp)-donor_n(1:2)+real(nad(1:2),dp))
+    room=max(0._dp,(cmax*mass-stock)/max(1.e-6_dp,1-cmax/.16_dp))
+    repair=max(0._dp,(ccrit*mass-stock)/max(1.e-6_dp,1-ccrit/.16_dp))
+    where(mass<=1.e-4_dp.or.donor_n(1:2)>1.e-12_dp)room=0
+    repair=min(repair,room)
+    cost=late_unit_cost
+    call NI_LATE_KERNEL([sum(q3),sum(q4)],kinetic_cap-[d_a3,d_a4],spare,cost,sum(room),a)
+    amount=real(flux32(sum(a)),dp);a=a*amount/max(sum(a),1.e-30_dp)
+    take=0;extra=0
+    f=min(1._dp,amount/max(sum(repair),1.e-30_dp));take=repair*f
+    amount=max(0._dp,amount-sum(take));room=max(0._dp,room-take)
+    f=min(1._dp,amount/max(sum(room),1.e-30_dp));extra=room*f
+    late_func=sum(take);late_lux=sum(extra);late_a=a;late_cost=sum(a*cost)
+    if(late_cost>spare+1.e-8_dp)error stop 'NI v3: luxury assimilation exceeds residual C'
+    call remove(q3,a(1));call remove(q4,a(2))
+    d_a3=d_a3+a(1);d_a4=d_a4+a(2)
+    rsp3=rsp3+real(a(1)*cost(1));rsp4=rsp4+real(a(2)*cost(2))
+    d_cost=real(rsp3,dp)+real(rsp4,dp)
+    pg=pg-real(late_cost)
+    ! Pay once by replacing discretionary storage, not by taking C from
+    ! already accepted new tissues or invoking VEGGR/PODS a second time.
+    f=max(0._dp,1-late_cost/max(sum(previous)*real(pch,dp),1.e-30_dp))
+    cad=real(previous*f)
+    late_c_after=sum(real(cad,dp))*real(pch,dp);late_nad=take+extra
+    nad(1:2)=nad(1:2)+real(take+extra)
+    refill_n=real(nad,dp)
+    navl=navl+real(sum(a));nassim=real(d_a3+d_a4)
+  end subroutine
+  real function NI_REDUCTION_RESP(tr3,tr4,nfix)
+    real,intent(in)::tr3,tr4,nfix
+    real(dp)::a3,a4
+    a3=real(tr3,dp);a4=real(tr4,dp)
+    if(NI_ENABLED())then
+      a3=d_a3;a4=d_a4
+    endif
+    NI_REDUCTION_RESP=real(30._dp/44*(a3/.16_dp*1.798_dp+a4/.16_dp*.462_dp+real(nfix,dp)/.16_dp*1.798_dp))
+  end function
   logical function NI_REMOB_ON()
-    NI_REMOB_ON=remob_mode==1
+    NI_REMOB_ON=ni_stage==5.and.budget_revision==1.and.remob_mode==1
   end function
   pure subroutine NI_REMOB_KERNEL(n,w,cm,cc,legacy,rate,tau,slow,beta,z,gap,carbon,cost,safe,func)
     real(dp),intent(in)::n(4),w(4),cm(2),cc(2),legacy(4),rate,tau,slow,beta,z,gap,carbon,cost
@@ -253,6 +332,7 @@ contains
     mass=max(0._dp,w_begin+real(dm,dp)+real(cad,dp)-donor_n/.16_dp-real(cr,dp))
     stock=max(0._dp,org_start+real(nn,dp)-donor_n)
     target=[cmax(1),cmax(2),real(root_target,dp)]
+    if(luxury_priority==1) target(1:2)=ccrit
     ! Refill adds protein mass NAD/0.16 as well as N: solve receiver space
     ! with that mass explicitly, independently of new-growth fractions.
     room=max(0._dp,(target*mass-stock)/max(1.e-6_dp,1-target/.16_dp))
@@ -302,7 +382,7 @@ contains
       assim_no3_v,assim_nh4_v,assim_no3_k,assim_nh4_k, &
       root_v,root_k,diffusion_k,pool_beta,leaf_a,leaf_b,stem_a,stem_b, &
       min_ratio,max_ratio,photo_floor,photo_gamma,growth_tau,budget_revision,curve_w0,photo_slw_ref, &
-      state_timing,pods_n_state,remob_mode,remob_severity,remob_tau,protect_beta,slow_ratio
+      state_timing,pods_n_state,remob_mode,remob_severity,remob_tau,protect_beta,slow_ratio,luxury_priority
     if(loaded) then
       if(NI_ENABLED()) then
         if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
@@ -333,6 +413,10 @@ contains
     end if
     if(ni_stage<0.or.ni_stage>5) error stop 'NI: stage must be 0..5'
     if(ni_stage>implemented_stage) error stop 'NI: requested integration stage is not connected in this build'
+    if(min(state_timing,pods_n_state,remob_mode,luxury_priority)<0.or. &
+       max(state_timing,pods_n_state,remob_mode,luxury_priority)>1) error stop 'NI v3: switches must be 0 or 1'
+    if(ni_stage/=5.and.max(state_timing,pods_n_state,remob_mode,luxury_priority)>0) &
+      error stop 'NI v3: opt-in modes require stage5; stage0 cannot silently activate them'
     if(.not.NI_ENABLED()) return
     if(budget_revision<0.or.budget_revision>1) error stop 'NI: budget_revision must be 0 or 1'
     if(min(state_timing,pods_n_state)<0.or.max(state_timing,pods_n_state)>1) &
@@ -346,6 +430,9 @@ contains
       if(.not.all(ieee_is_finite([remob_tau,protect_beta,slow_ratio]))) error stop 'NI v3: nonfinite remob parameters'
       if(remob_tau<=0.or.slow_ratio<1.or.protect_beta<0.or.protect_beta>1) error stop 'NI v3: invalid remob parameters'
     endif
+    if(luxury_priority<0.or.luxury_priority>1) error stop 'NI v3: invalid luxury priority mode'
+    if(luxury_priority==1.and.(state_timing/=1.or.pods_n_state/=1)) &
+      error stop 'NI v3: luxury priority requires C1 state modes'
     if(.not.ieee_is_finite(curve_w0).or.curve_w0<=0.or..not.ieee_is_finite(photo_slw_ref).or.photo_slw_ref<=0) &
       error stop 'NI: invalid curve breakpoint or functional leaf reference'
     if(.not.all(ieee_is_finite([q_no3_max,q_nh4_max,assim_no3_v,assim_nh4_v,assim_no3_k,assim_nh4_k, &
@@ -402,6 +489,8 @@ contains
     old_a3=0;old_a4=0;old_rsp3=0;old_rsp4=0
     r_mf=0;r_diff=0;r_mem=0;r_cr=0;r_bulk=0;r_candidate3=0;r_candidate4=0;r_final3=0;r_final4=0
     mob_safe=0;mob_func=0;mob_plan=0;mob_returned=0;mob_gap=0;mob_accept=0;mob_new_used=0;mob_c_paid=0
+    kinetic_cap=0;late_a=0;late_cost=0;late_c_budget=0;late_func=0;late_lux=0
+    late_unit_cost=0;late_c_before=0;late_c_after=0;late_c_reserved=0;late_nad=0
   end subroutine
   subroutine NI_ORG_BEGIN(stocks,off,seed,leak)
     real,intent(in)::stocks(6),off(6),seed,leak
@@ -490,11 +579,17 @@ contains
     real,intent(in)::accept,temperature,rno3,rnh4
     real,intent(out)::nassim,rsp3,rsp4
     real,intent(in),optional::time_fraction
-    real(dp)::a3,a4,cost3,cost4,factor,capacity,wref,dt
+    real(dp)::a3,a4,cost3,cost4,factor,capacity,wref,dt,pot3,pot4
     cost3=real(rno3,dp)/.16_dp; cost4=real(rnh4,dp)/.16_dp
     capacity=max(0._dp,real(accept,dp)); wref=sum(carrier)
     dt=1
     if(present(time_fraction)) dt=real(time_fraction,dp)
+    if(luxury_priority==1) then
+      late_unit_cost=[cost3,cost4]
+      call NI_ASSIM_KERNEL(sum(q3),sum(q4),wref,assim_no3_v*dt,assim_nh4_v*dt,assim_no3_k,assim_nh4_k, &
+        max(0._dp,min(1._dp,real(temperature,dp))),1.e30_dp,1.e30_dp,cost3,cost4,pot3,pot4)
+      kinetic_cap=kinetic_cap+[pot3,pot4]
+    endif
     if(ni_stage==1) then
       a3=sum(q3); a4=sum(q4)
       factor=min(1._dp,capacity/max(a3+a4,1.e-30_dp)); a3=a3*factor; a4=a4*factor
@@ -631,18 +726,31 @@ contains
         NI_POD_KERNEL(day_z(1)),growth_factor,z_end
     end if
     end_run=control%RUN;end_day=control%YRDOY
+    if(luxury_priority==1) then
+      if(.not.lux_opened)then
+        open(newunit=lux_unit,file='PlantNLuxury.csv',status='new',action='write',iostat=ios)
+        if(ios/=0)error stop 'NI v3: cannot create priority ledger'
+        write(lux_unit,'(A)')'run,yrdoy,luxury_priority,cap_no3,cap_nh4,core_no3,core_nh4,late_no3,late_nh4,'// &
+          'C_available,C_late,C_storage_before,C_storage_after,C_reserved,A_function_late,A_luxury,'// &
+          'NAD_late_leaf,NAD_late_stem,cost_no3,cost_nh4'
+        lux_opened=.true.
+      endif
+      write(lux_unit,'(3(I0,","),16(ES24.15E3,","),ES24.15E3)') control%RUN,control%YRDOY, &
+        luxury_priority,kinetic_cap,[d_a3,d_a4]-late_a,late_a,late_c_budget,late_cost,late_c_before,late_c_after, &
+        late_c_reserved,late_func,late_lux,late_nad,late_unit_cost
+    endif
     if(NI_REMOB_ON()) then
       if(.not.mob_opened) then
         open(newunit=mob_unit,file='PlantNRemob.csv',status='new',action='write',iostat=ios)
         if(ios/=0) error stop 'NI v3: cannot create remobilization ledger'
-        write(mob_unit,'(A)')'run,yrdoy,remob_mode,tau,protect_beta,slow_ratio,severity,veg_z_day,'// &
+        write(mob_unit,'(A)')'run,yrdoy,remob_mode,tau,protect_beta,slow_ratio,severity,veg_z_day,growth_severity_day,'// &
           'gap,acceptance_prediction,new_growth_N_actual,C_remob_actual,'// &
           'plan_leaf,plan_stem,plan_root,plan_shell,returned_leaf,returned_stem,returned_root,returned_shell,'// &
           'safe_leaf,safe_stem,safe_root,safe_shell,function_leaf,function_stem,function_root,function_shell'
         mob_opened=.true.
       endif
-      write(mob_unit,'(3(I0,","),24(ES24.15E3,","),ES24.15E3)') control%RUN,control%YRDOY, &
-        remob_mode,remob_tau,protect_beta,slow_ratio,real(remob_severity,dp),day_veg_z,mob_gap,mob_accept,mob_new_used, &
+      write(mob_unit,'(3(I0,","),25(ES24.15E3,","),ES24.15E3)') control%RUN,control%YRDOY, &
+        remob_mode,remob_tau,protect_beta,slow_ratio,real(remob_severity,dp),day_veg_z,day_growth,mob_gap,mob_accept,mob_new_used, &
         mob_c_paid,mob_plan,mob_returned,mob_safe,mob_func
     endif
     if(NI_REVISED()) then
