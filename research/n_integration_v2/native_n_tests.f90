@@ -8,7 +8,7 @@ program native_n_tests
   type(SwitchType)::s
   real(dp)::a3,a4,u,cr,low,nc,high,low2,nc2,high2
   real::un3(NL),un4(NL),s3(NL),s4(NL),rw(NL),tr3,tr4,trnu,pg,nass,rsp3,rsp4,refund
-  real::w(3),loss(3),n(3),q_before,q_after,fp
+  real::w(3),loss(3),n(3),q_before,q_after,fp,unused,nold,actual_u
   integer::checks
   checks=0
   call NI_ASSIM_KERNEL(1.1_dp,.1_dp,1._dp,1._dp,.14_dp,1.1_dp,.1_dp,1._dp,10._dp,2._dp,1._dp,1._dp,a3,a4)
@@ -37,6 +37,7 @@ program native_n_tests
   call check(low2<nc2.and.nc2<high2,'ordered soft references')
   c%CROP='TM';c%RUN=1;c%YRDOY=2026001
   s%ISWNIT='Y';s%ISWSYM='N';s%ISWWAT='Y';s%MEPHO='L';s%MEEVP='R'
+  s%ISWDIS='N'
   call NI_LOAD(c,s);call NI_RESET()
   call check(NI_TOTAL_Q()==0,'seasonal initialization')
   w=[100.,100.,100.];n=[.01,.01,.01];loss=0;rw=1
@@ -48,8 +49,8 @@ program native_n_tests
   pg=10
   call NI_ASSIMILATE(pg,.1,1.,.16,.16,nass,rsp3,rsp4)
   call check(nass>0.and.nass<=.1,'finite accepted provisional supply')
-  trnu=nass
-  call NI_SETTLE(trnu,rsp3,rsp4,nass,refund,un3,un4,1,tr3,tr4,pg)
+  unused=nass
+  call NI_SETTLE(unused,rsp3,rsp4,nass,refund,un3,un4,1,tr3,tr4,actual_u)
   call check(abs(NI_TOTAL_Q()-q_before)<1.e-6.and.nass==0,'unused provisional substrate returned once')
   call NI_END(c,w,loss,rw,1,n,1.,0.)
   call check(all(n==.01),'actual organ N can be below soft minimum without projection')
@@ -68,6 +69,24 @@ program native_n_tests
   call NI_RETURN_LITTER(s3,s4,1)
   call check(abs(sum(s3+s4)-10*(q_before-q_after))<1.e-5,'pending litter cannot be returned twice')
   call NI_RESET();call check(NI_TOTAL_Q()==0.and.NI_SOIL_INPUT()==0,'second run reset')
+  c%YRDOY=2026003;w=100.;loss=0.;call NI_BEGIN(w)
+  un3=0;un4=0;un3(1)=8.;un4(1)=.2
+  call NI_ACCEPT_UPTAKE(un3,un4,1,tr3,tr4,trnu)
+  call NI_END(c,w,loss,rw,1,n,1.,0.)
+  q_before=NI_TOTAL_Q();fp=NI_LEAF_FACTOR(3.,.005,.005)
+  c%YRDOY=2026004;call NI_BEGIN(w);pg=10
+  call NI_PREASSIM(pg,.5,1.,.16,.16,nold)
+  un3=0;un4=0;un3(1)=100.;un4(1)=20.
+  call NI_ACCEPT_UPTAKE(un3,un4,1,tr3,tr4,trnu)
+  call NI_ASSIMILATE(pg,max(0.,.5-nold),1.,.16,.16,nass,rsp3,rsp4,.5)
+  call NI_MERGE_OLD(nass,rsp3,rsp4)
+  unused=nass
+  call NI_SETTLE(unused,rsp3,rsp4,nass,refund,un3,un4,1,tr3,tr4,trnu)
+  call check(trnu<=.1100001,'provisional old conversion cannot invent receiver room')
+  call check(abs(NI_TOTAL_Q()-q_before-trnu)<1.e-6,'rolled-back uptake still closes mass')
+  call check(nass==0,'rejected conversion never enters organic ledger')
+  call NI_END(c,w,loss,rw,1,n,1.,0.)
+  call check(abs(NI_LEAF_FACTOR(3.,.005,.005)-fp)<1.e-7,'inorganic luxury N alone cannot increase photosynthesis')
   write(*,'(A,I0)') 'NATIVE_N_CHECKS_PASSED=',checks
 contains
   subroutine check(test,message)

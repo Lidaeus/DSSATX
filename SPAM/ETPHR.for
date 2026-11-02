@@ -451,6 +451,7 @@ C========================================================================
 
       USE MODULEDATA
       USE CG_P0Trace, ONLY: P0_LEAF
+      USE CG_Nitrogen, ONLY: NI_FEEDBACK, NI_LEAF_FACTOR
 	
       IMPLICIT NONE
       EXTERNAL TABEX, CURV
@@ -535,8 +536,12 @@ C     Nitrogen effects on LMXREF.  Photosynthesis is affected both by
 C     plant nutrition and age.  Quadratic from (1) to (2).  AGEMXL scaled
 C     to 1.0 at LNREF.
 
+      IF (NI_FEEDBACK()) THEN
+        AGEMXL=NI_LEAF_FACTOR(RNITP,SLW,SLWREF)
+      ELSE
       AGEMXL = CURV(TYPPGN,FNPGN(1),FNPGN(2),FNPGN(3),FNPGN(4),RNITP) /
      &   CURV(TYPPGN,FNPGN(1),FNPGN(2),FNPGN(3),FNPGN(4),LNREF)
+      ENDIF
 
 C     EFFECTS ON QUANTUM EFFICIENCY (QEFF).
 
@@ -574,7 +579,12 @@ C    25 Apr 2011 KJB,PDA,MPS added code for beta function: PDLA effects on lfmax
 C     Calculate QEFF and LFMAX at ambient conditions.
 
       QEFF = QEREF * CO2QE * AGEQE * BETAMX
+      IF (NI_FEEDBACK()) THEN
+!       Functional area N already contains SLW: do not multiply it twice.
+        LFMAX=LXREF*TEMPMX*AGEMXL*CO2MAX*CHILL*BETAMX
+      ELSE
       LFMAX = LXREF * SLWMAX * TEMPMX * AGEMXL * CO2MAX * CHILL * BETAMX
+      ENDIF
 !     P0b observes actual leaf N responses; no feedback is added.
       CALL P0_LEAF(RNITP,SLW,SLWREF,LNREF,AGEMXL,AGEQE,
      &    LFMAX,QEFF)

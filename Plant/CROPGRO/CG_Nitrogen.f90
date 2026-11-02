@@ -8,7 +8,7 @@ module CG_Nitrogen
   implicit none
   private
   integer, parameter :: dp=real64
-  integer, parameter :: implemented_stage=4
+  integer, parameter :: implemented_stage=5
   integer, save :: ni_stage=0, root_mode=0, output_unit=0
   logical, save :: loaded=.false., opened=.false., ready=.false., water_ready=.false.
   real(dp), save :: q_no3_max=-1, q_nh4_max=-1
@@ -25,6 +25,11 @@ module CG_Nitrogen
   real(dp), save :: d_cost=0, d_refund=0, d_litter=0, d_residual=0
   real(dp), save :: legacy_nh4=-1, d_pending=0
   real(dp), save :: old_a3=0,old_a4=0,old_rsp3=0,old_rsp4=0
+  real(dp), save :: org_begin=0,org_off_begin=0,leak_begin=0,legacy_n_res=0,legacy_c_overrun=0
+  real(dp), save :: r_mf(NL)=0,r_diff(NL)=0,r_mem(NL)=0,r_cr(NL)=0,r_bulk(NL)=0
+  real(dp), save :: r_candidate3(NL)=0,r_candidate4(NL)=0,r_final3(NL)=0,r_final4(NL)=0
+  integer,save::root_output_unit=0
+  logical,save::root_opened=.false.
   public :: NI_LOAD, NI_RESET, NI_ENABLED, NI_CURVES, NI_FEEDBACK
   public :: NI_BEGIN, NI_ACCEPT_UPTAKE, NI_ASSIMILATE, NI_SETTLE, NI_END
   public :: NI_RETURN_LITTER, NI_SOIL_INPUT, NI_SET_NH4
@@ -32,12 +37,17 @@ module CG_Nitrogen
   public :: NI_TARGETS, NI_REFERENCES, NI_GROWTH, NI_LEAF_FACTOR
   public :: NI_TOTAL_Q, NI_CURVE_KERNEL, NI_ROOT_KERNEL, NI_ASSIM_KERNEL
   public :: NI_PREASSIM, NI_MERGE_OLD
+  public :: NI_ORG_BEGIN, NI_ORG_END
+  public :: NI_SPLIT
 contains
   logical function NI_ENABLED()
     NI_ENABLED=ni_stage>0
   end function
   logical function NI_CURVES()
     NI_CURVES=ni_stage>=4
+  end function
+  logical function NI_SPLIT()
+    NI_SPLIT=ni_stage>=2
   end function
   logical function NI_FEEDBACK()
     NI_FEEDBACK=ni_stage>=5.and.ready
@@ -66,7 +76,13 @@ contains
       assim_no3_v,assim_nh4_v,assim_no3_k,assim_nh4_k, &
       root_v,root_k,diffusion_k,pool_beta,leaf_a,leaf_b,stem_a,stem_b, &
       min_ratio,max_ratio,photo_floor,photo_gamma,growth_tau
-    if(loaded) return
+    if(loaded) then
+      if(NI_ENABLED()) then
+        if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
+          error stop 'NI: mixed or unsupported crop/switch batch'
+      end if
+      return
+    end if
     loaded=.true.
     path='NIntegration.nml'
     call get_environment_variable('DSSAT_N_CONFIG',message,length,status)
@@ -92,6 +108,7 @@ contains
         photo_floor,photo_gamma,growth_tau]))) error stop 'NI: non-finite configuration value'
     if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N') &
       error stop 'NI: first integration supports nonfixing TM nitrogen simulation only'
+    if(switch%ISWDIS/='N') error stop 'NI: inorganic pest export is not implemented; pests must be off'
     if(q_no3_max<=0.or.q_nh4_max<=0.or.q_nh4_max>=q_no3_max) &
       error stop 'NI: explicit positive species capacities are required; NH4 capacity must be smaller'
     if(ni_stage>=2) then
@@ -99,7 +116,8 @@ contains
         error stop 'NI: explicit positive specific assimilation capacities and substrate constants required'
     end if
     if(ni_stage>=3) then
-      if(root_mode<1.or.root_mode>2.or.switch%ISWWAT/='Y'.or.switch%MEEVP=='Z') &
+      if(root_mode<0.or.root_mode>2) error stop 'NI: invalid root mode'
+      if(root_mode>0.and.(switch%ISWWAT/='Y'.or.switch%MEEVP=='Z')) &
         error stop 'NI: root mode requires actual non-Z water simulation'
       if(min(root_v,root_k)<=0.or.diffusion_k<0.or.pool_beta<0) &
         error stop 'NI: explicit root kinetics, diffusion, and pool feedback required'
@@ -110,6 +128,7 @@ contains
     if(NI_CURVES()) then
       if(min(leaf_a,leaf_b,stem_a,stem_b,min_ratio)<=0.or.min_ratio>=1.or.max_ratio<=1) &
         error stop 'NI: invalid organ soft-reference curves'
+      if(max(leaf_a,stem_a)*max_ratio>=1) error stop 'NI: reference N fraction must remain below one'
     end if
     if(ni_stage>=5) then
       if(switch%MEPHO/='L') error stop 'NI: new functional feedback currently supports verified L route only'
@@ -132,6 +151,18 @@ contains
     d_q_begin=sum(q3)+sum(q4); d_u3=0; d_u4=0; d_a3=0; d_a4=0
     d_cost=0; d_refund=0; d_litter=0
     old_a3=0;old_a4=0;old_rsp3=0;old_rsp4=0
+    r_mf=0;r_diff=0;r_mem=0;r_cr=0;r_bulk=0;r_candidate3=0;r_candidate4=0;r_final3=0;r_final4=0
+  end subroutine
+  subroutine NI_ORG_BEGIN(stocks,off,seed,leak)
+    real,intent(in)::stocks(6),off(6),seed,leak
+    org_begin=sum(real(stocks,dp))+real(seed,dp)
+    org_off_begin=sum(real(off,dp));leak_begin=real(leak,dp)
+  end subroutine
+  subroutine NI_ORG_END(stocks,off,seed,leak,c_overrun)
+    real,intent(in)::stocks(6),off(6),seed,leak,c_overrun
+    legacy_n_res=sum(real(stocks,dp))+real(seed,dp)-org_begin+sum(real(off,dp))-org_off_begin &
+      +real(leak,dp)-leak_begin-d_a3-d_a4
+    legacy_c_overrun=real(c_overrun,dp)
   end subroutine
   real function flux32(value)
     real(dp),intent(in)::value
@@ -161,6 +192,7 @@ contains
     real(dp)::p3,p4,h3,h4,scale
     integer::l
     p3=sum(real(uno3(1:nlayr),dp))/10; p4=sum(real(unh4(1:nlayr),dp))/10
+    if(minval(uno3(1:nlayr))<0.or.minval(unh4(1:nlayr))<0) error stop 'NI: negative gross uptake candidate'
     h3=max(0._dp,q_no3_max*sum(carrier)-sum(q3))
     h4=max(0._dp,q_nh4_max*sum(carrier)-sum(q4))
     if(p3>0) then
@@ -214,8 +246,8 @@ contains
       call NI_ASSIM_KERNEL(sum(q3),sum(q4),wref,assim_no3_v*dt,assim_nh4_v*dt,assim_no3_k,assim_nh4_k, &
           max(0._dp,min(1._dp,real(temperature,dp))),real(pg,dp),capacity,cost3,cost4,a3,a4)
     end if
-    ! Co-limit predicted growth demand by the carbon remaining after assimilation.
-    ! Host actual acceptance is settled once after allocation, without replaying SAVE routines.
+    ! Predicted demand is only a candidate bound. Actual host acceptance is
+    ! settled after allocation, without replaying stateful SAVE routines.
     d_a3=real(flux32(a3),dp); d_a4=real(flux32(a4),dp)
     nassim=flux32(d_a3+d_a4)
     factor=real(nassim,dp)/max(d_a3+d_a4,1.e-30_dp)
@@ -279,6 +311,8 @@ contains
     total=sum(q4)+ret4-(d_u4-new_u)
     q4=max(0._dp,total)*carrier/max(sum(carrier),1.e-30_dp);d_u4=new_u
     tr3=real(d_u3);tr4=real(d_u4);trnu=tr3+tr4;d_pending=d_u3+d_u4
+    r_final3(1:nlayr)=real(uno3(1:nlayr),dp)/10
+    r_final4(1:nlayr)=real(unh4(1:nlayr),dp)/10
     d_a3=d_a3-ret3; d_a4=d_a4-ret4
     cost_old=real(rsp3,dp)+real(rsp4,dp)
     rsp3=real(real(rsp3,dp)*(1-fraction)); rsp4=real(real(rsp4,dp)*(1-fraction))
@@ -289,7 +323,7 @@ contains
     type(ControlType),intent(in)::control
     integer,intent(in)::nlayr
     real,intent(in)::weights(3),losses(3),root_weights(:),org_n(3),lai,wcrlf
-    real(dp)::fraction(3),out3(3),out4(3),growth(3),denom,alpha,target,nraw
+    real(dp)::fraction(3),out3(3),out4(3),growth(3),denom,alpha,target,nraw,nniraw(2),nnifun(2),deficit(2),surplus(2)
     integer::l,ios
     if(.not.NI_ENABLED()) return
     growth=max(0._dp,real(weights,dp)+max(0._dp,real(losses,dp))-w_begin)
@@ -323,17 +357,48 @@ contains
       structural_fraction=max(0._dp,real(weights(1)-wcrlf,dp))/max(real(weights(1),dp),1.e-12_dp)
     end if
     ready=.true.
+    nniraw=0;nnifun=0;deficit=0;surplus=0
+    if(NI_CURVES()) then
+      nniraw=real(org_n(1:2),dp)/max(real(weights(1:2),dp)*ccrit,1.e-12_dp)
+      nnifun=(real(org_n(1:2),dp)/max(real(weights(1:2),dp),1.e-12_dp)-cmin)/(ccrit-cmin)
+      deficit=max(0._dp,ccrit*real(weights(1:2),dp)-real(org_n(1:2),dp))
+      surplus=max(0._dp,real(org_n(1:2),dp)-ccrit*real(weights(1:2),dp))
+    end if
     if(.not.opened) then
       open(newunit=output_unit,file='PlantNIntegration.csv',status='new',action='write',iostat=ios)
       if(ios/=0) error stop 'NI: output exists or cannot be created'
       write(output_unit,'(A)') 'run,yrdoy,stage,QNO3,QNH4,U_NO3,U_NH4,A_NO3,A_NH4,C_assim,C_refund,'// &
         'inorg_litter,pending_litter,Q_residual,carrier_leaf,carrier_stem,carrier_root,'// &
-        'leaf_min,leaf_crit,leaf_max,stem_min,stem_crit,stem_max,growth_factor,pending_uptake,soil_litter_returned_kg_ha'
+        'leaf_min,leaf_crit,leaf_max,stem_min,stem_crit,stem_max,growth_factor,pending_uptake,soil_litter_returned_kg_ha,'// &
+        'legacy_organic_N_residual,legacy_growth_C_overrun,QNO3_leaf,QNO3_stem,QNO3_root,QNH4_leaf,QNH4_stem,QNH4_root,'// &
+        'Norg_leaf,Norg_stem,Norg_root,Corg_leaf,Corg_stem,Corg_root,Ctotal_leaf,Ctotal_stem,Ctotal_root,'// &
+        'W_leaf,W_stem,W_root,functional_leaf_N_per_area,NNI_raw_leaf,NNI_raw_stem,NNI_functional_leaf,NNI_functional_stem,'// &
+        'Ndeficit_leaf,Ndeficit_stem,Nsurplus_leaf,Nsurplus_stem'
       opened=.true.
     end if
-    write(output_unit,'(I0,2(",",I0),23(",",ES24.15E3))') control%RUN,control%YRDOY,ni_stage, &
+    write(output_unit,'(I0,2(",",I0),52(",",ES24.15E3))') control%RUN,control%YRDOY,ni_stage, &
       sum(q3),sum(q4),d_u3,d_u4,d_a3,d_a4,d_cost,d_refund,d_litter,sum(litter3)+sum(litter4), &
-      d_residual,carrier,cmin(1),ccrit(1),cmax(1),cmin(2),ccrit(2),cmax(2),growth_factor,d_pending,returned_litter
+      d_residual,carrier,cmin(1),ccrit(1),cmax(1),cmin(2),ccrit(2),cmax(2),growth_factor,d_pending,returned_litter, &
+      legacy_n_res,legacy_c_overrun,q3,q4,real(org_n,dp), &
+      real(org_n,dp)/max(real(weights,dp),1.e-12_dp), &
+      (real(org_n,dp)+q3+q4)/max(real(weights,dp),1.e-12_dp),real(weights,dp), &
+      max(0._dp,real(org_n(1),dp)-cmin(1)*real(weights(1),dp))/max(real(lai,dp),1.e-12_dp), &
+      nniraw,nnifun,deficit,surplus
+    if(NI_ROOT_MODE()>0) then
+      if(.not.root_opened) then
+        open(newunit=root_output_unit,file='LayerNIntegration.csv',status='new',action='write',iostat=ios)
+        if(ios/=0) error stop 'NI: layer diagnostic already exists or cannot be opened'
+        write(root_output_unit,'(A)') 'run,yrdoy,layer,theta_transport,RWU_cm,'// &
+          'Cbulk_mgN_L,Cr_potential_mgN_L,MF_candidate_gN_m2,Diff_potential_gN_m2,'// &
+          'membrane_potential_gN_m2,NO3_candidate_gN_m2,NH4_candidate_gN_m2,NO3_final_gN_m2,NH4_final_gN_m2'
+        root_opened=.true.
+      end if
+      do l=1,nlayr
+        write(root_output_unit,'(I0,2(",",I0),11(",",ES24.15E3))') control%RUN,control%YRDOY,l, &
+          theta_snapshot(l),rwu_snapshot(l),r_bulk(l),r_cr(l),r_mf(l),r_diff(l),r_mem(l), &
+          r_candidate3(l),r_candidate4(l),r_final3(l),r_final4(l)
+      end do
+    end if
   end subroutine
   subroutine NI_RETURN_LITTER(sno3,snh4,nlayr)
     integer,intent(in)::nlayr
@@ -404,13 +469,19 @@ contains
       concentration=max(0._dp,real(no3(l)*bd(l),dp))/max(theta,1.e-12_dp)
       call NI_ROOT_KERNEL(concentration,rwu_snapshot(l),length,root_v,root_k,diffusion_k*wet, &
           feedback*sqrt(wet),root_mode,potential,cr)
+      r_bulk(l)=concentration;r_cr(l)=cr;r_mf(l)=.01_dp*rwu_snapshot(l)*concentration
+      r_mem(l)=potential
+      if(root_mode==2) r_diff(l)=.001_dp*diffusion_k*wet*length*max(0._dp,concentration-cr)
       potential=min(potential,max(0._dp,real(no3(l)-.25,dp)/real(kg2ppm(l),dp)/10))
       uno3(l)=flux32(10*potential)
-      ! Native NH4 potential only, without native shared NO3/ANDEM rescaling.
+      ! Native NH4 rate and saturation form, without shared NO3/ANDEM scaling
+      ! or the native arbitrary low-concentration cutoff.
       potential=.1_dp*length*sqrt(wet)*max(0._dp,1-exp(-.08_dp*real(nh4(l),dp)))*legacy_nh4
       potential=min(potential,max(0._dp,real(nh4(l)-.5,dp)/real(kg2ppm(l),dp)/10))
       unh4(l)=flux32(10*potential)
     end do
+    r_candidate3(1:nlayr)=real(uno3(1:nlayr),dp)/10
+    r_candidate4(1:nlayr)=real(unh4(1:nlayr),dp)/10
   end subroutine
   pure subroutine NI_CURVE_KERNEL(w,a,b,rmin,rmax,lower,critical,upper)
     real(dp),intent(in)::w,a,b,rmin,rmax

@@ -155,7 +155,7 @@ C=======================================================================
       REAL NH4(NL), NO3(NL), UNH4(NL), UNO3(NL)
       REAL P0_RWU(NL), P0_EP
       REAL NASSIMD, NFORGROW, NIUNUSED, NIREFUND, NILEAK0
-      REAL NISHARE, NIOLDN
+      REAL NISHARE, NIOLDN, NIVGC0
       REAL PHTHRS(20)
       REAL TGRO(TS)
       REAL SDDES(NCOHORTS)
@@ -942,6 +942,9 @@ C-----------------------------------------------------------------------
       ENDIF
       IF (NI_ENABLED()) THEN
         CALL NI_BEGIN((/WTLF,STMWT,RTWT/))
+        CALL NI_ORG_BEGIN((/WTNLF,WTNST,WTNRT,WTNSH,WTNSD,
+     &    WTNNOD/),(/WTNLO,WTNSO,WTNRO,WTNSHO,WTNSDO,WTNNO/),
+     &    SDNPL,TNLEAK)
         NILEAK0=TNLEAK
       ENDIF
 !     Initialize available N and C for beginning of daily calcs.
@@ -1051,9 +1054,9 @@ C-----------------------------------------------------------------------
       IF (ISWNIT .EQ. 'Y') THEN
       IF (NI_ENABLED()) THEN
         NIOLDN=0.
+        IF (NI_SPLIT()) CALL NI_PREASSIM(PGAVL,
+     &    MAX(0.,NDMTOT-NAVL),DTX,RNO3C,RNH4C,NIOLDN)
         IF (NI_ROOT_MODE().GT.0) THEN
-          CALL NI_PREASSIM(PGAVL,MAX(0.,NDMTOT-NAVL),DTX,
-     &      RNO3C,RNH4C,NIOLDN)
           CALL NI_ROOT_UPTAKE(CONTROL,NLAYR,SOILPROP%BD,
      &      DLAYR,LL,DUL,SAT,NO3,NH4,KG2PPM,UNO3,UNH4)
         ELSE
@@ -1064,7 +1067,7 @@ C-----------------------------------------------------------------------
         ENDIF
         CALL NI_ACCEPT_UPTAKE(UNO3,UNH4,NLAYR,
      &    TRNO3U,TRNH4U,TRNU)
-        IF (NI_ROOT_MODE().GT.0) THEN
+        IF (NI_SPLIT()) THEN
           CALL NI_ASSIMILATE(PGAVL,
      &      MAX(0.,NDMTOT-NAVL-NIOLDN),DTX,RNO3C,RNH4C,
      &      NASSIMD,RSPNO3,RSPNH4,0.5)
@@ -1307,6 +1310,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call routine to compute actual vegetative growth, C to mine or add
 C-----------------------------------------------------------------------
+      IF (NI_ENABLED()) NIVGC0=PGAVL
       CALL VEGGR(INTEGR, 
      &    AGRLF, AGRRT, AGRSTM, CMINEP, CSAVEV, DTX,      !Input
      &    DXR57, ECONO, FILECC, FILEGC, FNINL, FNINR,     !Input
@@ -1471,6 +1475,9 @@ C-----------------------------------------------------------------------
      &      PCNL,PCNST,XLAI/))
       ENDIF
       IF (NI_ENABLED()) THEN
+        CALL NI_ORG_END((/WTNLF,WTNST,WTNRT,WTNSH,WTNSD,
+     &    WTNNOD/),(/WTNLO,WTNSO,WTNRO,WTNSHO,WTNSDO,WTNNO/),
+     &    SDNPL,TNLEAK,MAX(0.,AGRVG*(WLDOTN+WSDOTN+WRDOTN)-NIVGC0))
         CALL NI_END(CONTROL,(/WTLF,STMWT,RTWT/),
      &    (/SLDOT+WLIDOT+WLFDOT,SSDOT+WSIDOT,SRDOT+WRIDOT/),
      &    SENRT,NLAYR,(/WTNLF,WTNST,WTNRT/),XLAI,WCRLF)

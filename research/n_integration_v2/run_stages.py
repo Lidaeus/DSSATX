@@ -20,9 +20,15 @@ def main():
  protection=json.loads((frozen/'readiness_receipt.json').read_text(encoding='utf-8'))['protected_executables_before']
  assert all(digest(Path(n))==h for n,h in protection.items())
  (root/'bin').mkdir();exe=root/'bin/dscsm048_nintegration.exe';shutil.copy2(a.exe,exe)
+ repo=Path(__file__).resolve().parents[2]
+ sources=['CMakeLists.txt','Plant/CROPGRO/CG_Nitrogen.f90','Plant/CROPGRO/CROPGRO.for',
+  'Plant/CROPGRO/NUPTAK.for','Plant/CROPGRO/DEMAND.for','Plant/CROPGRO/VEGGR.for',
+  'SPAM/SPAM.for','SPAM/ETPHR.for','Soil/Inorganic_N/SOILNI.for','Soil/Inorganic_N/SoilNiBal.for']
  receipt={'parameter_role':'ENGINEERING_DIAGNOSTIC_ONLY_NOT_CALIBRATED_NOT_RECOMMENDED_FOR_PREDICTION',
   'engineering_values':ENGINEERING,'v15_borrowing':False,'fruit_N_design':'official unchanged, no dilution curve',
   'legacy_bugs':'recorded and deferred by user; do not suppress their residuals',
+  'git_head_at_run':subprocess.check_output(['git','-C',str(repo),'rev-parse','HEAD'],text=True).strip(),
+  'source_hashes':{n:digest(repo/n) for n in sources},
   'binary':{'path':str(exe),'sha256':digest(exe)},'runs':{},'protected_before':protection}
  try:
   for stage in a.stages:
@@ -44,7 +50,7 @@ def main():
     assert not (run/'PlantNIntegration.csv').exists()
    else:
     d=pd.read_csv(run/'PlantNIntegration.csv',float_precision='round_trip')
-    assert len(d)==1512 and len(d.columns)==26,(len(d),list(d.columns))
+    assert len(d)==1512 and len(d.columns)==55,(len(d),list(d.columns))
     assert d.Q_residual.abs().max()<1e-9 and d[['QNO3','QNH4','A_NO3','A_NH4']].min().min()>=0
     result['new_module']={'days':len(d),'Q_residual_max':float(d.Q_residual.abs().max()),
        'Q_NO3_max':float(d.QNO3.max()),'Q_NH4_max':float(d.QNH4.max()),

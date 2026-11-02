@@ -40,7 +40,7 @@ C=======================================================================
 
 !-----------------------------------------------------------------------
       USE CG_Nitrogen, ONLY: NI_CURVES, NI_TARGETS,
-     &  NI_REFERENCES
+     &  NI_REFERENCES, NI_FEEDBACK, NI_GROWTH
       USE ModuleDefs
       USE ModuleData
       IMPLICIT NONE
@@ -563,8 +563,13 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
       IF (NSLA .GT. 1.2) THEN                      !To limit NSLA to 1.2
           NSLA=1.2 
       ENDIF
+      IF (NI_FEEDBACK()) THEN
+        NFSL=NI_GROWTH()
+        CUMNSF=NFSL
+      ELSE
       NFSL   = MAX(0.1, (1.0 - (1.0 - NSTRES)*NSLA))       
       CUMNSF = 0.75*CUMNSF + 0.25*NFSL  
+      ENDIF
 !-----------------------------------------------------------------------
 !     Compute overall effect of TMP, PAR, water stress on SLA (F), first
 !     for veg stages, then transition to rep stage from R1 to end leaf

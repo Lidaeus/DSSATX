@@ -42,7 +42,7 @@ C========================================================================
 
 !-----------------------------------------------------------------------
       USE CG_P0Trace
-      USE CG_Nitrogen, ONLY: NI_CURVES
+      USE CG_Nitrogen, ONLY: NI_CURVES, NI_FEEDBACK, NI_GROWTH
       USE ModuleDefs
       USE ModuleData
       IMPLICIT NONE
@@ -256,6 +256,10 @@ C-----------------------------------------------------------------------
 !     FO/KJB - Running average
       PNSTRES = XNSTRES
 
+      IF (NI_FEEDBACK()) THEN
+        XNSTRES=NI_GROWTH()
+        NSTRES=XNSTRES
+      ELSE
       IF (SUPPN .LT. NSTFAC * NDMNEW .AND. NDMNEW .GT. 0. .AND. 
      &        YRDOY .NE. YREMRG) THEN
         XNSTRES = MIN(1.0,SUPPN/(NDMNEW * NSTFAC))
@@ -265,6 +269,7 @@ C-----------------------------------------------------------------------
       
 !     FO/KJB - Running average
       NSTRES = XNSTRES * 0.5 + PNSTRES * 0.5
+      ENDIF
       
 !      FRRT  = ATOP * (1.0 - (MIN(TURFAC,NSTRES)))*(1.0-FRRT) + FRRT
       FRRT  = ATOP * (1.0 - (MIN(TURFAC, NSTRES, PStres2))) * 
