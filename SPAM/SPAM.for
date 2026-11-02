@@ -46,7 +46,7 @@ C=======================================================================
       USE ModuleDefs
       USE ModuleData
       USE CG_P0Trace
-      USE CG_Nitrogen, ONLY: NI_ENABLED, NI_CAPTURE_WATER
+      USE CG_Nitrogen, ONLY: NI_ROOT_MODE, NI_CAPTURE_WATER
       USE FloodModule
 
       IMPLICIT NONE
@@ -455,7 +455,7 @@ C=======================================================================
       CALL PUT('SPAM', 'EOP', EOP)
       CALL PUT('SPAM', 'EVAP',EVAP)
       CALL PUT('SPAM', 'UH2O',RWU)
-      IF (NI_ENABLED()) THEN
+      IF (NI_ROOT_MODE().GT.0) THEN
         CALL NI_CAPTURE_WATER(CONTROL,NLAYR,RWU(1:NLAYR),
      &    MAX(0.,SW_AVAIL(1:NLAYR)+LL(1:NLAYR)-
      &    0.5*RWU(1:NLAYR)/MAX(1.E-9,DLAYR(1:NLAYR))),

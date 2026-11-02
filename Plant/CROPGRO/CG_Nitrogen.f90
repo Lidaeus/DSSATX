@@ -119,7 +119,7 @@ contains
       if(root_mode<0.or.root_mode>2) error stop 'NI: invalid root mode'
       if(root_mode>0.and.(switch%ISWWAT/='Y'.or.switch%MEEVP=='Z')) &
         error stop 'NI: root mode requires actual non-Z water simulation'
-      if(min(root_v,root_k)<=0.or.diffusion_k<0.or.pool_beta<0) &
+      if(root_mode>0.and.(min(root_v,root_k)<=0.or.diffusion_k<0.or.pool_beta<0)) &
         error stop 'NI: explicit root kinetics, diffusion, and pool feedback required'
       if(root_mode==2.and.diffusion_k<=0) error stop 'NI: R2 requires positive effective diffusion'
     else if(root_mode/=0) then
