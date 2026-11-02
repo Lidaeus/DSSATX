@@ -67,9 +67,11 @@ if (RUN/'best_comparison.csv').exists():
   for tr,q2 in q.groupby('trno'):
    label=d[d.run==tr].label.iloc[0];n=label.split('_')[1]
    color={'N3':'#C0392B','N2':'#E67E22','N1':'#2980B9','N0':'#707070'}[n]
-   a.scatter(q2.observed/scale,q2.simulated/scale,c=color,s=18)
+   marker={'W3':'o','W2':'s','W1':'^'}[label.split('_')[0]]
+   a.scatter(q2.observed/scale,q2.simulated/scale,c=color,s=20,marker=marker)
   lo=min(q.observed.min(),q.simulated.min())/scale;hi=max(q.observed.max(),q.simulated.max())/scale
-  a.plot([lo,hi],[lo,hi],color='#777777',lw=1);a.set(xlabel='实测',ylabel='模拟',title=title);a.grid(alpha=.15)
+  unit='t/ha'if title=='最终鲜产'else'% DM'
+  a.plot([lo,hi],[lo,hi],color='#777777',lw=1);a.set(xlabel=f'实测（{unit}）',ylabel=f'模拟（{unit}）',title=title);a.grid(alpha=.15)
  fig.suptitle('最佳实际候选的确定性重跑诊断；率定拟合不等同独立验证',fontsize=10)
  fig.tight_layout(rect=[0,0,1,.93]);fig.savefig(dest/'diagnostic_best_fit.png',dpi=160);plt.close(fig)
 print('diagnostic PNGs saved:',dest)

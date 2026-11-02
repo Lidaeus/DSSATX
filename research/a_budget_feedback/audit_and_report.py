@@ -219,7 +219,7 @@ PEST主程序运行19.27分钟，原生IES评估779次：744次成功、35次失
 
 ## 7. 最佳组、重现与拟合局限
 
-所有实际评估候选最佳Phi={completion['best_actual_phi']:.12f}；最终接受成员重算最小Phi={float(finalphis.min()):.12f}。相对旧r020最佳128.9634下降{100*(earlyold-completion['best_actual_phi'])/earlyold:.2f}%；相对本轮新起点151.2061下降约58.13%。这些仅是相同目标定义下的训练拟合。
+所有实际评估候选最佳Phi={completion['best_actual_phi']:.12f}；从写出精度有限的最终成员观测CSV重算最小Phi约{float(finalphis.min()):.5f}，不以其末位差异替代原生精确重放结果。相对旧r020最佳128.9634下降{100*(earlyold-completion['best_actual_phi'])/earlyold:.2f}%；相对本轮新起点151.2061下降约58.13%。这些仅是相同目标定义下的训练拟合。
 
 最初回放Phi有约4.12e−5差异，定位到默认CSV浮点读取损失末位，实际固定列原生字段相同而NML连续参数末位不同。现使用round_trip适配器独立重放，参数浮点值及实际原生输入（排除工作路径）逐字节一致，Phi完全相同。历史冻结运行代码/原始评估不改写。精确参数保存在`best_parameters.exact.json`，后续部署应使用修复的`exact_replay_runtime/forward_A.py`；不能只依赖默认CSV解析。
 
