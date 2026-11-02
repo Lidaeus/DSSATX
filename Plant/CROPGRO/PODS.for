@@ -45,6 +45,8 @@
 !-----------------------------------------------------------------------
       USE ModuleDefs
       USE ModuleData
+      USE CG_Nitrogen, ONLY: NI_PODS, NI_POD_FACTOR
+      USE CG_P0Trace, ONLY: P0_ENABLED, P0_V
       IMPLICIT NONE
       EXTERNAL GETLUN, FIND, ERROR, IGNORE, PODCOMP, FreshWt, 
      &  WARNING, TIMDIF, CURV, TABEX
@@ -747,14 +749,25 @@ C-GH          IF (SHELN(NPP) .GE. 0.001 .AND. GRRAT1 .GE. 0.001) THEN
 !    DRPP**1.3 makes smaller and more sentitive to long days
 !    Scale pod addition to RNITP, leaf N for photo purporses
 !-----------------------------------------------------------------------
+          IF (NI_PODS()) THEN
+            RNITPD=NI_POD_FACTOR()
+          ELSE
           RNITPD = (RNITP*0.01-PROLFF*0.16)/(FNINL-PROLFF*0.16)
           RNITPD = MIN(1.1,RNITPD)
           RNITPD = MAX(0.1,RNITPD)
+          ENDIF
           PODADD = PMAX * TEMPOD * (DRPP**1.3) *
      &       MIN(SWADD1,SWADD2,RNITPD) * MAX((1.0 - ACCAGE),0.0)
 !    &       * MAX((1.0 - ACCAGE),0.0) * (1.0 + TURADD)
           SHELN(NR2TIM + 1) = MIN(PODADD, PGNPOD/(SHMAXG*AGRSH1),
      &      FLADD, NAVPOD/(SHMAXG*(FNINSH*CNSTRES**0.5)))
+          IF (P0_ENABLED()) THEN
+            CALL P0_V(CONTROL,'pods_set_budget',
+     &      'PODADD,C_limit,flower_limit,N_limit,selected,RNITPD',
+     &      (/PODADD,PGNPOD/(SHMAXG*AGRSH1),FLADD,
+     &      NAVPOD/(SHMAXG*(FNINSH*CNSTRES**0.5)),
+     &      SHELN(NR2TIM+1),RNITPD/))
+          ENDIF
 !-----------------------------------------------------------------------
 !    KJB ADDED 1/27/96.  2 CONDITIONS: NDSET AND TRIGGER (CUMSIG >.98)
 !    MUST BE MET TO STOP POD ADDITION.  THUS, IF WE ARE THRU THE WINDOW

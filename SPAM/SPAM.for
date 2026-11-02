@@ -46,7 +46,8 @@ C=======================================================================
       USE ModuleDefs
       USE ModuleData
       USE CG_P0Trace
-      USE CG_Nitrogen, ONLY: NI_ROOT_MODE, NI_CAPTURE_WATER
+      USE CG_Nitrogen, ONLY: NI_ROOT_MODE, NI_CAPTURE_WATER,
+     &  NI_OPEN_DAY
       USE FloodModule
 
       IMPLICIT NONE
@@ -249,6 +250,8 @@ C=======================================================================
 !     DAILY RATE CALCULATIONS
 !***********************************************************************
       ELSEIF (DYNAMIC .EQ. RATE) THEN
+!     ETPHR precedes CROPGRO RATE; freeze the same previous-end state.
+      CALL NI_OPEN_DAY(CONTROL)
 !-----------------------------------------------------------------------
       SWDELTX = 0.0
 !     ---------------------------------------------------------

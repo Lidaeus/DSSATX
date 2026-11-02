@@ -706,6 +706,8 @@ C-----------------------------------------------------------------------
 !     DAILY RATE CALCULATIONS
 !***********************************************************************
       ELSE IF (DYNAMIC .EQ. RATE) THEN
+!     Publish previous-end N state before phenology and daily consumers.
+      CALL NI_SYNC_STATE(CONTROL,NSTRES)
 !     P0b private reads verify the actual shared-cache interface.
       IF (P0_ENABLED()) THEN
         CALL GET('SPAM','UH2O',P0_RWU)
@@ -793,6 +795,7 @@ C-----------------------------------------------------------------------
 !     DAILY INTEGRATION 
 !***********************************************************************
       ELSE IF (DYNAMIC .EQ. INTEGR .AND. CROP .NE. 'FA') THEN
+      CALL NI_SYNC_STATE(CONTROL,NSTRES)
 !***********************************************************************
 !-----------------------------------------------------------------------
 !     Move PHENOL integration up here.

@@ -1,4 +1,4 @@
-! Official 4.8.6.4 integration. No V15 code/parameter set is used.
+! Official 4.8.6.4 + A budgets; opt-in v3 adaptations approved 2026-11-03.
 ! NI_STAGE: 0 official; 1 bounded pools; 2 finite assimilation;
 !           3 root transport; 4 organ reference curves; 5 functional feedback.
 module CG_Nitrogen
@@ -10,6 +10,11 @@ module CG_Nitrogen
   integer, parameter :: dp=real64
   integer, parameter :: implemented_stage=5
   integer, save :: ni_stage=0, root_mode=0, output_unit=0, budget_revision=0
+  integer, save :: state_timing=0, pods_n_state=0
+  integer, save :: end_run=-1,end_day=-1,day_run=-1,day_date=-1,day_source=-1
+  integer, save :: v3_unit=0
+  logical,save :: day_valid=.false.,v3_opened=.false.
+  real(dp),save :: z_end(2)=0,day_z(2)=0,day_growth=1
   real(dp), save :: curve_w0=1, photo_slw_ref=.0028_dp
   real(dp), save :: org_start(3)=0, donor_n(3)=0, donor_c(3)=0
   real(dp), save :: org_end_stock=0,org_end_off=0,seed_end=0,leak_end=0
@@ -47,7 +52,37 @@ module CG_Nitrogen
   public :: NI_SPLIT
   public :: NI_REVISED, NI_VEG_RECONCILE, NI_REFILL, NI_DONORS, NI_RETAIN
   public :: NI_EXPANSION, NI_AREA_REFILL, NI_MINIMUM
+  public :: NI_OPEN_DAY, NI_SYNC_STATE, NI_PODS, NI_POD_FACTOR, NI_POD_KERNEL
 contains
+  logical function NI_PODS()
+    NI_PODS=pods_n_state==1.and.day_valid
+  end function
+  pure real(dp) function NI_POD_KERNEL(z) result(f)
+    real(dp),intent(in)::z
+    ! V15 functional-response shape; new daily Z, not its old state scale.
+    f=1-(1-max(0._dp,min(1._dp,z)))**2
+  end function
+  real function NI_POD_FACTOR()
+    NI_POD_FACTOR=real(NI_POD_KERNEL(day_z(1)))
+  end function
+  subroutine NI_OPEN_DAY(control)
+    type(ControlType),intent(in)::control
+    if(state_timing==0.and.pods_n_state==0) return
+    if(day_run==control%RUN.and.day_date==control%YRDOY) return
+    day_run=control%RUN;day_date=control%YRDOY
+    day_valid=ready.and.end_run==control%RUN
+    day_source=-1;day_z=0;day_growth=1
+    if(day_valid) then
+      if(end_day>=control%YRDOY) error stop 'NI v3: current/future state in day snapshot'
+      day_source=end_day;day_z=z_end;day_growth=growth_factor
+    end if
+  end subroutine
+  subroutine NI_SYNC_STATE(control,nstres)
+    type(ControlType),intent(in)::control
+    real,intent(inout)::nstres
+    call NI_OPEN_DAY(control)
+    if(state_timing==1.and.day_valid) nstres=real(day_growth)
+  end subroutine
   logical function NI_REVISED()
     NI_REVISED=ni_stage>=4.and.budget_revision==1
   end function
@@ -157,7 +192,8 @@ contains
     namelist /NINTEGRATION/ ni_stage,root_mode,q_no3_max,q_nh4_max, &
       assim_no3_v,assim_nh4_v,assim_no3_k,assim_nh4_k, &
       root_v,root_k,diffusion_k,pool_beta,leaf_a,leaf_b,stem_a,stem_b, &
-      min_ratio,max_ratio,photo_floor,photo_gamma,growth_tau,budget_revision,curve_w0,photo_slw_ref
+      min_ratio,max_ratio,photo_floor,photo_gamma,growth_tau,budget_revision,curve_w0,photo_slw_ref, &
+      state_timing,pods_n_state
     if(loaded) then
       if(NI_ENABLED()) then
         if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
@@ -190,6 +226,10 @@ contains
     if(ni_stage>implemented_stage) error stop 'NI: requested integration stage is not connected in this build'
     if(.not.NI_ENABLED()) return
     if(budget_revision<0.or.budget_revision>1) error stop 'NI: budget_revision must be 0 or 1'
+    if(min(state_timing,pods_n_state)<0.or.max(state_timing,pods_n_state)>1) &
+      error stop 'NI v3: state switches must be 0 or 1'
+    if(max(state_timing,pods_n_state)>0.and.(ni_stage/=5.or.budget_revision/=1)) &
+      error stop 'NI v3: state changes require stage5 and A budget'
     if(.not.ieee_is_finite(curve_w0).or.curve_w0<=0.or..not.ieee_is_finite(photo_slw_ref).or.photo_slw_ref<=0) &
       error stop 'NI: invalid curve breakpoint or functional leaf reference'
     if(.not.all(ieee_is_finite([q_no3_max,q_nh4_max,assim_no3_v,assim_nh4_v,assim_no3_k,assim_nh4_k, &
@@ -230,6 +270,8 @@ contains
     q3=0; q4=0; carrier=0; w_begin=0; litter3=0; litter4=0
     returned_litter=0; water_ready=.false.; ready=.false.; growth_factor=1
     cmin=0; ccrit=0; cmax=0; d_pending=0
+    end_run=-1;end_day=-1;day_run=-1;day_date=-1;day_source=-1
+    day_valid=.false.;z_end=0;day_z=0;day_growth=1
   end subroutine
   subroutine NI_BEGIN(weights)
     real,intent(in)::weights(3)
@@ -445,6 +487,7 @@ contains
       error stop 'NI: storage capacity exceeded'
     if(NI_CURVES()) then
       call references(real(weights,dp))
+      z_end=(real(org_n(1:2),dp)/max(real(weights(1:2),dp),1.e-12_dp)-cmin)/(ccrit-cmin)
       nraw=(real(org_n(1),dp)/max(real(weights(1),dp),1.e-12_dp)-cmin(1))/(ccrit(1)-cmin(1))
       target=min(1._dp,max(0._dp,nraw))
       if(.not.ready) then
@@ -455,6 +498,19 @@ contains
       structural_fraction=max(0._dp,real(weights(1)-wcrlf,dp))/max(real(weights(1),dp),1.e-12_dp)
     end if
     ready=.true.
+    if(max(state_timing,pods_n_state)>0) then
+      if(.not.v3_opened) then
+        open(newunit=v3_unit,file='PlantNV3.csv',status='new',action='write',iostat=ios)
+        if(ios/=0) error stop 'NI v3: cannot create day-state ledger'
+        write(v3_unit,'(A)')'run,yrdoy,state_timing,pods_n_state,source_yrdoy,valid,'// &
+          'growth_day,z_leaf_day,z_stem_day,pod_n_factor,growth_end,z_leaf_end,z_stem_end'
+        v3_opened=.true.
+      end if
+      write(v3_unit,'(6(I0,","),6(ES24.15E3,","),ES24.15E3)')control%RUN,control%YRDOY, &
+        state_timing,pods_n_state,day_source,merge(1,0,day_valid),day_growth,day_z, &
+        NI_POD_KERNEL(day_z(1)),growth_factor,z_end
+    end if
+    end_run=control%RUN;end_day=control%YRDOY
     if(NI_REVISED()) then
       if(.not.audit_opened) then
         open(newunit=audit_unit,file='PlantABudget.csv',status='new',action='write',iostat=ios)
@@ -624,6 +680,7 @@ contains
   end subroutine
   real function NI_GROWTH()
     NI_GROWTH=real(growth_factor)
+    if(state_timing==1.and.day_valid) NI_GROWTH=real(day_growth)
   end function
   real function NI_LEAF_FACTOR(rnitp,slw,slwref)
     real,intent(in)::rnitp,slw,slwref
