@@ -4,7 +4,7 @@
 
 ## P0b状态（2026-11-02）
 
-已实现可关闭的 `DSSAT_P0_TRACE=0/1` 诊断，默认关闭；仅输出 `P0Trace.csv`，所有生理赋值保持官方原样。最终运行证据：`D:/Tomato_Cal/subprojects/critical_n/reports/p0b_trace_4864_20261102/run03`，最终分析在 `audit_final/`。
+已实现可关闭的 `DSSAT_P0_TRACE=0/1` 诊断，默认关闭；仅输出 `P0Trace.csv`，所有生理赋值保持官方原样。最终运行证据：`D:/Tomato_Cal/subprojects/critical_n/reports/p0b_trace_4864_20261102/final_run`，最终分析在 `analysis/`。诊断实现提交为 `16caa847`。
 
 26SP 12处理的追踪关闭/开启回放通过：8类选定输出均与冻结官方参照数值一致，43类有数值行的原生OUT在开关之间完全一致。跨日吸氮、RWU缓存、初始化、RPROAV与L光合路线已追踪。原生预算存在已定位问题，不将其标记为物理预算全部通过；详见本次执行报告。
 

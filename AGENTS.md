@@ -3,7 +3,7 @@
 这是用户项目 `D:/Tomato_Cal/subprojects/critical_n` 的官方4.8.6.4独立开发工作树。
 
 - 起点为 `v4.8.6.4` / `25c93b9a2f73f8ec45bf441b198dac5fb7b22849`；保留上游修复，不用4.8.2.0自定义整文件覆盖。
-- 当前只完成准备，未授权把本次准备描述成已完成新生理模型。后续按 `research/n_integration_v2/README.md` 的阶段与证据推进。
+- 当前完成准备和P0b只读追踪，新生理机制尚未实现。后续按用户任务及 `research/n_integration_v2/README.md` 的阶段与证据推进。
 - 沿用用户提供的 `D:/Tomato_Cal/AGENTS.md`、`D:/Tomato_Cal/subprojects/AGENTS.md` 与 `D:/Tomato_Cal/subprojects/critical_n/AGENTS.md` 约束；用户本会话的新指令优先。
 - 茄子继续走TMGRO048；当前拟合范围26SP，不纳入25秋或跨季节适用性前置要求。
 - 永不加入分季/关键日期生长护栏。SPAD、气体交换、荧光、茎粗不作经验替代率定目标；7月17日茎叶N只作诊断；果实N以采样当天独立商品成熟果为对象；产量目标采用鲜重。

@@ -153,7 +153,7 @@
   ],
   "v15_reference_policy": "user_approval_required_before_any_mechanism_or_successful_design_adoption",
   "v15_mechanisms_adopted": false,
-  "P0b_evidence": "D:/Tomato_Cal/subprojects/critical_n/reports/p0b_trace_4864_20261102/run03",
+  "P0b_evidence": "D:/Tomato_Cal/subprojects/critical_n/reports/p0b_trace_4864_20261102/final_run",
   "P0b_pending_and_RWU_interface_verified": true,
   "P0b_raw_native_N_C_budgets_closed": false,
   "P1_gate": "resolve_native_harvest_residue_retention_and_growth_cost_issues_with_separate_minimal_changes_before_new_pool"
