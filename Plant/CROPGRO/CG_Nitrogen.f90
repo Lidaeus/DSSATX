@@ -31,6 +31,11 @@ module CG_Nitrogen
   real(dp),save :: kinetic_cap(2)=0,late_a(2)=0,late_cost=0,late_c_budget=0,late_func=0,late_lux=0
   real(dp),save :: late_unit_cost(2)=0,late_c_before=0,late_c_after=0,late_c_reserved=0,late_nad(2)=0
   real(dp), save :: curve_w0=1, photo_slw_ref=.0028_dp
+  ! V4 P1: independent, opt-in mechanism comparisons; defaults reproduce C4.
+  real(dp),save :: leaf_min_ratio=-1,stem_min_ratio=-1,leaf_inf=0,stem_inf=0
+  real(dp),save :: photo_sln_ref=-1,veg_before(3)=0,veg_after(3)=0,storage_shift=0
+  integer,save :: photo_reference_mode=0,leaf_expansion_mode=0,v4_diagnostics=0,v4_unit=0
+  logical,save :: v4_opened=.false.
   real(dp), save :: org_start(3)=0, donor_n(3)=0, donor_c(3)=0
   real(dp), save :: org_end_stock=0,org_end_off=0,seed_end=0,leak_end=0
   real(dp), save :: veg_available=0,veg_cost=0,leaf_gate=1,refill_n(3)=0
@@ -75,6 +80,7 @@ module CG_Nitrogen
   public :: NI_C4_SEN_PLAN, NI_C4_FATE, NI_C4_NLOSS, NI_C4_AREA, NI_N_SEN_EXTRA
   public :: NI_C4_FRACTIONS
   public :: NI_C4_PHOTO, NI_CANOPY_N, NI_CANOPY_N_KERNEL
+  public :: NI_V4_CURVE_KERNEL, NI_V4_PHOTO_KERNEL, NI_V4_STORAGE_SHIFT
 contains
   logical function NI_C4_PHOTO()
     NI_C4_PHOTO=ni_stage==5.and.budget_revision==1.and.c4_photo==1.and.ready
@@ -433,6 +439,12 @@ contains
   real function NI_EXPANSION(dm,nnew)
     real,intent(in)::dm,nnew
     real(dp)::concentration,x
+    if(leaf_expansion_mode==1)then
+      ! Ablation: native new-tissue C/N acceptance and shared allocation
+      ! remain; omit the additional organ-concentration policy multiplier.
+      NI_EXPANSION=1.
+      return
+    endif
     concentration=max(0._dp,org_start(1)-donor_n(1)+real(nnew,dp))/ &
       max(1.e-12_dp,w_begin(1)-donor_n(1)/.16_dp-donor_c(1)+real(dm,dp))
     x=max(0._dp,min(1._dp,(concentration-cmin(1))/(ccrit(1)-cmin(1))))
@@ -457,6 +469,7 @@ contains
     real(dp)::scale,total,oldtotal,unitcost(3),composition(3)
     if(.not.NI_REVISED()) return
     veg_available=real(pg,dp);veg_cost=0;leaf_gate=1
+    veg_before=real(dm,dp);veg_after=veg_before
     oldtotal=sum(real(dm,dp))
     if(oldtotal<=0) return
     ! Preserve the actual N composition selected by VEGGR. Reduce potential
@@ -472,6 +485,11 @@ contains
     scale=min(1._dp,max(0._dp,real(pg,dp))/max(total*real(cost,dp),1.e-30_dp))
     dm=real(real(dm,dp)*scale);nn=real(real(nn,dp)*scale)
     veg_available=real(pg,dp);veg_cost=sum(real(dm,dp))*real(cost,dp)
+    veg_after=real(dm,dp)
+  end subroutine
+  subroutine NI_V4_STORAGE_SHIFT(amount)
+    real,intent(in)::amount
+    storage_shift=real(amount,dp)
   end subroutine
   subroutine NI_REFILL(available,dm,nn,cad,cr,root_target,nad,unused)
     real,intent(in)::available,dm(3),nn(3),cad(3),cr(3),root_target
@@ -531,7 +549,8 @@ contains
       root_v,root_k,diffusion_k,pool_beta,leaf_a,leaf_b,stem_a,stem_b, &
       min_ratio,max_ratio,photo_floor,photo_gamma,growth_tau,budget_revision,curve_w0,photo_slw_ref, &
       state_timing,pods_n_state,remob_mode,remob_severity,remob_tau,protect_beta,slow_ratio,luxury_priority, &
-      c4_budget,leaf_coupling,n_sen_rate,c4_photo
+      c4_budget,leaf_coupling,n_sen_rate,c4_photo,leaf_min_ratio,stem_min_ratio,leaf_inf,stem_inf, &
+      photo_reference_mode,photo_sln_ref,leaf_expansion_mode,v4_diagnostics
     if(loaded) then
       if(NI_ENABLED()) then
         if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
@@ -562,6 +581,19 @@ contains
     end if
     if(ni_stage<0.or.ni_stage>5) error stop 'NI: stage must be 0..5'
     if(ni_stage>implemented_stage) error stop 'NI: requested integration stage is not connected in this build'
+    if(min(photo_reference_mode,leaf_expansion_mode,v4_diagnostics)<0.or. &
+      max(photo_reference_mode,leaf_expansion_mode,v4_diagnostics)>1)error stop 'NI V4: invalid mode'
+    if(.not.all(ieee_is_finite([leaf_min_ratio,stem_min_ratio,leaf_inf,stem_inf,photo_sln_ref]))) &
+      error stop 'NI V4: nonfinite configuration'
+    if((leaf_min_ratio/=-1.and.(leaf_min_ratio<=0.or.leaf_min_ratio>=1)).or. &
+      (stem_min_ratio/=-1.and.(stem_min_ratio<=0.or.stem_min_ratio>=1)))error stop 'NI V4: invalid minimum ratio'
+    if(leaf_inf<0.or.stem_inf<0)error stop 'NI V4: negative asymptote'
+    if(max(photo_reference_mode,leaf_expansion_mode,v4_diagnostics)>0.or.leaf_min_ratio/=-1.or. &
+      stem_min_ratio/=-1.or.max(leaf_inf,stem_inf)>0)then
+      if(ni_stage/=5.or.budget_revision/=1.or.c4_photo/=1.or.leaf_coupling/=1) &
+        error stop 'NI V4: experiments require complete C4 stage5/A'
+    endif
+    if(photo_reference_mode==1.and.photo_sln_ref<=0)error stop 'NI V4: explicit area-N reference required'
     if(min(c4_budget,leaf_coupling,c4_photo)<0.or.max(c4_budget,leaf_coupling,c4_photo)>1)error stop 'NI C4: invalid mode'
     if(.not.ieee_is_finite(n_sen_rate).or.n_sen_rate<0.or.n_sen_rate>1)error stop 'NI C4: invalid senescence rate'
     if(c4_budget==1.and.(ni_stage/=5.or.budget_revision/=1.or.state_timing/=1.or.pods_n_state/=1)) &
@@ -618,6 +650,7 @@ contains
       if(min(leaf_a,leaf_b,stem_a,stem_b,min_ratio)<=0.or.min_ratio>=1.or.max_ratio<=1) &
         error stop 'NI: invalid organ soft-reference curves'
       if(max(leaf_a,stem_a)*max_ratio>=1) error stop 'NI: reference N fraction must remain below one'
+      if(leaf_inf>=leaf_a.or.stem_inf>=stem_a)error stop 'NI V4: asymptote must be below unit-biomass coefficient'
     end if
     if(ni_stage>=5) then
       if(switch%MEPHO/='L'.or.switch%MEEVP=='Z') &
@@ -649,6 +682,7 @@ contains
     mob_safe=0;mob_func=0;mob_plan=0;mob_returned=0;mob_gap=0;mob_accept=0;mob_new_used=0;mob_c_paid=0
     kinetic_cap=0;late_a=0;late_cost=0;late_c_budget=0;late_func=0;late_lux=0
     late_unit_cost=0;late_c_before=0;late_c_after=0;late_c_reserved=0;late_nad=0
+    veg_before=0;veg_after=0;storage_shift=0
     sen_frac=0;sen_plan_dm=0;sen_available=0;mob_sen=0;c4_nloss=0;c4_area_dead=0
   end subroutine
   subroutine NI_ORG_BEGIN(stocks,off,seed,leak)
@@ -898,6 +932,20 @@ contains
         NI_POD_KERNEL(day_z(1)),growth_factor,z_end
     end if
     end_run=control%RUN;end_day=control%YRDOY
+    if(v4_diagnostics==1)then
+      if(.not.v4_opened)then
+        open(newunit=v4_unit,file='PlantNV4.csv',status='new',action='write',iostat=ios)
+        if(ios/=0)error stop 'NI V4: cannot create mechanism ledger'
+        write(v4_unit,'(A)')'run,yrdoy,photo_reference_mode,leaf_expansion_mode,leaf_min_ratio,stem_min_ratio,'// &
+          'leaf_inf,stem_inf,photo_sln_ref,leaf_gate,veg_before_leaf,veg_before_stem,veg_before_root,'// &
+          'veg_after_leaf,veg_after_stem,veg_after_root,storage_shift_leaf_to_stem'
+        v4_opened=.true.
+      endif
+      write(v4_unit,'(4(I0,","),12(ES24.15E3,","),ES24.15E3)') control%RUN,control%YRDOY, &
+        photo_reference_mode,leaf_expansion_mode,merge(leaf_min_ratio,min_ratio,leaf_min_ratio>0), &
+        merge(stem_min_ratio,min_ratio,stem_min_ratio>0),leaf_inf,stem_inf,photo_sln_ref,leaf_gate, &
+        veg_before,veg_after,storage_shift
+    endif
     if(luxury_priority==1) then
       if(.not.lux_opened)then
         open(newunit=lux_unit,file='PlantNLuxury.csv',status='new',action='write',iostat=ios)
@@ -1074,12 +1122,24 @@ contains
     if(present(w0)) breakpoint=w0
     critical=a*max(breakpoint,w)**(-b); lower=rmin*critical; upper=rmax*critical
   end subroutine
+  pure subroutine NI_V4_CURVE_KERNEL(w,a,b,cinf,rmin,rmax,w0,lower,critical,upper)
+    real(dp),intent(in)::w,a,b,cinf,rmin,rmax,w0
+    real(dp),intent(out)::lower,critical,upper
+    if(cinf==0)then
+      call NI_CURVE_KERNEL(w,a,b,rmin,rmax,lower,critical,upper,w0)
+    else
+      critical=cinf+(a-cinf)*max(w0,w)**(-b)
+      lower=rmin*critical;upper=rmax*critical
+    endif
+  end subroutine
   subroutine references(weights)
     real(dp),intent(in)::weights(3)
     real(dp)::w
     w=max(0._dp,weights(1)+weights(2))/100 ! g DM/m2 -> t DM/ha; standing vegetative shoot
-    call NI_CURVE_KERNEL(w,leaf_a,leaf_b,min_ratio,max_ratio,cmin(1),ccrit(1),cmax(1),curve_w0)
-    call NI_CURVE_KERNEL(w,stem_a,stem_b,min_ratio,max_ratio,cmin(2),ccrit(2),cmax(2),curve_w0)
+    call NI_V4_CURVE_KERNEL(w,leaf_a,leaf_b,leaf_inf,merge(leaf_min_ratio,min_ratio,leaf_min_ratio>0), &
+      max_ratio,curve_w0,cmin(1),ccrit(1),cmax(1))
+    call NI_V4_CURVE_KERNEL(w,stem_a,stem_b,stem_inf,merge(stem_min_ratio,min_ratio,stem_min_ratio>0), &
+      max_ratio,curve_w0,cmin(2),ccrit(2),cmax(2))
   end subroutine
   subroutine NI_TARGETS(wleaf,wstem,fnil,fnis)
     real,intent(in)::wleaf,wstem
@@ -1113,7 +1173,17 @@ contains
       functional=max(0._dp,(real(rnitp,dp)/100*structural_fraction-cmin(1))*whole_slw)
       functional=min(functional,(ccrit(1)-cmin(1))*whole_slw)
     endif
+    if(photo_reference_mode==1)then
+      ! Fixed functional area-N reference in g N/m2 leaf; native SLW is
+      ! g DM/cm2 leaf. No second NNI or legacy SLW multiplier is added.
+      NI_LEAF_FACTOR=real(NI_V4_PHOTO_KERNEL(10000._dp*functional,photo_sln_ref,photo_floor,photo_gamma))
+      return
+    endif
     ratio=max(0._dp,min(1._dp,functional/max(reference,1.e-15_dp)))
     NI_LEAF_FACTOR=real(photo_floor+(1-photo_floor)*ratio**photo_gamma)
+  end function
+  pure real(dp) function NI_V4_PHOTO_KERNEL(functional_sln,reference,floor,gamma) result(f)
+    real(dp),intent(in)::functional_sln,reference,floor,gamma
+    f=floor+(1-floor)*max(0._dp,min(1._dp,functional_sln/max(reference,1.e-15_dp)))**gamma
   end function
 end module CG_Nitrogen

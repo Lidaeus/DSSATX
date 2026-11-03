@@ -90,7 +90,12 @@ def inject(work,values,runtime):
 
 def audit_A(work,config):
     cfg=dict(config)
-    for organ in ['leaf','stem']:cfg[organ+'_a']=config[organ+'_a']*config['curve_w0']**(-config[organ+'_b'])
+    for organ in ['leaf','stem']:
+        cinf=config.get(organ+'_inf',0)
+        if cinf:
+            cfg[organ+'_a']=cinf+(config[organ+'_a']-cinf)*config['curve_w0']**(-config[organ+'_b'])
+        else:
+            cfg[organ+'_a']=config[organ+'_a']*config['curve_w0']**(-config[organ+'_b'])
     result=audit(work,cfg)
     n=pd.read_csv(work/'PlantABudget.csv')
     if len(n)!=1512 or n.duplicated(['run','yrdoy']).any()or not n.budget_revision.eq(1).all():raise ValueError('A activation/coverage')

@@ -43,7 +43,8 @@ C========================================================================
 !-----------------------------------------------------------------------
       USE CG_P0Trace
       USE CG_Nitrogen, ONLY: NI_C4_ON, NI_CURVES, NI_FEEDBACK, NI_GROWTH,
-     &  NI_REVISED, NI_VEG_RECONCILE, NI_REFILL, NI_EXPANSION
+     &  NI_REVISED, NI_VEG_RECONCILE, NI_REFILL, NI_EXPANSION,
+     &  NI_V4_STORAGE_SHIFT
       USE ModuleDefs
       USE ModuleData
       IMPLICIT NONE
@@ -482,6 +483,7 @@ C-----------------------------------------------------------------------
         NILEFT=CADLF*(1.-NI_EXPANSION(CADLF,0.))
         CADLF=CADLF-NILEFT
         CADST=CADST+NILEFT
+        CALL NI_V4_STORAGE_SHIFT(NILEFT)
       ENDIF
 
 C-----------------------------------------------------------------------
