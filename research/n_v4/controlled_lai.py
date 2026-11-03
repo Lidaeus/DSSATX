@@ -154,7 +154,7 @@ def execute(item):
     return result
 
 if __name__=='__main__':
-    ap=argparse.ArgumentParser();ap.add_argument('--revision',default='r3');ap.add_argument('--scenario',choices=['all','gradient','recovery','pulse','low_light','initial_N'],default='all');a=ap.parse_args()
+    ap=argparse.ArgumentParser();ap.add_argument('--revision',default='r4');ap.add_argument('--scenario',choices=['all','gradient','recovery','pulse','low_light','initial_N'],default='all');a=ap.parse_args()
     scenarios=['gradient','recovery','pulse','low_light','initial_N'] if a.scenario=='all' else [a.scenario]
     tasks=[(a.revision,kind,variant) for kind in scenarios for variant in ['slow_reserve','lai_slow']]
     with ThreadPoolExecutor(max_workers=3) as pool:results=list(pool.map(execute,tasks))

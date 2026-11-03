@@ -40,6 +40,11 @@ def build(revision):
     target=OUT/'bin'/revision;target.mkdir(parents=True,exist_ok=False)
     env,_=p1.build_env()
     with (target/'build.log').open('w',encoding='utf8') as stream:
+        # CMake captures git provenance at configure time, not at link time.
+        # Refresh it after a commit even when all crop objects are unchanged.
+        configured=subprocess.run(['cmake','-S',str(REPO),'-B',str(REPO/'build')],cwd=REPO,env=env,
+            stdout=stream,stderr=subprocess.STDOUT)
+        if configured.returncode:raise RuntimeError('CMake configure failed; inspect build.log')
         r=subprocess.run(['cmake','--build',str(REPO/'build'),'--target','dscsm048','-j','6'],
             cwd=REPO,env=env,stdout=stream,stderr=subprocess.STDOUT)
     if r.returncode:raise RuntimeError((target/'build.log').read_text()[-5000:])
@@ -159,7 +164,7 @@ def mode0(revision):
 
 if __name__=='__main__':
     ap=argparse.ArgumentParser();ap.add_argument('step',choices=['prepare','build','units','case','all','mode0','guards'])
-    ap.add_argument('--revision',default='r3');ap.add_argument('--variant',choices=list(variants()),default='lai_slow');ap.add_argument('--trace',action='store_true');a=ap.parse_args()
+    ap.add_argument('--revision',default='r4');ap.add_argument('--variant',choices=list(variants()),default='lai_slow');ap.add_argument('--trace',action='store_true');a=ap.parse_args()
     if a.step=='prepare':prepare()
     elif a.step=='build':build(a.revision)
     elif a.step=='units':units(a.revision)

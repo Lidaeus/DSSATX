@@ -83,4 +83,4 @@ def main(revision='r2'):
     print(summary[summary.scenario.eq('gradient')&summary.variant.eq('lai_slow')].to_string(index=False))
     print(summary[summary.scenario.eq('recovery')&summary.variant.eq('lai_slow')&summary.run.isin([6,12])].to_string(index=False))
 
-if __name__=='__main__':main(sys.argv[1] if len(sys.argv)>1 else 'r3')
+if __name__=='__main__':main(sys.argv[1] if len(sys.argv)>1 else 'r4')
