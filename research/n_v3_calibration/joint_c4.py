@@ -96,10 +96,11 @@ def preflight(root,d):
         change=float(np.max(np.abs(native.iloc[:,3:].to_numpy()-baseline.iloc[:,3:].to_numpy())))
         effect=float(np.max(np.abs(comp.simulated-basecomp.simulated)))
         context=None
-        if row.name=='TCMP'and change<=1.e-10 and effect<=1.e-8:
+        if row.name in ['TCMP','NSLOPE'] and change<=1.e-10 and effect<=1.e-8:
             # TCMP governs the time course after the ICMP light threshold
             # is crossed. A single unshaded baseline cannot test its wiring.
-            icmp=bound[bound.name=='ICMP'].iloc[0]
+            context_name='ICMP' if row.name=='TCMP' else 'photo_slw_ref'
+            icmp=bound[bound.name==context_name].iloc[0]
             f0=base.copy();f0.loc[f0.name==icmp.pest_name,'value']=icmp.upper
             f0.to_csv(w/'context_base.csv',index=False)
             rb=evaluate(root/'preparation_design.json',w/'context_base.csv',w/'context_base')
@@ -109,7 +110,7 @@ def preflight(root,d):
             change=float(np.max(np.abs(nb.iloc[:,3:].to_numpy()-nc.iloc[:,3:].to_numpy())))
             cb=pd.read_csv(Path(rb['trial'])/'comparison.csv');cc=pd.read_csv(Path(rc['trial'])/'comparison.csv')
             effect=float(np.max(np.abs(cb.simulated-cc.simulated)))
-            context=f'ICMP={icmp.upper}; TCMP contrast only, both native runs retained'
+            context=f'{context_name}={icmp.upper}; {row.name} contrast only, both native runs retained'
         return dict(name=row.name,pest_name=row.pest_name,requested=value,native_change=change,objective_change=effect,
                     effective=change>1.e-10 or effect>1.e-8,success=True,phi=result['phi'],trial=result['trial'],
                     first_endpoint_error=first_endpoint_error,interaction_context=context)
@@ -180,6 +181,48 @@ def control(root,d,bounds):
 
 
 
+def review_context(root):
+    # This prepares a NEW frozen bounds revision before any PEST process starts.
+    if (root/'manager').exists() or (root/'execution_status.json').exists():raise ValueError('Cannot revise a launched run')
+    old_path=root/'design.json'
+    d=json.loads(old_path.read_text(encoding='utf8'))
+    c=json.loads((root/'preflight/NSLOPE_functional_context/context_result.json').read_text(encoding='utf8'))
+    if not c['effective']:raise ValueError('NSLOPE context does not establish wiring')
+    old_bounds=Path(d['bounds']);bounds=pd.read_csv(old_bounds,float_precision='round_trip')
+    candidates=pd.read_csv(root/'candidate_bounds.csv',float_precision='round_trip').set_index('name')
+    i=bounds.index[bounds.name.eq('NSLOPE')][0]
+    bounds.loc[i,['lower','upper','status']]=[candidates.loc['NSLOPE','lower'],candidates.loc['NSLOPE','upper'],'active']
+    dest=old_bounds.with_name('C4_joint_20261103_context.csv')
+    if dest.exists():raise ValueError('Preserve existing frozen revision')
+    bounds.to_csv(dest,index=False)
+    meta=json.loads(old_bounds.with_suffix('.meta.json').read_text(encoding='utf8'))
+    excluded=[n for n in d['excluded_after_probe'] if n!='NSLOPE']
+    meta.update(excluded_after_probe=excluded,previous_bounds=str(old_bounds),previous_bounds_sha256=sha(old_bounds),
+        context_review='NSLOPE responds at photo_slw_ref upper bound; preserve native range, do not classify saturation as absent wiring')
+    dump(dest.with_suffix('.meta.json'),meta)
+    wiring=pd.read_csv(root/'parameter_wiring_preflight.csv')
+    i=wiring.index[wiring.name.eq('NSLOPE')][0]
+    wiring.loc[i,['native_change','objective_change','effective','interaction_context']]=[c['native_change'],c['objective_change'],True,c['context']]
+    wiring.to_csv(root/'parameter_wiring_final.csv',index=False)
+    shutil.copy2(old_path,root/'design.before_context_review.json')
+    source=(root/'template').resolve();target=(root/'template_before_context_review').resolve()
+    if source.parent!=root.resolve() or target.parent!=root.resolve():raise ValueError('Unexpected template move')
+    shutil.move(str(source),str(target))
+    d.update(bounds=str(dest),excluded_after_probe=excluded,active=int(bounds.status.eq('active').sum()),
+        wiring_file=str(root/'parameter_wiring_final.csv'),source_head=subprocess.check_output(['git','-C',str(REPO),'rev-parse','HEAD'],text=True).strip(),
+        source_dirty=subprocess.check_output(['git','-C',str(REPO),'status','--porcelain'],text=True).strip())
+    control(root,d,bounds)
+    immutable=[p for p in (root/'runtime').rglob('*')if p.is_file() and '__pycache__'not in p.parts]
+    immutable+=list((root/'inputs').glob('*'))+list((root/'template').glob('*'))
+    immutable+=[dest,dest.with_suffix('.meta.json'),root/'fixed_nitrogen_config.json',root/'observations.csv',
+        root/'reference_active_76.csv',root/'parameter_wiring_final.csv',root/'bin/dscsm048_C4.exe',root/'bin/pestpp-ies.exe']
+    d['frozen_hashes']={str(p):sha(p)for p in immutable}
+    dump(old_path,d)
+    receipt=json.loads((root/'preflight_receipt.json').read_text(encoding='utf8'))
+    receipt.update(active=d['active'],excluded_after_probe=excluded,wiring_file=d['wiring_file'],NSLOPE_context=c)
+    dump(root/'preflight_receipt.context_review.json',receipt)
+    print('CONTEXT_REVIEW_FROZEN',d['active'],excluded,flush=True)
+
 def finalize(root,d):
     previous.evaluate=evaluate
     previous.finalize(root,d)
@@ -193,8 +236,10 @@ def finalize(root,d):
     dump(path,r)
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--prepare-only',action='store_true');p.add_argument('--launch-prepared',action='store_true');p.add_argument('--finalize-only',action='store_true');p.add_argument('--resume-preflight',action='store_true')
+    p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--prepare-only',action='store_true');p.add_argument('--launch-prepared',action='store_true');p.add_argument('--finalize-only',action='store_true');p.add_argument('--resume-preflight',action='store_true');p.add_argument('--review-context',action='store_true')
     a=p.parse_args();root=a.out.resolve()
+    if a.review_context:
+        review_context(root);sys.exit(0)
     if a.launch_prepared or a.finalize_only:d=json.loads((root/'design.json').read_text(encoding='utf8'))
     elif a.resume_preflight:
         if (root/'design.json').exists():raise ValueError('Frozen design cannot be mutated')
