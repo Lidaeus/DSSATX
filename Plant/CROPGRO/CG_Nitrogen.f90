@@ -20,6 +20,12 @@ module CG_Nitrogen
   integer,save :: remob_rate_mode=0
   real(dp),save :: remob_rate_max=-1,functional_rate_max=-1
   real(dp),save :: mob_rate_cap(4)=0,mob_function_cap(4)=0
+  integer,save :: lai_cn_mode=0,lai_unit=0,lai_accept_calls=0,lai_area_calls=0
+  logical,save :: lai_opened=.false.
+  real(dp),save :: lai_cn_shape=-1,lai_state=1,lai_signal=1,lai_dm_raw=0,lai_dm_request=0
+  real(dp),save :: lai_c_available=0,lai_n_available=0,lai_dm_actual=0,lai_n_actual=0
+  real(dp),save :: lai_c_actual=0,lai_veg_c=0,lai_veg_n=0,lai_build=0,lai_sla=0,lai_area=0
+  real(dp),save :: lai_min_begin=0,lai_crit_begin=0
   real(dp),save :: veg_z_end=1,day_veg_z=1
   real(dp),save :: mob_safe(4)=0,mob_func(4)=0,mob_plan(4)=0,mob_returned(4)=0
   real(dp),save :: mob_gap=0,mob_accept=0,mob_new_used=0,mob_c_paid=0
@@ -99,7 +105,111 @@ module CG_Nitrogen
   public :: NI_P2_VEG_ACCEPT,NI_P2_CSAVE,NI_P2_COMMIT_RESERVES,NI_P2_RNITP
   public :: NI_JOINT_KERNEL,NI_RESERVE_DONOR_KERNEL,NI_RESERVE_COMMIT_KERNEL
   public :: NI_P2_CARBON,NI_P2_UNUSED_ASSIM
+  public :: NI_LAI_ON,NI_LAI_REQUEST,NI_LAI_BUILD,NI_LAI_ACCEPT,NI_LAI_RECORD,NI_LAI_AREA,NI_LAI_CN_KERNEL
 contains
+  logical function NI_LAI_ON()
+    NI_LAI_ON=lai_cn_mode==1
+  end function
+  pure real(dp) function lai_factor(z,shape)
+    real(dp),intent(in)::z,shape
+    lai_factor=1-(1-max(0._dp,min(1._dp,z)))**shape
+  end function
+  pure subroutine NI_LAI_CN_KERNEL(carbon,nitrogen,dm,build,target,agr,proi,z,shape,accepted_dm,accepted_n,unitcost,scale,factor)
+    real(dp),intent(in)::carbon,nitrogen,dm(3),build(3),target(3),agr(3),proi(3),z,shape
+    real(dp),intent(out)::accepted_dm(3),accepted_n(3),unitcost(3),scale,factor
+    real(dp)::request(3),unused_repair(3),unused_fruit(2)
+    factor=lai_factor(z,shape);request=max(0._dp,dm);request(1)=request(1)*factor
+    call NI_JOINT_KERNEL(carbon,nitrogen,request,build,target,agr,proi,[0._dp,0._dp],[0._dp,0._dp,0._dp], &
+      accepted_dm,accepted_n,unused_repair,unused_fruit,unitcost,scale)
+  end subroutine
+  subroutine NI_LAI_REQUEST(dm)
+    real,intent(inout)::dm
+    lai_dm_raw=real(dm,dp);lai_state=1; lai_min_begin=cmin(1);lai_crit_begin=ccrit(1)
+    if(ready)lai_state=growth_factor
+    if(state_timing==1.and.day_valid)lai_state=day_growth
+    lai_signal=1
+    if(NI_LAI_ON())then
+      lai_signal=lai_factor(lai_state,lai_cn_shape)
+      dm=flux32(max(0._dp,real(dm,dp))*lai_signal)
+    endif
+    lai_dm_request=real(dm,dp)
+  end subroutine
+  subroutine NI_LAI_BUILD(build_leaf,build_stem,target_leaf,target_stem)
+    real,intent(inout)::build_leaf,build_stem
+    real,intent(in)::target_leaf,target_stem
+    if(.not.NI_LAI_ON())return
+    if(build_min_leaf>0)build_leaf=real(build_min_leaf*real(target_leaf,dp))
+    if(build_min_stem>0)build_stem=real(build_min_stem*real(target_stem,dp))
+  end subroutine
+  subroutine NI_LAI_ACCEPT(carbon,nitrogen,dm,nn,build,target,agr,proi,cost)
+    real,intent(in)::carbon,nitrogen,build(3),target(3),agr(3),proi(3)
+    real,intent(inout)::dm(3)
+    real,intent(out)::nn(3),cost
+    real(dp)::raw(3),accepted(3),nitrogen_used(3),unitcost(3),scale,factor,total,previous
+    integer::i
+    raw=real(dm,dp);raw(1)=lai_dm_raw
+    call NI_LAI_CN_KERNEL(real(carbon,dp),real(nitrogen,dp),raw,real(build,dp),real(target,dp), &
+      real(agr,dp),real(proi,dp),lai_state,lai_cn_shape,accepted,nitrogen_used,unitcost,scale,factor)
+    do i=1,3
+      previous=accepted(i);dm(i)=flux32(previous)
+      if(previous>0)nitrogen_used(i)=nitrogen_used(i)*real(dm(i),dp)/previous
+      nn(i)=flux32(nitrogen_used(i))
+    enddo
+    total=sum(real(dm,dp));cost=1
+    if(total>0)cost=real(sum(real(dm,dp)*unitcost)/total)
+  end subroutine
+  subroutine NI_LAI_RECORD(carbon,nitrogen,dm,nn,build,agr,proi,cost)
+    real,intent(in)::carbon,nitrogen,dm(3),nn(3),build,agr,proi,cost
+    real(dp)::composition
+    if(.not.NI_REVISED())return
+    lai_accept_calls=lai_accept_calls+1
+    if(lai_accept_calls/=1)error stop 'NI LAI: repeated vegetative acceptance'
+    lai_c_available=real(carbon,dp);lai_n_available=real(nitrogen,dp)
+    lai_dm_actual=real(dm(1),dp);lai_n_actual=real(nn(1),dp);lai_build=real(build,dp)
+    composition=0
+    if(dm(1)>0)composition=real(nn(1),dp)/(.16_dp*real(dm(1),dp))
+    lai_c_actual=real(dm(1),dp)*real(agr,dp)*(1-(composition-real(proi,dp))/(1-real(proi,dp)))
+    lai_veg_c=sum(real(dm,dp))*real(cost,dp);lai_veg_n=sum(real(nn,dp))
+    if(NI_LAI_ON())then
+      if(lai_dm_actual>lai_dm_request+2.e-6_dp)error stop 'NI LAI: accepted leaf exceeds state-limited request'
+      if(lai_n_actual+1.e-7_dp<lai_build*lai_dm_actual)error stop 'NI LAI: leaf assembly N deficit'
+    endif
+  end subroutine
+  real function NI_LAI_AREA(dm,sla)
+    real,intent(in)::dm,sla
+    NI_LAI_AREA=dm*sla
+    if(.not.NI_REVISED())return
+    lai_area_calls=lai_area_calls+1
+    if(lai_area_calls/=1)error stop 'NI LAI: repeated new leaf area integration'
+    lai_sla=real(sla,dp);lai_area=real(NI_LAI_AREA,dp)
+    if(abs(real(dm,dp)-lai_dm_actual)>1.e-7_dp)error stop 'NI LAI: area uses an unaccepted leaf mass'
+  end function
+  subroutine write_lai(control,lai)
+    type(ControlType),intent(in)::control
+    real,intent(in)::lai
+    real(dp)::nonreserve
+    integer::ios
+    if(max(lai_cn_mode,remob_rate_mode,v4_diagnostics)==0)return
+    ! Standalone pool/remobilization drivers do not execute VEGGR/GROW.
+    ! Full-crop replay separately requires all 1512 coupled ledger rows.
+    if(lai_cn_mode==0.and.lai_accept_calls==0.and.lai_area_calls==0)return
+    if(lai_accept_calls/=1.or.lai_area_calls/=1)error stop 'NI LAI: missing acceptance or area integration'
+    nonreserve=org_start(1)
+    if(NI_RESERVES())nonreserve=nonreserve-reserve_begin(1)
+    if(.not.lai_opened)then
+      open(newunit=lai_unit,file='PlantNLAI.csv',status='new',action='write',iostat=ios)
+      if(ios/=0)error stop 'NI LAI: cannot create leaf growth ledger'
+      write(lai_unit,'(A)')'run,yrdoy,lai_cn_mode,accept_calls,area_calls,shape,state_smoothed,state_raw_leaf,'// &
+        'state_response,N_nonreserve_begin,W_leaf_begin,N_min_begin,N_crit_begin,dm_leaf_potential,dm_leaf_request,'// &
+        'C_available_veg,N_available_veg,C_used_veg,N_used_veg,dm_leaf_actual,N_leaf_actual,C_leaf_actual,'// &
+        'build_N_leaf,SLA_new,new_leaf_area,old_leaf_area_lost,LAI_end,N_uptake_day,N_assim_day'
+      lai_opened=.true.
+    endif
+    write(lai_unit,'(5(I0,","),*(ES24.15E3,:,","))')control%RUN,control%YRDOY,lai_cn_mode,lai_accept_calls,lai_area_calls, &
+      lai_cn_shape,lai_state,day_z(1),lai_signal,nonreserve,w_begin(1), &
+      lai_min_begin,lai_crit_begin,lai_dm_raw,lai_dm_request,lai_c_available,lai_n_available,lai_veg_c,lai_veg_n, &
+      lai_dm_actual,lai_n_actual,lai_c_actual,lai_build,lai_sla,lai_area,c4_area_dead,real(lai,dp),d_u3+d_u4,d_a3+d_a4
+  end subroutine
   logical function NI_COMMON()
     NI_COMMON=common_acceptance==1
   end function
@@ -753,7 +863,7 @@ contains
   real function NI_EXPANSION(dm,nnew)
     real,intent(in)::dm,nnew
     real(dp)::concentration,x
-    if(leaf_expansion_mode==1.or.NI_COMMON())then
+    if(leaf_expansion_mode==1.or.NI_COMMON().or.NI_LAI_ON())then
       ! Ablation: native new-tissue C/N acceptance and shared allocation
       ! remain; omit the additional organ-concentration policy multiplier.
       NI_EXPANSION=1.
@@ -879,7 +989,7 @@ contains
       c4_budget,leaf_coupling,n_sen_rate,c4_photo,leaf_min_ratio,stem_min_ratio,leaf_inf,stem_inf, &
       photo_reference_mode,photo_sln_ref,leaf_expansion_mode,v4_diagnostics,common_acceptance,reserve_mode, &
       reserve_capacity,reserve_fill_tau,reserve_protect,build_min_leaf,build_min_stem, &
-      remob_rate_mode,remob_rate_max,functional_rate_max
+      remob_rate_mode,remob_rate_max,functional_rate_max,lai_cn_mode,lai_cn_shape
     if(loaded) then
       if(NI_ENABLED()) then
         if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
@@ -910,6 +1020,17 @@ contains
     end if
     if(ni_stage<0.or.ni_stage>5) error stop 'NI: stage must be 0..5'
     if(ni_stage>implemented_stage) error stop 'NI: requested integration stage is not connected in this build'
+    if(lai_cn_mode<0.or.lai_cn_mode>1)error stop 'NI LAI: invalid leaf C/N mode'
+    if(.not.ieee_is_finite(lai_cn_shape))error stop 'NI LAI: nonfinite leaf response'
+    if(lai_cn_mode==1)then
+      if(ni_stage/=5.or.budget_revision/=1.or.c4_budget/=1.or.leaf_coupling/=1.or.c4_photo/=1.or. &
+        state_timing/=1.or.pods_n_state/=1.or.remob_mode/=1.or.luxury_priority/=1) &
+        error stop 'NI LAI: leaf model requires complete revised C4 routes'
+      if(leaf_expansion_mode/=0)error stop 'NI LAI: duplicate expansion policy'
+      if(lai_cn_shape<1.or.lai_cn_shape>4)error stop 'NI LAI: explicit response shape in [1,4] required'
+    else if(lai_cn_shape/=-1)then
+      error stop 'NI LAI: unused leaf response requires lai_cn_mode=1'
+    endif
     if(remob_rate_mode<0.or.remob_rate_mode>1)error stop 'NI LAI: invalid remobilization rate mode'
     if(.not.all(ieee_is_finite([remob_rate_max,functional_rate_max])))error stop 'NI LAI: nonfinite rate limits'
     if(remob_rate_mode==1)then
@@ -923,8 +1044,8 @@ contains
     if(.not.all(ieee_is_finite([build_min_leaf,build_min_stem])))error stop 'NI P2: nonfinite new-tissue settings'
     if((build_min_leaf/=-1.and.(build_min_leaf<=0.or.build_min_leaf>1)).or. &
       (build_min_stem/=-1.and.(build_min_stem<=0.or.build_min_stem>1)))error stop 'NI P2: new-tissue fraction must be (0,1]'
-    if(max(build_min_leaf,build_min_stem)>0.and.common_acceptance/=1) &
-      error stop 'NI P2: separate new-tissue composition requires common acceptance'
+    if(max(build_min_leaf,build_min_stem)>0.and.common_acceptance/=1.and.lai_cn_mode/=1) &
+      error stop 'NI P2: separate new-tissue composition requires common acceptance or LAI C/N mode'
     if(max(common_acceptance,reserve_mode)>0)then
       if(ni_stage/=5.or.budget_revision/=1.or.c4_budget/=1.or.leaf_coupling/=1.or.c4_photo/=1.or. &
         remob_mode/=1.or.luxury_priority/=1)error stop 'NI P2: complete C4/C1-C3 routes required'
@@ -1024,6 +1145,7 @@ contains
     mob_rate_cap=0;mob_function_cap=0
     reserve_n=0;reserve_begin=0;reserve_fill=0;reserve_release=0;reserve_sen_recovery=0;reserve_litter=0
     reserve_pending=.false.;reserve_residual=0
+    lai_accept_calls=0;lai_area_calls=0;lai_dm_raw=0;lai_dm_request=0;lai_area=0
   end subroutine
   subroutine NI_BEGIN(weights)
     real,intent(in)::weights(3)
@@ -1048,6 +1170,9 @@ contains
     joint_build=0;joint_target=0;joint_agr=0;joint_proi=0;joint_unitcost=0
     joint_carbon=0;joint_nitrogen=0;joint_fruit_cap=0;joint_fruit_used=0;joint_scale=1
     joint_assim_n=0;joint_assim_c=0;joint_assim_unused=0
+    lai_accept_calls=0;lai_area_calls=0;lai_dm_raw=0;lai_dm_request=0;lai_area=0
+    lai_c_available=0;lai_n_available=0;lai_dm_actual=0;lai_n_actual=0;lai_veg_c=0;lai_veg_n=0
+    lai_c_actual=0;lai_build=0;lai_sla=0;lai_min_begin=0;lai_crit_begin=0
     if(max(common_acceptance,reserve_mode)>0)then
       donor_n=0;donor_c=0
     endif
@@ -1305,6 +1430,7 @@ contains
     end if
     end_run=control%RUN;end_day=control%YRDOY
     if(max(common_acceptance,reserve_mode)>0)call write_p2(control,org_n)
+    if(NI_REVISED())call write_lai(control,lai)
     if(v4_diagnostics==1)then
       if(.not.v4_opened)then
         open(newunit=v4_unit,file='PlantNV4.csv',status='new',action='write',iostat=ios)

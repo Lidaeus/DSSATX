@@ -63,7 +63,7 @@ C=======================================================================
       USE CG_Nitrogen, ONLY: NI_REVISED, NI_RETAIN,
      &  NI_AREA_REFILL, NI_MINIMUM, NI_LUX_ON, NI_REDUCTION_RESP,
      &  NI_C4_ON,NI_LEAF_COUPLED,NI_C4_NLOSS,NI_C4_AREA,
-     &  NI_CARB_KERNEL,NI_SHELL_CARB_KERNEL,NI_C4_FRACTIONS
+     &  NI_CARB_KERNEL,NI_SHELL_CARB_KERNEL,NI_C4_FRACTIONS,NI_LAI_AREA
       USE ISO_FORTRAN_ENV, ONLY: REAL64
       USE CG_P0Trace
       USE ModuleDefs     !Definitions of constructed variable types, 
@@ -1241,7 +1241,7 @@ C     Leaf Area, Specific Leaf Area Calculations
 C     Calculate Area Growth rate and Update Leaf Area (AREALF, XLAI)
 C-----------------------------------------------------------------------
       IF (NI_LEAF_COUPLED()) THEN
-        ALFDOT=NI_C4_AREA(WLDOTN*F)
+        ALFDOT=NI_C4_AREA(NI_LAI_AREA(WLDOTN,F))
       ELSE
       ALFDOT = WLDOTN*F - (SLDOT+WLIDOT+WLFDOT+NRUSLF/0.16)*SLA
       IF (WTLF > 1.E-4) THEN

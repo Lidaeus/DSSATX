@@ -45,7 +45,8 @@ C========================================================================
       USE CG_Nitrogen, ONLY: NI_C4_ON, NI_CURVES, NI_FEEDBACK, NI_GROWTH,
      &  NI_REVISED, NI_VEG_RECONCILE, NI_REFILL, NI_EXPANSION,
      &  NI_V4_STORAGE_SHIFT, NI_COMMON, NI_P2_POTENTIAL,
-     &  NI_P2_VEG_ACCEPT
+     &  NI_P2_VEG_ACCEPT,NI_LAI_ON,NI_LAI_REQUEST,NI_LAI_BUILD,
+     &  NI_LAI_ACCEPT,NI_LAI_RECORD
       USE ModuleDefs
       USE ModuleData
       IMPLICIT NONE
@@ -324,6 +325,10 @@ C-----------------------------------------------------------------------
       WLDOTN = FRLF * VGRDEM
       WSDOTN = FRSTM * VGRDEM
       WRDOTN = FRRT * VGRDEM
+      IF (NI_REVISED()) THEN
+        CALL NI_LAI_REQUEST(WLDOTN)
+        CALL NI_LAI_BUILD(FNINLG,FNINSG,FNINL,FNINS)
+      ENDIF
 C-----------------------------------------------------------------------
 C     Compute maximum N required for tissue growth
 C-----------------------------------------------------------------------
@@ -351,6 +356,18 @@ C-----------------------------------------------------------------------
         RETURN
       ENDIF
       NRATIO = 1.0
+      IF (NI_LAI_ON()) THEN
+        NIDM=(/WLDOTN,WSDOTN,WRDOTN/)
+        CALL NI_LAI_ACCEPT(PGAVL,NAVL,NIDM,NIN,
+     &    (/FNINLG,FNINSG,FNINRG/),(/FNINL,FNINS,FNINR/),
+     &    (/AGRLF,AGRSTM,AGRRT/),(/PROLFI,PROSTI,PRORTI/),AGRVG)
+        WLDOTN=NIDM(1)
+        WSDOTN=NIDM(2)
+        WRDOTN=NIDM(3)
+        NGRLF=NIN(1)
+        NGRST=NIN(2)
+        NGRRT=NIN(3)
+      ELSE
       IF (NAVL .LT. NGRVGG) THEN
 C-----------------------------------------------------------------------
 C     Compute ratio for reducing leaf growth to prevent N conc of
@@ -414,6 +431,7 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Compute C and N remaining to add to reserves
 C-----------------------------------------------------------------------
+      ENDIF
       IF (NI_REVISED()) THEN
         NIDM=(/WLDOTN,WSDOTN,WRDOTN/)
         NIN=(/NGRLF,NGRST,NGRRT/)
@@ -547,6 +565,9 @@ C     function of VSTAGE, air temperature, drought stress (TURFAC),
 C     daylenght and radiation (PAR).
 C-----------------------------------------------------------------------
       ENDIF
+      IF (NI_REVISED()) CALL NI_LAI_RECORD(PGAVL,NAVL,
+     &  (/WLDOTN,WSDOTN,WRDOTN/),(/NGRLF,NGRST,NGRRT/),
+     &  FNINLG,AGRLF,PROLFI,AGRVG)
       CALL CANOPY(INTEGR,
      &    ECONO, FILECC, FILEGC, KCAN, PAR, ROWSPC,       !Input
      &    RVSTGE, TGRO, TURFAC, VSTAGE, XLAI, NSTRES,     !Input
