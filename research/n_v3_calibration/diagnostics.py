@@ -26,7 +26,8 @@ def save(fig,path):
 def config(path):
     return {k:float(v)for k,v in re.findall(r'(\w+)\s*=\s*([-+\d.eE]+)',path.read_text())}
 def title(fig,label,extra=''):
-    fig.suptitle(label+'｜26SP固定参数运行诊断',fontsize=14,y=.99)
+    caption='｜26SP最佳组确定性诊断' if '率定后' in label else '｜26SP固定参数运行诊断'
+    fig.suptitle(label+caption,fontsize=14,y=.99)
     fig.text(.5,.015,'工程诊断，未经独立验证；'+extra,ha='center',fontsize=9,color='#555555')
 
 def curve_plot(dest,cfg,curves,label):
@@ -37,7 +38,8 @@ def curve_plot(dest,cfg,curves,label):
         for key,color,ls in [('Nmax','#4477AA','--'),('Ncrit','#17692C','-'),('Nmin','#AA7733','--')]:
             ax.plot(c.W_t_ha,c[key],c=color,ls=ls,lw=2 if key=='Ncrit'else 1.5,label=key)
         ax.axvline(cfg['curve_w0'],c='#777777',lw=.9,ls=':')
-        ax.set(title=f'{cn}：a={100*cfg[organ+"_a"]:.4f}%，b={cfg[organ+"_b"]:.4f}',xlabel='茎叶站存干物质量 W（t DM/ha）',ylabel='氮浓度（% DM）',xlim=(0,12),ylim=(0,4.5 if organ=='leaf'else 2.8))
+        ymax=max(4.5 if organ=='leaf'else 2.8,float(np.ceil(c.Nmax.max()*1.1*2)/2))
+        ax.set(title=f'{cn}：a={100*cfg[organ+"_a"]:.4f}%，b={cfg[organ+"_b"]:.4f}',xlabel='茎叶站存干物质量 W（t DM/ha）',ylabel='氮浓度（% DM）',xlim=(0,12),ylim=(0,ymax))
         ax.text(.98,.97,f'W0={cfg["curve_w0"]:.4f} t/ha\nNmin/Ncrit={cfg["min_ratio"]:.4f}\nNmax/Ncrit={cfg["max_ratio"]:.4f}',transform=ax.transAxes,ha='right',va='top',fontsize=9)
         ax.grid(alpha=.15);ax.legend(frameon=False,loc='upper center')
     title(fig,label+'：三条软参考曲线','Ncrit(%)=100a·max(W0,W)^(−b)；阴影为软参考带，不是置信区间或实际浓度硬边界')
@@ -82,6 +84,7 @@ def render(label,work,dest):
     curves=pd.concat(curves);curves.to_csv(dest/'diagnostic_curve_source.csv',index=False)
     for organ,cn in [('leaf','叶片'),('stem','茎')]:
         fig,axes=plt.subplots(1,3,figsize=(15,5),sharex=True,sharey=True)
+        ymax=max(6 if organ=='leaf'else 3.8,float(np.ceil(100*daily['Ctotal_'+organ].max()*1.08*2)/2))
         for ax,water in zip(axes,['W1','W2','W3']):
             for n in ['N3','N2','N1','N0']:
                 d=daily[daily.water_level.eq(water)&daily.nitrogen_level.eq(n)]
@@ -92,7 +95,7 @@ def render(label,work,dest):
                 q=o[~o.diagnostic_only];late=o[o.diagnostic_only]
                 ax.scatter(q.DAP,q.observed,c=COLORS[n],marker=SHAPES[water],s=33,edgecolors='white',linewidths=.5,zorder=4)
                 ax.scatter(late.DAP,late.observed,c=COLORS[n],marker='x',s=43,lw=1.4,zorder=4)
-            ax.set(title=water,xlabel='移栽后天数（DAP）',xlim=(0,128),ylim=(0,6 if organ=='leaf'else 3.8))
+            ax.set(title=water,xlabel='移栽后天数（DAP）',xlim=(0,128),ylim=(0,ymax))
             ax.grid(alpha=.15)
         axes[0].set_ylabel(cn+'氮浓度（% DM）')
         axes[-1].legend(frameon=False,ncol=2,loc='upper right')
@@ -110,10 +113,12 @@ def render(label,work,dest):
         b=ax.bar(x+.19,q.simulated_t_ha,.36,color=colors,alpha=.9)
         ax.bar_label(a,fmt='%.1f',fontsize=9,padding=3);ax.bar_label(b,fmt='%.1f',fontsize=9,padding=3)
         delta=q.loc['N3','simulated_t_ha']-q.loc['N0','simulated_t_ha']
-        ax.set(title=f'{water}  模拟N3−N0={delta:+.2f} t/ha',xticks=x,xticklabels=q.index,ylim=(0,90),xlabel='施氮处理')
+        ymax=max(90,float(np.ceil(final[['observed_t_ha','simulated_t_ha']].to_numpy().max()*1.2/10)*10))
+        ax.set(title=f'{water}  模拟N3−N0={delta:+.2f} t/ha',xticks=x,xticklabels=q.index,ylim=(0,ymax),xlabel='施氮处理')
         ax.grid(axis='y',alpha=.15);ax.set_axisbelow(True)
     axes[0].set_ylabel('季末累计采收鲜产（t/ha）')
-    title(fig,label+'：实测与模拟鲜产','空心柱=实测；实心柱=模拟；同一组A最佳参数，没有为各版本分别率定')
+    note='本轮PEST最佳参数的独立重放' if '率定后' in label else '同一组A最佳参数，没有为各版本分别率定'
+    title(fig,label+'：实测与模拟鲜产','空心柱=实测；实心柱=模拟；'+note)
     fig.tight_layout(rect=(0,.065,1,.925));save(fig,dest/'diagnostic_yield_observed_simulated.png')
     curve_plot(dest,cfg,curves,label)
     fig,axes=plt.subplots(1,2,figsize=(12,5))
@@ -131,6 +136,7 @@ def render(label,work,dest):
     sources={str(work/p):sha(work/p)for p in ['receipt.json','NIntegration.nml','PlantNIntegration.csv','PlantGro.OUT','comparison.csv']}
     sources.update({str(META):sha(META),str(RAW):sha(RAW)})
     manifest=dict(label=label,binary=receipt['binary'],binary_sha256=receipt['binary_sha256'],phi=receipt['phi'],config=cfg,
+        renderer_file=str(Path(__file__).resolve()),renderer_sha256=sha(__file__),
         source_hashes=sources,curve_definition='Ncrit=a*max(W0,W)^(-b), Nmin=min_ratio*Ncrit, Nmax=max_ratio*Ncrit; W=(Wleaf+Wstem)/100',
         observations='72 fitting N means/dates from frozen comparison; 24 July17 diagnostic means from raw g/kg converted to percent; no calibration-date remapping',
         scientific_status='engineering_diagnostic_not_independent_validation',
