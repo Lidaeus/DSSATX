@@ -157,6 +157,7 @@ C=======================================================================
       REAL P0_RWU(NL), P0_EP
       REAL NASSIMD, NFORGROW, NIUNUSED, NIREFUND, NILEAK0
       REAL NIV3FLUX(4),NIV3RETURN,NIV3REFUND,NIV3CPRED,NIV3CORE
+      REAL NIP2REPC,NIP2VEGC
       REAL NIV3CAD(2),NIV3NAD(3)
       REAL NISHARE, NIOLDN, NIVGC0
       REAL PHTHRS(20)
@@ -1274,6 +1275,37 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call routine to compute actual seed and shell growth
 C-----------------------------------------------------------------------
+      IF (NI_COMMON()) THEN
+        ! Predict once; neither PODS nor CANOPY is replayed. DEMAND includes
+        ! N acquisition cost; remove that prepaid component for pure growth.
+        NIP2REPC=MIN(NI_P2_CARBON(PGAVL)*XFRT,
+     &    MAX(0.,CDMREP-NDMREP*RPROAV/0.16))
+        NIP2VEGC=MAX(0.,NI_P2_CARBON(PGAVL)-NIP2REPC)*
+     &    (1.-CADPR1*FRACDN)
+        CALL VEGGR(9001,
+     &    AGRLF,AGRRT,AGRSTM,CMINEP,CSAVEV,DTX,
+     &    DXR57,ECONO,FILECC,FILEGC,FNINL,FNINR,
+     &    FNINS,KCAN,NAVL,NDMNEW,NDMOLD,
+     &    NFIXN,NMINEA,NR1,PAR,PCH2O,PG,NIP2VEGC,
+     &    PStres2,ROWSPC,RVSTGE,STMWT,TGRO,
+     &    NFORGROW,TURFAC,VSTAGE,WCRLF,WCRRT,WCRSH,
+     &    WCRST,WTLF,XLAI,YRDOY,YREMRG,
+     &    AGRVG,FRLF,FRRT,FRSTM,
+     &    CADLF,CADST,CANHT,CANWH,CMINEA,CRUSLF,
+     &    CRUSRT,CRUSSH,CRUSST,EXCESS,NADLF,NADRT,
+     &    NADST,NGRLF,NGRRT,NGRST,NSTRES,
+     &    TNLEAK,WLDOTN,WRDOTN,WSDOTN)
+        CALL NI_DONORS((/NRUSLF,NRUSST,NRUSRT/),
+     &    (/0.,0.,0./))
+        CALL NI_P2_PLAN(PGAVL,NAVL,NIP2REPC,NDMREP,FNINR)
+        ! Reject an unaccepted conversion reservation BEFORE executing any
+        ! organ. Its substrate stays inorganic; released C is usable today.
+        NIUNUSED=NI_P2_UNUSED_ASSIM()
+        CALL NI_SETTLE(NIUNUSED,RSPNO3,RSPNH4,NASSIMD,
+     &    NIREFUND,UNO3,UNH4,NLAYR,TRNO3U,TRNH4U,TRNU)
+        NAVL=NAVL-NIUNUSED
+        PGAVL=PGAVL+NIREFUND
+      ENDIF
       CALL PODS(INTEGR, 
      &    AGRSD1, AGRSH1, DLAYR, DRPP, DUL, FILECC,       !Input
      &    FILEGC,FILEIO, FNINL, FNINSD, FNINSH, GDMSD,    !Input
@@ -1308,6 +1340,7 @@ C     Compute carbon required for seed (CGRSD) and shell (CGRSH) growth
 C-----------------------------------------------------------------------
       CGRSD = WSDDTN * AGRSD3
       CGRSH = WSHDTN * AGRSH1
+      CALL NI_P2_FRUIT_USED(CGRSD+CGRSH,NGRSD+NGRSH)
 C-----------------------------------------------------------------------
 C     Reduce PGAVL by C used for seed growth
 C     Also reduce NAVL by N used for seed growth
@@ -1336,6 +1369,7 @@ C     as CH2O.  Increase this as plant moves from R1 into seed fill.
 C-----------------------------------------------------------------------
       CALL NI_REMOB_REPRO(NGRSD+NGRSH)
       CSAVEV = CADPR1 * PGAVL * FRACDN
+      CSAVEV = NI_P2_CSAVE(CSAVEV,PGAVL)
       PGAVL = PGAVL - CSAVEV
 !     P0b read-only trace; no model state is assigned.
       IF (P0_ENABLED()) THEN
@@ -1536,7 +1570,9 @@ C-----------------------------------------------------------------------
      &  WTNUP, WTRO, WTSDO, WTSHO, WTSO, XLAI, XPOD,      !Output
      &  ShutMob, RootMob, ShelMob,                        !Output
      &  TOSHMINE,TOCHMINE,HPODWT,HSDWT,HSHELWT)           !Output
-      
+      CALL NI_P2_COMMIT_RESERVES((/WTNLF,WTNST/),
+     &  (/WTLF,STMWT/))
+      RNITP=NI_P2_RNITP(WTNLF,WTLF-WCRLF,RNITP)
 !     P0b read-only trace; no model state is assigned.
       IF (P0_ENABLED()) THEN
         CALL P0_V(CONTROL,'cg_end',

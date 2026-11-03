@@ -45,7 +45,8 @@
 !-----------------------------------------------------------------------
       USE ModuleDefs
       USE ModuleData
-      USE CG_Nitrogen, ONLY: NI_PODS, NI_POD_FACTOR
+      USE CG_Nitrogen, ONLY: NI_PODS, NI_POD_FACTOR,
+     &  NI_COMMON, NI_P2_POD_BUDGET
       USE CG_P0Trace, ONLY: P0_ENABLED, P0_V
       IMPLICIT NONE
       EXTERNAL GETLUN, FIND, ERROR, IGNORE, PODCOMP, FreshWt, 
@@ -90,6 +91,7 @@
       REAL SUPDAY, SDMAXX, SHRAT, WTABR, START, PNAGE, FLWFRC, FLADD
       REAL ACTSW, POTSW, DSW, FLAYR, CURV, TABEX
       REAL CUMSIG, CNSTRES, AGRSD3, ANINSD
+      REAL NIP2NAVL,NIP2PGPOT
       REAL RNITPD, POTLIP, POTCAR
       REAL CRSD, NRSD, NREQ
 
@@ -408,6 +410,9 @@
         NR1TIM = MAX(TIMDIF(YRNR1,YRDOY),0)
 !-----------------------------------------------------------------------
         PGAVLR = PGAVL * XFRT
+        NIP2NAVL=NAVL
+        NIP2PGPOT=PGAVLR
+        CALL NI_P2_POD_BUDGET(PGAVLR,NIP2NAVL)
 
 !-----------------------------------------------------------------------
 !     Nitrogen stress; 8-Day moving average.
@@ -491,7 +496,7 @@ C-GH      IF (GDMSD .GT. 0.0001) THEN
             CRSD = MIN(PGAVLR / (GDMSD*AGRSD1), 1.0)
             NREQ = FNINSD * MIN(PGAVLR/AGRSD1, GDMSD)
             IF (NREQ .GT. 0.0) THEN
-              NRSD = NAVL / NREQ
+              NRSD = NIP2NAVL / NREQ
             ELSE
               NRSD = 1.0
             ENDIF
@@ -505,7 +510,7 @@ C-GH      IF (GDMSD .GT. 0.0001) THEN
 !     Detailed seed composition calculations
 !-----------------------------------------------------------------------
           CALL PODCOMP(
-     &      AGRSD1, FILECC, FNINSD, GDMSD, NAVL, PGAVLR,  !Input
+     &      AGRSD1, FILECC, FNINSD, GDMSD, NIP2NAVL, PGAVLR, !Input
      &      POTCAR, POTLIP,                               !Input/Output
      &      AGRSD3, ANINSD, CUMSIG, RSD,                  !Output
      &      INTEGR)                                       !Control
@@ -540,9 +545,16 @@ C-GH      IF (GDMSD .GT. 0.0001) THEN
 !     Shell section
 !-----------------------------------------------------------------------
         PGLEFT = MAX(0.0,(PGAVLR - WSDDTN*AGRSD3))
-        NLEFT  = MAX(0.0,(NAVL - NGRSD))
+        NLEFT  = MAX(0.0,(NIP2NAVL - NGRSD))
         PGNPOD = PGLEFT
         NAVPOD = NLEFT
+        IF (NI_COMMON()) THEN
+          ! New flower/pod NUMBER is a developmental forecast, not today's
+          ! accepted tissue growth. Keep prospective source indices so a
+          ! zero existing fruit demand cannot prevent all first flowering.
+          PGNPOD=MAX(0.,NIP2PGPOT-WSDDTN*AGRSD3)
+          NAVPOD=MAX(0.,NAVL-NGRSD)
+        ENDIF
 !-----------------------------------------------------------------------
 !     Calculate function for modifying pod setting with temperature
 !-----------------------------------------------------------------------
@@ -737,6 +749,8 @@ C-GH          IF (SHELN(NPP) .GE. 0.001 .AND. GRRAT1 .GE. 0.001) THEN
  2500   ENDDO
  
         PMAX = PGAVLR/(SDVAR*AGRSD1*SDPDVR)*(1./PODUR)
+        IF (NI_COMMON())
+     &    PMAX=NIP2PGPOT/(SDVAR*AGRSD1*SDPDVR)*(1./PODUR)
 
         IF (YRDOY .GE. YRNR2 .AND. YRNR2 .GT. 0) THEN
           FLADD = FLWRDY * TEMPOD *(DRPP**1.3)* MIN(SWADD1,SWADD2) *XFRT

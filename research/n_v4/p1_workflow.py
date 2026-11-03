@@ -10,6 +10,8 @@ REPO=Path(__file__).resolve().parents[2]
 CN=Path('D:/Tomato_Cal/subprojects/critical_n')
 OUT=CN/'reports/n_v4_p0_p1_20261103'
 OLD=CN/'runs/n4864_C4_joint80x4_20261103_r2'
+EXE_NAME='dscsm048_v4_p1_research.exe'
+BUILD_LOG='build_v4.log'
 sys.path.insert(0,str(REPO/'research/n_integration_v2'))
 sys.path.insert(0,str(REPO/'research/n_v3_calibration'))
 from smoke_forward import redirect,extract
@@ -49,13 +51,13 @@ def prepare():
 def deliver():
     target=OUT/'bin';target.mkdir(exist_ok=True)
     assert not (target/'build_receipt.json').exists(),'Preserve completed delivery'
-    exe=target/'dscsm048_v4_p1_research.exe'
+    exe=target/EXE_NAME
     if exe.exists():assert sha(exe)==sha(REPO/'build/bin/dscsm048.exe'),'Unexpected partial delivery'
     else:shutil.copy2(REPO/'build/bin/dscsm048.exe',exe)
     dump(target/'build_receipt.json',dict(exe=str(exe),sha256=sha(exe),
         git_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=REPO,text=True).strip(),
         source_hashes={str(p.relative_to(REPO)):sha(p) for folder in ['Plant/CROPGRO','SPAM'] for p in (REPO/folder).iterdir() if p.suffix.lower() in ['.for','.f90']},
-        git_diff=subprocess.check_output(['git','diff'],cwd=REPO,text=True,encoding='utf8'),build_log_sha256=sha(REPO/'build/build_v4.log')))
+        git_diff=subprocess.check_output(['git','diff'],cwd=REPO,text=True,encoding='utf8'),build_log_sha256=sha(REPO/'build'/BUILD_LOG)))
 
 def units():
     sys.path.insert(0,str(REPO/'research/n_v3'))
@@ -107,7 +109,7 @@ def case(item):
     redirect(work/'DSSATPRO.v48',work)
     (work/'NIntegration.nml').write_text('&NINTEGRATION\n'+''.join(f' {k}={v:.17g}\n' for k,v in cfg.items())+'/\n',encoding='ascii')
     env=os.environ.copy();env.update(DSSAT_N_CONFIG=str(work/'NIntegration.nml'),DSSAT_P0_TRACE='1' if name=='baseline' or name.endswith('_trace') else '0')
-    exe=OUT/'bin/dscsm048_v4_p1_research.exe';start=time.monotonic()
+    exe=OUT/'bin'/EXE_NAME;start=time.monotonic()
     result=dict(name=name,changes=changes,config=cfg,binary_sha256=sha(exe),success=False)
     try:
         with (work/'stdout.log').open('wb') as so,(work/'stderr.log').open('wb') as se:
@@ -153,7 +155,7 @@ def mode0():
     redirect(work/'DSSATPRO.v48',work)
     env=os.environ.copy();env.update(DSSAT_N_CONFIG=str(work/'NIntegration.nml'),DSSAT_P0_TRACE='0')
     with (work/'stdout.log').open('wb') as so,(work/'stderr.log').open('wb') as se:
-        r=subprocess.run([str(OUT/'bin/dscsm048_v4_p1_research.exe'),'B','DSSBatch.v48'],cwd=work,env=env,stdout=so,stderr=se,timeout=240)
+        r=subprocess.run([str(OUT/'bin'/EXE_NAME),'B','DSSBatch.v48'],cwd=work,env=env,stdout=so,stderr=se,timeout=240)
     assert r.returncode==0,(work/'stderr.log').read_text(errors='replace')
     checks={f:numeric_records(work/f)==numeric_records(source/f) for f in COMPARE_FILES}
     assert all(checks.values())
@@ -202,7 +204,7 @@ def guards():
         cfg=dict(b['config']);cfg.update(changes)
         (w/'NIntegration.nml').write_text('&NINTEGRATION\n'+''.join(f' {k}={v:.17g}\n' for k,v in cfg.items())+'/\n')
         env=os.environ.copy();env.update(DSSAT_N_CONFIG=str(w/'NIntegration.nml'),DSSAT_P0_TRACE='0')
-        r=subprocess.run([str(OUT/'bin/dscsm048_v4_p1_research.exe'),'B','DSSBatch.v48'],cwd=w,env=env,capture_output=True,text=True,timeout=60)
+        r=subprocess.run([str(OUT/'bin'/EXE_NAME),'B','DSSBatch.v48'],cwd=w,env=env,capture_output=True,text=True,timeout=60)
         (w/'output.log').write_text(r.stdout+r.stderr,encoding='utf8')
         assert r.returncode!=0 and expected in r.stdout+r.stderr,(name,r.returncode,r.stdout+r.stderr)
         results.append(dict(name=name,passed=True,expected=expected,returncode=r.returncode))

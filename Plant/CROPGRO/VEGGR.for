@@ -44,7 +44,8 @@ C========================================================================
       USE CG_P0Trace
       USE CG_Nitrogen, ONLY: NI_C4_ON, NI_CURVES, NI_FEEDBACK, NI_GROWTH,
      &  NI_REVISED, NI_VEG_RECONCILE, NI_REFILL, NI_EXPANSION,
-     &  NI_V4_STORAGE_SHIFT
+     &  NI_V4_STORAGE_SHIFT, NI_COMMON, NI_P2_POTENTIAL,
+     &  NI_P2_VEG_ACCEPT
       USE ModuleDefs
       USE ModuleData
       IMPLICIT NONE
@@ -235,7 +236,8 @@ C========================================================================
 !***********************************************************************
 !     DAILY RATE/INTEGRATION
 !***********************************************************************
-      ELSEIF (DYNAMIC .EQ. INTEGR) THEN
+      ELSEIF (DYNAMIC .EQ. INTEGR .OR.
+     &       (DYNAMIC .EQ. 9001 .AND. NI_COMMON())) THEN
       NIMINL=PROLFG
       NIMINS=PROSTG
       IF (NI_CURVES()) THEN
@@ -246,6 +248,18 @@ C========================================================================
       ENDIF
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
+      IF (NI_COMMON().AND.DYNAMIC.EQ.INTEGR) THEN
+        XNSTRES=NI_GROWTH()
+        NSTRES=XNSTRES
+        NRATIO=1.
+        CALL NI_P2_VEG_ACCEPT(PGAVL,NAVL,AGRVG,NIDM,NIN)
+        WLDOTN=NIDM(1)
+        WSDOTN=NIDM(2)
+        WRDOTN=NIDM(3)
+        NGRLF=NIN(1)
+        NGRST=NIN(2)
+        NGRRT=NIN(3)
+      ELSE
 C     Partitioning is modified by water stress and nitrogen stress
 C-----------------------------------------------------------------------
       SUPPN = NFIXN + TRNU + NMINEA
@@ -330,6 +344,12 @@ C-----------------------------------------------------------------------
      &    'AGRVG,NGRVEG,NGRVGG,NAVL,VGRDEM,PGAVL',
      &    (/AGRVG,NGRVEG,NGRVGG,NAVL,VGRDEM,PGAVL/))
       ENDIF
+      IF (DYNAMIC.EQ.9001.AND.NI_COMMON()) THEN
+        CALL NI_P2_POTENTIAL((/WLDOTN,WSDOTN,WRDOTN/),
+     &    (/FNINLG,FNINSG,FNINRG/),(/FNINL,FNINS,FNINR/),
+     &    (/AGRLF,AGRSTM,AGRRT/),(/PROLFI,PROSTI,PRORTI/))
+        RETURN
+      ENDIF
       NRATIO = 1.0
       IF (NAVL .LT. NGRVGG) THEN
 C-----------------------------------------------------------------------
@@ -406,6 +426,7 @@ C-----------------------------------------------------------------------
         NGRST=NIN(2)
         NGRRT=NIN(3)
       ENDIF
+      ENDIF ! Common acceptance replaces, rather than multiplies, native cuts.
       PGLEFT = MAX(0.0,PGAVL - ((WLDOTN + WSDOTN + WRDOTN) * AGRVG))
       ! C4 settles real stocks: do not erase a small unspent C balance.
       ! The old cutoff overstates actual mining by that discarded amount.

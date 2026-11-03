@@ -36,6 +36,17 @@ module CG_Nitrogen
   real(dp),save :: photo_sln_ref=-1,veg_before(3)=0,veg_after(3)=0,storage_shift=0
   integer,save :: photo_reference_mode=0,leaf_expansion_mode=0,v4_diagnostics=0,v4_unit=0
   logical,save :: v4_opened=.false.
+  integer,save :: common_acceptance=0,reserve_mode=0,p2_unit=0,p2_plan_calls=0,p2_veg_calls=0
+  real(dp),save :: reserve_capacity=-1,reserve_fill_tau=-1,reserve_protect=-1
+  real(dp),save :: build_min_leaf=-1,build_min_stem=-1
+  logical,save :: p2_opened=.false.,reserve_pending=.false.
+  real(dp),save :: reserve_n(2)=0,reserve_begin(2)=0,reserve_fill(2)=0,reserve_release(2)=0
+  real(dp),save :: reserve_sen_recovery(2)=0,reserve_litter(2)=0,reserve_residual(2)=0
+  real(dp),save :: joint_dm_req(3)=0,joint_build(3)=0,joint_target(3)=0,joint_agr(3)=0,joint_proi(3)=0
+  real(dp),save :: joint_dm(3)=0,joint_nn(3)=0,joint_repair(3)=0,joint_repair_used(3)=0
+  real(dp),save :: joint_unitcost(3)=0,joint_carbon=0,joint_nitrogen=0,joint_fruit_req(2)=0
+  real(dp),save :: joint_fruit_cap(2)=0,joint_fruit_used(2)=0,joint_scale=1,mob_repair_used=0
+  real(dp),save :: joint_assim_n=0,joint_assim_c=0,joint_assim_unused=0
   real(dp), save :: org_start(3)=0, donor_n(3)=0, donor_c(3)=0
   real(dp), save :: org_end_stock=0,org_end_off=0,seed_end=0,leak_end=0
   real(dp), save :: veg_available=0,veg_cost=0,leaf_gate=1,refill_n(3)=0
@@ -81,7 +92,226 @@ module CG_Nitrogen
   public :: NI_C4_FRACTIONS
   public :: NI_C4_PHOTO, NI_CANOPY_N, NI_CANOPY_N_KERNEL
   public :: NI_V4_CURVE_KERNEL, NI_V4_PHOTO_KERNEL, NI_V4_STORAGE_SHIFT
+  public :: NI_COMMON,NI_RESERVES,NI_P2_POTENTIAL,NI_P2_PLAN,NI_P2_POD_BUDGET,NI_P2_FRUIT_USED
+  public :: NI_P2_VEG_ACCEPT,NI_P2_CSAVE,NI_P2_COMMIT_RESERVES,NI_P2_RNITP
+  public :: NI_JOINT_KERNEL,NI_RESERVE_DONOR_KERNEL,NI_RESERVE_COMMIT_KERNEL
+  public :: NI_P2_CARBON,NI_P2_UNUSED_ASSIM
 contains
+  logical function NI_COMMON()
+    NI_COMMON=common_acceptance==1
+  end function
+  logical function NI_RESERVES()
+    NI_RESERVES=reserve_mode==1
+  end function
+  pure subroutine NI_JOINT_KERNEL(carbon,nitrogen,dm,build,target,agr,proi,fruit,repair, &
+      accepted_dm,accepted_n,accepted_repair,fruit_cap,cost,scale,assim_price,free_n)
+    real(dp),intent(in)::carbon,nitrogen,dm(3),build(3),target(3),agr(3),proi(3),fruit(2),repair(3)
+    real(dp),intent(out)::accepted_dm(3),accepted_n(3),accepted_repair(3),fruit_cap(2),cost(3),scale
+    real(dp),intent(in),optional::assim_price,free_n
+    real(dp)::lower,total,gap,blend,composition(3),nreq,creq,price,free,lo,hi,mid,expense,veg_fraction,planned_dm(3)
+    integer::i
+    lower=sum(dm*build)+fruit(2)+sum(repair)
+    total=sum(dm*target)+fruit(2)+sum(repair)
+    gap=max(0._dp,total-lower)
+    blend=max(0._dp,min(1._dp,(max(0._dp,nitrogen)-lower)/max(gap,1.e-30_dp)))
+    composition=build+blend*(target-build)
+    cost=agr*(1-(composition/.16_dp-proi)/(1-proi))
+    planned_dm=dm
+    if(present(assim_price).and.present(free_n))then
+      price=max(0._dp,assim_price);free=max(0._dp,free_n)
+      ! Keep the native reproductive C potential as a sink preference.
+      ! Vegetative potential must first include its own N acquisition cost;
+      ! otherwise ample-N plants spuriously lose fruit C to oversubscribed
+      ! veg potential. Scarce N is still shared by ALL receivers below.
+      expense=fruit(1)+max(0._dp,fruit(2)+sum(repair)-free)*price
+      if(expense<=max(0._dp,carbon))then
+        lo=0;hi=1
+        do i=1,64
+          mid=.5_dp*(lo+hi)
+          expense=fruit(1)+mid*sum(dm*cost)+ &
+            max(0._dp,fruit(2)+sum(repair)+mid*sum(dm*composition)-free)*price
+          if(expense<=max(0._dp,carbon))then
+            lo=mid
+          else
+            hi=mid
+          endif
+        enddo
+        veg_fraction=lo;planned_dm=dm*veg_fraction
+      endif
+    endif
+    creq=sum(planned_dm*cost)+fruit(1)
+    nreq=sum(planned_dm*composition)+fruit(2)+sum(repair)
+    scale=1
+    if(creq>0)scale=min(scale,max(0._dp,carbon)/creq)
+    if(nreq>0)scale=min(scale,max(0._dp,nitrogen)/nreq)
+    if(present(assim_price).and.present(free_n))then
+      price=max(0._dp,assim_price);free=max(0._dp,free_n)
+      lo=0;hi=scale
+      do i=1,64
+        mid=.5_dp*(lo+hi)
+        expense=mid*creq+max(0._dp,mid*nreq-free)*price
+        if(expense<=max(0._dp,carbon))then
+          lo=mid
+        else
+          hi=mid
+        endif
+      enddo
+      scale=lo
+    endif
+    accepted_dm=planned_dm*scale;accepted_n=accepted_dm*composition
+    accepted_repair=repair*scale;fruit_cap=fruit*scale
+  end subroutine
+  real function NI_P2_CARBON(pg)
+    real,intent(in)::pg
+    NI_P2_CARBON=pg
+    if(NI_COMMON())NI_P2_CARBON=real(real(pg,dp)+d_cost)
+  end function
+  real function NI_P2_UNUSED_ASSIM()
+    NI_P2_UNUSED_ASSIM=real(joint_assim_unused)
+  end function
+  subroutine NI_P2_POTENTIAL(dm,build,target,agr,proi)
+    real,intent(in)::dm(3),build(3),target(3),agr(3),proi(3)
+    joint_dm_req=max(0._dp,real(dm,dp));joint_build=real(build,dp);joint_target=real(target,dp)
+    joint_agr=real(agr,dp);joint_proi=real(proi,dp)
+    if(build_min_leaf>0)joint_build(1)=build_min_leaf*joint_target(1)
+    if(build_min_stem>0)joint_build(2)=build_min_stem*joint_target(2)
+    if(any(joint_build<0).or.any(joint_target<joint_build).or.any(joint_target>=.16_dp)) &
+      error stop 'NI P2: new tissue composition order'
+  end subroutine
+  subroutine NI_P2_PLAN(carbon,nitrogen,fruit_c,fruit_n,root_target)
+    real,intent(in)::carbon,nitrogen,fruit_c,fruit_n,root_target
+    real(dp)::repair(3),nonreserve(3),target(3),amount,surviving_mass(3),price,free,accepted_n
+    integer::i
+    if(.not.NI_COMMON())return
+    if(p2_plan_calls/=0)error stop 'NI P2: repeated common acceptance'
+    p2_plan_calls=1
+    joint_carbon=max(0._dp,real(carbon,dp)+d_cost);joint_nitrogen=max(0._dp,real(nitrogen,dp))
+    price=d_cost/max(d_a3+d_a4,1.e-30_dp);free=max(0._dp,joint_nitrogen-d_a3-d_a4)
+    joint_fruit_req=max(0._dp,real([fruit_c,fruit_n],dp))
+    nonreserve=org_start-donor_n;surviving_mass=max(0._dp,w_begin-donor_n/.16_dp)
+    nonreserve(1:2)=org_start(1:2)*(1-sen_frac(1:2))-mob_safe(1:2)-mob_func(1:2)
+    surviving_mass(1:2)=max(0._dp,w_begin(1:2)*(1-sen_frac(1:2))-(mob_safe(1:2)+mob_func(1:2))/.16_dp)
+    if(NI_RESERVES())nonreserve(1:2)=nonreserve(1:2)-max(0._dp,reserve_begin*(1-sen_frac(1:2))-mob_safe(1:2))
+    target=[ccrit,real(root_target,dp)]
+    repair=max(0._dp,(target*surviving_mass-nonreserve)/max(1.e-6_dp,1-target/.16_dp))*(1-exp(-1/growth_tau))
+    where(surviving_mass<=1.e-4_dp)repair=0
+    call NI_JOINT_KERNEL(joint_carbon,joint_nitrogen,joint_dm_req,joint_build,joint_target,joint_agr,joint_proi, &
+      joint_fruit_req,repair,joint_dm,joint_nn,joint_repair,joint_fruit_cap,joint_unitcost,joint_scale,price,free)
+    ! Only conservative rounding at the native float32 boundary, no new solve.
+    do i=1,3
+      amount=joint_dm(i);joint_dm(i)=real(flux32(amount),dp)
+      if(amount>0)joint_nn(i)=joint_nn(i)*joint_dm(i)/amount
+      joint_nn(i)=real(flux32(joint_nn(i)),dp)
+      joint_repair(i)=real(flux32(joint_repair(i)),dp)
+    enddo
+    joint_fruit_cap=real([flux32(joint_fruit_cap(1)),flux32(joint_fruit_cap(2))],dp)
+    accepted_n=sum(joint_nn)+sum(joint_repair)+joint_fruit_cap(2)
+    joint_assim_n=max(0._dp,accepted_n-free);joint_assim_c=joint_assim_n*price
+    joint_assim_unused=max(0._dp,d_a3+d_a4-joint_assim_n)
+  end subroutine
+  subroutine NI_P2_POD_BUDGET(carbon,nitrogen)
+    real,intent(inout)::carbon,nitrogen
+    if(.not.NI_COMMON())return
+    if(p2_plan_calls/=1)error stop 'NI P2: fruit execution without common plan'
+    carbon=min(carbon,real(joint_fruit_cap(1)));nitrogen=min(nitrogen,real(joint_fruit_cap(2)))
+  end subroutine
+  subroutine NI_P2_FRUIT_USED(carbon,nitrogen)
+    real,intent(in)::carbon,nitrogen
+    if(.not.NI_COMMON())return
+    joint_fruit_used=real([carbon,nitrogen],dp)
+    if(any(joint_fruit_used>joint_fruit_cap+2.e-5_dp))error stop 'NI P2: actual fruit exceeds accepted budget'
+  end subroutine
+  real function NI_P2_CSAVE(native,available)
+    real,intent(in)::native,available
+    NI_P2_CSAVE=native
+    if(NI_COMMON())NI_P2_CSAVE=min(native,real(max(0._dp,real(available,dp)-sum(joint_dm*joint_unitcost))))
+  end function
+  subroutine NI_P2_VEG_ACCEPT(pg,available,cost,dm,nn)
+    real,intent(in)::pg,available
+    real,intent(out)::cost,dm(3),nn(3)
+    real(dp)::unitcost(3),composition(3),total
+    if(p2_plan_calls/=1.or.p2_veg_calls/=0)error stop 'NI P2: missing/repeated vegetative execution'
+    p2_veg_calls=1
+    dm=real(joint_dm);nn=real(joint_nn)
+    composition=joint_nn/max(.16_dp*joint_dm,1.e-30_dp)
+    unitcost=joint_agr*(1-(composition-joint_proi)/(1-joint_proi))
+    total=sum(joint_dm)
+    cost=1
+    if(total>0)cost=real(sum(joint_dm*unitcost)/total)
+    if(total*real(cost,dp)>real(pg,dp)+2.e-5_dp.or.sum(joint_nn)>real(available,dp)+1.e-6_dp) &
+      error stop 'NI P2: accepted vegetative growth is not payable'
+    veg_before=joint_dm_req;veg_after=joint_dm;leaf_gate=1
+    veg_available=real(pg,dp);veg_cost=total*real(cost,dp)
+  end subroutine
+  pure subroutine NI_RESERVE_DONOR_KERNEL(n,w,reserve,cm,cc,legacy,rate,tau,slow,beta,z,protect_ratio, &
+      growth_gap,total_gap,carbon,cost,safe,func)
+    real(dp),intent(in)::n(4),w(4),reserve(2),cm(2),cc(2),legacy(4),rate,tau,slow,beta,z,protect_ratio
+    real(dp),intent(in)::growth_gap,total_gap,carbon,cost
+    real(dp),intent(out)::safe(4),func(4)
+    real(dp)::nonreserve(4),s(4),f(4),room,scale
+    nonreserve=n;nonreserve(1:2)=max(0._dp,n(1:2)-reserve)
+    call NI_REMOB_KERNEL(nonreserve,w,cm,cc,legacy,rate,tau,slow,beta,z,1.e30_dp,1.e30_dp,cost,s,f)
+    safe=s;safe(1:2)=max(0._dp,reserve-protect_ratio*cc*w(1:2))*(1-exp(-1/tau))
+    room=max(0._dp,total_gap)
+    if(cost>0)room=min(room,max(0._dp,carbon)/cost)
+    scale=min(1._dp,room/max(sum(safe),1.e-30_dp));safe=safe*scale
+    ! Healthy functional protein can support new growth, never an old-tissue
+    ! repair-only request that would mine and rebuild the same function.
+    room=min(max(0._dp,room-sum(safe)),max(0._dp,growth_gap-sum(safe)))
+    scale=min(1._dp,room/max(sum(f),1.e-30_dp));func=f*scale
+  end subroutine
+  pure subroutine NI_RESERVE_COMMIT_KERNEL(begin,sen_fraction,fast,sen_recovered,fill,ending,recovered,litter,residual)
+    real(dp),intent(in)::begin(2),sen_fraction(2),fast(2),sen_recovered(2),fill(2)
+    real(dp),intent(out)::ending(2),recovered(2),litter(2),residual(2)
+    recovered=min(begin*sen_fraction,max(0._dp,sen_recovered))
+    litter=begin*sen_fraction-recovered
+    ending=begin-fast-recovered-litter+fill
+    residual=ending-begin+fast+recovered+litter-fill
+  end subroutine
+  subroutine NI_P2_COMMIT_RESERVES(n,w)
+    real,intent(in)::n(2),w(2)
+    if(.not.NI_RESERVES())return
+    if(.not.reserve_pending)error stop 'NI P2: repeated reserve commit'
+    reserve_release=mob_safe(1:2)
+    call NI_RESERVE_COMMIT_KERNEL(reserve_begin,sen_frac(1:2),reserve_release,mob_sen(1:2),reserve_fill, &
+      reserve_n,reserve_sen_recovery,reserve_litter,reserve_residual)
+    if(minval(reserve_n)<-1.e-12_dp.or.any(reserve_n>real(n,dp)+1.e-7_dp)) &
+      error stop 'NI P2: organic reserve is not a subset of organic N'
+    if(any(reserve_n>reserve_capacity*max(real(w,dp),carrier(1:2)*(1-sen_frac(1:2)))+1.e-9_dp)) &
+      error stop 'NI P2: organic reserve nominal capacity exceeded'
+    if(maxval(abs(reserve_residual))>1.e-12_dp)error stop 'NI P2: organic reserve budget'
+    reserve_pending=.false.
+  end subroutine
+  real function NI_P2_RNITP(n,mass,current)
+    real,intent(in)::n,mass,current
+    NI_P2_RNITP=current
+    if(NI_RESERVES().and.mass>1.e-4)NI_P2_RNITP=real(100*max(0._dp,real(n,dp)-reserve_n(1))/real(mass,dp))
+  end function
+  subroutine write_p2(control,n)
+    type(ControlType),intent(in)::control
+    real,intent(in)::n(3)
+    integer::ios
+    if(.not.p2_opened)then
+      open(newunit=p2_unit,file='PlantNP2.csv',status='new',action='write',iostat=ios)
+      if(ios/=0)error stop 'NI P2: cannot create common/reserve ledger'
+      write(p2_unit,'(A)')'run,yrdoy,common_acceptance,reserve_mode,plan_calls,veg_calls,C_available,N_available,'// &
+        'fruit_C_request,fruit_N_request,fruit_C_cap,fruit_N_cap,fruit_C_used,fruit_N_used,common_scale,'// &
+        'dm_request_leaf,dm_request_stem,dm_request_root,dm_accept_leaf,dm_accept_stem,dm_accept_root,'// &
+        'N_accept_leaf,N_accept_stem,N_accept_root,unit_C_leaf,unit_C_stem,unit_C_root,'// &
+        'repair_accept_leaf,repair_accept_stem,repair_accept_root,repair_used_leaf,repair_used_stem,repair_used_root,'// &
+        'R_begin_leaf,R_begin_stem,R_end_leaf,R_end_stem,R_fill_leaf,R_fill_stem,R_fast_leaf,R_fast_stem,'// &
+        'R_sen_recovery_leaf,R_sen_recovery_stem,R_litter_leaf,R_litter_stem,R_residual_leaf,R_residual_stem,'// &
+        'R_capacity_leaf,R_capacity_stem,N_nonreserve_leaf,N_nonreserve_stem,C_assim_accepted,N_assim_accepted,'// &
+        'build_N_leaf,build_N_stem,build_N_root,target_N_leaf,target_N_stem,target_N_root'
+      p2_opened=.true.
+    endif
+    write(p2_unit,'(2(I0,","),*(ES24.15E3,:,","))')control%RUN,control%YRDOY, &
+      real([common_acceptance,reserve_mode,p2_plan_calls,p2_veg_calls],dp),joint_carbon,joint_nitrogen, &
+      joint_fruit_req,joint_fruit_cap,joint_fruit_used,joint_scale,joint_dm_req,joint_dm,joint_nn,joint_unitcost, &
+      joint_repair,joint_repair_used,reserve_begin,reserve_n,reserve_fill,reserve_release, &
+      reserve_sen_recovery,reserve_litter,reserve_residual,max(0._dp,reserve_capacity)*carrier(1:2),real(n(1:2),dp)-reserve_n, &
+      joint_assim_c,joint_assim_n,joint_build,joint_target
+  end subroutine
   logical function NI_C4_PHOTO()
     NI_C4_PHOTO=ni_stage==5.and.budget_revision==1.and.c4_photo==1.and.ready
   end function
@@ -212,11 +442,13 @@ contains
   end function
   real function NI_CORE_DEMAND(total,new_n,root_target)
     real,intent(in)::total,new_n,root_target
-    real(dp)::target(3),room(3)
+    real(dp)::target(3),room(3),functional(3)
     NI_CORE_DEMAND=total
     if(luxury_priority/=1) return
     target=[ccrit(1),ccrit(2),real(root_target,dp)]
-    room=max(0._dp,(target*w_begin-org_start)/max(1.e-6_dp,1-target/.16_dp))
+    functional=org_start
+    if(NI_RESERVES())functional(1:2)=functional(1:2)-reserve_begin
+    room=max(0._dp,(target*w_begin-functional)/max(1.e-6_dp,1-target/.16_dp))
     where(w_begin<=1.e-4_dp)room=0
     NI_CORE_DEMAND=real(min(max(0._dp,real(total,dp)),max(0._dp,real(new_n,dp))+sum(room)))
   end function
@@ -232,6 +464,7 @@ contains
     real,intent(inout)::pg,cad(2),nad(3),navl,nassim,rsp3,rsp4
     real,intent(in)::dm(3),nn(3),cr(3),pch,csave
     real(dp)::mass(2),stock(2),room(2),repair(2),a(2),cost(2),spare,f,amount,take(2),extra(2),previous(2)
+    real(dp)::r_surv(2),r_goal(2),r_room(2),r_cap(2),gapc(2)
     if(luxury_priority/=1) return
     ! Existing growth, core repairs and native reserved CSAVEV keep priority.
     spare=max(0._dp,sum(real(cad,dp))*real(pch,dp)-max(0._dp,real(csave,dp)))
@@ -244,8 +477,35 @@ contains
     mass=max(0._dp,w_begin(1:2)+real(dm(1:2),dp)+previous*(1-f)- &
       donor_n(1:2)/.16_dp-real(cr(1:2),dp)+real(nad(1:2),dp)/.16_dp)
     stock=max(0._dp,org_start(1:2)+real(nn(1:2),dp)-donor_n(1:2)+real(nad(1:2),dp))
+    if(NI_COMMON().or.NI_RESERVES())then
+      ! Match C4's actual surviving receiver: reclaimed senescing protein
+      ! was already debited as donor, and remaining cell loss occurs once.
+      mass=max(0._dp,mass-sen_plan_dm+mob_sen(1:2)/.16_dp+real(cr(1:2),dp)*sen_frac(1:2))
+      stock=max(0._dp,stock-org_start(1:2)*sen_frac(1:2)+mob_sen(1:2))
+    endif
     room=max(0._dp,(cmax*mass-stock)/max(1.e-6_dp,1-cmax/.16_dp))
     repair=max(0._dp,(ccrit*mass-stock)/max(1.e-6_dp,1-ccrit/.16_dp))
+    if(NI_RESERVES())then
+      r_surv=max(0._dp,reserve_begin*(1-sen_frac(1:2))-mob_safe(1:2))
+      repair=max(0._dp,(ccrit*mass-stock+r_surv)/max(1.e-6_dp,1-ccrit/.16_dp))
+      gapc=cmax-ccrit
+      r_cap=reserve_capacity*max(mass,carrier(1:2)*(1-sen_frac(1:2)))
+      r_goal=max(0._dp,(gapc*mass-r_surv)/max(1.e-6_dp,1-gapc/.16_dp))
+      r_room=min(max(0._dp,r_cap-r_surv),r_goal)*(1-exp(-1/reserve_fill_tau))
+      where(mass<=1.e-4_dp.or.donor_n(1:2)>1.e-12_dp)r_room=0
+      room=repair+r_room
+    endif
+    if(NI_COMMON())then
+      ! Growth and functional repair were jointly accepted once. Remaining
+      ! kinetic/C room can fill a true reserve, never rerun growth/repair.
+      if(NI_RESERVES())then
+        where(stock-r_surv<ccrit*mass)r_room=0
+        room=r_room
+      else
+        where(stock<ccrit*mass)room=0
+      endif
+      repair=0
+    endif
     where(mass<=1.e-4_dp.or.donor_n(1:2)>1.e-12_dp)room=0
     repair=min(repair,room)
     cost=late_unit_cost
@@ -254,6 +514,7 @@ contains
     take=0;extra=0
     f=min(1._dp,amount/max(sum(repair),1.e-30_dp));take=repair*f
     amount=max(0._dp,amount-sum(take));room=max(0._dp,room-take)
+    if(NI_RESERVES())room=r_room
     f=min(1._dp,amount/max(sum(room),1.e-30_dp));extra=room*f
     late_func=sum(take);late_lux=sum(extra);late_a=a;late_cost=sum(a*cost)
     if(late_cost>spare+1.e-8_dp)error stop 'NI v3: luxury assimilation exceeds residual C'
@@ -267,6 +528,7 @@ contains
     f=max(0._dp,1-late_cost/max(sum(previous)*real(pch,dp),1.e-30_dp))
     cad=real(previous*f)
     late_c_after=sum(real(cad,dp))*real(pch,dp);late_nad=take+extra
+    if(NI_RESERVES())reserve_fill=reserve_fill+extra
     nad(1:2)=nad(1:2)+real(take+extra)
     refill_n=real(nad,dp)
     navl=navl+real(sum(a));nassim=real(d_a3+d_a4)
@@ -305,6 +567,7 @@ contains
     real,intent(in)::demand,supply,pg,cdemand,n(4),w(4),legacy(4),rate,rpro
     real,intent(out)::nmine,flux(4)
     real(dp)::ratio,gap,paid,z,factor,total,healthy_n(4),healthy_w(4),remaining,remaining_c
+    real(dp)::growth_gap,repair_gap,healthy_reserve(2)
     integer::i
     ! Conservative C/N acceptance predictor, not a replay of stateful PODS.
     ! The final accepted amount is reconciled against actual growth below.
@@ -313,6 +576,13 @@ contains
     mob_accept=min(max(0._dp,real(demand,dp)),ratio*max(0._dp,real(pg,dp)))
     gap=min(max(0._dp,real(demand-supply,dp)), &
       max(0._dp,ratio*real(pg,dp)-real(supply,dp))/(1+ratio*paid))
+    growth_gap=gap
+    repair_gap=0
+    if(NI_RESERVES())then
+      repair_gap=sum(max(0._dp,ccrit*w_begin(1:2)-(org_start(1:2)-reserve_begin)))*(1-exp(-1/growth_tau))
+      gap=growth_gap+repair_gap
+      if(paid>0)gap=min(gap,max(0._dp,real(pg,dp))/paid)
+    endif
     mob_gap=gap;z=day_growth ! shared smoothed C1 state; no second severity clock
     if(remob_severity==0) z=0
     healthy_n=real(n,dp);healthy_w=real(w,dp);mob_sen=0
@@ -326,8 +596,15 @@ contains
       mob_sen=sen_available*min(1._dp,remaining/max(total,1.e-30_dp))
       remaining=max(0._dp,gap-sum(mob_sen));remaining_c=max(0._dp,remaining_c-paid*sum(mob_sen))
     endif
-    call NI_REMOB_KERNEL(healthy_n,healthy_w,cmin,ccrit,real(legacy,dp),real(rate,dp), &
-      remob_tau,slow_ratio,protect_beta,z,remaining,remaining_c,paid,mob_safe,mob_func)
+    if(NI_RESERVES())then
+      healthy_reserve=reserve_begin*(1-sen_frac(1:2))
+      call NI_RESERVE_DONOR_KERNEL(healthy_n,healthy_w,healthy_reserve,cmin,ccrit,real(legacy,dp),real(rate,dp), &
+        remob_tau,slow_ratio,protect_beta,z,reserve_protect,max(0._dp,growth_gap-sum(mob_sen)), &
+        remaining,remaining_c,paid,mob_safe,mob_func)
+    else
+      call NI_REMOB_KERNEL(healthy_n,healthy_w,cmin,ccrit,real(legacy,dp),real(rate,dp), &
+        remob_tau,slow_ratio,protect_beta,z,remaining,remaining_c,paid,mob_safe,mob_func)
+    endif
     mob_plan=mob_safe+mob_func+mob_sen
     ! Round down once at the host boundary; retain source components.
     do i=1,4
@@ -355,6 +632,12 @@ contains
     ! Shell mining is integrated into cohorts/harvest inside PODS. It stays
     ! on the native path and is never undone after those irreversible calls.
     if(mob_plan(4)>mob_new_used+1.e-6_dp) error stop 'NI v3: native shell export has no growth recipient'
+    if((NI_COMMON().or.NI_RESERVES()).and.mob_new_used+mob_repair_used==0)then
+      ! Float32 SUM(unused) can be slightly below the component-wise double
+      ! total. A nonexistent recipient must cancel every provisional source,
+      ! rather than leave a tiny irreversible reserve export.
+      left=max(left,sum(mob_safe(1:3)+mob_func(1:3)+mob_sen(1:3)))
+    endif
     old=real(nmine,dp);take=0
     do k=1,3
       if(k==1) then
@@ -390,7 +673,8 @@ contains
     mob_returned=mob_plan-real(flux,dp)
     mob_c_paid=real(nmine,dp)*max(0._dp,real(rpro,dp))/.16_dp
     if(real(returned,dp)>real(unused,dp)+1.e-6_dp) error stop 'NI v3: cancellation exceeds unaccepted supply'
-    if(real(nmine,dp)>mob_new_used+1.e-6_dp) error stop 'NI v3: internal export not used by new growth'
+    if(real(nmine,dp)>mob_new_used+mob_repair_used+1.e-6_dp) error stop 'NI v3: internal export has no accepted recipient'
+    if(NI_RESERVES().and.sum(mob_func)>mob_new_used+1.e-6_dp)error stop 'NI P2: healthy function exported for repair only'
     donor_n=real(flux(1:3),dp)
   end subroutine
   logical function NI_PODS()
@@ -439,7 +723,7 @@ contains
   real function NI_EXPANSION(dm,nnew)
     real,intent(in)::dm,nnew
     real(dp)::concentration,x
-    if(leaf_expansion_mode==1)then
+    if(leaf_expansion_mode==1.or.NI_COMMON())then
       ! Ablation: native new-tissue C/N acceptance and shared allocation
       ! remain; omit the additional organ-concentration policy multiplier.
       NI_EXPANSION=1.
@@ -497,6 +781,12 @@ contains
     real(dp)::mass(3),stock(3),target(3),room(3),total,amount
     mass=max(0._dp,w_begin+real(dm,dp)+real(cad,dp)-donor_n/.16_dp-real(cr,dp))
     stock=max(0._dp,org_start+real(nn,dp)-donor_n)
+    if(NI_COMMON().or.NI_RESERVES())then
+      mass(1:2)=max(0._dp,mass(1:2)-sen_plan_dm+mob_sen(1:2)/.16_dp+real(cr(1:2),dp)*sen_frac(1:2))
+      stock(1:2)=max(0._dp,stock(1:2)-org_start(1:2)*sen_frac(1:2)+mob_sen(1:2))
+    endif
+    if(NI_RESERVES())stock(1:2)=max(0._dp,stock(1:2)- &
+      max(0._dp,reserve_begin*(1-sen_frac(1:2))-mob_safe(1:2)))
     target=[cmax(1),cmax(2),real(root_target,dp)]
     if(luxury_priority==1) target(1:2)=ccrit
     ! Refill adds protein mass NAD/0.16 as well as N: solve receiver space
@@ -506,9 +796,16 @@ contains
     total=sum(room);amount=min(max(0._dp,real(available,dp)),total)
     ! Internal growth credit must not be consumed by luxury or same-pool
     ! refill. Cancel its unused reservation before accepting external surplus.
-    if(NI_REMOB_ON()) amount=min(max(0._dp,real(available,dp)-sum(mob_plan)),total)
+    if(NI_REMOB_ON().and..not.NI_COMMON()) amount=min(max(0._dp,real(available,dp)-sum(mob_plan)),total)
     nad=0
+    if(NI_COMMON())then
+      room=min(room,joint_repair)
+      total=sum(room);amount=min(max(0._dp,real(available,dp)),total)
+    endif
     if(total>0) nad=real(amount*room/total)
+    if(NI_COMMON())then
+      joint_repair_used=real(nad,dp);mob_repair_used=sum(joint_repair_used)
+    endif
     unused=max(0.,available-sum(nad))
     refill_n=real(nad,dp)
   end subroutine
@@ -550,7 +847,8 @@ contains
       min_ratio,max_ratio,photo_floor,photo_gamma,growth_tau,budget_revision,curve_w0,photo_slw_ref, &
       state_timing,pods_n_state,remob_mode,remob_severity,remob_tau,protect_beta,slow_ratio,luxury_priority, &
       c4_budget,leaf_coupling,n_sen_rate,c4_photo,leaf_min_ratio,stem_min_ratio,leaf_inf,stem_inf, &
-      photo_reference_mode,photo_sln_ref,leaf_expansion_mode,v4_diagnostics
+      photo_reference_mode,photo_sln_ref,leaf_expansion_mode,v4_diagnostics,common_acceptance,reserve_mode, &
+      reserve_capacity,reserve_fill_tau,reserve_protect,build_min_leaf,build_min_stem
     if(loaded) then
       if(NI_ENABLED()) then
         if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
@@ -581,6 +879,22 @@ contains
     end if
     if(ni_stage<0.or.ni_stage>5) error stop 'NI: stage must be 0..5'
     if(ni_stage>implemented_stage) error stop 'NI: requested integration stage is not connected in this build'
+    if(min(common_acceptance,reserve_mode)<0.or.max(common_acceptance,reserve_mode)>1)error stop 'NI P2: invalid mode'
+    if(.not.all(ieee_is_finite([build_min_leaf,build_min_stem])))error stop 'NI P2: nonfinite new-tissue settings'
+    if((build_min_leaf/=-1.and.(build_min_leaf<=0.or.build_min_leaf>1)).or. &
+      (build_min_stem/=-1.and.(build_min_stem<=0.or.build_min_stem>1)))error stop 'NI P2: new-tissue fraction must be (0,1]'
+    if(max(build_min_leaf,build_min_stem)>0.and.common_acceptance/=1) &
+      error stop 'NI P2: separate new-tissue composition requires common acceptance'
+    if(max(common_acceptance,reserve_mode)>0)then
+      if(ni_stage/=5.or.budget_revision/=1.or.c4_budget/=1.or.leaf_coupling/=1.or.c4_photo/=1.or. &
+        remob_mode/=1.or.luxury_priority/=1)error stop 'NI P2: complete C4/C1-C3 routes required'
+      if(leaf_expansion_mode/=0)error stop 'NI P2: common acceptance replaces the P1 expansion ablation'
+    endif
+    if(reserve_mode==1)then
+      if(.not.all(ieee_is_finite([reserve_capacity,reserve_fill_tau,reserve_protect])))error stop 'NI P2: nonfinite reserve settings'
+      if(reserve_capacity<=0.or.reserve_capacity>=.16_dp.or.reserve_fill_tau<=0.or. &
+        reserve_protect<0.or.reserve_protect>=1)error stop 'NI P2: explicit reserve capacity, rate and protection required'
+    endif
     if(min(photo_reference_mode,leaf_expansion_mode,v4_diagnostics)<0.or. &
       max(photo_reference_mode,leaf_expansion_mode,v4_diagnostics)>1)error stop 'NI V4: invalid mode'
     if(.not.all(ieee_is_finite([leaf_min_ratio,stem_min_ratio,leaf_inf,stem_inf,photo_sln_ref]))) &
@@ -667,6 +981,8 @@ contains
     day_valid=.false.;z_end=0;day_z=0;day_growth=1
     veg_z_end=1;day_veg_z=1;mob_safe=0;mob_func=0;mob_plan=0;mob_returned=0
     sen_frac=0;sen_plan_dm=0;sen_available=0;mob_sen=0;c4_nloss=0;c4_area_dead=0
+    reserve_n=0;reserve_begin=0;reserve_fill=0;reserve_release=0;reserve_sen_recovery=0;reserve_litter=0
+    reserve_pending=.false.;reserve_residual=0
   end subroutine
   subroutine NI_BEGIN(weights)
     real,intent(in)::weights(3)
@@ -683,6 +999,16 @@ contains
     kinetic_cap=0;late_a=0;late_cost=0;late_c_budget=0;late_func=0;late_lux=0
     late_unit_cost=0;late_c_before=0;late_c_after=0;late_c_reserved=0;late_nad=0
     veg_before=0;veg_after=0;storage_shift=0
+    reserve_begin=reserve_n;reserve_fill=0;reserve_release=0;reserve_sen_recovery=0;reserve_litter=0
+    reserve_pending=NI_RESERVES();reserve_residual=0
+    p2_plan_calls=0;p2_veg_calls=0;mob_repair_used=0
+    joint_dm_req=0;joint_dm=0;joint_nn=0;joint_repair=0;joint_repair_used=0;joint_fruit_req=0
+    joint_build=0;joint_target=0;joint_agr=0;joint_proi=0;joint_unitcost=0
+    joint_carbon=0;joint_nitrogen=0;joint_fruit_cap=0;joint_fruit_used=0;joint_scale=1
+    joint_assim_n=0;joint_assim_c=0;joint_assim_unused=0
+    if(max(common_acceptance,reserve_mode)>0)then
+      donor_n=0;donor_c=0
+    endif
     sen_frac=0;sen_plan_dm=0;sen_available=0;mob_sen=0;c4_nloss=0;c4_area_dead=0
   end subroutine
   subroutine NI_ORG_BEGIN(stocks,off,seed,leak)
@@ -870,8 +1196,10 @@ contains
     integer,intent(in)::nlayr
     real,intent(in)::weights(3),losses(3),root_weights(:),org_n(3),lai,wcrlf
     real(dp)::fraction(3),out3(3),out4(3),growth(3),denom,alpha,target,nraw,nniraw(2),nnifun(2),deficit(2),surplus(2)
+    real(dp)::functional_n(2)
     integer::l,ios
     if(.not.NI_ENABLED()) return
+    if(reserve_pending)error stop 'NI P2: reserve stock was not committed'
     growth=max(0._dp,real(weights,dp)+max(0._dp,real(losses,dp))-w_begin)
     fraction=min(1._dp,max(0._dp,real(losses,dp))/max(w_begin+growth,1.e-12_dp))
     if(NI_LEAF_COUPLED())fraction=sen_frac
@@ -894,10 +1222,12 @@ contains
       error stop 'NI: storage capacity exceeded'
     if(NI_CURVES()) then
       call references(real(weights,dp))
-      z_end=(real(org_n(1:2),dp)/max(real(weights(1:2),dp),1.e-12_dp)-cmin)/(ccrit-cmin)
-      veg_z_end=(sum(real(org_n(1:2),dp))-sum(real(weights(1:2),dp)*cmin))/ &
+      functional_n=real(org_n(1:2),dp)
+      if(NI_RESERVES())functional_n=functional_n-reserve_n
+      z_end=(functional_n/max(real(weights(1:2),dp),1.e-12_dp)-cmin)/(ccrit-cmin)
+      veg_z_end=(sum(functional_n)-sum(real(weights(1:2),dp)*cmin))/ &
         max(sum(real(weights(1:2),dp)*(ccrit-cmin)),1.e-12_dp)
-      nraw=(real(org_n(1),dp)/max(real(weights(1),dp),1.e-12_dp)-cmin(1))/(ccrit(1)-cmin(1))
+      nraw=(functional_n(1)/max(real(weights(1),dp),1.e-12_dp)-cmin(1))/(ccrit(1)-cmin(1))
       target=min(1._dp,max(0._dp,nraw))
       if(.not.ready) then
         growth_factor=target
@@ -932,6 +1262,7 @@ contains
         NI_POD_KERNEL(day_z(1)),growth_factor,z_end
     end if
     end_run=control%RUN;end_day=control%YRDOY
+    if(max(common_acceptance,reserve_mode)>0)call write_p2(control,org_n)
     if(v4_diagnostics==1)then
       if(.not.v4_opened)then
         open(newunit=v4_unit,file='PlantNV4.csv',status='new',action='write',iostat=ios)
@@ -991,6 +1322,7 @@ contains
     if(NI_CURVES()) then
       nniraw=real(org_n(1:2),dp)/max(real(weights(1:2),dp)*ccrit,1.e-12_dp)
       nnifun=(real(org_n(1:2),dp)/max(real(weights(1:2),dp),1.e-12_dp)-cmin)/(ccrit-cmin)
+      if(NI_RESERVES())nnifun=(functional_n/max(real(weights(1:2),dp),1.e-12_dp)-cmin)/(ccrit-cmin)
       deficit=max(0._dp,ccrit*real(weights(1:2),dp)-real(org_n(1:2),dp))
       surplus=max(0._dp,real(org_n(1:2),dp)-ccrit*real(weights(1:2),dp))
     end if
@@ -1012,7 +1344,7 @@ contains
       legacy_n_res,legacy_c_overrun,q3,q4,real(org_n,dp), &
       real(org_n,dp)/max(real(weights,dp),1.e-12_dp), &
       (real(org_n,dp)+q3+q4)/max(real(weights,dp),1.e-12_dp),real(weights,dp), &
-      max(0._dp,real(org_n(1),dp)-cmin(1)*real(weights(1),dp))/max(real(lai,dp),1.e-12_dp), &
+      max(0._dp,real(org_n(1),dp)-reserve_n(1)-cmin(1)*real(weights(1),dp))/max(real(lai,dp),1.e-12_dp), &
       nniraw,nnifun,deficit,surplus
     if(NI_ROOT_MODE()>0) then
       if(.not.root_opened) then

@@ -16,7 +16,12 @@ for name in sys.argv[1:]:
         actual+=sen.filter(regex='^sen_N_').sum(axis=1)
     planned=d.filter(regex='^plan_').sum(axis=1);returned=d.filter(regex='^returned_').sum(axis=1)
     err=float(abs(planned-returned-actual).max());assert err<1e-13
-    assert (actual<=d.new_growth_N_actual+1e-6).all()
+    repair=0
+    if (w/'PlantNP2.csv').exists():
+        p2=pd.read_csv(w/'PlantNP2.csv',float_precision='round_trip')
+        assert list(zip(d.run,d.yrdoy))==list(zip(p2.run,p2.yrdoy))
+        repair=p2[['repair_used_leaf','repair_used_stem','repair_used_root']].sum(axis=1)
+    assert (actual<=d.new_growth_N_actual+repair+1e-6).all()
     assert d.filter(regex='^returned_').min().min()>=-1e-12
     for organ in ['leaf','stem','root']:
         aging=sen['sen_N_'+organ] if sen is not None else 0

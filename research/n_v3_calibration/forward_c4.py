@@ -130,7 +130,12 @@ def audit_c4(work,config):
         source+=actual
         if organ!='shell' and abs(actual-old['mobilized_'+organ]).max()>1e-12:raise ValueError('C4 donor source '+organ)
     planned=mob.filter(regex='^plan_').sum(axis=1)-mob.filter(regex='^returned_').sum(axis=1)
-    if abs(source-planned).max()>1e-12 or (source>mob.new_growth_N_actual+1e-6).any():raise ValueError('C4 source-recipient reconciliation')
+    repair=0
+    if config.get('common_acceptance')==1:
+        p2=load('PlantNP2.csv')
+        if not p2.index.equals(cash.index):raise ValueError('P2 recipient journal alignment')
+        repair=p2[['repair_used_leaf','repair_used_stem','repair_used_root']].sum(axis=1)
+    if abs(source-planned).max()>1e-12 or (source>mob.new_growth_N_actual+repair+1e-6).any():raise ValueError('C4 source-recipient reconciliation')
     for organ in ['leaf','stem']:
         if (leaf['sen_N_'+organ]>leaf['sen_available_'+organ]+1e-12).any():raise ValueError('C4 dying material balance')
     if not leaf.n_sen_rate.eq(config['n_sen_rate']).all():raise ValueError('C4 senescence setting not consumed')
