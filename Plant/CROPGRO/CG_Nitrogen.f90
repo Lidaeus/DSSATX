@@ -140,7 +140,12 @@ contains
     res=real(pg,dp)+sum(real(draw,dp))-real(main,dp)-real(assim,dp)-real(mob,dp) &
       -real(veg,dp)-real(fruit,dp)-real(store,dp)
     scale=max(1._dp,abs(real(pg,dp)),sum(real(draw,dp)))
-    if(abs(res)>32*epsilon(1.)*scale) error stop 'NI C4: actual carbohydrate expenditure imbalance'
+    if(abs(res)>32*epsilon(1.)*scale) then
+      write(*,*)'NI C4 cash failure run/day/res:',control%RUN,control%YRDOY,res
+      write(*,*)'PG,draw,maintenance,assim,mob,veg,fruit,store,unused,maintenance potential:', &
+        pg,draw,main,assim,mob,veg,fruit,store,predicted_unused,main_potential
+      error stop 'NI C4: actual carbohydrate expenditure imbalance'
+    endif
     if(.not.cash_opened) then
       open(newunit=cash_unit,file='PlantCCash.csv',status='new',action='write',iostat=ios)
       if(ios/=0)error stop 'NI C4: cannot create carbohydrate expenditure ledger'

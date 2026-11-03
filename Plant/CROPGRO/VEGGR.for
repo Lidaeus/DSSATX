@@ -406,7 +406,9 @@ C-----------------------------------------------------------------------
         NGRRT=NIN(3)
       ENDIF
       PGLEFT = MAX(0.0,PGAVL - ((WLDOTN + WSDOTN + WRDOTN) * AGRVG))
-      IF (PGLEFT < 1.E-5) PGLEFT = 0.0
+      ! C4 settles real stocks: do not erase a small unspent C balance.
+      ! The old cutoff overstates actual mining by that discarded amount.
+      IF (PGLEFT < 1.E-5 .AND. .NOT.NI_C4_ON()) PGLEFT = 0.0
       IF (P0_ENABLED()) THEN
         CALL P0_LOCAL('veg_after_N',
      &    'AGRVG,NRATIO,PGAVL,PGLEFT',
