@@ -21,7 +21,7 @@ if __name__=='__main__':
     selected=Path(done['best_trial'])
     shutil.copy2(selected/'NIntegration.nml',ROOT/'best_NIntegration.nml')
     work=OUT/'C4_calibrated'
-    render('C4率定后',selected,work)
+    render('C4率定后',selected,work,binary=d['binary'])
     cases=dict(C3=CN/'reports/n_v3_execution_20261103/cases/delivery_combined',
         C4=CN/'reports/n_v3_c4_execution_20261103/cases/delivery_full',C4_calibrated=selected)
     metrics=[];ys=[];reference=None

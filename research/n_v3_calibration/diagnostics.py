@@ -45,11 +45,12 @@ def curve_plot(dest,cfg,curves,label):
     title(fig,label+'：三条软参考曲线','Ncrit(%)=100a·max(W0,W)^(−b)；阴影为软参考带，不是置信区间或实际浓度硬边界')
     fig.tight_layout(rect=(0,.065,1,.925));save(fig,dest/'diagnostic_N_reference_curves.png')
 
-def render(label,work,dest):
+def render(label,work,dest,binary=None):
     if dest.exists():assert not list(dest.iterdir()),'Preserve existing diagnostic artifacts'
     dest.mkdir(parents=True,exist_ok=True)
     receipt=json.loads((work/'receipt.json').read_text(encoding='utf8'))
-    assert receipt['success'] and sha(receipt['binary'])==receipt['binary_sha256']
+    binary=receipt.get('binary',binary)
+    assert binary is not None and receipt['success'] and sha(binary)==receipt['binary_sha256']
     cfg=config(work/'NIntegration.nml')
     meta=pd.read_csv(META).rename(columns={'treatment':'trno'})
     pg=read_native(work/'PlantGro.OUT').reset_index()
@@ -135,7 +136,7 @@ def render(label,work,dest):
     fig.tight_layout(rect=(0,.065,1,.925));save(fig,dest/'diagnostic_N_state_vs_biomass.png')
     sources={str(work/p):sha(work/p)for p in ['receipt.json','NIntegration.nml','PlantNIntegration.csv','PlantGro.OUT','comparison.csv']}
     sources.update({str(META):sha(META),str(RAW):sha(RAW)})
-    manifest=dict(label=label,binary=receipt['binary'],binary_sha256=receipt['binary_sha256'],phi=receipt['phi'],config=cfg,
+    manifest=dict(label=label,binary=str(binary),binary_sha256=receipt['binary_sha256'],phi=receipt['phi'],config=cfg,
         renderer_file=str(Path(__file__).resolve()),renderer_sha256=sha(__file__),
         source_hashes=sources,curve_definition='Ncrit=a*max(W0,W)^(-b), Nmin=min_ratio*Ncrit, Nmax=max_ratio*Ncrit; W=(Wleaf+Wstem)/100',
         observations='72 fitting N means/dates from frozen comparison; 24 July17 diagnostic means from raw g/kg converted to percent; no calibration-date remapping',
@@ -145,7 +146,7 @@ def render(label,work,dest):
     print('PLOTTED',label,dest,flush=True)
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--repair-curves-font',action='store_true');parser.add_argument('--label');parser.add_argument('--work',type=Path);parser.add_argument('--out',type=Path)
+    parser=argparse.ArgumentParser();parser.add_argument('--repair-curves-font',action='store_true');parser.add_argument('--label');parser.add_argument('--work',type=Path);parser.add_argument('--out',type=Path);parser.add_argument('--binary',type=Path)
     args=parser.parse_args()
     if args.repair_curves_font:
         for label in ['C3','C4']:
@@ -153,7 +154,7 @@ if __name__=='__main__':
             curve_plot(dest,m['config'],pd.read_csv(dest/'diagnostic_curve_source.csv'),label)
             m['artifacts']['diagnostic_N_reference_curves.png']=sha(dest/'diagnostic_N_reference_curves.png')
             (dest/'diagnostic_manifest.json').write_text(json.dumps(m,ensure_ascii=False,indent=2),encoding='utf8')
-    elif args.work:render(args.label,args.work,args.out)
+    elif args.work:render(args.label,args.work,args.out,args.binary)
     else:
         render('C3',CN/'reports/n_v3_execution_20261103/cases/delivery_combined',OUT/'C3')
         render('C4',CN/'reports/n_v3_c4_execution_20261103/cases/delivery_full',OUT/'C4')

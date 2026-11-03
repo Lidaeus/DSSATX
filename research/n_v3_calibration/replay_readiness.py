@@ -11,7 +11,7 @@ sys.path.insert(0,str(HERE));sys.path.insert(0,str(REPO/'research/n_integration_
 from smoke_forward import sha,dump,redirect
 from forward_c4 import audit_c4
 
-def run(name,source,exe,inputs):
+def run(name,source,exe,inputs,design_path=None):
     work=OUT/'cases'/name;work.mkdir(parents=True,exist_ok=False)
     for item in list(inputs)+['NIntegration.nml']:shutil.copy2(source/item,work/item)
     redirect(work/'DSSATPRO.v48',work)
@@ -23,7 +23,7 @@ def run(name,source,exe,inputs):
     from workflow import extract
     import pandas as pd,re
     cfg={k:float(v)for k,v in re.findall(r'(\w+)\s*=\s*([-+\d.eE]+)',(work/'NIntegration.nml').read_text())}
-    design=json.loads((FAILED/'preparation_design.json').read_text(encoding='utf8'))
+    design=json.loads((Path(design_path)if design_path else FAILED/'preparation_design.json').read_text(encoding='utf8'))
     comp=extract(work,pd.read_csv(design['observations']).fillna(''),Path(design['runtime']))
     comp.to_csv(work/'comparison.csv',index=False)
     receipt=dict(success=True,name=name,binary=str(exe),binary_sha256=sha(exe),config=cfg,
