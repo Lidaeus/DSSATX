@@ -17,6 +17,9 @@ module CG_Nitrogen
   real(dp),save :: z_end(2)=0,day_z(2)=0,day_growth=1
   integer,save :: remob_mode=0,remob_severity=1
   real(dp),save :: remob_tau=-1,protect_beta=-1,slow_ratio=-1
+  integer,save :: remob_rate_mode=0
+  real(dp),save :: remob_rate_max=-1,functional_rate_max=-1
+  real(dp),save :: mob_rate_cap(4)=0,mob_function_cap(4)=0
   real(dp),save :: veg_z_end=1,day_veg_z=1
   real(dp),save :: mob_safe(4)=0,mob_func(4)=0,mob_plan(4)=0,mob_returned(4)=0
   real(dp),save :: mob_gap=0,mob_accept=0,mob_new_used=0,mob_c_paid=0
@@ -244,14 +247,17 @@ contains
     veg_available=real(pg,dp);veg_cost=total*real(cost,dp)
   end subroutine
   pure subroutine NI_RESERVE_DONOR_KERNEL(n,w,reserve,cm,cc,legacy,rate,tau,slow,beta,z,protect_ratio, &
-      growth_gap,total_gap,carbon,cost,safe,func)
+      growth_gap,total_gap,carbon,cost,safe,func,safe_max,func_max)
     real(dp),intent(in)::n(4),w(4),reserve(2),cm(2),cc(2),legacy(4),rate,tau,slow,beta,z,protect_ratio
     real(dp),intent(in)::growth_gap,total_gap,carbon,cost
     real(dp),intent(out)::safe(4),func(4)
-    real(dp)::nonreserve(4),s(4),f(4),room,scale
+    real(dp),intent(in),optional::safe_max,func_max
+    real(dp)::nonreserve(4),s(4),f(4),room,scale,fraction
     nonreserve=n;nonreserve(1:2)=max(0._dp,n(1:2)-reserve)
-    call NI_REMOB_KERNEL(nonreserve,w,cm,cc,legacy,rate,tau,slow,beta,z,1.e30_dp,1.e30_dp,cost,s,f)
-    safe=s;safe(1:2)=max(0._dp,reserve-protect_ratio*cc*w(1:2))*(1-exp(-1/tau))
+    call NI_REMOB_KERNEL(nonreserve,w,cm,cc,legacy,rate,tau,slow,beta,z,1.e30_dp,1.e30_dp,cost,s,f,safe_max,func_max)
+    fraction=1-exp(-1/tau)
+    if(present(safe_max))fraction=min(fraction,max(0._dp,safe_max))
+    safe=s;safe(1:2)=max(0._dp,reserve-protect_ratio*cc*w(1:2))*fraction
     room=max(0._dp,total_gap)
     if(cost>0)room=min(room,max(0._dp,carbon)/cost)
     scale=min(1._dp,room/max(sum(safe),1.e-30_dp));safe=safe*scale
@@ -545,18 +551,24 @@ contains
   logical function NI_REMOB_ON()
     NI_REMOB_ON=ni_stage==5.and.budget_revision==1.and.remob_mode==1
   end function
-  pure subroutine NI_REMOB_KERNEL(n,w,cm,cc,legacy,rate,tau,slow,beta,z,gap,carbon,cost,safe,func)
+  pure subroutine NI_REMOB_KERNEL(n,w,cm,cc,legacy,rate,tau,slow,beta,z,gap,carbon,cost,safe,func,safe_max,func_max)
     real(dp),intent(in)::n(4),w(4),cm(2),cc(2),legacy(4),rate,tau,slow,beta,z,gap,carbon,cost
     real(dp),intent(out)::safe(4),func(4)
-    real(dp)::available(2),protect(2),remaining,total,factor
+    real(dp),intent(in),optional::safe_max,func_max
+    real(dp)::available(2),protect(2),remaining,total,factor,fast_fraction,slow_fraction
     protect=w(1:2)*(cm+beta*(cc-cm))
     available=max(0._dp,n(1:2)-cc*w(1:2))
     safe=0;func=0
-    safe(1:2)=available*(1-exp(-1/tau))
+    fast_fraction=1-exp(-1/tau);slow_fraction=1-exp(-1/(tau*slow))
+    if(present(safe_max))fast_fraction=min(fast_fraction,max(0._dp,safe_max))
+    if(present(func_max))slow_fraction=min(slow_fraction,max(0._dp,func_max))
+    safe(1:2)=available*fast_fraction
     ! Keep the native root/shell donor paths, never increase their rate.
     safe(3:4)=min(max(0._dp,n(3:4)),max(0._dp,legacy(3:4)))*max(0._dp,min(1._dp,rate))
+    if(present(safe_max))safe(3:4)=min(safe(3:4), &
+      min(max(0._dp,n(3:4)),max(0._dp,legacy(3:4)))*max(0._dp,safe_max))
     available=max(0._dp,min(n(1:2),cc*w(1:2))-protect)
-    func(1:2)=available*(1-exp(-1/(tau*slow)))*(1-max(0._dp,min(1._dp,z)))**2
+    func(1:2)=available*slow_fraction*(1-max(0._dp,min(1._dp,z)))**2
     remaining=max(0._dp,gap)
     if(cost>0) remaining=min(remaining,max(0._dp,carbon)/cost)
     total=sum(safe);factor=min(1._dp,remaining/max(total,1.e-30_dp));safe=safe*factor
@@ -585,7 +597,7 @@ contains
     endif
     mob_gap=gap;z=day_growth ! shared smoothed C1 state; no second severity clock
     if(remob_severity==0) z=0
-    healthy_n=real(n,dp);healthy_w=real(w,dp);mob_sen=0
+    healthy_n=real(n,dp);healthy_w=real(w,dp);mob_sen=0;healthy_reserve=0
     remaining=gap;remaining_c=max(0._dp,real(pg,dp))
     if(NI_LEAF_COUPLED())then
       ! Planned dying material is disjoint from healthy donor balances.
@@ -600,11 +612,21 @@ contains
       healthy_reserve=reserve_begin*(1-sen_frac(1:2))
       call NI_RESERVE_DONOR_KERNEL(healthy_n,healthy_w,healthy_reserve,cmin,ccrit,real(legacy,dp),real(rate,dp), &
         remob_tau,slow_ratio,protect_beta,z,reserve_protect,max(0._dp,growth_gap-sum(mob_sen)), &
-        remaining,remaining_c,paid,mob_safe,mob_func)
+        remaining,remaining_c,paid,mob_safe,mob_func,remob_fast_limit(),remob_slow_limit())
     else
       call NI_REMOB_KERNEL(healthy_n,healthy_w,cmin,ccrit,real(legacy,dp),real(rate,dp), &
-        remob_tau,slow_ratio,protect_beta,z,remaining,remaining_c,paid,mob_safe,mob_func)
+        remob_tau,slow_ratio,protect_beta,z,remaining,remaining_c,paid,mob_safe,mob_func,remob_fast_limit(),remob_slow_limit())
     endif
+    mob_rate_cap=0;mob_function_cap=0
+    mob_rate_cap(1:2)=max(0._dp,healthy_n(1:2)-ccrit*healthy_w(1:2))* &
+      min(1-exp(-1/remob_tau),remob_fast_limit())
+    if(NI_RESERVES())mob_rate_cap(1:2)=max(0._dp,healthy_reserve-reserve_protect*ccrit*healthy_w(1:2))* &
+      min(1-exp(-1/remob_tau),remob_fast_limit())
+    mob_rate_cap(3:4)=min(max(0._dp,healthy_n(3:4)),max(0._dp,real(legacy(3:4),dp)))* &
+      min(max(0._dp,min(1._dp,real(rate,dp))),remob_fast_limit())
+    mob_function_cap(1:2)=max(0._dp,min(healthy_n(1:2)-healthy_reserve,ccrit*healthy_w(1:2))- &
+      healthy_w(1:2)*(cmin+protect_beta*(ccrit-cmin)))* &
+      min(1-exp(-1/(remob_tau*slow_ratio)),remob_slow_limit())*(1-max(0._dp,min(1._dp,z)))**2
     mob_plan=mob_safe+mob_func+mob_sen
     ! Round down once at the host boundary; retain source components.
     do i=1,4
@@ -618,6 +640,14 @@ contains
     nmine=sum(flux);mob_c_paid=real(nmine,dp)*paid
     if(mob_c_paid>real(pg,dp)+1.e-6_dp) error stop 'NI v3: unaffordable mobilization'
   end subroutine
+  real(dp) function remob_fast_limit()
+    remob_fast_limit=1
+    if(remob_rate_mode==1)remob_fast_limit=remob_rate_max
+  end function
+  real(dp) function remob_slow_limit()
+    remob_slow_limit=1
+    if(remob_rate_mode==1)remob_slow_limit=functional_rate_max
+  end function
   subroutine NI_REMOB_REPRO(used)
     real,intent(in)::used
     if(NI_REMOB_ON()) mob_new_used=max(0._dp,real(used,dp))
@@ -848,7 +878,8 @@ contains
       state_timing,pods_n_state,remob_mode,remob_severity,remob_tau,protect_beta,slow_ratio,luxury_priority, &
       c4_budget,leaf_coupling,n_sen_rate,c4_photo,leaf_min_ratio,stem_min_ratio,leaf_inf,stem_inf, &
       photo_reference_mode,photo_sln_ref,leaf_expansion_mode,v4_diagnostics,common_acceptance,reserve_mode, &
-      reserve_capacity,reserve_fill_tau,reserve_protect,build_min_leaf,build_min_stem
+      reserve_capacity,reserve_fill_tau,reserve_protect,build_min_leaf,build_min_stem, &
+      remob_rate_mode,remob_rate_max,functional_rate_max
     if(loaded) then
       if(NI_ENABLED()) then
         if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
@@ -879,6 +910,15 @@ contains
     end if
     if(ni_stage<0.or.ni_stage>5) error stop 'NI: stage must be 0..5'
     if(ni_stage>implemented_stage) error stop 'NI: requested integration stage is not connected in this build'
+    if(remob_rate_mode<0.or.remob_rate_mode>1)error stop 'NI LAI: invalid remobilization rate mode'
+    if(.not.all(ieee_is_finite([remob_rate_max,functional_rate_max])))error stop 'NI LAI: nonfinite rate limits'
+    if(remob_rate_mode==1)then
+      if(ni_stage/=5.or.budget_revision/=1.or.remob_mode/=1)error stop 'NI LAI: rate limits require revised remobilization'
+      if(remob_rate_max<=0.or.remob_rate_max>1.or.functional_rate_max<=0.or. &
+        functional_rate_max>remob_rate_max)error stop 'NI LAI: explicit ordered daily rate limits required'
+    else if(remob_rate_max/=-1.or.functional_rate_max/=-1)then
+      error stop 'NI LAI: unused rate limits require remob_rate_mode=1'
+    endif
     if(min(common_acceptance,reserve_mode)<0.or.max(common_acceptance,reserve_mode)>1)error stop 'NI P2: invalid mode'
     if(.not.all(ieee_is_finite([build_min_leaf,build_min_stem])))error stop 'NI P2: nonfinite new-tissue settings'
     if((build_min_leaf/=-1.and.(build_min_leaf<=0.or.build_min_leaf>1)).or. &
@@ -981,6 +1021,7 @@ contains
     day_valid=.false.;z_end=0;day_z=0;day_growth=1
     veg_z_end=1;day_veg_z=1;mob_safe=0;mob_func=0;mob_plan=0;mob_returned=0
     sen_frac=0;sen_plan_dm=0;sen_available=0;mob_sen=0;c4_nloss=0;c4_area_dead=0
+    mob_rate_cap=0;mob_function_cap=0
     reserve_n=0;reserve_begin=0;reserve_fill=0;reserve_release=0;reserve_sen_recovery=0;reserve_litter=0
     reserve_pending=.false.;reserve_residual=0
   end subroutine
@@ -996,6 +1037,7 @@ contains
     old_a3=0;old_a4=0;old_rsp3=0;old_rsp4=0
     r_mf=0;r_diff=0;r_mem=0;r_cr=0;r_bulk=0;r_candidate3=0;r_candidate4=0;r_final3=0;r_final4=0
     mob_safe=0;mob_func=0;mob_plan=0;mob_returned=0;mob_gap=0;mob_accept=0;mob_new_used=0;mob_c_paid=0
+    mob_rate_cap=0;mob_function_cap=0
     kinetic_cap=0;late_a=0;late_cost=0;late_c_budget=0;late_func=0;late_lux=0
     late_unit_cost=0;late_c_before=0;late_c_after=0;late_c_reserved=0;late_nad=0
     veg_before=0;veg_after=0;storage_shift=0
@@ -1297,12 +1339,15 @@ contains
         write(mob_unit,'(A)')'run,yrdoy,remob_mode,tau,protect_beta,slow_ratio,severity,veg_z_day,growth_severity_day,'// &
           'gap,acceptance_prediction,new_growth_N_actual,C_remob_actual,'// &
           'plan_leaf,plan_stem,plan_root,plan_shell,returned_leaf,returned_stem,returned_root,returned_shell,'// &
-          'safe_leaf,safe_stem,safe_root,safe_shell,function_leaf,function_stem,function_root,function_shell'
+          'safe_leaf,safe_stem,safe_root,safe_shell,function_leaf,function_stem,function_root,function_shell,'// &
+          'rate_mode,rate_max,functional_rate_max,capR_leaf,capR_stem,capR_root,capR_shell,'// &
+          'capF_leaf,capF_stem,capF_root,capF_shell'
         mob_opened=.true.
       endif
-      write(mob_unit,'(3(I0,","),25(ES24.15E3,","),ES24.15E3)') control%RUN,control%YRDOY, &
+      write(mob_unit,'(3(I0,","),*(ES24.15E3,:,","))') control%RUN,control%YRDOY, &
         remob_mode,remob_tau,protect_beta,slow_ratio,real(remob_severity,dp),day_veg_z,day_growth,mob_gap,mob_accept,mob_new_used, &
-        mob_c_paid,mob_plan,mob_returned,mob_safe,mob_func
+        mob_c_paid,mob_plan,mob_returned,mob_safe,mob_func,real(remob_rate_mode,dp), &
+        remob_rate_max,functional_rate_max,mob_rate_cap,mob_function_cap
     endif
     if(NI_REVISED()) then
       if(.not.audit_opened) then
