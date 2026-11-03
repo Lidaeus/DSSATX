@@ -1,4 +1,4 @@
-# N v3: staged state, remobilization and assimilation budget
+# N v3: C4 isolated physiology and stock-budget branch
 
 User approval 2026-11-03 authorizes the reviewed C0-C3 sequence, including
 the individually reported V15 S1 principles V1-V3. This does not authorize
@@ -48,8 +48,35 @@ PlantNIntegration/PlantABudget rather than introducing another true N pool.
 verify_c1/2/3.py independently reconstruct published state, submitted source,
 recipient, unused kinetic capacity, N cost and residual-C storage accounts.
 
-C4 physiology (remobilization vs area/senescence) is NOT changed. Current
-GROW/SENES double pathways remain a transparent comparison until complete
-elemental-C/DM accounting and the detailed replacement diff are reviewed.
-These checks prove incremental Q/organic-N/vegetative-payment closure, not
-complete whole-system elemental C closure or field management validity.
+C4 is now opt-in on branch codex/n-v3-c4-ledger-20261103, descended from the
+frozen C3 8e5c5d45. Its evidence goes exclusively to
+critical_n/reports/n_v3_c4_execution_20261103. C3 and protected binaries stay
+unchanged. Use run_c4_delivery.py and freeze_c4_delivery.py for C4; inherited
+freeze_delivery.py describes the earlier C3 delivery and is not a C4 entry.
+
+- `c4_budget=1`: reconcile actual mobile carbohydrate stocks, fruit dry-mass
+  harvest, current mixed fruit N export, and actual carbohydrate expenditure.
+  Fruit carbohydrate is not pre-credited as export before cohort settlement.
+  Maintenance potential, paid and unpaid are separate under carbon shortage;
+  no starvation-mortality model is invented. Fruit N demand stays native.
+- `leaf_coupling=1`: requires C4 budget/remobilization. Plan age/shade/water
+  losses once before allocation. Recycle eligible dying-material N before
+  healthy safe and gated functional N. Return rejected reservations. Areas
+  change through new growth and scheduled cell loss; no NRUS-driven automatic
+  area destruction and no NAD-driven instantaneous area creation.
+- `n_sen_rate=0`: no additional N-driven cell death by default. The optional
+  0.02/day scenario is an uncalibrated sensitivity setting; it does not
+  establish an eggplant senescence constant.
+- `c4_photo=1`: convert both concentration and specific mass to whole-DM
+  basis for functional N/area; normalize positive sun/shade masses and N to
+  the actual aggregate stocks. Reserve N does not proportionally raise Pmax.
+
+verify_c4.py reconstructs organ DM/mobile carbohydrate, litter and area;
+verify_c4_photo.py checks actual hourly sun/shade stock conservation. C1-C3
+verifiers remain applicable, with normal-aging N added to source accounting.
+These prove incremental organic/inorganic N, physical mobile-CH2O and actual
+CH2O payment closure, not complete whole-system elemental C closure. Legacy
+respiration/composition constants do not yet define a chemically consistent
+full C balance. Frost/pest losses require explicit settlement before the new
+leaf mode supports them; such unplanned damage fails rather than hiding loss.
+No improvement in field fit or management validity is assumed.

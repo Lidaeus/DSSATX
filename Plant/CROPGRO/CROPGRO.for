@@ -103,6 +103,7 @@ C=======================================================================
       REAL HARVFRAC(2)
       REAL LAIMX, LAGSD, LNGPEG
       REAL MAINR
+      REAL NIC4MAINP
       REAL NSTRES, NPLTD, NDMNEW,
      &    NADRT,  NADST,  NGRLF,  NGRRT,  NGRST,
      &    NADLF, NMINEA,
@@ -969,6 +970,11 @@ C    STILL WANT THE SPEED-UP CAUSED BY THE "+ DXR57" FEATURE AFTER R5.
 C
 C-----------------------------------------------------------------------
       CMINEP = CMOBMX * (DTX + DXR57) * (WCRST + WCRRT + WCRSH +WCRLF)
+      IF (NI_C4_ON()) THEN
+        ! Fruit carbohydrate is not credited before its cohort can export it.
+        CMINEP=CMOBMX*(DTX+DXR57)*(WCRLF+WCRST+WCRRT)
+        CRUSSH=0.
+      ENDIF
       PGAVL = PG + CMINEP
 C-----------------------------------------------------------------------
 C       Compute maintenance respiration and subtract from available CH2O
@@ -978,6 +984,8 @@ C-----------------------------------------------------------------------
      &    RO, RP,                                         !Input/Output
      &    MAINR)                                          !Output
 
+      NIC4MAINP=MAINR
+      IF (NI_C4_ON()) MAINR=MIN(MAINR,MAX(0.,PGAVL))
       IF (MAINR .GT. PGAVL) THEN
         PGAVL  = 0.0
       ELSE
@@ -1035,6 +1043,14 @@ C-----------------------------------------------------------------------
       ENDIF
       NIV3CPRED=PGAVL
       IF (YRDOY == YREND) RETURN
+      IF (NI_LEAF_COUPLED()) THEN
+        ! Exactly one stateful SENES call: plan before donor allocation.
+        CALL SENES(INTEGR, ISWITCH,
+     &    FILECC,CLW,DTX,KCAN,NR7,0.,OZON7,PAR,
+     &    RHOL,SLAAD,STMWT,SWFAC,VSTAGE,WTLF,XLAI,
+     &    SFOZ1,OBASE,SLDOT,SLNDOT,SSDOT,SSNDOT)
+        CALL NI_C4_SEN_PLAN((/SLDOT,SSDOT/),AREALF)
+      ENDIF
 
 C-----------------------------------------------------------------------
 C    Compute N Available From Seed, During Early Growth
@@ -1404,6 +1420,10 @@ C-----------------------------------------------------------------------
       NAVL = NAVL - (NGRLF + NGRST + NGRRT)
       NAVL = NAVL - (NADLF + NADST + NADRT)
       PGAVL = PGAVL - (CADST + CADLF) * PCH2O
+      CALL NI_C4_CASH(CONTROL,PG,MAINR,
+     &  (/CRUSLF,CRUSST,CRUSRT,CRUSSH/),RSPNO3+RSPNH4,
+     &  NMINEA/0.16*RPRO,AGRVG*(WLDOTN+WSDOTN+WRDOTN),
+     &  CGRSD+CGRSH,(CADST+CADLF)*PCH2O,PGAVL,NIC4MAINP)
 !     P0b read-only trace; no model state is assigned.
       IF (P0_ENABLED()) THEN
         CALL P0_V(CONTROL,'cg_ledger_end',
@@ -1413,11 +1433,13 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Call leaf senescence routine to compute leaf loss variables
 C-----------------------------------------------------------------------
+      IF (.NOT.NI_LEAF_COUPLED()) THEN
       CALL SENES(INTEGR, ISWITCH,
      &    FILECC, CLW, DTX, KCAN, NR7, NRUSLF, OZON7, PAR,!Input
      &    RHOL, SLAAD, STMWT, SWFAC, VSTAGE, WTLF, XLAI,  !Input
      &    SFOZ1, OBASE,                                   !Input
      &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
+      ENDIF
 
 C-----------------------------------------------------------------------
 C     Call freeze damage routine if TMIN is less than FREEZ1 deg C
@@ -1447,6 +1469,9 @@ C-----------------------------------------------------------------------
 C       Calculate the respiration required for seed, shell, and veg tissue
 C       depending on the source of N uptake
 C-----------------------------------------------------------------------
+      IF (NI_LEAF_COUPLED()) CALL NI_C4_FATE(
+     &  SLDOT,SSDOT,SLNDOT,SSNDOT,SRDOT,SENRT,NLAYR,
+     &  (/CRUSLF,CRUSST,CRUSRT/),WLIDOT,WLFDOT,WSIDOT,WRIDOT)
       IF (NI_ENABLED()) THEN
         IF ((NFORGROW+NFIXN+NMINEA).GT.1.E-4) THEN
           RPROAV=((RSPNO3+RSPNH4)*0.16+NFIXN*RFIXN

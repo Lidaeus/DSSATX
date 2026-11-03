@@ -42,7 +42,7 @@ C========================================================================
 
 !-----------------------------------------------------------------------
       USE CG_P0Trace
-      USE CG_Nitrogen, ONLY: NI_CURVES, NI_FEEDBACK, NI_GROWTH,
+      USE CG_Nitrogen, ONLY: NI_C4_ON, NI_CURVES, NI_FEEDBACK, NI_GROWTH,
      &  NI_REVISED, NI_VEG_RECONCILE, NI_REFILL, NI_EXPANSION
       USE ModuleDefs
       USE ModuleData
@@ -469,6 +469,7 @@ C-----------------------------------------------------------------------
           CRUSST = CMINEA / CMINEP * CMOBMX * WCRST * (DTX + DXR57)
           CRUSRT = CMINEA / CMINEP * CMOBMX * WCRRT * (DTX + DXR57)
           CRUSSH = CMINEA / CMINEP * CMOBMX * WCRSH * (DTX + DXR57)
+          IF (NI_C4_ON()) CRUSSH=0.
         ENDIF
       ENDIF
       CADLF = CADLF + CSAVEV/PCH2O * LSTR

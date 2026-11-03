@@ -20,7 +20,7 @@ def run(cmd):
     return p.stdout
 run([fc,'-I',str(REPO/'build/mod'),'-J',str(mods),*flags,'-c',str(REPO/'Plant/CROPGRO/CG_Nitrogen.f90'),'-o',str(work/'core.obj')])
 results=[]
-for source in ['research/n_integration_v2/native_n_tests.f90','research/a_budget_feedback/native_A_tests.f90','research/n_v3/native_v3_tests.f90']:
+for source in ['research/n_integration_v2/native_n_tests.f90','research/a_budget_feedback/native_A_tests.f90','research/n_v3/native_v3_tests.f90','research/n_v3/native_c4_tests.f90']:
     exe=work/(Path(source).stem+'.exe')
     run([fc,'-I',str(mods),'-I',str(REPO/'build/mod'),*flags,str(REPO/source),str(work/'core.obj'),'-o',str(exe),'-static','-static-libgcc','-static-libgfortran'])
     output=run([str(exe)]);print(output.strip())

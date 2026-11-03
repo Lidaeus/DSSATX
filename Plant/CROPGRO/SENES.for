@@ -24,6 +24,7 @@ C========================================================================
      &    SLDOT, SLNDOT, SSDOT, SSNDOT)                   !Output
 
 C-----------------------------------------------------------------------
+      USE CG_Nitrogen, ONLY: NI_LEAF_COUPLED, NI_N_SEN_EXTRA
       USE ModuleDefs
       USE ModuleData
       IMPLICIT NONE
@@ -207,6 +208,7 @@ C     to contain no more mineable Protein--i.e., N content of senesced
 C     leaves and petioles is different from canopy average.
 C-----------------------------------------------------------------------
         LFSEN = SENRTE * NRUSLF / 0.16
+        IF (NI_LEAF_COUPLED()) LFSEN=0.
         LFSEN = MIN(WTLF,LFSEN)
         SLDOT = SLDOT + LFSEN
         SLDOT = MIN(WTLF,SLDOT)
@@ -251,6 +253,8 @@ C-----------------------------------------------------------------------
         SLNDOT = MAX(SLNDOT, SLFO3)
 
         SLDOT = SLDOT + SLNDOT
+        IF (NI_LEAF_COUPLED())
+     &    SLDOT=SLDOT+NI_N_SEN_EXTRA(WTLF,SLDOT)
         SSDOT = SLDOT * PORPT
         SSDOT = MIN(SSDOT,0.1*STMWT)
         SSNDOT = SLNDOT * PORPT

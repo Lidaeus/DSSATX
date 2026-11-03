@@ -55,6 +55,7 @@ def case(name,exe,changes=None,trace=True,input_modifier=None):
         p=subprocess.run([str(exe),'B','DSSBatch.v48'],cwd=work,env=env,stdout=so,stderr=se,timeout=240)
     info=(work/'INFO.OUT').read_text(errors='replace')if(work/'INFO.OUT').exists()else''
     result=dict(name=name,success=p.returncode==0 and bool(re.search(r'Normal end of run\s+12\b',info)),
+        input_role='modified_input_diagnostic' if input_modifier else 'frozen_field_input_replay',
         returncode=p.returncode,config=cfg,binary=str(exe),binary_sha256=sha(exe),elapsed=time.monotonic()-start,
         input_hashes={f.name:sha(f)for f in work.iterdir()if f.is_file() and f.name in {p.name for p in Path(design['inputs']).iterdir()}})
     if not result['success']:

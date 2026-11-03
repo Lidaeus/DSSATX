@@ -61,7 +61,10 @@ C=======================================================================
 
 !-----------------------------------------------------------------------
       USE CG_Nitrogen, ONLY: NI_REVISED, NI_RETAIN,
-     &  NI_AREA_REFILL, NI_MINIMUM, NI_LUX_ON, NI_REDUCTION_RESP
+     &  NI_AREA_REFILL, NI_MINIMUM, NI_LUX_ON, NI_REDUCTION_RESP,
+     &  NI_C4_ON,NI_LEAF_COUPLED,NI_C4_NLOSS,NI_C4_AREA,
+     &  NI_CARB_KERNEL,NI_SHELL_CARB_KERNEL,NI_C4_FRACTIONS
+      USE ISO_FORTRAN_ENV, ONLY: REAL64
       USE CG_P0Trace
       USE ModuleDefs     !Definitions of constructed variable types, 
                          ! which contain control information, soil
@@ -164,6 +167,10 @@ C=======================================================================
 
       REAL TOSHMINE, TOCHMINE
       REAL HPODWT,HSDWT,HSHELWT
+      REAL C4NL(3),C4FRAC
+      INTEGER C4I
+      REAL(REAL64) C4W0(5),C4Q0(4),C4Q1(4),C4QOFF(4),
+     &  C4F(3),C4DRAW(4),C4LOCK,C4MASS,C4TOL,C4CHECK
       REAL NHSHWT, NHSDWT
 !-----------------------------------------------------------------------
 !     Constructed variable types defined in ModuleDefs.for.
@@ -479,6 +486,11 @@ C***********************************************************************
 C     Daily integration
 C***********************************************************************
       ELSEIF (DYNAMIC == INTEGR) THEN
+      IF (NI_C4_ON()) THEN
+        C4W0=REAL((/WTLF,STMWT,RTWT,SHELWT,SDWT/),REAL64)
+        C4Q0=REAL((/WCRLF,WCRST,WCRRT,WCRSH/),REAL64)
+        C4DRAW=REAL((/CRUSLF,CRUSST,CRUSRT,TOCHMINE/),REAL64)
+      ENDIF
       IF (P0_ENABLED()) THEN
         CALL P0_V(CONTROL,'c4_grow_begin',
      &    'W_leaf,W_stem,W_root,W_shell,W_seed,'//
@@ -616,6 +628,8 @@ C-----------------------------------------------------------------------
 C     Net pod growth rate
 C-----------------------------------------------------------------------
       WPDOT = WSHDOT + WSDDOT - HPODWT
+      ! Component harvest is already in WSHDOT/WSDDOT.
+      IF (NI_C4_ON()) WPDOT=WSHDOT+WSDDOT
       IF (WPDOT .LT. 0.0) THEN
         WPDOT = MAX(WPDOT, -PODWT)
       ENDIF        
@@ -694,6 +708,38 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 C     Update C Storage, Concentrations in Leaves, Stems, Roots, and Shells
 C-----------------------------------------------------------------------
+      IF (NI_C4_ON()) THEN
+        IF (NI_LEAF_COUPLED()) THEN
+          CALL NI_C4_FRACTIONS(C4F)
+        ELSE
+          C4F=REAL((/SLDOT+WLIDOT+WLFDOT,SSDOT+WSIDOT,
+     &      SRDOT+WRIDOT/),REAL64)/MAX(1.D-12,C4W0(1:3)-
+     &      REAL((/NRUSLF,NRUSST,NRUSRT/),REAL64)/.16D0-
+     &      C4DRAW(1:3))
+          C4F=MIN(1.D0,MAX(0.D0,C4F))
+        ENDIF
+        CALL NI_CARB_KERNEL(C4Q0(1),REAL(WLDOTN,REAL64),
+     &    REAL(ALPHL,REAL64),REAL(CADLF,REAL64),C4DRAW(1),
+     &    C4F(1),C4Q1(1),C4QOFF(1))
+        CALL NI_CARB_KERNEL(C4Q0(2),REAL(WSDOTN,REAL64),
+     &    REAL(ALPHS,REAL64),REAL(CADST,REAL64),C4DRAW(2),
+     &    C4F(2),C4Q1(2),C4QOFF(2))
+        CALL NI_CARB_KERNEL(C4Q0(3),REAL(WRDOTN,REAL64),
+     &    REAL(ALPHR,REAL64),0.D0,C4DRAW(3),C4F(3),
+     &    C4Q1(3),C4QOFF(3))
+        C4MASS=C4W0(4)+REAL(WSHDTN-TOSHMINE-TOCHMINE,REAL64)
+        CALL NI_SHELL_CARB_KERNEL(C4Q0(4),
+     &    REAL(WSHDTN,REAL64),REAL(ALPHSH,REAL64),C4DRAW(4),
+     &    C4MASS,REAL(WTABRT+WSHIDT+HSHELWT,REAL64),
+     &    REAL(WTSHMT,REAL64),REAL(RHOSH,REAL64),
+     &    C4Q1(4),C4QOFF(4),C4LOCK)
+        IF (MINVAL(C4Q1).LT.-1.D-8)
+     &    ERROR STOP 'NI C4: carbohydrate export exceeds stock'
+        WRCLDT=REAL(C4Q1(1)-C4Q0(1))
+        WRCSDT=REAL(C4Q1(2)-C4Q0(2))
+        WRCRDT=REAL(C4Q1(3)-C4Q0(3))
+        WRCSHD=REAL(C4Q1(4)-C4Q0(4))
+      ENDIF
       WCRLF = WCRLF + WRCLDT
       WCRST = WCRST + WRCSDT
       WCRRT = WCRRT + WRCRDT
@@ -775,6 +821,10 @@ C     Net growth rate of nitrogen in the leaves
 C-----------------------------------------------------------------------
       IF (NI_REVISED()) NLOFF=MIN(NLOFF,
      &  MAX(0.,WTNLF+NGRLF+NADLF-NRUSLF))
+      IF (NI_LEAF_COUPLED()) THEN
+        CALL NI_C4_NLOSS(C4NL)
+        NLOFF=C4NL(1)
+      ENDIF
       NLDOT = NGRLF - NLOFF - NRUSLF
       IF (WTLF > 1.E-4) THEN
          NLDOT = NLDOT + NADLF *
@@ -797,6 +847,7 @@ C     Net growth rate of nitrogen in the stems
 C-----------------------------------------------------------------------
       IF (NI_REVISED()) NSOFF=MIN(NSOFF,
      &  MAX(0.,WTNST+NGRST+NADST-NRUSST))
+      IF (NI_LEAF_COUPLED()) NSOFF=C4NL(2)
       NSDOT = NGRST - NSOFF - NRUSST
       IF (STMWT > 1.E-4) THEN
          NSDOT = NSDOT + NADST * 
@@ -816,6 +867,7 @@ C     Net growth rate of nitrogen in the roots
 C-----------------------------------------------------------------------
       IF (NI_REVISED()) NROFF=MIN(NROFF,
      &  MAX(0.,WTNRT+NGRRT+NADRT-NRUSRT))
+      IF (NI_LEAF_COUPLED()) NROFF=C4NL(3)
       NIROOTN=MAX(0.,NROFF-WRIDOT*PCNRT/100.)
       NRDOT = NGRRT - NROFF - NRUSRT
       IF (RTWT > 1.E-4) THEN
@@ -828,13 +880,26 @@ C     Shell nitrogen senescence, abortion and pest damage loss
 C-----------------------------------------------------------------------
       NSHOFF = (WTABRT+WSHIDT+HSHELWT) * (PCNSH/100.)
       NIHSHN=HSHELWT*PCNSH/100.
-      IF (NI_REVISED()) THEN
+      IF (NI_C4_ON()) THEN
+        ! Export current mixed fruit N, including today's growth.
+        C4FRAC=MIN(1.,MAX(0.,WTABRT+WSHIDT+HSHELWT)/
+     &    MAX(1.E-12,REAL(C4W0(4))+WSHDTN-TOSHMINE-TOCHMINE))
+        NSHOFF=MAX(0.,WTNSH+NGRSH-NRUSSH)*C4FRAC
+        NIHSHN=0.
+        IF (WTABRT+WSHIDT+HSHELWT.GT.0.) NIHSHN=NSHOFF*
+     &    HSHELWT/(WTABRT+WSHIDT+HSHELWT)
+      ELSE IF (NI_REVISED()) THEN
         NISHOFF=NSHOFF
         NSHOFF=MIN(NSHOFF,MAX(0.,WTNSH+NGRSH-NRUSSH))
         IF (NISHOFF.GT.0.) NIHSHN=NIHSHN*NSHOFF/NISHOFF
       ENDIF
       NHSHWT = NHSHWT + NIHSHN
+      IF (NI_C4_ON()) THEN
+        IF (WTABRT+WSHIDT+HSHELWT.GT.0.) NLPEST=NLPEST+
+     &    NSHOFF*WSHIDT/(WTABRT+WSHIDT+HSHELWT)
+      ELSE
       NLPEST = NLPEST + WSHIDT * PCNSH/100.
+      ENDIF
       IF (NSHOFF < 0.0) THEN
         NSHOFF = 0.0
       ENDIF
@@ -848,7 +913,13 @@ C-----------------------------------------------------------------------
 C     Seed nitrogen senescence, abortion and pest damage loss
 C-----------------------------------------------------------------------
       NSDOFF = (SWIDOT+HSDWT) * (PCNSD/100.)
-      IF (NI_REVISED()) THEN
+      IF (NI_C4_ON()) THEN
+        C4FRAC=MIN(1.,MAX(0.,SWIDOT+HSDWT)/
+     &    MAX(1.E-12,REAL(C4W0(5))+WSDDTN))
+        NSDOFF=MAX(0.,WTNSD+NGRSD)*C4FRAC
+        IF (SWIDOT+HSDWT.GT.0.) NHSDWT=NHSDWT+
+     &    NSDOFF*HSDWT/(SWIDOT+HSDWT)
+      ELSE IF (NI_REVISED()) THEN
         NISDOFF=NSDOFF
         NSDOFF=MIN(NSDOFF,MAX(0.,WTNSD+NGRSD))
         IF (NISDOFF.GT.0.) THEN
@@ -1162,10 +1233,14 @@ C-----------------------------------------------------------------------
 C     Leaf Area, Specific Leaf Area Calculations
 C     Calculate Area Growth rate and Update Leaf Area (AREALF, XLAI)
 C-----------------------------------------------------------------------
+      IF (NI_LEAF_COUPLED()) THEN
+        ALFDOT=NI_C4_AREA(WLDOTN*F)
+      ELSE
       ALFDOT = WLDOTN*F - (SLDOT+WLIDOT+WLFDOT+NRUSLF/0.16)*SLA
       IF (WTLF > 1.E-4) THEN
          ALFDOT = ALFDOT + SLA * (NI_AREA_REFILL(NADLF)/0.16) *
      &   NI_RETAIN((SLDOT+WLIDOT+WLFDOT)/WTLF)
+      ENDIF
       ENDIF
 
       AREALF = AREALF + ALFDOT
@@ -1267,6 +1342,32 @@ C-----------------------------------------------------------------------
      &    NADRT,CADLF,CADST,ALPHL,ALPHS,
      &    ALPHR,ALPHSH,WTSHMT,TOSHMINE,ALFDOT,
      &    F,SLDOT,SSDOT,SRDOT/))
+      ENDIF
+      IF (NI_C4_ON()) THEN
+        C4TOL=MAX(2.D-5,64*EPSILON(1.)*
+     &    MAX(1.D0,REAL(TOTWT,REAL64)))
+        IF (ABS(REAL(PODWT-SHELWT-SDWT,REAL64)).GT.C4TOL)
+     &    ERROR STOP 'NI C4: pod component dry mass mismatch'
+        IF (ABS(REAL(TOPWT-WTLF-STMWT-PODWT,REAL64))
+     &    .GT.C4TOL) ERROR STOP 'NI C4: top component mismatch'
+        IF (ABS(REAL(TOTWT-TOPWT-RTWT-DWNOD,REAL64))
+     &    .GT.C4TOL) ERROR STOP 'NI C4: total component mismatch'
+        IF (MAXVAL(ABS(REAL((/WCRLF,WCRST,WCRRT,WCRSH/),
+     &    REAL64)-C4Q1)).GT.8*EPSILON(1.)*
+     &    MAX(1.D0,MAXVAL(C4Q0),MAXVAL(C4Q1)))
+     &    ERROR STOP 'NI C4: carbohydrate stock integration mismatch'
+        IF (MAXVAL(REAL((/WCRLF,WCRST,WCRRT,WCRSH/),
+     &    REAL64)-REAL((/WTLF,STMWT,RTWT,SHELWT/),REAL64))
+     &    .GT.C4TOL) ERROR STOP 'NI C4: carbohydrate exceeds organ DM'
+        IF (MAXVAL(REAL((/WCRLF,WCRST,WCRRT,WCRSH/),
+     &    REAL64)+REAL((/WTNLF,WTNST,WTNRT,WTNSH/),REAL64)
+     &    /0.16D0-REAL((/WTLF,STMWT,RTWT,SHELWT/),REAL64))
+     &    .GT.C4TOL) ERROR STOP 'NI C4: protein and CH2O exceed DM'
+        IF (P0_ENABLED()) CALL P0_V(CONTROL,'c4_carb_fate',
+     &    'Qout_leaf,Qout_stem,Qout_root,Qout_shell,Q_locked,'//
+     &    'TOCHMINE,HPODWT,HSDWT,HSHELWT',
+     &    (/REAL(C4QOFF),REAL(C4LOCK),
+     &      TOCHMINE,HPODWT,HSDWT,HSHELWT/))
       ENDIF
       SENESCE % ResWt  = SenWt
       SENESCE % ResLig = SenLig

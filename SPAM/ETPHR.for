@@ -313,6 +313,8 @@ C=======================================================================
      &  CCNEFF,CICAD,CMXSF,CQESF,PGPATH,                  !Input
      &  AGEQESL,CO2QESL,QEFFSL)                           !Output
 
+      USE CG_Nitrogen, ONLY: NI_C4_PHOTO, NI_CANOPY_N
+      USE CG_P0Trace, ONLY: P0_ENABLED, P0_LOCAL
       IMPLICIT  NONE
       EXTERNAL PGLFEQ, PGLEAF
       SAVE
@@ -347,6 +349,13 @@ C     leaves are physically above shaded (SH) leaves.
       SLWSH = 1./SLAAD - 0.5*SLWSLO*LAISL
       PCNLSL = RNITP + 0.5*NSLOPE*LAISH
       PCNLSH = RNITP - 0.5*NSLOPE*LAISL
+      IF (NI_C4_PHOTO()) THEN
+        CALL NI_CANOPY_N(LAISL,LAISH,SLAAD,RNITP,
+     &    SLWSLO,NSLOPE,SLWSL,SLWSH,PCNLSL,PCNLSH)
+        IF (P0_ENABLED()) CALL P0_LOCAL('c4_canopy_n',
+     &    'LAISL,LAISH,SLAAD,RNITP,SLWSL,SLWSH,PCNLSL,PCNLSH',
+     &    (/LAISL,LAISH,SLAAD,RNITP,SLWSL,SLWSH,PCNLSL,PCNLSH/))
+      ENDIF
 
 C     Calulate leaf photosynthesis for SH and SL leaves.
 

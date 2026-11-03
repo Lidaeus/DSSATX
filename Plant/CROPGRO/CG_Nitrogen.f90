@@ -24,6 +24,10 @@ module CG_Nitrogen
   logical,save :: mob_opened=.false.
   integer,save :: luxury_priority=0,lux_unit=0
   logical,save :: lux_opened=.false.
+  integer,save :: c4_budget=0,leaf_coupling=0,c4_photo=0,cash_unit=0,leaf_unit=0
+  logical,save :: cash_opened=.false.,leaf_opened=.false.
+  real(dp),save :: n_sen_rate=0,sen_frac(3)=0,sen_plan_dm(2)=0,sen_available(4)=0,mob_sen(4)=0
+  real(dp),save :: c4_nloss(3)=0,c4_area_dead=0
   real(dp),save :: kinetic_cap(2)=0,late_a(2)=0,late_cost=0,late_c_budget=0,late_func=0,late_lux=0
   real(dp),save :: late_unit_cost(2)=0,late_c_before=0,late_c_after=0,late_c_reserved=0,late_nad(2)=0
   real(dp), save :: curve_w0=1, photo_slw_ref=.0028_dp
@@ -67,7 +71,131 @@ module CG_Nitrogen
   public :: NI_REMOB_ON, NI_REMOB_KERNEL, NI_REMOB_PLAN, NI_REMOB_SETTLE, NI_REMOB_REPRO
   public :: NI_CORE_DEMAND, NI_LUXURY, NI_LATE_KERNEL, NI_REDUCTION_RESP
   public :: NI_LUX_ON
+  public :: NI_C4_ON, NI_LEAF_COUPLED, NI_C4_CASH, NI_CARB_KERNEL, NI_SHELL_CARB_KERNEL
+  public :: NI_C4_SEN_PLAN, NI_C4_FATE, NI_C4_NLOSS, NI_C4_AREA, NI_N_SEN_EXTRA
+  public :: NI_C4_FRACTIONS
+  public :: NI_C4_PHOTO, NI_CANOPY_N, NI_CANOPY_N_KERNEL
 contains
+  logical function NI_C4_PHOTO()
+    NI_C4_PHOTO=ni_stage==5.and.budget_revision==1.and.c4_photo==1.and.ready
+  end function
+  pure subroutine NI_CANOPY_N_KERNEL(lai,slaad,nitrogen,slopes,mass,npercent)
+    real(dp),intent(in)::lai(2),slaad,nitrogen,slopes(2)
+    real(dp),intent(out)::mass(2),npercent(2)
+    real(dp)::mean_mass,total,target,actual
+    mass=0;npercent=0;total=sum(max(0._dp,lai))
+    if(slaad<=0.or.total<=1.e-12_dp) return
+    mean_mass=1/slaad
+    mass=max(0._dp,mean_mass+.5_dp*slopes(1)*[lai(2),-lai(1)])
+    mass=mass*(mean_mass*total)/max(sum(mass*lai),1.e-30_dp)
+    npercent=max(0._dp,nitrogen+.5_dp*slopes(2)*[lai(2),-lai(1)])
+    target=max(0._dp,nitrogen)/100*mean_mass*total
+    actual=sum(npercent/100*mass*lai)
+    if(actual>1.e-30_dp)then
+      npercent=npercent*target/actual
+    else
+      ! Disjoint, extreme slopes cannot erase the existing canopy N stock.
+      npercent=max(0._dp,nitrogen)
+    endif
+  end subroutine
+  subroutine NI_CANOPY_N(lsl,lsh,slaad,nitrogen,slwslo,nslope,slwsl,slwsh,pcnsl,pcnsh)
+    real,intent(in)::lsl,lsh,slaad,nitrogen,slwslo,nslope
+    real,intent(out)::slwsl,slwsh,pcnsl,pcnsh
+    real(dp)::mass(2),pcn(2)
+    call NI_CANOPY_N_KERNEL(real([lsl,lsh],dp),real(slaad,dp),real(nitrogen,dp), &
+      real([slwslo,nslope],dp),mass,pcn)
+    slwsl=real(mass(1));slwsh=real(mass(2));pcnsl=real(pcn(1));pcnsh=real(pcn(2))
+  end subroutine
+  subroutine NI_C4_FRACTIONS(fraction)
+    real(dp),intent(out)::fraction(3)
+    fraction=sen_frac
+  end subroutine
+  logical function NI_C4_ON()
+    NI_C4_ON=ni_stage==5.and.budget_revision==1.and.c4_budget==1
+  end function
+  logical function NI_LEAF_COUPLED()
+    NI_LEAF_COUPLED=NI_C4_ON().and.leaf_coupling==1
+  end function
+  pure subroutine NI_CARB_KERNEL(q0,growth,alpha,addition,draw,fraction,q1,litter)
+    real(dp),intent(in)::q0,growth,alpha,addition,draw,fraction
+    real(dp),intent(out)::q1,litter
+    litter=max(0._dp,q0-draw)*max(0._dp,min(1._dp,fraction))
+    q1=q0+alpha*growth+addition-draw-litter
+  end subroutine
+  pure subroutine NI_SHELL_CARB_KERNEL(q0,growth,alpha,draw,mass_before_loss,loss,mature,ratio,q1,out,locked)
+    real(dp),intent(in)::q0,growth,alpha,draw,mass_before_loss,loss,mature,ratio
+    real(dp),intent(out)::q1,out,locked
+    real(dp)::q
+    q=q0+alpha*growth-draw
+    out=max(0._dp,q)*min(1._dp,max(0._dp,loss)/max(mass_before_loss,1.e-12_dp))
+    locked=min(max(0._dp,q-out),max(0._dp,mature*ratio))
+    q1=q-out-locked
+  end subroutine
+  subroutine NI_C4_CASH(control,pg,main,draw,assim,mob,veg,fruit,store,predicted_unused,main_potential)
+    type(ControlType),intent(in)::control
+    real,intent(in)::pg,main,draw(4),assim,mob,veg,fruit,store,predicted_unused,main_potential
+    real(dp)::res,scale
+    integer::ios
+    if(.not.NI_C4_ON()) return
+    res=real(pg,dp)+sum(real(draw,dp))-real(main,dp)-real(assim,dp)-real(mob,dp) &
+      -real(veg,dp)-real(fruit,dp)-real(store,dp)
+    scale=max(1._dp,abs(real(pg,dp)),sum(real(draw,dp)))
+    if(abs(res)>32*epsilon(1.)*scale) error stop 'NI C4: actual carbohydrate expenditure imbalance'
+    if(.not.cash_opened) then
+      open(newunit=cash_unit,file='PlantCCash.csv',status='new',action='write',iostat=ios)
+      if(ios/=0)error stop 'NI C4: cannot create carbohydrate expenditure ledger'
+      write(cash_unit,'(A)')'run,yrdoy,PG,actual_C_mined,maintenance,N_assim,N_resynthesis,veg_growth,fruit_growth,'// &
+        'storage_cost,CH2O_residual,C_equivalent_residual,predicted_unused_not_a_stock,'// &
+        'maintenance_potential,maintenance_unpaid'
+      cash_opened=.true.
+    endif
+    write(cash_unit,'(2(I0,","),12(ES24.15E3,","),ES24.15E3)')control%RUN,control%YRDOY,real(pg,dp), &
+      sum(real(draw,dp)),real(main,dp),real(assim,dp),real(mob,dp),real(veg,dp),real(fruit,dp),real(store,dp), &
+      res,.4_dp*res,real(predicted_unused,dp),real(main_potential,dp),real(main_potential,dp)-real(main,dp)
+  end subroutine
+  real function NI_N_SEN_EXTRA(weight,baseline)
+    real,intent(in)::weight,baseline
+    NI_N_SEN_EXTRA=0
+    if(NI_LEAF_COUPLED())NI_N_SEN_EXTRA=real(min(max(0._dp,real(weight-baseline,dp)), &
+      max(0._dp,real(weight,dp))*(1-exp(-n_sen_rate*(1-day_growth)**2))))
+  end function
+  subroutine NI_C4_SEN_PLAN(loss,area)
+    real,intent(in)::loss(2),area
+    sen_plan_dm=min(w_begin(1:2),max(0._dp,real(loss,dp)))
+    sen_frac(1:2)=sen_plan_dm/max(w_begin(1:2),1.e-12_dp)
+    sen_available=0
+    sen_available(1:2)=max(0._dp,org_start(1:2)*sen_frac(1:2)-cmin*sen_plan_dm)
+    c4_area_dead=real(area,dp)*sen_frac(1)
+  end subroutine
+  subroutine NI_C4_FATE(sl,ss,sln,ssn,sr,senrt,nlayers,draw,wlid,wlfd,wsid,wrid)
+    integer,intent(in)::nlayers
+    real,intent(inout)::sl,ss,sln,ssn,sr,senrt(:)
+    real,intent(in)::draw(3),wlid,wlfd,wsid,wrid
+    real(dp)::loss(2),root_mass_before,old_sr
+    if(.not.NI_LEAF_COUPLED()) return
+    ! Extra damage is not silently assimilated into the planned aging pool.
+    if(max(wlid,wlfd,wsid,wrid)>1.e-7)error stop 'NI C4: unplanned pest/freeze loss needs explicit receiver settlement'
+    loss=sen_plan_dm-mob_sen(1:2)/.16_dp-real(draw(1:2),dp)*sen_frac(1:2)
+    if(minval(loss)<-1.e-6_dp)error stop 'NI C4: reclaimed material exceeds planned senescence'
+    c4_nloss(1:2)=max(0._dp,org_start(1:2)*sen_frac(1:2)-mob_sen(1:2))
+    if(sl>0)sln=real(real(sln,dp)*max(0._dp,loss(1))/real(sl,dp))
+    if(ss>0)ssn=real(real(ssn,dp)*max(0._dp,loss(2))/real(ss,dp))
+    sl=real(max(0._dp,loss(1)));ss=real(max(0._dp,loss(2)))
+    old_sr=max(0._dp,real(sr,dp))
+    sen_frac(3)=min(1._dp,old_sr/max(w_begin(3),1.e-12_dp))
+    root_mass_before=max(0._dp,w_begin(3)-donor_n(3)/.16_dp-real(draw(3),dp))
+    sr=real(root_mass_before*sen_frac(3))
+    if(old_sr>0)senrt(1:nlayers)=real(real(senrt(1:nlayers),dp)*real(sr,dp)/old_sr)
+    c4_nloss(3)=max(0._dp,org_start(3)-donor_n(3))*sen_frac(3)
+  end subroutine
+  subroutine NI_C4_NLOSS(nloss)
+    real,intent(out)::nloss(3)
+    nloss=real(c4_nloss)
+  end subroutine
+  real function NI_C4_AREA(newarea)
+    real,intent(in)::newarea
+    NI_C4_AREA=real(real(newarea,dp)-c4_area_dead)
+  end function
   logical function NI_LUX_ON()
     NI_LUX_ON=ni_stage==5.and.budget_revision==1.and.luxury_priority==1
   end function
@@ -165,7 +293,7 @@ contains
   subroutine NI_REMOB_PLAN(demand,supply,pg,cdemand,n,w,legacy,rate,rpro,nmine,flux)
     real,intent(in)::demand,supply,pg,cdemand,n(4),w(4),legacy(4),rate,rpro
     real,intent(out)::nmine,flux(4)
-    real(dp)::ratio,gap,paid,z,factor,total
+    real(dp)::ratio,gap,paid,z,factor,total,healthy_n(4),healthy_w(4),remaining,remaining_c
     integer::i
     ! Conservative C/N acceptance predictor, not a replay of stateful PODS.
     ! The final accepted amount is reconciled against actual growth below.
@@ -176,16 +304,27 @@ contains
       max(0._dp,ratio*real(pg,dp)-real(supply,dp))/(1+ratio*paid))
     mob_gap=gap;z=day_growth ! shared smoothed C1 state; no second severity clock
     if(remob_severity==0) z=0
-    call NI_REMOB_KERNEL(real(n,dp),real(w,dp),cmin,ccrit,real(legacy,dp),real(rate,dp), &
-      remob_tau,slow_ratio,protect_beta,z,gap,real(pg,dp),paid,mob_safe,mob_func)
-    mob_plan=mob_safe+mob_func
+    healthy_n=real(n,dp);healthy_w=real(w,dp);mob_sen=0
+    remaining=gap;remaining_c=max(0._dp,real(pg,dp))
+    if(NI_LEAF_COUPLED())then
+      ! Planned dying material is disjoint from healthy donor balances.
+      healthy_n(1:2)=healthy_n(1:2)*(1-sen_frac(1:2))
+      healthy_w(1:2)=healthy_w(1:2)*(1-sen_frac(1:2))
+      total=sum(sen_available)
+      if(paid>0)remaining=min(remaining,remaining_c/paid)
+      mob_sen=sen_available*min(1._dp,remaining/max(total,1.e-30_dp))
+      remaining=max(0._dp,gap-sum(mob_sen));remaining_c=max(0._dp,remaining_c-paid*sum(mob_sen))
+    endif
+    call NI_REMOB_KERNEL(healthy_n,healthy_w,cmin,ccrit,real(legacy,dp),real(rate,dp), &
+      remob_tau,slow_ratio,protect_beta,z,remaining,remaining_c,paid,mob_safe,mob_func)
+    mob_plan=mob_safe+mob_func+mob_sen
     ! Round down once at the host boundary; retain source components.
     do i=1,4
       flux(i)=flux32(mob_plan(i))
     end do
     do i=1,4
       total=mob_plan(i);factor=real(flux(i),dp)/max(total,1.e-30_dp)
-      mob_safe(i)=mob_safe(i)*factor;mob_func(i)=mob_func(i)*factor
+      mob_safe(i)=mob_safe(i)*factor;mob_func(i)=mob_func(i)*factor;mob_sen(i)=mob_sen(i)*factor
     end do
     mob_plan=real(flux,dp);mob_returned=0;mob_new_used=0
     nmine=sum(flux);mob_c_paid=real(nmine,dp)*paid
@@ -206,29 +345,33 @@ contains
     ! on the native path and is never undone after those irreversible calls.
     if(mob_plan(4)>mob_new_used+1.e-6_dp) error stop 'NI v3: native shell export has no growth recipient'
     old=real(nmine,dp);take=0
-    do k=1,2
+    do k=1,3
       if(k==1) then
         part=mob_func
-      else
+      else if(k==2)then
         part=mob_safe
+      else
+        part=mob_sen
       endif
       part(4)=0
       total=sum(part);amount=min(left,total);factor=amount/max(total,1.e-30_dp)
       do j=1,3
         if(k==1) then
           mob_func(j)=mob_func(j)*(1-factor)
-        else
+        else if(k==2)then
           mob_safe(j)=mob_safe(j)*(1-factor)
+        else
+          mob_sen(j)=mob_sen(j)*(1-factor)
         endif
         take(j)=take(j)+part(j)*factor
       enddo
       left=max(0._dp,left-amount)
     enddo
     do j=1,3
-      total=mob_safe(j)+mob_func(j)
+      total=mob_safe(j)+mob_func(j)+mob_sen(j)
       flux(j)=flux32(total)
       factor=real(flux(j),dp)/max(total,1.e-30_dp)
-      mob_safe(j)=mob_safe(j)*factor;mob_func(j)=mob_func(j)*factor
+      mob_safe(j)=mob_safe(j)*factor;mob_func(j)=mob_func(j)*factor;mob_sen(j)=mob_sen(j)*factor
     enddo
     nmine=sum(flux)
     returned=real(max(0._dp,old-real(nmine,dp)))
@@ -382,7 +525,8 @@ contains
       assim_no3_v,assim_nh4_v,assim_no3_k,assim_nh4_k, &
       root_v,root_k,diffusion_k,pool_beta,leaf_a,leaf_b,stem_a,stem_b, &
       min_ratio,max_ratio,photo_floor,photo_gamma,growth_tau,budget_revision,curve_w0,photo_slw_ref, &
-      state_timing,pods_n_state,remob_mode,remob_severity,remob_tau,protect_beta,slow_ratio,luxury_priority
+      state_timing,pods_n_state,remob_mode,remob_severity,remob_tau,protect_beta,slow_ratio,luxury_priority, &
+      c4_budget,leaf_coupling,n_sen_rate,c4_photo
     if(loaded) then
       if(NI_ENABLED()) then
         if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
@@ -413,6 +557,14 @@ contains
     end if
     if(ni_stage<0.or.ni_stage>5) error stop 'NI: stage must be 0..5'
     if(ni_stage>implemented_stage) error stop 'NI: requested integration stage is not connected in this build'
+    if(min(c4_budget,leaf_coupling,c4_photo)<0.or.max(c4_budget,leaf_coupling,c4_photo)>1)error stop 'NI C4: invalid mode'
+    if(.not.ieee_is_finite(n_sen_rate).or.n_sen_rate<0.or.n_sen_rate>1)error stop 'NI C4: invalid senescence rate'
+    if(c4_budget==1.and.(ni_stage/=5.or.budget_revision/=1.or.state_timing/=1.or.pods_n_state/=1)) &
+      error stop 'NI C4: budget mode requires C1 stage5/A'
+    if(leaf_coupling==1.and.(c4_budget/=1.or.remob_mode/=1))error stop 'NI C4: leaf coupling requires budget and remob modes'
+    if(leaf_coupling==0.and.n_sen_rate/=0)error stop 'NI C4: N senescence requires leaf coupling'
+    if(c4_photo==1.and.(ni_stage/=5.or.budget_revision/=1.or.state_timing/=1.or.pods_n_state/=1)) &
+      error stop 'NI C4: area-N feedback requires C1 stage5/A'
     if(min(state_timing,pods_n_state,remob_mode,luxury_priority)<0.or. &
        max(state_timing,pods_n_state,remob_mode,luxury_priority)>1) error stop 'NI v3: switches must be 0 or 1'
     if(ni_stage/=5.and.max(state_timing,pods_n_state,remob_mode,luxury_priority)>0) &
@@ -476,6 +628,7 @@ contains
     end_run=-1;end_day=-1;day_run=-1;day_date=-1;day_source=-1
     day_valid=.false.;z_end=0;day_z=0;day_growth=1
     veg_z_end=1;day_veg_z=1;mob_safe=0;mob_func=0;mob_plan=0;mob_returned=0
+    sen_frac=0;sen_plan_dm=0;sen_available=0;mob_sen=0;c4_nloss=0;c4_area_dead=0
   end subroutine
   subroutine NI_BEGIN(weights)
     real,intent(in)::weights(3)
@@ -491,6 +644,7 @@ contains
     mob_safe=0;mob_func=0;mob_plan=0;mob_returned=0;mob_gap=0;mob_accept=0;mob_new_used=0;mob_c_paid=0
     kinetic_cap=0;late_a=0;late_cost=0;late_c_budget=0;late_func=0;late_lux=0
     late_unit_cost=0;late_c_before=0;late_c_after=0;late_c_reserved=0;late_nad=0
+    sen_frac=0;sen_plan_dm=0;sen_available=0;mob_sen=0;c4_nloss=0;c4_area_dead=0
   end subroutine
   subroutine NI_ORG_BEGIN(stocks,off,seed,leak)
     real,intent(in)::stocks(6),off(6),seed,leak
@@ -681,6 +835,7 @@ contains
     if(.not.NI_ENABLED()) return
     growth=max(0._dp,real(weights,dp)+max(0._dp,real(losses,dp))-w_begin)
     fraction=min(1._dp,max(0._dp,real(losses,dp))/max(w_begin+growth,1.e-12_dp))
+    if(NI_LEAF_COUPLED())fraction=sen_frac
     out3=q3*fraction; out4=q4*fraction
     q3=q3-out3; q4=q4-out4
     carrier=max(real(weights,dp),carrier*(1-fraction))
@@ -713,6 +868,18 @@ contains
       structural_fraction=max(0._dp,real(weights(1)-wcrlf,dp))/max(real(weights(1),dp),1.e-12_dp)
     end if
     ready=.true.
+    if(NI_LEAF_COUPLED())then
+      if(.not.leaf_opened)then
+        open(newunit=leaf_unit,file='PlantNLeaf.csv',status='new',action='write',iostat=ios)
+        if(ios/=0)error stop 'NI C4: cannot create leaf fate ledger'
+        write(leaf_unit,'(A)')'run,yrdoy,sen_DM_leaf_planned,sen_DM_stem_planned,cell_loss_leaf,cell_loss_stem,cell_loss_root,'// &
+          'sen_available_leaf,sen_available_stem,sen_N_leaf,sen_N_stem,sen_N_root,sen_N_shell,'// &
+          'litter_N_leaf,litter_N_stem,litter_N_root,old_area_lost,n_sen_rate'
+        leaf_opened=.true.
+      endif
+      write(leaf_unit,'(2(I0,","),15(ES24.15E3,","),ES24.15E3)')control%RUN,control%YRDOY,sen_plan_dm,sen_frac, &
+        sen_available(1:2),mob_sen,c4_nloss,c4_area_dead,n_sen_rate
+    endif
     if(max(state_timing,pods_n_state)>0) then
       if(.not.v3_opened) then
         open(newunit=v3_unit,file='PlantNV3.csv',status='new',action='write',iostat=ios)
@@ -926,7 +1093,7 @@ contains
   end function
   real function NI_LEAF_FACTOR(rnitp,slw,slwref)
     real,intent(in)::rnitp,slw,slwref
-    real(dp)::functional,reference,ratio
+    real(dp)::functional,reference,ratio,whole_slw
     functional=max(0._dp,(real(rnitp,dp)/100*structural_fraction-cmin(1))*real(slw,dp))
     reference=(ccrit(1)-cmin(1))*real(slwref,dp)
     if(NI_REVISED()) then
@@ -934,6 +1101,13 @@ contains
       functional=min(functional,(ccrit(1)-cmin(1))*real(slw,dp))
       reference=(ccrit(1)-cmin(1))*photo_slw_ref
     end if
+    if(NI_C4_PHOTO())then
+      ! RNITP and native SLW both exclude carbohydrate. Convert both bases,
+      ! not the concentration alone, to obtain actual organic N/leaf area.
+      whole_slw=max(0._dp,real(slw,dp))/max(structural_fraction,1.e-12_dp)
+      functional=max(0._dp,(real(rnitp,dp)/100*structural_fraction-cmin(1))*whole_slw)
+      functional=min(functional,(ccrit(1)-cmin(1))*whole_slw)
+    endif
     ratio=max(0._dp,min(1._dp,functional/max(reference,1.e-15_dp)))
     NI_LEAF_FACTOR=real(photo_floor+(1-photo_floor)*ratio**photo_gamma)
   end function
