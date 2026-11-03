@@ -660,6 +660,13 @@ C-----------------------------------------------------------------------
       RTWT   = RTWT   + WRDOT
       PODWT  = PODWT  + WPDOT
       DWNOD  = DWNOD  + WNDOT
+      IF (NI_C4_ON()) THEN
+        ! Aggregates are derived quantities, not additional independent stocks.
+        ! Repeated harvest/clamping must not drift from the actual components.
+        PODWT=SHELWT+SDWT
+        TOPWT=WTLF+STMWT+PODWT
+        TOTWT=TOPWT+RTWT+DWNOD
+      ENDIF
       TGROW  = TGROW  + GROWTH
       LINTW  = LINTW  + LTDOT
 
