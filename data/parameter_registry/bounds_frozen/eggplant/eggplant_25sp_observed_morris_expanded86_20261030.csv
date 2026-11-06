@@ -1,0 +1,92 @@
+﻿name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,range_note
+ATOP,1.08,0.5599999999999999,1.6,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+CMOBMX,0.10025,0.0005,0.2,active,SPE_CarbonReserve,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,碳动员宽域探针；覆盖历史平移域与原工作上限，非新实测先验。
+DSWBAR,17.5,5.0,30.0,active,SPE_WaterStress,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,覆盖历史5–8工作域和注册表10–30建议域的筛查包络。
+EM-FL,25.5,20.0,31.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+EM-V1,37.5,35.0,40.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+FINREF,375.0,150.0,600.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+FL-SD,16.425,7.0,25.85,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+FL-SH,2.8,1.0,4.6,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+FL-VS,120.0,100.0,140.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+FNPGN1,2.5,1.5,3.5,active,SPE_Photo,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,覆盖bundle节点2.0与历史工作域；叶氮光合曲线结构探针。
+FNPGN2,4.6,4.0,5.2,active,SPE_Photo,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,历史节点工作域；与相邻节点留间隔。
+FNPGN3,12.7,5.4,20.0,active,SPE_Photo,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,有序节点探针，覆盖bundle值20；须核实QDR曲线是否实际使用此节点。
+FNPGN4,25.0,20.0,30.0,active,SPE_Photo,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,有序节点探针，覆盖bundle值20；允许3、4端点相等；不擅改QDR类型。
+FRLFF,0.27999999999999997,0.08,0.48,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+FRSTMF,0.645,0.37,0.92,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+ICMP,0.017499999999999998,0.005,0.03,active,SPE_Senescence,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+JU-R0,11.0,2.0,20.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+KCAN,0.6799999999999999,0.5,0.86,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+KC_SLOPE,0.2,0.0,0.4,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+LFMAX,2.035,1.27,2.8,active,CUL_Growth,CUL,TMGRO048.CUL,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+LNGSH,33.4,18.0,48.8,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+LNREF,4.5,3.0,6.0,active,SPE_Nitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,使用注册表建议域，避免仅分析历史率定4.50–5.05窄域。
+NMOBMX,0.23,0.06,0.4,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+NRCVR,0.19999999999999998,0.05,0.35,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+NSLOPE,0.3,0.1,0.5,active,SPE_Nitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,使用注册表建议域，覆盖历史工作域。
+NSTFAC,0.64,0.3,0.98,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+NVSMOB,0.4,0.2,0.6,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+OPTLFP_FS,0.0034999999999999996,0.0025,0.0045,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+OPTSDP_FS,0.00515,0.0038,0.0065,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+OPTSTP_FS,0.0029899999999999996,0.00209,0.00389,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+PARMAX,41.0,30.75,51.25,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+PGEFF,0.055,0.03,0.08,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,注册表建议域与历史冻结工作域的包络。
+PHTMAX,61.0,45.75,76.25,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+PL-EM,7.5,3.0,12.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+PM06,0.375,0.1,0.65,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+PM09,0.8400000000000001,0.68,1.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+PODUR,32.0,6.0,58.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+PORPT,0.25,0.1,0.4,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+PROLFF,0.075,0.04,0.11,active,SPE_Compo,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,历史冻结工作域；F上限低于G下限。
+PROLFG,0.2,0.15,0.25,active,SPE_Compo,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,跨历史器官蛋白工作域取有序子域，G上限低于I下限。
+PROLFI,0.31,0.26,0.36,active,SPE_Compo,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用早期器官蛋白候选域，并令I下限严格高于G上限。
+PRORTF,0.06,0.057,0.063,active,SPE_Compo,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。 根器官无独立实测；此处为历史约±5%局部探针，低敏感不能作广域排除。
+PRORTG,0.119,0.11305,0.12495,active,SPE_Compo,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。 根器官无独立实测；此处为历史约±5%局部探针，低敏感不能作广域排除。
+PRORTI,0.14400000000000002,0.1368,0.1512,active,SPE_Compo,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。 根器官无独立实测；此处为历史约±5%局部探针，低敏感不能作广域排除。
+PROSHG,0.14500000000000002,0.12,0.17,active,SPE_Compo,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,早期果壳蛋白候选域；高于固定PROSHF=0.110，低于I下限。
+PROSHI,0.215,0.18,0.25,active,SPE_Compo,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,早期果壳蛋白候选域；只作模型过程探针，不等同整果实测氮。
+PROSTF,0.060000000000000005,0.035,0.085,active,SPE_Compo,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,历史冻结工作域；F上限低于G下限。
+PROSTG,0.125,0.1,0.15,active,SPE_Compo,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,有序矩形域探针；包含bundle基线0.136，低于I下限。
+PROSTI,0.20500000000000002,0.16,0.25,active,SPE_Compo,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,有序矩形域探针；I下限高于G上限，包含bundle基线0.188。
+RHGHT,1.3,0.6,2.0,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+RTEXF,0.15,0.05,0.25,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+RTNH4,0.029,0.008,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+RTNO3,0.029,0.008,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+RWDTH,1.375,0.625,2.125,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+RWUMX,0.04,0.02,0.06,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+SDPDV,200.0,100.0,300.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+SENDAY,0.015,0.008,0.022,active,SPE_Senescence,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+SENMAX_LATE,0.31,0.2,0.42,active,SPE_Senescence,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+SENPOR_LATE,0.14500000000000002,0.1,0.19,active,SPE_Senescence,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+SENRT2,0.015000000000000001,0.005,0.025,active,SPE_Senescence,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+SENRTE,1.3,0.8,1.8,active,SPE_Senescence,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+SFDUR,37.5,10.0,65.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+SIZLF,300.0,250.0,350.0,active,CUL_Growth,CUL,TMGRO048.CUL,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+SLAVR,207.5,115.0,300.0,active,CUL_Growth,CUL,TMGRO048.CUL,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+SWBAR_REC,0.45,0.05,0.85,active,SPE_WaterResponse,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,注册表建议域与历史冻结工作域的包络。
+TB1,10.0,8.0,12.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+TB2,10.0,8.0,12.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+TB3,10.0,8.0,12.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+TCMP,95.0,40.0,150.0,active,SPE_Senescence,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+TM1,40.75,34.0,47.5,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+TM2,39.5,34.0,45.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+TM3,39.5,34.0,45.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+TO11,23.75,20.0,27.5,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+TO12,23.75,20.0,27.5,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+TO13,23.75,20.0,27.5,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+TO21,30.5,28.0,33.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+TO22,30.5,28.0,33.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+TO23,30.5,28.0,33.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+TRIFL,0.75,0.2,1.3,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+VSSINK,8.5,2.0,15.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+WTFSD,0.5549999999999999,0.39,0.72,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+XFINT,0.235,0.12,0.35,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+XFPHT,52.5,35.0,70.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,sensitivity_observed_20261030,沿用已冻结工作域作本轮过程筛查；仍须新bundle边界与联合轨迹预检。
+XFRT,0.86,0.73,0.99,active,CUL_HarvestPartition,CUL,TMGRO048.CUL,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+XMAGE,17.5,5.0,30.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,sensitivity_observed_20261030,两份历史冻结工作域的连续包络；不是观测置信区间，也不是历史最佳成员的局部范围。
+YSWBAR_MID,0.55,0.1,1.0,active,SPE_WaterResponse,SPE,TMGRO048.SPE,TM0008,TM0001,sensitivity_observed_20261030,注册表建议域；零胁迫区也保留，解释为条件敏感性。
+SASC_RATIO,0.9,0.9,0.9,fixed,initial_conditions,IC,XXQL2501.TMX,TM0008,TM0001,sensitivity_observed_20261030,"User fixed; serialized literal, never sampled."
+ICNS_25SP,1,1,1,fixed,initial_conditions,IC,XXQL2501.TMX,TM0008,TM0001,sensitivity_observed_20261030,"User fixed; serialized literal, never sampled."
+ICNS_26SP,1,1,1,fixed,initial_conditions,IC,XXQL2501.TMX,TM0008,TM0001,sensitivity_observed_20261030,"User fixed; serialized literal, never sampled."
+PAGE_25SP,25,25,25,fixed,initial_conditions,IC,XXQL2501.TMX,TM0008,TM0001,sensitivity_observed_20261030,"User fixed; serialized literal, never sampled."
+PENV_25SP,20,20,20,fixed,initial_conditions,IC,XXQL2501.TMX,TM0008,TM0001,sensitivity_observed_20261030,"User fixed; serialized literal, never sampled."

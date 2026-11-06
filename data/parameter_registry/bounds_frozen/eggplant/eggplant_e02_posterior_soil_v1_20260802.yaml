@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_posterior_soil_v1_20260802"
+crop: "eggplant"
+created_at: "2026-08-01T13:21:57Z"
+approved_at: "2026-08-01T13:21:57Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_posterior_soil_v1_20260802.csv"
+derived_from_sha256: "ad036c7bb39a2e4d23768899b3c312f02d6783581a730ce778cad1b963dbcff2"
+bounds_sha256: "ad036c7bb39a2e4d23768899b3c312f02d6783581a730ce778cad1b963dbcff2"
+parameter_count: 109
+automatic_repairs: 0
+notes: "Posterior-narrow genetic bounds plus LNREF/CMOBMX/RWUMX/DSWBAR/XFRMAX and 8-layer IBSB910017 SBDM/SLLL/SDUL/SSAT uncertainty groups; objective unchanged."

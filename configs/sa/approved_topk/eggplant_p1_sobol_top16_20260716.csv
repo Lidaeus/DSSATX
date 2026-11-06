@@ -1,0 +1,17 @@
+parameter,morris_consensus_rank,selection_class,approval_status
+TRIFL,1,stable_core,approved
+XFRT,2,stable_core,approved
+TB2,3,stable_core,approved
+RTNO3,4,stable_core,approved
+FRLFF,5,stable_core,approved
+LFMAX,6,stable_core,approved
+EM-FL,7,stable_core,approved
+XFINT,8,stable_core,approved
+TO12,9,stable_core,approved
+TO22,10,stable_core,approved
+PM06,11,stable_core,approved
+FRSTMF,12,stable_core,approved
+TM2,13,stable_core,approved
+NMOBMX,14,stable_core,approved
+FL-SD,15,top_k_boundary_union,approved
+RTNH4,16,top_k_boundary_union,approved

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "split_id": "eggplant_e02_s1s2_25sp_six_treatment_split_20260806",
+  "treatment_roles": {
+    "calibration": [
+      3,
+      4,
+      5,
+      11,
+      12,
+      13
+    ],
+    "validation": [],
+    "diagnostic": []
+  },
+  "notes": "E02 S1/S2 pre-calibration uses corrected 25SP six-treatment bundle; no autumn season."
+}

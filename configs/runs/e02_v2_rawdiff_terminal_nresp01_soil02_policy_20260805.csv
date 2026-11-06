@@ -1,0 +1,26 @@
+group,transform,offset,reference,sigma,sigma_source,model_sigma,sigma_floor,group_multiplier,n_eff,phi_role,note
+PDAPM,raw,0,1,,,0.0,1.0,1.0,,diagnostic_only,Planting-date reference
+ADAPM,raw,0,1,,,0.0,1.0,1.0,,diagnostic_only,Diagnostic only
+MDAPM,raw,0,1,,,0.0,1.0,1.0,,diagnostic_only,Diagnostic only
+LAIXM,raw,0,1,,,0.2,0.1,1.0,,calibration,Maximum LAI
+LAIDM,raw,0,1,,,0.5,0.2,1.0,,diagnostic_only,Original LAI state retained only for diagnostics
+LWADM,raw,0,1,,,20.0,10.0,1.0,,diagnostic_only,Original leaf dry-mass state retained only for diagnostics
+SWADM,raw,0,1,,,25.0,10.0,1.0,,diagnostic_only,Original stem dry-mass state retained only for diagnostics
+LAIDDM,raw,0,1,,,0.0,0.0,1.0,,calibration,Signed LAI difference between consecutive measured dates
+LWADDM,raw,0,1,,,0.0,0.0,1.0,,calibration,Signed leaf dry-mass difference between consecutive measured dates
+SWADDM,raw,0,1,,,0.0,0.0,1.0,,calibration,Signed stem dry-mass difference between consecutive measured dates
+LAIETM,raw,0,1,,,0.0,0.0,1.0,,calibration,Terminal LAI state
+LWETM,raw,0,1,,,0.0,0.0,1.0,,calibration,Terminal leaf dry mass
+SWETM,raw,0,1,,,0.0,0.0,1.0,,calibration,Terminal stem dry mass
+CHTDM,raw,0,1,,,0.05,0.02,1.0,,diagnostic_only,Canopy height diagnostic only
+SNAMM,raw,0,1,,,5.0,2.0,1.0,,calibration,Stem nitrogen mass
+LNAMM,raw,0,1,,,5.0,2.0,1.0,,calibration,Leaf nitrogen mass
+CNAMM,raw,0,1,,,5.0,2.0,1.0,,diagnostic_only,Combined nitrogen mass diagnostic only
+CHFPWM,raw,0,1,,,30.0,20.0,1.0,,diagnostic_only,Fresh cumulative harvest diagnostic only
+CHPDTM,raw,0,1,,,25.0,15.0,1.0,,calibration,Only terminal cumulative dry harvest is active
+HPODWM,raw,0,1,,,25.0,15.0,1.0,,calibration,Measured event dry-harvest increment
+HIAMM,raw,0,1,0.1,assumption,0.02,0.01,1.0,,sensitivity_only,Harvest index sensitivity only
+PWADM,raw,0,1,250.0,assumption,30.0,20.0,1.0,,diagnostic_only,Legacy cumulative token diagnostic only
+PWAIM,raw,0,1,250.0,assumption,30.0,20.0,1.0,,diagnostic_only,Legacy incremental token diagnostic only
+NRESPM,raw,0,1,50.0,assumption,50.0,50.0,1.0,,calibration,Raw within-water nitrogen response contrast
+SOIL_WATER,raw,0,1,,,,,,,calibration,Audited post-initial soil-water observations

@@ -1,0 +1,12 @@
+group,transform,offset,reference,sigma,sigma_source,model_sigma,sigma_floor,group_multiplier,n_eff,phi_role,note
+ADAPM,raw,0,1,25.0,assumption,2.0,1.0,1.0,,calibration,Low-priority transplanted indeterminate-crop phenology; family budget is reduced separately
+LAIXM,raw,0,1,0.8,assumption,0.2,0.1,1.0,,diagnostic_only,Maximum LAI is diagnostic; LAID time series is the calibration evidence
+LAIDM,raw,0,1,2.0,assumption,0.5,0.2,1.0,,calibration,Leaf area process observation
+LWADM,raw,0,1,150.0,assumption,20.0,10.0,1.0,,calibration,Leaf dry mass process observation; exclude fruit-containing total-mass variables
+SWADM,raw,0,1,200.0,assumption,25.0,10.0,1.0,,calibration,Stem dry mass process observation; exclude fruit-containing total-mass variables
+PWADM,raw,0,1,250.0,assumption,30.0,20.0,1.0,,diagnostic_only,Full cumulative series is diagnostic to avoid double-counting incremental harvests
+25SP_PWADM_H11,raw,0,1,250.0,assumption,30.0,20.0,1.0,,calibration,Final 25SP cumulative harvest anchor
+25FA_PWADM_H3,raw,0,1,250.0,assumption,30.0,20.0,1.0,,calibration,Final 25FA cumulative harvest anchor
+PWAIM,raw,0,1,250.0,assumption,30.0,20.0,1.25,,calibration,Primary repeated-harvest event observations
+HIAMM,raw,0,1,0.10,assumption,0.02,0.01,1.0,,sensitivity_only,Harvest index is not a calibration target for continuous-harvest eggplant
+CNAMM,raw,0,1,25.0,assumption,5.0,2.0,1.0,,calibration,Plant nitrogen amount on the FileA scale (approximately kg N ha-1)

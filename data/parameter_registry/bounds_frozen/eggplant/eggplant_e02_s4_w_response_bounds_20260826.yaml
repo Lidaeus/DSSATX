@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_s4_w_response_bounds_20260826"
+crop: "eggplant"
+created_at: "2026-08-26T14:50:48Z"
+approved_at: "2026-08-26T14:50:48Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_s4_w_response_proposal_20260826.csv"
+derived_from_sha256: "a9f70e2b9637f8a99793d6479f380bb691a4cef7abf7a092a3242239da4e9182"
+bounds_sha256: "a9f70e2b9637f8a99793d6479f380bb691a4cef7abf7a092a3242239da4e9182"
+parameter_count: 148
+automatic_repairs: 0
+notes: "E02 Stage S4 water response parameter bounds (12 active, S1+S2+S3 posterior fixed)"

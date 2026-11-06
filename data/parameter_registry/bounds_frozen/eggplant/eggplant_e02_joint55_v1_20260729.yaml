@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_joint55_v1_20260729"
+crop: "eggplant"
+created_at: "2026-07-28T16:05:18Z"
+approved_at: "2026-07-28T16:05:18Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_joint55_v1_20260729.csv"
+derived_from_sha256: "559a05e8bd919255ee1be50dac4eff647a4216c93ded8948833e723bf7d9ae77"
+bounds_sha256: "3bba936f5986f3c697cd454a5ff7fa120bdbf94cc032190dd4f4771f42534ce5"
+parameter_count: 64
+automatic_repairs: 0
+notes: "Three-season posterior boundary review; joint 25SP+25FA preparation; RHGHT/XFPHT/TO11 only"

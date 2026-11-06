@@ -1,0 +1,2 @@
+group,transform,offset,reference,sigma,sigma_source,replicate_sd,n_replicates,n_effective,model_sigma,sigma_floor,group_multiplier
+ADAPM,log,0,1,25,synthetic_test_fixture,,,,,,1.0

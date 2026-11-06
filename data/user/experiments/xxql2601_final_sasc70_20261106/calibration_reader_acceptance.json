@@ -1,0 +1,23 @@
+{
+  "independent_FileA": {
+    "checked_cells": 60,
+    "failures": 0,
+    "method": "direct_source_terminal_mass_peak_LAI_and_per_plot_quality_weighted_dry_yield"
+  },
+  "input_audit_errors": 0,
+  "process_treatments_read": 12,
+  "harvest_treatments_read": 12,
+  "harvest_events_in_source": 60,
+  "NPK_source_rows": 396,
+  "exact_NPK_dates": [
+    "2026-05-02",
+    "2026-06-02",
+    "2026-06-03",
+    "2026-06-24",
+    "2026-06-29",
+    "2026-07-02",
+    "2026-07-17"
+  ],
+  "smoke_treatments": 12,
+  "smoke_passed": true
+}

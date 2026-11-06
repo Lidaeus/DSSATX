@@ -1,0 +1,33 @@
+{
+  "purpose": "Independent controlled mechanism variants; no changes to parameter/observation bounds",
+  "variants": [
+    {
+      "name": "v15_s1_interface",
+      "weighted_signal": false,
+      "joint_growth_repair": false,
+      "binary": "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\bin\\v15_s1_interface.exe",
+      "sha256": "107ec95f443af66eb30d53769496836414131d6befd6ab2f34cd00ef98b137fc"
+    },
+    {
+      "name": "v15_s2_weighted",
+      "weighted_signal": true,
+      "joint_growth_repair": false,
+      "binary": "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\bin\\v15_s2_weighted.exe",
+      "sha256": "decb23031a87785f62761602906c408d6699033a73d4983e53b8d1c6c791c722"
+    },
+    {
+      "name": "v15_s2_joint",
+      "weighted_signal": false,
+      "joint_growth_repair": true,
+      "binary": "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\bin\\v15_s2_joint.exe",
+      "sha256": "ec278946c5f06f6f8a714afd0b7dd3de31350f087a6d963d08efe5276e657d85"
+    },
+    {
+      "name": "v15_s2_weighted_joint",
+      "weighted_signal": true,
+      "joint_growth_repair": true,
+      "binary": "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\bin\\v15_s2_weighted_joint.exe",
+      "sha256": "bb335718c88b76f35bb85830cd9c38251b32adff28e8225f1f5716b1135c4013"
+    }
+  ]
+}

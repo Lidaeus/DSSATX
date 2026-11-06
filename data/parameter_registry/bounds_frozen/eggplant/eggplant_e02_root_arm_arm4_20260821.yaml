@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_root_arm_arm4_20260821"
+crop: "eggplant"
+created_at: "2026-08-21T14:37:43Z"
+approved_at: "2026-08-21T14:37:43Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_root_arm_arm4_20260821.csv"
+derived_from_sha256: "4ac9f8420c3d0ace5819d38bc69d141e7f6b75e92fb0e92053c4a9bb99f85f1a"
+bounds_sha256: "4ac9f8420c3d0ace5819d38bc69d141e7f6b75e92fb0e92053c4a9bb99f85f1a"
+parameter_count: 120
+automatic_repairs: 0
+notes: "Root Exploration Arm4 (full_root_n_synergy)"

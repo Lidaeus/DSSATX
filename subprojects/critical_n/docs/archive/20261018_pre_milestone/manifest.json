@@ -1,0 +1,25 @@
+{
+  "purpose": "preserve historical document wording before milestone documentation update",
+  "files": [
+    {
+      "source": "D:\\Tomato_Cal\\subprojects\\critical_n\\README.md",
+      "snapshot": "D:\\Tomato_Cal\\subprojects\\critical_n\\docs\\archive\\20261018_pre_milestone\\critical_n_README.md",
+      "sha256": "6a422852b21461d0dd588ae296c7f783833030873cd7bd48ffffe0371c20f55b"
+    },
+    {
+      "source": "D:\\Tomato_Cal\\subprojects\\critical_n\\docs\\README.md",
+      "snapshot": "D:\\Tomato_Cal\\subprojects\\critical_n\\docs\\archive\\20261018_pre_milestone\\docs_README.md",
+      "sha256": "56458ac5192a9207a9e8bb4f8ac469309c87bf3d12e78be1e893d702aa335dc1"
+    },
+    {
+      "source": "D:\\Tomato_Cal\\subprojects\\critical_n\\docs\\开发进展_20261015.md",
+      "snapshot": "D:\\Tomato_Cal\\subprojects\\critical_n\\docs\\archive\\20261018_pre_milestone\\开发进展_20261015.md",
+      "sha256": "8f8bc523d8fe683ebdd9be541e402ca24897acc99f4ddbb022a89878e6c91469"
+    },
+    {
+      "source": "D:\\Tomato_Cal\\subprojects\\critical_n\\docs\\DSSAT氮机制改进项目_架构梳理与后续开发计划_20261015.md",
+      "snapshot": "D:\\Tomato_Cal\\subprojects\\critical_n\\docs\\archive\\20261018_pre_milestone\\架构梳理与后续开发计划_20261015.md",
+      "sha256": "1fcbc9e73c3fcc0df23ec7433d0a9795d208a5d87e680046993323b12fe3ddda"
+    }
+  ]
+}

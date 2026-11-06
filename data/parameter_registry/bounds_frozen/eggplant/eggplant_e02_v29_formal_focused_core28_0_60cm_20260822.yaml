@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_v29_formal_focused_core28_0_60cm_20260822"
+crop: "eggplant"
+created_at: "2026-08-22T15:00:20Z"
+approved_at: "2026-08-22T15:00:20Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_v29_formal_focused_core28_0_60cm_20260822.csv"
+derived_from_sha256: "82f3e96349991e8d5d8b7132a4701a839c7791e7c649d854348d4b60c426d2d0"
+bounds_sha256: "82f3e96349991e8d5d8b7132a4701a839c7791e7c649d854348d4b60c426d2d0"
+parameter_count: 140
+automatic_repairs: 0
+notes: "v29 Formal Focused Core ~28 parameters center-anchored on Physiological Base with all macro constants fixed"

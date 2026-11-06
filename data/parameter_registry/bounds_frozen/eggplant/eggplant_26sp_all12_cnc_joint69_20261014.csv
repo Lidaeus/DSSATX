@@ -1,0 +1,109 @@
+﻿name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,change,approved,reason,old_lower,old_upper,execution_enabled
+ATOP,1.25335,0.6,1.6,active,SPE_RootWater,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.6,1.6,True
+CMOBMX,0.00131102,0.0005,0.1905,active,SPE_CarbonReserve,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.0005,0.1905,True
+CSDL,12.33,12.33,12.33,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,12.33,12.33,True
+DSWBAR,6.87357,5.0,8.0,active,SPE_WaterStress,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,5.0,8.0,True
+EM-FL,27.7229,20.0,28.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,20.0,28.0,True
+EM-V1,35.031,35.0,38.5,active,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,35.0,38.5,True
+EVMODC,0.0,0.0,0.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.0,0.0,True
+FINREF,498.622,150.0,600.0,active,SPE_SourceSink,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,150.0,600.0,True
+FL-LF,192.323,45.0,220.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,380.0,550.0,True
+FL-SD,24.657,16.0,27.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,原上界堆积，微扩上界；删除远离主要后验的低尾,8.85,25.85,True
+FL-SH,3.2714,1.0,4.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,1.0,4.0,True
+FL-VS,100.0,100.0,100.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,100.0,100.0,True
+FRCNOD,0.05,0.05,0.05,fixed,SPE_Nodule,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.05,0.05,True
+FRLFF,0.118127,0.09,0.14,active,SPE_RootWater,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,与FRSTMF联合设界，端点分配之和不超过1,0.08,0.45,True
+FRSTMF,0.857737,0.72,0.86,active,SPE_RootWater,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,与FRLFF联合设界，保留代表解及主要后验区间，避免负根分配,0.65,0.92,True
+JU-R0,3.8,3.8,3.8,fixed,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,3.8,3.8,True
+KCAN,0.71997,0.5,0.75,active,SPE_Photosynthesis,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.5,0.75,True
+KC_SLOPE,0.1,0.1,0.1,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.1,0.1,True
+LFMAX,2.42236,1.8,2.8,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,1.8,2.8,True
+LNGSH,22.8591,18.0,40.0,active,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,18.0,40.0,True
+LNREF,5.83383,5.5,6.5,active,SPE_Nitrogen,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,5.5,6.5,True
+NMOBMX,0.0921372,0.08,0.097,active,SPE_Other,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,限制过强再动员上尾，保留代表解,0.08,0.1,True
+NRCVR,0.316726,0.1,0.35,active,SPE_Other,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.1,0.35,True
+NSLOPE,0.300774,0.15,0.38,active,SPE_Nitrogen,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.15,0.38,True
+NSTFAC,0.890189,0.8,0.98,active,SPE_Other,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.8,0.98,True
+NVSMOB,0.301412,0.26,0.33,active,SPE_Other,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,围绕主要后验轻微收紧,0.25,0.4,True
+PARMAX,41.0,41.0,41.0,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,41.0,41.0,True
+PHTMAX,61.0,61.0,61.0,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,61.0,61.0,True
+PL-EM,11.4,11.4,11.4,fixed,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,11.4,11.4,True
+PM06,0.186729,0.1,0.55,active,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.1,0.55,True
+PM09,0.75,0.75,0.75,fixed,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.75,0.75,True
+PODUR,9.49352,7.0,19.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留主要后验和成熟库探索空间,6.0,22.0,True
+PORMIN,0.02,0.02,0.02,fixed,SPE_RootWater,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.02,0.02,True
+PORPT,0.150401,0.1,0.4,active,SPE_RootWater,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.1,0.4,True
+PPSEN,0.0,0.0,0.0,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.0,0.0,True
+RHGHT,0.89965,0.6,1.4,active,ECO_Architecture,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.6,1.4,True
+RTEXF,0.1,0.1,0.1,fixed,SPE_RootNitrogen,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.1,0.1,True
+RTNH4,0.0129542,0.006,0.028,active,SPE_RootNitrogen,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,下界堆积，小幅向低吸氮率侧扩展,0.008,0.035,True
+RTNO3,0.00644242,0.003,0.015,active,SPE_RootNitrogen,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留下界，削减高吸氮率尾部,0.01,0.02,True
+RWDTH,1.86488,0.625,2.125,active,ECO_Architecture,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.625,2.125,True
+RWUMX,0.0116157,0.009,0.018,active,SPE_RootWater,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"grid-supported expanded lower domain, not frozen",True,保留水响应敏感下界及主要后验上尾,0.012,0.026,True
+SD-PM,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,400.0,400.0,True
+SDPDV,111.4,111.4,111.4,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,111.4,111.4,True
+SENDAY,0.0181026,0.008,0.022,active,SPE_Senescence,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.008,0.022,True
+SENRTE,0.891011,0.8,1.8,active,SPE_Senescence,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.8,1.8,True
+SFDUR,27.1397,18.0,52.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,原下界堆积，小幅探索较早成熟并缩减高尾,20.0,65.0,True
+SIZLF,297.4,260.0,300.0,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,260.0,300.0,True
+SIZREF,300.0,300.0,300.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,300.0,300.0,True
+SLAREF,300.0,300.0,300.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,300.0,300.0,True
+SLAVR,167.95,140.0,225.0,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留代表解及后验95%附近，不强制压到125–145,115.0,260.0,True
+TB1,8.61291,8.0,9.6,active,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,8.0,9.6,True
+TB2,10.6878,8.5,11.5,active,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,8.5,11.5,True
+TB3,5.2,5.2,5.2,fixed,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,5.2,5.2,True
+THRSH,8.5,8.5,8.5,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,8.5,8.5,True
+TM1,46.1988,36.0,47.5,active,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,36.0,47.5,True
+TM2,41.5777,35.0,44.0,active,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,35.0,44.0,True
+TM3,48.0,48.0,48.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,48.0,48.0,True
+TO11,23.3439,22.0,27.0,active,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,22.0,27.0,True
+TO12,24.2475,20.0,26.0,active,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,20.0,26.0,True
+TO13,26.0,26.0,26.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,26.0,26.0,True
+TO21,28.0,28.0,28.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,28.0,28.0,True
+TO22,28.0,28.0,28.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,28.0,28.0,True
+TO23,28.0,28.0,28.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,28.0,28.0,True
+TRIFL,0.791965,0.75,1.3,active,ECO_Architecture,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.75,1.3,True
+V1-JU,0.0,0.0,0.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.0,0.0,True
+VSSINK,13.5416,4.0,15.0,active,SPE_SourceSink,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,4.0,15.0,True
+WTFSD,0.55,0.55,0.55,fixed,SPE_RootWater,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.55,0.55,True
+WTPSD,0.004,0.004,0.004,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.004,0.004,True
+XFINT,0.12,0.12,0.12,fixed,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.12,0.12,True
+XFPHT,38.8,38.8,38.8,fixed,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,38.8,38.8,True
+XFRMAX,0.0,0.0,0.0,fixed,SPE_WaterStress,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.0,0.0,True
+XFRT,0.926654,0.78,0.95,active,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.78,0.95,True
+XMAGE,11.7201,8.0,15.0,active,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留代表解与主要后验，准确日期果氮仍做完整性检查,5.0,18.0,True
+NREXP,0.65,0.65,0.65,fixed,species,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.65,0.65,True
+NRMIN,0.7,0.7,0.7,fixed,species,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.7,0.7,True
+SWBAR_REC,0.371127,0.35,0.85,active,SPE_WaterResponse,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.35,0.85,True
+YSWBAR_MID,0.769728,0.3,0.95,active,SPE_WaterResponse,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.3,0.95,True
+PGEFF,0.0624424,0.05,0.08,active,SPE_Photosynthesis,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.05,0.08,True
+PROLFF,0.236508,0.22,0.24,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,收紧残留叶蛋白，矩形范围保证F<=G<=I,0.215,0.24,True
+PROSTF,0.0808337,0.072,0.088,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,矩形范围保证茎蛋白F<=G<=I,0.06,0.085,True
+PRORTF,0.0634513,0.063,0.07,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.063,0.07,True
+PROLFG,0.253461,0.242,0.27,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留主要后验区间并与F/I范围分离,0.24,0.28,True
+PROSTG,0.136445,0.105,0.143,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留主要后验区间并与F/I范围分离,0.1,0.16,True
+PRORTG,0.115542,0.11305,0.12495,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.11305,0.12495,True
+PROLFI,0.285134,0.275,0.31,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留代表解及主要后验区间,0.28,0.36,True
+PROSTI,0.163477,0.145,0.225,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,下界堆积，适当向低蛋白侧探索；上界保留后验95%附近,0.16,0.25,True
+PRORTI,0.138293,0.1368,0.1512,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.1368,0.1512,True
+FNPGN1,3.25746,2.4,3.5,active,SPE_Photo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,2.4,3.5,True
+FNPGN2,6.3717,5.5,6.5,active,SPE_Photo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,5.5,6.5,True
+PROSHG,0.124968,0.124968,0.124968,fixed,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"zero response in 2026 objectives; proposed fixed at 67-candidate value, not universally biologically inactive",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.124968,0.124968,True
+PROSHI,0.120489,0.115,0.18,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,原下界堆积，轻微降低但仍高于固定PROSHF=.11,0.121,0.22,True
+SENPOR_LATE,0.215109,0.17,0.26,active,SPE_Senescence,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留代表解及主要后验，削减低/高衰老率尾部,0.1,0.19,True
+ICMP,0.0260304,0.005,0.03,active,SPE_Senescence,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.005,0.03,True
+TCMP,55.8965,40.0,150.0,active,SPE_Senescence,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,40.0,150.0,True
+SENRT2,0.0144894,0.005,0.025,active,SPE_Senescence,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.005,0.025,True
+SENMAX_LATE,0.243267,0.2,0.42,active,SPE_Senescence,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.2,0.42,True
+FNPGN3,20.0,20.0,20.0,fixed,SPE_Photo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,20.0,20.0,True
+FNPGN4,20.0,20.0,20.0,fixed,SPE_Photo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,20.0,20.0,True
+PROSHF,0.11,0.11,0.11,fixed,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,"retain current domain, use 67-candidate reference",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.11,0.11,True
+OPTLFP_FS,0.00250119,0.00250119,0.00250119,fixed,SPE_Phos,SPE,TMGRO048.SPE.base,TM0008,TM0001,both,"zero response in 2026 objectives; proposed fixed at 67-candidate value, not universally biologically inactive",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.00250119,0.00250119,True
+OPTSDP_FS,0.00605937,0.00605937,0.00605937,fixed,SPE_Phos,SPE,TMGRO048.SPE.base,TM0008,TM0001,both,"zero response in 2026 objectives; proposed fixed at 67-candidate value, not universally biologically inactive",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.00605937,0.00605937,True
+OPTSTP_FS,0.00229963,0.00229963,0.00229963,fixed,SPE_Phos,SPE,TMGRO048.SPE.base,TM0008,TM0001,both,"zero response in 2026 objectives; proposed fixed at 67-candidate value, not universally biologically inactive",True,保留原范围，代表解作为新中心；未据条件后验盲目收紧,0.00229963,0.00229963,True
+KEP,0.855819,0.76,0.9,active,SPE_Evapotranspiration,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,new radiation-extinction parameter; registry and formal injection support pending,True,削减低尾，保留物理上限及贴边后验,0.7,0.9,True
+SOIL_SLDR,0.885177,0.75,0.93,active,SOIL_Hydraulics,SOIL,SOIL.SOL,,,eggplant_stage2,,True,原上界堆积，小幅上探；不改变实测水/N初值,0.65,0.9,True
+CNC_A,4.85,4.2,5.2,active,SPE_CNC,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,,True,Explicit current user attachment: critical N curve parameter recommended active range,,,True
+CNC_B,0.38,0.3,0.45,active,SPE_CNC,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,,True,Explicit current user attachment: critical N curve parameter recommended active range,,,True
+CNC_W0,1.0,0.8,1.5,active,SPE_CNC,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,,True,Explicit current user attachment: critical N curve parameter recommended active range,,,True
+CNC_NC_INF,1.7,1.4,2.0,active,SPE_CNC,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,,True,Explicit current user attachment: critical N curve parameter recommended active range,,,True

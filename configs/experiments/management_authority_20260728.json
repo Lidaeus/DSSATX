@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "authority_id": "eggplant_transplant_management_20260728",
+  "approved_on": "2026-07-28",
+  "authority": "user decision in project thread",
+  "rules": {
+    "25SP_ADAP_days": 21,
+    "PAGE_days_all_seasons": 25,
+    "SPRL_all_seasons": -99,
+    "SPRL_interpretation": "DSSAT missing/default"
+  },
+  "scope": [
+    "E02 single-season 55-parameter calibration and diagnostics",
+    "subsequent joint or pooled calibration derived from these bundles"
+  ],
+  "supersedes_for_future_runs": {
+    "25SP_ADAP_days": 37,
+    "PAGE_days_all_seasons": 60,
+    "SPRL_25SP": 3,
+    "SPRL_25FA": 6,
+    "SPRL_26SP": 5
+  },
+  "preservation_policy": "Completed run directories and their source bundles remain unchanged; future runs use the versioned authoritative bundles."
+}

@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_s2_yield_bounds_20260826"
+crop: "eggplant"
+created_at: "2026-08-26T14:15:11Z"
+approved_at: "2026-08-26T14:15:11Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_s2_yield_proposal_20260826.csv"
+derived_from_sha256: "be0182203dd580f867952a9b1304e2bb2b746c4d9b5a0c07467b3b6238919291"
+bounds_sha256: "be0182203dd580f867952a9b1304e2bb2b746c4d9b5a0c07467b3b6238919291"
+parameter_count: 148
+automatic_repairs: 0
+notes: "E02 Stage S2 yield and harvest process parameter bounds (17 active, S1 posterior fixed)"

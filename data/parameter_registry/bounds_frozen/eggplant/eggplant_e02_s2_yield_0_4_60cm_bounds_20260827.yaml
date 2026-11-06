@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_s2_yield_0_4_60cm_bounds_20260827"
+crop: "eggplant"
+created_at: "2026-08-27T12:21:31Z"
+approved_at: "2026-08-27T12:21:31Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_s2_yield_0_4_60cm_proposal_20260827.csv"
+derived_from_sha256: "ba4ce9d0001d939dc40d0b0c0731ccf9c7ca65d16cf673ea824e9f79088988bc"
+bounds_sha256: "ba4ce9d0001d939dc40d0b0c0731ccf9c7ca65d16cf673ea824e9f79088988bc"
+parameter_count: 148
+automatic_repairs: 0
+notes: "Stage S2 Final Yield & Harvest Process Bounds for 0-4cm and 4-60cm soil scheme"

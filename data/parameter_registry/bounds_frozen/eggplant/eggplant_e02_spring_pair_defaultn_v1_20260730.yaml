@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_spring_pair_defaultn_v1_20260730"
+crop: "eggplant"
+created_at: "2026-07-30T12:52:52Z"
+approved_at: "2026-07-30T12:52:52Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_spring_pair_defaultn_v1_20260730.csv"
+derived_from_sha256: "bd0cf81272d1f475d4c428112bff46a75b71e90b2e22008751dd6ef82ed91f29"
+bounds_sha256: "bd0cf81272d1f475d4c428112bff46a75b71e90b2e22008751dd6ef82ed91f29"
+parameter_count: 72
+automatic_repairs: 0
+notes: "两个春季默认硝态氮铵态氮率定v1：restore stage4_full_v12 legacy ranges where available; keep current safe skeleton for constrained rows; FL-VS fixed 120; SOIL_SLPF 0.90-0.96"

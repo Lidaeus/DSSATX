@@ -1,0 +1,18 @@
+{
+  "module_id": "water_stress",
+  "display_name_en": "Water Stress",
+  "display_name_zh": "水分胁迫",
+  "priority": "conditional",
+  "required_observations": ["irrigation_gradient", "soil_water_content", "fruit_set_rate"],
+  "parameters": [
+    {"name": "DSWBAR", "location": "SPE", "physical_bounds": [5, 50], "default_bounds": [10, 30],
+     "role": "scalar", "init_source": "SPE line 84, position 1",
+     "units": "cm", "scientific_note": "Depth of soil-water-bar reference layer for stress.",
+     "existing_v4": false},
+    {"name": "XFRMAX", "location": "SPE", "physical_bounds": [0, 1], "default_bounds": [0, 0.5],
+     "role": "scalar", "init_source": "SPE line 84, position 2",
+     "units": "fraction", "scientific_note": "Maximum fruit partition under water stress.",
+     "existing_v4": false}
+  ],
+  "constraints": []
+}

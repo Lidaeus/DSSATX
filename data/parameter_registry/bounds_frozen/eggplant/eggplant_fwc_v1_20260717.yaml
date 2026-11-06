@@ -1,0 +1,12 @@
+bounds_id: "eggplant_fwc_v1_20260717"
+crop: "eggplant"
+created_at: "2026-07-23T05:55:20Z"
+approved_at: "2026-07-23T05:55:20Z"
+approved_by: "Ceres Architect"
+review_status: "approved"
+derived_from: "eggplant_fwc_v1_20260717.csv"
+derived_from_sha256: "09928e774f15af7fc091acb05281b5255af26e37fdd71c41457e346b830bf0df"
+bounds_sha256: "560c446d16590c780af2f2bddfe57f50a21e018a323c260f8c78fd8346bb1f32"
+parameter_count: 160
+automatic_repairs: 0
+notes: "Fruit-water-content SA bounds: 23 active (20 Sobol-20 + THRSH + 3 SPE params PCARSD/SDPROS/XMPAGE), 137 fixed"

@@ -1,0 +1,99 @@
+"""Generate full 22-treatment diagnostic plots for Arm A and Arm B on 0-4cm / 4-60cm soil.
+"""
+from __future__ import annotations
+
+import os
+import shutil
+import sys
+from pathlib import Path
+import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+import tools.calibration.evaluate_fixedsoil_official_best189_20260813 as evaluation
+from src.calibration.nitrogen_response import derive_filex_water_n_mapping
+
+
+def generate_suite_for_arm(arm_id: str, member_id: str, bundle_prefix: str, out_name: str):
+    case_name = "e02_arm_a" if "arm_a" in arm_id else "e02_arm_b"
+    det_root = ROOT / f"workspace/runs/plot_eval_{arm_id}_member_{member_id}"
+    out_root = ROOT / f"figture/{out_name}"
+    
+    evaluation.RUN_DIR = ROOT / f"workspace/runs/e02_from_scratch_{arm_id}_20260828"
+    evaluation.DET_ROOT = det_root
+    evaluation.OUT_ROOT = out_root
+    evaluation.BEST_MEMBER = str(member_id)
+    evaluation.FIGURE_DIR = out_root
+    evaluation.TABLE_DIR = out_root
+    evaluation.CASE = case_name
+    
+    evaluation.SEASONS = [
+        {
+            "season_id": "25SP",
+            "excode": "XXQL2501",
+            "treatments": [2, 3, 4, 5, 9, 10, 11, 12, 13, 14],
+            "bundle": ROOT / f"data/user/experiments/xxql2501_{bundle_prefix}",
+        },
+        {
+            "season_id": "26SP",
+            "excode": "XXQL2601",
+            "treatments": list(range(1, 13)),
+            "bundle": ROOT / f"data/user/experiments/xxql2601_{bundle_prefix}",
+        },
+    ]
+    evaluation.SEASON_IDS = [item["season_id"] for item in evaluation.SEASONS]
+    evaluation.COLORS = {"25SP": "#2878B5", "26SP": "#2A9D55"}
+    os.environ["DSSAT_CUSTOM_EXE"] = str(evaluation.EXE.resolve())
+    os.environ["DSSAT_SPE_BASE"] = str(evaluation.SPE.resolve())
+    evaluation._swap = lambda: []
+    evaluation._restore = lambda replacements: None
+
+    if det_root.exists():
+        shutil.rmtree(det_root)
+    det_root.mkdir(parents=True, exist_ok=True)
+    out_root.mkdir(parents=True, exist_ok=True)
+
+    # Read param from best eval dir
+    src_param_csv = ROOT / f"workspace/runs/{case_name}_best_member_{member_id}_eval_20260828/{case_name}_best_params.csv"
+    dest_params = det_root / f"best_member_{member_id}_params.csv"
+    shutil.copy2(src_param_csv, dest_params)
+    evaluation._export_member = lambda out_csv: len(pd.read_csv(dest_params))
+
+    mapping_csv = evaluation.DET_ROOT / "two_season_water_n_mapping_from_filex.csv"
+    mappings = [
+        derive_filex_water_n_mapping(
+            season["bundle"] / f"{season['excode']}.TMX",
+            season_id=season["season_id"],
+            treatments=season["treatments"],
+        )
+        for season in evaluation.SEASONS
+    ]
+    pd.concat(mappings, ignore_index=True).to_csv(mapping_csv, index=False, encoding="utf-8-sig")
+    evaluation.PLOT_MAPPING_CSV = mapping_csv
+    evaluation.EXTRA_LIMITATIONS = [
+        f"Evaluation of {arm_id} (Member #{member_id}) on 0-4cm and 4-60cm soil scheme.",
+        "Evaluates 22 treatments (25SP TN 2-5, 9-14; 26SP TN 1-12).",
+    ]
+
+    rc = int(evaluation.main() or 0)
+    print(f"Generated full suite for {arm_id}: exit code {rc}, out_dir: {out_root}")
+
+
+if __name__ == "__main__":
+    # Arm A
+    generate_suite_for_arm(
+        arm_id="arm_a_v15_baseline",
+        member_id="33",
+        bundle_prefix="from_scratch_0_4_60cm_20260827",
+        out_name="e02_arm_a_best33_0_4_60cm_soil_20260828"
+    )
+    
+    # Arm B
+    generate_suite_for_arm(
+        arm_id="arm_b_clean_measuredn",
+        member_id="75",
+        bundle_prefix="clean_measuredn_0_4_60cm_20260828",
+        out_name="e02_arm_b_best75_0_4_60cm_clean_measuredn_20260828"
+    )

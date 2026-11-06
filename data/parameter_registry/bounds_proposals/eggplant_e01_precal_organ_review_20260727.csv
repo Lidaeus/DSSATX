@@ -1,0 +1,7 @@
+parameter,current_lower,current_upper,proposed_lower,proposed_upper,decision,status,evidence
+SLAREF,200,420,160,420,review_then_smoke,candidate,25FA organ lower-bound hit fraction 0.725; verify leaf mass units and observation definition before promotion
+SLAVR,220,340,220,400,review_then_smoke,candidate,25FA organ upper-bound hit fraction 0.425; verify leaf-area response before promotion
+XFRT,0.7,1.0,0.7,1.0,hold_physical_upper,candidate,25SP organ upper-bound hit fraction 0.535; physical upper bound is 1.0, no extrapolation without model evidence
+XFPHT,35,70,35,70,hold_then_rerun,candidate,25SP organ lower-bound hit fraction 0.430; current range already broad and stage-order constraint must remain valid
+PL-EM,3,12,3,12,hold_then_rerun,candidate,25SP organ upper-bound hit fraction 0.285; insufficient independent evidence
+PODUR,25,60,25,60,hold_then_rerun,candidate,25SP organ lower-bound hit fraction 0.255; do not widen from failed yield runs

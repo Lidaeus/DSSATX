@@ -1,0 +1,12 @@
+bounds_id: "eggplant_26sp_cal25sp_val_dual_morris98_80x4_20261105_spaced"
+crop: "eggplant"
+created_at: "2026-11-05T09:36:05Z"
+approved_at: "2026-11-05T09:36:05Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "approved_trial_bounds.csv"
+derived_from_sha256: "adf368c5f3d1175459776a5c968959ecf62155be324718515371350f3abef9b4"
+bounds_sha256: "2085b597e1faec735f08378ec8376441c25753f9e71dd37df0d214e228e2aead"
+parameter_count: 126
+automatic_repairs: 0
+notes: "User authorized 80x4 trial; historical working bounds and updated observed anthesis dates"

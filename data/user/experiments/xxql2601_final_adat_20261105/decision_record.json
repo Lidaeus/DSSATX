@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-27",
+  "shared_initial_mineral_N": "all_seasons_all_treatments;mg_N_kg_dry_soil;before_basal",
+  "weather_source": "XXTW2403.WTH_all_seasons",
+  "TAV_AMP": "existing",
+  "spring_anthesis": "user_confirmed_ADAT;25SP_2025-05-01;26SP_2026-05-02",
+  "maturity": "MDAT_missing;former_PODD_proxy_not_a_confirmed_maturity_observation",
+  "autumn_planting": "current_TMX_2025-08-13",
+  "autumn_terminal": "current_TMX_2026-01-06",
+  "density_plants_ha": 27000,
+  "dry_mass_units": "g_plant_to_kg_ha_times_27",
+  "autumn_sample_pairing": "mean_concentration_times_mean_mass",
+  "autumn_soil_sheet_20261002_real_date": "2026-10-02;preserved_out_of_season;excluded_from_phi",
+  "autumn_dry_fraction": 0.05,
+  "initial_water_temporal_proxy": "25SP_3days_and_26SP_2days_carry_back_to_prebasal_start",
+  "initial_water_hidden_scaling": "none;26SP_TN10_TN12_no_0.82_multiplier",
+  "unpaired_autumn_uncertainty": "sample_SD_descriptive;independent_plot_n_rep_unknown_set_0",
+  "observation_missing_policy": "no_imputation;no_historical_rep_removal;no_legacy_observation_fallback",
+  "calibration_status": "engineering_validated_inputs;not_parameter_calibration_or_science_validated_results",
+  "refresh_scope": "25SP_and_26SP_latest_source_workbooks",
+  "source_folder": "D:\\三季节数据汇总\\2026春",
+  "quality_workbook": "2026春品质指标集-修正.xlsx",
+  "manual_marker_identity": "relocated_by_treatment_replicate_date_and_field;values_verified",
+  "NPK_growth_alignment": "exact_current_source_dates;legacy_June03_to_June02_proxy_not_used",
+  "historical_run_policy": "existing_bundles_and_calibration_results_remain_frozen",
+  "final_soil_revision": {
+    "supersedes_bundle": "xxql2601_refreshed_20261027",
+    "supersedes_manifest_sha256": "8bdd6a486ac8d17d60f4e42c2c30129c853e0b45fa6e762d4b557f5c9e4833f7",
+    "date": "2026-11-05",
+    "source": {
+      "origin": "D:\\三季节数据汇总\\2026春\\2026春土壤养分全氮-有机碳集.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\final_soil_cn_20261105\\source_snapshot\\2026春土壤养分全氮-有机碳集.xlsx",
+      "sheet": "Sheet1",
+      "sha256": "020d9b42daa113e962272c88da12e790ae40da05dc247765c34b5b01fe7c6c7f"
+    },
+    "fields": [
+      "organic_c_pct",
+      "total_n_gkg"
+    ],
+    "method": "three replicates per treatment and source layer; dry-soil-mass overlap; SOL equal-treatment mean",
+    "deep_prior": "inherit SOC=0.10 percent and TN=0.10 g/kg only below sampled interval",
+    "other_chemistry_source": {
+      "origin": "D:\\三季节数据汇总\\2026春\\2026春土壤养分数据集.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\final_soil_cn_20261105\\source_snapshot\\2026春土壤养分数据集.xlsx",
+      "sheet": "Sheet1",
+      "sha256": "0f1e2e6b652836d1d1e3054c9f7758e97148586e686ce458a23c69218b731d27"
+    },
+    "treatment_join": {
+      "key": "plot_number",
+      "user_confirmed": "2026-11-05",
+      "sampling_date": "2026-01-06",
+      "source_water_label_conflicts": [
+        4,
+        6,
+        7,
+        9,
+        10,
+        12
+      ],
+      "bundle_water_nitrogen_groups_preserved": true
+    }
+  },
+  "anthesis_revision": {
+    "parent_bundle": "xxql2601_final_20261105",
+    "parent_manifest_sha256": "0988c35a4c898da5200a8518a9a5975507e6a9fa1e7fb47681b34db00a1baa37",
+    "source": "User supplied revised observed anthesis date",
+    "old_adat": 26110,
+    "new_adat": 26122,
+    "date": "2026-05-02",
+    "treatments": 12,
+    "inherited_input_audits": "Historical audit snapshots from the parent bundle"
+  }
+}

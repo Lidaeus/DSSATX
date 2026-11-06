@@ -1,0 +1,16 @@
+group,transform,offset,reference,sigma,sigma_source,model_sigma,sigma_floor,group_multiplier,n_eff,phi_role,note
+PDAPM,raw,0,1,1.0,observed_event_date,1.0,0.5,1.0,,calibration,Transplant date is fixed by FileX; retained as an auditable zero-day phenology constraint
+ADAPM,raw,0,1,25.0,assumption,2.0,1.0,1.0,,calibration,E01-P phenology-only sub-trial: ADAP is the sole active Phi target for empirical initialization
+MDAPM,raw,0,1,25.0,assumption,2.0,1.0,1.0,,calibration,MDAT carries the documented PODD (fruit-growth initiation) proxy
+LAIXM,raw,0,1,0.8,assumption,0.2,0.1,1.0,,diagnostic_only,Maximum LAI diagnostic; not active in E01-P
+LAIDM,raw,0,1,2.0,assumption,0.5,0.2,1.0,,diagnostic_only,Leaf area process observation; diagnostic in E01-P
+LWADM,raw,0,1,150.0,assumption,20.0,10.0,1.0,,diagnostic_only,Leaf dry mass process observation; diagnostic in E01-P
+SWADM,raw,0,1,200.0,assumption,25.0,10.0,1.0,,diagnostic_only,Stem dry mass process observation; diagnostic in E01-P
+CNAMM,raw,0,1,25.0,assumption,5.0,2.0,1.0,,diagnostic_only,Plant nitrogen amount; diagnostic in E01-P
+CHFPWM,log,1,1,250.0,assumption,30.0,20.0,1.25,,diagnostic_only,Fresh fruit cumulative harvest; diagnostic in E01-P; ln((y+1)/1) transform retained for token contract
+CHPDTM,log,1,1,200.0,assumption,25.0,15.0,1.25,,diagnostic_only,Dry fruit cumulative harvest; diagnostic in E01-P (NOT the active target in this sub-trial); ln((y+1)/1) transform retained for token contract
+HIAMM,raw,0,1,0.10,assumption,0.02,0.01,1.0,,sensitivity_only,Harvest index not a calibration target
+PWADM,raw,0,1,250.0,assumption,30.0,20.0,1.0,,diagnostic_only,Legacy PWAD; diagnostic only
+PWAIM,raw,0,1,250.0,assumption,30.0,20.0,1.0,,diagnostic_only,Legacy PWAI; diagnostic only
+CHTDM,raw,0,1,2.0,assumption,0.5,0.2,1.0,,diagnostic_only,Plant height is not part of the phenology-only sub-trial
+SOIL_WATER,raw,0,1,,,,,,,diagnostic_only,Soil water retained for audit but not constrained by the phenology-only sub-trial

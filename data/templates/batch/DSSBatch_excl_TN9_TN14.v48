@@ -1,0 +1,21 @@
+$BATCH(TOMATO_CAL)
+!
+! Directory    : C:\DSSAT48\Tomato_Cal\Workspace
+! Command Line : C:\DSSAT48\DSCSM048.EXE B DSSBatch.v48
+! Crop         : Tomato
+! Experiment   : XXQL2501.TMX
+! ExpNo        : 1
+!
+! Variant: excl TN9 (W2-N4) and TN14 (W4-N2)
+!   Removes the only W2 and W4 treatments, leaving a clean 2x4 factorial:
+!   W1 (TRTNO 2,3,4,5) x N1-N4  +  W3 (TRTNO 10,11,12,13) x N1-N4
+!
+@FILEX                                                                                        TRTNO     RP     SQ     OP     CO
+XXQL2501.TMX                                                                                     2      1      0      0      0
+XXQL2501.TMX                                                                                     3      1      0      0      0
+XXQL2501.TMX                                                                                     4      1      0      0      0
+XXQL2501.TMX                                                                                     5      1      0      0      0
+XXQL2501.TMX                                                                                    10      1      0      0      0
+XXQL2501.TMX                                                                                    11      1      0      0      0
+XXQL2501.TMX                                                                                    12      1      0      0      0
+XXQL2501.TMX                                                                                    13      1      0      0      0

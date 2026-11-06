@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_gen_final_uncertainty_13trt_20260924"
+crop: "eggplant"
+created_at: "2026-09-24T00:18:23Z"
+approved_at: "2026-09-24T00:18:23Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_gen_final_uncertainty_13trt_20260924.csv"
+derived_from_sha256: "6ca9f3b78f29aa54adaddbc3172c3e22fb7b525dfac9d2c40de63e09f14d64ca"
+bounds_sha256: "3bed4179f77ea903a1093c247bf5c64f481dbc8edf6be248918b059d35a79718"
+parameter_count: 168
+automatic_repairs: 0
+notes: "Final 200x6 uncertainty-grade calibration bounds: DSWBAR [4.8, 6.8], LFMAX [1.95, 2.35], TB1 [8.8, 9.8] locking cross-season thermal balance, KCAN fixed at 0.67, preserving strict physiological contract subspace and SASC=0.90, ICNS=1.0."

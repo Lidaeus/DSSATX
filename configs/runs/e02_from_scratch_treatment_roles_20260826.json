@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "status": "proposed_non_executable",
+  "design_id": "e02_from_scratch_treatment_roles_20260826",
+  "purpose": "Season-specific complete-block roles for the from-scratch E02 design",
+  "leakage_rule": "Never split rows from the same treatment across calibration and validation",
+  "season_roles": {
+    "25SP": {
+      "calibration": [2, 5, 10, 13],
+      "diagnostic": [3, 4, 6, 7, 8, 9, 11, 12, 14],
+      "validation": []
+    },
+    "26SP": {
+      "calibration": [1, 3, 9, 12],
+      "diagnostic": [2, 4, 5, 6, 7, 8, 10, 11],
+      "validation": []
+    },
+    "25FA": {
+      "calibration": [],
+      "diagnostic": [],
+      "validation": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    }
+  },
+  "factor_mapping_source": {
+    "25SP": "XXQL2501.TMX MI/MF table plus frozen treatment_metadata",
+    "26SP": "XXQL2601.TMX MI/MF table plus frozen treatment_metadata",
+    "25FA": "rebuilt 25FA bundle TMX/TMT/FileA, frozen validation metadata only"
+  },
+  "notes": [
+    "This file is a design record only; it must not be passed to the current builder as a validation_split_id.",
+    "The 25FA validation block is locked and cannot trigger bounds, weights, candidate selection, or seasonal offsets.",
+    "If rebuilt bundle metadata disagrees with these roles, stop and revise this file before calibration."
+  ]
+}

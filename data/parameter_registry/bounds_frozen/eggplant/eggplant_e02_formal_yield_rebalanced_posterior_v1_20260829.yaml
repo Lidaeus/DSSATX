@@ -1,0 +1,19 @@
+bounds_id: eggplant_e02_formal_yield_rebalanced_posterior_v1_20260829
+crop: eggplant
+created_at: '2026-08-28T17:33:28.079110Z'
+status: frozen_for_formal_calibration
+source_bounds_id: eggplant_e02_formal_armab_rrmse_widescope_20260828
+posterior_source: e02_formal_armab_rrmse_26spncal_200x6_20260828.6.par.csv
+initial_value_rule: final posterior median, except SLPF reset to 0.90
+contraction_rule: q05-q95 padded 25%, minimum 50% previous width
+escape_rule: yield, N-response, water-response and boundary-sensitive parameters retain
+  full previous envelope
+phtmax_evidence:
+  previous_bounds:
+  - 45.0
+  - 75.0
+  q05: 53.1811
+  median: 58.69065
+  q95: 66.05033
+  boundary_hit: false
+audit_csv: workspace/reports/e02_formal_yield_rebalanced_post_20260829/posterior_bounds_audit.csv

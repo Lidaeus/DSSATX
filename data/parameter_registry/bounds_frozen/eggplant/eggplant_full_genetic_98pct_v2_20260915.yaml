@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_genetic_98pct_v2_20260915"
+crop: "eggplant"
+created_at: "2026-09-14T23:48:50Z"
+approved_at: "2026-09-14T23:48:50Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_genetic_98pct_v2_20260915.csv"
+derived_from_sha256: "ec80d674571441e3801228eb0884ec2720601ae8ee7cc5bebc7d396521e6604b"
+bounds_sha256: "328c3a9e69b2eb5bb0604c64878b7b24650c9de14162016f0d77e3d5c4dd7535"
+parameter_count: 156
+automatic_repairs: 0
+notes: "Full genetic 98 pct v2 with seasonal SLPF and boundary adjustments"

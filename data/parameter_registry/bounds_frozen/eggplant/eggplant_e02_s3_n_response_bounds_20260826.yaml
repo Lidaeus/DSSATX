@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_s3_n_response_bounds_20260826"
+crop: "eggplant"
+created_at: "2026-08-26T14:28:27Z"
+approved_at: "2026-08-26T14:28:27Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_s3_n_response_proposal_20260826.csv"
+derived_from_sha256: "82a12ee7d1f83db9ed845660baaa7472b72b67e61a33a2dd7ba31445e3c1d45e"
+bounds_sha256: "82a12ee7d1f83db9ed845660baaa7472b72b67e61a33a2dd7ba31445e3c1d45e"
+parameter_count: 148
+automatic_repairs: 0
+notes: "E02 Stage S3 nitrogen response parameter bounds (15 active, S1+S2 posterior fixed)"

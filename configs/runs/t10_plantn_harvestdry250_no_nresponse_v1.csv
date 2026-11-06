@@ -1,0 +1,10 @@
+group,phi_budget,note
+PHENO,0.10,PDAT/ADAT flowering phenology; MDAT diagnostic-only
+CANOPY,1.00,LAID process and LAIX
+BIOMASS,1.00,LWAD+SWAD; exclude total fruit-containing mass
+PLANT_N,1.00,SNAM+LNAM only; CNAM excluded; only seasons with observations participate
+HARVEST_FRESH,1.25,CHFPW diagnostic-only; no fresh-weight target in Phi
+HARVEST_DRY,2.50,CHPDT cumulative plus HPODW incremental dry harvest; static shared budget
+CUMULATIVE_HARVEST,1.00,Legacy PWAD diagnostic-only fallback
+INCREMENTAL_HARVEST,1.00,Legacy PWAI diagnostic-only fallback
+SOIL_WATER,1.00,Audited volumetric soil-water process group

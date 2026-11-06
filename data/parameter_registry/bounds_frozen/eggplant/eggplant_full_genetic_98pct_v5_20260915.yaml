@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_genetic_98pct_v5_20260915"
+crop: "eggplant"
+created_at: "2026-09-15T05:42:27Z"
+approved_at: "2026-09-15T05:42:27Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_genetic_98pct_v5_20260915.csv"
+derived_from_sha256: "93bb0e5946a45d9a968b6d2e707b88a8de9e95a6d980d85c07e095bb2b0dc1ae"
+bounds_sha256: "94b254dc2a491fe692f4edef5c2e5b028c7fd5abd86bc3958aabbb188e7d8b1a"
+parameter_count: 163
+automatic_repairs: 0
+notes: "V5: Comprehensive senescence and N remobilization calibration to eliminate N0 late LAI collapse while preserving water-nitrogen monotonicity and yield NRMSE"

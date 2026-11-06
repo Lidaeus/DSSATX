@@ -1,0 +1,12 @@
+bounds_id: "eggplant_26sp_cal25sp_val_cold_c31pst_noadat_80x4_20261106"
+crop: "eggplant"
+created_at: "2026-11-06T03:01:07Z"
+approved_at: "2026-11-06T03:01:07Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "approved_trial_bounds.csv"
+derived_from_sha256: "de1581c3317fe937338104b285b7d6c08fc8820c8f2aba1f364063ae7a113d50"
+bounds_sha256: "8acb309fec995615a7b433594dca7af715459e470f7eea124a657bc3d8a20503"
+parameter_count: 126
+automatic_repairs: 0
+notes: "Archived spring inputs; overlap with C31 control-file ranges and native precision."

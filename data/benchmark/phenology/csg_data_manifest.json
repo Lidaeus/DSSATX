@@ -1,0 +1,29 @@
+{
+  "schema_version": 2,
+  "manifest_id": "csg_overwintering_phenology_benchmark_v1",
+  "created_at": "2026-09-20T16:00:00Z",
+  "data_status": "frozen_benchmark_contract",
+  "scenario_type": "csg_independent_zero_shot",
+  "biological_specification": {
+    "crop": "eggplant",
+    "scion_cultivar": "Solanum melongena L. cv. Brilliance",
+    "rootstock": "Solanum torvum Sw. (托鲁巴姆)",
+    "grafting_method": "cleft_grafting_apex",
+    "facility_type": "sunken_solar_greenhouse_csg",
+    "wall_thickness_m": 3.5,
+    "thermal_blanket_schedule": "16:30_close_08:30_open"
+  },
+  "artifacts": [
+    {
+      "path": "csg_benchmark_targets.csv",
+      "description": "Frozen phenological milestone targets for CSG overwintering cycle",
+      "sha256": "ba21130485edb99d1a159bda8aefee76b61bcc5cf22d70e9935684acec199e57"
+    }
+  ],
+  "verification_enforcement": {
+    "hash_algorithm": "SHA-256",
+    "windows_command": "certutil -hashfile data\\benchmark\\phenology\\csg_benchmark_targets.csv SHA256",
+    "linux_command": "sha256sum data/benchmark/phenology/csg_benchmark_targets.csv",
+    "gating_rule": "Zero-shot evaluation harness must verify artifact hashes before inference; any hash mismatch raises SecurityIntegrityError."
+  }
+}

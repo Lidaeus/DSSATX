@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_joint61_m1_offsets_v4_selective_20260729"
+crop: "eggplant"
+created_at: "2026-07-29T05:05:16Z"
+approved_at: "2026-07-29T05:05:16Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_joint61_m1_offsets_v4_selective_20260729.csv"
+derived_from_sha256: "8b58eba49004b3a6504cbb64c4e4063e5120b9f7885cb681b704da949cf3333b"
+bounds_sha256: "e44f5564d574619af835f9dd1b5a443730ce3091f73e07e49850dc1232fb54a2"
+parameter_count: 71
+automatic_repairs: 0
+notes: "User-approved selective CHPDT+CHTD trial; modest lower-bound relaxation where physical bounds permit; FL-SH retained at physical lower bound; no LAID/LWAD/SWAD transform"

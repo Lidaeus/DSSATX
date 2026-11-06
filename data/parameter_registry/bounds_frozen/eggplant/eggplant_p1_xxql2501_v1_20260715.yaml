@@ -1,0 +1,14 @@
+bounds_id: "eggplant_p1_xxql2501_v1_20260715"
+crop: "eggplant"
+created_at: "2026-07-15T15:45:23Z"
+approved_at: "2026-07-15T15:45:23Z"
+approved_by: "Lidaeus"
+review_status: "superseded"
+derived_from: "eggplant_p1_xxql2501_v1_20260715.csv"
+derived_from_sha256: "0709373a558950c799fd21f70976bb3fcc645f3e74adad6322af1fdaf7190a66"
+bounds_sha256: "0709373a558950c799fd21f70976bb3fcc645f3e74adad6322af1fdaf7190a66"
+parameter_count: 157
+automatic_repairs: 0
+notes: "User-approved P1 genotype bounds; SOIL fixed to xxql2501_20260715; treatment-specific IC disabled"
+superseded_by: "eggplant_p1_xxql2501_v2_20260715"
+superseded_reason: "Formal preflight exposed overlapping XMAGE/XFPHT ranges that permit invalid Morris trajectories"

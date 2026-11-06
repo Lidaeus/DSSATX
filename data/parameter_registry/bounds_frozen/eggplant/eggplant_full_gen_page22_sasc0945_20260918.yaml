@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_gen_page22_sasc0945_20260918"
+crop: "eggplant"
+created_at: "2026-09-18T10:48:00Z"
+approved_at: "2026-09-18T10:48:00Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_gen_page22_sasc0945_20260918.csv"
+derived_from_sha256: "adb84ecc14c104caefb7a982c8e62bfdad247d355ab5b32907a504eaafc969a2"
+bounds_sha256: "adb84ecc14c104caefb7a982c8e62bfdad247d355ab5b32907a504eaafc969a2"
+parameter_count: 164
+automatic_repairs: 0
+notes: "Updated SASC_RATIO=0.945, ICNS=0.7, PAGE=22, SLPF from real11, formal 150x5 calibration"

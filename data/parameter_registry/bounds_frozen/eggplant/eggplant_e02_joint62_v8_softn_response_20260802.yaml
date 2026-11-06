@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_joint62_v8_softn_response_20260802"
+crop: "eggplant"
+created_at: "2026-08-01T10:54:53Z"
+approved_at: "2026-08-01T10:54:53Z"
+approved_by: "codex"
+review_status: "approved"
+derived_from: "eggplant_e02_joint62_v8_softn_response_20260802.csv"
+derived_from_sha256: "84dccf26ff6b4243bc15a18e4aaa59f34a1719201d4e41e017e5643c7b7edc14"
+bounds_sha256: "cb23814db0a9f85376f4a8c8fa074b009be01409244e8b0c88cf2b4fa54b8dea"
+parameter_count: 72
+automatic_repairs: 0
+notes: "Corrected fruit moisture truth (95% moisture, DMC=5%); boundary-combo evidence; soft observed-shape N response; RTNO3 lower 0.015, NSTFAC lower 0.70, LNREF upper 8.0; XFINT retained as engineering guardrail."

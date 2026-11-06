@@ -1,0 +1,12 @@
+bounds_id: "eggplant_p1_xxql2501_v2_20260715"
+crop: "eggplant"
+created_at: "2026-07-15T15:59:14Z"
+approved_at: "2026-07-15T15:59:14Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_p1_xxql2501_v2_20260715.csv"
+derived_from_sha256: "597af4164da16b27c4d22e18bb97c30923c2cfaa22864be1231952c79ed7cc89"
+bounds_sha256: "597af4164da16b27c4d22e18bb97c30923c2cfaa22864be1231952c79ed7cc89"
+parameter_count: 157
+automatic_repairs: 0
+notes: "Supersedes v1; guarantees XMAGE < XFPHT for independent Morris samples; other approved ranges and experiment-fixed nuisance inputs retained"

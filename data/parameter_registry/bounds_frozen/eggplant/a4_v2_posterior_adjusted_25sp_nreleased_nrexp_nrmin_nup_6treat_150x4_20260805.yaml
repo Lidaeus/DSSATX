@@ -1,0 +1,12 @@
+bounds_id: "a4_v2_posterior_adjusted_25sp_nreleased_nrexp_nrmin_nup_6treat_150x4_20260805"
+crop: "eggplant"
+created_at: "2026-08-04T23:10:22Z"
+approved_at: "2026-08-04T23:10:22Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "a4_v2_posterior_adjusted_25sp_nreleased_nrexp_nrmin_nup_6treat_150x4_20260805.csv"
+derived_from_sha256: "cbbcbe3cc57eff3a9c237bfe20bc139fb1b8076ffea1fa915795e57c9c543108"
+bounds_sha256: "cbbcbe3cc57eff3a9c237bfe20bc139fb1b8076ffea1fa915795e57c9c543108"
+parameter_count: 111
+automatic_repairs: 0
+notes: "A4 v1 posterior-edge adjustment: release 30 parameters with >=10% final posterior mass in 2% boundary band; retain hard/structural limits; A4 custom DSSAT."

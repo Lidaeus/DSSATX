@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "design_id": "eggplant_e02_joint62_three_season_defaultn_nresponse_v2_20260730",
+  "cultivar_identity": "same_eggplant_cultivar",
+  "shared_parameter_scope": "55 shared crop/process parameters including SOIL_SLPF plus seven 25FA effective offsets",
+  "observation_policy": "configs/runs/e02_n_response_snam_lnam_chpdtlog_noadap_v3.csv",
+  "group_policy": "configs/runs/t10_water_n_response_group_policy_harvestdry250_v1.csv",
+  "nitrogen_response_objective": {
+    "enabled": true,
+    "mapping_csv": "configs/runs/e02_three_season_water_n_mapping_20260730.csv",
+    "source_variable": "CHPDT",
+    "contrast": "ln1p_Nk_minus_ln1p_N0",
+    "response_target": "observed_shape",
+    "levels": [
+      "N1",
+      "N2",
+      "N3"
+    ],
+    "sigma_floor": 0.1,
+    "budget_rule": "0.75 total per season; count-corrected across both water levels, harvests and three contrasts"
+  },
+  "seasonal_parameterization": {
+    "reference_season_id": "25SP",
+    "offsets": [
+      {
+        "offset_name": "DLFMAX_AUT",
+        "parameter_name": "LFMAX",
+        "transform": "log_multiplier",
+        "target_season_ids": [
+          "25FA"
+        ],
+        "rationale": "documented autumn effective maximum leaf photosynthetic-capacity adjustment"
+      },
+      {
+        "offset_name": "DSLAVR_AUT",
+        "parameter_name": "SLAVR",
+        "transform": "log_multiplier",
+        "target_season_ids": [
+          "25FA"
+        ],
+        "rationale": "documented autumn effective specific-leaf-area adjustment"
+      },
+      {
+        "offset_name": "DXFRT_AUT",
+        "parameter_name": "XFRT",
+        "transform": "logit_additive",
+        "target_season_ids": [
+          "25FA"
+        ],
+        "rationale": "documented autumn effective fruit dry-matter partitioning adjustment"
+      },
+      {
+        "offset_name": "DSFDUR_AUT",
+        "parameter_name": "SFDUR",
+        "transform": "log_multiplier",
+        "target_season_ids": [
+          "25FA"
+        ],
+        "rationale": "documented autumn effective fruit-growth-duration adjustment"
+      },
+      {
+        "offset_name": "DTB1_AUT",
+        "parameter_name": "TB1",
+        "transform": "additive",
+        "target_season_ids": [
+          "25FA"
+        ],
+        "rationale": "documented autumn vegetative-stage base-temperature adjustment"
+      },
+      {
+        "offset_name": "DTB2_AUT",
+        "parameter_name": "TB2",
+        "transform": "additive",
+        "target_season_ids": [
+          "25FA"
+        ],
+        "rationale": "documented autumn early-reproductive-stage base-temperature adjustment"
+      },
+      {
+        "offset_name": "DTB3_AUT",
+        "parameter_name": "TB3",
+        "transform": "additive",
+        "target_season_ids": [
+          "25FA"
+        ],
+        "rationale": "documented autumn late-reproductive-stage base-temperature adjustment"
+      }
+    ]
+  },
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data\\user\\experiments\\xxql2501_special_defaultn_v1_20260730",
+      "bundle_manifest_sha256": "8d6de7989de08ea6741603e9b333e4d2bfab322290fcd3ff05e2763c5b376c4f",
+      "role": "calibration",
+      "treatments": [
+        2,
+        3,
+        4,
+        5,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "season_id": "25FA",
+      "experiment_code": "XXQL2502",
+      "bundle_path": "data\\user\\experiments\\xxql2502_special_defaultn_v1_20260730",
+      "bundle_manifest_sha256": "8c923317a26b5c70662498145bd55a41c5b0d3ec8997d9e915906c012740852d",
+      "role": "calibration",
+      "treatments": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data\\user\\experiments\\xxql2601_special_defaultn_v1_20260730",
+      "bundle_manifest_sha256": "a6e065ab82b4ccb7a43ab1b05f124c7fb535cc2c30fcfd4e9608b394b20f88f1",
+      "role": "calibration",
+      "treatments": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    }
+  ],
+  "t10_scheme": {
+    "purpose": "Formal replanning baseline with default FileX mineral N and explicit water x nitrogen response constraints",
+    "harvest_budget_total": 2.5,
+    "absolute_harvest_budget": 1.75,
+    "nitrogen_response_budget": 0.75,
+    "response_shape": "observed ln1p contrasts; no monotonicity assumption",
+    "active_parameters": 62,
+    "ADAP": "diagnostic_only",
+    "MDAP": "diagnostic_only",
+    "FileX_initial_SNO3": 1.0,
+    "FileX_initial_SNH4": 0.5,
+    "canonical_input_rule": "Only the three explicitly hashed special_defaultn bundles are valid for this design"
+  }
+}

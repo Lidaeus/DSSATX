@@ -1,0 +1,100 @@
+﻿name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,proposed_stage,rationale,baseline_value,init_source
+ATOP,1.1,0.6,1.6,active,SPE_RootWater,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S3_water_fruit,C31 frozen scientific domain; no posterior +/-15% tightening,0.8,domain_midpoint
+CMOBMX,0.0955,0.0005,0.1905,active,SPE_CarbonReserve,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,0.022,domain_midpoint
+CSDL,12.33,12.33,12.33,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,12.33,current_canonical_template
+DSWBAR,6.5,5.0,8.0,active,SPE_WaterStress,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S3_water_fruit,C31 frozen scientific domain; no posterior +/-15% tightening,15.0,domain_midpoint
+EM-FL,24.0,20.0,28.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,23.3,domain_midpoint
+EM-V1,39.3,39.3,39.3,fixed,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,39.3,current_canonical_template
+EVMODC,0.0,0.0,0.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.0,current_canonical_template
+FINREF,220.0,220.0,220.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,220.0,current_canonical_template
+FL-LF,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,400.0,current_canonical_template
+FL-SD,17.35,8.85,25.85,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,8.1,domain_midpoint
+FL-SH,2.5,1.0,4.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,2.0,domain_midpoint
+FL-VS,100.0,100.0,100.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,100.0,current_canonical_template
+FRCNOD,0.05,0.05,0.05,fixed,SPE_Nodule,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.05,current_canonical_template
+FRLFF,0.265,0.08,0.45,active,SPE_RootWater,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,0.3,domain_midpoint
+FRSTMF,0.785,0.65,0.92,active,SPE_RootWater,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,0.49,domain_midpoint
+JU-R0,3.8,3.8,3.8,fixed,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,3.8,current_canonical_template
+KCAN,0.625,0.5,0.75,active,SPE_Photosynthesis,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,0.67,domain_midpoint
+KC_SLOPE,0.1,0.1,0.1,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.1,current_canonical_template
+LFMAX,2.3,1.8,2.8,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,1.27,domain_midpoint
+LNGSH,29.0,18.0,40.0,active,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,39.0,domain_midpoint
+LNREF,6.0,5.5,6.5,active,SPE_Nitrogen,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S2_nitrogen,C31 frozen scientific domain; no posterior +/-15% tightening,4.5,domain_midpoint
+NMOBMX,0.09,0.06,0.12,active,SPE_Other,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S2_nitrogen,C31 frozen scientific domain; no posterior +/-15% tightening,0.09,domain_midpoint
+NRCVR,0.22499999999999998,0.1,0.35,active,SPE_Other,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S2_nitrogen,C31 frozen scientific domain; no posterior +/-15% tightening,0.15,domain_midpoint
+NSLOPE,0.265,0.15,0.38,active,SPE_Nitrogen,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S2_nitrogen,C31 frozen scientific domain; no posterior +/-15% tightening,0.25,domain_midpoint
+NSTFAC,0.89,0.8,0.98,active,SPE_Other,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S2_nitrogen,C31 frozen scientific domain; no posterior +/-15% tightening,0.7,domain_midpoint
+NVSMOB,0.4,0.2,0.6,active,SPE_Other,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S2_nitrogen,C31 frozen scientific domain; no posterior +/-15% tightening,0.38,domain_midpoint
+PARMAX,41.0,41.0,41.0,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,41.0,current_canonical_template
+PHTMAX,61.0,61.0,61.0,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,61.0,current_canonical_template
+PL-EM,11.4,11.4,11.4,fixed,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,11.4,current_canonical_template
+PM06,0.6,0.6,0.6,fixed,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.6,current_canonical_template
+PM09,0.75,0.75,0.75,fixed,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.75,current_canonical_template
+PODUR,14.0,6.0,22.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,S3_water_fruit,C31 frozen scientific domain; no posterior +/-15% tightening,33.0,domain_midpoint
+PORMIN,0.02,0.02,0.02,fixed,SPE_RootWater,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.02,current_canonical_template
+PORPT,0.21,0.21,0.21,fixed,SPE_RootWater,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.21,current_canonical_template
+PPSEN,0.0,0.0,0.0,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.0,current_canonical_template
+RHGHT,1.0,0.6,1.4,active,ECO_Architecture,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,1.3,domain_midpoint
+RTEXF,0.1,0.1,0.1,fixed,SPE_RootNitrogen,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.1,current_canonical_template
+RTNH4,0.021500000000000002,0.008,0.035,active,SPE_RootNitrogen,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S2_nitrogen,C31 frozen scientific domain; no posterior +/-15% tightening,0.012,domain_midpoint
+RTNO3,0.015,0.01,0.02,active,SPE_RootNitrogen,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S2_nitrogen,C31 frozen scientific domain; no posterior +/-15% tightening,0.012,domain_midpoint
+RWDTH,1.375,0.625,2.125,active,ECO_Architecture,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,S3_water_fruit,C31 frozen scientific domain; no posterior +/-15% tightening,1.3,domain_midpoint
+RWUMX,0.04,0.02,0.06,active,SPE_RootWater,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S3_water_fruit,C31 frozen scientific domain; no posterior +/-15% tightening,0.04,domain_midpoint
+SD-PM,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,400.0,current_canonical_template
+SDPDV,111.4,111.4,111.4,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,111.4,current_canonical_template
+SENDAY,0.015,0.008,0.022,active,SPE_Senescence,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,0.02,domain_midpoint
+SENRTE,1.3,0.8,1.8,active,SPE_Senescence,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,1.0,domain_midpoint
+SFDUR,42.5,20.0,65.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,S3_water_fruit,C31 frozen scientific domain; no posterior +/-15% tightening,11.7,domain_midpoint
+SIZLF,280.0,260.0,300.0,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,297.1,domain_midpoint
+SIZREF,300.0,300.0,300.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,300.0,current_canonical_template
+SLAREF,300.0,300.0,300.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,300.0,current_canonical_template
+SLAVR,187.5,115.0,260.0,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,293.0,domain_midpoint
+TB1,8.8,8.0,9.6,active,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,7.0,domain_midpoint
+TB2,10.0,8.5,11.5,active,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,7.2,domain_midpoint
+TB3,5.2,5.2,5.2,fixed,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,5.2,current_canonical_template
+THRSH,8.5,8.5,8.5,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,8.5,current_canonical_template
+TM1,41.75,36.0,47.5,active,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,48.0,domain_midpoint
+TM2,39.5,35.0,44.0,active,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,48.0,domain_midpoint
+TM3,48.0,48.0,48.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,48.0,current_canonical_template
+TO11,24.5,22.0,27.0,active,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,22.0,domain_midpoint
+TO12,23.0,20.0,26.0,active,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,22.0,domain_midpoint
+TO13,26.0,26.0,26.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,26.0,current_canonical_template
+TO21,28.0,28.0,28.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,28.0,current_canonical_template
+TO22,28.0,28.0,28.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,28.0,current_canonical_template
+TO23,28.0,28.0,28.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,28.0,current_canonical_template
+TRIFL,0.25,0.25,0.25,fixed,ECO_Architecture,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.25,current_canonical_template
+V1-JU,0.0,0.0,0.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.0,current_canonical_template
+VSSINK,9.5,4.0,15.0,active,SPE_SourceSink,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,4.1,domain_midpoint
+WTFSD,0.55,0.55,0.55,fixed,SPE_RootWater,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.55,current_canonical_template
+WTPSD,0.004,0.004,0.004,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.004,current_canonical_template
+XFINT,0.12,0.12,0.12,fixed,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.12,current_canonical_template
+XFPHT,38.8,38.8,38.8,fixed,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,38.8,current_canonical_template
+XFRMAX,0.0,0.0,0.0,fixed,SPE_WaterStress,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.0,current_canonical_template
+XFRT,0.865,0.78,0.95,active,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,eggplant_stage2,S3_water_fruit,C31 frozen scientific domain; no posterior +/-15% tightening,0.99,domain_midpoint
+XMAGE,11.5,5.0,18.0,active,ECO_Phenology,ECO,TMGRO048.ECO.base,TM0008,TM0001,eggplant_stage2,S3_water_fruit,C31 frozen scientific domain; no posterior +/-15% tightening,28.6,domain_midpoint
+NREXP,0.65,0.65,0.65,fixed,species,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.65,current_canonical_template
+NRMIN,0.7,0.7,0.7,fixed,species,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.7,current_canonical_template
+SWBAR_REC,0.6,0.35,0.85,active,SPE_WaterResponse,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S3_water_fruit,C31 frozen scientific domain; no posterior +/-15% tightening,0.25,domain_midpoint
+YSWBAR_MID,0.625,0.3,0.95,active,SPE_WaterResponse,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S3_water_fruit,C31 frozen scientific domain; no posterior +/-15% tightening,1.0,domain_midpoint
+PGEFF,0.065,0.05,0.08,active,SPE_Photosynthesis,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,0.0541,domain_midpoint
+PROLFF,0.20500000000000002,0.18,0.23,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S2_nitrogen,C31 frozen scientific domain; no posterior +/-15% tightening,0.11,domain_midpoint
+PROSTF,0.060000000000000005,0.035,0.085,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S2_nitrogen,C31 frozen scientific domain; no posterior +/-15% tightening,0.065,domain_midpoint
+PRORTF,0.06,0.06,0.06,fixed,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.06,current_canonical_template
+PROLFG,0.26,0.24,0.28,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S2_nitrogen,C31 frozen scientific domain; no posterior +/-15% tightening,0.22,domain_midpoint
+PROSTG,0.13,0.1,0.16,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S2_nitrogen,C31 .10-.20 narrowed to .10-.16 to enforce PROSTG <= PROSTI,0.136,domain_midpoint
+PRORTG,0.119,0.119,0.119,fixed,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.119,current_canonical_template
+PROLFI,0.32,0.28,0.36,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S2_nitrogen,C31 frozen scientific domain; no posterior +/-15% tightening,0.27,domain_midpoint
+PROSTI,0.20500000000000002,0.16,0.25,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S2_nitrogen,C31 frozen scientific domain; no posterior +/-15% tightening,0.188,domain_midpoint
+PRORTI,0.144,0.144,0.144,fixed,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.144,current_canonical_template
+FNPGN1,2.95,2.4,3.5,active,SPE_Photo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S2_nitrogen,C31 frozen scientific domain; no posterior +/-15% tightening,2.0,domain_midpoint
+FNPGN2,6.0,5.5,6.5,active,SPE_Photo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S2_nitrogen,C31 frozen scientific domain; no posterior +/-15% tightening,4.5,domain_midpoint
+PROSHG,0.15,0.15,0.15,fixed,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.15,current_canonical_template
+PROSHI,0.17049999999999998,0.121,0.22,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S3_water_fruit,C31 .08-.22 narrowed to .121-.22 to enforce PROSHF <= PROSHI,0.21,domain_midpoint
+SENPOR_LATE,0.14500000000000002,0.1,0.19,active,SPE_Senescence,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,0.16,domain_midpoint
+ICMP,0.01,0.01,0.01,fixed,SPE_Senescence,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,0.01,current_canonical_template
+TCMP,50.0,50.0,50.0,fixed,SPE_Senescence,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,50.0,current_canonical_template
+SENRT2,0.015000000000000001,0.005,0.025,active,SPE_Senescence,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,0.02,domain_midpoint
+SENMAX_LATE,0.31,0.2,0.42,active,SPE_Senescence,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S1_canopy,C31 frozen scientific domain; no posterior +/-15% tightening,0.5,domain_midpoint
+FNPGN3,20.0,20.0,20.0,fixed,SPE_Photo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,20.0,current_canonical_template
+FNPGN4,20.0,20.0,20.0,fixed,SPE_Photo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,fixed,Current canonical template; no root/P or weak-structure joint release,20.0,current_canonical_template
+PROSHF,0.11,0.099,0.121,active,SPE_Compo,SPE,TMGRO048.SPE.base,TM0008,TM0001,eggplant_stage2,S3_water_fruit,Registry DEFAULT_BOUNDS; fruit N minimum/mobilization; new proposal,0.11,registry_default

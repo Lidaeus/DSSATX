@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "member": "126",
+  "member_rule": "phi_q10_highest_nse of formal IES 20260817",
+  "source_deterministic_dir": "D:\\Tomato_Cal\\workspace\\runs\\e02_fixedsoil_nse_official_25sp26sp_200x6_20260817\\deterministic_candidates\\phi_q10_highest_nse_tmxfix_20260818",
+  "source_metrics_csv": "D:\\Tomato_Cal\\workspace\\runs\\e02_fixedsoil_nse_official_25sp26sp_200x6_20260817\\deterministic_candidates\\phi_q10_highest_nse_tmxfix_20260818\\metrics_by_season_variable.csv",
+  "DRY_CUM": {
+    "nse": {
+      "25SP": 0.9053597611255794,
+      "26SP": 0.8771866831854745
+    },
+    "bias": {
+      "25SP": -32.85499999999999,
+      "26SP": -123.27833333333336
+    },
+    "pbias_pct": {
+      "25SP": -1.9204128990022382,
+      "26SP": -6.595775037229255
+    }
+  },
+  "N_RESPONSE": {
+    "nse": {
+      "25SP": -0.926381,
+      "26SP": -3.518331
+    }
+  },
+  "W_RESPONSE": {
+    "nse": {
+      "25SP": -1.660082,
+      "26SP": -1.461583
+    }
+  },
+  "ORGAN": {
+    "LAID": {
+      "nse": {
+        "25SP": 0.8173825034188138,
+        "26SP": 0.1546810855315677
+      }
+    },
+    "LWAD": {
+      "nse": {
+        "25SP": 0.8363661972586163,
+        "26SP": 0.6369287465076949
+      }
+    },
+    "SWAD": {
+      "nse": {
+        "25SP": 0.9150333830846517,
+        "26SP": 0.8714789807177086
+      }
+    },
+    "CHTD": {
+      "nse": {
+        "25SP": -0.3212700238023205,
+        "26SP": -4.230348745328813
+      }
+    }
+  },
+  "notes": [
+    "DRY_CUM/ORGAN from deterministic replay of member 126 on the fixed TMX (20260818).",
+    "N/W response NSE are the user-confirmed formal-IES values (plan section 2.1)."
+  ]
+}

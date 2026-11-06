@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "report_sha256": "d9750a71095e420affdc15b076618d65d28218f10aee308cf2fc7626b6a26b35",
+  "local_report_links_checked": 14,
+  "targets": 516,
+  "families": 16,
+  "budget_sum": 100.0,
+  "active_parameters": 65,
+  "native_cases": 71,
+  "formal_run_started": false,
+  "source_provenance_sha256": "c83a364fa3a31bbc33e46e860b8b8823d9a69ee437e91e362a5f8466aeec330a"
+}

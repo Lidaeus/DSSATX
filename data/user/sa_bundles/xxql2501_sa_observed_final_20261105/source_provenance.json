@@ -1,0 +1,25 @@
+{
+  "source_bundle": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2501_final_20261105",
+  "source_manifest_sha256": "96d872d28e63e726dd4e9b89dd4d88ad85f1bd17d9bcec6edf1a5279e35365c7",
+  "generator": "workspace\\audits\\final_soil_cn_20261105\\build_final_soil.py",
+  "generator_sha256": "80b7751e820f3523d9bc779d975b423f7bb3ad02a4c7db578ceabc82f6089aa5",
+  "transformations": {},
+  "unchanged_payloads": {
+    "DSSBatch.v48": "7af3c66abaa1ffb095fa972e46dd831a963d2d146e3736e55a446416c9f20064",
+    "fertilizer_event_audit.csv": "3696a183b368351a7081b0d834835c3a36753d0b2960d8f47a3ebff3b4377cf4",
+    "harvest_schedule_audit.csv": "54abf95221abca07f6623790ee49cbd6488e103f0de1c8ed8f6babdd6bf2bb5c",
+    "irrigation_event_audit.csv": "b293a0cfc64e223916dc63139b1e7e2fb9f2d48232bf437b8b26863761e2fc2e",
+    "SOIL.SOL": "cf26a89e13a1d70b554e26969a9f074f39440b2901e822e5e1915d8bea357d4f",
+    "TMGRO048.CUL": "92a373800d68b46d07601777e1579fff7b976f74190814bc6e0494eda7c4455b",
+    "TMGRO048.ECO": "9f2d43d335a4455679d701116d861a1915c1010a79d002e60ca4db74fe3d73ff",
+    "TMGRO048.SPE": "59fb51f8d4314615973038843994160cf612443c789ba938092ba0af0bb1d0f7",
+    "treatment_metadata.csv": "f3e9108f1994177c24c2696eb8ff5b054e72d588a8f939ed3c10031fcee006c1",
+    "XXQL2501.TMA": "7a35cb34fd3072ee17515b8ae2beec705961e7367b420e056c805c0c94784aa5",
+    "XXQL2501.TMT": "f6522402b6a5b411cbc4dec530640e0b1022a85657f0e5c7de2c7a14c11d4a53",
+    "XXQL2501.TMX": "ae045fdba5d61cd702ad10986438818cc2c00dcd5e859ef4480ad33d453e909d",
+    "XXTW2403.WTH": "b9f520285c335f47ec5105a6f7b363089462a7a1736334b7918ff3ea14820920"
+  },
+  "observations": "TMA/TMT copied as parent reference only; no observed-target fitting or counterfactual truth implied.",
+  "supersedes_bundle": "xxql2501_sa_observed_20261029",
+  "supersedes_manifest_sha256": "fab9dc524c9685d73183d1d686d79936ee0408c39757a18fc16201c12bb17030"
+}

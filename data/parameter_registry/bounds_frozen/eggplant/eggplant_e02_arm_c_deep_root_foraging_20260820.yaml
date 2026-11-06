@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_arm_c_deep_root_foraging_20260820"
+crop: "eggplant"
+created_at: "2026-08-20T13:58:09Z"
+approved_at: "2026-08-20T13:58:09Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_arm_c_deep_root_foraging_20260820.csv"
+derived_from_sha256: "3e17f32900c41f4c3992a35c7b08122d445cfe9303bcb7ba7af12c0fcb942085"
+bounds_sha256: "3e17f32900c41f4c3992a35c7b08122d445cfe9303bcb7ba7af12c0fcb942085"
+parameter_count: 120
+automatic_repairs: 0
+notes: "Exploratory trial: Arm C: Deep Root Growth & Foraging (RTEXF 0.18-0.35 + Deep SRGF)"

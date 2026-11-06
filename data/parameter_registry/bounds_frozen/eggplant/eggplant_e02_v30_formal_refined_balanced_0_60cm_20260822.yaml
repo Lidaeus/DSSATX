@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_v30_formal_refined_balanced_0_60cm_20260822"
+crop: "eggplant"
+created_at: "2026-08-22T15:50:15Z"
+approved_at: "2026-08-22T15:50:15Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_v30_formal_refined_balanced_0_60cm_20260822.csv"
+derived_from_sha256: "9a0108f603d4fda4827158c723edb12a55ac5b54846f11280515aa0ceff3794c"
+bounds_sha256: "9a0108f603d4fda4827158c723edb12a55ac5b54846f11280515aa0ceff3794c"
+parameter_count: 218
+automatic_repairs: 0
+notes: "v30 Formal Refined Balanced Calibration 100% sourced from Physiological Base"

@@ -1,0 +1,112 @@
+name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,review_note,notes
+atop,0.9193835,0.8498628375000001,0.9843067124999999,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+cmobmx,0.0010119,0.001,0.12,active,SPE_CarbonReserve,SPE,TMGRO048.SPE.base,,,,v15: lower 0.005→0.001; upper 0.05→0.12,v15 boundary pressure fix 20260819
+csdl,12.28715,12.16121875,12.460686250000002,active,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+dswbar,13.66965,5.0,25.0,active,SPE_WaterStress,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+em-fl,23.0004,23.0,27.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+em-v1,38.53135,38.025932499999996,39.149567499999996,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+evmodc,0.0,0.0,0.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+finref,278.1195,221.79581250000004,337.7445375,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,v15: upper 275.0→350.0,v15 boundary pressure fix 20260819
+fl-lf,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+fl-sd,12.137,8.637,15.637,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+fl-sh,3.58003,2.68003,4.480029999999999,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+fl-vs,100.0,100.0,100.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+frcnod,0.05,0.05,0.05,fixed,SPE_Nodule,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+frlff,0.2668375,0.25,0.5,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,v15: lower 0.352094→0.25; upper 0.459223→0.5,v15 boundary pressure fix 20260819
+frstmf,0.5515485,0.462343,0.75,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,v15: upper 0.668104→0.75,v15 boundary pressure fix 20260819
+ju-r0,2.20262,2.0,11.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+kcan,0.436364,0.2908399625,0.5615145875,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+kc_slope,0.012494600000000002,0.008,0.044000000000000004,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+lfmax,1.513905,1.5,2.5,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+lngsh,24.718249999999998,20.0,34.4,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v15: lower 29.2→20.0,v15 boundary pressure fix 20260819
+lnref,4.3618500000000004,3.4298239999999995,5.651261000000001,active,SPE_Nitrogen,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+nmobmx,0.29402249999999996,0.02,0.4,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+nrcvr,0.3209115,0.03,0.35,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+nslope,0.13893250000000001,0.105433,0.23758134999999994,active,SPE_Nitrogen,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+nstfac,0.875857,0.7500000000000001,1.0,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+nvsmob,0.5302305,0.15,0.6,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+parmax,37.3773,35.0,45.590442499999995,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+phtmax,58.69065,45.0,75.0,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,,20260817 formal confirmation: frozen PHTMAX 45-75
+pl-em,7.68171,7.564492,9.282407,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+pm06,0.694354,0.1,0.7,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+pm09,0.624574,0.3999999999999999,0.7,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+podur,17.698500000000003,12.0,58.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v15: lower 12.0→8.0,v15 boundary pressure fix 20260819
+pormin,0.00553982,0.001,0.01,active,SPE_RootWater,SPE,TMGRO048.SPE.base,,,,OAT: PORMIN=0.001 improved mean W-response NSE and 26SP dry NSE; values >=0.02 broke the dry/scale gate,Extracted from 0805_corrected PST
+porpt,0.2930335,0.08,0.35,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+ppsen,0.0,0.0,0.0,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,"v15: status→fixed; 91.5% ensemble at lower bound, eggplant photoperiod insensitive",v15 boundary pressure fix 20260819
+rhght,0.7182405000000001,0.7,0.9305225000000001,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+rtexf,0.13202350000000002,0.086788,0.197761,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+rtnh4,0.0330303,0.005,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+rtno3,0.0451144,0.008,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+rwdth,0.700055,0.7,1.25,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+rwumx,0.0430634,0.025452,0.053393,active,SPE_RootWater,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+sd-pm,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+sdpdv,197.2185,171.14347499999997,223.45072500000003,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+senday,0.0374825,0.013030710000000001,0.05874056999999999,active,SPE_Senescence,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+senrte,1.45428,0.22927999999999993,2.6792800000000003,active,SPE_Senescence,SPE,TMGRO048.SPE.base,,,,v15: lower 0.3→0.1; upper 3.0→5.0,v15 boundary pressure fix 20260819
+sfdur,49.944649999999996,20.0,50.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v15: upper 27.0→35.0,v15 boundary pressure fix 20260819
+sizlf,343.6435,323.992119,350.0,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+sizref,445.856,300.0,600.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,v15: lower 247.311107→247.311; upper 333.194242→380.0,v15 boundary pressure fix 20260819
+slaref,261.12,240.0,480.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+slavr,229.0385,200.0,320.0,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_01,1.3761,1.34,1.42,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_02,1.57701,1.51,1.59,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_03,1.519695,1.49,1.57,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_04,1.48807,1.46,1.54,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_05,1.49371,1.45,1.53,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_06,1.56078,1.51,1.59,active,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_07,1.6,1.6,1.6,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_08,1.56,1.56,1.56,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_01,0.3088515,0.298,0.322,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_02,0.313167,0.29812,0.32212,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_03,0.34165049999999997,0.318,0.342,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_04,0.31684100000000004,0.3087249999999999,0.332725,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_05,0.333534,0.323324,0.347324,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_06,0.283999,0.2779999999999999,0.302,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_07,0.272,0.272,0.272,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_08,0.271,0.271,0.271,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_01,0.143716,0.1326,0.1486,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_02,0.1509705,0.143979,0.159979,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_03,0.172422,0.163528,0.179528,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_04,0.1604375,0.149,0.165,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_05,0.1656265,0.158,0.174,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_06,0.1731875,0.1679999999999999,0.184,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_07,0.163,0.163,0.163,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_08,0.157,0.157,0.157,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slpf,0.9,0.88,0.93,active,SOIL_Fertility,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_01,0.4899915,0.475,0.505,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_02,0.42942650000000004,0.415,0.445,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_03,0.4369075,0.425,0.455,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_04,0.4689275,0.445,0.475,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_05,0.506845,0.495,0.525,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_06,0.3345335,0.3219079999999999,0.351908,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_07,0.32,0.32,0.32,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_08,0.323549,0.323549,0.323549,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+tb1,8.803615,8.550702125,8.975777375,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+tb2,9.859175,8.859175,10.859175,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+tb3,11.54535,11.147895,11.84742,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+thrsh,7.91216,7.5,8.5,active,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+tm1,42.48363306705,39.394612499999994,42.483942,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+tm2,44.657849999999996,38.5,45.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v15: lower 34.0→32.0,v15 boundary pressure fix 20260819
+tm3,43.83845,39.5,45.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+to11,23.65775,22.2052225,24.8129575,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v15: lower 24.75235→22.0; upper 26.61746→26.617,v15 boundary pressure fix 20260819
+to12,27.499625,23.75,27.5,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+to13,25.52295,23.54795,27.497950000000003,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+to21,32.58735,30.096655,34.475125,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v15: upper 33.0→35.0,v15 boundary pressure fix 20260819
+to22,27.7245,27.6,28.557000000000002,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v15: lower 28.022244→27.6; upper 29.513696→29.514,v15 boundary pressure fix 20260819
+to23,29.617350000000002,28.51627125,31.07343375,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+trifl,0.7960925,0.6,1.2999999999999998,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+v1-ju,0.0,0.0,0.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+vssink,4.2112,3.218203375,5.4338271250000005,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+wtfsd,0.5304875,0.2,0.6,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+wtpsd,0.004,0.004,0.004,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+xfint,0.120028,0.12,0.4,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+xfpht,61.02419999999999,54.43894999999999,67.60945,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v15: lower 43.658998→43.659; upper 53.587852→70.0,v15 boundary pressure fix 20260819
+xfrmax,0.185479,0.08476538750000001,0.28076566249999996,active,SPE_WaterStress,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+xfrt,0.9146535,0.73,0.99,active,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+xmage,13.881450000000001,12.429200000000002,15.3337,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v15: lower 13.871373→10.0; upper 15.808997→15.809,v15 boundary pressure fix 20260819
+nrexp,0.586497,0.1,1.0,active,species,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST; NREXP/NRMIN lower widened to 0.1
+nrmin,0.79993,0.1,0.8,active,species,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST; NREXP/NRMIN lower widened to 0.1
+swbar_rec,0.293769,0.25,0.75,active,SPE_WaterResponse,SPE,TMGRO048.SPE.base,,,both,OAT gate-qualified: mean W-response NSE -10.685 to -7.918 at 0.72,Anchor reconstructs XSWBAR ordered nodes
+yswbar_mid,0.585549,0.43554899999999996,0.735549,active,SPE_WaterResponse,SPE,TMGRO048.SPE.base,,,both,OAT gate-qualified: mean W-response NSE -10.685 to -8.399 at 0.55; 0.15 failed gate,Anchor reconstructs YSWBAR bounded nodes
+pgeff,0.048639749999999995,0.03,0.09,active,species,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,,

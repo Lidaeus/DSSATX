@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_s5_soil_fertility_expanded_bounds_20260827"
+crop: "eggplant"
+created_at: "2026-08-27T10:00:55Z"
+approved_at: "2026-08-27T10:00:55Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_s5_soil_fertility_expanded_proposal_20260827.csv"
+derived_from_sha256: "3ba50e970397e71f52be75b76b94691554b70fb41a5200af52648bab5a4ac13a"
+bounds_sha256: "3ba50e970397e71f52be75b76b94691554b70fb41a5200af52648bab5a4ac13a"
+parameter_count: 148
+automatic_repairs: 0
+notes: "E02 Stage S5 Soil Fertility & Mineralization Expanded Bounds (63 active parameters including soil_slpf [0.70, 1.40], soil_slnf [1.00, 6.00], xfpht [10.0, 65.0], xmage [10.0, 55.0], em-v1 [20.0, 48.0], kcan [0.30, 0.85])"

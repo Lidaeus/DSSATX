@@ -1,0 +1,12 @@
+bounds_id: eggplant_full_gen_slu1_slll4cm_sasc0922_0945_20260919
+crop: eggplant
+created_at: '2026-09-19T07:05:00Z'
+csv_file: eggplant_full_gen_slu1_slll4cm_sasc0922_0945_20260919.csv
+csv_sha256: 2e5314a962c959a3d82fdc8cbca4d47c5379494518436aa55a1640cf2db54d80
+description: Full genetic suite (70 params) + SOIL_SLDR [0.15, 0.35] + SOIL_SLLL_01
+  [0.12, 0.24] + SOIL_SLLL_02 [0.12, 0.24] + SASC_RATIO [0.922, 0.945] with SLU1=1.0
+  and EFIR=0.95.
+total_params: 165
+active_params: 74
+fixed_params: 89
+parent_bounds_id: eggplant_full_gen_p22_sasc0945_sldr015_035_20260919

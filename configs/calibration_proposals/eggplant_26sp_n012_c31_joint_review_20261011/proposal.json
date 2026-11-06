@@ -1,0 +1,174 @@
+{
+  "schema": "non_executable_c31_joint_objective_review_v1",
+  "status": "awaiting_user_review",
+  "approved": false,
+  "executable": false,
+  "design_id": "eggplant_26sp_n012_c31_joint_review_20261011",
+  "c31_reference_run": "full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927",
+  "current_run": "eggplant_26sp_n012_formal_20261011_r3",
+  "datasets": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_refreshed_20261010",
+      "bundle_manifest_sha256": "c2b8fad69879eaa40afe6a994e5a05fd4d75d8c1ebc3f5293eb3e83bf126b602",
+      "roles": {
+        "validation": [
+          2,
+          3,
+          4,
+          5,
+          10,
+          11,
+          12,
+          13
+        ]
+      }
+    },
+    {
+      "season_id": "25FA",
+      "experiment_code": "XXQL2502",
+      "bundle_path": "data/user/experiments/xxql2502_refreshed_20261010",
+      "bundle_manifest_sha256": "ad3e9d6364687952d07a791379b609c499375a85610c3c9ff578af5d0f663d92",
+      "roles": {
+        "diagnostic": [
+          2,
+          5,
+          8,
+          11
+        ],
+        "validation": [
+          1,
+          3,
+          4,
+          6,
+          7,
+          9,
+          10,
+          12
+        ]
+      }
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_refreshed_20261010",
+      "bundle_manifest_sha256": "3eb23088d4ea456839522be4db423fd7897e837b8dbba756979503aca1646ff1",
+      "roles": {
+        "calibration": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "holdout": [
+          1,
+          2,
+          3
+        ]
+      }
+    }
+  ],
+  "proposed_phi_budget_total": 100,
+  "target_count": 492,
+  "objective_policy": "proposed_objective_policy.csv",
+  "target_catalog": "proposed_calibration_targets.csv",
+  "joint_execution": {
+    "staged_calibration": false,
+    "noptmax": 6,
+    "ies_num_reals": 200,
+    "workers": 6,
+    "initial_method": "Sobol within unchanged frozen bounds; physical/output feasibility screening only",
+    "seed": 20261011,
+    "no_observation_noise": true,
+    "relative_phi_screening": false,
+    "active_parameters": [
+      "CMOBMX",
+      "DSWBAR",
+      "EM-FL",
+      "FL-SD",
+      "FL-SH",
+      "FRLFF",
+      "FRSTMF",
+      "KCAN",
+      "LFMAX",
+      "LNGSH",
+      "LNREF",
+      "PODUR",
+      "RHGHT",
+      "RTNH4",
+      "RTNO3",
+      "RWDTH",
+      "RWUMX",
+      "SENRTE",
+      "SFDUR",
+      "SIZLF",
+      "SLAVR",
+      "TB1",
+      "TB2",
+      "TM1",
+      "TM2",
+      "TO11",
+      "TO12",
+      "VSSINK",
+      "XFRT",
+      "XMAGE",
+      "SWBAR_REC",
+      "YSWBAR_MID",
+      "PGEFF",
+      "PROLFF",
+      "PROSTF",
+      "PROLFI",
+      "PROSTI",
+      "FNPGN1",
+      "FNPGN2",
+      "PROSHI",
+      "SENPOR_LATE",
+      "PROSHF"
+    ],
+    "bounds_id": "eggplant_26sp_n012_formal_20261011",
+    "parameter_start": "frozen init, no r3 staged or C31 posterior warm start",
+    "no_automatic_budget_bounds_or_parameter_activation_changes": true,
+    "failed_preflight_action": "report concrete failure and proposed change before execution"
+  },
+  "pending_implementation": [
+    "joint-only entry point",
+    "exact-date cumulative harvest and anthesis operators",
+    "metadata-driven N/W contrasts and soft sign operator",
+    "all-target forward readback and PEST Phi identity"
+  ],
+  "statistical_contract": "fixed-budget correlated composite loss; not independent chi-square likelihood or posterior sample",
+  "c31_iteration6_audit": {
+    "n_total_records": 142,
+    "n_nonbase_records": 141,
+    "min_member": "19",
+    "min_phi": 643.8887448849487,
+    "mean_phi": 682.8509082419355,
+    "missing_maturity_simulation": "all final MDAPS are -99; constant Phi 449.0176",
+    "c31_candidate_is_not_this_min_member": true
+  },
+  "source_hashes": {
+    "workspace/runs/full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927/full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927.pst": "b567938ba9277e94b0967d6a01e590c002c095d87e63a93d70e1f0818c20d406",
+    "workspace/runs/full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927/full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927.weights.audit.csv": "c90530e5435fb155333b082e3c95b1271565acf5d491588c7367d08490b99fbb",
+    "workspace/runs/full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927/full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927.adjusted.obs_data.csv": "8920ad787f0377b15a77aaf9b91a11c4f8f898904e46545d224fdddf53350d01",
+    "workspace/runs/full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927/full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927.6.obs.csv": "5964b743f72390f82ab8197735ebb26c3747fe1d5352f61f02f3c98db554200f",
+    "workspace/runs/full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927/full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927.phi.actual.csv": "4c017467d1469d2cde5a30090be088b78a8521a566aeac2caf10563d858e7253",
+    "workspace/runs/full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927/run_manifest.yaml": "bb798dbbc3535291095cc1372f17b4f047ca071885227ee0c9f3d4aece948c4a",
+    "configs/runs/eggplant_26sp_n012_formal_20261011_r3/design.json": "0ba8c99562ed9fb7e03b62d697c9b124a189e417f62e58732b830b7d43883b17",
+    "configs/runs/eggplant_26sp_n012_formal_20261011_r3/review_objective_policy.csv": "de95e36b8a3e1839683d5de423e33a55c0c35a237e65f9684a5ae2b429a08244",
+    "configs/runs/eggplant_26sp_n012_formal_20261011_r3/calibration_observations.csv": "c4bd2c5e5ab2f25a253d68d689de6353377f5367475a4d9d7f462f64d4ad26f8",
+    "workspace/runs/eggplant_26sp_n012_formal_20261011_r3/result_review/recomputed_metrics.csv": "841e17107f77c0c6b66a7bf44845aa1a090d1c35aca656233f2107c49fe91d35",
+    "configs/calibration_proposals/eggplant_26sp_n012_review_20261011/observation_catalog.csv": "e923837c9323a06d628dac5ad58674f39bc7a3c36744463adaab16f59b86f1b0",
+    "data/user/experiments/xxql2601_refreshed_20261010/treatment_metadata.csv": "b24ba4e8fbf80a643652b6a89202e9850cd60f1dfdcd5000d9e259a4425b5e52",
+    "data/user/experiments/xxql2601_refreshed_20261010/XXQL2601.TMA": "70a2ab0866982ad192941481cf99e9e30306df2169d30267adfef14bfe93356f",
+    "workspace/candidates/candidate_c31_scheme1_dual_spring_precision/candidate_manifest.json": "311fd6fd11ca58aa0cc6c142e44318399ca71a00846dd7fe660f524a02383a2c",
+    "data/user/experiments/xxql2501_refreshed_20261010/input_manifest.json": "c2b8fad69879eaa40afe6a994e5a05fd4d75d8c1ebc3f5293eb3e83bf126b602",
+    "data/user/experiments/xxql2502_refreshed_20261010/input_manifest.json": "ad3e9d6364687952d07a791379b609c499375a85610c3c9ff578af5d0f663d92",
+    "data/user/experiments/xxql2601_refreshed_20261010/input_manifest.json": "3eb23088d4ea456839522be4db423fd7897e837b8dbba756979503aca1646ff1"
+  }
+}

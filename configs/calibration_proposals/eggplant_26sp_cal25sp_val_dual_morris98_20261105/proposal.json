@@ -1,0 +1,181 @@
+{
+  "approved": false,
+  "execution_enabled": false,
+  "bundles": {
+    "25SP": {
+      "bundle_id": "xxql2501_final_20261105",
+      "manifest_sha256": "96d872d28e63e726dd4e9b89dd4d88ad85f1bd17d9bcec6edf1a5279e35365c7",
+      "path": "data/user/experiments/xxql2501_final_20261105",
+      "role": "validation",
+      "treatments": [
+        2,
+        3,
+        4,
+        5,
+        10,
+        11,
+        12,
+        13
+      ]
+    },
+    "26SP": {
+      "bundle_id": "xxql2601_final_20261105",
+      "manifest_sha256": "0988c35a4c898da5200a8518a9a5975507e6a9fa1e7fb47681b34db00a1baa37",
+      "path": "data/user/experiments/xxql2601_final_20261105",
+      "role": "calibration",
+      "treatments": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    }
+  },
+  "core_groups": [
+    "phenology",
+    "canopy",
+    "biomass",
+    "yield_harvest"
+  ],
+  "core_cutoff": 0.98,
+  "core_parameters": 53,
+  "core_cumulative": 0.9802817912022668,
+  "supplement_parameters": [
+    "RWUMX",
+    "PROLFF",
+    "PORPT",
+    "ALPHS",
+    "PROSTF"
+  ],
+  "active_parameters": [
+    "PGEFF",
+    "EM-FL",
+    "TO12",
+    "TO11",
+    "TRIFL",
+    "SLAVR",
+    "FL-SD",
+    "TB2",
+    "TM2",
+    "SLAREF",
+    "TO22",
+    "VSSINK",
+    "PODUR",
+    "SFDUR",
+    "TB1",
+    "EM-V1",
+    "FINREF",
+    "LFMAX",
+    "RNO3C",
+    "LNGSH",
+    "XMAGE",
+    "XSWBAR(3)",
+    "XFRT",
+    "YSWBAR(3)",
+    "PM06",
+    "XFINT",
+    "PROLFI",
+    "XFPHT",
+    "TO21",
+    "TM1",
+    "SIZREF",
+    "PROSTI",
+    "RWDTH",
+    "SENPOR(4)",
+    "FL-SH",
+    "NMOBMX",
+    "DSWBAR",
+    "LNREF",
+    "SIZLF",
+    "THRSH",
+    "FNPGN(2)",
+    "NSTFAC",
+    "RHGHT",
+    "FNPGN(1)",
+    "CMOBMX",
+    "FRLFF",
+    "ALPHL",
+    "PROSHI",
+    "RTNO3",
+    "FRLFMX",
+    "SENRTE",
+    "PROLFG",
+    "ATOP",
+    "RWUMX",
+    "PORPT",
+    "ALPHS",
+    "PROSTF",
+    "PROLFF"
+  ],
+  "proposed_ies_members": 100,
+  "proposed_ies_updates": 5,
+  "proposed_seed": 20261105,
+  "proposed_workers": 6,
+  "proposed_fixed_environment": {
+    "SLPF_25SP": 0.9,
+    "SLPF_26SP": 0.89,
+    "SASC": -99,
+    "ICNS_25SP": 1,
+    "ICNS_26SP": 1
+  },
+  "proposed_other_fixed": {
+    "FL-LF": 400,
+    "SD-PM": 400,
+    "CSDL": 12.33,
+    "PPSEN": 0
+  },
+  "n_positive_weight_targets": 629,
+  "coverage_by_season_process": {
+    "phenology": {
+      "25SP": 0.9999999999999997,
+      "26SP": 0.9999999999999998
+    },
+    "canopy": {
+      "25SP": 0.9808808569486263,
+      "26SP": 0.9866327694956156
+    },
+    "biomass": {
+      "25SP": 0.9721573548689063,
+      "26SP": 0.9780471441175941
+    },
+    "yield_harvest": {
+      "25SP": 0.9751616562905526,
+      "26SP": 0.9778708576133576
+    },
+    "water_response": {
+      "25SP": 0.9340816129315871,
+      "26SP": 0.9471120943806607
+    },
+    "nitrogen_response": {
+      "25SP": 0.9395028107934651,
+      "26SP": 0.9311537456325581
+    },
+    "water_nitrogen_interaction": {
+      "25SP": 0.8796595766377237,
+      "26SP": 0.8928806887092833
+    }
+  },
+  "source_sha256": {
+    "configs/experiments/current_bundles.json": "ce47f58584858c36a8fb6ff8bde81d69989edca407eaffcf439c69543e77ea72",
+    "workspace/runs/morris_dual_spring126_r40_20261105_paired_feasible/approved_bounds.csv": "34e6c87c51c43c2f325314a9a06a4a53ffa8faa0e496bcba51349879cebb68f2",
+    "workspace/runs/morris_dual_spring126_r40_20261105_paired_feasible/morris_X_serialized.csv": "47e2be5dc9d936feefb2bdd48879ee42e155bb4e24e879b332b04555f1fe1aea",
+    "workspace/runs/morris_dual_spring126_r40_20261105_paired_feasible/results/result_manifest.json": "3d8202856ea46af82a43d6cb94beba2a82da2a8aa265e48417947cccac0bfdc5",
+    "workspace/runs/morris_dual_spring126_r40_20261105_paired_feasible/results/morris_process_scores.csv": "d94ebaeded28c9e2e4196ee380c1477d07ed0ab8382e5ddd5b340a25eb8971c6",
+    "data/user/experiments/xxql2601_final_20261105/soil_water_layer_mapping.csv": "e97391e6e315f3cfd65339507a6381284f1ffed0aaf5b39f6246ea2d87a3a8df",
+    "data/parameter_registry/bounds_frozen/eggplant/eggplant_full_gen_final_calib_scheme1_tb1_200x6_20260927.csv": "22f1c5efb7750b77b7d18716c08a33afb2d0970ca53343cec5a7231bd653e3c4",
+    "data/parameter_registry/bounds_frozen/eggplant/eggplant_26sp_n012_c31_joint67_20261011.csv": "94eeae4095be9c7dcd67fb1072368e08f4d26eca7356260444b708c946120054",
+    "data/parameter_registry/bounds_frozen/eggplant/eggplant_26sp_cal25sp_val_sa98_joint40_100x5_20261031.csv": "3865808b3d345ef2f28759c0f3c23137b800c1c438abda6bd69bbf67887a71c6"
+  },
+  "proposal_sha256": {
+    "parameter_selection_and_bounds.csv": "a64d0a2f7356993ad264cdae01aeb6d69ed6b7a4e45880c6310cb901cc81b86e",
+    "proposed_objective_policy.csv": "1fd01d6f2c4e844b4c41066bfe94e691c6cac3fd8afa6f05d0033cd0b5f1b765"
+  }
+}

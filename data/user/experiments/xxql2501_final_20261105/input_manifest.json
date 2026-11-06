@@ -1,0 +1,219 @@
+{
+  "bundle_id": "xxql2501_final_20261105",
+  "created": "2026-11-05",
+  "season": "25SP",
+  "immutable": true,
+  "intended_use": "calibration_and_validation_inputs;not_calibrated_results",
+  "source_provenance_sha256": "09436c9de5131e443ade4471c0f9710bbefc03923f1cb2dccc7b42491b18b298",
+  "generator_sha256": "80b7751e820f3523d9bc779d975b423f7bb3ad02a4c7db578ceabc82f6089aa5",
+  "decision_record": {
+    "date": "2026-10-27",
+    "shared_initial_mineral_N": "all_seasons_all_treatments;mg_N_kg_dry_soil;before_basal",
+    "weather_source": "XXTW2403.WTH_all_seasons",
+    "TAV_AMP": "existing",
+    "spring_anthesis": "existing_TMA_ADAT;25SP_2025-04-22;26SP_2026-04-20",
+    "maturity": "MDAT_missing;former_PODD_proxy_not_a_confirmed_maturity_observation",
+    "autumn_planting": "current_TMX_2025-08-13",
+    "autumn_terminal": "current_TMX_2026-01-06",
+    "density_plants_ha": 27000,
+    "dry_mass_units": "g_plant_to_kg_ha_times_27",
+    "autumn_sample_pairing": "mean_concentration_times_mean_mass",
+    "autumn_soil_sheet_20261002_real_date": "2026-10-02;preserved_out_of_season;excluded_from_phi",
+    "autumn_dry_fraction": 0.05,
+    "initial_water_temporal_proxy": "25SP_3days_and_26SP_2days_carry_back_to_prebasal_start",
+    "initial_water_hidden_scaling": "none;26SP_TN10_TN12_no_0.82_multiplier",
+    "unpaired_autumn_uncertainty": "sample_SD_descriptive;independent_plot_n_rep_unknown_set_0",
+    "observation_missing_policy": "no_imputation;no_historical_rep_removal;no_legacy_observation_fallback",
+    "calibration_status": "engineering_validated_inputs;not_parameter_calibration_or_science_validated_results",
+    "refresh_scope": "25SP_and_26SP_latest_source_workbooks",
+    "source_folder": "D:\\三季节数据汇总\\2025春",
+    "quality_workbook": "2025春品质集优先采用品质集中的果实含水率.xlsx",
+    "manual_marker_identity": "relocated_by_treatment_replicate_date_and_field;values_verified",
+    "NPK_growth_alignment": "exact_current_source_dates;legacy_June03_to_June02_proxy_not_used",
+    "historical_run_policy": "existing_bundles_and_calibration_results_remain_frozen",
+    "final_soil_revision": {
+      "supersedes_bundle": "xxql2501_refreshed_20261027",
+      "supersedes_manifest_sha256": "7567423a28300d57000532753e7a19fffadbe9e0d8624b1d3c286d69c95b0d3a",
+      "date": "2026-11-05",
+      "source": {
+        "origin": "D:\\三季节数据汇总\\2025春\\2025春初始土壤基础养分.xlsx",
+        "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\final_soil_cn_20261105\\source_snapshot\\2025春初始土壤基础养分.xlsx",
+        "sheet": "末-基础养分",
+        "sha256": "4c0da978b7a444571af57a60f1df9bf44a1a42483348f3db250b7cb43c8a8a6c"
+      },
+      "fields": [
+        "organic_c_pct"
+      ],
+      "method": "three replicates per treatment and source layer; dry-soil-mass overlap; SOL equal-treatment mean",
+      "deep_prior": "inherit SOC=0.10 percent and TN=0.10 g/kg only below sampled interval"
+    }
+  },
+  "engineering_checks": "observation_input_audit_and_final_exact_bundle_DSSAT_smoke_passed",
+  "files": [
+    {
+      "name": "calibration_reader_acceptance.json",
+      "sha256": "4d493258bb622949487abbd38caa7d0be09286fa2dde86eb1b243cbfac49d621",
+      "size_bytes": 450
+    },
+    {
+      "name": "decision_record.json",
+      "sha256": "934a6321467365eb1e74c1b33de1ec730e00951d070b1e81283bb48c398348a7",
+      "size_bytes": 2551
+    },
+    {
+      "name": "dssat_smoke_report.json",
+      "sha256": "d33d59c58509d893bbd6f6bd766dfce2db273d922f1a19ee417e36e7cf91e01e",
+      "size_bytes": 23894
+    },
+    {
+      "name": "DSSBatch.v48",
+      "sha256": "7af3c66abaa1ffb095fa972e46dd831a963d2d146e3736e55a446416c9f20064",
+      "size_bytes": 1225
+    },
+    {
+      "name": "fertilizer_event_audit.csv",
+      "sha256": "3696a183b368351a7081b0d834835c3a36753d0b2960d8f47a3ebff3b4377cf4",
+      "size_bytes": 5810
+    },
+    {
+      "name": "FileA_values.csv",
+      "sha256": "f7a99fe91514b2547d6393c519bde3a266d127f366950c0f78d1227fc53a938c",
+      "size_bytes": 825
+    },
+    {
+      "name": "FileT_values.csv",
+      "sha256": "0584c21d646019fc5aea601583edd710ab59835955e076c6d942df5c5574d1ad",
+      "size_bytes": 12056
+    },
+    {
+      "name": "fruit_quality_match_audit.csv",
+      "sha256": "0477cc3229c8e7c2531a3b83f10dad78f4a006c1eee2ae2ba2a7f181017c4b7c",
+      "size_bytes": 16346
+    },
+    {
+      "name": "growth_replicates.csv",
+      "sha256": "54afb6f04c794ae765c71a08d553048a417bfa48f433d102a7ee435e961c3290",
+      "size_bytes": 10749
+    },
+    {
+      "name": "harvest_increment_reconciliation.csv",
+      "sha256": "a72dfb7ab8ea473370cabf3dcb28b09ccb6313717ac7d906b27c65dc9f6b4865",
+      "size_bytes": 2738
+    },
+    {
+      "name": "harvest_replicates.csv",
+      "sha256": "93148f99c8adc533e224e1838e369c6c07628b8df363f56ee71270a4078104c8",
+      "size_bytes": 38204
+    },
+    {
+      "name": "harvest_schedule_audit.csv",
+      "sha256": "54abf95221abca07f6623790ee49cbd6488e103f0de1c8ed8f6babdd6bf2bb5c",
+      "size_bytes": 838
+    },
+    {
+      "name": "input_quality_audit.json",
+      "sha256": "62c7e84fb17a80f0558e6295c221bf9fb6e2768a52020793f1f41a6b19ec5da7",
+      "size_bytes": 19148
+    },
+    {
+      "name": "irrigation_event_audit.csv",
+      "sha256": "b293a0cfc64e223916dc63139b1e7e2fb9f2d48232bf437b8b26863761e2fc2e",
+      "size_bytes": 4873
+    },
+    {
+      "name": "manual_value_markers.csv",
+      "sha256": "65ca8d09b62ca63a78bc2a52eb4ef84dee911010b639be30fafe54ea977305d6",
+      "size_bytes": 3833
+    },
+    {
+      "name": "observation_uncertainty.csv",
+      "sha256": "a99ee40dc751566aa90c3f79a2c03cf6afec56e93446492bc00b1aa0f43f6469",
+      "size_bytes": 93657
+    },
+    {
+      "name": "observation_value_changes.csv",
+      "sha256": "ed66cca27744ba4443d32e32767059a523c977a68fbc978cd0c23a70ae5db02e",
+      "size_bytes": 4756
+    },
+    {
+      "name": "plant_npk_source_values.csv",
+      "sha256": "97ac39d964a23dd5783b4434a7284314929292f0682359fe9f301bacae48c37a",
+      "size_bytes": 4872
+    },
+    {
+      "name": "SOIL.SOL",
+      "sha256": "cf26a89e13a1d70b554e26969a9f074f39440b2901e822e5e1915d8bea357d4f",
+      "size_bytes": 1521
+    },
+    {
+      "name": "soil_depth_mapping_audit.csv",
+      "sha256": "076d9106db5b38edf26c9398859ed08b641c1cb1a5f517e3fa8f27ba7a25b9b2",
+      "size_bytes": 99594
+    },
+    {
+      "name": "soil_water_layer_mapping.csv",
+      "sha256": "d0611ba0f29523dc43ce80e425c11a73f6b66c6e5a1caf9f17315491b0d02b08",
+      "size_bytes": 601
+    },
+    {
+      "name": "soil_water_observations.csv",
+      "sha256": "9b3a136421bdf2fd19318a6703480df9c1d55d4020e9546c198c165a97a40c91",
+      "size_bytes": 36446
+    },
+    {
+      "name": "soil_water_samples.csv",
+      "sha256": "5608b8e25646db210e2afecfaa797b89ffc896dadeb3f9b695f634d53dbc8f18",
+      "size_bytes": 81291
+    },
+    {
+      "name": "source_provenance.json",
+      "sha256": "09436c9de5131e443ade4471c0f9710bbefc03923f1cb2dccc7b42491b18b298",
+      "size_bytes": 6639
+    },
+    {
+      "name": "standing_npk_calculation_audit.csv",
+      "sha256": "c0ba70d910e75efca8124babdb2cf3683f0db337ebb1eae9d12820d696154785",
+      "size_bytes": 9661
+    },
+    {
+      "name": "TMGRO048.CUL",
+      "sha256": "92a373800d68b46d07601777e1579fff7b976f74190814bc6e0494eda7c4455b",
+      "size_bytes": 2923
+    },
+    {
+      "name": "TMGRO048.ECO",
+      "sha256": "9f2d43d335a4455679d701116d861a1915c1010a79d002e60ca4db74fe3d73ff",
+      "size_bytes": 2820
+    },
+    {
+      "name": "TMGRO048.SPE",
+      "sha256": "59fb51f8d4314615973038843994160cf612443c789ba938092ba0af0bb1d0f7",
+      "size_bytes": 9914
+    },
+    {
+      "name": "treatment_metadata.csv",
+      "sha256": "f3e9108f1994177c24c2696eb8ff5b054e72d588a8f939ed3c10031fcee006c1",
+      "size_bytes": 178
+    },
+    {
+      "name": "XXQL2501.TMA",
+      "sha256": "7a35cb34fd3072ee17515b8ae2beec705961e7367b420e056c805c0c94784aa5",
+      "size_bytes": 996
+    },
+    {
+      "name": "XXQL2501.TMT",
+      "sha256": "f6522402b6a5b411cbc4dec530640e0b1022a85657f0e5c7de2c7a14c11d4a53",
+      "size_bytes": 12056
+    },
+    {
+      "name": "XXQL2501.TMX",
+      "sha256": "ae045fdba5d61cd702ad10986438818cc2c00dcd5e859ef4480ad33d453e909d",
+      "size_bytes": 19548
+    },
+    {
+      "name": "XXTW2403.WTH",
+      "sha256": "b9f520285c335f47ec5105a6f7b363089462a7a1736334b7918ff3ea14820920",
+      "size_bytes": 5172
+    }
+  ]
+}

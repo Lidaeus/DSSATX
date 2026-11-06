@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "design_id": "eggplant_e02_single55_25sp_actualn_nochtd_rhghtrelax_v1_20260731",
+  "diagnostic_single_season": true,
+  "cultivar_identity": "same_eggplant_cultivar",
+  "shared_parameter_scope": "single-season 55-parameter conditional calibration using 25SP actual FileX N; CHTD retained for diagnostics only; no seasonal offsets",
+  "observation_policy": "configs/runs/e02_n_response_snam_lnam_chpdtlog_noadap_nochtd_v1.csv",
+  "group_policy": "configs/runs/t10_n_response_group_policy_harvestdry250_v2.csv",
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data\\user\\experiments\\xxql2501_actual_trial_calibration_v2_20260726",
+      "bundle_manifest_sha256": "647a95b23062019f1fb76b6f88085e32b7dc3f5490c9d6faf0f20881ca2e3d95",
+      "role": "calibration",
+      "treatments": [2, 3, 4, 5, 9, 10, 11, 12, 13, 14]
+    }
+  ],
+  "t10_scheme": {
+    "purpose": "25SP-only rerun from the three-season posterior15phys no-CHTD configuration with a lower RHGHT floor",
+    "harvest_contract": "raw cumulative dry CHPDT plus ln(y+1) incremental dry HPODW",
+    "active_crop_targets": [
+      "PDAP",
+      "LAIX",
+      "LAID",
+      "LWAD",
+      "SWAD",
+      "SNAM",
+      "LNAM",
+      "CHPDT",
+      "HPODW"
+    ],
+    "active_process_targets": [
+      "SOIL_WATER"
+    ],
+    "shared_active_parameters": 55,
+    "seasonal_offset_parameters": 0,
+    "total_active_parameters": 55,
+    "fixed_project_invariants": {
+      "FL-VS": 100.0,
+      "ADAP": "diagnostic_only",
+      "CHTD": "diagnostic_only"
+    },
+    "management_authority": "ADAP diagnostic-only; CHTD diagnostic-only; PAGE=25 d and SPRL=-99; 25SP actual FileX initial soil N retained",
+    "virtual_terminal_harvest": true,
+    "bounded_nearest_read": "d+/-1 day window"
+  }
+}

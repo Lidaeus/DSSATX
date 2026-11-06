@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_v15_boundary_pressure_fix_20260819"
+crop: "eggplant"
+created_at: "2026-08-19T07:10:58Z"
+approved_at: "2026-08-19T07:10:58Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_v15_boundary_pressure_fix_20260819.csv"
+derived_from_sha256: "1352ca0a262a165380a940cfa7bdf529d6a85c1aad32bb9e2be19a1ddc71c84a"
+bounds_sha256: "1352ca0a262a165380a940cfa7bdf529d6a85c1aad32bb9e2be19a1ddc71c84a"
+parameter_count: 110
+automatic_repairs: 0
+notes: "v15 boundary pressure fix: 15 param bound adjustments + PPSEN fixed; derived from best42 analysis of 200x6 formal run"

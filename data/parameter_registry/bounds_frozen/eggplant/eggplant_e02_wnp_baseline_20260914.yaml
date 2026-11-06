@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_wnp_baseline_20260914"
+crop: "eggplant"
+created_at: "2026-09-14T03:55:51Z"
+approved_at: "2026-09-14T03:55:51Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_wnp_proposal_20260914.csv"
+derived_from_sha256: "c2b957fd29307b108d10a241e4fe2b22abd945041acf35a6f13ec9959a192275"
+bounds_sha256: "c2b957fd29307b108d10a241e4fe2b22abd945041acf35a6f13ec9959a192275"
+parameter_count: 154
+automatic_repairs: 0
+notes: "Unified W-N-P baseline incorporating 26 species phosphorus parameters with +-10% floating space around peanut anchor"

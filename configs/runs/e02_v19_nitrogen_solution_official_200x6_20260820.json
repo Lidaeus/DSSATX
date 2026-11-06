@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "design_id": "e02_v19_nitrogen_solution_official_200x6_20260820",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "v19 formal nitrogen solution + 10-layer soil + Phi budget (200 proc + 300 term)",
+  "bounds_id": "eggplant_e02_v19_nitrogen_solution_20260820",
+  "observation_policy": "configs/runs/e02_v2_rawdiff_terminal_nresp01_soil02_policy_20260813.csv",
+  "group_policy": "configs/runs/t10_rawdiff_terminal_nresp01_soil02_group_policy_20260813.csv",
+  "initial_condition_policy": "Fixed corrected FileX with 5cm topdressing depth and 10-layer soil inputs",
+  "nitrogen_response_objective": {
+    "enabled": false
+  },
+  "water_response_objective": {
+    "enabled": false
+  },
+  "harvest_dry_objective": {
+    "enabled": true,
+    "mode": "increment_plus_terminal",
+    "variable": "CHPDT",
+    "process_lambda_per_season": 200.0,
+    "terminal_lambda_per_season": 300.0
+  },
+  "process_state_objective": {
+    "enabled": true,
+    "mode": "signed_difference_plus_terminal",
+    "variables": [
+      "LAID",
+      "LWAD",
+      "SWAD"
+    ]
+  },
+  "seasonal_parameterization": null,
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2501_repfilter_measuredmoisture_v3_measuredn_20260820",
+      "role": "calibration",
+      "treatments": [
+        2,
+        5,
+        10,
+        13
+      ]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2601_repfilter_measuredmoisture_v3_measuredn_20260820",
+      "role": "calibration",
+      "treatments": [
+        2,
+        11,
+        3,
+        12
+      ]
+    }
+  ],
+  "formal_contract": {
+    "phi_budget": {
+      "dry_proc": 200.0,
+      "dry_term": 300.0,
+      "laid": 150.0,
+      "lwad": 150.0,
+      "swad": 150.0,
+      "soil_water": 50.0
+    },
+    "n_reals": 200,
+    "noptmax": 6
+  }
+}

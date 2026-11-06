@@ -1,0 +1,147 @@
+{
+  "design_table_id": "eggplant_p2_tooling_design_20260718",
+  "schema_version": 1,
+  "approved_at": "2026-07-18",
+  "approved_by": "tooling development configuration",
+  "approval_scope": "tooling_development",
+  "bounds_id": "eggplant_p1_xxql2501_v4_sobol20_20260717",
+  "input_bundle": "xxql2501_20260716",
+  "validation_split_id": "xxql2501_v4_split_20260717",
+  "observation_policy_id": "assumption_based_sigma_v2",
+  "weight_profile_id": "assumption_based_sigma_v2",
+  "random_seed": 20260717,
+  "stages": {
+    "S1": {
+      "reals": 20,
+      "noptmax": 2,
+      "active_params": [
+        "EM-FL",
+        "TRIFL"
+      ],
+      "observation_outputs": {
+        "PestEval.OUT": [
+          "ADAP"
+        ]
+      },
+      "representative_outputs": {
+        "PestTmtGrow.OUT": [
+          "LAID"
+        ]
+      },
+      "expected_runs_factor": "reals × (params+2) per iteration"
+    },
+    "S2": {
+      "reals": 30,
+      "noptmax": 2,
+      "active_params": [
+        "NSTFAC",
+        "RTNO3",
+        "NMOBMX",
+        "NVSMOB"
+      ],
+      "fixed_params": [
+        "EM-FL",
+        "TRIFL"
+      ],
+      "observation_outputs": {
+        "PestJoint.OUT": [
+          "LAIX",
+          "CNAM"
+        ],
+        "PestTmtGrow.OUT": [
+          "LAID",
+          "LWAD",
+          "SWAD"
+        ]
+      },
+      "representative_outputs": {
+        "PestHarvest.OUT": [
+          "PWAI",
+          "PWAD"
+        ]
+      }
+    },
+    "S3": {
+      "reals": 30,
+      "noptmax": 2,
+      "active_params": [
+        "XFRT",
+        "XFINT"
+      ],
+      "fixed_params": [
+        "EM-FL",
+        "TRIFL",
+        "NSTFAC",
+        "RTNO3",
+        "NMOBMX",
+        "NVSMOB"
+      ],
+      "observation_outputs": {
+        "PestHarvest.OUT": [
+          "PWAI"
+        ]
+      },
+      "representative_outputs": {
+        "PestHarvest.OUT": [
+          "PWAD"
+        ],
+        "PestJoint.OUT": [
+          "HWAM"
+        ]
+      }
+    },
+    "S4": {
+      "reals": 40,
+      "noptmax": 2,
+      "active_params": [
+        "EM-FL",
+        "TRIFL",
+        "NSTFAC",
+        "RTNO3",
+        "NMOBMX",
+        "NVSMOB"
+      ],
+      "fixed_params": [
+        "XFRT",
+        "XFINT"
+      ],
+      "observation_outputs": {
+        "PestEval.OUT": [
+          "ADAP"
+        ],
+        "PestJoint.OUT": [
+          "LAIX",
+          "CNAM"
+        ],
+        "PestTmtGrow.OUT": [
+          "LAID",
+          "LWAD",
+          "SWAD"
+        ]
+      },
+      "representative_outputs": {
+        "PestHarvest.OUT": [
+          "PWAI",
+          "PWAD"
+        ],
+        "PestJoint.OUT": [
+          "HWAM"
+        ]
+      },
+      "selection_evidence": "calibration_only",
+      "validation_visibility": "forbidden_until_frozen"
+    }
+  },
+  "stopping_rules": {
+    "primary": "noptmax reached",
+    "secondary": "phiredstp convergence (relative Phi reduction < 1% over 3 iterations)",
+    "retention_floor": "≥90% realization retention; if below, diagnose before adding reals"
+  },
+  "robustness_contrast": {
+    "profile": "assumption_based_sigma_v2",
+    "contrast": "PWAIM group_multiplier 1.25 (incremental harvest up-weighting)",
+    "purpose": "test whether key parameter directions and validation conclusions are stable to harvest-weight perturbation"
+  },
+  "pwtadj1": "off (deferred per plan)",
+  "log_transform": "none this round (no new log variables; only if observation policy explicitly enables)"
+}

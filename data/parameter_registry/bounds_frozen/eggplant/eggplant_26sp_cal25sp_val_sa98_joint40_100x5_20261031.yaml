@@ -1,0 +1,12 @@
+bounds_id: "eggplant_26sp_cal25sp_val_sa98_joint40_100x5_20261031"
+crop: "eggplant"
+created_at: "2026-10-31T04:20:21Z"
+approved_at: "2026-10-31T04:20:21Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "approved_bounds_proposal.csv"
+derived_from_sha256: "3865808b3d345ef2f28759c0f3c23137b800c1c438abda6bd69bbf67887a71c6"
+bounds_sha256: "3865808b3d345ef2f28759c0f3c23137b800c1c438abda6bd69bbf67887a71c6"
+parameter_count: 99
+automatic_repairs: 0
+notes: "User approved40;100x5;FLLF400;SLPF25=.93,26=.89"

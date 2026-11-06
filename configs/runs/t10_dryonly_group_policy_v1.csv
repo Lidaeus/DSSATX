@@ -1,0 +1,10 @@
+group,phi_budget,note
+PHENO,0.10,PDAT/ADAT flowering phenology constraints; MDAT is diagnostic-only for indeterminate eggplant
+CANOPY,1.00,LAID process; LAIX diagnostic-only
+BIOMASS,1.00,LWAD+SWAD; exclude HWAM and fruit-containing total mass
+PLANT_N,1.00,CNAM; only seasons with observations participate
+HARVEST_FRESH,1.25,CHFPW diagnostic-only in dry-only variant; budget retained (no active obs) so the group-weight audit can resolve the family
+HARVEST_DRY,1.25,CHPDT cumulative plus HPODW incremental dry harvest share this single static family budget; additional harvest events do not increase total family allocation
+CUMULATIVE_HARVEST,1.00,Legacy PWAD diagnostic-only fallback
+INCREMENTAL_HARVEST,1.00,Legacy PWAI diagnostic-only fallback
+SOIL_WATER,0.80,Audited volumetric soil-water process group; group multiplier 0.8 per P0-3; observation-count corrected within each season

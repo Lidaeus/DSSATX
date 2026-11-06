@@ -1,0 +1,12 @@
+group,phi_budget,note
+PHENO,0.10,PDAT flowering phenology; MDAT and ADAT diagnostic-only
+CANOPY,0.7500,LAID process and LAIX; adjusted from 1.00 to preserve source multiplier 0.158114 over 30 active obs (source had 40)
+BIOMASS,0.7500,LWAD plus SWAD; adjusted from 1.00 to preserve source multiplier 0.125000 over 48 active obs (source had 64)
+PLANT_N,1.00,SNAM plus LNAM only
+HARVEST_FRESH,1.25,CHFPW diagnostic-only
+HARVEST_DRY_TOTAL,0.6563,Cumulative terminal dry harvest CHPDT; calibrated so multiplier matches source 0.104583 over 60 active obs
+HARVEST_DRY_INCREMENT,0.6563,Event dry-harvest increments HPODW; calibrated so multiplier matches source 0.104583 over 60 active obs
+N_RESPONSE,0.0556,Reduced to 1/3 of source weight multiplier (0.111803/3=0.037268) over 40 active obs; source had 60 obs with budget 0.75
+CUMULATIVE_HARVEST,1.00,Legacy PWAD diagnostic-only fallback
+INCREMENTAL_HARVEST,1.00,Legacy PWAI diagnostic-only fallback
+SOIL_WATER,0.0833,Reduced to 1/3 of source weight multiplier (0.111803/3=0.037268) over 60 active obs; source had 80 obs with budget 1.00

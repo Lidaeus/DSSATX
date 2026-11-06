@@ -1,0 +1,12 @@
+bounds_id: "eggplant_t9_highdim_v1_20260722"
+crop: "eggplant"
+created_at: "2026-07-22T03:49:38Z"
+approved_at: "2026-07-22T03:49:38Z"
+approved_by: "Ceres Architect"
+review_status: "approved"
+derived_from: "t9_highdim_freeze_ready_20260722.csv"
+derived_from_sha256: "faf68ebfea390d0cee2c226df7b0cf5778186fcaa8602487ee11dbfae7cc7c75"
+bounds_sha256: "f93837842bdbcbfd170eec73868ce70272016c62535ed25858074300f3b8ee1b"
+parameter_count: 64
+automatic_repairs: 0
+notes: "T9 high-dim diagnostic calibration: 55 active + 9 fixed; EM-V1 baseline 22 range 10-40; FL-VS active 100-140; HWAM/LAIX diagnostic-only; phenology budget 0.25"

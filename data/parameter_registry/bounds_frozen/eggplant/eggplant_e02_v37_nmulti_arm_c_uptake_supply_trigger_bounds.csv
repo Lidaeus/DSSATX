@@ -1,0 +1,123 @@
+name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,review_note,notes
+atop,0.887766,0.887766,0.887766,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+cmobmx,0.0342009,0.0342009,0.0342009,fixed,SPE_CarbonReserve,SPE,TMGRO048.SPE.base,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v37: cmobmx upper relaxed to 0.15 to unlock stem C remobilization
+csdl,12.0014,12.0014,12.0014,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+dswbar,9.70945,9.70945,9.70945,fixed,SPE_WaterStress,SPE,TMGRO048.SPE.base,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+em-fl,27.5336,27.5336,27.5336,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v31: lower widened to 20.0 to avoid hitting 23.0
+em-v1,38.8304,38.8304,38.8304,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+evmodc,0.0,0.0,0.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+finref,176.799,176.799,176.799,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v15 boundary pressure fix 20260819
+fl-lf,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+fl-sd,7.89688,7.89688,7.89688,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+fl-sh,2.8024,2.8024,2.8024,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+fl-vs,100.0,100.0,100.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+frcnod,0.05,0.05,0.05,fixed,SPE_Nodule,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+frlff,0.372203,0.372203,0.372203,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v15 boundary pressure fix 20260819
+frstmf,0.515875,0.515875,0.515875,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v15 boundary pressure fix 20260819
+ju-r0,2.39972,2.39972,2.39972,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+kcan,0.447444,0.447444,0.447444,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v37: kcan lower adjusted to 0.35 to avoid artificial 0.25 clamping
+kc_slope,0.0119885,0.0119885,0.0119885,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+lfmax,2.23942,2.23942,2.23942,fixed,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+lngsh,21.7537,21.7537,21.7537,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v15 boundary pressure fix 20260819
+lnref,3.43959,3.43959,3.43959,fixed,SPE_Nitrogen,SPE,TMGRO048.SPE.base,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+nmobmx,0.544394,0.544394,0.544394,fixed,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v37: nmobmx upper relaxed to 0.60 to avoid 0.45 clamping
+nrcvr,0.168609,0.168609,0.168609,fixed,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+nslope,0.101293,0.101293,0.101293,fixed,SPE_Nitrogen,SPE,TMGRO048.SPE.base,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+nstfac,0.5,0.5,0.75,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,v37 nitrogen P0 local arm c; explicit member137 anchor; range 0.5-0.75,Extracted from 0805_corrected PST
+nvsmob,0.672832,0.672832,0.672832,fixed,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+parmax,38.4706,38.4706,38.4706,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v31: widened to 38-60 to avoid photosynthetic lower bound lock
+phtmax,69.2048,69.2048,69.2048,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,20260817 formal confirmation: frozen PHTMAX 45-75
+pl-em,8.99381,8.99381,8.99381,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+pm06,0.858865,0.858865,0.858865,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v31: upper widened to 0.90 to avoid hitting 0.70
+pm09,0.413631,0.413631,0.413631,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+podur,17.9786,17.9786,17.9786,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v15 boundary pressure fix 20260819
+pormin,0.0058253,0.0058253,0.0058253,fixed,SPE_RootWater,SPE,TMGRO048.SPE.base,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+porpt,0.291136,0.291136,0.291136,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+ppsen,0.0,0.0,0.0,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v15 boundary pressure fix 20260819
+rhght,0.531322,0.531322,0.531322,fixed,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+rtexf,0.21161,0.12,0.24,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,v37 nitrogen P0 local arm c; explicit member137 anchor; range 0.12-0.24,Extracted from 0805_corrected PST
+rtnh4,0.0358809,0.018,0.042,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,v37 nitrogen P0 local arm c; explicit member137 anchor; range 0.018-0.042,Extracted from 0805_corrected PST
+rtno3,0.0459014,0.035,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,v37 nitrogen P0 local arm c; explicit member137 anchor; range 0.035-0.05,Extracted from 0805_corrected PST
+rwdth,0.35,0.35,0.35,fixed,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v31: lower widened to 0.50 to avoid hitting 0.70
+rwumx,0.0508883,0.0508883,0.0508883,fixed,SPE_RootWater,SPE,TMGRO048.SPE.base,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+sd-pm,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+sdpdv,177.728,177.728,177.728,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+senday,0.0110533,0.0110533,0.0110533,fixed,SPE_Senescence,SPE,TMGRO048.SPE.base,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+senrte,2.67981,2.67981,2.67981,fixed,SPE_Senescence,SPE,TMGRO048.SPE.base,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v15 boundary pressure fix 20260819
+sfdur,40.0,40.0,40.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v31: widened to 35-65 to uncap fruit filling duration for long-season harvests
+sizlf,322.47,322.47,322.47,fixed,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+sizref,412.995,412.995,412.995,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v15 boundary pressure fix 20260819
+slaref,265.014,265.014,265.014,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v37: slaref upper bound capped at 280 per user directive
+slavr,226.172,226.172,226.172,fixed,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_sbdm_01,1.36936,1.36936,1.36936,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_sbdm_02,1.55246,1.55246,1.55246,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_sbdm_03,1.53567,1.53567,1.53567,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_sbdm_04,1.46898,1.46898,1.46898,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_sbdm_05,1.477,1.477,1.477,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_sbdm_06,1.55606,1.55606,1.55606,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_sbdm_07,1.61133,1.61133,1.61133,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_sbdm_08,1.5746,1.5746,1.5746,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_sdul_01,0.300589,0.300589,0.300589,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_sdul_02,0.307146,0.307146,0.307146,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_sdul_03,0.329116,0.329116,0.329116,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_sdul_04,0.318307,0.318307,0.318307,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_sdul_05,0.33502,0.33502,0.33502,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_sdul_06,0.289875,0.289875,0.289875,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_sdul_07,0.270025,0.270025,0.270025,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_sdul_08,0.272977,0.272977,0.272977,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_slll_01,0.144373,0.144373,0.144373,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_slll_02,0.152194,0.152194,0.152194,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_slll_03,0.171014,0.171014,0.171014,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_slll_04,0.159289,0.159289,0.159289,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_slll_05,0.166302,0.166302,0.166302,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_slll_06,0.175644,0.175644,0.175644,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_slll_07,0.162646,0.162646,0.162646,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_slll_08,0.152463,0.152463,0.152463,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_slpf,0.931083,0.931083,0.931083,fixed,SOIL_Fertility,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v31: adjusted to 0.88-0.96 matching high greenhouse fertility
+soil_ssat_01,0.484714,0.484714,0.484714,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_ssat_02,0.439154,0.439154,0.439154,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_ssat_03,0.439819,0.439819,0.439819,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_ssat_04,0.467972,0.467972,0.467972,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_ssat_05,0.509073,0.509073,0.509073,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_ssat_06,0.333693,0.333693,0.333693,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_ssat_07,0.316506,0.316506,0.316506,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+soil_ssat_08,0.322806,0.322806,0.322806,fixed,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+tb1,8.88373,8.88373,8.88373,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+tb2,9.99497,9.99497,9.99497,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+tb3,11.3105,11.3105,11.3105,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+thrsh,7.91358,7.91358,7.91358,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+tm1,42.401,42.401,42.401,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v31: lower 35.0 > upper(TO21)
+tm2,44.6738,44.6738,44.6738,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v31: lower 32.0 > upper(TO22)
+tm3,46.5209,46.5209,46.5209,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+to11,25.9397,25.9397,25.9397,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v15 boundary pressure fix 20260819
+to12,25.3366,25.3366,25.3366,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v31: upper 27.5 < lower(TO22)
+to13,25.9534,25.9534,25.9534,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+to21,31.1572,31.1572,31.1572,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v31: upper 34.5 < lower(TM1)
+to22,29.2128,29.2128,29.2128,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,"v31: lower 27.6 > upper(TO12), upper 31.5 < lower(TM2)"
+to23,29.358,29.358,29.358,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+trifl,0.750486,0.750486,0.750486,fixed,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+v1-ju,0.0,0.0,0.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+vssink,5.08743,5.08743,5.08743,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+wtfsd,0.46779,0.46779,0.46779,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v37: wtfsd lower relaxed to 0.25 to unlock fruit dry weight flexibility
+wtpsd,0.004,0.004,0.004,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+xfint,0.299529,0.299529,0.299529,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST
+xfpht,49.5235,49.5235,49.5235,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v15 boundary pressure fix 20260819
+xfrmax,0.197731,0.197731,0.197731,fixed,SPE_WaterStress,SPE,TMGRO048.SPE.base,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v31: widened to 0.10-0.45 for sufficient daily reproductive sink allocation
+xfrt,0.810374,0.810374,0.810374,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v37: xfrt relaxed to 0.60-0.95 for maximum fruit partition
+xmage,19.343,19.343,19.343,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v37: xmage upper relaxed to 25.0 to avoid 15.8 clamping
+nrexp,0.815747,0.815747,0.815747,fixed,species,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST; NREXP/NRMIN lower widened to 0.1
+nrmin,0.609315,0.609315,0.609315,fixed,species,SPE,TMGRO048.SPE,TM0008,TM0001,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Extracted from 0805_corrected PST; NREXP/NRMIN lower widened to 0.1
+swbar_rec,0.510305,0.510305,0.510305,fixed,SPE_WaterResponse,SPE,TMGRO048.SPE.base,,,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Anchor reconstructs XSWBAR ordered nodes
+yswbar_mid,0.705169,0.705169,0.705169,fixed,SPE_WaterResponse,SPE,TMGRO048.SPE.base,,,both,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,Anchor reconstructs YSWBAR bounded nodes
+PGEFF,0.0515488,0.0515488,0.0515488,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v37: PGEFF upper relaxed to 0.065 to expand photosynthate source pool
+PROLFF,0.0985538,0.0985538,0.0985538,fixed,SPE_Compo,SPE,TMGRO048.SPE,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,
+PROSTF,0.0369371,0.0369371,0.0369371,fixed,SPE_Compo,SPE,TMGRO048.SPE,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,
+PRORTF,0.0344483,0.0344483,0.0344483,fixed,SPE_Compo,SPE,TMGRO048.SPE,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,
+PROLFG,0.16275,0.16275,0.16275,fixed,SPE_Compo,SPE,TMGRO048.SPE,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,
+PROSTG,0.143197,0.143197,0.143197,fixed,SPE_Compo,SPE,TMGRO048.SPE,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,
+PRORTG,0.165141,0.165141,0.165141,fixed,SPE_Compo,SPE,TMGRO048.SPE,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,
+PROLFI,0.23,0.23,0.27,active,SPE_Compo,SPE,TMGRO048.SPE,,,,v37 nitrogen P0 local arm c; explicit member137 anchor; range 0.23-0.27,
+PROSTI,0.268333,0.24,0.3,active,SPE_Compo,SPE,TMGRO048.SPE,,,,v37 nitrogen P0 local arm c; explicit member137 anchor; range 0.24-0.3,
+PRORTI,0.171277,0.171277,0.171277,fixed,SPE_Compo,SPE,TMGRO048.SPE,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,
+FNPGN1,0.554778,0.554778,0.554778,fixed,SPE_Photo,SPE,TMGRO048.SPE,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v37: fnpgn1 lower relaxed to 0.3
+FNPGN2,3.55909,3.55909,3.55909,fixed,SPE_Photo,SPE,TMGRO048.SPE,,,,fixed to v37 iteration-3 member 137 for nitrogen mechanism attribution,v37: fnpgn2 lower relaxed to 2.0

@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_gen_final_opt_13trt_20260922"
+crop: "eggplant"
+created_at: "2026-09-22T14:17:14Z"
+approved_at: "2026-09-22T14:17:14Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_gen_final_opt_13trt_20260922.csv"
+derived_from_sha256: "fc65bf218cfce37560df032ebd53090bf55f95561d19cd0c070aaf0791b5e6cf"
+bounds_sha256: "fc65bf218cfce37560df032ebd53090bf55f95561d19cd0c070aaf0791b5e6cf"
+parameter_count: 168
+automatic_repairs: 0
+notes: "Final parameter ranges: KCAN [0.5, 0.75], SIZLF [260, 300], DSWBAR [5, 8], THRSH=8.5 fixed, TB1 [8, 10], leaf/stem/fruit PRO bounded by measured N, root PRO Tomato+-5%, P bounded by measured tissue P, SLAREF=290 fixed, SIZREF=290 fixed, SASC_RATIO=0.92 fixed, ICNS_25SP=1.0 fixed"

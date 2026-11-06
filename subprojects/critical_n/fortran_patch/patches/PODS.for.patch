@@ -1,0 +1,70 @@
+--- Plant/CROPGRO/PODS.for
++++ Plant/CROPGRO/PODS.for
+@@ -35,7 +35,7 @@
+      &    NSTRES, PGAVL, PHTHRS, PHTIM, PNTIM, PUNCSD,    !Input
+      &    PUNCTR, RNITP, SDDES, SDGR, SHELWT, SW, SWFAC,  !Input
+      &    TDUMX, TGRO, TURADD, XFRT, YRDOY, YRNR1, YRNR2, !Input
+-     &    PStres2, YRPLT,                                 !Input
++     &    PStres2, YRPLT, CHPDTN,                         !Input
+      &    AGRSD3, LAGSD, LNGPEG, NGRSD, NGRSH, PCTMAT,    !Output
+      &    PODNO, POTCAR, POTLIP, SDNO, SDVAR, SEEDNO,     !Output
+      &    SHELN, SHVAR, WSDDTN, WSHDTN, WTABRT, WTSD,     !Output
+@@ -80,7 +80,7 @@
+       REAL PROLFF, FNINL, SEEDNO, PODNO, XMPAGE
+       REAL WTPSD, SFDUR, PROSHF, XMAGE
+       REAL TOSHMINE,TOCHMINE
+-      REAL HPODWT,HSDWT,HSHELWT
++      REAL HPODWT,HSDWT,HSHELWT,CHPDTN
+ 
+       REAL NAVPOD, ADDSHL, FLWADD
+       REAL PGLEFT, PODMAT, AFLW, FLWRDY, PODADD, SHMINE, ACCAGE, PGAVLR
+@@ -237,7 +237,7 @@
+       CALL FRESHWT(DYNAMIC, ISWFWT,                
+      &        YRPLT, XMAGE, NR2TIM, PHTIM,                      !Input 
+      &        WTSD,SDNO,WTSHE,SHELN,                            !Input 
+-     &        HPODWT,HSDWT,HSHELWT)                             !Output
++     &        HPODWT,HSDWT,HSHELWT,CHPDTN)                      !Output
+ 
+ !-----------------------------------------------------------------------
+ !    Read Ecotype Parameter File
+@@ -334,7 +334,7 @@
+       CALL FRESHWT(DYNAMIC, ISWFWT,                
+      &        YRPLT, XMAGE, NR2TIM, PHTIM,                      !Input 
+      &        WTSD,SDNO,WTSHE,SHELN,                            !Input 
+-     &        HPODWT,HSDWT,HSHELWT)                             !Output
++     &        HPODWT,HSDWT,HSHELWT,CHPDTN)                      !Output
+ 
+ !***********************************************************************
+ !***********************************************************************
+@@ -744,7 +744,12 @@
+ !    DRPP**1.3 makes smaller and more sentitive to long days
+ !    Scale pod addition to RNITP, leaf N for photo purporses
+ !-----------------------------------------------------------------------
+-          RNITPD = (RNITP*0.01-PROLFF*0.16)/(FNINL-PROLFF*0.16)
++C       Phase R3: Singularity guard & protected pod addition scaling
++          IF (FNINL - PROLFF * 0.16 .GT. 0.001) THEN
++            RNITPD = (RNITP*0.01-PROLFF*0.16)/(FNINL-PROLFF*0.16)
++          ELSE
++            RNITPD = 1.0
++          ENDIF
+           RNITPD = MIN(1.1,RNITPD)
+           RNITPD = MAX(0.1,RNITPD)
+           PODADD = PMAX * TEMPOD * (DRPP**1.3) *
+@@ -815,7 +820,7 @@
+           CALL FRESHWT(DYNAMIC, ISWFWT,                
+      &        YRPLT, XMAGE, NR2TIM, PHTIM,                      !Input 
+      &        WTSD,SDNO,WTSHE,SHELN,                            !Input 
+-     &        HPODWT,HSDWT,HSHELWT)                             !Output
++     &        HPODWT,HSDWT,HSHELWT,CHPDTN)                      !Output
+      
+         ENDIF
+ 
+@@ -844,7 +849,7 @@
+           CALL FRESHWT(DYNAMIC, ISWFWT,                
+      &        YRPLT, XMAGE, NR2TIM, PHTIM,                      !Input 
+      &        WTSD,SDNO,WTSHE,SHELN,                            !Input 
+-     &        HPODWT,HSDWT,HSHELWT)                             !Output
++     &        HPODWT,HSDWT,HSHELWT,CHPDTN)                      !Output
+       ENDIF
+ 
+ !***********************************************************************

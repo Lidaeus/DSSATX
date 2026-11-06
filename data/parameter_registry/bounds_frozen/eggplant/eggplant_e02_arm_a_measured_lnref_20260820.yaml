@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_arm_a_measured_lnref_20260820"
+crop: "eggplant"
+created_at: "2026-08-20T13:40:36Z"
+approved_at: "2026-08-20T13:40:36Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_arm_a_measured_lnref_20260820.csv"
+derived_from_sha256: "ddf24f29fe8af009b217b3e71132ada589fc670fb6f03d5b0c1b1579c30b8a62"
+bounds_sha256: "ddf24f29fe8af009b217b3e71132ada589fc670fb6f03d5b0c1b1579c30b8a62"
+parameter_count: 120
+automatic_repairs: 0
+notes: "Exploratory trial: Arm A: Measured High Leaf N (LNREF 4.2-5.6%)"

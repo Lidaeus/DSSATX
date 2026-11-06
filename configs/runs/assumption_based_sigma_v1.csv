@@ -1,0 +1,11 @@
+group,transform,offset,reference,sigma,sigma_source,model_sigma,sigma_floor,group_multiplier,n_eff,note
+ADAPM,raw,0,1,25.0,assumption_phenology_days,2.0,1.0,1.0,1,assumption: ~25 days phenology uncertainty
+LAIXM,raw,0,1,0.8,assumption_canopy_lai_max,0.2,0.1,1.0,1,assumption: ~0.8 max LAI units
+LAIDM,raw,0,1,2.0,assumption_canopy_lai,0.5,0.2,1.0,1,assumption: ~2.0 LAI units
+LWADM,raw,0,1,150.0,assumption_biomass_kg_ha,50.0,10.0,1.0,1,assumption: ~150 kg/ha leaf dry mass
+SWADM,raw,0,1,200.0,assumption_biomass_kg_ha,50.0,10.0,1.0,1,assumption: ~200 kg/ha stem dry mass
+PWADM,raw,0,1,250.0,assumption_harvest_cv_0p08,30.0,20.0,1.0,1,CV-based 0.08 on mean incremental fruit mass
+PWAIM,raw,0,1,250.0,assumption_harvest_cv_0p08,30.0,20.0,1.25,1,robustness contrast: 1.25 multiplier on incremental harvest
+HWAMM,raw,0,1,50.0,assumption_yield_kg_ha,15.0,5.0,1.0,1,assumption: ~50 kg/ha end-of-season yield
+HIAMM,raw,0,1,0.10,assumption_harvest_index,0.03,0.01,1.0,1,assumption: ~0.10 harvest index
+CNAMM,raw,0,1,25.0,assumption_nitrogen_pct,5.0,2.0,1.0,1,assumption: ~25% nitrogen content

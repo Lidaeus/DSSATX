@@ -1,0 +1,32 @@
+﻿name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,review_note,notes,category
+CSDL,12.5418,11.5,13.0,active,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST,other_crop_or_process
+PORMIN,0.00813383,0.001,0.01,active,SPE_RootWater,SPE,TMGRO048.SPE.base,,,,OAT: PORMIN=0.001 improved mean W-response NSE and 26SP dry NSE; values >=0.02 broke the dry/scale gate,Extracted from 0805_corrected PST,other_crop_or_process
+SIZREF,560.721,300.0,600.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,v15: lower 247.311107→247.311; upper 333.194242→380.0,v15 boundary pressure fix 20260819,other_crop_or_process
+SLAREF,275.134,225.0,280.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,,v37: slaref upper bound capped at 280 per user directive,other_crop_or_process
+THRSH,8.31515,7.5,9.5,active,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST,other_crop_or_process
+XFRMAX,0.20643,0.12,0.4,active,SPE_WaterStress,SPE,TMGRO048.SPE.base,,,,,v31: widened to 0.10-0.45 for sufficient daily reproductive sink allocation,other_crop_or_process
+NREXP,0.306147,0.2,0.9,active,species,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST; NREXP/NRMIN lower widened to 0.1,other_crop_or_process
+NRMIN,0.581436,0.3,0.85,active,species,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST; NREXP/NRMIN lower widened to 0.1,other_crop_or_process
+OPTLFP_EM,0.0038,0.00342,0.00418,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+OPTLFP_FF,0.0033,0.00297,0.00363,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+OPTSTP_EM,0.0028,0.00252,0.00308,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+OPTSTP_FF,0.0025,0.00225,0.00275,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+OPTRTP_EM,0.0021,0.00189,0.00231,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+OPTRTP_FF,0.0018,0.00162,0.00198,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+OPTRTP_FS,0.0015,0.00135,0.00165,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+OPTSDP_FF,0.004,0.0036,0.0044,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+MINLFP_EM,0.0027,0.00243,0.00297,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+MINLFP_FF,0.0022,0.00198,0.00242,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+MINLFP_FS,0.0017,0.00153,0.00187,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+MINSTP_EM,0.0017,0.00153,0.00187,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+MINSTP_FF,0.0013,0.00117,0.00143,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+MINSTP_FS,0.001,0.0009,0.0011,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+MINRTP_EM,0.0011,0.00099,0.00121,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+MINRTP_FF,0.0011,0.00099,0.00121,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+MINRTP_FS,0.0011,0.00099,0.00121,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+MINSDP_FF,0.0033,0.00297,0.00363,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+MINSDP_FS,0.0033,0.00297,0.00363,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,tissue_P_concentration
+ROOTRAD,0.0025,0.00225,0.00275,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,other_crop_or_process
+FRACPMOBIL,0.2,0.18,0.22,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,other_crop_or_process
+SRATPHOTO,0.63,0.567,0.693,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,other_crop_or_process
+SRATPART,0.83,0.747,0.913,active,SPE_Phos,SPE,TMGRO048.SPE,TM0008,TM0001,both,Initial baseline +-10% from peanut anchor,Physiological prior constraint from 2025 SP/FA plant tissue P audit,other_crop_or_process

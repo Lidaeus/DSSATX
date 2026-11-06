@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_gen_page22_sasc0925_scale200x6_20260918"
+crop: "eggplant"
+created_at: "2026-09-18T07:14:27Z"
+approved_at: "2026-09-18T07:14:27Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_gen_page22_sasc0925_scale200x6_20260918.csv"
+derived_from_sha256: "412645a2204a8467395941d2fdfbf3282e0f331cfc2faae6319a92b6fe3189a0"
+bounds_sha256: "fad606c1dcf0e3613cf9f2acdc90f45c17552c290fabf3b7548333f0200f1d65"
+parameter_count: 164
+automatic_repairs: 0
+notes: "Scale 200x6 calibration: PAGE=22, SASC=0.925, ICNS=0.7, relaxed 7 boundary touching parameters"

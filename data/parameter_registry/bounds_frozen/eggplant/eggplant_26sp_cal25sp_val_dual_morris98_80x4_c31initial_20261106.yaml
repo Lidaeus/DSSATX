@@ -1,0 +1,12 @@
+bounds_id: "eggplant_26sp_cal25sp_val_dual_morris98_80x4_c31initial_20261106"
+crop: "eggplant"
+created_at: "2026-11-05T16:58:45Z"
+approved_at: "2026-11-05T16:58:45Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "approved_trial_bounds.csv"
+derived_from_sha256: "ba9dc9188f7f07efe1195e396548deef0d10e75979a757069b636604ea3094c7"
+bounds_sha256: "1e25db08be6a5d99975ff82ba7c2247e000c4537dd5886de87c76576d93852db"
+parameter_count: 126
+automatic_repairs: 0
+notes: "User approved 80x4, original ADAT and SASC; use C31 frozen ranges where compatible"

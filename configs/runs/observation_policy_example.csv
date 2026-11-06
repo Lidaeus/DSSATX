@@ -1,0 +1,8 @@
+group,transform,offset,reference,sigma,sigma_source,replicate_sd,n_replicates,n_effective,model_sigma,sigma_floor,group_multiplier
+ADAPM,raw,0,1,,,,,,,,1.0
+LAIXM,raw,0,1,,,,,,,,1.0
+LAIDM,raw,0,1,,,,,,,,1.0
+LWADM,raw,0,1,,,,,,,,1.0
+SWADM,raw,0,1,,,,,,,,1.0
+PWADM,raw,0,1,,,,,,,,1.0
+PWAIM,raw,0,1,,,,,,,,1.1

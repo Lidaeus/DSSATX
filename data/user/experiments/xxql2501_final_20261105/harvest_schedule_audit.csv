@@ -1,0 +1,11 @@
+factor,observed_harvest_date,model_execution_date,model_output_date,role
+5,2025-05-20,2025-05-19,2025-05-20,measured_harvest;one_day_CRGRO_output_lag
+5,2025-05-26,2025-05-25,2025-05-26,measured_harvest;one_day_CRGRO_output_lag
+5,2025-06-02,2025-06-01,2025-06-02,measured_harvest;one_day_CRGRO_output_lag
+5,2025-06-07,2025-06-06,2025-06-07,measured_harvest;one_day_CRGRO_output_lag
+5,2025-06-12,2025-06-11,2025-06-12,measured_harvest;one_day_CRGRO_output_lag
+5,2025-06-19,2025-06-18,2025-06-19,measured_harvest;one_day_CRGRO_output_lag
+5,2025-06-24,2025-06-23,2025-06-24,measured_harvest;one_day_CRGRO_output_lag
+5,2025-07-03,2025-07-02,2025-07-03,measured_harvest;one_day_CRGRO_output_lag
+5,2025-07-11,2025-07-10,2025-07-11,measured_harvest;one_day_CRGRO_output_lag
+5,,2025-07-13,,terminal_observation_only;no_measured_harvest

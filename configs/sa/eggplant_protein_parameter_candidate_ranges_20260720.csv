@@ -1,0 +1,13 @@
+parameter,organ,init,lower,upper,primary_sa_status,secondary_sa_status,evidence_level,required_constraint,calibration_policy
+PROLFI,leaf,0.270,0.260,0.360,excluded,candidate,direct_total_N_but_growth_stage_indirect,PROLFI>PROLFG>PROLFF,only_if_organ_N_time_series_identifies_luxury_state
+PROLFG,leaf,0.220,0.170,0.250,excluded,candidate,direct_total_N_but_growth_stage_indirect,PROLFI>PROLFG>PROLFF,only_if_organ_N_time_series_identifies_growth_threshold
+PROLFF,leaf,0.110,0.080,0.140,excluded,candidate,direct_total_N_but_growth_stage_indirect,PROLFI>PROLFG>PROLFF,only_if_late_season_leaf_N_and_remobilization_are_observed
+PROSTI,stem,0.188,0.145,0.220,excluded,candidate,direct_total_N_but_growth_stage_indirect,PROSTI>PROSTG>PROSTF,only_if_organ_N_time_series_identifies_luxury_state
+PROSTG,stem,0.136,0.090,0.140,excluded,candidate,direct_total_N_but_growth_stage_indirect,PROSTI>PROSTG>PROSTF,only_if_organ_N_time_series_identifies_growth_threshold
+PROSTF,stem,0.065,0.040,0.080,excluded,candidate,direct_total_N_but_growth_stage_indirect,PROSTI>PROSTG>PROSTF,only_if_late_season_stem_N_and_remobilization_are_observed
+PROSHI,shell,0.210,0.180,0.250,excluded,diagnostic_candidate,whole_fruit_total_N_only_indirect,PROSHI>PROSHG>PROSHF,not_without_shell_or_fruit_fraction_definition
+PROSHG,shell,0.150,0.120,0.170,excluded,diagnostic_candidate,whole_fruit_total_N_only_indirect,PROSHI>PROSHG>PROSHF,not_without_shell_or_fruit_fraction_definition
+PROSHF,shell,0.110,0.070,0.110,excluded,diagnostic_candidate,whole_fruit_total_N_only_indirect,PROSHI>PROSHG>PROSHF,not_without_shell_or_fruit_fraction_definition
+PRORTI,root,0.144,0.144,0.144,fixed,deferred,no_root_samples,PRORTI>PRORTG>PRORTF,do_not_calibrate_without_root_N_data
+PRORTG,root,0.119,0.119,0.119,fixed,deferred,no_root_samples,PRORTI>PRORTG>PRORTF,do_not_calibrate_without_root_N_data
+PRORTF,root,0.060,0.060,0.060,fixed,deferred,no_root_samples,PRORTI>PRORTG>PRORTF,do_not_calibrate_without_root_N_data

@@ -1,0 +1,12 @@
+bounds_id: "eggplant_25sp_observed_morris_expanded86_refNguard_20261030"
+crop: "eggplant"
+created_at: "2026-10-30T13:59:15Z"
+approved_at: "2026-10-30T13:59:15Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_25sp_observed_morris_expanded86_refNguard_20261030.csv"
+derived_from_sha256: "13c2195c5551f61e41ab39471e7ce966728951e53a80a34ad9547fe0d0b4debe"
+bounds_sha256: "13c2195c5551f61e41ab39471e7ce966728951e53a80a34ad9547fe0d0b4debe"
+parameter_count: 91
+automatic_repairs: 0
+notes: "Continue with announced minimal LNREF reference guard 3.6-6; all other domains unchanged. Observed-only single-seed sensitivity."

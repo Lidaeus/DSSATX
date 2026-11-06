@@ -1,0 +1,18 @@
+{
+  "recorded_on": "2026-10-11",
+  "authority": "direct_user_clarification",
+  "user_statement": "果实全氮测定使用的是测定果实品质时采摘成熟果实，切去一半测定品质，剩下一半烘干后磨粉称样测定。",
+  "sample_object": "picked_mature_fruit",
+  "sample_preparation": "remaining_half_after_other_half_used_for_quality_assay;oven_dried;ground;weighed_for_total_N",
+  "concentration_basis": "mg_N_per_g_dried_sample",
+  "concentration_to_percent_factor": 0.1,
+  "half_fruit_concentration_multiplier": 1.0,
+  "whole_fruit_representation": "remaining_half_as_representative_mature_fruit_sample;no_skin_or_seed_removal_was_reported",
+  "representation_is_assumption": true,
+  "sampling_date_rule": "actual_quality_and_N_sampling_date;do_not_replace_with_nearest_bulk_yield_harvest",
+  "preferred_model_compartment": "mature_fruit_seed_plus_shell;not_all_age_standing_fruit",
+  "preferred_operator": "(GN%D*MTDSD+SHND*MTDSH)/(MTDSD+MTDSH)",
+  "operator_status": "proposed_model_organ_average_N_proxy;runtime_phase_and_injection_preflight_required",
+  "new_harvest_event_added": false,
+  "calibration_design_approved": false
+}

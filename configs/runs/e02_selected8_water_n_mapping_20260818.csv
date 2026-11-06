@@ -1,0 +1,9 @@
+season_id,treatment,mi,water_level,irrigation_mm,mf,nitrogen_kg_ha,nitrogen_level
+25SP,2,1,W3,481.4,1,364.0,N3
+25SP,5,1,W3,481.4,4,0.0,N0
+25SP,10,3,W1,283.1,1,364.0,N3
+25SP,13,3,W1,283.1,4,0.0,N0
+26SP,2,2,W2,357.8,1,361.0,N3
+26SP,11,2,W2,357.8,4,0.0,N0
+26SP,3,1,W1,239.2,1,361.0,N3
+26SP,12,1,W1,239.2,4,0.0,N0

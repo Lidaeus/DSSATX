@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_s5_formal_joint_bounds_20260826"
+crop: "eggplant"
+created_at: "2026-08-26T15:03:39Z"
+approved_at: "2026-08-26T15:03:39Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_s5_formal_joint_proposal_20260826.csv"
+derived_from_sha256: "2a6e702b9608bd458300e20e449474fab7c929a2d148f056a2e4ac2bb09423da"
+bounds_sha256: "2a6e702b9608bd458300e20e449474fab7c929a2d148f056a2e4ac2bb09423da"
+parameter_count: 148
+automatic_repairs: 0
+notes: "E02 Stage S5 formal joint multi-season calibration bounds (72 active genetic parameters, S1-S4 posterior initialized, soil/IC fixed)"

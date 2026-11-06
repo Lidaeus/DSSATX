@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_genetic_98pct_v3_20260915"
+crop: "eggplant"
+created_at: "2026-09-15T02:11:31Z"
+approved_at: "2026-09-15T02:11:31Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_genetic_98pct_v3_20260915.csv"
+derived_from_sha256: "d41281d45110aecbafa397a02bc3c95d2045bac58e801c3d58dbdc2c283262c4"
+bounds_sha256: "d41281d45110aecbafa397a02bc3c95d2045bac58e801c3d58dbdc2c283262c4"
+parameter_count: 158
+automatic_repairs: 0
+notes: "V3 full genetic calibration with DOY 194 fix, organ N recalibration, 26SP initial N 0.34x scaling, and PHOSP=Y"

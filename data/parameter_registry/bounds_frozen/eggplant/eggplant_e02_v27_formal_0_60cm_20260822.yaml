@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_v27_formal_0_60cm_20260822"
+crop: "eggplant"
+created_at: "2026-08-22T10:20:28Z"
+approved_at: "2026-08-22T10:20:28Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_v27_formal_0_60cm_20260822.csv"
+derived_from_sha256: "fc13af062d5134d0656d1f9590b9b13a82c86ccf18b83315ce73c0142e4f7e79"
+bounds_sha256: "fc13af062d5134d0656d1f9590b9b13a82c86ccf18b83315ce73c0142e4f7e79"
+parameter_count: 148
+automatic_repairs: 0
+notes: "v27 Formal 0-60cm deep plow bounds with tight SDUL/SLOC, strict XFRT/PODUR, open SDPDV/SETMAX/SRMAX, and full root state"

@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_v26_maximum_scope_full_root_20260822"
+crop: "eggplant"
+created_at: "2026-08-22T06:38:05Z"
+approved_at: "2026-08-22T06:38:05Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_v26_maximum_scope_full_root_20260822.csv"
+derived_from_sha256: "82bdb2a8acbcaddf90238ad358830c7689d67bc88a16933fe787e39b76b4895a"
+bounds_sha256: "82bdb2a8acbcaddf90238ad358830c7689d67bc88a16933fe787e39b76b4895a"
+parameter_count: 148
+automatic_repairs: 0
+notes: "v26 Maximum scope bounds with tight SDUL/SLOC, PLDP, PLWT, LFMAX, SFDUR, PODUR, SETMAX, SRMAX"

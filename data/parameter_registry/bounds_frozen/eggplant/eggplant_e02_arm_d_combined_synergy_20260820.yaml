@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_arm_d_combined_synergy_20260820"
+crop: "eggplant"
+created_at: "2026-08-19T18:07:05Z"
+approved_at: "2026-08-19T18:07:05Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_arm_d_combined_synergy_20260820.csv"
+derived_from_sha256: "26a70171fa416548a94d5c7259c79a0ae8f5e06963b03679611cf0aa613b40f8"
+bounds_sha256: "26a70171fa416548a94d5c7259c79a0ae8f5e06963b03679611cf0aa613b40f8"
+parameter_count: 120
+automatic_repairs: 0
+notes: "Exploratory Arm d_combined_synergy: Arm D: 全要素协同组合臂 (Combined Synergy A+B+C)"

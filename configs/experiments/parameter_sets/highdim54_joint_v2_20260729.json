@@ -1,0 +1,18 @@
+{
+  "set_id": "highdim54_joint_v2_20260729",
+  "parameters": [
+    "ATOP", "EM-FL", "EM-V1", "FINREF", "FL-SD", "FL-SH",
+    "FRLFF", "FRSTMF", "JU-R0", "KCAN", "KC_SLOPE", "LFMAX", "LNGSH",
+    "NMOBMX", "NRCVR", "NSTFAC", "NVSMOB", "PARMAX", "PHTMAX", "PL-EM",
+    "PM06", "PM09", "PODUR", "PORPT", "RHGHT", "RTEXF", "RTNH4", "RTNO3",
+    "RWDTH", "SDPDV", "SFDUR", "SIZLF", "SIZREF", "SLAREF", "SLAVR",
+    "TB1", "TB2", "TB3", "TM1", "TM2", "TM3", "TO11", "TO12", "TO13",
+    "TO21", "TO22", "TO23", "TRIFL", "VSSINK", "WTFSD", "XFINT", "XFPHT",
+    "XFRT", "XMAGE"
+  ],
+  "declared_count": 54,
+  "source_file": "data/parameter_registry/bounds_frozen/eggplant/eggplant_e02_joint54_v2_20260729.csv",
+  "source_sha256": "79fed33eca01df61e1bf23f50a06e8071769bcd3dc943384ad66fd1407000236",
+  "applicable_observations": "PDAP and ADAP; LAID/LAIX; LWAD/SWAD/CHTD/CNAM where measured; cumulative dry CHPDT on raw scale; incremental dry HPODW on ln(y+1) scale; post-initial SOIL_WATER. MDAP and fresh harvest are diagnostic-only.",
+  "approval_note": "Joint v2 removes FL-VS from calibration and fixes it at 100 per project invariant. Ten tail ranges were contracted after the PAGE=25 joint smoke; RHGHT, XFPHT and TO11 retain evidence-based directional expansions."
+}

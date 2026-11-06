@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_s2_yield_parallel_bounds_20260827"
+crop: "eggplant"
+created_at: "2026-08-27T15:52:46Z"
+approved_at: "2026-08-27T15:52:46Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_s2_yield_parallel_proposal_20260827.csv"
+derived_from_sha256: "10ae452b86d758cf456310611ea66e1c137cd53c01abc88878afcfa2fcf20ffc"
+bounds_sha256: "10ae452b86d758cf456310611ea66e1c137cd53c01abc88878afcfa2fcf20ffc"
+parameter_count: 148
+automatic_repairs: 0
+notes: "Stage S2 Parallel Yield Pre-calibration (41 active parameters, common prior base, soil_slpf [0.85, 0.96], soil_slnf [1.00, 6.00])"

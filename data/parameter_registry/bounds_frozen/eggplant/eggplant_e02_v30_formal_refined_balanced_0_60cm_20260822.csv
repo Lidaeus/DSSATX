@@ -1,0 +1,219 @@
+﻿name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,review_note,notes
+atop,0.813768,0.813768,0.813768,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+cmobmx,0.005,0.005,0.005,fixed,SPE_CarbonReserve,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+csdl,12.3922,12.3922,12.3922,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+dswbar,16.7702,16.7702,16.7702,fixed,SPE_WaterStress,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+em-fl,26.6395,26.0,27.2,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+em-v1,38.0,38.0,38.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+evmodc,0.0,0.0,0.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+finref,275.0,275.0,275.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+fl-lf,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+fl-sd,8.5214,8.0,9.2,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Flower to first seed duration
+fl-sh,2.5854,2.45,2.75,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Flower to first pod duration
+fl-vs,100.0,100.0,100.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+frcnod,0.05,0.05,0.05,fixed,SPE_Nodule,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+frlff,0.352094,0.352094,0.352094,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+frstmf,0.462343,0.462343,0.462343,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+ju-r0,2.0,2.0,2.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+kcan,0.6,0.6,0.6,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+kc_slope,0.143123,0.143123,0.143123,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+lfmax,1.7,1.65,1.75,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+lngsh,30.6805,30.6805,30.6805,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+lnref,5.04909,4.95,5.15,active,SPE_Nitrogen,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+nmobmx,0.179405,0.179405,0.179405,fixed,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,,NMOBMX tightened to <= 0.20 to prevent excessive leaf N remobilization
+nrcvr,0.356732,0.34,0.38,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Root N recovery active
+nslope,0.25,0.25,0.25,fixed,SPE_Nitrogen,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+nstfac,0.65,0.65,0.65,fixed,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,,N stress factor active
+nvsmob,0.248738,0.248738,0.248738,fixed,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,,NVSMOB bounded in 0.20-0.25 physiological range
+parmax,42.5663,42.5663,42.5663,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+phtmax,74.4333,74.4333,74.4333,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,,20260817 formal confirmation: frozen PHTMAX 45-75
+pl-em,10.9835,10.9835,10.9835,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+pm06,0.392042,0.392042,0.392042,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+pm09,0.97663,0.97663,0.97663,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+podur,18.0,17.5,18.5,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Pod duration
+pormin,0.01,0.01,0.01,fixed,SPE_RootWater,SPE,TMGRO048.SPE.base,,,,OAT: PORMIN=0.001 improved mean W-response NSE and 26SP dry NSE; values >=0.02 broke the dry/scale gate,Extracted from 0805_corrected PST
+porpt,0.252858,0.252858,0.252858,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+ppsen,0.000374009,0.000374009,0.000374009,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+rhght,0.700104,0.700104,0.700104,fixed,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+rtexf,0.462184,0.462184,0.462184,fixed,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+rtnh4,0.014575,0.0138,0.0152,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Root NH4 uptake active
+rtno3,0.014575,0.0138,0.0152,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Root NO3 uptake active
+rwdth,1.57668,1.57668,1.57668,fixed,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+rwumx,0.043038,0.041,0.045,active,SPE_RootWater,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+sd-pm,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+sdpdv,197.294,188.0,208.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+senday,0.0364994,0.0364994,0.0364994,fixed,SPE_Senescence,SPE,TMGRO048.SPE.base,TM0008,TM0001,both,,Senescence day fraction
+senrte,0.305942,0.285,0.33,active,SPE_Senescence,SPE,TMGRO048.SPE.base,TM0008,TM0001,both,,SENRTE tightened to <= 2.50 to prevent cliff-like canopy collapse
+sfdur,22.9567,22.0,24.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Seed fill duration
+sizlf,314.526,305.0,325.0,active,CUL_Morphology,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Max single leaf size
+sizref,311.95,311.95,311.95,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+slaref,265.156,265.156,265.156,fixed,SPE_Morphology,SPE,TMGRO048.SPE.base,TM0008,TM0001,both,,Reference specific leaf area
+slavr,194.663,188.0,202.0,active,CUL_Morphology,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Realistic specific leaf area
+soil_sbdm_01,1.38,1.38,1.38,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_02,1.55,1.55,1.55,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_03,1.53,1.53,1.53,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_04,1.5,1.5,1.5,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_05,1.49,1.49,1.49,fixed,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_06,1.55,1.5423,1.6377,disabled,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_07,1.6,1.5617,1.6583,disabled,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sbdm_08,1.56,1.5326,1.6274,disabled,SOIL_Phys,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_01,0.32,0.314,0.326,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_02,0.33,0.324,0.336,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_03,0.34,0.334,0.346,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_04,0.305,0.299,0.311,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_05,0.29,0.284,0.296,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_06,0.29,0.285514,0.301898,disabled,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_07,0.272,0.265916,0.280474,disabled,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_sdul_08,0.271,0.24985,0.27615,disabled,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_01,0.15,0.147,0.153,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_02,0.157,0.154,0.16,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_03,0.166,0.163,0.169,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_04,0.173,0.17,0.176,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_05,0.176,0.173,0.179,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_06,0.176,0.175644,0.186366,disabled,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_07,0.163,0.159516,0.167534,disabled,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slll_08,0.157,0.1463,0.1617,disabled,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_slpf,0.93,0.93,0.93,fixed,SOIL_Fertility,SOIL,SOIL.SOL,TM0008,TM0001,both,,Soil fertility capped at 0.955
+soil_ssat_01,0.45,0.44,0.46,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_02,0.46,0.45,0.47,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_03,0.51,0.5,0.52,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_04,0.4,0.39,0.41,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_05,0.35,0.34,0.36,active,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_06,0.336908,0.318389,0.336908,disabled,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_07,0.32,0.314302,0.332607,disabled,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+soil_ssat_08,0.323549,0.30305,0.323549,disabled,SOIL_WatRet,SOIL,SOIL.SOL,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+tb1,8.26701,8.26701,8.26701,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+tb2,8.0,8.0,8.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+tb3,11.6608,11.6608,11.6608,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+thrsh,7.5,7.5,7.5,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+tm1,40.4669,40.4669,40.4669,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+tm2,40.476,40.476,40.476,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+tm3,34.0,34.0,34.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+to11,25.1136,25.1136,25.1136,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+to12,21.4337,21.4337,21.4337,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+to13,24.57,24.57,24.57,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+to21,31.0661,31.0661,31.0661,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+to22,29.1158,29.1158,29.1158,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+to23,29.5338,29.5338,29.5338,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+trifl,0.739443,0.739443,0.739443,fixed,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+v1-ju,0.0,0.0,0.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+vssink,3.57056,3.57056,3.57056,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+wtfsd,0.445965,0.445965,0.445965,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+wtpsd,0.004,0.004,0.004,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+xfint,0.237487,0.237487,0.237487,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Earlier fruit allocation start
+xfpht,46.5369,46.5369,46.5369,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Extracted from 0805_corrected PST
+xfrmax,0.032311,0.03,0.035,active,SPE_WaterStress,SPE,TMGRO048.SPE.base,,,,,Extracted from 0805_corrected PST
+xfrt,0.74,0.73,0.75,active,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,,Max fruit partitioning
+xmage,19.6888,19.6888,19.6888,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,,Multi-harvest fruit age
+nrexp,0.65,0.65,0.65,fixed,species,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST; NREXP/NRMIN lower widened to 0.1
+nrmin,0.7,0.7,0.7,fixed,species,SPE,TMGRO048.SPE,TM0008,TM0001,both,,Extracted from 0805_corrected PST; NREXP/NRMIN lower widened to 0.1
+swbar_rec,0.270394,0.270394,0.270394,fixed,SPE_WaterResponse,SPE,TMGRO048.SPE.base,,,both,OAT gate-qualified: mean W-response NSE -10.685 to -7.918 at 0.72,Anchor reconstructs XSWBAR ordered nodes
+yswbar_mid,0.677781,0.677781,0.677781,fixed,SPE_WaterResponse,SPE,TMGRO048.SPE.base,,,both,OAT gate-qualified: mean W-response NSE -10.685 to -8.399 at 0.55; 0.15 failed gate,Anchor reconstructs YSWBAR bounded nodes
+soil_sloc_01,0.65,0.63,0.67,active,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,,Measured SOM 1.59% -> SOC 0.922%
+soil_sloc_02,0.18,0.175,0.185,active,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,,Measured SOM 1.20% -> SOC 0.696%
+soil_sloc_03,0.1,0.095,0.105,active,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,,Measured SOM 0.54% -> SOC 0.313%
+soil_srgf_04,1.0,1.0,1.0,fixed,SOIL_Root,SOIL,SOIL.SOL,TM0008,TM0001,both,,Root growth factor 20-30 cm
+soil_srgf_05,0.658936,0.658936,0.658936,fixed,SOIL_Root,SOIL,SOIL.SOL,TM0008,TM0001,both,,Root growth factor 30-40 cm
+soil_srgf_06,0.658837,0.2,0.75,disabled,SOIL_Root,SOIL,SOIL.SOL,TM0008,TM0001,both,,Root growth factor 40-50 cm
+soil_srgf_07,0.171737,0.1,0.6,disabled,SOIL_Root,SOIL,SOIL.SOL,TM0008,TM0001,both,,Root growth factor 50-60 cm
+soil_srgf_08,0.106124,0.05,0.4,disabled,SOIL_Root,SOIL,SOIL.SOL,TM0008,TM0001,both,,Root growth factor 60-80 cm
+soil_srgf_09,0.0479495,0.01,0.25,disabled,SOIL_Root,SOIL,SOIL.SOL,TM0008,TM0001,both,,Root growth factor 80-100 cm
+soil_slnf,3.2,3.1,3.3,active,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,,SOIL_SLNF active in 1.20-1.60 to represent greenhouse soil background N mineralization
+RTDEPI,14.7718,14.0,15.5,active,species,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,,
+PLWT,9.442,9.0,10.0,active,ic,IC,XXQL2501.TMX,TM0008,TM0001,eggplant_stage2,,
+SOIL_SBDM_09,1.53639,1.53639,1.53639,disabled,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+SOIL_SSKS_01,0.23,0.23,0.23,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+SOIL_SLCL_01,35.0,35.0,35.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+SOIL_SLSI_01,30.0,30.0,30.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+SOIL_SSKS_02,0.23,0.23,0.23,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+SOIL_SLCL_02,35.0,35.0,35.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+SOIL_SLSI_02,30.0,30.0,30.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+SOIL_SSKS_03,0.24,0.24,0.24,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+SOIL_SLCL_03,35.0,35.0,35.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+SOIL_SLSI_03,30.0,30.0,30.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+SOIL_SSKS_04,0.24,0.24,0.24,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+SOIL_SLCL_04,35.0,35.0,35.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+SOIL_SLSI_04,30.0,30.0,30.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+SOIL_SSKS_05,0.24,0.24,0.24,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+SOIL_SLCL_05,35.0,35.0,35.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+SOIL_SLSI_05,30.0,30.0,30.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN02_L01,1.499,1.499,1.499,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN02_L01,33.71,33.71,33.71,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN02_L02,1.037,1.037,1.037,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN02_L02,13.78,13.78,13.78,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN02_L03,1.594,1.594,1.594,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN02_L03,10.63,10.63,10.63,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN02_L04,0.5,0.5,0.5,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN02_L04,1.0,1.0,1.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN02_L05,0.5,0.5,0.5,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN02_L05,1.0,1.0,1.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN05_L01,1.267,1.267,1.267,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN05_L01,19.9,19.9,19.9,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN05_L02,0.817,0.817,0.817,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN05_L02,11.59,11.59,11.59,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN05_L03,0.6185,0.6185,0.6185,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN05_L03,4.188,4.188,4.188,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN05_L04,0.5,0.5,0.5,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN05_L04,1.0,1.0,1.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN05_L05,0.5,0.5,0.5,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN05_L05,1.0,1.0,1.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN10_L01,1.951,1.951,1.951,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN10_L01,34.55,34.55,34.55,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN10_L02,0.7143,0.7143,0.7143,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN10_L02,15.0,15.0,15.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN10_L03,1.4,1.4,1.4,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN10_L03,2.409,2.409,2.409,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN10_L04,0.5,0.5,0.5,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN10_L04,1.0,1.0,1.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN10_L05,0.5,0.5,0.5,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN10_L05,1.0,1.0,1.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN13_L01,0.8803,0.8803,0.8803,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN13_L01,44.38,44.38,44.38,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN13_L02,0.6725,0.6725,0.6725,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN13_L02,10.28,10.28,10.28,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN13_L03,0.732,0.732,0.732,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN13_L03,4.111,4.111,4.111,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN13_L04,0.5,0.5,0.5,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN13_L04,1.0,1.0,1.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2501_TN13_L05,0.5,0.5,0.5,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2501_TN13_L05,1.0,1.0,1.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN02_L01,2.996,2.996,2.996,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN02_L01,64.81,64.81,64.81,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN02_L02,2.972,2.972,2.972,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN02_L02,39.74,39.74,39.74,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN02_L03,2.255,2.255,2.255,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN02_L03,19.02,19.02,19.02,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN02_L04,0.5,0.5,0.5,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN02_L04,1.0,1.0,1.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN02_L05,0.5,0.5,0.5,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN02_L05,1.0,1.0,1.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN11_L01,2.126,2.126,2.126,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN11_L01,31.05,31.05,31.05,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN11_L02,0.8951,0.8951,0.8951,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN11_L02,9.565,9.565,9.565,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN11_L03,0.7771,0.7771,0.7771,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN11_L03,6.431,6.431,6.431,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN11_L04,0.5,0.5,0.5,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN11_L04,1.0,1.0,1.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN11_L05,0.5,0.5,0.5,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN11_L05,1.0,1.0,1.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN03_L01,3.324,3.324,3.324,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN03_L01,41.7,41.7,41.7,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN03_L02,1.478,1.478,1.478,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN03_L02,39.37,39.37,39.37,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN03_L03,2.154,2.154,2.154,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN03_L03,19.79,19.79,19.79,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN03_L04,0.5,0.5,0.5,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN03_L04,1.0,1.0,1.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN03_L05,0.5,0.5,0.5,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN03_L05,1.0,1.0,1.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN12_L01,1.861,1.861,1.861,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN12_L01,47.57,47.57,47.57,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN12_L02,0.7317,0.7317,0.7317,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN12_L02,42.37,42.37,42.37,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN12_L03,0.8497,0.8497,0.8497,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN12_L03,10.21,10.21,10.21,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN12_L04,0.5,0.5,0.5,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN12_L04,1.0,1.0,1.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNH4_XXQL2601_TN12_L05,0.5,0.5,0.5,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,
+IC_SNO3_XXQL2601_TN12_L05,1.0,1.0,1.0,fixed,crop,CUL,TM0008.CUL,TM0008,TM0001,eggplant_stage2,,

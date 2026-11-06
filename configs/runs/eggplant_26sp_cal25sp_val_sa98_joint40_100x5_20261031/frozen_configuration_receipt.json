@@ -1,0 +1,4 @@
+{
+  "design_sha256": "6a3197c88fd918a35cefcb02824a3486756b99523f15d5bd5cdea1fa64ae7553",
+  "revision_reason": "Inject only approved SLPF token; do not generate historical soil alias"
+}

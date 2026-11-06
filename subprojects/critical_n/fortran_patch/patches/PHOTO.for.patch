@@ -1,0 +1,57 @@
+--- Plant/CROPGRO/PHOTO.for
++++ Plant/CROPGRO/PHOTO.for
+@@ -25,6 +25,7 @@
+      &    BETN, CO2, DXR57, EXCESS, KCAN, KC_SLOPE,       !Input
+      &    NR5, PAR, PStres1, SLPF, RNITP, SLAAD,          !Input
+      &    SWFAC, TDAY, XHLAI, XPOD,                       !Input
++     &    NNI_IN,                                         !Input
+      &  AGEFAC, PG)                                       !Output
+ 
+ !-----------------------------------------------------------------------
+@@ -42,6 +43,7 @@
+       INTEGER DAS, NR5
+ 
+       REAL AGEFAC, AGEFCC, AGEREF, A0, BETN, CCEFF, CCK, CCMAX, 
++     &  NNI_IN, 
+      &  CCMP, CO2, COLDSTR, CUMSTR, CURV, DXR57, EXCESS,
+      &  KCAN, KCANR, KC_SLOPE, LMXSTD, LNREF, PAR, PARMAX, PG, PGFAC, 
+      &  SLPF, PGLFMX, PGREF, PGSLW, PHTHRS10, PHTMAX, PRATIO, 
+@@ -140,6 +142,11 @@
+ C     need to scale effect back on daily canopy version.
+ C-----------------------------------------------------------------------
+       AGEFCC = (1.0 - EXP(-2.0 * AGEFAC)) / (1. - EXP(-2.0 * 1.0))
++C-----------------------------------------------------------------------
++C     Phase 2: Purged redundant NNI acclimation multiplier to eliminate
++C     toxic penalty at NNI=1.0. Photosynthetic N response is driven
++C     by leaf N (SLN) and AGEFAC without double penalty.
++C-----------------------------------------------------------------------
+ 
+ C-----------------------------------------------------------------------
+ C     Compute canopy pg response to changes in specific leaf weight.
+@@ -396,7 +403,7 @@
+ !            at a CO2 concentration of 330 vpm 
+ ! CCMP     Canopy CO2 compensation point (CO2 at which daily PG is 0.0) 
+ ! CHAR     Contains the contents of last record read 
+-! CO2      Atmospheric carbon dioxide concentration (µmol[CO2] / mol[air])
++! CO2      Atmospheric carbon dioxide concentration (Âµmol[CO2] / mol[air])
+ ! COLDSTR  Cold weather stress factor for photosynthesis (not currently 
+ !            used) 
+ ! CUMSTR   Cumulative stress factor for photosynthesis after start of seed 
+@@ -448,7 +455,7 @@
+ ! PGLFMX   Multiplier for daily canopy photosynthesis to account for 
+ !            cultivar differences in leaf photosynthesis capabilities 
+ ! PGREF    Reference value for leaf level photosynthesis used in canopy 
+-!            light response curve (µmol[CO2] / m2-s)
++!            light response curve (Âµmol[CO2] / m2-s)
+ ! PGSLW    Relative effect of leaf thickness (SLW) on daily canopy PG 
+ ! PHTHRS10 Threshold time that must accumulate in phase 10 for the next 
+ !            stage to occur.  Equivalent to PHTHRS(10) in Subroutine 
+@@ -475,7 +482,7 @@
+ ! SWFAC    Effect of soil-water stress on photosynthesis, 1.0=no stress, 
+ !            0.0=max stress 
+ ! TABEX    Function subroutine - Lookup utility 
+-! TDAY     Average temperature during daylight hours (°C)
++! TDAY     Average temperature during daylight hours (Â°C)
+ ! TIMDIF   Integer function which calculates the number of days between two 
+ !            Julian dates (da)
+ ! TPGFAC   Reduction in specific leaf area due to daytime temperature being 

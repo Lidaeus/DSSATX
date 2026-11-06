@@ -1,0 +1,72 @@
+{
+  "design_id": "eggplant_formal_multiseason_design_candidate_v1_20260719",
+  "status": "awaiting_two_season_bundles_and_user_freeze_approval",
+  "purpose": "formal_genetic_parameter_sensitivity_analysis_then_calibration",
+  "crop": "eggplant",
+  "model": "CROPGRO-Tomato TMGRO048",
+  "required_seasons": [
+    {
+      "season_slot": "spring_1",
+      "bundle_id": "xxql2501_symbi_n_candidate_20260719",
+      "availability": "audited_candidate",
+      "recommended_role": "calibration"
+    },
+    {
+      "season_slot": "spring_2",
+      "bundle_id": null,
+      "availability": "awaiting_user_input",
+      "recommended_role": "validation"
+    },
+    {
+      "season_slot": "autumn_1",
+      "bundle_id": null,
+      "availability": "awaiting_user_input",
+      "recommended_role": "calibration"
+    }
+  ],
+  "role_rationale": "Use one spring and the autumn season to identify temperature response across contrasting thermal regimes; reserve the second spring as whole-season validation. Role assignment remains reviewable before freeze.",
+  "bounds_proposal": "eggplant_formal_multiseason_candidate_v1_20260719",
+  "bounds_status": "proposal_only_not_frozen",
+  "primary_sa": {
+    "method": "Morris_multi_seed",
+    "same_parameter_domain_across_seasons": true,
+    "same_design_and_seed_across_seasons": true,
+    "aggregate_after_season_specific_quality_control": true,
+    "environmental_parameters": "fixed",
+    "initial_conditions": "fixed",
+    "symbiosis": "N",
+    "formal_execution_allowed": false
+  },
+  "parameter_policies": {
+    "cardinal_temperature": {
+      "active": ["TB1", "TO11", "TO21", "TM1", "TB2", "TO12", "TO22", "TM2", "TB3", "TO13", "TO23", "TM3"],
+      "constraint": "TB < TO1 < TO2 < TM is guaranteed by non-overlapping rectangular bounds"
+    },
+    "soil_and_initial_conditions": {
+      "primary_role": "measured_fixed_inputs",
+      "optional_role": "separate_nuisance_robustness_analysis",
+      "uncertainty_source": "measurement replicate SD/SE or documented method uncertainty; generic percentages are not calibration evidence"
+    },
+    "FL-VS": {
+      "sensitivity_range": [100.0, 140.0],
+      "initial": 120.0,
+      "calibration_condition": "last-main-stem-leaf or terminal-growth observations must identify the coefficient"
+    },
+    "dynamic_partition": {
+      "XMAGE": [8.0, 30.0],
+      "XFPHT": [35.0, 70.0],
+      "XFINT": [0.1, 0.35],
+      "constraint": "upper(XMAGE) < lower(XFPHT)"
+    },
+    "nonlegume": {
+      "FRCNOD": "fixed_0.05_excluded",
+      "SYMBI": "N"
+    }
+  },
+  "formal_blockers": [
+    "spring_2 and autumn_1 versioned input bundles are absent",
+    "season roles and treatment-level observation roles are not frozen",
+    "parameter proposal has not been promoted to bounds_frozen",
+    "temperature exposure coverage has not been audited against proposed ranges"
+  ]
+}

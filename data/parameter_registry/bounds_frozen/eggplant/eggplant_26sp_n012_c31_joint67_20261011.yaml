@@ -1,0 +1,12 @@
+bounds_id: "eggplant_26sp_n012_c31_joint67_20261011"
+crop: "eggplant"
+created_at: "2026-10-11T15:42:39Z"
+approved_at: "2026-10-11T15:42:39Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "bounds_proposal.csv"
+derived_from_sha256: "ca8b22bb7eb70f03746da03d3ef28fed4f421f044e6f902a00e748c63b938eb3"
+bounds_sha256: "94eeae4095be9c7dcd67fb1072368e08f4d26eca7356260444b708c946120054"
+parameter_count: 102
+automatic_repairs: 0
+notes: "User approved direct joint 67-parameter version; latest inputs remain fixed"

@@ -1,0 +1,123 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+
+# OS & IDE
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
+.trae/
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.dbg/
+.zcode/
+node_modules/
+
+# DSSAT / PEST++ Output Files & Intermediate Results
+*.OUT
+*.LST
+*.pst
+*.par
+*.rec
+*.rei
+*.res
+*.jco
+*.sen
+*.unc
+*.mtt
+*.svd
+*.sobs
+*.obs
+*.pcs
+*.pdc
+*.log
+*.rst
+*.nans.csv
+*_run_mapping.csv
+*.audit.csv
+Pest*.audit.csv
+
+# Binaries & Executables
+*.exe
+*.dll
+# Keep bundled PEST++ Windows binaries
+!pestpp-5.2.16-win/bin/*.exe
+!pestpp-5.2.16-win/bin/*.dll
+
+# Runtime Sandboxes and Execution Workspaces
+workspace/
+Workspace/Calibration_Results/
+Workspace/Sensitivity_Results/
+Workspace/Visualization_Results/
+Workspace/best_parameters.csv
+Workspace/calibration_results_analysis.csv
+Workspace/parameter_uncertainty_analysis.csv
+Workspace/sensitivity_report_morris.csv
+Workspace/tomato_cal.*
+Workspace/eggplant_stage2_v*
+Workspace/eggplant_v13.*
+Workspace/eggplant_v13pdc.csv
+Workspace/eggplant_v13pcs.csv
+Workspace/Sensitivity_Analyze/SA_Project_Output/
+**/_agents/
+.agents/
+**/.agents/
+_iso_runs/
+**/_iso_runs/
+scratch/
+tmp/
+/TMGRO048.CUL
+/TMGRO048.ECO
+/TMGRO048.SPE
+**/_seasons/
+**/failed_dssat_artifacts/
+failed_dssat_artifacts/
+macOS_*/
+windows/
+
+# Keep Workspace backward-compatible stubs and base templates
+!Workspace/*.py
+!Workspace/*.tpl
+!Workspace/*.ins
+!Workspace/*.base
+!Workspace/*.CUL
+!Workspace/*.ECO
+!Workspace/*.SPE
+!Workspace/*.SOL
+!Workspace/*.WTH
+!Workspace/*.TMA
+!Workspace/*.TMT
+!Workspace/*.TMX
+!Workspace/*.md
+!Workspace/*.csv
+!Workspace/DSSBatch.v48
+
+# Figures & Plotting Output Artifacts (Regenerable from scripts, excluded from lean core repo)
+figture/
+/figures/
+paper_figures/
+paper_data/
+workspace/figure_redesign_demo/
+paper/journal_guidelines/files/
+
+# Transient / Root Dumps
+2025春品质集.csv
+wAppDataLocalProgramsTraeresourcesappoutvsworkbenchcontribterminalcommonscripts*
+
+# Historical Forensic Experiment Derivatives
+data/user/experiments/*_crgro_y_v2/
+data/user/experiments/_bundle_repair_symbi_y_*.json
+data/user/experiments/xxql2501_sa_counterfactual_symbi_n_candidate_20260719/
+data/user/experiments/xxql2501_symbi_n_candidate_20260719/
+data/user/experiments/xxql2601_sa_controlled_candidate_20260720/
+data/user/experiments/xxql2601_sa_controlled_7t_candidate_20260720/
+data/user/experiments/xxql2601_sa_source_candidate_20260720/
+
+# macOS handoff
+.DS_Store
+/.local/
+/subprojects/critical_n/dssat_csm_os_4864/

@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_spring_pair_histbest_rtn_relax_20260730"
+crop: "eggplant"
+created_at: "2026-07-30T04:28:51Z"
+approved_at: "2026-07-30T04:28:51Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_spring_pair_histbest_rtn_relax_20260730.csv"
+derived_from_sha256: "4dbcc92128eac2f644cd7a11c2f9c280f6f402cab0e19d710258c450952e5af4"
+bounds_sha256: "4dbcc92128eac2f644cd7a11c2f9c280f6f402cab0e19d710258c450952e5af4"
+parameter_count: 72
+automatic_repairs: 0
+notes: "Historical v6 PlantN+SLPF bounds; 25SP+26SP four-corner calibration; RTNH4 lower=0.001 and RTNO3 lower=0.003 by user approval"

@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_gen_13trt_n1_fix_20260924"
+crop: "eggplant"
+created_at: "2026-09-24T05:26:32Z"
+approved_at: "2026-09-24T05:26:32Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "proposal_full_gen_13trt_n1_fix_20260924.csv"
+derived_from_sha256: "48a3dc68b87fe552e26d98212de199672c4e387bbee9df58c74101b359ae4891"
+bounds_sha256: "a18c4d719b74f658a124b0318aacc6d8a2524c2966e66b21dab39f682c13edc7"
+parameter_count: 168
+automatic_repairs: 0
+notes: "Fix N1 over-prediction and spring inversion via PROLFF[0.18,0.23], PROLFG[0.24,0.28], PROLFI[0.28,0.36], FNPGN2/LNREF[5.5,6.5], RTNO3[0.01,0.02], with fixed SLPF(25SP=0.88, 26SP=0.89), SLU1=2.5, SLDR=0.40, ICNS=1.0, FNPGN3/4=20, SASC=0.90"

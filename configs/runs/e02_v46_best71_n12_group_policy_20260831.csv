@@ -1,0 +1,17 @@
+group,phi_budget,note
+PHENO,0.10,PDAT only; ADAT/MDAT diagnostic
+CANOPY,1.00,No positive CANOPY observations are allowed by the objective contract
+CANOPY_INCREMENT,0.60,No positive CANOPY_INCREMENT observations are allowed by the objective contract
+CANOPY_TERMINAL,0.40,Exact-date terminal LAI retained
+BIOMASS,1.00,Raw LWAD/SWAD states diagnostic only
+BIOMASS_INCREMENT,0.30,Leaf/stem increments balanced against fruit scale
+BIOMASS_TERMINAL,0.15,Terminal leaf/stem mass protected from dominating yield scale
+PLANT_N,1.00,Plant nitrogen diagnostic only unless audited observations exist
+HARVEST_FRESH_INCREMENT,3.75,Measured event fresh-harvest increments
+HARVEST_FRESH,4.50,Terminal cumulative fresh harvest; seasonal RRMSE lambda overrides
+HARVEST_FRESH_TREND,0.30,Intermediate cumulative fresh trend
+N_RESPONSE,0.025,Season x water-stratum N2/N0 and N1/N0 response
+W_RESPONSE,0.025,Season x nitrogen-stratum water response
+CUMULATIVE_HARVEST,1.00,Legacy diagnostic family
+INCREMENTAL_HARVEST,1.00,Legacy diagnostic family
+SOIL_WATER,0.05,Audited post-initial soil-water observations

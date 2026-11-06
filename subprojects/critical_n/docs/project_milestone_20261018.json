@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-18",
+  "milestone_title": "可复现器官氮机制研究平台与双春季受约束联合率定",
+  "user_designated_research_milestone": true,
+  "research_platform_milestone_reached": true,
+  "formal_scientific_promotion": false,
+  "independent_cross_environment_validation": false,
+  "quality_prediction_validated": false,
+  "common_guardrails": {
+    "passed": 15,
+    "total": 16
+  },
+  "current_run": "stable79_checkpointed150x5_20261018",
+  "model_binary": "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v13\\bin\\capacity_a.exe",
+  "model_binary_sha256": "dcdac47dbde6bc224d2f492845ac43973af60f2414cbf4cb7be85a8f722e070b",
+  "current_parameters": "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v13\\runs\\stable79_checkpointed150x5_20261018\\best_parameters.csv",
+  "current_parameters_sha256": "1fd25fe4d7a41521dadbd26b41cdec3775360c0e301077d7e109f650ff91effe",
+  "preserved_reference_run": "expanded_joint79_150x5",
+  "scope": "documentation milestone, not replacement of original run acceptance flags",
+  "novelty": "project-specific integration and implementation candidates; no verified world-first claim",
+  "prior_reports_retained": true
+}

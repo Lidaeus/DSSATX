@@ -1,0 +1,18 @@
+﻿group,phi_budget,note
+PHENO,0.1,PDAT only; ADAT/MDAT diagnostic
+CANOPY,1.0,Measured multi-date LAI state constraint retained
+CANOPY_INCREMENT,0.6,LAI increments retained
+CANOPY_TERMINAL,0.4,Exact-date terminal LAI retained
+BIOMASS,1.0,Raw LWAD/SWAD states diagnostic only
+BIOMASS_INCREMENT,0.3,Leaf/stem increments balanced against fruit scale
+BIOMASS_TERMINAL,0.15,Terminal leaf/stem mass protected from dominating yield scale
+PLANT_N,1.0,Plant nitrogen where audited observations exist
+HARVEST_FRESH_INCREMENT,3.75,Measured event fresh-harvest increments (3x budget)
+HARVEST_FRESH,4.5,Terminal cumulative fresh harvest; seasonal RRMSE lambda overrides static budget (3x budget)
+HARVEST_FRESH_TREND,0.3,Intermediate cumulative fresh trend diagnostic guard (3x budget)
+N_RESPONSE,0.075,v47 response strength tripled; executable NSE lambda is set in design
+W_RESPONSE,0.075,v47 response strength tripled; executable NSE lambda is set in design
+CUMULATIVE_HARVEST,1.0,Legacy diagnostic family
+INCREMENTAL_HARVEST,1.0,Legacy diagnostic family
+SOIL_WATER,0.05,Audited post-initial soil-water observations
+CANOPY_HEIGHT,0.45,One tenth of terminal HARVEST_FRESH budget 4.50

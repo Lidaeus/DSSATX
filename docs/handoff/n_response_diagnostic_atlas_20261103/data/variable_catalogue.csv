@@ -1,0 +1,59 @@
+variable,label,unit,temporal_type,observed_family,available
+Q_total,等效无机氮库 Q,kg N/ha,stock,,True
+Q_NO3,Q中的硝态氮,kg N/ha,stock,,True
+Q_NH4,Q中的铵态氮,kg N/ha,stock,,True
+A_daily,实际日同化氮,kg N/ha/d,flux,,True
+A_nitrate,硝态氮同化,kg N/ha/d,flux,,True
+A_ammonium,铵态氮同化,kg N/ha/d,flux,,True
+A_cumulative,累计同化氮（不含初始库存）,kg N/ha,cumulative,,True
+U_daily,根系实际吸氮,kg N/ha/d,flux,,True
+U_cumulative,累计根系吸氮,kg N/ha,cumulative,,True
+organ_Norg,站存器官有机氮合计,kg N/ha,stock,,True
+plant_N_total,全株有机＋无机N库存,kg N/ha,stock,,True
+leaf_Corg_pct,叶片有机氮浓度,% DM,concentration,LEAF_N_CONCENTRATION,True
+stem_Corg_pct,茎有机氮浓度,% DM,concentration,STEM_N_CONCENTRATION,True
+canopy_Corg_pct,茎叶加权有机氮浓度,% DM,concentration,,True
+canopy_Ctotal_pct,茎叶加权总N浓度（含Q）,% DM,concentration,,True
+lai,站存 LAI,m2/m2,state,CANOPY_LAI,True
+LAI_new,每日新增叶面积,m2/m2/d,flux,,True
+LAI_lost,每日损失叶面积,m2/m2/d,flux,,True
+leaf_DM,站存叶干重,kg DM/ha,stock,LEAF_DRY_MASS,True
+leaf_SLA,新叶环境比叶面积,m2/kg DM,state,,True
+leaf_DM_new,每日新叶组装干重,kg DM/ha/d,flux,,True
+leaf_acceptance,实际新叶／请求新叶,0–1,factor,,True
+PG_daily,实际冠层日光合碳输入 PG,kg CH2O/ha/d,flux,,True
+PG_cumulative,累计冠层光合碳输入,t CH2O/ha,cumulative,,True
+PG_leaf_area,PG／LAI（冠层平均面积指标）,g CH2O/m2 leaf/d,derived,,True
+photo_N_mean,实际光合氮能力因子,0–1,factor,,True
+photo_QE_mean,实际量子效率氮因子,0–1,factor,,True
+yield_cumulative,累计采收鲜果量,t fresh/ha,cumulative,,True
+yield_event,单次采收鲜果量,t fresh/ha/event,event,HARVEST_FRESH_EVENT,True
+R_total,叶茎有机储备 R,kg N/ha,stock,,True
+leaf_QNO3,叶等效硝态Q,kg N/ha,stock,,True
+leaf_QNH4,叶等效铵态Q,kg N/ha,stock,,True
+leaf_R,叶有机储备 R,kg N/ha,stock,,True
+leaf_Nnonreserve,叶非储备有机N,kg N/ha,stock,,True
+stem_QNO3,茎等效硝态Q,kg N/ha,stock,,True
+stem_QNH4,茎等效铵态Q,kg N/ha,stock,,True
+stem_R,茎有机储备 R,kg N/ha,stock,,True
+stem_Nnonreserve,茎非储备有机N,kg N/ha,stock,,True
+root_QNO3,根等效硝态Q,kg N/ha,stock,,True
+root_QNH4,根等效铵态Q,kg N/ha,stock,,True
+root_Norg,根有机氮,kg N/ha,stock,,True
+fruit_Norg,站存果实有机氮,kg N/ha,stock,,True
+NNI_raw_leaf,叶经典有机 NNI = Corg/Ncrit,比值,index,,True
+NNI_raw_stem,茎经典有机 NNI = Corg/Ncrit,比值,index,,True
+NNI_functional_leaf,叶非储备带宽状态 z,未截断,index,,True
+NNI_functional_stem,茎非储备带宽状态 z,未截断,index,,True
+growth_day,当日共享生长氮状态 G,0–1,factor,,True
+NSTRES,实际传入生长的 NSTRES,0–1,factor,,True
+state_response,新叶氮响应 h(G),0–1,factor,,True
+pod_n_factor,坐果潜力氮因子,0–1,factor,,True
+mob_function_gate,健康功能N动员严重度门控,0–1,factor,,True
+functional_deficit_leaf,叶非储备N距临界需要的缺口,kg N/ha,stock,,True
+functional_surplus_leaf,叶非储备N距临界需要的富余,kg N/ha,stock,,True
+leaf_N_functional_area,低端参考以上的非储备叶N／面积,g N/m2 leaf,derived,,True
+leaf_Norg_area,有机叶N／叶面积,g N/m2 leaf,derived,,True
+MF,质流候选供给（非实际吸收）,kg N/ha/d,potential,,True
+Diff,有效扩散潜力（非实际吸收）,kg N/ha/d,potential,,True
+membrane,根膜吸收潜力,kg N/ha/d,potential,,True

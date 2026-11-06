@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_selected8_water_followup_20260818"
+crop: "eggplant"
+created_at: "2026-08-18T14:43:25Z"
+approved_at: "2026-08-18T14:43:25Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_selected8_water_followup_20260818.csv"
+derived_from_sha256: "a4b4b574a52297b9476531846238aeac2fa3e6d9c8442390cc266fd413f9ff15"
+bounds_sha256: "a4b4b574a52297b9476531846238aeac2fa3e6d9c8442390cc266fd413f9ff15"
+parameter_count: 110
+automatic_repairs: 0
+notes: "Selected-eight B objective; member39 anchor; OAT-approved PORMIN and SWBAR curve anchors"

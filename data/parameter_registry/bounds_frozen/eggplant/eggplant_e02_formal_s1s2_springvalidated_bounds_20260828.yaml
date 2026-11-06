@@ -1,0 +1,15 @@
+bounds_id: eggplant_e02_formal_s1s2_springvalidated_bounds_20260828
+crop: eggplant
+created_at: '2026-08-28T01:15:41.857374+00:00'
+status: frozen_user_approved
+active_parameter_count: 39
+init_anchor: s2_ordered51 current-soil deterministic candidate; best low-Phi S2 member
+  satisfying XMAGE < XFPHT
+boundary_rule: S1/S2 Q05-Q95 union plus 10% prior-span padding; pressured side retains
+  prior bound
+validation_priority: 25SP/26SP held-out spring treatments; 25FA locked
+history_decision: excluded after current-soil replay
+source_bounds:
+- D:\Tomato_Cal\data\parameter_registry\bounds_frozen\eggplant\eggplant_e02_s1_canopy_parallel_bounds_20260827.csv
+- D:\Tomato_Cal\data\parameter_registry\bounds_frozen\eggplant\eggplant_e02_s2_yield_parallel_bounds_20260827.csv
+validation_metrics_sha256: 2063a2a357b44414b3f1027f6fd3d4ad76833dcf686c6843523a2a9e16d56529

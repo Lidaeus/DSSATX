@@ -1,0 +1,66 @@
+﻿name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,review_note
+LFMAX,1.27,1.27,1.27,fixed,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+SIZLF,297.1,297.1,297.1,fixed,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+SLAVR,293.0,293.0,293.0,fixed,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+CSDL,12.33,12.33,12.33,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+PPSEN,0.0,0.0,0.0,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+THRSH,8.5,8.5,8.5,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+WTPSD,0.004,0.004,0.004,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+XFRT,0.99,0.99,0.99,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+EM-FL,23.3,23.3,23.3,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+FL-LF,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+FL-SD,8.1,8.1,8.1,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+FL-SH,2.0,2.0,2.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+PODUR,33.0,33.0,33.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+SD-PM,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+SDPDV,111.4,111.4,111.4,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+SFDUR,11.7,11.7,11.7,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+RHGHT,1.7,1.7,1.7,fixed,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+RWDTH,1.6,1.6,1.6,fixed,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+TRIFL,0.64,0.64,0.64,fixed,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+EM-V1,22.0,22.0,22.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+FL-VS,100.0,100.0,100.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+JU-R0,3.8,3.8,3.8,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+LNGSH,39.0,39.0,39.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+PL-EM,11.4,11.4,11.4,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+PM06,0.5,0.5,0.5,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+PM09,0.97,0.97,0.97,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+V1-JU,0.0,0.0,0.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+XFINT,0.3,0.3,0.3,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+XFPHT,38.8,38.8,38.8,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+XMAGE,13.5,13.5,13.5,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+KCAN,0.66,0.66,0.66,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+KC_SLOPE,0.1,0.1,0.1,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+PARMAX,41.0,41.0,41.0,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+PHTMAX,61.0,61.0,61.0,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+ATOP,0.8,0.8,0.8,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+FRCNOD,0.05,0.05,0.05,fixed,SPE_Nodule,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+FRLFF,0.37,0.37,0.37,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+FRSTMF,0.53,0.53,0.53,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+PORPT,0.21,0.21,0.21,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+RTNO3,0.012,0.006,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,N-response subspace; user-approved lower-bound relaxation where specified
+RTNH4,0.012,0.004,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,N-response subspace; user-approved lower-bound relaxation where specified
+RTEXF,0.1,0.025,0.25,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,N-response subspace; user-approved lower-bound relaxation where specified
+WTFSD,0.55,0.55,0.55,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+EVMODC,0.0,0.0,0.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+FINREF,220.0,220.0,220.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+SIZREF,300.0,300.0,300.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+SLAREF,300.0,300.0,300.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+VSSINK,4.1,4.1,4.1,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+TB1,9.2,9.2,9.2,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+TB2,8.6,8.6,8.6,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+TB3,11.0,11.0,11.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+TM1,40.0,40.0,40.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+TM2,40.0,40.0,40.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+TM3,39.8,39.8,39.8,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+TO11,25.5,25.5,25.5,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+TO12,25.0,25.0,25.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+TO13,26.0,26.0,26.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+TO21,28.8,28.8,28.8,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+TO22,29.6,29.6,29.6,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+TO23,29.1,29.1,29.1,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,Fixed while identifying nitrogen response subspace
+NSTFAC,0.5,0.2,1.0,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,N-response subspace; user-approved lower-bound relaxation where specified
+NMOBMX,0.09,0.02,0.25,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,N-response subspace; user-approved lower-bound relaxation where specified
+NVSMOB,0.38,0.15,0.6,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,N-response subspace; user-approved lower-bound relaxation where specified
+NRCVR,0.15,0.03,0.35,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,N-response subspace; user-approved lower-bound relaxation where specified
+SOIL_SLPF,0.92,0.65,1.0,active,SOIL_Fertility,SOIL,SOIL.SOL,TM0008,TM0001,both,User-required DSSAT SLPF soil fertility index

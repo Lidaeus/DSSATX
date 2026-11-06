@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "design_id": "eggplant_e02_single23_26sp_v1",
+  "diagnostic_single_season": true,
+  "cultivar_identity": "same_eggplant_cultivar",
+  "shared_parameter_scope": "single-season conditional calibration; 26SP enters model development and is not independent validation",
+  "observation_policy": "configs/runs/assumption_based_sigma_v5_dryonly.csv",
+  "group_policy": "configs/runs/t10_dryonly_group_policy_v1.csv",
+  "seasons": [
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data\\user\\experiments\\xxql2601_actual_trial_calibration_v2_20260726",
+      "bundle_manifest_sha256": "3694d955d11e305e9e9a4e42751c4b4cdffe97a7a28a5c3c1fb05875a2c02b69",
+      "role": "calibration",
+      "treatments": [
+        1,
+        3,
+        4,
+        6,
+        7,
+        9,
+        10,
+        12
+      ]
+    }
+  ],
+  "t10_scheme": {
+    "purpose": "E02 formal single-season 23-parameter conditional calibration",
+    "harvest_contract": "dry_only_chpdt",
+    "log_transform": "ln((y+1)/1) for CHPDT cumulative",
+    "pwad_pwai_removed_from_phi": true,
+    "chfpw_removed_from_phi": true,
+    "sla_ref_fixed": 300,
+    "active_params_target": 23,
+    "virtual_terminal_harvest": true,
+    "bounded_nearest_read": "d+/-1 day window",
+    "seasonal_offsets": "none"
+  }
+}

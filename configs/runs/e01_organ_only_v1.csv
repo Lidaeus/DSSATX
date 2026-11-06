@@ -1,0 +1,14 @@
+group,transform,offset,reference,sigma,sigma_source,model_sigma,sigma_floor,group_multiplier,n_eff,phi_role,note
+ADAPM,raw,0,1,25.0,assumption,2.0,1.0,1.0,,diagnostic_only,Phenology; diagnostic in E01-O (organ-development sub-trial)
+MDAPM,raw,0,1,25.0,assumption,2.0,1.0,1.0,,diagnostic_only,Maturity date; unavailable (-99) in organ-development contract
+LAIXM,raw,0,1,0.8,assumption,0.2,0.1,1.0,,diagnostic_only,Maximum LAI diagnostic; LAID is the active canopy observation
+LAIDM,raw,0,1,2.0,assumption,0.5,0.2,1.0,,calibration,E01-O organ-development sub-trial: LAID is active for canopy initialization
+LWADM,raw,0,1,150.0,assumption,20.0,10.0,1.0,,calibration,E01-O organ-development sub-trial: LWAD is active for leaf mass initialization
+SWADM,raw,0,1,200.0,assumption,25.0,10.0,1.0,,calibration,E01-O organ-development sub-trial: SWAD is active for stem mass initialization
+CNAMM,raw,0,1,25.0,assumption,5.0,2.0,1.0,,diagnostic_only,Plant nitrogen amount; diagnostic in E01-O
+CHFPWM,log,1,1,250.0,assumption,30.0,20.0,1.25,,diagnostic_only,Fresh fruit cumulative harvest; diagnostic in E01-O; ln((y+1)/1) transform retained for token contract
+CHPDTM,log,1,1,200.0,assumption,25.0,15.0,1.25,,diagnostic_only,Dry fruit cumulative harvest; diagnostic in E01-O (NOT the active target in this sub-trial); ln((y+1)/1) transform retained for token contract
+HIAMM,raw,0,1,0.10,assumption,0.02,0.01,1.0,,sensitivity_only,Harvest index not a calibration target
+PWADM,raw,0,1,250.0,assumption,30.0,20.0,1.0,,diagnostic_only,Legacy PWAD; diagnostic only
+PWAIM,raw,0,1,250.0,assumption,30.0,20.0,1.0,,diagnostic_only,Legacy PWAI; diagnostic only
+SOIL_WATER,raw,0,1,,,,,,,calibration,Audited soil-water observations; sigma comes from observation_uncertainty.csv and group multiplier is applied by T8 audit

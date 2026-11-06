@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_sobol23_e01review_laisafe_v3_20260728"
+crop: "eggplant"
+created_at: "2026-07-28T00:02:26Z"
+approved_at: "2026-07-28T00:02:26Z"
+approved_by: "Codex"
+review_status: "approved"
+derived_from: "eggplant_e02_sobol23_e01review_laisafe_v3_20260728.csv"
+derived_from_sha256: "3d06a4cc3376b050da19129cbb00ea2fceae26eab177c6908eceef86c5655ffb"
+bounds_sha256: "d99fdaa3274029c08f58884d63ba18f1e890c01c20243ad8c54a6c2bfd3a93be"
+parameter_count: 64
+automatic_repairs: 0
+notes: "E01 150x5 review plus corrected formal 8-treatment smoke; v3 enforces empirical LAI<=10 guard after v2 remained above threshold."

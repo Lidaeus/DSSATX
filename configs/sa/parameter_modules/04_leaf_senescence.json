@@ -1,0 +1,22 @@
+{
+  "module_id": "leaf_senescence",
+  "display_name_en": "Leaf Senescence",
+  "display_name_zh": "叶片衰老",
+  "priority": "batch_1",
+  "required_observations": ["green_leaf_area", "senesced_leaf_area"],
+  "parameters": [
+    {"name": "SENRTE", "location": "SPE", "physical_bounds": [0, 5], "default_bounds": [0.5, 2.0],
+     "role": "scalar", "init_source": "SPE line 69, position 1",
+     "units": "1/d", "scientific_note": "Base rate of leaf senescence.",
+     "existing_v4": false},
+    {"name": "SENDAY", "location": "SPE", "physical_bounds": [0, 0.2], "default_bounds": [0.01, 0.05],
+     "role": "scalar", "init_source": "SPE line 69, position 3",
+     "units": "1/d", "scientific_note": "Daily fraction senescence rate (thermal/stress-driven).",
+     "existing_v4": false},
+    {"name": "SENPOR_LATE", "location": "SPE", "physical_bounds": [0, 1], "default_bounds": [0.05, 0.3],
+     "role": "array_anchor", "init_source": "SPE senescence SENPOR array, late anchor",
+     "units": "fraction", "scientific_note": "Late-stage anchor of SENPOR (senescence partition array).",
+     "existing_v4": false, "anchor_of": "SENPOR", "anchor_index": 4}
+  ],
+  "constraints": []
+}

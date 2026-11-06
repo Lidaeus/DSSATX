@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_genetic_98pct_v8_20260917"
+crop: "eggplant"
+created_at: "2026-09-17T07:45:34Z"
+approved_at: "2026-09-17T07:45:34Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_genetic_98pct_v8_20260917.csv"
+derived_from_sha256: "0a025abfe6270dbd384a5b7fdeb36d64eb1afbd799970aad5b87775314bdfd51"
+bounds_sha256: "186a61734cc372990fb6f30757782b16a795366b4fc69b3340a2b1e8a6501188"
+parameter_count: 163
+automatic_repairs: 0
+notes: "V8 optimization: activate lnref [4.60, 5.20], relax frlff upper to 0.45, slavr lower to 115, tb1 lower to 6.5, tm1 upper to 47.5, maintain 80cm SRGF truncation and V7 proven bounds"

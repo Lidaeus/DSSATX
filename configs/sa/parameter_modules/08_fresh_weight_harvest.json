@@ -1,0 +1,22 @@
+{
+  "module_id": "fresh_weight_harvest",
+  "display_name_en": "Fresh Weight & Harvest",
+  "display_name_zh": "鲜重与采收",
+  "priority": "conditional",
+  "required_observations": ["fresh_fruit_mass", "dry_matter_content"],
+  "parameters": [
+    {"name": "DMC0", "location": "SPE", "physical_bounds": [0.02, 0.3], "default_bounds": [0.05, 0.15],
+     "role": "scalar", "init_source": "REQUIRES TEMPLATE MODIFICATION: not yet in SPE",
+     "units": "fraction", "scientific_note": "Initial fruit dry matter content; template line must be added. Range-constrained 0 < DMC < 1.",
+     "existing_v4": false},
+    {"name": "DMCH", "location": "SPE", "physical_bounds": [0.05, 0.5], "default_bounds": [0.1, 0.3],
+     "role": "scalar", "init_source": "REQUIRES TEMPLATE MODIFICATION",
+     "units": "fraction", "scientific_note": "Harvest-stage fruit dry matter content; template line must be added. Range-constrained 0 < DMC < 1.",
+     "existing_v4": false},
+    {"name": "KDMC", "location": "SPE", "physical_bounds": [0, 5], "default_bounds": [0.5, 2.0],
+     "role": "scalar", "init_source": "REQUIRES TEMPLATE MODIFICATION",
+     "units": "dimensionless", "scientific_note": "Rate coefficient for dry matter content evolution; template line must be added. Range-constrained 0 < DMC < 1.",
+     "existing_v4": false}
+  ],
+  "constraints": []
+}

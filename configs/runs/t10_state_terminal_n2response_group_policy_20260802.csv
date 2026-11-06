@@ -1,0 +1,12 @@
+group,phi_budget,note
+PHENO,0.10,Phenology retained only where policy activates it
+CANOPY,1.00,LAIX and measured LAID states
+BIOMASS,1.00,Measured LWAD and SWAD states
+PLANT_N,1.00,SNAM plus LNAM
+HARVEST_FRESH,1.25,Diagnostic-only family
+HARVEST_DRY_INCREMENT,1.25,Measured event dry-yield increments
+HARVEST_DRY_TOTAL,0.50,One terminal cumulative dry-yield anchor per treatment
+N_RESPONSE,0.75,Strictly paired terminal N2-minus-N0 contrast within each FileX water level
+CUMULATIVE_HARVEST,1.00,Legacy diagnostic fallback
+INCREMENTAL_HARVEST,1.00,Legacy diagnostic fallback
+SOIL_WATER,1.00,Audited volumetric soil-water observations

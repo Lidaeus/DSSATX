@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "status": "requires_revalidation_after_20260923_source_refresh",
+  "executable": false,
+  "design_id": "full_gen_13trt_final_calib_200x8_20260922",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "full crop pool plus narrow soil profile",
+  "bounds_id": "eggplant_full_gen_fnpgn3_real_sh2o_13trt_20260922",
+  "observation_policy": "configs/runs/e02_formal_v47_free_nscale_observation_policy_20260901.csv",
+  "group_policy": "configs/runs/e02_formal_v48_n_gradient_water2x_group_policy_20260902.csv",
+  "purpose": "13-treatment final calibration C23 conditional prediction replay",
+  "seasons": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_corrected_20260923",
+      "bundle_manifest_sha256": "6cb772fad3e186e887d6ff770fad21a4e0cf14cfa895c14a1793b22c1c82f6ac",
+      "role": "calibration",
+      "treatments": [2, 3, 5, 6, 10, 13]
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_corrected_20260923",
+      "bundle_manifest_sha256": "0cd0925d470a05df1e554995d0001f82019979c2e0cc19c3421f59603bd64267",
+      "role": "calibration",
+      "treatments": [1, 2, 3, 5, 9, 11, 12]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_joint62_defaultn_replan_v1_20260730"
+crop: "eggplant"
+created_at: "2026-07-29T22:25:06Z"
+approved_at: "2026-07-29T22:25:06Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_joint62_v7_nstfac050_rhght035_20260730.csv"
+derived_from_sha256: "7a0094737a8d2beb3846099fabab30004d57653da588c1388b1bf335f29e5178"
+bounds_sha256: "fae5fd8106fe6cc332a1762eebc1f029f198cbad4040ffb45c3bf19085323d40"
+parameter_count: 72
+automatic_repairs: 0
+notes: "Default-N replan: SNO3=1, SNH4=0.5; RHGHT lower 0.35; RTNO3/RTNH4 lower 0.003/0.001; NSTFAC restored to 0.10; ADAP and MDAP diagnostic-only"

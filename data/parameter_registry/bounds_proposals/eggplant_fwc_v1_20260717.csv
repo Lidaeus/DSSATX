@@ -1,0 +1,161 @@
+name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,review_note
+LFMAX,1.27,1.27,1.36,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+SIZLF,297.1,297.1,297.1,fixed,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+SLAVR,293.0,293.0,293.0,fixed,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+CSDL,12.33,12.33,12.33,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+PPSEN,0.0,0.0,0.0,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+THRSH,8.5,8.5,8.5,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+WTPSD,0.004,0.004,0.004,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+XFRT,0.99,0.73,0.99,active,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+EM-FL,23.3,23.0,31.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+FL-LF,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+FL-SD,8.1,8.1,8.1,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+FL-SH,2.0,2.0,2.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+PODUR,33.0,33.0,33.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+SD-PM,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+SDPDV,111.4,111.4,111.4,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+SFDUR,11.7,11.7,11.7,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+RHGHT,1.7,1.7,1.7,fixed,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+RWDTH,1.6,0.7,1.6,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+TRIFL,0.64,0.2,0.85,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+EM-V1,10.4,10.4,10.4,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+FL-VS,100.0,100.0,100.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+JU-R0,3.8,3.8,3.8,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+LNGSH,39.0,39.0,39.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+PL-EM,11.4,11.4,11.4,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+PM06,0.5,0.35,0.65,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+PM09,0.97,0.97,0.97,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+V1-JU,0.0,0.0,0.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+XFINT,0.3,0.12,0.5,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+XFPHT,38.8,38.8,38.8,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,Range separated after formal preflight so every Morris sample preserves XMAGE < XFPHT
+XMAGE,13.5,13.5,13.5,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,P1-R1 candidate lower bound; preserves baseline and removed representative high-N numerical failures in corrected input replay
+KCAN,0.66,0.66,0.66,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+KC_SLOPE,0.1,0.1,0.1,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+PARMAX,41.0,41.0,41.0,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,V14 mode label normalized; approved by user on 2026-07-15
+PHTMAX,61.0,61.0,61.0,fixed,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+ATOP,0.8,0.5599999999999999,1.0,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+FRCNOD,0.05,0.05,0.05,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+FRLFF,0.37,0.259,0.481,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+FRSTMF,0.53,0.371,0.6890000000000001,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+PORPT,0.21,0.147,0.273,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+RTNO3,0.012,0.008,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+RTNH4,0.012,0.01,0.05,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+RTEXF,0.1,0.1,0.1,fixed,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+WTFSD,0.55,0.55,0.55,fixed,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+EVMODC,0.0,0.0,0.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+FINREF,220.0,220.0,220.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+SIZREF,300.0,300.0,300.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+SLAREF,300.0,300.0,300.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1-R1 candidate lower bound; preserves baseline and removed representative high-N numerical failures in corrected input replay
+VSSINK,4.1,4.1,4.1,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+TB1,9.2,9.2,9.2,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; approved by user on 2026-07-15
+TB2,8.6,8.0,12.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+TB3,11.0,11.0,11.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; approved by user on 2026-07-15
+TM1,40.0,40.0,40.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; approved by user on 2026-07-15
+TM2,34.3,33.0,40.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+TM3,39.8,39.8,39.8,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; approved by user on 2026-07-15
+TO11,25.5,25.5,25.5,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; approved by user on 2026-07-15
+TO12,27.1,22.0,27.5,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+TO13,26.0,26.0,26.0,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; approved by user on 2026-07-15
+TO21,28.8,28.8,28.8,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; approved by user on 2026-07-15
+TO22,29.6,28.0,32.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+TO23,29.1,29.1,29.1,fixed,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,P1 ordered temperature range; approved by user on 2026-07-15
+NSTFAC,0.5,0.3,0.85,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+NMOBMX,0.09,0.08,0.4,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+NVSMOB,0.38,0.2,0.5,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,v4 Sobol-guided: active per eggplant_p1_sobol_top20_v4_20260717 (ST-ranked in both domains)
+NRCVR,0.15,0.15,0.15,fixed,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,retained from V14 design; approved by user on 2026-07-15
+SOIL_SALB,0.13,0.13,0.13,fixed,SOIL_SurfaceHydro,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to versioned experiment soil profile
+SOIL_SLDR,0.27,0.27,0.27,fixed,SOIL_SurfaceHydro,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to versioned experiment soil profile
+SOIL_SLRO,81.0,81.0,81.0,fixed,SOIL_SurfaceHydro,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to versioned experiment soil profile
+SOIL_SLOC_01,1.03,1.03,1.03,fixed,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 20 cm
+SOIL_SBDM_01,1.36,1.36,1.36,fixed,SOIL_Physical,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 20 cm
+SOIL_SLLL_01,0.148,0.148,0.148,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 20 cm
+SOIL_SDUL_01,0.3,0.3,0.3,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 20 cm
+SOIL_SSAT_01,0.49,0.49,0.49,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 20 cm
+SOIL_SLOC_02,0.86,0.86,0.86,fixed,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 40 cm
+SOIL_SBDM_02,1.55,1.55,1.55,fixed,SOIL_Physical,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 40 cm
+SOIL_SLLL_02,0.153,0.153,0.153,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 40 cm
+SOIL_SDUL_02,0.31,0.31,0.31,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 40 cm
+SOIL_SSAT_02,0.43,0.43,0.43,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 40 cm
+SOIL_SLOC_03,0.77,0.77,0.77,fixed,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 60 cm
+SOIL_SBDM_03,1.56,1.56,1.56,fixed,SOIL_Physical,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 60 cm
+SOIL_SLLL_03,0.165,0.165,0.165,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 60 cm
+SOIL_SDUL_03,0.33,0.33,0.33,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 60 cm
+SOIL_SSAT_03,0.44,0.44,0.44,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 60 cm
+SOIL_SLOC_04,0.65,0.65,0.65,fixed,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 80 cm
+SOIL_SBDM_04,1.51,1.51,1.51,fixed,SOIL_Physical,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 80 cm
+SOIL_SLLL_04,0.157,0.157,0.157,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 80 cm
+SOIL_SDUL_04,0.32,0.32,0.32,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 80 cm
+SOIL_SSAT_04,0.46,0.46,0.46,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 80 cm
+SOIL_SLOC_05,0.54,0.54,0.54,fixed,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 100 cm
+SOIL_SBDM_05,1.47,1.47,1.47,fixed,SOIL_Physical,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 100 cm
+SOIL_SLLL_05,0.165,0.165,0.165,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 100 cm
+SOIL_SDUL_05,0.33,0.33,0.33,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 100 cm
+SOIL_SSAT_05,0.5,0.5,0.5,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 100 cm
+SOIL_SLOC_06,0.16,0.16,0.16,fixed,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 145 cm
+SOIL_SBDM_06,1.59,1.59,1.59,fixed,SOIL_Physical,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 145 cm
+SOIL_SLLL_06,0.182,0.182,0.182,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 145 cm
+SOIL_SDUL_06,0.291,0.291,0.291,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 145 cm
+SOIL_SSAT_06,0.334,0.334,0.334,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 145 cm
+SOIL_SLOC_07,0.09,0.09,0.09,fixed,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 175 cm
+SOIL_SBDM_07,1.61,1.61,1.61,fixed,SOIL_Physical,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 175 cm
+SOIL_SLLL_07,0.162,0.162,0.162,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 175 cm
+SOIL_SDUL_07,0.272,0.272,0.272,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 175 cm
+SOIL_SSAT_07,0.32,0.32,0.32,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 175 cm
+SOIL_SLOC_08,0.03,0.03,0.03,fixed,SOIL_Chemical,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 203 cm
+SOIL_SBDM_08,1.58,1.58,1.58,fixed,SOIL_Physical,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 203 cm
+SOIL_SLLL_08,0.154,0.154,0.154,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 203 cm
+SOIL_SDUL_08,0.263,0.263,0.263,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 203 cm
+SOIL_SSAT_08,0.319,0.319,0.319,fixed,SOIL_WaterRetention,SOIL,SOIL.SOL,TM0008,TM0001,both,Fixed to soil IBTM910017 layer boundary 203 cm
+IC_SH2O_TN02_L01,0.216,0.216,0.216,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC2, 20 cm; not a shared calibration parameter"
+IC_SH2O_TN02_L02,0.224,0.224,0.224,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC2, 40 cm; not a shared calibration parameter"
+IC_SH2O_TN02_L03,0.239,0.239,0.239,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC2, 60 cm; not a shared calibration parameter"
+IC_SH2O_TN02_L04,0.23,0.23,0.23,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC2, 80 cm; not a shared calibration parameter"
+IC_SH2O_TN02_L05,0.239,0.239,0.239,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC2, 100 cm; not a shared calibration parameter"
+IC_SH2O_TN03_L01,0.189,0.189,0.189,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC3, 20 cm; not a shared calibration parameter"
+IC_SH2O_TN03_L02,0.269,0.269,0.269,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC3, 40 cm; not a shared calibration parameter"
+IC_SH2O_TN03_L03,0.288,0.288,0.288,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC3, 60 cm; not a shared calibration parameter"
+IC_SH2O_TN03_L04,0.306,0.306,0.306,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC3, 80 cm; not a shared calibration parameter"
+IC_SH2O_TN03_L05,0.208,0.208,0.208,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC3, 100 cm; not a shared calibration parameter"
+IC_SH2O_TN04_L01,0.17,0.17,0.17,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC4, 20 cm; not a shared calibration parameter"
+IC_SH2O_TN04_L02,0.249,0.249,0.249,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC4, 40 cm; not a shared calibration parameter"
+IC_SH2O_TN04_L03,0.321,0.321,0.321,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC4, 60 cm; not a shared calibration parameter"
+IC_SH2O_TN04_L04,0.3,0.3,0.3,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC4, 80 cm; not a shared calibration parameter"
+IC_SH2O_TN04_L05,0.231,0.231,0.231,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC4, 100 cm; not a shared calibration parameter"
+IC_SH2O_TN05_L01,0.202,0.202,0.202,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC5, 20 cm; not a shared calibration parameter"
+IC_SH2O_TN05_L02,0.26,0.26,0.26,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC5, 40 cm; not a shared calibration parameter"
+IC_SH2O_TN05_L03,0.281,0.281,0.281,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC5, 60 cm; not a shared calibration parameter"
+IC_SH2O_TN05_L04,0.299,0.299,0.299,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC5, 80 cm; not a shared calibration parameter"
+IC_SH2O_TN05_L05,0.255,0.255,0.255,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC5, 100 cm; not a shared calibration parameter"
+IC_SH2O_TN09_L01,0.216,0.216,0.216,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC9, 20 cm; not a shared calibration parameter"
+IC_SH2O_TN09_L02,0.248,0.248,0.248,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC9, 40 cm; not a shared calibration parameter"
+IC_SH2O_TN09_L03,0.297,0.297,0.297,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC9, 60 cm; not a shared calibration parameter"
+IC_SH2O_TN09_L04,0.304,0.304,0.304,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC9, 80 cm; not a shared calibration parameter"
+IC_SH2O_TN09_L05,0.314,0.314,0.314,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC9, 100 cm; not a shared calibration parameter"
+IC_SH2O_TN10_L01,0.216,0.216,0.216,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC10, 20 cm; not a shared calibration parameter"
+IC_SH2O_TN10_L02,0.254,0.254,0.254,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC10, 40 cm; not a shared calibration parameter"
+IC_SH2O_TN10_L03,0.298,0.298,0.298,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC10, 60 cm; not a shared calibration parameter"
+IC_SH2O_TN10_L04,0.317,0.317,0.317,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC10, 80 cm; not a shared calibration parameter"
+IC_SH2O_TN10_L05,0.333,0.333,0.333,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC10, 100 cm; not a shared calibration parameter"
+IC_SH2O_TN11_L01,0.241,0.241,0.241,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC11, 20 cm; not a shared calibration parameter"
+IC_SH2O_TN11_L02,0.262,0.262,0.262,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC11, 40 cm; not a shared calibration parameter"
+IC_SH2O_TN11_L03,0.317,0.317,0.317,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC11, 60 cm; not a shared calibration parameter"
+IC_SH2O_TN11_L04,0.326,0.326,0.326,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC11, 80 cm; not a shared calibration parameter"
+IC_SH2O_TN11_L05,0.369,0.369,0.369,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC11, 100 cm; not a shared calibration parameter"
+IC_SH2O_TN12_L01,0.216,0.216,0.216,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC12, 20 cm; not a shared calibration parameter"
+IC_SH2O_TN12_L02,0.268,0.268,0.268,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC12, 40 cm; not a shared calibration parameter"
+IC_SH2O_TN12_L03,0.315,0.315,0.315,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC12, 60 cm; not a shared calibration parameter"
+IC_SH2O_TN12_L04,0.336,0.336,0.336,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC12, 80 cm; not a shared calibration parameter"
+IC_SH2O_TN12_L05,0.346,0.346,0.346,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC12, 100 cm; not a shared calibration parameter"
+IC_SH2O_TN13_L01,0.238,0.238,0.238,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC13, 20 cm; not a shared calibration parameter"
+IC_SH2O_TN13_L02,0.296,0.296,0.296,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC13, 40 cm; not a shared calibration parameter"
+IC_SH2O_TN13_L03,0.305,0.305,0.305,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC13, 60 cm; not a shared calibration parameter"
+IC_SH2O_TN13_L04,0.365,0.365,0.365,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC13, 80 cm; not a shared calibration parameter"
+IC_SH2O_TN13_L05,0.356,0.356,0.356,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC13, 100 cm; not a shared calibration parameter"
+IC_SH2O_TN14_L01,0.28,0.28,0.28,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC14, 20 cm; not a shared calibration parameter"
+IC_SH2O_TN14_L02,0.313,0.313,0.313,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC14, 40 cm; not a shared calibration parameter"
+IC_SH2O_TN14_L03,0.315,0.315,0.315,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC14, 60 cm; not a shared calibration parameter"
+IC_SH2O_TN14_L04,0.358,0.358,0.358,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC14, 80 cm; not a shared calibration parameter"
+IC_SH2O_TN14_L05,0.392,0.392,0.392,fixed,IC_InitialWater,IC,XXQL2501.TMX,TM0008,TM0001,both,"Disabled: treatment-specific IC14, 100 cm; not a shared calibration parameter"
+PCARSD,0.56,0.4,0.7,active,SPE_Composition,SPE,TMGRO048.SPE.base,TM0008,TM0001,both,Fruit-water-content SA candidate (SPE param)
+SDPROS,0.324,0.2,0.45,active,SPE_Composition,SPE,TMGRO048.SPE.base,TM0008,TM0001,both,Fruit-water-content SA candidate (SPE param)
+XMPAGE,100.0,60.0,150.0,active,SPE_SeedShell,SPE,TMGRO048.SPE.base,TM0008,TM0001,both,Fruit-water-content SA candidate (SPE param)

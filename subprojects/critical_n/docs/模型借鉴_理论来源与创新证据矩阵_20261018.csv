@@ -1,0 +1,19 @@
+﻿id,topic,origin_type,reference_ids,current_implementation,local_evidence,novelty_level,supported_wording,claim_boundary
+M01,DSSAT生命周期、土壤水氮、光合、物候与原生器官库存,直接代码继承,S01,继承DSSAT-CROPGRO/TMGRO048主体,n_buffer_v12/manifests/source_capacity_a.zip,非本项目创新,在DSSAT-CROPGRO框架内扩展器官氮机制,不宣称重建整个DSSAT或创造原生过程
+M02,临界氮稀释与NNI,经典理论 + 项目经验扩展,S02;S03;S08,叶/茎参照使用营养体DM及渐近下限曲线,n_buffer_v12/experiments/build_capacity_a/N_BUFFER_V2.f90::nb_targets,理论非原创；具体适配为贡献候选,将经典临界氮思想适配于多次采收营养体和器官参照,渐近下限、参数及叶/茎映射并非经典原式直接证明
+M03,最低/临界/最高氮边界,原设计明确模型概念借鉴,S04;S06,由组成、保护比例和容量密度构造嵌套量边界,n_buffer_v1/reports/升级设计方案 + frozen nb_relative_state,整合适配贡献候选,用有序边界区分不足、充足和富余状态,不是首次提出三边界或奢侈吸收
+M04,功能、结构、储备氮的区分,原设计明确概念借鉴；现补充官方源码定位,S05;S08,叶/茎快库为原生器官总N子集，非储备N作功能代理,n_buffer_v12/experiments/build_capacity_a/N_BUFFER_V2.f90,器官接口与集成贡献候选,实现不重复计量的器官氮缓冲与功能响应分离,并非照搬APSIM三套独立生化池；没有独立硝态/氨基态氮池
+M05,营养体DM避免采收分母突变,问题导向适配；有相关模型先例,S06;S08,NBUF路径Wveg=(WTLF+STMWT)/100，果实独立受体,n_buffer_v12/experiments/build_capacity_a/CROPGRO.for:892-894,场景适配贡献候选,避免直接以在株果量变化驱动营养体临界参照跳变,STICS已区分储藏器官；不能宣称首次分离果实与营养体
+M06,有向氮状态psi,项目重参数化；标准归一化思想,S03;S04,亏缺/富余侧分别以边界间隔归一化,n_buffer_v12/experiments/build_capacity_a/N_BUFFER_V2.f90::nb_relative_state,局部形式与集成候选,提供从亏缺到富余的统一状态描述,不是新营养定律；总状态不能代表所有器官功能状态
+M07,功能叶N光合响应,已有叶N理论 + 项目经验响应,S08,非储备叶N进入临界参照响应；不足侧2.5次幂、充足侧平台,n_buffer_v12/experiments/build_capacity_a/N_BUFFER_V2.f90::nb_photo_factor,接口贡献候选,抑制储备N直接虚增功能光合的路径,指数与临界映射为经验假设；无气体交换独立验证
+M08,HATS/LATS双亲和动力学,原设计明确STICS等模型启发,S06,分层双Michaelis-Menten形式，叠加已有RT缩放,n_buffer_v12/experiments/build_capacity_a/NUPTAK.for,借鉴方法；实现适配,引入外界浓度依赖的有效根吸收能力,不是新转运理论；当前常数未完成逐项数值来源确认
+M09,水流相关供氮项,DAISY概念启发；非方程移植,S07;S09,实际/回退水流与孔隙浓度项，加主动有效项,n_buffer_v12/experiments/build_capacity_a/NUPTAK.for,半经验整合候选,使有效吸氮潜力显式依赖水流、浓度和根长,未解根际径向PDE；质量输送与跨膜相加可能重叠；NH4吸附和温度简化
+M10,体内状态反馈根吸收,生理理论背景 + 项目经验函数,S08;S09,当前冠军保留V7正半区logistic；psi=0主动项右极限0.5,n_buffer_v11/docs/AD04_根反馈跳变_通道协调与碳氮补偿诊断_20261017.md,经验集成；非全域平滑创新,引入状态相关根吸收反馈并记录其条件效应,不能写所有根过程连续或更真实已被实验证明
+M11,名义库容、日速率、偏好目标分离,守恒原则 + 项目约束接口实现,S04;S08,严格容量与日充填预算；偏好计划不能替代实际接受上限,n_buffer_v12/docs/严格库容数学接口与初步诊断_20261017.md,本项目算法/工程贡献候选,在原生积分前协调有限受体、根预留及对应C费用,守恒本身不是原创；仍为日尺度顺序结算
+M12,未接受根N取消、种子返回与C退款,项目缺陷修复及接口设计,S01;S08,土壤积分前取消外源预留、撤销内源预留、返回种子N、对应C入储备,n_buffer_v12/experiments/build_capacity_a/N_BUFFER_V2.f90;CROPGRO.for,实现贡献候选,避免以无界入库或删除残差实现表面守恒,不是已吸收N真实外排；退款未重算同日生长
+M13,动态果氮、双无机/有机氮形态库,历史研究候选；非当前主线,S08,V8-V11部分候选存在；当前冠军未采用完整双形态体系,n_buffer_v9/docs; n_buffer_v11/docs,不能列为当前已实现创新,保留为后续质量机制的可检验扩展方向,不能把历史分支模块并入当前模型说明
+M14,定宽注入、小数施肥、单位与队列一致性,原框架继承 + 项目工程修复,S01,原生回读、输入精度、整株/队列误差边界审计,n_buffer_v7/vendor/InputModule; n_buffer_v12/manifests,可复现工程贡献,保证参数、施肥量与原生模拟内容对应,数值格式修复不是新的植物理论
+M15,双季多目标PEST-IES,外部成熟方法 + 项目应用,S10,1123目标、79物理活跃维、真实PEST-IES,n_buffer_v13/launch_checkpointed_ies.py,应用与工作流贡献,联合约束末产量、过程、器官N及水氮差分,不宣称发明IES；两季均为率定
+M16,失败提案检查点保留,基于PEST重启的项目工作流,S10,5段各一次更新，保留同成员上次有效参数/输出对,n_buffer_v13/docs/率定改进登记_20261018.md,工作流贡献候选,降低本次条件局部率定的永久成员损失,不是新后验采样算法或98%全域可用性证明
+M17,全精度重放与多账本证据链,通用复现原则 + 项目集成,S01;S10,1123预测、20账本、900检查点配对、冻结哈希,n_buffer_v13/runs/stable79_checkpointed150x5_20261018/independent_verification.json,可复现研究贡献,将实现正确、观测可用、拟合表现与科研验收分开报告,确定性闭合不能独立证明生理正确
+M18,果实品质预测,未来研究接口,S08,目前仅有总N、DM、C分配与采收状态基础,docs/论文定位与证据路线_20261018.md,尚未实现/验证的创新方向,为品质模型构建提供状态和通量基础,不宣称已能准确预测硝酸盐、糖酸、花青素或真实蛋白

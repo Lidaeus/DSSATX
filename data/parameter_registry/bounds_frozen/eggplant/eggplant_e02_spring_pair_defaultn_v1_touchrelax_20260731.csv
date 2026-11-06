@@ -1,0 +1,73 @@
+name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,review_note
+LFMAX,1.27,1.0,1.36,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,20260731 touch-relax after fix6: widen lower bound because posterior lower-touch exceeded 70 percent
+SIZLF,320.622,250.0,350.0,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+SLAVR,282.97,250.0,300.0,active,CUL_Growth,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+CSDL,12.33,12.33,12.33,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,inherit spring-pair default-N v1 fixed row unchanged
+PPSEN,0.0,0.0,0.0,fixed,CUL_Photoperiod,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,inherit spring-pair default-N v1 fixed row unchanged
+THRSH,8.5,8.5,8.5,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,inherit spring-pair default-N v1 fixed row unchanged
+WTPSD,0.004,0.004,0.004,fixed,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,inherit spring-pair default-N v1 fixed row unchanged
+XFRT,0.986485,0.73,0.99,active,CUL_HarvestPartition,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+EM-FL,26.3177,23.0,42.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+FL-LF,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,inherit spring-pair default-N v1 fixed row unchanged
+FL-SD,7.0,4.0,21.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,20260731 touch-relax after fix6: widen lower bound because posterior lower-touch exceeded 70 percent
+FL-SH,3.28054,1.0,4.6,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+PODUR,30.0,20.0,58.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,20260731 touch-relax after fix6: widen lower bound because posterior lower-touch exceeded 70 percent
+SD-PM,400.0,400.0,400.0,fixed,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,inherit spring-pair default-N v1 fixed row unchanged
+SDPDV,100.0,100.0,300.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+SFDUR,27.0,10.0,35.0,active,CUL_PhenologyHarvest,CUL,TMGRO048.CUL.base,TM0008,TM0001,both,20260731 touch-relax after fix6: widen upper bound because posterior upper-touch exceeded 70 percent
+RHGHT,1.34655,0.9,2.47,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,20260731 touch-relax after fix6: widen lower bound because posterior lower-touch exceeded 70 percent
+RWDTH,1.6,0.7,2.0,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+TRIFL,0.64,0.35,0.8,active,ECO_Architecture,ECO,TMGRO048.ECO,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+EM-V1,15.1997,10.32,20.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,20260731 touch-relax after fix6: widen upper bound because posterior upper-touch exceeded 70 percent
+FL-VS,120.0,120.0,120.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,inherit spring-pair default-N v1 fixed FL-VS 120 unchanged
+JU-R0,3.8,2.0,12.0,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+LNGSH,31.2,25.0,46.8,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,20260731 touch-relax after fix6: widen lower bound because posterior lower-touch exceeded 70 percent
+PL-EM,6.72445,5.92,8.88,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+PM06,0.697848,0.48,0.72,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+PM09,0.6,0.6,0.9,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+V1-JU,0.0,0.0,0.0,fixed,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,inherit spring-pair default-N v1 fixed row unchanged
+XFINT,0.35729,0.24,0.36,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+XFPHT,29.04,19.36,29.04,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+XMAGE,14.7609,12.0,16.5,active,ECO_Phenology,ECO,TMGRO048.ECO,TM0008,TM0001,both,20260731 touch-relax after fix6: widen lower bound because posterior lower-touch exceeded 70 percent while preserving XMAGE lower than XFPHT lower
+KCAN,0.603964,0.5025,0.8375,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+KC_SLOPE,0.09,0.03,0.15,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 touch-relax after fix6: widen lower bound because posterior lower-touch exceeded 70 percent
+PARMAX,29.2623,25.0,45.0,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+PHTMAX,53.9978,40.0,60.0,active,SPE_Photosynthesis,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+ATOP,0.773962,0.6,1.0,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+FRCNOD,0.05,0.05,0.05,fixed,SPE_Nodule,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 fixed row unchanged
+FRLFF,0.288287,0.28,0.32,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+FRSTMF,0.390404,0.3675,0.6125,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+PORPT,0.1575,0.10,0.2625,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 touch-relax after fix6: widen lower bound because posterior lower-touch exceeded 70 percent
+RTNO3,0.0401964,0.015,0.08,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 touch-relax after fix6: widen upper bound because posterior upper-touch exceeded 70 percent
+RTNH4,0.0183675,0.01,0.04,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+RTEXF,0.141198,0.08,0.204,active,SPE_RootNitrogen,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 touch-relax after fix6: widen lower bound because posterior lower-touch exceeded 70 percent
+WTFSD,0.509342,0.4125,0.6875,active,SPE_RootWater,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+EVMODC,0.0,0.0,0.0,fixed,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 fixed row unchanged
+FINREF,263.521,154.0,286.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+SIZREF,284.421,210.0,390.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+SLAREF,343.991,210.0,390.0,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+VSSINK,2.76977,1.61,2.99,active,SPE_SourceSink,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+TB1,8.67475,6.5,9.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+TB2,10.5,10.5,11.8,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+TB3,11.8409,8.0,14.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 touch-relax after fix6: widen upper bound because posterior upper-touch exceeded 70 percent
+TM1,38.1836,36.5,40.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+TM2,40.0,36.5,48.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+TM3,39.8,36.5,44.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+TO11,25.5,18.0,27.4,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+TO12,25.0,18.0,27.4,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+TO13,26.0,18.0,27.4,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 touch-relax note: kept original upper bound because frozen-bound validation requires independent ranges to guarantee TO13 lower than TO23
+TO21,28.8,27.5,33.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+TO22,29.6,27.5,36.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+TO23,29.1,27.5,36.0,active,SPE_TempStages,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+NSTFAC,0.5,0.2,1.0,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+NMOBMX,0.25,0.10,0.5,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,20260731 touch-relax after fix6: widen lower bound because posterior lower-touch exceeded 70 percent
+NVSMOB,0.33133,0.248,0.372,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+NRCVR,0.15,0.03,0.35,active,SPE_Other,SPE,TMGRO048.SPE,TM0008,TM0001,both,inherit spring-pair default-N v1 bounds unchanged
+DLFMAX_AUT,0.0,-0.1625189295,0.1397619424,disabled,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,inherit spring-pair default-N v1 disabled row unchanged
+DSLAVR_AUT,0.0,-0.1625189295,0.1397619424,disabled,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,inherit spring-pair default-N v1 disabled row unchanged
+DXFRT_AUT,0.0,-0.35,0.35,disabled,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,inherit spring-pair default-N v1 disabled row unchanged
+DSFDUR_AUT,0.0,-0.1625189295,0.1397619424,disabled,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,inherit spring-pair default-N v1 disabled row unchanged
+DTB1_AUT,0.0,-2.0,2.0,disabled,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,inherit spring-pair default-N v1 disabled row unchanged
+DTB2_AUT,0.0,-2.0,2.0,disabled,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,inherit spring-pair default-N v1 disabled row unchanged
+DTB3_AUT,0.0,-2.0,2.0,disabled,SeasonalOffset,DERIVED,seasonal_offsets.json,TM0008,TM0001,both,inherit spring-pair default-N v1 disabled row unchanged
+SOIL_SLPF,0.95,0.9,0.96,active,SOIL_Fertility,SOIL,SOIL.SOL,TM0008,TM0001,both,inherit spring-pair default-N v1 user-approved SLPF bounds unchanged

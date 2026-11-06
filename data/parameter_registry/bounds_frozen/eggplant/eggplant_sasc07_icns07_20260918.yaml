@@ -1,0 +1,12 @@
+bounds_id: "eggplant_sasc07_icns07_20260918"
+crop: "eggplant"
+created_at: "2026-09-18T00:41:00Z"
+approved_at: "2026-09-18T00:41:00Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_sasc07_icns07_20260918.csv"
+derived_from_sha256: "a9af46e255456890f4c35bf2a22b9a0fef54868fe38ecd12ce0670977cd73b2c"
+bounds_sha256: "2f124dad539f4b9d874bc1592cd33cbb0e2c04e1b8eca89181680c7beb82cbce"
+parameter_count: 164
+automatic_repairs: 0
+notes: "SASC_RATIO fixed to 0.70, ICNS_26SP fixed to 0.70, full genetic suite active"

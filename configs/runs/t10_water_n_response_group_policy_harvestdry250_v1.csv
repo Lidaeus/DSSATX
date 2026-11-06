@@ -1,0 +1,11 @@
+group,phi_budget,note
+PHENO,0.10,PDAT flowering phenology; MDAT and ADAT diagnostic-only
+CANOPY,1.00,LAID process and LAIX
+BIOMASS,1.00,LWAD plus SWAD
+PLANT_N,1.00,SNAM plus LNAM only
+HARVEST_FRESH,1.25,CHFPW diagnostic-only
+HARVEST_DRY,1.75,70 percent of approved 2.50 dry-harvest budget for absolute CHPDT and HPODW
+N_RESPONSE,0.75,30 percent of approved 2.50 dry-harvest budget for within-water N1/N2/N3 versus N0 log cumulative-yield contrasts
+CUMULATIVE_HARVEST,1.00,Legacy PWAD diagnostic-only fallback
+INCREMENTAL_HARVEST,1.00,Legacy PWAI diagnostic-only fallback
+SOIL_WATER,1.00,Audited volumetric soil-water process group

@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "status": "proposed_non_executable",
+  "design_id": "e02_from_scratch_stage_plan_20260826",
+  "cultivar_identity": "TM0008",
+  "shared_parameter_scope": "genetic_only",
+  "soil_scheme": {
+    "id": "10L-B",
+    "bottoms_cm": [2, 4, 15, 30, 40, 60, 80, 100, 140, 180],
+    "tillage_depth_cm": 60,
+    "soil_and_initial_conditions": "fixed"
+  },
+  "calibration_seasons": ["25SP", "26SP"],
+  "locked_validation_season": "25FA",
+  "role_definition": "25SP calibration TN2,5,10,13; 26SP calibration TN1,3,9,12; all other treatments diagnostic; 25FA never tunes or expands bounds",
+  "objective_contract": {
+    "policy_csv": "configs/runs/e02_from_scratch_objective_contract_20260826.csv",
+    "group_policy_csv": "configs/runs/e02_from_scratch_group_policy_20260826.csv",
+    "mapping_csv": "configs/runs/e02_from_scratch_water_n_mapping_20260826.csv",
+    "n_response": {
+      "enabled_in_final": true,
+      "contrast": "same_water_N3_minus_N0",
+      "weighting": "season_nse",
+      "lambda_per_season": 1.0,
+      "sst_scope": "season_x_water_stratum"
+    },
+    "w_response": {
+      "enabled_in_final": true,
+      "contrast_by_season": {"25SP": "W3_minus_W1", "26SP": "W3_minus_W1"},
+      "weighting": "season_nse",
+      "lambda_per_season_initial": 0.5,
+      "lambda_per_season_escalation": 1.0,
+      "sst_scope": "season_x_nitrogen_stratum"
+    },
+    "dry_harvest": "event_increment_plus_one_terminal_cumulative",
+    "terminal_lai": "last_observation_and_simulation_on_same_date",
+    "laix": "diagnostic_only",
+    "intermediate_cumulative_dry": "diagnostic_only"
+  },
+  "stages": [
+    {"id": "S0", "purpose": "input/objective/hash preflight", "num_reals": 1, "noptmax": 0},
+    {"id": "S1", "purpose": "canopy_development_structure", "fixed_from": "baseline"},
+    {"id": "S2", "purpose": "final_yield_and_yield_process", "fixed_from": "S1 posterior"},
+    {"id": "S3", "purpose": "nitrogen_response", "fixed_from": "S1+S2 posterior"},
+    {"id": "S4", "purpose": "water_response", "fixed_from": "S1+S2+S3 posterior"},
+    {"id": "S5", "purpose": "formal_joint", "fixed_from": "accepted S1-S4 posterior"}
+  ],
+  "formal_run": {
+    "engine": "official DSSAT v4.8",
+    "num_reals": 200,
+    "noptmax": 6,
+    "agents": 6,
+    "seed": "to_be_frozen_before_run",
+    "candidate_reruns": ["lowest_phi", "highest_nse_within_10pct_phi", "posterior_median"]
+  },
+  "bounds_policy": {
+    "source": "multi_seed_Morris_then_frozen_bounds",
+    "candidate_pool_guidance": "Use SA to identify stable candidates, but activate every genetic parameter required by S1-S4 in S5; no arbitrary cap",
+    "boundary_band_fraction": 0.05,
+    "boundary_pressure_min_fraction": 0.15,
+    "max_single_cycle_expansion_fraction": 0.25,
+    "validation_cannot_trigger_expansion": true,
+    "temperature_bounds_auto_expand": false
+  },
+  "required_before_execution": [
+    "Rebuild 25SP/26SP/25FA bundles and regenerate manifests",
+    "Pass objective contract tests including LAIX exclusion and same-date terminal LAI",
+    "Pass treatment-factor and complete-block role audit",
+    "Freeze Morris-derived bounds with immutable SHA-256",
+    "Audit current internal CANOPY aliases so they remain compatibility names only and never create an active CANOPY target"
+  ]
+}

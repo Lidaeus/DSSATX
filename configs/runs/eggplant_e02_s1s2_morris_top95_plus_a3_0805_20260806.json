@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "design_table_id": "eggplant_e02_s1s2_morris_top95_plus_a3_0805_v3_20260806",
+  "bounds_id": "eggplant_e02_s1s2_morris_top95_plus_a3_0805_v3_20260806",
+  "input_bundle": "xxql2501_corrected_management_layermean_20260806",
+  "observation_policy_id": "e02_v2_rawdiff_terminal_nresp01_soil02_policy_20260805",
+  "approval_scope": "science_use",
+  "validation_split_id": "eggplant_e02_s1s2_25sp_six_treatment_split_20260806",
+  "stages": {
+    "S1": {
+      "active_params": [
+        "CMOBMX",
+        "EM-FL",
+        "EM-V1",
+        "FL-SD",
+        "FRLFF",
+        "LFMAX",
+        "NMOBMX",
+        "NVSMOB",
+        "PM06",
+        "RWUMX",
+        "SENDAY",
+        "TB1",
+        "TB2",
+        "TO11",
+        "TO12",
+        "TRIFL",
+        "XFINT"
+      ],
+      "fixed_params": [
+        "CSDL",
+        "FL-LF",
+        "FL-SH",
+        "JU-R0",
+        "KC_SLOPE",
+        "NRCVR",
+        "NREXP",
+        "NRMIN",
+        "NSTFAC",
+        "NUPCMN",
+        "NUPK50",
+        "PL-EM",
+        "PODUR",
+        "PPSEN",
+        "PROLFF",
+        "PROLFG",
+        "PROLFI",
+        "PRORTF",
+        "PRORTG",
+        "PRORTI",
+        "PROSHF",
+        "PROSHI",
+        "PROSTF",
+        "PROSTG",
+        "PROSTI",
+        "RHGHT",
+        "RTEXF",
+        "RTNH4",
+        "RTNO3",
+        "RWDTH",
+        "SD-PM",
+        "SDPDV",
+        "SFDUR",
+        "SIZLF",
+        "SLAVR",
+        "SOIL_SBDM_01",
+        "SOIL_SBDM_02",
+        "SOIL_SBDM_03",
+        "SOIL_SBDM_04",
+        "SOIL_SBDM_05",
+        "SOIL_SBDM_06",
+        "SOIL_SBDM_07",
+        "SOIL_SBDM_08",
+        "TB3",
+        "THRSH",
+        "TM1",
+        "TM2",
+        "TM3",
+        "TO13",
+        "TO21",
+        "TO22",
+        "TO23",
+        "V1-JU",
+        "VSSINK",
+        "WTPSD",
+        "XFPHT",
+        "XFRT",
+        "XMAGE",
+        "FL-VS"
+      ],
+      "observation_outputs": {
+        "PestEval.OUT": [
+          "ADAP"
+        ],
+        "PestJoint.OUT": [
+          "LAIX",
+          "CNAM"
+        ],
+        "PestTmtGrow.OUT": [
+          "LAID",
+          "LWAD",
+          "SWAD"
+        ]
+      },
+      "representative_outputs": {
+        "PestEval.OUT": [
+          "ADAP"
+        ],
+        "PestTmtGrow.OUT": [
+          "LAID",
+          "LWAD",
+          "SWAD"
+        ]
+      },
+      "purpose": "冠层形态建成预率定；S2 释放前固定全部收获/终值及 A3 氮响应参数"
+    },
+    "S2": {
+      "active_params": [
+        "PROLFF",
+        "PROLFG",
+        "PROLFI",
+        "PRORTF",
+        "PRORTG",
+        "PRORTI",
+        "PROSHF",
+        "PROSHI",
+        "PROSTF",
+        "PROSTG",
+        "PROSTI",
+        "RTNH4",
+        "RTNO3",
+        "XFRT",
+        "NREXP",
+        "NRMIN",
+        "NUPK50",
+        "NUPCMN"
+      ],
+      "fixed_params": [
+        "CMOBMX",
+        "CSDL",
+        "EM-FL",
+        "EM-V1",
+        "FL-LF",
+        "FL-SD",
+        "FL-SH",
+        "FRLFF",
+        "JU-R0",
+        "KC_SLOPE",
+        "LFMAX",
+        "NMOBMX",
+        "NRCVR",
+        "NSTFAC",
+        "NVSMOB",
+        "PL-EM",
+        "PM06",
+        "PODUR",
+        "PPSEN",
+        "RHGHT",
+        "RTEXF",
+        "RWDTH",
+        "RWUMX",
+        "SD-PM",
+        "SDPDV",
+        "SENDAY",
+        "SFDUR",
+        "SIZLF",
+        "SLAVR",
+        "SOIL_SBDM_01",
+        "SOIL_SBDM_02",
+        "SOIL_SBDM_03",
+        "SOIL_SBDM_04",
+        "SOIL_SBDM_05",
+        "SOIL_SBDM_06",
+        "SOIL_SBDM_07",
+        "SOIL_SBDM_08",
+        "TB1",
+        "TB2",
+        "TB3",
+        "THRSH",
+        "TM1",
+        "TM2",
+        "TM3",
+        "TO11",
+        "TO12",
+        "TO13",
+        "TO21",
+        "TO22",
+        "TO23",
+        "TRIFL",
+        "V1-JU",
+        "VSSINK",
+        "WTPSD",
+        "XFINT",
+        "XFPHT",
+        "XMAGE",
+        "FL-VS"
+      ],
+      "observation_outputs": {
+        "PestJoint.OUT": [
+          "LAIX",
+          "CNAM"
+        ],
+        "PestHarvest.OUT": [
+          "CHFPW",
+          "CHPDT",
+          "HPODW"
+        ],
+        "PestTmtGrow.OUT": [
+          "LAID",
+          "LWAD",
+          "SWAD"
+        ],
+        "PestNResponse.OUT": [
+          "NRESP"
+        ]
+      },
+      "representative_outputs": {
+        "PestHarvest.OUT": [
+          "CHPDT",
+          "HPODW"
+        ],
+        "PestJoint.OUT": [
+          "LAIX",
+          "CNAM"
+        ]
+      },
+      "purpose": "收获过程和终值预率定；继承 S1 代表参数"
+    }
+  }
+}

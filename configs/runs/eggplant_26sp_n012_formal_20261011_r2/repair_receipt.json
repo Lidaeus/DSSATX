@@ -1,0 +1,52 @@
+{
+  "prepared_at": "2026-10-11T08:48:59.937569+00:00",
+  "source_run": "eggplant_26sp_n012_formal_20261011",
+  "source_design_sha256": "fe8624eb9c25266282194a034f5b1512f0928ab060fb85d9e16a278d325bf68a",
+  "source_status_sha256": "02a8e5df69bafc13c557bd188f4dda445620fc35f73664c5cd8d1660154dde13",
+  "bounds_unchanged": true,
+  "targets_weights_roles_unchanged": true,
+  "source_initial_prior_width_divisor": 4.0,
+  "operational_changes": {
+    "initial_sigma_width_divisor": 8.0,
+    "feasibility_screen_all_initial_members": true,
+    "feasibility_screen_uses_observed_values": false,
+    "ies_bad_phi_sigma": 1e+300,
+    "ies_initial_lambda": 10.0,
+    "lambda_scale_fac": [
+      0.25,
+      0.5
+    ],
+    "ies_lambda_mults": [
+      0.1,
+      1.0,
+      10.0
+    ],
+    "maximum_stage_attempts": 3,
+    "retry_sigma_divisors": [
+      8.0,
+      12.0,
+      16.0
+    ],
+    "retry_initial_lambdas": [
+      10.0,
+      100.0,
+      1000.0
+    ],
+    "retry_scale_factors": [
+      [
+        0.25,
+        0.5
+      ],
+      [
+        0.1,
+        0.25
+      ],
+      [
+        0.05,
+        0.1
+      ]
+    ],
+    "retry_condition": "engineering retention/Phi-finiteness failure only; same anchor, bounds, targets, weights and seed",
+    "ensemble_interpretation": "feasibility-conditioned local optimization ensemble; not a posterior uncertainty sample"
+  }
+}

@@ -1,0 +1,12 @@
+treatment,treatment_label,water_level,nitrogen_level
+2,TN2 (W3-N3),W3,N3
+3,TN3 (W3-N2),W3,N2
+4,TN4 (W3-N1),W3,N1
+5,TN5 (W3-N0),W3,N0
+6,TN6 (W2-N3),W2,N3
+9,TN9 (W2-N0),W2,N0
+10,TN10 (W1-N3),W1,N3
+11,TN11 (W1-N2),W1,N2
+12,TN12 (W1-N1),W1,N1
+13,TN13 (W1-N0),W1,N0
+14,TN14 (CK-N2),CK,N2

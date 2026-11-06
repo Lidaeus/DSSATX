@@ -1,0 +1,6 @@
+group,phi_budget,note
+PHENO,0.25,Low-priority transplanted indeterminate-crop phenology
+CANOPY,1.0,LAID process observations; LAIX is diagnostic-only
+BIOMASS,1.0,Leaf stem and plant-N process observations; exclude HWAM and fruit-containing total mass
+CUMULATIVE_HARVEST,0.5,Final cumulative harvest anchors only
+INCREMENTAL_HARVEST,1.25,Primary repeated-harvest event observations

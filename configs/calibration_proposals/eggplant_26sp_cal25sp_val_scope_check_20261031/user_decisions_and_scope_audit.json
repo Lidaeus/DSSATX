@@ -1,0 +1,99 @@
+{
+  "date": "2026-10-31",
+  "approval_for_execution": false,
+  "status": "scope_decisions_recorded_waiting_user_further_decision",
+  "confirmed": {
+    "ies_num_reals": 100,
+    "noptmax": 5,
+    "FL-LF": {
+      "value": 400,
+      "status": "fixed",
+      "meaning": "Photothermal time from first flower R1 to end of leaf expansion; not individual leaf lifespan"
+    },
+    "SLPF_25SP": 0.93,
+    "SLPF_26SP": 0.89
+  },
+  "prior_recommendation_withdrawn": "41 active parameters including FL-LF; leaf-lifespan wording; 200x6 size; SLPF .933/.933",
+  "SA_extension_authorized": false,
+  "new_model_runs_authorized": false,
+  "evidence": {
+    "current_sa_parameters": 86,
+    "historical_joint65_total": 65,
+    "historical_joint65_crop_parameters": 64,
+    "historical_joint65_soil_parameters": 1,
+    "joint65_crop_in_current_sa": 62,
+    "joint65_crop_not_in_current_sa": [
+      "FL-LF",
+      "KEP"
+    ],
+    "joint65_non_crop_not_in_current_sa": [
+      "SOIL_SLDR"
+    ],
+    "historical_sa_total": 138,
+    "historical_sa_crop": 105,
+    "historical_sa_soil": 33,
+    "historical_sa_crop_in_current_sa": 74,
+    "historical_sa_crop_not_in_current_sa": 31,
+    "historical_P_concentration_parameters_not_current": 19
+  },
+  "checked_65_configurations": [
+    {
+      "configuration": "eggplant_26sp_all12_robust_joint65_200x5_20261012",
+      "active_count": 65,
+      "not_in_current_sa": [
+        "FL-LF",
+        "KEP",
+        "SOIL_SLDR"
+      ],
+      "bounds_sha256": "affffbcd0a18bae76ae5d33921e0e9f282b7d30f5aece51959f0116e6b1a8476"
+    },
+    {
+      "configuration": "eggplant_26sp_n012_rmse_joint65_200x5_20261012",
+      "active_count": 65,
+      "not_in_current_sa": [
+        "FL-LF",
+        "KEP",
+        "SOIL_SLDR"
+      ],
+      "bounds_sha256": "cd517dc0550b3c93bcbaae7bab9da6a8f9dfebf2041de5b70adb20c6def01028"
+    },
+    {
+      "configuration": "eggplant_26sp_n012_robust_joint65_200x5_20261012",
+      "active_count": 65,
+      "not_in_current_sa": [
+        "FL-LF",
+        "KEP",
+        "SOIL_SLDR"
+      ],
+      "bounds_sha256": "482a4a85c575da114efd2e6081570a4cc5b01065151a21baa113bdbb4728769f"
+    },
+    {
+      "configuration": "eggplant_26sp_n012_waterN_joint65_20261012",
+      "active_count": 65,
+      "not_in_current_sa": [
+        "FL-LF",
+        "KEP",
+        "SOIL_SLDR"
+      ],
+      "bounds_sha256": "cd517dc0550b3c93bcbaae7bab9da6a8f9dfebf2041de5b70adb20c6def01028"
+    }
+  ],
+  "sources_sha256": {
+    "workspace/runs/sa_25sp_observed_morris86_seed20261030_r30_refNguard_20261030/formal_r30/sa_sen_morris.sen.par.csv": "c2ecd95b651659cac368845e2fe7ae91375fafa5210aeed7167640d5168b0dbb",
+    "workspace/runs/sa_25sp_observed_morris86_seed20261030_r30_refNguard_20261030/review_20261030/paper_data/balanced_rankings.csv": "30ab719f8ed04e6faed4859695f36aabaf34888da006e04940ccfa9a4bf1f832",
+    "data/parameter_registry/bounds_frozen/eggplant/eggplant_26sp_all12_posterior_joint65_20261012.csv": "affffbcd0a18bae76ae5d33921e0e9f282b7d30f5aece51959f0116e6b1a8476",
+    "workspace/runs/eggplant_26sp_all12_robust_joint65_200x5_20261012/joint/joint.pst": "3df0e0167069564a504a5377d5ebc14b79ddc163e07e82bf7401d7ec268b29df",
+    "data/parameter_registry/bounds_frozen/eggplant/eggplant_e02_wnp_baseline_20260914.csv": "c2b957fd29307b108d10a241e4fe2b22abd945041acf35a6f13ec9959a192275",
+    "workspace/runs/sa_wnp_phase1_20260914/26SP/sa_sen_morris.pst": "f4a67e1d3ab42fb68f29b79311d98c70a913b9095c8df199a9f2ecf0b948aa6f",
+    "workspace/runs/sa_wnp_phase1_20260914/26SP/sa_sen_morris.sen.par.csv": "a95a36fb6e2ecffd442571eb584321e851c69723a42632cbd30da2b6f5cd8b0b",
+    "data/templates/genotype/TMGRO048.CUL.base": "92a373800d68b46d07601777e1579fff7b976f74190814bc6e0494eda7c4455b",
+    "docs/reports/evidence/p0_settings_review_20260914/Plant__CROPGRO__CROPGRO.for": "a3356a39b6adddeb1296dd8aa62778562c7ee896a051512b81cd7f0d0d717490"
+  },
+  "report_path": "D:\\Tomato_Cal\\docs\\reports\\65参数率定与本轮Morris参数覆盖核对_20261031.md",
+  "report_sha256": "61cd05e5342ebd4e0ca3c0b32dcaa890e1afc59222f683b19ef372cb4b784eca",
+  "audit_artifacts_sha256": {
+    "historical138_vs_current_morris86.csv": "442ce11e6e4447125061179e55001e5d28835c9e9d736979a3c460481ad806bd",
+    "historical31_crop_parameters_not_in_current.csv": "990f37b82c1788213977219f0082ce938cd0d87a5edb266a9f1a6194d60160db",
+    "joint65_vs_current_morris86.csv": "566d7e87f5c9dd8c3b101ac8094a17c930043102aff9eebd4884d597e389ad3d"
+  }
+}

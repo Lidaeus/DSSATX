@@ -1,0 +1,18 @@
+group,phi_budget,note
+PHENO,0.10,PDAT only; ADAT/MDAT diagnostic
+CANOPY,1.00,Measured multi-date LAI state constraint retained
+CANOPY_INCREMENT,0.60,LAI increments retained
+CANOPY_TERMINAL,0.40,Exact-date terminal LAI retained
+BIOMASS,1.00,Raw LWAD/SWAD states diagnostic only
+BIOMASS_INCREMENT,0.30,Leaf/stem increments reduced after late structural residuals dominated Phi
+BIOMASS_TERMINAL,0.15,Terminal leaf/stem mass reduced to protect yield scale
+PLANT_N,1.00,SNAM plus LNAM
+HARVEST_FRESH,1.25,Diagnostic only
+HARVEST_DRY_INCREMENT,1.25,Event dry-harvest increments retained
+HARVEST_DRY_TOTAL,1.50,Static fallback only; seasonal RRMSE lambda overrides this budget
+HARVEST_DRY_TREND,0.10,Diagnostic only
+N_RESPONSE,0.025,Season and stratum-specific NSE lambda configured in design JSON
+W_RESPONSE,0.025,Season and stratum-specific NSE lambda configured in design JSON
+CUMULATIVE_HARVEST,1.00,Legacy diagnostic family
+INCREMENTAL_HARVEST,1.00,Legacy diagnostic family
+SOIL_WATER,0.05,Audited post-initial soil-water observations

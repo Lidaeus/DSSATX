@@ -1,0 +1,12 @@
+bounds_id: "eggplant_26sp_cal25sp_val_wn_gradient_cmobmx_80x4_20261106"
+crop: "eggplant"
+created_at: "2026-11-06T11:50:46Z"
+approved_at: "2026-11-06T11:50:46Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "approved_trial_bounds.csv"
+derived_from_sha256: "417f6036998b6a98167f1c4345718fd6ce8dab57d65cb7b576dcfc6387d4b664"
+bounds_sha256: "7299ed86fceedb94e7ff5bab520587a29ad15a2e13751134449013b4bc5c77ad"
+parameter_count: 126
+automatic_repairs: 0
+notes: "2026-only W2-W1 and N2-N0 trial; CMOBMX interval from paired perturbation."

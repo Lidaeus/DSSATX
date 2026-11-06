@@ -1,0 +1,12 @@
+bounds_id: "eggplant_two_spring_organ_n_postedge_20260806"
+crop: "eggplant"
+created_at: "2026-08-06T04:59:12Z"
+approved_at: "2026-08-06T04:59:12Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_two_spring_organ_n_postedge_20260806.csv"
+derived_from_sha256: "6536c184b863d4434db7b4c56a4488dd8a3a4c5a67413368a7117ebf49bde1e0"
+bounds_sha256: "6536c184b863d4434db7b4c56a4488dd8a3a4c5a67413368a7117ebf49bde1e0"
+parameter_count: 188
+automatic_repairs: 0
+notes: "Posterior-edge widening from 83-parameter A3 NR-ZP final ensemble; coupled temperature ordering constraints preserved; fixed/disabled rows preserved; custom NUPK50/NUPCMN remain in A3 builder."

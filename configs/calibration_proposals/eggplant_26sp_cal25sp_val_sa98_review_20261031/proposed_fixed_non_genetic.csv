@@ -1,0 +1,20 @@
+﻿name,proposed_value,basis
+SASC_RATIO,0.9,SAOC times .90 at each layer; runtime only; user prior decision
+ICNS_25SP,1.0,No extra scaling of current measured initial mineral N
+ICNS_26SP,1.0,No extra scaling of current measured initial mineral N
+PAGE_25SP,25.0,Current bundle planting field
+PAGE_26SP,24.0,Current bundle planting field
+PENV_25SP,20.0,Current bundle planting field
+PENV_26SP,20.0,Current bundle planting field
+SOIL_SLDR,0.65,Current SOIL.SOL; do not use historical fitted .873538
+SOIL_SLU1,5.5,Current SOIL.SOL
+SLPF_25SP,0.933,"Current bundle; inherited empirical setting, not a field measurement"
+SLPF_26SP,0.933,"Current bundle; inherited empirical setting, not a field measurement"
+SOIL_SALB,0.13,Current SOIL.SOL
+SOIL_SLRO,75.0,Current SOIL.SOL
+SOIL_SLNF,1.0,Current SOIL.SOL
+KEP,0.7,Current SPE canopy/soil evaporation coefficient; keep empirical process setting fixed
+TAV,20.0,Current WTH header
+AMP,6.0,Current WTH header
+PPOP,2.7,"Current TMX, plants/m2"
+PPOE,2.7,"Current TMX, plants/m2"

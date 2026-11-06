@@ -1,0 +1,12 @@
+bounds_id: "eggplant_26sp_all12_posterior_joint65_20261012"
+crop: "eggplant"
+created_at: "2026-10-12T15:56:44Z"
+approved_at: "2026-10-12T15:56:44Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "approved_bounds_proposal.csv"
+derived_from_sha256: "f5afee3bc5fdbb30d4ba2a6078bafce38bafea85fe5e063211a99eec78e404e5"
+bounds_sha256: "affffbcd0a18bae76ae5d33921e0e9f282b7d30f5aece51959f0116e6b1a8476"
+parameter_count: 104
+automatic_repairs: 0
+notes: "User-authorized all12 successor; conditional posterior guided, root/protein rectangular safety; FL-LF45–220 retained"

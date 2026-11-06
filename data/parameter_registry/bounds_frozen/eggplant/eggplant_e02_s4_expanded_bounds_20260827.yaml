@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_s4_expanded_bounds_20260827"
+crop: "eggplant"
+created_at: "2026-08-27T06:40:21Z"
+approved_at: "2026-08-27T06:40:21Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_s4_expanded_proposal_20260827.csv"
+derived_from_sha256: "bbf24450e62491c62bf847a971bc66c433bd34dbd8fe54774e39837d6f107ba6"
+bounds_sha256: "bbf24450e62491c62bf847a971bc66c433bd34dbd8fe54774e39837d6f107ba6"
+parameter_count: 148
+automatic_repairs: 0
+notes: "E02 Stage S4 Expanded Bounds (approved relaxed bounds: XFPHT adjustable in 10-50, TRIFL up to 2.2, SIZREF up to 680, LFMAX up to 2.8, XFRT up to 0.995, SDPDV up to 450)"

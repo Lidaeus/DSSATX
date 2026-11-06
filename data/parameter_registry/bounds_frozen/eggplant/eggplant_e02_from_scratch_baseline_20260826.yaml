@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_from_scratch_baseline_20260826"
+crop: "eggplant"
+created_at: "2026-08-26T14:01:12Z"
+approved_at: "2026-08-26T14:01:12Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_from_scratch_baseline_proposal_20260826.csv"
+derived_from_sha256: "6fc2cb71fe1ab4238ef64c7881bab85b936c3524ba20d6eb258da1909f988644"
+bounds_sha256: "6fc2cb71fe1ab4238ef64c7881bab85b936c3524ba20d6eb258da1909f988644"
+parameter_count: 148
+automatic_repairs: 0
+notes: "E02 from-scratch baseline with fixed soil/IC parameters and 94 active genetic parameters"

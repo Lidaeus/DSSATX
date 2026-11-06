@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_joint61_m1_offsets_v3_20260729"
+crop: "eggplant"
+created_at: "2026-07-28T22:59:51Z"
+approved_at: "2026-07-28T22:59:51Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_joint61_m1_offsets_v3_20260729.csv"
+derived_from_sha256: "30ae3b8a161d5b9b6e0287bcd23ee01dacc9c8255143a229ec619bfe960bbcf7"
+bounds_sha256: "28bed0d54cf0fb4a86c9b5d1c47b957e5dc1ea0a6f549587a1c401f3d611a837"
+parameter_count: 71
+automatic_repairs: 0
+notes: "Joint 25SP+25FA M1; final-ensemble boundary review; seven documented autumn offsets; PAGE25 and dry-harvest contract"

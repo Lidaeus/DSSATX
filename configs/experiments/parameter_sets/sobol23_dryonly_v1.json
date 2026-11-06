@@ -1,0 +1,14 @@
+{
+  "set_id": "sobol23_dryonly_v1",
+  "parameters": [
+    "ATOP", "EM-FL", "EM-V1", "FL-SD", "FRLFF", "FRSTMF",
+    "LFMAX", "NMOBMX", "NSTFAC", "NVSMOB", "PM06", "PORPT",
+    "RTNH4", "RTNO3", "TB1", "TB2", "TM2", "TO11",
+    "TO12", "TO22", "TRIFL", "XFINT", "XFRT"
+  ],
+  "declared_count": 23,
+  "source_file": "configs/sa/approved_topk/eggplant_formal_sobol_top23_v1_20260721.csv",
+  "source_sha256": "1dea53103fa4ce5e65d9a262986653679cb6540647939fff402dd05b89ff3f2d",
+  "applicable_observations": "CHPDT (cumulative dry fruit weight, ln(y+1) scale); LAID/LWAD/SWAD as process diagnostics; ADAP as low-weight phenology auxiliary where valid",
+  "approval_note": "Sobol top-23 from formal Morris v4 + Sobol N=128 consensus across XXQL2501/2502/2601. PM06 is included (selection_order 7, cross_domain_recurrent in 6/6 domains). The early T7 17-param list excluded PM06; this set supersedes T7. Approved 2026-07-21. Dry-fruit-weight target only."
+}

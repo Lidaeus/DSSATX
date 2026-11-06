@@ -1,0 +1,28 @@
+{
+  "version": "V7-SLN r1",
+  "build_source_commit": "dcfbcb16c40e420a6cb3b50d09d8dd30a03c5149",
+  "source_commit": "502ddfb7edd596eee2ebdc7c259196dce78058d9",
+  "binary_sha256": "57f525e55d20fa23502f06766038f195220744d7aea647529ff493edd0a4cc3f",
+  "source_hashes_match": true,
+  "reference_numeric_reproduced": true,
+  "previous_day_signal_verified": true,
+  "treatment_simulations": 60,
+  "native_checks": 74124,
+  "all_budgets_passed": true,
+  "protected_executables_verified": true,
+  "objective_sha256": "934c68699ff0f5a8d762781541cd089c228c0880a1e6b773138b2dd63ce95073",
+  "reference_choice": {
+    "area_N_g_per_m2_leaf": 1.0,
+    "timing": "previous day without additional smoothing",
+    "assimilation_multipliers": [
+      0.5,
+      0.25
+    ]
+  },
+  "artifacts": {
+    "功能面积氮扩叶小试与浓度参考审查.md": "e86eedbc3cbd3803f4965da089b388c09bef3556a9881f07fe4e5514d6d973aa",
+    "diagnostic_trial_summary.csv": "48ff8f0e9701797e4d165fabeb94bac001a08b49dd18d9bb6125c6a19f9bdefa",
+    "diagnostic_high_N_spreads.csv": "2d8bf2094174a58e2c0523dbba67cff8148ba834ddb8f77dae485cebeb65f425",
+    "diagnostic_N0_lower_reference_pairs.csv": "8a4d7ea32dda97869a78e2e4108f2d729b71ffb4d26fca35ef8c1f17dfee0fde"
+  }
+}

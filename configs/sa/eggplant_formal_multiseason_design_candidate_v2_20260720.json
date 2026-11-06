@@ -1,0 +1,60 @@
+{
+  "design_id": "eggplant_formal_multiseason_design_candidate_v2_20260720",
+  "status": "runtime_reproducibility_fixed_awaiting_clean_commit_and_baseline_smoke",
+  "purpose": "formal_genetic_parameter_sensitivity_analysis_then_observation_gated_calibration",
+  "crop": "eggplant",
+  "model": "CROPGRO-Tomato TMGRO048",
+  "observations_required_for_sensitivity": false,
+  "observations_required_for_calibration": true,
+  "common_factorial_design": {
+    "water_levels": [1, 3],
+    "nitrogen_levels": [1, 2, 3, 4],
+    "treatment_count_per_season": 8,
+    "initial_condition_policy": "depth-wise within-season median assigned to every retained treatment"
+  },
+  "seasons": [
+    {
+      "experiment": "XXQL2501",
+      "season": "2025_spring",
+      "source_bundle": "xxql2501_sa_source_candidate_20260720",
+      "controlled_bundle": "xxql2501_sa_controlled_candidate_20260720",
+      "treatments": [2, 3, 4, 5, 10, 11, 12, 13],
+      "future_role": "calibration_candidate"
+    },
+    {
+      "experiment": "XXQL2502",
+      "season": "2025_autumn",
+      "source_bundle": "xxql2502_sa_source_candidate_20260720",
+      "controlled_bundle": "xxql2502_sa_controlled_candidate_20260720",
+      "treatments": [1, 3, 4, 6, 7, 9, 10, 12],
+      "future_role": "calibration_candidate"
+    },
+    {
+      "experiment": "XXQL2601",
+      "season": "2026_spring",
+      "source_bundle": "xxql2601_sa_source_tn12_w1_candidate_20260721",
+      "controlled_bundle": "xxql2601_sa_controlled_tn12_w1_candidate_20260721",
+      "treatments": [1, 3, 4, 6, 7, 9, 10, 12],
+      "future_role": "whole_season_validation_candidate"
+    }
+  ],
+  "primary_parameter_domain": "eggplant_formal_multiseason_candidate_v3_20260720",
+  "primary_parameter_count": 55,
+  "protein_secondary_domain": "eggplant_protein_parameter_candidate_ranges_20260720.csv",
+  "protein_policy": "not mixed into primary SA; implement and verify SPE injection before a separate secondary screen",
+  "environment_policy": "SOIL and FileX initial conditions fixed in primary genetic SA",
+  "simulation_options_policy": "SYMBI=N and POTAS=N for non-legume eggplant using CRGRO048",
+  "analysis": {
+    "preflight": "baseline plus lower/upper one-at-a-time perturbation",
+    "screening": "Morris with three fixed seeds and ten trajectories per seed initially",
+    "extension": "add trajectories only if ranking stability is inadequate",
+    "sobol": "not automatic; consider only for a reduced influential subset",
+    "aggregation": "season-specific QA first, then equal-season standardized-effect aggregation"
+  },
+  "formal_execution_allowed": false,
+  "remaining_gates": [
+    "commit the reviewed source, frozen bounds, input bundles and output contracts in a clean worktree",
+    "the corrected XXQL2601 TN12=W1 eight-treatment bundle passes deterministic DSSAT baseline smoke",
+    "build one frozen-runtime case and verify its runtime manifest before launching the r=10 campaign"
+  ]
+}

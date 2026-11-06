@@ -1,0 +1,49 @@
+{
+  "profile_id": "times_simsun_c31_v1",
+  "renderer": "R",
+  "r_min_version": "4.3",
+  "column_width_mm": 89.0,
+  "double_column_width_mm": 183.0,
+  "max_height_mm": 170.0,
+  "font_family": [
+    "Times New Roman",
+    "SimSun"
+  ],
+  "font_size_pt": 7.0,
+  "panel_label_size_pt": 8.0,
+  "axes_linewidth_pt": 0.5,
+  "data_linewidth_pt": 1.0,
+  "marker_size_pt": 3.5,
+  "raster_dpi": 600,
+  "formats": [
+    "pdf",
+    "svg",
+    "png"
+  ],
+  "palette": {
+    "observed": "#000000",
+    "simulated": "#0072B2",
+    "calibration": "#0072B2",
+    "validation": "#D55E00",
+    "uncertainty": "#56B4E9",
+    "neutral": "#7A7A7A",
+    "highlight": "#E69F00",
+    "positive": "#009E73",
+    "negative": "#CC79A7"
+  },
+  "nitrogen_colors": {
+    "N3": "#C0392B",
+    "N2": "#E67E22",
+    "N1": "#2980B9",
+    "N0": "#707070"
+  },
+  "water_shapes": {
+    "W3": 21,
+    "W2": 22,
+    "W1": 24,
+    "CK": 23
+  },
+  "mixed_times_simsun": true,
+  "chinese_font": "SimSun",
+  "stage2_review": true
+}

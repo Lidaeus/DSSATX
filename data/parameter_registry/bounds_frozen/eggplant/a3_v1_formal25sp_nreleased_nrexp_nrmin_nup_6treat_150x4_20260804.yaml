@@ -1,0 +1,12 @@
+bounds_id: "a3_v1_formal25sp_nreleased_nrexp_nrmin_nup_6treat_150x4_20260804"
+crop: "eggplant"
+created_at: "2026-08-04T12:11:22Z"
+approved_at: "2026-08-04T12:11:22Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "a3_v1_formal25sp_nreleased_nrexp_nrmin_nup_6treat_150x4_20260804.csv"
+derived_from_sha256: "a8e00cf8b4b3b05d0cd3d1eff0a308197bea119f5b772dd1c7fcb7bbd10db2bf"
+bounds_sha256: "a8e00cf8b4b3b05d0cd3d1eff0a308197bea119f5b772dd1c7fcb7bbd10db2bf"
+parameter_count: 111
+automatic_repairs: 0
+notes: "A3 custom shared N uptake: NUPK50 1-40 ppm, NUPQ 0.50-1.50, NUPCMN 0-2 ppm; E02 retry3 contract."

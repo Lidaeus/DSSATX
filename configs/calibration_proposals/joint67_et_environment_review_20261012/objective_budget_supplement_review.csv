@@ -1,0 +1,17 @@
+﻿variable,family,phi_budget,n_targets,sigma_floor,cv_model,unit,operator,transform,approved
+CHPDT,HARVEST_DRY_CUMULATIVE,15,45,25.0,0.2,kg DM/ha,all five exact harvest dates,raw,False
+HPODW,HARVEST_DRY_EVENT,14,45,25.0,0.2,kg DM/ha,five event increments,raw,False
+N_FRESH_CONTRAST,N_RESPONSE,6,6,1500.0,0.2,kg fresh/ha,N1-N0 and N2-N0 within each water level,raw,False
+W_FRESH_CONTRAST,W_RESPONSE,8,6,1500.0,0.2,kg fresh/ha,W2-W1 and W3-W1 within each N level,raw,False
+N2_SIGN_PENALTY,N_RESPONSE_DIRECTION,2,3,1500.0,0.2,kg fresh/ha,"soft max(0,-simulated N2-N0); observed target zero",raw,False
+LAID,CANOPY_LAI,7,36,0.05,0.1,m2/m2,raw measured-date state,raw,False
+LWAD,LEAF_DRY_MASS,6,36,20.0,0.15,kg DM/ha,raw measured-date state,raw,False
+SWAD,STEM_DRY_MASS,6,36,25.0,0.15,kg DM/ha,raw measured-date state,raw,False
+CHTD,HEIGHT,3,36,0.03,0.1,m,raw measured-date state,raw,False
+LEAF_N_PCT,LEAF_N_CONCENTRATION,7,36,0.15,0.1,% dry mass,PlantN LN%D,raw,False
+STEM_N_PCT,STEM_N_CONCENTRATION,7,36,0.15,0.1,% dry mass,PlantN SN%D,raw,False
+FRUIT_N_PCT,FRUIT_N_CONCENTRATION,6,27,0.15,0.2,% dry mass,approved mature fruit proxy; exact sampling dates,raw,False
+ADAP,ANTHESIS,3,9,2.0,0.0,day,TMA ADAT minus PDAT; not flowering/fruit-setting-start sheet,raw,False
+VWC,SOIL_WATER,3,135,0.01,0.08,cm3/cm3,post-initial observed soil layers and dates,raw,False
+N_ADJACENT_FRESH_CONTRAST,N_DOSE_ADJACENT,2,3,1500.0,0.2,kg fresh/ha,terminal fresh N2-N1 within each W; parent dispersion quadrature,raw,False
+WB100_INTERVAL,WATER_BALANCE_100CM,5,18,10.0,0.1,mm,I+P-runoff-delta S100; two nonoverlapping exact observation intervals; morning approximation,raw,False

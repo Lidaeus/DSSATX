@@ -1,0 +1,6 @@
+group,phi_budget,note
+PHENO,1.0,Phenology dates (ADAPS) — equal weight with canopy/biomass
+CANOPY,1.0,Canopy process (LAID/LAIXS/LAI_AUC/LAI_PEAK/LAI_END)
+BIOMASS,1.0,Biomass process (LWAD/SWAD/CWAMS/AGB_END/LEAF_END/STEM_END)
+CUMULATIVE_HARVEST,1.0,Cumulative harvested dry/fresh matter (PWADM) — equal family budget
+INCREMENTAL_HARVEST,1.25,Incremental harvest events (PWAIM) — modest predeclared up-weight per user decision

@@ -1,0 +1,22 @@
+{
+  "profile_id": "e02_fit_first_multitarget_dryharvest_v1",
+  "active_phi_targets": [
+    "PDAP",
+    "ADAP",
+    "LAIX",
+    "LAID",
+    "LWAD",
+    "SWAD",
+    "CHTD",
+    "CNAM",
+    "CHPDT",
+    "HPODW",
+    "SOIL_WATER"
+  ],
+  "diagnostic_targets": ["MDAP", "CHFPW", "PWAD", "PWAI", "HIAM"],
+  "forbidden_targets": ["HWAM", "L#SD", "M#AD", "CWID", "L#PA", "RWAD", "PDMCD"],
+  "transform": "raw CHPDT; ln(y+1) HPODW; raw for other active targets",
+  "offset": 1.0,
+  "reference": 1.0,
+  "description": "Joint E02 fit-first contract: cumulative and incremental dry harvest both enter Phi and share one static HARVEST_DRY budget; fresh harvest and MDAP remain diagnostic-only."
+}

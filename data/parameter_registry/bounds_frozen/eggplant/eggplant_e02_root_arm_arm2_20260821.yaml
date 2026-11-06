@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_root_arm_arm2_20260821"
+crop: "eggplant"
+created_at: "2026-08-21T14:19:30Z"
+approved_at: "2026-08-21T14:19:30Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_root_arm_arm2_20260821.csv"
+derived_from_sha256: "b062e7a15f6f2b39f8fbe0f5c0a1c65faef54f755e309182b9bf135fcb45b92a"
+bounds_sha256: "b062e7a15f6f2b39f8fbe0f5c0a1c65faef54f755e309182b9bf135fcb45b92a"
+parameter_count: 120
+automatic_repairs: 0
+notes: "Root Exploration Arm2 (high_soil_mineralization)"

@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-30",
+  "method": "Morris",
+  "run_dir": "D:\\Tomato_Cal\\workspace\\runs\\sa_25sp_observed_morris86_seed20261030_r30_refNguard_20261030",
+  "status_file": "D:\\Tomato_Cal\\workspace\\runs\\sa_25sp_observed_morris86_seed20261030_r30_refNguard_20261030\\campaign_status.json",
+  "bundle": "D:\\Tomato_Cal\\data\\user\\sa_bundles\\xxql2501_sa_observed_20261029",
+  "bundle_manifest_sha256": "fab9dc524c9685d73183d1d686d79936ee0408c39757a18fc16201c12bb17030",
+  "bounds_id": "eggplant_25sp_observed_morris_expanded86_refNguard_20261030",
+  "bounds_sha256": "13c2195c5551f61e41ab39471e7ce966728951e53a80a34ad9547fe0d0b4debe",
+  "output_profile": "D:\\Tomato_Cal\\configs\\sa\\eggplant_25sp_observed_expanded_morris_20261030_outputs.json",
+  "output_profile_sha256": "e1c9fea8599e3a9a41b6a34f1b026251c2cb8444cbc2f1016b7a7e6f5999a6ba",
+  "seed": 20261030,
+  "morris_p": 6,
+  "morris_delta": 0.6,
+  "morris_r": 30,
+  "parameter_count": 86,
+  "planned_formal_evaluations": 2610,
+  "cross_seed_analysis": false,
+  "controlled_bundle_used": false,
+  "fixed": {
+    "SASC_RATIO": 0.9,
+    "ICNS_25SP": 1.0,
+    "ICNS_26SP": 1.0
+  },
+  "range_revision": {
+    "parameter": "LNREF",
+    "lower": 3.6,
+    "upper": 6.0,
+    "center": 4.8
+  },
+  "parameter_calibration": false,
+  "science_status": "science_pending",
+  "focused_review": {
+    "review_date": "2026-10-31",
+    "directory": "D:\\Tomato_Cal\\workspace\\runs\\sa_25sp_observed_morris86_seed20261030_r30_refNguard_20261030\\review_20261030",
+    "data_status": "science_pending",
+    "focused_scope_status": "engineering_validated",
+    "complete_trajectories": 30,
+    "outputs": [
+      "ADAPS",
+      "LAI_AUC",
+      "FRUITD_END"
+    ],
+    "original_full_design_passed": false,
+    "report": "D:\\Tomato_Cal\\docs\\reports\\2025春Morris结果核验与敏感性图表说明_20261030.md",
+    "figure_manifest": "D:\\Tomato_Cal\\workspace\\runs\\sa_25sp_observed_morris86_seed20261030_r30_refNguard_20261030\\review_20261030\\figures\\figure_manifest.json"
+  }
+}

@@ -1,0 +1,18 @@
+$BATCH(TOMATO_CAL)
+!
+! Validation Batch: 25SP Complement (5) + 26SP Complement (5) for 13-Treatment Calibration
+! 25SP: TN 4 (W3N1), TN 9 (W2N0), TN 11 (W1N2), TN 12 (W1N1), TN 14 (CKN2)
+! 26SP: TN 4 (W3N2), TN 6 (W1N2), TN 7 (W3N1), TN 8 (W2N1), TN 10 (W1N1)
+! Total Runs: 10
+!
+@FILEX                                                                                        TRTNO     RP     SQ     OP     CO
+XXQL2501.TMX                                                                                     4      1      0      0      0
+XXQL2501.TMX                                                                                     9      1      0      0      0
+XXQL2501.TMX                                                                                    11      1      0      0      0
+XXQL2501.TMX                                                                                    12      1      0      0      0
+XXQL2501.TMX                                                                                    14      1      0      0      0
+XXQL2601.TMX                                                                                     4      1      0      0      0
+XXQL2601.TMX                                                                                     6      1      0      0      0
+XXQL2601.TMX                                                                                     7      1      0      0      0
+XXQL2601.TMX                                                                                     8      1      0      0      0
+XXQL2601.TMX                                                                                    10      1      0      0      0

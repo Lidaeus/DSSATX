@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "approval_id": "eggplant_p1_sobol_top20_v4_20260717",
+  "review_status": "approved",
+  "approved_at": "2026-07-17",
+  "approved_parameter_count": 20,
+  "approved_topk_csv": "eggplant_p1_sobol_top20_v4_20260717.csv",
+  "approved_topk_csv_sha256": "505b4f665cccc54e042e202bdb0d109456049aec8c48b1adca84f54303a1ed97",
+  "source_morris_report": "docs/reports/P1_v4_W2_stability_report.md",
+  "source_stability_sha256": "6db5132259eedd84ebb53dc8fdbf909bd1aaec2cbde15c80db53c60ee601f75e",
+  "source_proposal_sha256": "da47bc74ea8672942273dd0b87666fc6330ed6b6bd0fa77f4feb006b07fa6f41",
+  "selection_rule": "Approved Top-15 union of general_genetic and water_nitrogen_response stable cores from the v4 164-output two-domain Morris (seeds 20261007,20261021; seed 20260923 excluded with 6 failures)",
+  "bounds_id": "eggplant_p1_xxql2501_v3_20260716",
+  "bounds_sha256": "6b7e31248c7eb1aca173209bf9f8c5c2f86822be55ac4915e60803e58000674a",
+  "output_profile_id": "eggplant_p1_controlled_wn_v4",
+  "output_profile_sha256": "0923aa1ed16627243da8a2d50a63209bc9ba3fcb19f9e42d7e38b71ced9e27dc",
+  "input_bundle_id": "xxql2501_sa_counterfactual_v1_20260716",
+  "input_manifest_sha256": "bdede79d723cfbf02e8517a86c56d6c6c1693c26a950fff83e7f104133ef7d77",
+  "sobol_parameter_distribution": "uniform",
+  "preflight_samples": 4,
+  "formal_sample_schedule": "standard"
+}

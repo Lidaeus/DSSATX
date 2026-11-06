@@ -1,0 +1,13 @@
+{
+  "status": "passed_review_only",
+  "targets": 516,
+  "budget_sum": 100,
+  "active_parameters": 65,
+  "exact_objective_encoding": true,
+  "robust_sign_and_near_zero_checks": true,
+  "physical_bounds_and_seed_joint_checks": true,
+  "original_phi_reproduced": 3.420019086534893,
+  "source_runtime_changes": [],
+  "ensemble_preflight": false,
+  "formal_run_started": false
+}

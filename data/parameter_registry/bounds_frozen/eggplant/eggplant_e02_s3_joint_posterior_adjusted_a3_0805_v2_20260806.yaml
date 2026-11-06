@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_s3_joint_posterior_adjusted_a3_0805_v2_20260806"
+crop: "eggplant"
+created_at: "2026-08-06T10:25:06Z"
+approved_at: "2026-08-06T10:25:06Z"
+approved_by: "Codex"
+review_status: "approved"
+derived_from: "eggplant_e02_s3_joint_posterior_adjusted_a3_0805_v2_20260806.csv"
+derived_from_sha256: "97c69d580c6648735f39a86cae5aa62b60fc31b091c317166927fed313ddf1f8"
+bounds_sha256: "97c69d580c6648735f39a86cae5aa62b60fc31b091c317166927fed313ddf1f8"
+parameter_count: 36
+automatic_repairs: 0
+notes: "S3 bounds v2: posterior/edge adjusted; engineering safe floors NUPK50>=1, NUPCMN>=0.01, RTNH4>=0.01 after A3 NUPTAK STOP99 initial-draw evidence; 25SP only"

@@ -1,0 +1,192 @@
+{
+  "profile_id": "eggplant_formal_xxql2501_outputs_v1_20260720",
+  "experiment_bundle": "xxql2501_sa_controlled_candidate_20260720",
+  "season": "2025_spring",
+  "experiment": "XXQL2501",
+  "treatments": [
+    2,
+    3,
+    4,
+    5,
+    10,
+    11,
+    12,
+    13
+  ],
+  "features": [
+    "YIELD_HWAMS",
+    "LAIXS",
+    "CWAMS",
+    "ADAPS",
+    "PDFPS",
+    "LAI_AUC",
+    "LAI_PEAK",
+    "LAI_END",
+    "FRUITD_END",
+    "CUMHARVEST_DAP50",
+    "LEAF_END_LWAD",
+    "STEM_END_SWAD",
+    "AGB_END_CWAD"
+    ,"LEAF_N_END"
+    ,"STEM_N_END"
+    ,"ROOT_N_END"
+    ,"FRUIT_N_END"
+  ],
+  "allow_degenerate_features": ["FRUIT_N_END"],
+  "lai_time_points": [
+    45,
+    67,
+    95,
+    119
+  ],
+  "fruit_time_points": [],
+  "include_treatment_mean": false,
+  "response_groups": {
+    "phenology": [
+      "ADAPS",
+      "PDFPS"
+    ],
+    "canopy": [
+      "LAIXS",
+      "LAI_AUC",
+      "LAI_PEAK",
+      "LAI_END",
+      "LAI_DAP"
+    ],
+    "biomass": [
+      "CWAMS",
+      "LEAF_END_LWAD",
+      "STEM_END_SWAD",
+      "AGB_END_CWAD"
+    ],
+    "organ_n": [
+      "LEAF_N_END",
+      "STEM_N_END",
+      "ROOT_N_END",
+      "FRUIT_N_END"
+    ],
+    "yield_harvest": [
+      "YIELD_HWAMS",
+      "FRUITD_END",
+      "CUMHARVEST_DAP50"
+    ],
+    "water_response": [
+      "WATER_LAI_AUC",
+      "WATER_AGB_END_CWAD",
+      "WATER_FRUITD_END",
+      "WATER_CUMHARVEST_DAP50"
+    ],
+    "nitrogen_response": [
+      "NITROGEN_LAI_AUC",
+      "NITROGEN_AGB_END_CWAD",
+      "NITROGEN_FRUITD_END",
+      "NITROGEN_CUMHARVEST_DAP50"
+    ],
+    "water_nitrogen_interaction": [
+      "INTERACTION_LAI_AUC",
+      "INTERACTION_AGB_END_CWAD",
+      "INTERACTION_FRUITD_END",
+      "INTERACTION_CUMHARVEST_DAP50"
+    ]
+  },
+  "ranking_domains": {
+    "general_genetic": [
+      "phenology",
+      "canopy",
+      "biomass",
+      "organ_n",
+      "yield_harvest"
+    ],
+    "water_nitrogen_response": [
+      "water_response",
+      "nitrogen_response",
+      "water_nitrogen_interaction"
+    ]
+  },
+  "water_nitrogen_design": {
+    "contrast_features": [
+      "LAI_AUC",
+      "AGB_END_CWAD",
+      "FRUITD_END",
+      "CUMHARVEST_DAP50"
+    ],
+    "water_pairs": {
+      "N3": [
+        10,
+        2
+      ],
+      "N2": [
+        11,
+        3
+      ],
+      "N1": [
+        12,
+        4
+      ],
+      "N0": [
+        13,
+        5
+      ]
+    },
+    "nitrogen_series": {
+      "W3": [
+        {
+          "treatment": 13,
+          "n_kg_ha": 0.0
+        },
+        {
+          "treatment": 12,
+          "n_kg_ha": 130.0
+        },
+        {
+          "treatment": 11,
+          "n_kg_ha": 271.0
+        },
+        {
+          "treatment": 10,
+          "n_kg_ha": 399.0
+        }
+      ],
+      "W1": [
+        {
+          "treatment": 5,
+          "n_kg_ha": 0.0
+        },
+        {
+          "treatment": 4,
+          "n_kg_ha": 130.0
+        },
+        {
+          "treatment": 3,
+          "n_kg_ha": 271.0
+        },
+        {
+          "treatment": 2,
+          "n_kg_ha": 399.0
+        }
+      ]
+    },
+    "_notes": {
+      "water_pairs_omissions": [],
+      "dropped_duplicate_wn_assignments": [],
+      "dropped_duplicate_dose_treatments": [],
+      "mf_to_nclass": {
+        "1": "N3",
+        "2": "N2",
+        "3": "N1",
+        "4": "N0"
+      },
+      "mi_to_w": {
+        "1": "W1",
+        "3": "W3"
+      }
+    }
+  },
+  "design_notes": [
+    "Formal per-season sensitivity output contract for XXQL2501 (2025_spring).",
+    "Features, lai_time_points, fruit_time_points, response_groups and ranking_domains are IDENTICAL across the three season contracts so the same metric name has the same meaning.",
+    "MDAPS is omitted because the uncalibrated baseline returns the DSSAT -99 missing sentinel.",
+    "Nitrogen doses (n_kg_ha) are derived from this season's FileX *FERTILIZERS (INORGANIC) FAMN column via fertilizer_n_total_kg_ha, NOT from a hardcoded ladder; the three seasons differ (2501: 399/271/130/0; 2502: 360/240/120/0; 2601: 361/240/120/0 kg N/ha).",
+    "LAI DAP points 45/67/95/119 lie inside every season's PlantGro DAP window (2501: 8-141; 2502: DAP 0-147; 2601: 2-131)."
+  ]
+}

@@ -1,0 +1,52 @@
+proposal_id: "eggplant_formal_multiseason_candidate_v1_20260719"
+crop: "eggplant"
+created_at: "2026-07-19T11:14:57Z"
+review_status: "proposed"
+ready_for_formal_run: false
+derived_from: "eggplant_p1_xxql2501_v3_candidate_20260716.csv"
+derived_from_sha256: "6b7e31248c7eb1aca173209bf9f8c5c2f86822be55ac4915e60803e58000674a"
+experiment_bundle_available: "xxql2501_symbi_n_candidate_20260719"
+input_manifest_sha256: "1a49d445ea44fa4928ac85630ac4abce710b6cf093ffc08906d4195bd0038be4"
+required_season_design: "two spring seasons plus one autumn season"
+available_audited_season_count: 1
+required_audited_season_count: 3
+proposal_sha256: "7ce37738be9431821724e18a4721e8b48081276a14fee34207b1170ee7dc47f2"
+parameter_count: 157
+active_parameter_count: 55
+active_temperature_parameter_count: 12
+active_soil_or_ic_count: 0
+soil_policy: "fixed in primary genetic SA; optional narrow nuisance analysis is separate"
+fl_vs_policy: "SA probe 100-140; calibrate only if terminal-growth observations identify the coefficient"
+stage_order_policy: "independent rectangular ranges must guarantee XMAGE < XFPHT"
+temperature_order_policy: "independent rectangular ranges must guarantee TB < TO1 < TO2 < TM"
+references:
+  - "https://www.researchgate.net/publication/269708910_Estimation_of_leaf_number_of_eggplant_using_thermal_time_model"
+  - "https://journals.ashs.org/downloadpdf/journals/hortsci/47/8/article-p1038.pdf"
+  - "https://doi.org/10.1016/j.scienta.2021.110538"
+  - "https://doi.org/10.1007/s11119-023-10087-9"
+notes: "Proposal only; do not freeze or run until all three season bundles and exact boundaries are reviewed"
+t3_injection_preflight_20260720:
+  status: "resolved"
+  total_injections: 165
+  structural_violations: 0
+  resolved_findings:
+    - parameter: "PM06"
+      location: "ECO"
+      issue: "severe_field_width_rounding"
+      resolution: "TMGRO048.ECO.base PM06 field widened from 1-dp ('  0.6') to 2-dp (' 0.60'). The init value (0.6) is unchanged; only the field format now allows 2-dp injection. PM06 lower=0.35 / upper=0.65 now round-trip exactly."
+      resolved_at: "2026-07-20"
+    - parameter: "XFINT"
+      location: "ECO"
+      issue: "proposal_bound_outside_dssat_guard"
+      resolution: "Proposal lower bound raised from 0.10 to 0.12 to match the update_eco_file XFINT guard [0.12, 0.50]."
+      resolved_at: "2026-07-20"
+  remaining_precision_loss_cases:
+    - "LNGSH (ECO): 0.1-0.2% — 1-dp field rounding (acceptable)"
+    - "PM09 (ECO): 0.1% — 2-dp field rounding (acceptable)"
+    - "KCAN (SPE): 0.2-0.4% — 2-dp field rounding (acceptable)"
+    - "FRLFF (SPE): 0.2-0.4% — 2-dp field rounding (acceptable)"
+    - "FRSTMF (SPE): 0.1-0.3% — 2-dp field rounding (acceptable)"
+    - "PORPT (SPE): 1.1-2.0% — 2-dp field rounding (acceptable)"
+    - "WTFSD (SPE): 0.7-1.3% — 2-dp field rounding (acceptable)"
+    - "VSSINK (SPE): 2.4% — narrow 4-char field rounds 2.05 to 2.0 (acceptable)"
+  interpretation: "After PM06 field widening and XFINT lower-bound correction, all 165 injections pass with at most documented precision loss (DSSAT fixed-width format limits). Ready for T4 Morris sampling."

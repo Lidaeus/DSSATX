@@ -1,0 +1,126 @@
+{
+  "constraints": [
+    {
+      "constraint_id": "phenology_fl_sh_lt_fl_sd",
+      "constraint_type": "ordering",
+      "parameters": ["FL-SH", "FL-SD"],
+      "expression": "FL-SH.init < FL-SD.init (flower-to-pod before flower-to-seed)",
+      "relation": "<",
+      "field": "init"
+    },
+    {
+      "constraint_id": "lngsh_le_xmpage",
+      "constraint_type": "ordering",
+      "parameters": ["LNGSH", "XMPAGE"],
+      "expression": "LNGSH.init <= XMPAGE.init (fruit growth duration within max physiological age)",
+      "relation": "<=",
+      "field": "init"
+    },
+    {
+      "constraint_id": "xmage_le_xmpage",
+      "constraint_type": "ordering",
+      "parameters": ["XMAGE", "XMPAGE"],
+      "expression": "XMAGE.init <= XMPAGE.init (harvest age within max physiological age)",
+      "relation": "<=",
+      "field": "init"
+    },
+    {
+      "constraint_id": "cardinal_temp_stage1",
+      "constraint_type": "ordering",
+      "parameters": ["TB1", "TO11", "TO21", "TM1"],
+      "expression": "TB1 < TO11 <= TO21 < TM1 (cardinal temperature ordering, stage 1)",
+      "relation": "<",
+      "field": "init",
+      "rectangular": true
+    },
+    {
+      "constraint_id": "cardinal_temp_stage2",
+      "constraint_type": "ordering",
+      "parameters": ["TB2", "TO12", "TO22", "TM2"],
+      "expression": "TB2 < TO12 <= TO22 < TM2 (cardinal temperature ordering, stage 2)",
+      "relation": "<",
+      "field": "init",
+      "rectangular": true
+    },
+    {
+      "constraint_id": "cardinal_temp_stage3",
+      "constraint_type": "ordering",
+      "parameters": ["TB3", "TO13", "TO23", "TM3"],
+      "expression": "TB3 < TO13 <= TO23 < TM3 (cardinal temperature ordering, stage 3)",
+      "relation": "<",
+      "field": "init",
+      "rectangular": true
+    },
+    {
+      "constraint_id": "xfint_range",
+      "constraint_type": "range",
+      "parameters": ["XFINT"],
+      "expression": "0 <= XFINT <= 0.50 (IPDMND risk constraint)",
+      "lower": 0.0,
+      "upper": 0.50
+    },
+    {
+      "constraint_id": "xfrt_range",
+      "constraint_type": "range",
+      "parameters": ["XFRT"],
+      "expression": "0 <= XFRT <= 1 (fruit partition fraction)",
+      "lower": 0.0,
+      "upper": 1.0
+    },
+    {
+      "constraint_id": "xfpht_positive",
+      "constraint_type": "range",
+      "parameters": ["XFPHT"],
+      "expression": "XFPHT > 0 (photothermal-day harvest threshold)",
+      "lower": 1.0,
+      "upper": 1000.0
+    },
+    {
+      "constraint_id": "xmage_ge_1",
+      "constraint_type": "range",
+      "parameters": ["XMAGE"],
+      "expression": "XMAGE >= 1 (harvest age in photothermal days)",
+      "lower": 1.0,
+      "upper": 1000.0
+    },
+    {
+      "constraint_id": "partition_leaf_stem_sum",
+      "constraint_type": "sum_to_one",
+      "parameters": ["LEAF_PART_FLORAL", "STEM_PART_EARLY"],
+      "expression": "YLEAF_i + YSTEM_i <= 1 at every node (root partition non-negative; validated at expansion time)",
+      "tolerance": 0.999
+    },
+    {
+      "constraint_id": "mutual_exclusive_slavr_slaref",
+      "constraint_type": "mutual_exclusive",
+      "parameters": ["SLAVR", "SLAREF"],
+      "expression": "Only one of SLAVR / SLAREF may be active (same physical quantity)"
+    },
+    {
+      "constraint_id": "mutual_exclusive_sizlf_sizref",
+      "constraint_type": "mutual_exclusive",
+      "parameters": ["SIZLF", "SIZREF"],
+      "expression": "Only one of SIZLF / SIZREF may be active (same physical quantity)"
+    },
+    {
+      "constraint_id": "mutual_exclusive_rwdth_yvswh",
+      "constraint_type": "mutual_exclusive",
+      "parameters": ["RWDTH", "YVSWH"],
+      "expression": "Only one of RWDTH (scale) / YVSWH (base curve) may be active"
+    },
+    {
+      "constraint_id": "mutual_exclusive_rhght_yvsht",
+      "constraint_type": "mutual_exclusive",
+      "parameters": ["RHGHT", "YVSHT"],
+      "expression": "Only one of RHGHT (scale) / YVSHT (base curve) may be active"
+    },
+    {
+      "constraint_id": "dmc_range",
+      "constraint_type": "range",
+      "parameters": ["DMC0", "DMCH", "KDMC"],
+      "expression": "0 < DMC < 1 (dry matter content fraction)",
+      "lower": 0.01,
+      "upper": 0.99
+    }
+  ]
+}

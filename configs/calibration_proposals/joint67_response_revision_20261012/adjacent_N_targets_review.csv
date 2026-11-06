@@ -1,0 +1,4 @@
+﻿water_level,trno,paired_trno,date,variable,observed,sigma_eff,budget,unit,approved,source,covariance_assumption
+W1,6,10,2026-07-17,N_ADJACENT_FRESH_CONTRAST,2912.8499999999985,5418.036801037805,2,kg fresh/ha,False,frozen 2026 terminal CHFPW,zero between treatment means; n_eff=1
+W2,5,8,2026-07-17,N_ADJACENT_FRESH_CONTRAST,7239.600000000006,4054.6820154483125,2,kg fresh/ha,False,frozen 2026 terminal CHFPW,zero between treatment means; n_eff=1
+W3,4,7,2026-07-17,N_ADJACENT_FRESH_CONTRAST,6561.000000000015,7291.508831510802,2,kg fresh/ha,False,frozen 2026 terminal CHFPW,zero between treatment means; n_eff=1

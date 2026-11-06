@@ -1,0 +1,17 @@
+﻿group,phi_budget,note
+PHENO,0.1,PDAT flowering phenology; MDAT and ADAT diagnostic-only
+CANOPY_INCREMENT,0.6,Signed LAI differences across consecutive observation dates
+CANOPY_TERMINAL,0.4,Terminal LAI state per treatment (up from 0.20)
+BIOMASS,1.0,Original LWAD and SWAD state series diagnostic-only
+BIOMASS_INCREMENT,0.75,Signed leaf and stem dry-mass differences
+BIOMASS_TERMINAL,0.4,Terminal leaf and stem dry-mass states (up from 0.25)
+PLANT_N,1.0,SNAM plus LNAM only
+HARVEST_FRESH,1.25,CHFPW diagnostic-only
+HARVEST_DRY_INCREMENT,1.25,Measured event dry-harvest increments
+HARVEST_DRY_TOTAL,1.5,One terminal cumulative dry harvest per treatment (x3 vs v2: 0.50)
+HARVEST_DRY_TREND,0.75,Intermediate cumulative dry harvest log-transformed (relative shape / early-season fit)
+N_RESPONSE,0.025,Retained raw N response contrast (x1/4 vs v2: 0.10)
+W_RESPONSE,0.1,Within-nitrogen water-yield contrast; x4 vs 20260813 (0.025) per 26SP yield/boundary report 20260819 to reach >=5% realized Phi share
+CUMULATIVE_HARVEST,1.0,Legacy PWAD diagnostic-only fallback
+INCREMENTAL_HARVEST,1.0,Legacy PWAI diagnostic-only fallback
+SOIL_WATER,0.05,Audited soil-water observations (x1/4 vs v2: 0.20)

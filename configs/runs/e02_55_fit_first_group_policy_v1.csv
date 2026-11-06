@@ -1,0 +1,10 @@
+group,phi_budget,note
+PHENO,0.50,fit_first handoff: PDAP/ADAP are active; MDAP remains diagnostic-only
+CANOPY,1.00,fit_first handoff: LAID 0.60, LAIX 0.20, CHTD 0.20 within CANOPY family
+BIOMASS,1.50,fit_first handoff: LWAD+SWAD share biomass family budget
+PLANT_N,1.00,CNAM; only seasons with observations participate
+HARVEST_FRESH,0.01,fit_first handoff: CHFPW remains diagnostic-only; positive placeholder required by T8 budget schema
+HARVEST_DRY,4.00,fit_first handoff: CHPDT 0.85 and HPODW 0.15 share one static family budget
+CUMULATIVE_HARVEST,1.00,Legacy PWAD diagnostic-only fallback
+INCREMENTAL_HARVEST,1.00,Legacy PWAI diagnostic-only fallback
+SOIL_WATER,0.50,fit_first handoff: retain soil-water observations without dominating crop parameters

@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_final_formal_200reals_params_20260827"
+crop: "eggplant"
+created_at: "2026-08-27T03:25:37Z"
+approved_at: "2026-08-27T03:25:37Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_final_formal_200reals_proposal_20260827.csv"
+derived_from_sha256: "5d29af57d197c2b35e1b65453c0e3981c829b366eb8105629756d696bf537dd2"
+bounds_sha256: "5d29af57d197c2b35e1b65453c0e3981c829b366eb8105629756d696bf537dd2"
+parameter_count: 148
+automatic_repairs: 0
+notes: "E02 Final calibrated eggplant parameters from approved formal 200x6 parallel confirmation calibration (source-sink focused, pure raw-scale validated)"

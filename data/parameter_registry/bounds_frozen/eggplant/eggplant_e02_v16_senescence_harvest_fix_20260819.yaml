@@ -1,0 +1,12 @@
+bounds_id: "eggplant_e02_v16_senescence_harvest_fix_20260819"
+crop: "eggplant"
+created_at: "2026-08-19T12:34:07Z"
+approved_at: "2026-08-19T12:34:07Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_e02_v16_senescence_harvest_fix_20260819.csv"
+derived_from_sha256: "854ab28f5aaac7123800bb7b82852cc5c9708e5a134d1b63d2ab5ff53204fb01"
+bounds_sha256: "854ab28f5aaac7123800bb7b82852cc5c9708e5a134d1b63d2ab5ff53204fb01"
+parameter_count: 110
+automatic_repairs: 0
+notes: "v16 senescence + harvest sequence rebalance bounds"

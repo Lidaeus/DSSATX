@@ -1,0 +1,22 @@
+{
+  "profile_id": "e02_multitarget_dryharvest_v2",
+  "active_phi_targets": [
+    "PDAP",
+    "ADAP",
+    "LAIX",
+    "LAID",
+    "LWAD",
+    "SWAD",
+    "CHTD",
+    "CNAM",
+    "CHPDT",
+    "HPODW",
+    "SOIL_WATER"
+  ],
+  "diagnostic_targets": ["MDAP", "CHFPW", "PWAD", "PWAI", "HIAM"],
+  "forbidden_targets": ["HWAM", "L#SD", "M#AD", "CWID", "L#PA", "RWAD", "PDMCD"],
+  "transform": "raw for CHPDT; ln(y+1) for HPODW; raw for other active targets",
+  "offset": 1.0,
+  "reference": 1.0,
+  "description": "Parallel fit_first branch from the 2026-07-28 handoff: CHPDT is optimized on the original scale; HPODW remains ln(y+1); MDAP and CHFPW remain diagnostic-only. Family budgets are defined in e02_55_fit_first_group_policy_v1.csv."
+}

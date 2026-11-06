@@ -1,0 +1,22 @@
+{
+  "source_commit": "d2e5f7f655ce37eeab17f6e56c29aaf652cb2914",
+  "case_dir": "D:\\Tomato_Cal\\subprojects\\critical_n\\reports\\n_v4_lai_20261103\\cases\\r4_lai_slow_trace",
+  "binary_sha256": "11d98149af76d78453c4693f24ed9f7a532d7851dab881d9002b724f1bad2a8b",
+  "figure_count": 20,
+  "objective_rows": 612,
+  "additional_diagnostic_N_observations": 24,
+  "model_code_edited": false,
+  "model_executed": false,
+  "objectives_changed": false,
+  "diagnostic_only": true,
+  "source_files": {
+    "catalogue.py": "48d590ff3f1a4fb3ae3eca639538ff95d9ac892d2b46fa16cd958961f903634e",
+    "data.py": "af494ebe26126ff3d813a4f5c9d85ea2152104731ba1b80bb9a3bf343356ff77",
+    "make_atlas.py": "3870f7764654c4c7c50a207817f64ab124af04df9f6b83b120a16e0736d0d918",
+    "metrics.py": "3b1fabd9ceb0ae4266ea42c117dc9a5cfd24d8d768e2fa9929b5fd4e243eda02",
+    "render.py": "af54c24bf412622e3bdd14bfe9d7eeaa3cd15ad6cae3dc17ebe518051cdaeae5",
+    "test_contract.py": "f118c96b0f9572dcba5597722b6d14f829565f26d329574a82ca1772576b7849"
+  },
+  "atlas_sha256": "f5c1b6b65b14a6762d2a37d5f731e3175d9220161792f066f3bf56f5f7e6d288",
+  "figure_manifest_sha256": "52e4c45060272a021817e24a8614987dc1c073c70040ccf849b797b449e89ae6"
+}

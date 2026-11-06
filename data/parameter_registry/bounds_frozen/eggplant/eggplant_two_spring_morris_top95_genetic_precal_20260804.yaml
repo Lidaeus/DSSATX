@@ -1,0 +1,12 @@
+bounds_id: "eggplant_two_spring_morris_top95_genetic_precal_20260804"
+crop: "eggplant"
+created_at: "2026-08-03T21:55:20Z"
+approved_at: "2026-08-03T21:55:20Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "morris_top95_genetic_bounds_proposal.csv"
+derived_from_sha256: "8d0c15ef7d138666e6919cbec685b9cda39b492347a458d3e3b11daaabe2087d"
+bounds_sha256: "140d37c4553b7f96c48d272acc9ce7dbce726b2abe8cbc9cc374aff25102188a"
+parameter_count: 188
+automatic_repairs: 0
+notes: "Genetic-only Morris top-95% normalized organ-N/general-genetic ranking; SOIL/IC nuisance excluded; two spring cases; custom NRESP DSSAT"

@@ -1,0 +1,21 @@
+{
+  "run_id": "eggplant_26sp_cal25sp_val_sa98_joint40_100x5_20261031",
+  "run_dir": "D:\\Tomato_Cal\\workspace\\runs\\eggplant_26sp_cal25sp_val_sa98_joint40_100x5_20261031",
+  "execution_design": "D:\\Tomato_Cal\\workspace\\runs\\eggplant_26sp_cal25sp_val_sa98_joint40_100x5_20261031\\source_snapshot\\configs\\runs\\eggplant_26sp_cal25sp_val_sa98_joint40_100x5_20261031\\design.json",
+  "status_file": "D:\\Tomato_Cal\\workspace\\runs\\eggplant_26sp_cal25sp_val_sa98_joint40_100x5_20261031\\pipeline_status.json",
+  "approved": true,
+  "active_parameters": 40,
+  "ies_num_reals": 100,
+  "noptmax": 5,
+  "fixed": {
+    "FL-LF": 400.0,
+    "SLPF_25SP": 0.93,
+    "SLPF_26SP": 0.89,
+    "SASC_RATIO": 0.9,
+    "ICNS_25SP": 1.0,
+    "ICNS_26SP": 1.0
+  },
+  "calibration": "XXQL2601",
+  "validation": "XXQL2501",
+  "report": "D:\\Tomato_Cal\\docs\\reports\\40参数联合率定100x5启动记录_20261031.md"
+}

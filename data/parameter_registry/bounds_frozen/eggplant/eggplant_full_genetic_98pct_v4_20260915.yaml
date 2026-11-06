@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_genetic_98pct_v4_20260915"
+crop: "eggplant"
+created_at: "2026-09-15T04:18:51Z"
+approved_at: "2026-09-15T04:18:51Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_genetic_98pct_v4_20260915.csv"
+derived_from_sha256: "eb41215e055a8f9de3a7fe7283e08316c63c98888d5bad8431580055c1eb71e7"
+bounds_sha256: "eb41215e055a8f9de3a7fe7283e08316c63c98888d5bad8431580055c1eb71e7"
+parameter_count: 159
+automatic_repairs: 0
+notes: "V4: Leaf senescence tuning for artificial pruning mimicry (SENRTE, SENPOR_LATE) + organ P refinement"

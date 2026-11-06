@@ -1,0 +1,20 @@
+group,transform,offset,reference,sigma,sigma_source,model_sigma,sigma_floor,group_multiplier,n_eff,phi_role,note
+PDAPM,raw,0,1,,,0.0,1.0,1.0,,diagnostic_only,Planting-date reference excluded from Phi
+ADAPM,raw,0,1,,,0.0,1.0,1.0,,diagnostic_only,ADAP permanently excluded from calibration
+MDAPM,raw,0,1,,not_applicable,0.0,1.0,1.0,,diagnostic_only,No physiological maturity target for indeterminate eggplant
+LAIXM,raw,0,1,,,0.2,0.1,1.0,,calibration,Maximum LAI
+LAIDM,raw,0,1,,,0.5,0.2,1.0,,calibration,Measured LAI states retained; no differencing
+LWADM,raw,0,1,,,20.0,10.0,1.0,,calibration,Measured leaf dry-mass states retained; no differencing
+SWADM,raw,0,1,,,25.0,10.0,1.0,,calibration,Measured stem dry-mass states retained; no differencing
+CHTDM,raw,0,1,,,0.05,0.02,1.0,,diagnostic_only,Canopy height excluded from Phi
+SNAMM,raw,0,1,,,5.0,2.0,1.0,,calibration,Stem nitrogen mass from measured concentration and mass
+LNAMM,raw,0,1,,,5.0,2.0,1.0,,calibration,Leaf nitrogen mass from measured concentration and mass
+CNAMM,raw,0,1,,,5.0,2.0,1.0,,diagnostic_only,CNAM deliberately excluded
+CHFPWM,log,1,1,,,30.0,20.0,1.0,,diagnostic_only,Fresh cumulative harvest excluded from Phi
+CHPDTM,raw,0,1,,,25.0,15.0,1.0,,calibration,Only terminal cumulative dry harvest is activated by the objective mask
+HPODWM,raw,0,1,,,25.0,15.0,1.0,,calibration,Measured event dry-harvest increments on original scale
+NRESPM,raw,0,1,,,0.0,50.0,1.0,,calibration,Terminal paired raw N2-minus-N0 dry-yield contrast
+HIAMM,raw,0,1,0.1,assumption,0.02,0.01,1.0,,sensitivity_only,Harvest-index sensitivity only
+PWADM,raw,0,1,250.0,assumption,30.0,20.0,1.0,,diagnostic_only,Legacy cumulative token
+PWAIM,raw,0,1,250.0,assumption,30.0,20.0,1.0,,diagnostic_only,Legacy incremental token
+SOIL_WATER,raw,0,1,,,,,,,calibration,Audited post-initial soil-water observations

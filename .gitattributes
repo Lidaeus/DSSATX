@@ -1,0 +1,24 @@
+.gitattributes text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.csv text eol=crlf
+*.json text eol=crlf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.R text eol=lf
+
+# DSSAT inputs are provenance-bearing bytes. Never rewrite their line endings.
+*.TMX -text whitespace=-blank-at-eol,-blank-at-eof
+*.TMA -text whitespace=-blank-at-eol,-blank-at-eof
+*.TMT -text whitespace=-blank-at-eol,-blank-at-eof
+*.CUL -text whitespace=-blank-at-eol,-blank-at-eof
+*.ECO -text whitespace=-blank-at-eol,-blank-at-eof
+*.SPE -text whitespace=-blank-at-eol,-blank-at-eof
+*.SOL -text whitespace=-blank-at-eol,-blank-at-eof
+*.WTH -text whitespace=-blank-at-eol,-blank-at-eof
+*.v48 -text whitespace=-blank-at-eol,-blank-at-eof
+
+# Preserve archived 26SP inputs and frozen plotting data byte for byte.
+fixtures/** -text
+docs/handoff/** -text
+subprojects/critical_n/vnext_v15_s1/source/** -text

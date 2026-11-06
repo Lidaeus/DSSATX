@@ -1,0 +1,12 @@
+bounds_id: "eggplant_26sp_w1w2_n012_postprecal_allgenetic_20260804"
+crop: "eggplant"
+created_at: "2026-08-04T01:06:19Z"
+approved_at: "2026-08-04T01:06:19Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_26sp_w1w2_n012_postprecal_allgenetic_20260804.csv"
+derived_from_sha256: "ae5258ec6d81c8cb073e2fdb3cd5b6d743b2fd43b4664ce43fd4ecaa3d6916ac"
+bounds_sha256: "ae5258ec6d81c8cb073e2fdb3cd5b6d743b2fd43b4664ce43fd4ecaa3d6916ac"
+parameter_count: 188
+automatic_repairs: 0
+notes: "Release remaining reviewed genetic/structure parameters after 95% sensitivity post-precalibration; preserve adjusted 31-parameter ranges; exclude soil and IC; custom nresp DSSAT; FL-VS fixed at 120."
