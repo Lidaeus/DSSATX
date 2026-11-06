@@ -1,0 +1,14 @@
+{
+  "success": true,
+  "purpose": "26SP smoke and conservation, not cross-platform numerical parity",
+  "binary_sha256": "62a9dc3ca0741e5cd17b1e5ad6a0497b1979999a7644d335172221aead343cc1",
+  "config_sha256": "7f2abea02180475b20d0204355f6166d11aafa3e1a66fcc881b40de9379f95b3",
+  "treatments": 12,
+  "daily_rows": 1512,
+  "layer_rows": 19656,
+  "max_abs_budget_residuals": {
+    "Q_residual": 1.370431546021678e-15,
+    "organic_residual": 5.178153496838284e-07,
+    "CH2O_residual": 3.030523657798767e-06
+  }
+}
