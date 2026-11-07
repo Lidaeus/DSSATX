@@ -23,6 +23,10 @@ python -m pip install -r requirements-dev.txt
 
 如果 Command Line Tools 已安装，直接执行 Homebrew 步骤。使用 `uname -m`、`python -V` 和 `gfortran --version` 核对环境。若 Homebrew 只提供带版本号的 gfortran，先用 `ls "$(brew --prefix gcc)"/bin/gfortran*` 查看，再将完整路径指定给下面的 `FC`。
 
+### Make 快捷入口
+
+仓库根目录提供 `Makefile` 统一入口（`make help` 查看全部命令）：`make env`、`make build`、`make test`、`make smoke`（冒烟输出自动带时间戳新目录，无需手动换 `--out`）。所有可再生产物收敛到 `.local/` 与 `workspace/` 两个 gitignore 根目录，用 `make status` 查看占用、`make clean-*`/`make distclean` 回收。目录边界与清理纪律详见 [macOS 开发与清理规范](docs/macOS开发与清理规范.md)。
+
 ## 2. 编译和验证
 
 从包根目录运行以下命令。CMake 在 `.local` 下构建，引擎测试和生产文件分开。
