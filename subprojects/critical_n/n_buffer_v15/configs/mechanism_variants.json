@@ -28,6 +28,18 @@
       "joint_growth_repair": true,
       "binary": "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\bin\\v15_s2_weighted_joint.exe",
       "sha256": "bb335718c88b76f35bb85830cd9c38251b32adff28e8225f1f5716b1135c4013"
+    },
+    {
+      "name": "v15_s3_v4root",
+      "root_kernel": 2,
+      "root_v": 0.0002,
+      "root_k": 10.0,
+      "diffusion_k": 0.005,
+      "overlay": "source/v15_s3_v4root/NUPTAK.for",
+      "baseline": "v15_s1_interface (frozen 2026-11-01)",
+      "note": "v4-R2 simultaneous root uptake kernel (from 4864 CG_Nitrogen NI_ROOT_KERNEL mode 2); psi-keyed feedback multiplies root_v; RootUptake.nml absent reproduces S1 byte-for-byte. root_v/root_k/diffusion_k are UNCALIBRATED engineering values (not in the PEST domain).",
+      "binary": ".local/build-v15-s3-v4root/bin/dscsm048 (macOS x86_64, 2026-11-07)",
+      "sha256": "1a812c1a17666a349ebe39a3f31f85f7200289e45f40fa6664d54bb8171634d0"
     }
   ]
 }

@@ -34,7 +34,30 @@ PY_TESTS := tests/test_publication_figures.py \
 
 .PHONY: help env build native-tests smoke smoke-config test status \
         clean-smoke clean-build clean-runs clean-trash distclean \
-        v15s1-assets v15s1-env smoke-ies
+        v15s1-assets v15s1-env smoke-ies v4root-build v4root-tests
+
+# ── V15 S3（v4root 变体：v4-R2 联立根吸核）────────────────────
+# 冻结 S1 源码 rsync 到 .local（可再生），叠加变体 overlay 后构建。
+V4VAR   := subprojects/critical_n/n_buffer_v15/source/v15_s3_v4root
+V4SRC   := .local/build-v15-s3-v4root-src
+V4BUILD := .local/build-v15-s3-v4root
+
+v4root-tests: ## 运行 v4root 变体 NUPTAK 原生属性测试（直连真实对象）
+	bash $(V4VAR)/run_native_tests.sh $(CURDIR)/subprojects/critical_n/vnext_v15_s1/source
+
+$(V4BUILD)/bin/dscsm048: $(V4VAR)/NUPTAK.for
+	@rm -rf $(V4SRC)
+	rsync -a --exclude '.DS_Store' \
+	  subprojects/critical_n/vnext_v15_s1/source/ $(V4SRC)/
+	cp $(V4VAR)/NUPTAK.for $(V4SRC)/Plant/CROPGRO/NUPTAK.for
+	cmake -S $(V4SRC) -B $(V4BUILD) -G Ninja \
+	  -DCMAKE_Fortran_COMPILER="$(FC)" -DCMAKE_BUILD_TYPE=RELEASE \
+	  -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+	cmake --build $(V4BUILD) --parallel $(JOBS)
+	@file $(V4BUILD)/bin/dscsm048
+	@shasum -a 256 $(V4BUILD)/bin/dscsm048
+
+v4root-build: $(V4BUILD)/bin/dscsm048 ## 构建 v15_s3_v4root 变体引擎（overlay 于冻结 S1 源码）
 
 # ── V15 S1 率定接线 ────────────────────────────────────────────
 # 编译 V15 S1 引擎并准备率定资产：.local/v15s1-inputs/dssat-std（平铺标准

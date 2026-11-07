@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-07（macOS 平台移植 + V15 S3 v4root 根系吸氮变体）
+
+- macOS 开发环境搭建（部署至 ~/dev/Tomato_Cal、Makefile 任务入口、两根清理规范、归档交接包）；posix 率定接线落地：run_dssat.py 增加 DSSATPRO.L48 生成（DSSAT_STD_DATA_DIR）、DSSAT_HOME 注入与 posix 路径格式，V15 S1 引擎 50×4 PEST++ IES 联合率定实跑验证通过（Phi 4523→207、零模型失败）。
+- 新增 V15 世代机制变体 v15_s3_v4root（subprojects/critical_n/n_buffer_v15/source/v15_s3_v4root/）：以覆盖文件 NUPTAK.for 移植 4864 引擎 n_v4 世代的 v4-R2 联立根系吸氮核（膜 Michaelis-Menten 在根表浓度与质流+扩散供给二分联解，替代 S1 质流+主动相加），负反馈以 nb_feedback_response(ψ,α_H) 经 poolfactor 乘 root_v（与 v4 pool_beta/QH1 同拓扑，键控 V15 现有 ψ，不引入 Q3 池）；RootUptake.nml/DSSAT_ROOT_UPTAKE_NML 选择内核，nml 缺失逐字节复现 S1（回归①验证）。
+- 验证：19 项原生属性测试全过（含满奢侈 ψ 吸收降 98%）；26SP 12 处理回归②通过（RootKernelLedger 972 层-日，守恒断言未触发）；确定性 A/B 显示 S1 植株 N 对施氮梯度钝化而 S3 恢复梯度响应（W3：49→64→70→73 kg/ha）；同种子 50×4 IES A/B 见两 run 目录。root_v/root_k/diffusion_k 为 UNCALIBRATED 工程值，未进入率定域；变体登记于 n_buffer_v15/configs/mechanism_variants.json。
+
 ## 2026-09-23（产量与土壤源数据修订）
 
 - 根据 `data/user/ref/DSSAT文件/` 最新 Excel 重建 25SP、26SP、25FA 三季输入包；秋季初始氮采用用户指定的 `2025秋土壤养分数据集.xlsx`，26SP 采用单独的五层矿质氮表，25SP 的硝态氮/铵态氮列已为纯氮，不再二次换算。
