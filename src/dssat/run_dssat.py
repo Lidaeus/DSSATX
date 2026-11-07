@@ -2107,6 +2107,9 @@ def _field_spans_from_header(header_line, field_names, line_len):
 
 def _to_dssatpro_path(p):
     p = os.path.abspath(str(p))
+    if os.name != "nt":
+        # Native Linux/macOS builds read DSSATPRO.L48 with plain POSIX paths.
+        return p
     drive, rest = os.path.splitdrive(p)
     rest = rest.replace("/", "\\")
     if not rest.startswith("\\"):
@@ -4174,7 +4177,9 @@ def run_model():
         exe_path = next((p for p in exe_candidates if p and os.path.isfile(p)), DSSAT_EXE)
 
         dssat_root = os.path.normpath(os.path.join(cwd_script, "..", ".."))
+        pro_name = "DSSATPRO.L48" if os.name != "nt" else "DSSATPRO.v48"
         dssatpro_candidates = [
+            os.path.join(run_dir, pro_name),
             os.path.join(run_dir, "DSSATPRO.v48"),
             os.path.join(dssat_root, "DSSATPRO.v48"),
             os.path.normpath(os.path.join(dssat_root, "data", "templates", "DSSATPRO.v48")),
@@ -4182,7 +4187,7 @@ def run_model():
             r"C:\DSSAT48\DSSATPRO.v48",
         ]
         dssatpro_src = next((p for p in dssatpro_candidates if p and os.path.isfile(p)), None)
-        dssatpro_dst = os.path.join(run_dir, "DSSATPRO.v48")
+        dssatpro_dst = os.path.join(run_dir, pro_name)
         wrote_dssatpro = False
         try:
             if dssatpro_src and os.path.exists(dssatpro_src):
@@ -4256,9 +4261,15 @@ def run_model():
         if DSSAT_MODEL:
             dssat_args.append(DSSAT_MODEL)
         dssat_args.extend(["B", batch_arg])
+        engine_env = os.environ.copy()
+        if os.name != "nt":
+            # Native builds use DSSAT_HOME to locate DSSATPRO.L48 and to
+            # scope stale-output cleanup to this run directory.
+            engine_env["DSSAT_HOME"] = str(run_dir)
         result = subprocess.run(
             dssat_args,
             cwd=run_dir,
+            env=engine_env,
             input="\n" * 8,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -4436,8 +4447,48 @@ def _to_dssatpro_path(p: Path) -> str:
     return f"{drive} {rest}"
 
 
+def _write_local_dssatpro_posix(run_dir: Path) -> Path:
+    """Write DSSATPRO.L48 for native Linux/macOS engine builds.
+
+    Native builds resolve ``DSSATPRO.L48`` (see OSDefs) from the run
+    directory and locate standard data files by searching the current
+    directory first (CSREADS). This mirrors ``tools/portable_dssat.py``:
+    every profile record is made run-relative and the engine's standard
+    data files are copied into the run directory from
+    ``DSSAT_STD_DATA_DIR`` (a flat directory holding ``*.CDE``,
+    ``MODEL.ERR``, ``*.SDA``, ``*.WDA`` and the ``DSSATPRO.L48.in``
+    template of the engine being used).
+    """
+    std_dir_value = os.environ.get("DSSAT_STD_DATA_DIR", "").strip()
+    if not std_dir_value:
+        raise FileNotFoundError(
+            "DSSAT_STD_DATA_DIR is not set. POSIX calibration runs need a "
+            "flat directory with the engine's standard data files (*.CDE, "
+            "MODEL.ERR, *.SDA, *.WDA) plus its DSSATPRO.L48.in template."
+        )
+    std_dir = Path(std_dir_value)
+    if not std_dir.is_dir():
+        raise FileNotFoundError(f"DSSAT_STD_DATA_DIR is not a directory: {std_dir}")
+    for pattern in ("*.CDE", "MODEL.ERR", "*.SDA", "*.WDA"):
+        for source in sorted(std_dir.glob(pattern)):
+            _copy(source, run_dir / source.name)
+    template = (std_dir / "DSSATPRO.L48.in").read_text(encoding="ascii", errors="ignore")
+    out = []
+    for line in template.splitlines():
+        match = re.fullmatch(r"([A-Z0-9]{3}) // \S+(.*)", line)
+        if match:
+            code, tail = match.groups()
+            line = f"{code}    .{tail}"
+        out.append(line)
+    dst = run_dir / "DSSATPRO.L48"
+    dst.write_text("\n".join(out) + "\n", encoding="ascii")
+    return dst
+
+
 def _write_local_dssatpro(run_dir: Path) -> Path:
     """Write DSSATPRO.v48 into run_dir with CRD, TMD, and SLD pointing to run_dir."""
+    if os.name != "nt":
+        return _write_local_dssatpro_posix(run_dir)
     templates = DATA_DIR / "templates"
     lines = (templates / "DSSATPRO.v48").read_text(encoding="utf-8", errors="ignore").splitlines(keepends=True)
     crd_line = f"CRD {_to_dssatpro_path(run_dir)}\n"

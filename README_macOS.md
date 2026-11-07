@@ -70,7 +70,15 @@ python tools/portable_dssat.py smoke \
 ## 3. 率定和出图
 
 - `src/calibration/`、`src/dssat/`、`tools/parallel/` 是率定入口。PEST++ 请使用与 Mac 架构匹配的原生执行体，可按 [USGS PEST++ 源码与构建说明](https://github.com/usgs/pestpp) 安装。将 `pestpp-ies` 所在目录加到 `PATH`，或设置 `PESTPP_BIN_DIR` 指向该目录。包内并行管理器会据此寻找 `pestpp-ies`、`pestpp-glm` 或 `pestpp-sen`。
-- 现有按日期命名的率定脚本、一些配置和 PEST 控制文件生成路径仍沿用 Windows 目录。移植实际批次时，需要检查 `.pst` 的模型命令和每个工作目录里的 DSSAT 配置，先单独验证正向调用，再启动多进程。包内已验证的是独立正向冒烟入口，macOS PEST++ 联合率定仍待实跑。冻结边界、率定目标和观测算子请继续遵循 [项目规则](AGENTS.md) 和 [氮机制研究约束](subprojects/critical_n/AGENTS.md)。
+- 现有按日期命名的率定脚本、一些配置和 PEST 控制文件生成路径仍沿用 Windows 目录。移植实际批次时，需要检查 `.pst` 的模型命令和每个工作目录里的 DSSAT 配置，先单独验证正向调用，再启动多进程。冻结边界、率定目标和观测算子请继续遵循 [项目规则](AGENTS.md) 和 [氮机制研究约束](subprojects/critical_n/AGENTS.md)。
+- **macOS PEST++ IES 联合率定已于 2026-11-07 实跑验证**（V15 S1 引擎、xxql2601_final_sasc70 bundle、50 realization × noptmax 4、4 agents、约 10 分钟、Phi 4523→207、零模型失败）。POSIX 接线三件套：`DSSAT_CUSTOM_EXE`（原生 dscsm048）+ `DSSAT_STD_DATA_DIR`（平铺标准数据 + DSSATPRO.L48.in，`run_dssat.py` 据此在每次调用的隔离目录生成 `DSSATPRO.L48` 并设 `DSSAT_HOME`）+ `DSSAT_SPE_BASE`（V15 机制运行时需带 NBUF 卡的 SPE 基线）。一键复现：
+
+```bash
+make smoke-ies                 # 或带参数：make smoke-ies REALS=50 ITERS=4 AGENTS=4
+eval "$(make v15s1-env)"       # 仅导出环境变量供自定义批次使用
+```
+
+注意 V15 S1（n_buffer 线，vendored 4.8.2.0）与 4.8.6.4 引擎的氮机制不同：前者经 SPE 的 `!*ORGAN NITROGEN RESERVES AND BUFFER DILUTION` 卡激活（无卡则静默走 legacy 分支），诊断输出为 `NAcceptance/NDecision/NFlux/RootNSupply.csv` 等自有 CSV，`make_all.R`/`make_atlas.py` 的 PlantNIntegration 契约仅适用 4.8.6.4 线。
 - `paper/R/` 是论文绘图入口，需要 R 和 `ggplot2`、`patchwork`、`jsonlite`、`svglite`。论文图使用经验证的冻结数据包，操作见 [论文图流水线](paper/README.md)。
 - `research/n_diagnostics/` 位于引擎仓库，可重绘冻结诊断数据。若 Matplotlib 找不到系统中文字体，设置 `DSSAT_DIAGNOSTIC_FONT` 为本机已安装的中文字体文件。下面示例只读归档数据重绘，避免覆盖现有图册。
 

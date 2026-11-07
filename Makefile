@@ -13,6 +13,12 @@ ENGINE := subprojects/critical_n/dssat_csm_os_4864
 BUILD  := .local/build-v7
 EXE    := $(BUILD)/bin/dscsm048
 
+# V15 S1（n_buffer 线，vendored 4.8.2.0）率定接线
+V15SRC   := subprojects/critical_n/vnext_v15_s1/source
+V15BUILD := .local/build-v15s1
+V15EXE   := $(V15BUILD)/bin/dscsm048
+V15ASSET := .local/v15s1-inputs
+
 PYTHON := $(shell if [ -x .venv/bin/python ]; then echo .venv/bin/python; else echo python3.13; fi)
 FC     := $(shell command -v gfortran 2>/dev/null)
 NPROC  := $(shell sysctl -n hw.ncpu 2>/dev/null || echo 6)
@@ -27,12 +33,71 @@ PY_TESTS := tests/test_publication_figures.py \
             subprojects/critical_n/tests/test_scheme_b_mass_balance.py
 
 .PHONY: help env build native-tests smoke smoke-config test status \
-        clean-smoke clean-build clean-runs clean-trash distclean
+        clean-smoke clean-build clean-runs clean-trash distclean \
+        v15s1-assets v15s1-env smoke-ies
+
+# ── V15 S1 率定接线 ────────────────────────────────────────────
+# 编译 V15 S1 引擎并准备率定资产：.local/v15s1-inputs/dssat-std（平铺标准
+# 数据 + DSSATPRO.L48.in）与带 NBUF 机制卡的 TMGRO048.SPE 基线（项目基线
+# 原样 + 冻结卡值，不改动 data/templates 的冻结模板）。
+v15s1-assets: $(V15EXE) $(V15ASSET)/TMGRO048.SPE.base
+$(V15EXE):
+	cmake -S $(V15SRC) -B $(V15BUILD) -G Ninja \
+	  -DCMAKE_Fortran_COMPILER="$(FC)" -DCMAKE_BUILD_TYPE=RELEASE \
+	  -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+	cmake --build $(V15BUILD) --parallel $(JOBS)
+	@file $(V15EXE)
+$(V15ASSET)/TMGRO048.SPE.base: $(V15ASSET)/dssat-std/DSSATPRO.L48.in
+	@mkdir -p $(V15ASSET)
+	{ cat data/templates/genotype/TMGRO048.SPE.base; \
+	  printf '\n!*ORGAN NITROGEN RESERVES AND BUFFER DILUTION\n'; \
+	  sed -n '174p' fixtures/v7-26sp/TMGRO048.SPE; } > $@
+	@echo "NBUF SPE 基线：$@"
+$(V15ASSET)/dssat-std/DSSATPRO.L48.in:
+	@mkdir -p $(V15ASSET)/dssat-std
+	cp $(V15SRC)/Data/*.CDE $(V15SRC)/Data/MODEL.ERR $@D/
+	cp $(V15SRC)/Data/StandardData/*.SDA $(V15SRC)/Data/StandardData/*.WDA $@D/
+	cp $(V15SRC)/Data/DSSATPRO.L48.in $@D/
+	@echo "标准数据：$(V15ASSET)/dssat-std/"
+
+# 导出 V15 S1 联合率定所需的环境变量（source 或 eval 使用）：
+#   eval "$(make v15s1-env)"
+v15s1-env: ## 输出 V15 S1 率定环境变量（eval "$(make v15s1-env)"）
+	@echo 'export DSSAT_CUSTOM_EXE=$(CURDIR)/$(V15EXE);'
+	@echo 'export DSSAT_STD_DATA_DIR=$(CURDIR)/$(V15ASSET)/dssat-std;'
+	@echo 'export DSSAT_SPE_BASE=$(CURDIR)/$(V15ASSET)/TMGRO048.SPE.base;'
+	@echo 'export PATH=$(CURDIR)/.venv/bin:$$PATH;'
+
+# 50×4 IES 联合率定冒烟（xxql2601 sasc70 bundle + 20261106 冻结边界）。
+# 用法：make smoke-ies [PREFIX=xxx] [REALS=50] [ITERS=4] [AGENTS=4]
+V15ENV := PATH="$(CURDIR)/.venv/bin:$$PATH" \
+          DSSAT_CUSTOM_EXE="$(CURDIR)/$(V15EXE)" \
+          DSSAT_STD_DATA_DIR="$(CURDIR)/$(V15ASSET)/dssat-std" \
+          DSSAT_SPE_BASE="$(CURDIR)/$(V15ASSET)/TMGRO048.SPE.base"
+smoke-ies: v15s1-assets ## V15 S1 50×4 PEST++ IES 联合率定冒烟
+	@test -x .venv/bin/python || { echo "先运行 make env"; exit 2; }
+	@P=$(if $(PREFIX),$(PREFIX),macsmk$(if $(REALS),$(REALS),50)x$(if $(ITERS),$(ITERS),4)); \
+	R=$${P}_$$(date +%Y%m%d_%H%M%S); \
+	echo "run_id=$$R"; \
+	env $(V15ENV) .venv/bin/python src/calibration/build_pest.py \
+	  --mode eggplant_stage2 \
+	  --bounds-id eggplant_26sp_cal25sp_val_cold_c31pst_noadat_80x4_20261106 \
+	  --bounds-crop eggplant \
+	  --input-dir data/user/experiments/xxql2601_final_sasc70_20261106 \
+	  --prefix $$P --noptmax $(if $(ITERS),$(ITERS),4) \
+	  --ies-num-reals $(if $(REALS),$(REALS),50) --random-seed 20261107 \
+	  --batch DSSBatch.v48 --harvest-var CHPDT \
+	  --out-dir workspace/runs/$$R && \
+	env $(V15ENV) .venv/bin/python tools/parallel/run_parallel.py \
+	  --run-dir workspace/runs/$$R --case $$P \
+	  --mode ies --n-agents $(if $(AGENTS),$(AGENTS),4) --wait && \
+	.venv/bin/python tools/check_run_quality.py --allow-fail \
+	  --run-dir workspace/runs/$$R --prefix $$P
 
 help: ## 显示本帮助
 	@echo "Tomato_Cal macOS 任务入口（默认 python: $(PYTHON), FC: $(if $(FC),$(FC),未找到!), 并行: $(JOBS)）"
 	@echo
-	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
 
 # ── 环境 ──────────────────────────────────────────────────────
 env: ## 创建 .venv 并安装 requirements-dev.txt
