@@ -19,7 +19,8 @@ VARIANT = Path(__file__).resolve().parent
 KEEP = [
     "Evaluate.OUT", "PlantGro.OUT", "PlantN.OUT", "Summary.OUT",
     "RootNSupply.csv", "NDecision.csv", "NAcceptance.csv", "NFlux.csv",
-    "OrganNState.csv", "RootKernelLedger.csv", "WARNING.OUT",
+    "OrganNState.csv", "RootKernelLedger.csv", "PestHarvest.OUT",
+    "FreshWt.OUT", "WARNING.OUT",
 ]
 
 

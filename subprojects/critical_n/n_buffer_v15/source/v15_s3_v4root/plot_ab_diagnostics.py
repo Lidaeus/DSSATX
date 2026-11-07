@@ -106,8 +106,24 @@ def fnum(x):
     return float(x)
 
 
-def fig_wn_response(diag, ev1, ev3, meta):
-    metrics = [("PWAMS", "果重 PWAMS (kg/ha)", "fruit"),
+def parse_pest_harvest_fresh(path):
+    """Final cumulative fresh fruit yield (CHFPWS, kg/ha) per treatment
+    from PestHarvest.OUT: the last harvest event of each RUN."""
+    final = {}
+    run_re = re.compile(r"RUN\s+(\d+)\s+TN\s+(\d+)")
+    tok_re = re.compile(r"@CHFPWS@\s+(-?\d+\.?\d*)")
+    for ln in path.read_text(errors="replace").splitlines():
+        m = run_re.match(ln)
+        if not m:
+            continue
+        t = tok_re.search(ln)
+        if t:
+            final[int(m.group(2))] = float(t.group(1))
+    return final
+
+
+def fig_wn_response(diag, ev1, ev3, meta, fresh1, fresh3):
+    metrics = [("FRESH", "鲜果产量 CHFPWS (kg/ha)", "fresh_yield"),
                ("CWAMS", "地上生物量 CWAMS (kg/ha)", "biomass"),
                ("CNAMS", "植株氮 CNAMS (kg/ha)", "plantn")]
     norder = ["N0", "N1", "N2", "N3"]
@@ -117,11 +133,17 @@ def fig_wn_response(diag, ev1, ev3, meta):
         for col, (tag, ev) in enumerate((("S1 相加核", ev1), ("S3 v4-R2 联立核", ev3))):
             ax = axes[row][col]
             vals = {}
-            for r in ev:
-                trt = int(r["TN"])
-                if trt in meta:
-                    vals.setdefault(meta[trt][1], {})[meta[trt][2]] = \
-                        fnum(r[key])
+            if key == "FRESH":
+                source = fresh1 if col == 0 else fresh3
+                for trt, v in source.items():
+                    if trt in meta:
+                        vals.setdefault(meta[trt][1], {})[meta[trt][2]] = v
+            else:
+                for r in ev:
+                    trt = int(r["TN"])
+                    if trt in meta:
+                        vals.setdefault(meta[trt][1], {})[meta[trt][2]] = \
+                            fnum(r[key])
             for w in ("W1", "W2", "W3"):
                 ys = [vals.get(w, {}).get(n) for n in norder]
                 ax.plot(range(4), ys, "o-", color=WC[w], label=w)
@@ -372,8 +394,10 @@ def main():
     led = diag / "replay_s3/RootKernelLedger.csv"
     if led.is_file():
         ledger3 = parse_csv_dicts(led)
+    fresh1 = parse_pest_harvest_fresh(diag / "replay_s1/PestHarvest.OUT")
+    fresh3 = parse_pest_harvest_fresh(diag / "replay_s3/PestHarvest.OUT")
 
-    fig_wn_response(diag, ev1, ev3, meta)
+    fig_wn_response(diag, ev1, ev3, meta, fresh1, fresh3)
     fig_trajectories(diag, pg1, pg3, dec1, dec3, meta)
     fig_root_uptake(diag, nd1, nd3, ledger3, meta)
     fig_psi(diag, dec1, dec3, meta)

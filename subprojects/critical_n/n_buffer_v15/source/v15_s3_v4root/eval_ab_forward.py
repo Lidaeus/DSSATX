@@ -23,9 +23,27 @@ REPO = Path(__file__).resolve().parents[5]
 VARIANT = Path(__file__).resolve().parent
 SUM_COLS = {
     "CWAMS": "aboveground_kg_ha",
-    "PWAMS": "fruit_weight_kg_ha",
     "CNAMS": "plant_n_kg_ha",
 }
+
+
+def parse_fresh_yield(path):
+    """Final cumulative fresh fruit yield (CHFPWS, kg/ha) per TN from
+    PestHarvest.OUT (fresh-weight contract; PWAMS is a dry maturity
+    metric and is not meaningful for this indeterminate crop)."""
+    import re
+    final = {}
+    run_re = re.compile(r"RUN\s+(\d+)\s+TN\s+(\d+)")
+    tok_re = re.compile(r"@CHFPWS@\s+(-?\d+\.?\d*)")
+    with path.open(errors="replace") as f:
+        for ln in f:
+            m = run_re.match(ln)
+            if not m:
+                continue
+            t = tok_re.search(ln)
+            if t:
+                final[int(m.group(2))] = float(t.group(1))
+    return final
 
 
 def parse_summary(path: Path):
@@ -87,6 +105,8 @@ def main():
     _, sum_s1 = run_forward("s1", s1_exe, workroot, {})
     _, sum_s3 = run_forward("s3", s3_exe, workroot,
                             {"DSSAT_ROOT_UPTAKE_NML": str(nml)})
+    fresh1 = parse_fresh_yield(workroot.parent / "_ab_s1/PestHarvest.OUT")
+    fresh3 = parse_fresh_yield(workroot.parent / "_ab_s3/PestHarvest.OUT")
 
     meta = {}
     with (REPO / "data/user/experiments/xxql2601_final_sasc70_20261106"
@@ -101,19 +121,27 @@ def main():
         w.writerow(["run", "trt", "trt_label", "water_level",
                     "nitrogen_level",
                     *[f"s1_{v}" for v in SUM_COLS.values()],
+                    "s1_fresh_yield_kg_ha",
                     *[f"s3_{v}" for v in SUM_COLS.values()],
-                    *[f"ratio_{v}" for v in SUM_COLS.values()]])
+                    "s3_fresh_yield_kg_ha",
+                    *[f"ratio_{v}" for v in SUM_COLS.values()],
+                    "ratio_fresh_yield_kg_ha"])
         for r1, r3 in zip(sum_s1, sum_s3):
             trt = int(r1.get("TN", 0) or 0)
             m = meta.get(trt, {})
             vals1 = {k: float(r1[k]) for k in SUM_COLS if k in r1}
             vals3 = {k: float(r3[k]) for k in SUM_COLS if k in r3}
+            f1 = fresh1.get(trt, float("nan"))
+            f3 = fresh3.get(trt, float("nan"))
             row = [1, trt, m.get("treatment_label", ""),
                    m.get("water_level", ""), m.get("nitrogen_level", "")]
             row += [vals1.get(k, float("nan")) for k in SUM_COLS]
+            row += [f1]
             row += [vals3.get(k, float("nan")) for k in SUM_COLS]
+            row += [f3]
             row += [(vals3[k] / vals1[k] if vals1.get(k, 0) else float("nan"))
                     for k in SUM_COLS]
+            row += [f3 / f1 if f1 else float("nan")]
             w.writerow(row)
     print(f"wrote {out} ({len(sum_s1)} treatments)")
 
