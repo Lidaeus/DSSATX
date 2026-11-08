@@ -34,7 +34,8 @@ PY_TESTS := tests/test_publication_figures.py \
 
 .PHONY: help env build native-tests smoke smoke-config test status \
         clean-smoke clean-build clean-runs clean-trash distclean \
-        v15s1-assets v15s1-env smoke-ies v4root-build v4root-tests
+        v15s1-assets v15s1-env smoke-ies v4root-build v4root-tests \
+        s4-build s4-tests
 
 # ── V15 S3（v4root 变体：v4-R2 联立根吸核）────────────────────
 # 冻结 S1 源码 rsync 到 .local（可再生），叠加变体 overlay 后构建。
@@ -58,6 +59,30 @@ $(V4BUILD)/bin/dscsm048: $(V4VAR)/NUPTAK.for
 	@shasum -a 256 $(V4BUILD)/bin/dscsm048
 
 v4root-build: $(V4BUILD)/bin/dscsm048 ## 构建 v15_s3_v4root 变体引擎（overlay 于冻结 S1 源码）
+
+# ── V15 S4（nstate 变体：ψ* 融合氮状态）───────────────────────
+# 冻结 S1 源码 + 双 overlay（S3 的 NUPTAK.for + 修改的 N_BUFFER_V2.f90）。
+S4VAR   := subprojects/critical_n/n_buffer_v15/source/v15_s4_nstate
+S4SRC   := .local/build-v15-s4-nstate-src
+S4BUILD := .local/build-v15-s4-nstate
+
+s4-tests: ## 运行 ψ* 融合状态原生属性测试
+	bash $(S4VAR)/run_native_tests.sh
+
+$(S4BUILD)/bin/dscsm048: $(S4VAR)/N_BUFFER_V2.f90 $(S4VAR)/NUPTAK.for
+	@rm -rf $(S4SRC)
+	rsync -a --exclude '.DS_Store' \
+	  subprojects/critical_n/vnext_v15_s1/source/ $(S4SRC)/
+	cp $(S4VAR)/NUPTAK.for $(S4SRC)/Plant/CROPGRO/NUPTAK.for
+	cp $(S4VAR)/N_BUFFER_V2.f90 $(S4SRC)/Plant/CROPGRO/N_BUFFER_V2.f90
+	cmake -S $(S4SRC) -B $(S4BUILD) -G Ninja \
+	  -DCMAKE_Fortran_COMPILER="$(FC)" -DCMAKE_BUILD_TYPE=RELEASE \
+	  -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+	cmake --build $(S4BUILD) --parallel $(JOBS)
+	@file $(S4BUILD)/bin/dscsm048
+	@shasum -a 256 $(S4BUILD)/bin/dscsm048
+
+s4-build: $(S4BUILD)/bin/dscsm048 ## 构建 v15_s4_nstate 变体引擎（2×2 因子开关单二进制）
 
 # ── V15 S1 率定接线 ────────────────────────────────────────────
 # 编译 V15 S1 引擎并准备率定资产：.local/v15s1-inputs/dssat-std（平铺标准

@@ -40,6 +40,17 @@
       "note": "v4-R2 simultaneous root uptake kernel (from 4864 CG_Nitrogen NI_ROOT_KERNEL mode 2); psi-keyed feedback multiplies root_v; RootUptake.nml absent reproduces S1 byte-for-byte. root_v/root_k/diffusion_k are UNCALIBRATED engineering values (not in the PEST domain).",
       "binary": ".local/build-v15-s3-v4root/bin/dscsm048 (macOS x86_64, 2026-11-07)",
       "sha256": "1a812c1a17666a349ebe39a3f31f85f7200289e45f40fa6664d54bb8171634d0"
+    },
+    {
+      "name": "v15_s4_nstate",
+      "root_kernel": 2,
+      "nstate_mode": 2,
+      "state_tau": 0.0,
+      "overlays": ["source/v15_s4_nstate/NUPTAK.for", "source/v15_s4_nstate/N_BUFFER_V2.f90"],
+      "baseline": "v15_s3_v4root",
+      "note": "Fused plant-N state psi*: functional-N basis (v4 functional N + S2 signal N) on the unified dilution curve, two-sided anchored (-1 band floor via floor_ratio, +1 physical capacity via cap_density); deficiency side is the NNI_f deficit. Optional state_tau first-order relaxation of the published growth-side state (nb_get_psi) while the root-uptake feedback (nb_get_uptake_psi) stays instantaneous. 2x2 factor matrix root_kernel x nstate_mode in one binary; both nmls absent reproduces S1 byte-for-byte, RootUptake-only reproduces S3 byte-for-byte (dual-anchor regression verified). No new calibrated parameters.",
+      "binary": ".local/build-v15-s4-nstate/bin/dscsm048 (macOS x86_64, 2026-11-08)",
+      "sha256": "cf9464ba88581325e0dfed0a4ecda918e7a306c1ba6cd108aedc7d222d0da2a8"
     }
   ]
 }

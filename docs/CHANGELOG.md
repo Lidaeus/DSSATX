@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-08（V15 S4 nstate：植株氮状态融合 ψ*）
+
+- 新增变体 v15_s4_nstate（subprojects/critical_n/n_buffer_v15/source/v15_s4_nstate/，双 overlay：S3 的 NUPTAK.for + 修改的 N_BUFFER_V2.f90）：融合 v4 功能氮基准/参考带/NNI/growth_tau 与 V15 ψ 双侧锚定，得到连续的植株氮状态表征 ψ*——功能氮基准（复用 nb_uptake_signal，锁死储备不再冒充奢侈）+ 统一稀释曲线（新增 nb_curve_conc，消除 plan/commit 双基准）+ 双侧锚定（亏缺侧 (NNI_f−1)/(1−r_eff) 锚 −1 于参考带下沿、奢侈侧锚 +1 于物理容量）；可选 state_tau 一阶松弛仅作用于生长侧发布态（nb_get_psi），根吸负反馈（nb_get_uptake_psi）恒瞬时。NState.nml/DSSAT_NSTATE_NML 选择 nstate_mode，与 RootUptake.nml 组成单二进制 2×2 因子矩阵；不新增率定参数。
+- 验证：19 项原生属性测试全过（值连续/双侧锚点/NNI 线性/储备语义/松弛与 getter 分流）；双锚回归硬门通过——(1,1) 与 S1 冻结二进制、(2,1) 与 S3 二进制均逐字节一致；(2,2)/(1,2) 12 处理全跑通、既有账本字节稳定、ψ* 专用账本 NStatePsi.csv 落盘。诊断证据：率定参数重放显示假奢侈修正确实可见（后期总氮基准 ψ 振荡 +0.6~0.8 而 ψ* 仅 +0.2~0.5），NNI_f 梯度正确；鲜果产量 2×2 显示状态融合使平台下移、氮响应更陡。变体登记于 mechanism_variants.json（sha cf9464ba…）。
+
 ## 2026-11-07（macOS 平台移植 + V15 S3 v4root 根系吸氮变体）
 
 - macOS 开发环境搭建（部署至 ~/dev/Tomato_Cal、Makefile 任务入口、两根清理规范、归档交接包）；posix 率定接线落地：run_dssat.py 增加 DSSATPRO.L48 生成（DSSAT_STD_DATA_DIR）、DSSAT_HOME 注入与 posix 路径格式，V15 S1 引擎 50×4 PEST++ IES 联合率定实跑验证通过（Phi 4523→207、零模型失败）。

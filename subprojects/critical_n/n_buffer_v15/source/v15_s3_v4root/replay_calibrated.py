@@ -20,7 +20,7 @@ KEEP = [
     "Evaluate.OUT", "PlantGro.OUT", "PlantN.OUT", "Summary.OUT",
     "RootNSupply.csv", "NDecision.csv", "NAcceptance.csv", "NFlux.csv",
     "OrganNState.csv", "RootKernelLedger.csv", "PestHarvest.OUT",
-    "FreshWt.OUT", "WARNING.OUT",
+    "FreshWt.OUT", "NStatePsi.csv", "WARNING.OUT",
 ]
 
 
