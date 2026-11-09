@@ -1,11 +1,11 @@
 {
   "bundle_id": "xxql2601_final_20261105",
-  "created": "2026-11-05",
+  "created": "2026-11-06",
   "season": "26SP",
   "immutable": true,
   "intended_use": "calibration_and_validation_inputs;not_calibrated_results",
-  "source_provenance_sha256": "427f7fad3d9691e82e47942c22342541539ab64b4a4c6d829fb46716c0d5cbc5",
-  "generator_sha256": "b360098f35e50b0bba0c1c24c1d088284e61f01a357745cb6ed9647f7d1faa19",
+  "source_provenance_sha256": "07a4885e06b9cd9484dc7a815b670b37e5196c995927d9ee2844ff811288aa2d",
+  "generator_sha256": "43510a42a2618533f7e8eb6ef017de4604d8ace83b977729259ea8ba771863ce",
   "decision_record": {
     "date": "2026-10-27",
     "shared_initial_mineral_N": "all_seasons_all_treatments;mg_N_kg_dry_soil;before_basal",
@@ -67,9 +67,30 @@
         ],
         "bundle_water_nitrogen_groups_preserved": true
       }
+    },
+    "latest_soil_cn_refresh": {
+      "revision_date": "2026-11-06",
+      "named_parent_manifest_sha256": "0988c35a4c898da5200a8518a9a5975507e6a9fa1e7fb47681b34db00a1baa37",
+      "prior_active_bundle": {
+        "bundle_id": "xxql2601_final_sasc70_20261106",
+        "manifest_sha256": "2333a67f5c92f6217564eb49062147610e6a11316361e65e599951163b3fab6c"
+      },
+      "prior_tmx_comparison_source": "D:\\Tomato_Cal\\workspace\\runs\\eggplant_26sp_cal25sp_val_wn_gradient_cmobmx_80x4_20261106\\26SP_inputs",
+      "archived_named_parent": "D:\\Tomato_Cal_Cold_Storage\\bundle_retirement_20261106_cn_refresh\\calibration\\xxql2601_final_20261105",
+      "SASC_SAOC_ratio": 0.7,
+      "workbook": {
+        "origin": "D:\\三季节数据汇总\\2026春\\2026春土壤养分全氮-有机碳集.xlsx",
+        "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\xxql2601_final_cn_refresh_20261106\\2026春土壤养分全氮-有机碳集.xlsx",
+        "sha256": "d9d7f1bace9ba481118b357fff6cbe035fb0e9bf2fc2bb261cd5af2edfa90bf9",
+        "sheet": "Sheet1"
+      },
+      "plot_join": "plot number",
+      "source_water_label_conflicts": [],
+      "method": "three replicates; dry-soil-mass overlap; shared profile equal-treatment mean",
+      "sampled_depth_cm": 100
     }
   },
-  "engineering_checks": "observation_input_audit_and_final_exact_bundle_DSSAT_smoke_passed",
+  "engineering_checks": "manifest_verified_and_DSSAT_smoke_with_156_soil_layers_readback",
   "files": [
     {
       "name": "calibration_reader_acceptance.json",
@@ -78,13 +99,13 @@
     },
     {
       "name": "decision_record.json",
-      "sha256": "3ad228376aa182f664b7f8c8efe9c3f70fc7726a3c17337710942a536bb873bf",
-      "size_bytes": 3238
+      "sha256": "f09e8ac9ce7f4ea35b26478726bef2dbbb6a472b86dc804a97fa9373b13ce397",
+      "size_bytes": 4484
     },
     {
       "name": "dssat_smoke_report.json",
-      "sha256": "4d635d6872fe38771e4d5eca61a7534f07b3d5d3548ada2fa56accf88ce38850",
-      "size_bytes": 35218
+      "sha256": "bf23d223c91a7318cfe0e2cd9a962e1880baeb9c7f9f786a4b568a6b27fd96a9",
+      "size_bytes": 35283
     },
     {
       "name": "DSSBatch.v48",
@@ -163,13 +184,13 @@
     },
     {
       "name": "SOIL.SOL",
-      "sha256": "f60ef506b9a77a93da0d42bc6e24c7ba46787f2164fc0084f824a21b4a88dcb1",
+      "sha256": "fb5c268c3c39d210498c4aecda7c7d60e15113fcd753c6e7677eece53395c83d",
       "size_bytes": 1535
     },
     {
       "name": "soil_depth_mapping_audit.csv",
-      "sha256": "bdf9f710582b9968cd6c6253c4d9753874a501fd2c21b36c27c0dca55bd51ac9",
-      "size_bytes": 147966
+      "sha256": "9b77b0edc269a7564a0630432a6cf9331c9694dd20d4f86fc3966ca81dd39310",
+      "size_bytes": 147944
     },
     {
       "name": "soil_water_layer_mapping.csv",
@@ -188,8 +209,8 @@
     },
     {
       "name": "source_provenance.json",
-      "sha256": "427f7fad3d9691e82e47942c22342541539ab64b4a4c6d829fb46716c0d5cbc5",
-      "size_bytes": 7649
+      "sha256": "07a4885e06b9cd9484dc7a815b670b37e5196c995927d9ee2844ff811288aa2d",
+      "size_bytes": 8895
     },
     {
       "name": "standing_npk_calculation_audit.csv",
@@ -228,7 +249,7 @@
     },
     {
       "name": "XXQL2601.TMX",
-      "sha256": "6bdd0bf3df8be413b6ce07a0d26a2d9675e924e49ea5b91d1abf73eb843cdfc7",
+      "sha256": "9f1a7096d5b42577b0f9242cab298bd4c29e0edb2de4884aac4fe5ab4558d818",
       "size_bytes": 29589
     },
     {
@@ -236,5 +257,26 @@
       "sha256": "8dbc5f13b54bca7a0e5b33a9ba03383397c9da552a8a38ab0d37ae28beb944f8",
       "size_bytes": 5211
     }
-  ]
+  ],
+  "latest_soil_cn_refresh": {
+    "revision_date": "2026-11-06",
+    "named_parent_manifest_sha256": "0988c35a4c898da5200a8518a9a5975507e6a9fa1e7fb47681b34db00a1baa37",
+    "prior_active_bundle": {
+      "bundle_id": "xxql2601_final_sasc70_20261106",
+      "manifest_sha256": "2333a67f5c92f6217564eb49062147610e6a11316361e65e599951163b3fab6c"
+    },
+    "prior_tmx_comparison_source": "D:\\Tomato_Cal\\workspace\\runs\\eggplant_26sp_cal25sp_val_wn_gradient_cmobmx_80x4_20261106\\26SP_inputs",
+    "archived_named_parent": "D:\\Tomato_Cal_Cold_Storage\\bundle_retirement_20261106_cn_refresh\\calibration\\xxql2601_final_20261105",
+    "SASC_SAOC_ratio": 0.7,
+    "workbook": {
+      "origin": "D:\\三季节数据汇总\\2026春\\2026春土壤养分全氮-有机碳集.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\xxql2601_final_cn_refresh_20261106\\2026春土壤养分全氮-有机碳集.xlsx",
+      "sha256": "d9d7f1bace9ba481118b357fff6cbe035fb0e9bf2fc2bb261cd5af2edfa90bf9",
+      "sheet": "Sheet1"
+    },
+    "plot_join": "plot number",
+    "source_water_label_conflicts": [],
+    "method": "three replicates; dry-soil-mass overlap; shared profile equal-treatment mean",
+    "sampled_depth_cm": 100
+  }
 }

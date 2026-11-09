@@ -1,0 +1,12 @@
+bounds_id: "eggplant_final_springs_58_restored_bounds_40x3_8agents_20261107"
+crop: "eggplant"
+created_at: "2026-11-07T10:49:17Z"
+approved_at: "2026-11-07T10:49:17Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "approved_trial_bounds.csv"
+derived_from_sha256: "6a82748843ee143acf2241faece6147db1fc2bdd74330ff70304bad507bb994c"
+bounds_sha256: "6a82748843ee143acf2241faece6147db1fc2bdd74330ff70304bad507bb994c"
+parameter_count: 126
+automatic_repairs: 0
+notes: "User requested the first 40x3 intervals and a new 58-parameter 40x3 trial."

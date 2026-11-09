@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-10（spring58 参数率定线 macOS 适配）
+
+- 适配 Windows 便携包 eggplant_spring58_calibration_portable_20261109（sha 9f2eaf29…）：率定线 eggplant_final_springs_58_restored_bounds_40x3_8agents_20261107（58 参数×511 目标×族预算 Phi=97×40×3×8 代理）落地 macOS。**目标函数与权重设计逐字节保留**（族预算制、伪 Huber δ=1.5、带符号水氮对比、鲜产最大预算族 22、诊断零预算、98% 保留率+确定性复算验收）；src/calibration 目标函数核心件与项目本就同源，零数学改动。
+- 按用户决定切换验证集：xxql2501_refreshed_lwad_20261108（LWAD 修订包）替代 xxql2501_refreshed_20261027（不引入项目）；锁定验证观测表（568 行）与 25SP 载荷以包自带构建函数重建。
+- 引擎考证：Windows 官方实为 4.8.5.000（非 4.8.6.4）；构建 tag v4.8.5.0 并修复两处 gfortran 严格 FORMAT 缺逗号（OPSOILNI 运行时 T52X 构造、OPSWBL 重复组）；残余 Phi Δ≈+2% 溯源为 CO2048.WDA 数据表（tag 版止于 2023，Windows 安装器表未随包；暂用 4.8.5.62 表，提供 Windows 文件后可逐位等价），全程记录于 design.json 的 port_macos 节。
+- 修复两个 macOS 专属缺陷：run_parallel 的 manager 就绪等待（511 观测大 pst 超出原 10 秒窗导致 agent 握手竞态）；pestpp-ies 5.2.27 apple 构建 execv 剥命令首 token 前导斜杠（绝对路径解释器无法启动，改用 V15 验证过的裸 python 形态）。
+- 二级 40×3 复跑进行中；完成后 finalize（选优+确定性复算+LWAD 验证季+梯度诊断）与 Windows round_quality 对照。文档：docs/率定目标函数设计_spring58_20261109.md、docs/spring58运行指南_macOS.md。
+
 ## 2026-11-08（V15 S4 nstate：植株氮状态融合 ψ*）
 
 - 新增变体 v15_s4_nstate（subprojects/critical_n/n_buffer_v15/source/v15_s4_nstate/，双 overlay：S3 的 NUPTAK.for + 修改的 N_BUFFER_V2.f90）：融合 v4 功能氮基准/参考带/NNI/growth_tau 与 V15 ψ 双侧锚定，得到连续的植株氮状态表征 ψ*——功能氮基准（复用 nb_uptake_signal，锁死储备不再冒充奢侈）+ 统一稀释曲线（新增 nb_curve_conc，消除 plan/commit 双基准）+ 双侧锚定（亏缺侧 (NNI_f−1)/(1−r_eff) 锚 −1 于参考带下沿、奢侈侧锚 +1 于物理容量）；可选 state_tau 一阶松弛仅作用于生长侧发布态（nb_get_psi），根吸负反馈（nb_get_uptake_psi）恒瞬时。NState.nml/DSSAT_NSTATE_NML 选择 nstate_mode，与 RootUptake.nml 组成单二进制 2×2 因子矩阵；不新增率定参数。

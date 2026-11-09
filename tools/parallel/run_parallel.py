@@ -140,22 +140,35 @@ def _start_proc(exe, args, cwd, stdout_path, stderr_path, *, append=False, detac
     return p, out_f, err_f
 
 
-def _wait_for_manager_start(process, *, timeout_s=10.0):
+def _wait_for_manager_start(process, *, timeout_s=120.0, stdout_path=None):
     """Give the PEST++ manager an exclusive startup window before agents connect.
 
     Starting agents first was racy on Windows: an early agent could repeatedly
     attempt the Panther security handshake before the manager had initialized,
     then exit while the manager waited forever for workers.  PEST++ does not
-    expose a harmless readiness probe, so we instead require the manager to
-    remain alive through a short initialization window.
+    expose a harmless readiness probe, so we require the manager to remain
+    alive through a short initialization window, and (when the manager's
+    stdout log is available) additionally wait for its "listening on socket"
+    banner -- large cases (e.g. 511 observations) can take well over the old
+    fixed 10 s window before the listener is actually up.
     """
     deadline = time.monotonic() + float(timeout_s)
+    listening = stdout_path is None
     while time.monotonic() < deadline:
         rc = process.poll()
         if rc is not None:
             raise RuntimeError(f"manager exited during startup (exit_code={rc})")
+        if not listening and stdout_path and os.path.isfile(stdout_path):
+            try:
+                with open(stdout_path, "r", errors="replace") as handle:
+                    if "listening on socket" in handle.read().lower():
+                        listening = True
+            except OSError:
+                pass
+        if listening and time.monotonic() > deadline - float(timeout_s) + 10.0:
+            return True
         time.sleep(0.1)
-    return True
+    return listening
 
 
 def _read_last_nonempty_line(path, *, max_bytes=4096):
@@ -923,7 +936,7 @@ def cmd_run(args):
             "attempt": attempt,
             "resumed": bool(args.resume),
         })
-        _wait_for_manager_start(manager_process)
+        _wait_for_manager_start(manager_process, stdout_path=manager_out)
 
         agent_handles.extend(_launch_agents(append_logs=args.resume))
         _debug_report(

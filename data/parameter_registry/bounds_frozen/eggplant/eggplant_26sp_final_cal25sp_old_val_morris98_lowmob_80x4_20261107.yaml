@@ -1,0 +1,12 @@
+bounds_id: "eggplant_26sp_final_cal25sp_old_val_morris98_lowmob_80x4_20261107"
+crop: "eggplant"
+created_at: "2026-11-07T01:15:35Z"
+approved_at: "2026-11-07T01:15:35Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "approved_trial_bounds.csv"
+derived_from_sha256: "48cc963484c4820943432ec1d7242df6edd3aa974f6aeae9597300832a9b410d"
+bounds_sha256: "becee8e619b963a83734a6683de881754f912fa5b26f6bfe957bfc4fc57f308e"
+parameter_count: 126
+automatic_repairs: 0
+notes: "New Morris 52+6, tested floors and half-parent mobilization ceilings."

@@ -151,5 +151,26 @@
       ],
       "bundle_water_nitrogen_groups_preserved": true
     }
+  },
+  "latest_soil_cn_refresh": {
+    "revision_date": "2026-11-06",
+    "named_parent_manifest_sha256": "0988c35a4c898da5200a8518a9a5975507e6a9fa1e7fb47681b34db00a1baa37",
+    "prior_active_bundle": {
+      "bundle_id": "xxql2601_final_sasc70_20261106",
+      "manifest_sha256": "2333a67f5c92f6217564eb49062147610e6a11316361e65e599951163b3fab6c"
+    },
+    "prior_tmx_comparison_source": "D:\\Tomato_Cal\\workspace\\runs\\eggplant_26sp_cal25sp_val_wn_gradient_cmobmx_80x4_20261106\\26SP_inputs",
+    "archived_named_parent": "D:\\Tomato_Cal_Cold_Storage\\bundle_retirement_20261106_cn_refresh\\calibration\\xxql2601_final_20261105",
+    "SASC_SAOC_ratio": 0.7,
+    "workbook": {
+      "origin": "D:\\三季节数据汇总\\2026春\\2026春土壤养分全氮-有机碳集.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\xxql2601_final_cn_refresh_20261106\\2026春土壤养分全氮-有机碳集.xlsx",
+      "sha256": "d9d7f1bace9ba481118b357fff6cbe035fb0e9bf2fc2bb261cd5af2edfa90bf9",
+      "sheet": "Sheet1"
+    },
+    "plot_join": "plot number",
+    "source_water_label_conflicts": [],
+    "method": "three replicates; dry-soil-mass overlap; shared profile equal-treatment mean",
+    "sampled_depth_cm": 100
   }
 }

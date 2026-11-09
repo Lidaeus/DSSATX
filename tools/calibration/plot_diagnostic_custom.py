@@ -148,7 +148,8 @@ def plot_candidate_nitrogen_response(cand_dir, cand_label, out_file, *, mapping_
         ax.set_xlabel("Nitrogen Level", fontsize=11)
         ax.set_ylabel("Fruit Yield (t/ha)", fontsize=11)
         ax.grid(True, linestyle="--", alpha=0.4)
-        ax.legend(fontsize=8, loc="lower right" if s == "25FA" else "upper left")
+        legend_loc = "best" if mapping_csv is not None else ("lower right" if s == "25FA" else "upper left")
+        ax.legend(fontsize=8, loc=legend_loc)
     
     fig.suptitle(f"Diagnostic: Nitrogen-Yield Response and N3-N2 Difference — {cand_label}",
                  fontsize=12, fontweight="bold", y=1.03)

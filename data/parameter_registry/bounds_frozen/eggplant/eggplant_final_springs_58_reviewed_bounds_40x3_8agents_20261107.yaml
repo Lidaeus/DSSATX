@@ -1,0 +1,12 @@
+bounds_id: "eggplant_final_springs_58_reviewed_bounds_40x3_8agents_20261107"
+crop: "eggplant"
+created_at: "2026-11-07T09:40:11Z"
+approved_at: "2026-11-07T09:40:11Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "approved_trial_bounds.csv"
+derived_from_sha256: "08c5c3a134510acd26039c22584ac10aad5e15db860d35698afeb7c25f4aa99c"
+bounds_sha256: "08c5c3a134510acd26039c22584ac10aad5e15db860d35698afeb7c25f4aa99c"
+parameter_count: 126
+automatic_repairs: 0
+notes: "User approved the reviewed spring 58-parameter bounds and a 40x3 trial."

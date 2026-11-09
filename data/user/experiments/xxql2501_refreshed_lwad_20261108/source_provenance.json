@@ -1,0 +1,14 @@
+{
+  "baseline_bundle": "D:\\Tomato_Cal_Cold_Storage\\bundle_retirement_20261105\\calibration\\xxql2501_refreshed_20261027",
+  "baseline_manifest_sha256": "7567423a28300d57000532753e7a19fffadbe9e0d8624b1d3c286d69c95b0d3a",
+  "sources": [
+    {
+      "path": "D:\\三季节数据汇总\\2025春\\2025春作物生长指标集.xlsx",
+      "sha256": "470deaa56d9ddbe41bea4fcceae61bbcfd92fdee6bed20509903e3e70068fe70",
+      "sheet": "Sheet1",
+      "field": "叶干重"
+    }
+  ],
+  "generator": "tools\\experiments\\refresh_25sp_leaf_dry_weight_20261108.py",
+  "generator_sha256": "69dbc3007daa3c18c7b680783a98a1309db7c3730832d8221f42781188bf623e"
+}

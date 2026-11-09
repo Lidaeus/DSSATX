@@ -1,0 +1,12 @@
+bounds_id: "eggplant_final_springs_water_stress_expanded_40x3_8agents_20261107"
+crop: "eggplant"
+created_at: "2026-11-07T05:08:14Z"
+approved_at: "2026-11-07T05:08:14Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "approved_trial_bounds.csv"
+derived_from_sha256: "9d90385fd3b3018fdc9babf5ec4abe21c896387378ee10edaa3ab6f6e715f6ac"
+bounds_sha256: "e703757cfb287d52ef844f0a01a2932d013f899b5412d007bb18f3343ac61a83"
+parameter_count: 126
+automatic_repairs: 0
+notes: "User approved small 40x3 official-model water-gradient and remobilization domain exploration."
