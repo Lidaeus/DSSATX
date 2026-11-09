@@ -55,16 +55,26 @@ env PATH="$PWD/.venv/bin:/usr/local/bin:/usr/bin:/bin" \
   --run-dir workspace/runs/eggplant_final_springs_58_restored_bounds_40x3_8agents_20261107/joint \
   --case joint --mode ies --n-agents 8 --wait
 
-# 4) 后处理（选优→确定性复算→LWAD 验证季→梯度诊断；顺序不可变）
-.venv/bin/python -X utf8 -c "
-from tools.calibration.run_dual_morris98_trial_20261105 import read, finalize
+# 4) 后处理（选优→确定性复算→LWAD 验证季→梯度诊断；顺序不可变）。
+#    必须复刻率定链的三处运行时补丁（缺一即崩，均为链脚本 __main__ 的行为）：
+#    a) trial.MEMBERS/UPDATES/WORKERS = 40, 3, 8（否则保留率按 80 分母算全不过门）
+#    b) sa98_joint40.SIGNED.add('N2_N0_FRESH_CONTRAST')（最终批次对比族名）
+#    c) trial.DATES = design['anthesis_dates']（existing ADAT 口径，非模块常量确认口径）
+env DSSAT_CUSTOM_EXE="$PWD/.local/build-485-release/bin/dscsm048" \
+  DSSAT_STD_DATA_DIR="$PWD/.local/485mix-std" \
+  .venv/bin/python -X utf8 -c "
+import tools.calibration.run_dual_morris98_trial_20261105 as trial
+trial.MEMBERS, trial.UPDATES, trial.WORKERS = 40, 3, 8
+import src.calibration.sa98_joint40 as s98
+s98.SIGNED.add('N2_N0_FRESH_CONTRAST')
 import pandas as pd, pathlib
 RUN = pathlib.Path('workspace/runs/eggplant_final_springs_58_restored_bounds_40x3_8agents_20261107')
-d = read(RUN/'design.json')
+d = trial.read(RUN/'design.json')
+trial.DATES = dict(d['anthesis_dates'])
 b = pd.read_csv(d['frozen_bounds']).rename(columns={'name':'registry_name','native_name':'name'})
 obs = pd.read_csv(RUN/'calibration_observations.csv').fillna('')
 params = pd.read_csv(RUN/'joint/initial_ensemble.csv', index_col=0)
-finalize(RUN, b, obs, d, params)"
+trial.finalize(RUN, b, obs, d, params)"
 ```
 
 ## 4. 本次移植修好的三个 macOS 专属缺陷（均已有 V15/经验对照）
