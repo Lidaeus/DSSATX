@@ -1,0 +1,166 @@
+{
+  "metrics": {
+    "source_directory_excel": 28,
+    "destination_before_excel": 26,
+    "destination_after_excel": 28,
+    "identical_files": 22,
+    "replaced_files": 3,
+    "added_files": 2,
+    "retained_newer_destination": 1,
+    "quality25_TSS_changed_values": 120,
+    "quality25_TSS_factor": 1.5,
+    "moisture25_old_rows": 630,
+    "moisture25_new_rows": 1050,
+    "moisture25_old_dates": {
+      "2025-03-12": 210,
+      "2025-05-01": 210,
+      "2025-05-24": 210
+    },
+    "moisture25_new_dates": {
+      "2025-03-12": 210,
+      "2025-05-01": 210,
+      "2025-05-24": 210,
+      "2025-06-19": 210,
+      "2025-07-12": 210
+    },
+    "SPAD26_main_old_rows": 60,
+    "SPAD26_main_new_rows": 36,
+    "SPAD26_other_old_rows": 15,
+    "SPAD26_other_new_rows": 12,
+    "quality26_source_observations": 120,
+    "quality26_current_observations": 108,
+    "technical_aggregation_user_confirmed": true
+  },
+  "manual_flag_checks": [
+    {
+      "file": "2025春\\2025春品质集优先采用品质集中的果实含水率.xlsx",
+      "sheet": "Sheet1",
+      "cell": "J12",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春品质集优先采用品质集中的果实含水率.xlsx",
+      "sheet": "Sheet1",
+      "cell": "J15",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春品质集优先采用品质集中的果实含水率.xlsx",
+      "sheet": "Sheet1",
+      "cell": "J31",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春品质集优先采用品质集中的果实含水率.xlsx",
+      "sheet": "Sheet1",
+      "cell": "K47",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春品质集优先采用品质集中的果实含水率.xlsx",
+      "sheet": "Sheet1",
+      "cell": "K78",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春品质集优先采用品质集中的果实含水率.xlsx",
+      "sheet": "Sheet1",
+      "cell": "L47",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春品质集优先采用品质集中的果实含水率.xlsx",
+      "sheet": "Sheet1",
+      "cell": "L78",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春品质集优先采用品质集中的果实含水率.xlsx",
+      "sheet": "Sheet1",
+      "cell": "M47",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春品质集优先采用品质集中的果实含水率.xlsx",
+      "sheet": "Sheet1",
+      "cell": "M78",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春土壤含水量数据集.xlsx",
+      "sheet": "Sheet1",
+      "cell": "E43",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春土壤含水量数据集.xlsx",
+      "sheet": "Sheet1",
+      "cell": "G43",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春土壤含水量数据集.xlsx",
+      "sheet": "Sheet1",
+      "cell": "C257",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春土壤含水量数据集.xlsx",
+      "sheet": "Sheet1",
+      "cell": "E257",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春土壤含水量数据集.xlsx",
+      "sheet": "Sheet1",
+      "cell": "G257",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春土壤含水量数据集.xlsx",
+      "sheet": "Sheet1",
+      "cell": "E447",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春土壤含水量数据集.xlsx",
+      "sheet": "Sheet1",
+      "cell": "E487",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春土壤含水量数据集.xlsx",
+      "sheet": "Sheet1",
+      "cell": "E572",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春土壤含水量数据集.xlsx",
+      "sheet": "Sheet1",
+      "cell": "G447",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春土壤含水量数据集.xlsx",
+      "sheet": "Sheet1",
+      "cell": "G487",
+      "same_confirmed_value": true
+    },
+    {
+      "file": "2025春\\2025春土壤含水量数据集.xlsx",
+      "sheet": "Sheet1",
+      "cell": "G572",
+      "same_confirmed_value": true
+    }
+  ],
+  "content_notes": {
+    "2025春\\2025春品质集优先采用品质集中的果实含水率.xlsx": "Sheet1!N2:N121可溶性固形物120个值全部为旧版的1.5倍，其余数据列和Sheet2数值/公式一致。",
+    "2025春\\2025春土壤含水量数据集.xlsx": "记录630→1050行，新增420行；原有630行A:N值及公式一致，O列由日期序列号改为日期格式，实际日期一致。",
+    "2026春\\20260519_SPAD.xlsx": "总记录75→48条；主处理60→36条，每处理5→3条；附加处理15→12条。部分读数更新，用户确认属于同小区技术读数合并。",
+    "2026春\\2026春LI6400_数据整理.xlsx": "新增LI6400光合数据整理文件，1个分析页；保留其中来源、选取与复核字段。",
+    "2026春\\2026春品质指标集.xlsx": "保留目标2026-10-09版本，不以源2026-10-08版本覆盖。首期每处理4→3条，全表120→108条；数值有合并调整，用户确认属于同小区技术读数合并。",
+    "2026春\\LI600_分系统清洗结果.xlsx": "新增LI600文件，含概览、分系统清洗、质控明细、小区覆盖、原始值、字段字典、清洗规则7页。"
+  },
+  "all_destination_hashes_verified": true,
+  "current_excel_error_count": 0
+}

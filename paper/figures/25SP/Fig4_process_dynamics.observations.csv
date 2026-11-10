@@ -1,0 +1,49 @@
+"season_id","treatment","run_id","data_status","dataset_role","variable","variable_label","unit","time","time_label","observed","simulated","source_file","date_code","year","doy","dap","harvest_number","observed_sd","observed_se","n_rep","simulation_date_code","simulation_date_gap_days","treatment_label","water_level","nitrogen_level","variable_panel"
+"25SP","10","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","LAID","Leaf area index","m² m⁻²",45,"Days after planting",0.242,0.289,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25120,2025,120,45,NA,NA,NA,NA,25120,0,"TN10 (W1-N3)","W1","N3","Leaf area index
+[m² m⁻²]"
+"25SP","10","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","LWAD","Leaf dry mass","kg ha⁻¹",45,"Days after planting",91,115,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25120,2025,120,45,NA,NA,NA,NA,25120,0,"TN10 (W1-N3)","W1","N3","Leaf dry mass
+[kg ha⁻¹]"
+"25SP","10","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","SWAD","Stem dry mass","kg ha⁻¹",45,"Days after planting",122,114,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25120,2025,120,45,NA,NA,NA,NA,25120,0,"TN10 (W1-N3)","W1","N3","Stem dry mass
+[kg ha⁻¹]"
+"25SP","10","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","LAID","Leaf area index","m² m⁻²",67,"Days after planting",1.545,1.89,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25142,2025,142,67,NA,NA,NA,NA,25142,0,"TN10 (W1-N3)","W1","N3","Leaf area index
+[m² m⁻²]"
+"25SP","10","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","LWAD","Leaf dry mass","kg ha⁻¹",67,"Days after planting",613,758,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25142,2025,142,67,NA,NA,NA,NA,25142,0,"TN10 (W1-N3)","W1","N3","Leaf dry mass
+[kg ha⁻¹]"
+"25SP","10","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","SWAD","Stem dry mass","kg ha⁻¹",67,"Days after planting",687,847,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25142,2025,142,67,NA,NA,NA,NA,25142,0,"TN10 (W1-N3)","W1","N3","Stem dry mass
+[kg ha⁻¹]"
+"25SP","10","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","LAID","Leaf area index","m² m⁻²",95,"Days after planting",3.223,2.962,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25170,2025,170,95,NA,NA,NA,NA,25170,0,"TN10 (W1-N3)","W1","N3","Leaf area index
+[m² m⁻²]"
+"25SP","10","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","LWAD","Leaf dry mass","kg ha⁻¹",95,"Days after planting",1144,1276,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25170,2025,170,95,NA,NA,NA,NA,25170,0,"TN10 (W1-N3)","W1","N3","Leaf dry mass
+[kg ha⁻¹]"
+"25SP","10","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","SWAD","Stem dry mass","kg ha⁻¹",95,"Days after planting",1400,1656,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25170,2025,170,95,NA,NA,NA,NA,25170,0,"TN10 (W1-N3)","W1","N3","Stem dry mass
+[kg ha⁻¹]"
+"25SP","10","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","LAID","Leaf area index","m² m⁻²",119,"Days after planting",4.015,2.98,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25194,2025,194,119,NA,NA,NA,NA,25194,0,"TN10 (W1-N3)","W1","N3","Leaf area index
+[m² m⁻²]"
+"25SP","10","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","LWAD","Leaf dry mass","kg ha⁻¹",119,"Days after planting",1256,1321,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25194,2025,194,119,NA,NA,NA,NA,25194,0,"TN10 (W1-N3)","W1","N3","Leaf dry mass
+[kg ha⁻¹]"
+"25SP","10","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","SWAD","Stem dry mass","kg ha⁻¹",119,"Days after planting",2474,1747,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25194,2025,194,119,NA,NA,NA,NA,25194,0,"TN10 (W1-N3)","W1","N3","Stem dry mass
+[kg ha⁻¹]"
+"25SP","13","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","LAID","Leaf area index","m² m⁻²",45,"Days after planting",0.212,0.291,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25120,2025,120,45,NA,NA,NA,NA,25120,0,"TN13 (W1-N0)","W1","N0","Leaf area index
+[m² m⁻²]"
+"25SP","13","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","LWAD","Leaf dry mass","kg ha⁻¹",45,"Days after planting",75,116,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25120,2025,120,45,NA,NA,NA,NA,25120,0,"TN13 (W1-N0)","W1","N0","Leaf dry mass
+[kg ha⁻¹]"
+"25SP","13","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","SWAD","Stem dry mass","kg ha⁻¹",45,"Days after planting",111,114,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25120,2025,120,45,NA,NA,NA,NA,25120,0,"TN13 (W1-N0)","W1","N0","Stem dry mass
+[kg ha⁻¹]"
+"25SP","13","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","LAID","Leaf area index","m² m⁻²",67,"Days after planting",1.312,1.425,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25142,2025,142,67,NA,NA,NA,NA,25142,0,"TN13 (W1-N0)","W1","N0","Leaf area index
+[m² m⁻²]"
+"25SP","13","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","LWAD","Leaf dry mass","kg ha⁻¹",67,"Days after planting",497,646,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25142,2025,142,67,NA,NA,NA,NA,25142,0,"TN13 (W1-N0)","W1","N0","Leaf dry mass
+[kg ha⁻¹]"
+"25SP","13","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","SWAD","Stem dry mass","kg ha⁻¹",67,"Days after planting",581,807,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25142,2025,142,67,NA,NA,NA,NA,25142,0,"TN13 (W1-N0)","W1","N0","Stem dry mass
+[kg ha⁻¹]"
+"25SP","13","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","LAID","Leaf area index","m² m⁻²",95,"Days after planting",2.845,1.687,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25170,2025,170,95,NA,NA,NA,NA,25170,0,"TN13 (W1-N0)","W1","N0","Leaf area index
+[m² m⁻²]"
+"25SP","13","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","LWAD","Leaf dry mass","kg ha⁻¹",95,"Days after planting",1080,980,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25170,2025,170,95,NA,NA,NA,NA,25170,0,"TN13 (W1-N0)","W1","N0","Leaf dry mass
+[kg ha⁻¹]"
+"25SP","13","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","SWAD","Stem dry mass","kg ha⁻¹",95,"Days after planting",1191,1726,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25170,2025,170,95,NA,NA,NA,NA,25170,0,"TN13 (W1-N0)","W1","N0","Stem dry mass
+[kg ha⁻¹]"
+"25SP","13","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","LAID","Leaf area index","m² m⁻²",119,"Days after planting",3.39,1.542,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25194,2025,194,119,NA,NA,NA,NA,25194,0,"TN13 (W1-N0)","W1","N0","Leaf area index
+[m² m⁻²]"
+"25SP","13","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","LWAD","Leaf dry mass","kg ha⁻¹",119,"Days after planting",1022,883,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25194,2025,194,119,NA,NA,NA,NA,25194,0,"TN13 (W1-N0)","W1","N0","Leaf dry mass
+[kg ha⁻¹]"
+"25SP","13","c31_scheme1_dual_spring_precision","legacy_unvalidated","calibration","SWAD","Stem dry mass","kg ha⁻¹",119,"Days after planting",1683,1637,"D:\Tomato_Cal\workspace\runs\c31_deterministic\_seasons\25SP\25SP_deterministic_process_compare.csv",25194,2025,194,119,NA,NA,NA,NA,25194,0,"TN13 (W1-N0)","W1","N0","Stem dry mass
+[kg ha⁻¹]"

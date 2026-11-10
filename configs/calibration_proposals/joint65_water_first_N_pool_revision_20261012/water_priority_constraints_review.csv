@@ -1,0 +1,7 @@
+﻿season_id,trno,paired_trno,date,stratum,observed,sigma_eff,minimum_effect_fraction_review,minimum_simulated_gain_review,direction_rule_target,direction_rule_sigma,source,approved
+26SP,11,12.0,2026-07-17,N0,10053.449999999995,4387.166418498391,0.25,2513.362499999999,0.0,1500.0,existing approved paired terminal fresh yield contrasts; no new independent observations,False
+26SP,9,12.0,2026-07-17,N0,9313.19999999999,6092.79912106086,0.25,2328.2999999999975,0.0,1500.0,existing approved paired terminal fresh yield contrasts; no new independent observations,False
+26SP,8,10.0,2026-07-17,N1,6475.049999999996,4621.499933203503,0.25,1618.762499999999,0.0,1500.0,existing approved paired terminal fresh yield contrasts; no new independent observations,False
+26SP,7,10.0,2026-07-17,N1,3325.049999999996,4762.332310181646,0.25,831.262499999999,0.0,1500.0,existing approved paired terminal fresh yield contrasts; no new independent observations,False
+26SP,5,6.0,2026-07-17,N2,10801.800000000005,5324.063625615304,0.25,2700.450000000001,0.0,1500.0,existing approved paired terminal fresh yield contrasts; no new independent observations,False
+26SP,4,6.0,2026-07-17,N2,6973.200000000012,7756.765896274035,0.25,1743.300000000003,0.0,1500.0,existing approved paired terminal fresh yield contrasts; no new independent observations,False

@@ -66,10 +66,12 @@ def git_metadata() -> dict[str, str | bool]:
             cwd=PROJECT_ROOT,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=10,
             check=False,
         )
-        return completed.stdout.strip() if completed.returncode == 0 else ""
+        return completed.stdout.strip() if completed.returncode == 0 and completed.stdout else ""
 
     return {
         "git_commit": run("rev-parse", "HEAD"),

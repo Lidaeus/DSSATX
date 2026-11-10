@@ -1,0 +1,10 @@
+{
+  "recorded_at": "2026-10-11T01:11:34.677965+00:00",
+  "user_statement": "启动正式参数率定",
+  "proposal_sha256": "008943c95d7a0f4cee83fda9ca7f1b2cc5bd2829ee48028392687a81cfe0b07d",
+  "bounds_sha256": "eeaca6253b6dd57317455fb4fa53523be4962ea857e2acfc91efea45141f03a8",
+  "review_doc_sha256": "9dffd24d7decefabe3fc71825bdb9768c0bf33f4431537eec78ad27850d67554",
+  "calibration_count": 423,
+  "active_candidates": 53,
+  "validation_not_used_for_fit": true
+}

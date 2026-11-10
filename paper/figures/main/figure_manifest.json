@@ -1,0 +1,131 @@
+{
+  "schema_version": 2,
+  "created_at": "2026-09-27T04:03:08Z",
+  "renderer": "R 4.5.2",
+  "package_versions": {
+    "ggplot2": "4.0.3",
+    "patchwork": "1.3.2",
+    "jsonlite": "2.0.0",
+    "svglite": "2.2.2"
+  },
+  "git_commit": "ed0b24a77941d7f4a07b484879bdae78c806e21a",
+  "git_dirty": true,
+  "profile_id": "general_q1_v1",
+  "profile": {
+    "path": "D:/Tomato_Cal/configs/figures/publication.json",
+    "sha256": "66a7e4cabbbabfad7471068bd70ba79d79a24848b4aba85f14e67e8db45ed58f"
+  },
+  "run_id": "c31_scheme1_dual_spring_precision",
+  "data_status": "legacy_layout_demo",
+  "science_validated": false,
+  "source_is_demo": true,
+  "demo_label_visible": false,
+  "publication_label_note": "User authorized clean C31 champion figures on 2026-09-27; scientific status unchanged.",
+  "scientific_status_promoted": false,
+  "input_manifest": {
+    "path": "D:/Tomato_Cal/paper/paper_data/terminal/paper_data_manifest.json",
+    "sha256": "4db92b815a71f1859c364bae97d7d8a2775619822a92d8e241d31b1f0ae31b9d"
+  },
+  "artifacts": [
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig3_model_performance.pdf",
+      "sha256": "f075c40211c4232799d73e1a951064e41c676cccc12e0de085d064d402c30222"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig3_model_performance.svg",
+      "sha256": "4705a87d554bdc4f298365e3cb6eaa5860f945cb66c46b1a95a686bd8bfeff12"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig3_model_performance.png",
+      "sha256": "6de2f823d105681a0fd37d5194bc11766b0c2d1e7c94bc9ff59a65507487fec2"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig3_model_performance.source.csv",
+      "sha256": "3d7c462a3a3b88790b94569007b8a5ca1b28777856a00509b8712037237f4a8b"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig3_model_performance.metrics.csv",
+      "sha256": "49f2cdb338ae9efc2de9d1c4f6275fe56d9fd90539b464bc039201fd3f0b5268"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig2_phi_convergence.pdf",
+      "sha256": "9e61dd7da97e76c75f830a891e0e1ddd7a0ecec23692c79b3629eea64605449b"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig2_phi_convergence.svg",
+      "sha256": "0ba52d6dde88a367a4b7643ca4b36c41dd1daff14707cf67115a637fcc170e46"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig2_phi_convergence.png",
+      "sha256": "1642c2ac4951a14bd4917ac5df79a31db522969519a9bf4270e53b01d0432122"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig2_phi_convergence.source.csv",
+      "sha256": "3c69cce1bdc80c8b1fcb90e98f753a5164f93c0bbbf607527fcc4a55638d38ff"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig2_phi_convergence.summary.csv",
+      "sha256": "0802e25290d0ddc2a0bd8e822f8cb3193a5f720da60f6a7d740c379244b31e26"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig6_water_nitrogen_response.pdf",
+      "sha256": "51c0512ee4ab577835e646ff00dfebd52b5dc4ef302c749b41517ed0b7aac797",
+      "render_revision_manifest": {
+        "manifest_path": "D:/Tomato_Cal/paper/03_Figures/Main_Figures/fig6_nitrogen_curve_revision_manifest.json",
+        "sha256": "2395541fdadacb90d17ed2e493653be4f816bd7e02dc293a68243ba13ad003f5",
+        "rendered_manifest_sha256": "b09428b2a7fdc43972f10c72d872f8e4faa3878b3b89d6a764c7d7a5fe119399"
+      }
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig6_water_nitrogen_response.svg",
+      "sha256": "0134783116cac887a7907e423cdfa875f935e4daef1042692fda82e47316747c",
+      "render_revision_manifest": {
+        "manifest_path": "D:/Tomato_Cal/paper/03_Figures/Main_Figures/fig6_nitrogen_curve_revision_manifest.json",
+        "sha256": "2395541fdadacb90d17ed2e493653be4f816bd7e02dc293a68243ba13ad003f5",
+        "rendered_manifest_sha256": "b09428b2a7fdc43972f10c72d872f8e4faa3878b3b89d6a764c7d7a5fe119399"
+      }
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig6_water_nitrogen_response.png",
+      "sha256": "06981ca40318eefaf8d58e2e9d2e300d0738f6f594e34e2467642df25c0568b2",
+      "render_revision_manifest": {
+        "manifest_path": "D:/Tomato_Cal/paper/03_Figures/Main_Figures/fig6_nitrogen_curve_revision_manifest.json",
+        "sha256": "2395541fdadacb90d17ed2e493653be4f816bd7e02dc293a68243ba13ad003f5",
+        "rendered_manifest_sha256": "b09428b2a7fdc43972f10c72d872f8e4faa3878b3b89d6a764c7d7a5fe119399"
+      }
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig6_water_nitrogen_response.source.csv",
+      "sha256": "e10c083fcc6625417f65eb6ed3208cf354df551d42158c5f206a6b51b4be9347",
+      "render_revision_manifest": {
+        "manifest_path": "D:/Tomato_Cal/paper/03_Figures/Main_Figures/fig6_nitrogen_curve_revision_manifest.json",
+        "sha256": "2395541fdadacb90d17ed2e493653be4f816bd7e02dc293a68243ba13ad003f5",
+        "rendered_manifest_sha256": "b09428b2a7fdc43972f10c72d872f8e4faa3878b3b89d6a764c7d7a5fe119399"
+      }
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig6_water_response.pdf",
+      "sha256": "c0cb3a1347adabcbd693d505f95d5ae3b8db2865af681250145906da53fdeb51"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig6_water_response.svg",
+      "sha256": "9ff5878eedbd56a23e74ae1ecb1ad72aeceb69ade74cecf0ba3e7147212469d7"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig6_water_response.png",
+      "sha256": "1a08a0ccdda907b64970af60d7da637912018e966e8956d653e84597a7a7aff8"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/main/Fig6_water_response.source.csv",
+      "sha256": "14f9d0267f1083c6a954eb3f519da02d43b31df5c30b915a377ed1e9b10567ac"
+    }
+  ],
+  "render_revisions": [
+    {
+      "manifest_path": "D:/Tomato_Cal/paper/03_Figures/Main_Figures/fig6_nitrogen_curve_revision_manifest.json",
+      "sha256": "2395541fdadacb90d17ed2e493653be4f816bd7e02dc293a68243ba13ad003f5",
+      "rendered_manifest_sha256": "b09428b2a7fdc43972f10c72d872f8e4faa3878b3b89d6a764c7d7a5fe119399"
+    }
+  ],
+  "updated_at": "2026-10-05T15:20:22.213787+00:00"
+}

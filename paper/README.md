@@ -1,5 +1,30 @@
 # R 论文图流水线
 
+## 2026-09-27 Champion C31 全局双春高精度代表解与交付
+
+当前最终全局 Champion 确立为 **C31**（`c28_scheme1_tb1_92`，基于 Scheme 1 物理土壤校正体系与发育基温 `TB1 = 9.20 °C`），产物入口见 [README_PAPER_WORKSPACE.md](README_PAPER_WORKSPACE.md)。
+本轮引入方案 1 实测物理土壤参数（`SLPF_25SP = 0.88`, `SLPF_26SP = 0.89`, `SASC_RATIO = 0.92`, `SOIL_SLDR = 0.40`, `SOIL_SLU1 = 2.50 mm d⁻¹`），实现双春季精度的历史性跨越：
+- **2026春 (26SP, 12处理)**：$R^2 = 0.7016$，$\text{NRMSE} = 4.89\%$，$\text{NSE} = +0.7011$，$d = 0.9022$（$0.9072$），同时攻破两项 0.70 门槛；
+- **2025春 (25SP, 11处理)**：$R^2 = 0.8802$，$\text{NRMSE} = 6.24\%$，$\text{NSE} = +0.3726$；
+- **双春合并 (23处理)**：$R^2 = 0.7246$，$\text{NRMSE} = 5.57\%$，$\text{NSE} = +0.5721$；
+- **三季全样本 (35处理)**：$R^2 = 0.9846$（$0.9840$），$\text{NRMSE} = 7.67\%$，$\text{NSE} = +0.9757$（$+0.9745$），Willmott $d = 0.9940$；
+- **2025秋盲验 (25FA, 12处理)**：均产 $13.41\text{ t/ha}$，$\text{NRMSE} = 23.07\%$；
+- **水氮农艺阶梯**：Table 4 中春茬所有处理的水分边际缓解（W2−W1）与充分灌溉恢复（W3−W1）阶梯 100% 严格为正，彻底消解零氮负灌溉非物理陷阱。
+
+全套图版位于 `03_Figures/Main_Figures` 与 `Supplementary_Figures`，数据包位于 `paper_data/`，所有图版 SHA-256 校验记录于 `03_Figures/figure_manifest.json`。
+
+## 2026-09-22 Champion C23 历史阶段回顾（已由 C31 继承与超越）
+
+历史代表解 C23（iter8_real194）查明并修复 25SP W2N0/W2N3 底土 20–60 cm 初始无机氮与有机质反向错位问题，实现 25SP 鲜果产量 NRMSE 6.00%。其历史产物已被 Champion C31 全面升级与覆盖。
+
+## 2026-09-20 C16 重绘与显式标签控制
+
+当前论文代表解及产物入口见 [README_PAPER_WORKSPACE.md](README_PAPER_WORKSPACE.md)。R 入口支持 `--publication-label-note "作者明确要求及日期"`：在原数据哈希及未验证数据许可门禁之后，仅控制 DEMO 水印和文件名前缀。使用这一选项不会将数据改为 `science_validated`；输出 manifest 保存实际 `data_status`、`science_validated`、`demo_label_visible`、`publication_label_note` 和 `scientific_status_promoted=false`。未传此选项时保留原有 DEMO 展示行为。
+
+C16 的季节数据包显式冻结过程配对的 `simulation_date_code` 与 `simulation_date_gap_days`。R 性能/残差图排除已知非同日过程配对；动态点仍保留在真实观测 DAP，模型线不外推。三季轨迹不得用年份推断春/秋归属。累计采收的单调插值允许至少两个真实节点，验证节点与插值结果均不下降。线宽点值转换为 ggplot 毫米单位；各季全处理同变量使用统一纵轴。
+
+回归检查：`python -m pytest tests/test_publication_figures.py -q`；使用固定 R 4.5.2 运行 `tests/test_c16_plot_contracts.R`。
+
 ## 2026-09-02 迁移与证据修订
 
 旧Python入口 `tools/reporting/generate_v46_page25_publication_suite.py` 已降为诊断，只接受显式确定性目录、处理映射与空输出目录；不再自动挑选champion或后验，也不再输出Fig/FigS。其历史产物保留但不得当作论文证据。

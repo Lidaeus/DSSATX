@@ -174,16 +174,12 @@ def test_assert_use_allowed_passes_when_not_prohibited(tmp_path):
     assert_use_allowed(manifest, use=USE_PARAMETER_CALIBRATION)
 
 
-def test_real_calibration_bundle_passes_integrity():
-    """The real frozen calibration bundle must pass the full integrity gate."""
-    manifest = verify_manifest_integrity("data/user/experiments/xxql2501_20260716")
-    assert manifest.bundle_id == "xxql2501_20260716"
+@pytest.mark.parametrize("season", ["25SP", "26SP"])
+def test_real_calibration_bundle_passes_integrity(season):
+    """Every bundle registered as current must pass the full integrity gate."""
+    root = Path(__file__).resolve().parents[1]
+    entry = json.loads((root / "configs/experiments/current_bundles.json").read_text())["bundles"][season]
+    manifest = verify_manifest_integrity(root / "data/user/experiments" / entry["bundle_id"])
+    assert manifest.bundle_id == entry["bundle_id"]
+    assert manifest.manifest_sha256 == entry["manifest_sha256"]
     assert USE_PARAMETER_CALIBRATION not in manifest.prohibited_use
-
-
-def test_real_sa_counterfactual_bundle_rejected_for_calibration():
-    """The real SA counterfactual bundle must be rejected for calibration use."""
-    with pytest.raises(InputUseProhibitedError):
-        verify_calibrated_input_bundle(
-            "data/user/experiments/xxql2501_sa_counterfactual_v1_20260716"
-        )

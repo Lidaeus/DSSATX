@@ -1,0 +1,5 @@
+"dataset_role","variable","variable_label","unit","n","bias","rmse","median_residual","residual_sd","residual_mad","max_abs_residual"
+"diagnostic","FRESH_INC","Incremental fresh harvest","kg ha⁻¹",36,563.641666666667,1180.8603093837,487.450000000001,1052.37974009249,1183.70784,2909.3
+"diagnostic","LAID","Leaf area index","m² m⁻²",24,-1.09375,1.23669172256738,-0.9885,0.589576727314863,0.785778,2.146
+"diagnostic","LWAD","Leaf dry mass","kg ha⁻¹",24,-512.25,609.23018364709,-464,336.88293025271,440.3322,1121
+"diagnostic","SWAD","Stem dry mass","kg ha⁻¹",24,-470.166666666667,581.230734447746,-412,349.069529222881,452.9343,1081

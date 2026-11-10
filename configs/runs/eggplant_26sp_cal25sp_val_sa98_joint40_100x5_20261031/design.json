@@ -1,0 +1,122 @@
+{
+  "schema": "approved_sa98_joint40_v1",
+  "approved": true,
+  "design_id": "eggplant_26sp_cal25sp_val_sa98_joint40_100x5_20261031",
+  "approval": {
+    "user_statement": "好，先按当前的40参数方案进行参数率定；100成员×5轮；FL-LF固定400；SLPF：2025春0.93，2026春0.89。",
+    "recorded_at": "2026-10-31T04:20:21.702379+00:00"
+  },
+  "datasets": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_refreshed_20261027",
+      "bundle_manifest_sha256": "7567423a28300d57000532753e7a19fffadbe9e0d8624b1d3c286d69c95b0d3a",
+      "verified_bundle_files": 33,
+      "roles": {
+        "validation": [
+          2,
+          3,
+          4,
+          5,
+          10,
+          11,
+          12,
+          13
+        ]
+      }
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_refreshed_20261027",
+      "bundle_manifest_sha256": "8bdd6a486ac8d17d60f4e42c2c30129c853e0b45fa6e762d4b557f5c9e4833f7",
+      "verified_bundle_files": 33,
+      "roles": {
+        "calibration": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ]
+      }
+    }
+  ],
+  "bounds_id": "eggplant_26sp_cal25sp_val_sa98_joint40_100x5_20261031",
+  "bounds_sha256": "3865808b3d345ef2f28759c0f3c23137b800c1c438abda6bd69bbf67887a71c6",
+  "active_parameters": [
+    "DSWBAR",
+    "EM-FL",
+    "EM-V1",
+    "FINREF",
+    "FL-SD",
+    "FL-SH",
+    "FNPGN1",
+    "FRLFF",
+    "LFMAX",
+    "LNGSH",
+    "LNREF",
+    "NMOBMX",
+    "PGEFF",
+    "PM06",
+    "PODUR",
+    "PROLFI",
+    "PROSTI",
+    "RHGHT",
+    "RWDTH",
+    "SENPOR_LATE",
+    "SENRTE",
+    "SFDUR",
+    "SIZLF",
+    "SLAVR",
+    "SWBAR_REC",
+    "TB1",
+    "TB2",
+    "TM1",
+    "TM2",
+    "TO11",
+    "TO12",
+    "TO21",
+    "TO22",
+    "TRIFL",
+    "VSSINK",
+    "XFINT",
+    "XFPHT",
+    "XFRT",
+    "XMAGE",
+    "YSWBAR_MID"
+  ],
+  "ies_num_reals": 100,
+  "noptmax": 5,
+  "workers": 6,
+  "seed": 20261031,
+  "dssat_executable": "C:\\DSSAT48\\DSCSM048.EXE",
+  "dssat_executable_sha256": "92173d5f63bc60d58839630b9a29f57632a19b373cab0faa8ad70362d98f5c7a",
+  "calibration_observations_sha256": "f6ec21b1edc7e50bc9cd87f31e81abab5413de89b37ec6c29d356ef026120d5d",
+  "validation_sha256": "826a2d1599e37ce3d3fb96600938acfd2efd0ad54b9fb655ca0034bcbf0c75df",
+  "runtime_hashes": {
+    "src/calibration/sa98_joint40.py": "ec7a8366047468f092742493ce107ec4f332f7f43cefed63b28b432253c63b0c",
+    "src/calibration/single_season_n.py": "6d1b0e3ea1d8022b71b6493650cc537950dfbce6edb812cd91609246e4ec0a98",
+    "src/calibration/all12_joint.py": "37d3c4acb4b88488e823951230098d9400eef9cea6e54728d541d381225313cf",
+    "src/dssat/run_dssat.py": "038aeb37295ab14a2e2fb937442fee79c033e49c2855703a945fdcdbf7d1e3e5",
+    "src/dssat/array_expander.py": "a587f5dff068336e38f554cc6a38a20e19b46cf7aa449b887fa1e8d7e2d8f548",
+    "src/common/param_registry.py": "6b72d5c063a34a1a8201b1ae78519d20f134c7c864aff0cd0d07f39fb14acca6",
+    "src/common/input_manifest.py": "394eefb0ad23fc0f0f877d77985e46d5dea9dea389fc5b1d1880630848b5ab1a",
+    "src/dssat/forward_sa98_joint40.py": "af6d5b571cc9cf85b2102bcd085b787aba6f67dfd3fe6b8acc13519d84f5e36f"
+  },
+  "ensemble_preflight_passed": false,
+  "scientific_status": "science_pending",
+  "source_review_sha256": "62265ab70b285f7f859430192fedc770f911058ba2d6d81b97ec8e83b78862d1",
+  "selection_rule": "Minimum complete calibration Phi across all iterations; no validation feedback",
+  "maximum_initial_native_candidates": 2000,
+  "initialization": "99 global Sobol feasible + center; no Phi filtering or historical warm start",
+  "preflight_runtime_revision": 3
+}

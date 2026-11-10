@@ -1,0 +1,16 @@
+﻿family,budget,variable,floor,cv,loss,huber_delta,n_targets,n_eff,approved,prior_budget,diagnostic_only
+FINAL_FRESH_YIELD,22,CHFPW,500.0,0.15,quadratic,,12,1,False,25.0,False
+FINAL_DRY_YIELD,18,CHPDT,25.0,0.2,quadratic,,12,1,False,20.0,False
+HARVEST_DRY_CUMULATIVE_EARLY,5,CHPDT,25.0,0.2,pseudo_huber,1.5,48,1,False,5.0,False
+HARVEST_DRY_EVENT,10,HPODW,25.0,0.2,pseudo_huber,1.5,60,1,False,10.0,False
+CANOPY_LAI,10,LAID,0.05,0.1,pseudo_huber,1.5,48,1,False,10.0,False
+LEAF_DRY_MASS,6,LWAD,20.0,0.15,pseudo_huber,1.5,48,1,False,6.0,False
+STEM_DRY_MASS,7,SWAD,25.0,0.15,pseudo_huber,1.5,48,1,False,6.0,False
+HEIGHT,3,CHTD,0.03,0.1,pseudo_huber,1.5,48,1,False,3.0,False
+LEAF_N_CONCENTRATION,4,LEAF_N_PCT,0.15,0.1,pseudo_huber,1.5,48,1,False,3.0,False
+STEM_N_CONCENTRATION,4,STEM_N_PCT,0.15,0.1,pseudo_huber,1.5,48,1,False,3.0,False
+FRUIT_N_CONCENTRATION,0,FRUIT_N_PCT,0.15,0.2,pseudo_huber,1.5,0,1,False,2.0,True
+ANTHESIS,3,ADAP,2.0,0.0,quadratic,,12,1,False,3.0,False
+SOIL_WATER,4,VWC,0.01,0.08,quadratic,,180,1,False,2.0,False
+W_SIGNED_CONTRAST,2,W_FRESH_CONTRAST,1500.0,0.2,quadratic,,8,1,False,1.0,False
+N_ADJACENT_SIGNED_CONTRAST,2,N_ADJACENT_FRESH_CONTRAST,1500.0,0.2,quadratic,,9,1,False,1.0,False

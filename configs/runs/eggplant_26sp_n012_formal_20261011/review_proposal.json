@@ -1,0 +1,271 @@
+{
+  "schema": "calibration_review_proposal_v1",
+  "design_id": "eggplant_26sp_n012_review_20261011",
+  "status": "awaiting_user_review",
+  "executable": false,
+  "formal_calibration_started": false,
+  "weather_boundary": {
+    "TAV": 20.0,
+    "AMP": 6.0
+  },
+  "fruit_sampling_definition": {
+    "recorded_on": "2026-10-11",
+    "authority": "direct_user_clarification",
+    "user_statement": "果实全氮测定使用的是测定果实品质时采摘成熟果实，切去一半测定品质，剩下一半烘干后磨粉称样测定。",
+    "sample_object": "picked_mature_fruit",
+    "sample_preparation": "remaining_half_after_other_half_used_for_quality_assay;oven_dried;ground;weighed_for_total_N",
+    "concentration_basis": "mg_N_per_g_dried_sample",
+    "concentration_to_percent_factor": 0.1,
+    "half_fruit_concentration_multiplier": 1.0,
+    "whole_fruit_representation": "remaining_half_as_representative_mature_fruit_sample;no_skin_or_seed_removal_was_reported",
+    "representation_is_assumption": true,
+    "sampling_date_rule": "actual_quality_and_N_sampling_date;do_not_replace_with_nearest_bulk_yield_harvest",
+    "preferred_model_compartment": "mature_fruit_seed_plus_shell;not_all_age_standing_fruit",
+    "preferred_operator": "(GN%D*MTDSD+SHND*MTDSH)/(MTDSD+MTDSH)",
+    "operator_status": "proposed_model_organ_average_N_proxy;runtime_phase_and_injection_preflight_required",
+    "new_harvest_event_added": false,
+    "calibration_design_approved": false
+  },
+  "datasets": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_refreshed_20261010",
+      "bundle_manifest_sha256": "c2b8fad69879eaa40afe6a994e5a05fd4d75d8c1ebc3f5293eb3e83bf126b602",
+      "roles": {
+        "validation": [
+          2,
+          3,
+          4,
+          5,
+          10,
+          11,
+          12,
+          13
+        ]
+      }
+    },
+    {
+      "season_id": "25FA",
+      "experiment_code": "XXQL2502",
+      "bundle_path": "data/user/experiments/xxql2502_refreshed_20261010",
+      "bundle_manifest_sha256": "ad3e9d6364687952d07a791379b609c499375a85610c3c9ff578af5d0f663d92",
+      "roles": {
+        "diagnostic": [
+          2,
+          5,
+          8,
+          11
+        ],
+        "validation": [
+          1,
+          3,
+          4,
+          6,
+          7,
+          9,
+          10,
+          12
+        ]
+      }
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_refreshed_20261010",
+      "bundle_manifest_sha256": "3eb23088d4ea456839522be4db423fd7897e837b8dbba756979503aca1646ff1",
+      "roles": {
+        "calibration": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "holdout": [
+          1,
+          2,
+          3
+        ]
+      }
+    }
+  ],
+  "parameter_proposal": "data/parameter_registry/bounds_proposals/eggplant_26sp_n012_review_20261011.csv",
+  "bounds_id": null,
+  "bounds_reference": "eggplant_full_gen_final_calib_scheme1_tb1_200x6_20260927",
+  "active_parameter_count": 53,
+  "activation_rule": "Only reviewed parameters passing calibration-only injection and perturbation checks; validation outcomes may never activate parameters or alter bounds.",
+  "stages": [
+    {
+      "stage_id": "S1_canopy",
+      "active_parameters": [
+        "EM-FL",
+        "FL-SH",
+        "FL-SD",
+        "LFMAX",
+        "SLAVR",
+        "SIZLF",
+        "KCAN",
+        "TB1",
+        "TB2",
+        "TO11",
+        "TO12",
+        "TM1",
+        "TM2",
+        "LNGSH",
+        "RHGHT",
+        "FRLFF",
+        "FRSTMF",
+        "VSSINK",
+        "PGEFF",
+        "CMOBMX",
+        "SENRTE",
+        "SENDAY",
+        "SENRT2",
+        "SENPOR_LATE",
+        "SENMAX_LATE"
+      ],
+      "freeze_other_stages": true,
+      "noptmax": 3,
+      "ies_num_reals": 200,
+      "seed": 20261011
+    },
+    {
+      "stage_id": "S2_nitrogen",
+      "active_parameters": [
+        "LNREF",
+        "NSLOPE",
+        "NSTFAC",
+        "RTNO3",
+        "RTNH4",
+        "NMOBMX",
+        "NVSMOB",
+        "NRCVR",
+        "PROLFF",
+        "PROLFG",
+        "PROLFI",
+        "PROSTF",
+        "PROSTG",
+        "PROSTI",
+        "FNPGN1",
+        "FNPGN2"
+      ],
+      "freeze_other_stages": true,
+      "noptmax": 3,
+      "ies_num_reals": 200,
+      "seed": 20261012
+    },
+    {
+      "stage_id": "S3_water_fruit",
+      "active_parameters": [
+        "ATOP",
+        "DSWBAR",
+        "RWDTH",
+        "RWUMX",
+        "SWBAR_REC",
+        "YSWBAR_MID",
+        "XFRT",
+        "XMAGE",
+        "SFDUR",
+        "PODUR",
+        "PROSHI",
+        "PROSHF"
+      ],
+      "freeze_other_stages": true,
+      "noptmax": 3,
+      "ies_num_reals": 200,
+      "seed": 20261013
+    }
+  ],
+  "final_joint": {
+    "noptmax": 6,
+    "ies_num_reals": 200,
+    "seed": 20261014,
+    "active_scope": "Only stage parameters with non-degenerate effects; approval required for changes",
+    "agents": 6
+  },
+  "uncertainty_model": {
+    "n_eff": 1,
+    "formula": "sqrt(SD^2/n_eff + floor^2 + (cv*abs(observed))^2)",
+    "floor_and_cv_status": "assumed_pending_review",
+    "weight_formula": "sqrt(family_budget / (number_treatments * number_observations_in_treatment_family)) / sigma_eff",
+    "interpreted_as": "balanced composite objective; not independent chi-square likelihood",
+    "validation_weight": 0
+  },
+  "objectives": {
+    "catalog": "observation_catalog.csv",
+    "policy": "objective_policy.csv",
+    "primary": "Raw date-specific stem/leaf dry mass, LAI, height, soil water, dry event harvest, leaf/stem N%, and mature-fruit dry-basis N% via the proposed organ-average proxy; all await design review and runtime preflight",
+    "diagnostic_only": [
+      "SNAM",
+      "LNAM",
+      "CNAM",
+      "cumulative_harvest_N",
+      "CHPDT",
+      "CHFPW",
+      "HFPOW",
+      "N_RESPONSE",
+      "W_RESPONSE",
+      "PDMCD"
+    ],
+    "no_duplicate_primary_states_increments_or_products": true
+  },
+  "constraints": [
+    "TBj < TO1j < TO2j < TMj",
+    "XMAGE < fixed XFPHT",
+    "PROLFF <= PROLFG <= PROLFI",
+    "PROSTF <= PROSTG <= PROSTI",
+    "PROSHF <= PROSHI",
+    "FNPGN1 < FNPGN2 < FNPGN3 = FNPGN4",
+    "FRLFF + FRSTMF may need mechanism-specific partition constraints at injection"
+  ],
+  "fixed_inputs": "Immutable per-season TMX/SOL/weather: N, water, fertilizer, PAGE/PENV/PLWT, density, soil chemistry/physical layers/SASC/SLPF; do not import old fixed IC/soil values",
+  "historical_validation_caveat": "C31 and prior batches have already used 2025 treatments; current split is locked out of this run but is retrospective external validation, not historically blind validation.",
+  "pending": [
+    "User review of objectives/bounds/weights/stages including mature-fruit proxy",
+    "Validate mature-fruit proxy output phase and finite mature mass on exact sample dates; no substitution or added bulk harvest",
+    "Implement and test concentration objectives in builder/runtime",
+    "Support one formal calibration season without diagnostic_single_season workaround",
+    "Verify all proposal parameter injection and perturbation effects against current 26SP only",
+    "Freeze a new approved bounds ID before building PST"
+  ],
+  "output_evidence": {
+    "native_n_rows_matched": 99,
+    "native_plantn_columns": [
+      "YEAR",
+      "DOY",
+      "DAS",
+      "DAP",
+      "CNAD",
+      "GNAD",
+      "VNAD",
+      "GN%D",
+      "VN%D",
+      "NFXC",
+      "NUPC",
+      "LNAD",
+      "SNAD",
+      "LN%D",
+      "SN%D",
+      "SHND",
+      "RN%D",
+      "NFXD",
+      "SNN0C",
+      "SNN1C",
+      "run",
+      "trno",
+      "date"
+    ],
+    "fruit_FRN_percent_native_available": false,
+    "fruit_semantic_confirmation_required": false,
+    "fruit_sampling_definition": "picked_mature_fruit_remaining_dried_half",
+    "fruit_proxy_native_dates_available": 27,
+    "fruit_proxy_is_cohort_specific_N": false,
+    "fruit_operator_runtime_phase_preflight_passed": false,
+    "new_native_reader_is_not_integrated_into_pest": true
+  }
+}

@@ -5,7 +5,7 @@ Examples
 Engineering precheck (uses a non-science-validated parameter snapshot)::
 
     python tools/run_formal_optimization.py \\
-        --design configs/management/eggplant_greenhouse_drip_formal_v2.json \\
+        --design <revalidated_design.json> \\
         --parameter-set-dir workspace/runs/<run_id>/parameter_set \\
         --work-root workspace/runs/<run_id>/management_v2 \\
         --allow-engineering-precheck --generations 3 --population-size 56
@@ -13,7 +13,7 @@ Engineering precheck (uses a non-science-validated parameter snapshot)::
 Formal run (blocked until the parameter set is science_validated)::
 
     python tools/run_formal_optimization.py \\
-        --design configs/management/eggplant_greenhouse_drip_formal_v2.json \\
+        --design <revalidated_design.json> \\
         --parameter-set-dir <frozen_validated_parameter_set_dir> \\
         --work-root workspace/runs/<run_id>/management_v2_formal
 """
@@ -38,8 +38,8 @@ def main() -> int:
     )
     parser.add_argument(
         "--design",
-        default="configs/management/eggplant_greenhouse_drip_formal_v2.json",
-        help="Path to the v2 formal design JSON.",
+        required=True,
+        help="Path to a design revalidated against the current input bundles.",
     )
     parser.add_argument(
         "--parameter-set-dir",

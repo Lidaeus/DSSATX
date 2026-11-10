@@ -1,0 +1,211 @@
+season_id,treatment,event_type,event_label,calendar_date,doy,dap,target_stage_index,observed_value,unit,uncertainty_se
+25SP,2,transplanting,Transplanting,2025-03-16,75,0,0.0,0.0,dap,0.0
+25SP,2,anthesis,First Anthesis (ADAPS),2025-04-22,112,37,1.0,37.0,dap,1.0
+25SP,2,fruit_set,First Fruit (PDFPS),2025-05-04,124,49,1.25,49.0,dap,1.5
+25SP,2,first_harvest,First Commercial Harvest (CHPDT),2025-05-20,140,65,1.5,65.0,dap,1.0
+25SP,2,peak_harvest,Peak Harvest (CHPDT),2025-06-19,170,95,2.0,95.0,dap,1.0
+25SP,2,cessation,Pulling Date (SD-PM),2025-07-17,198,123,2.5,123.0,dap,0.5
+25SP,3,transplanting,Transplanting,2025-03-16,75,0,0.0,0.0,dap,0.0
+25SP,3,anthesis,First Anthesis (ADAPS),2025-04-22,112,37,1.0,37.0,dap,1.0
+25SP,3,fruit_set,First Fruit (PDFPS),2025-05-04,124,49,1.25,49.0,dap,1.5
+25SP,3,first_harvest,First Commercial Harvest (CHPDT),2025-05-20,140,65,1.5,65.0,dap,1.0
+25SP,3,peak_harvest,Peak Harvest (CHPDT),2025-06-19,170,95,2.0,95.0,dap,1.0
+25SP,3,cessation,Pulling Date (SD-PM),2025-07-17,198,123,2.5,123.0,dap,0.5
+25SP,4,transplanting,Transplanting,2025-03-16,75,0,0.0,0.0,dap,0.0
+25SP,4,anthesis,First Anthesis (ADAPS),2025-04-22,112,37,1.0,37.0,dap,1.0
+25SP,4,fruit_set,First Fruit (PDFPS),2025-05-04,124,49,1.25,49.0,dap,1.5
+25SP,4,first_harvest,First Commercial Harvest (CHPDT),2025-05-20,140,65,1.5,65.0,dap,1.0
+25SP,4,peak_harvest,Peak Harvest (CHPDT),2025-06-19,170,95,2.0,95.0,dap,1.0
+25SP,4,cessation,Pulling Date (SD-PM),2025-07-17,198,123,2.5,123.0,dap,0.5
+25SP,5,transplanting,Transplanting,2025-03-16,75,0,0.0,0.0,dap,0.0
+25SP,5,anthesis,First Anthesis (ADAPS),2025-04-22,112,37,1.0,37.0,dap,1.0
+25SP,5,fruit_set,First Fruit (PDFPS),2025-05-04,124,49,1.25,49.0,dap,1.5
+25SP,5,first_harvest,First Commercial Harvest (CHPDT),2025-05-20,140,65,1.5,65.0,dap,1.0
+25SP,5,peak_harvest,Peak Harvest (CHPDT),2025-06-19,170,95,2.0,95.0,dap,1.0
+25SP,5,cessation,Pulling Date (SD-PM),2025-07-17,198,123,2.5,123.0,dap,0.5
+25SP,6,transplanting,Transplanting,2025-03-16,75,0,0.0,0.0,dap,0.0
+25SP,6,anthesis,First Anthesis (ADAPS),2025-04-22,112,37,1.0,37.0,dap,1.0
+25SP,6,fruit_set,First Fruit (PDFPS),2025-05-04,124,49,1.25,49.0,dap,1.5
+25SP,6,first_harvest,First Commercial Harvest (CHPDT),2025-05-20,140,65,1.5,65.0,dap,1.0
+25SP,6,peak_harvest,Peak Harvest (CHPDT),2025-06-19,170,95,2.0,95.0,dap,1.0
+25SP,6,cessation,Pulling Date (SD-PM),2025-07-17,198,123,2.5,123.0,dap,0.5
+25SP,9,transplanting,Transplanting,2025-03-16,75,0,0.0,0.0,dap,0.0
+25SP,9,anthesis,First Anthesis (ADAPS),2025-04-22,112,37,1.0,37.0,dap,1.0
+25SP,9,fruit_set,First Fruit (PDFPS),2025-05-04,124,49,1.25,49.0,dap,1.5
+25SP,9,first_harvest,First Commercial Harvest (CHPDT),2025-05-20,140,65,1.5,65.0,dap,1.0
+25SP,9,peak_harvest,Peak Harvest (CHPDT),2025-06-19,170,95,2.0,95.0,dap,1.0
+25SP,9,cessation,Pulling Date (SD-PM),2025-07-17,198,123,2.5,123.0,dap,0.5
+25SP,10,transplanting,Transplanting,2025-03-16,75,0,0.0,0.0,dap,0.0
+25SP,10,anthesis,First Anthesis (ADAPS),2025-04-22,112,37,1.0,37.0,dap,1.0
+25SP,10,fruit_set,First Fruit (PDFPS),2025-05-04,124,49,1.25,49.0,dap,1.5
+25SP,10,first_harvest,First Commercial Harvest (CHPDT),2025-05-20,140,65,1.5,65.0,dap,1.0
+25SP,10,peak_harvest,Peak Harvest (CHPDT),2025-06-19,170,95,2.0,95.0,dap,1.0
+25SP,10,cessation,Pulling Date (SD-PM),2025-07-17,198,123,2.5,123.0,dap,0.5
+25SP,11,transplanting,Transplanting,2025-03-16,75,0,0.0,0.0,dap,0.0
+25SP,11,anthesis,First Anthesis (ADAPS),2025-04-22,112,37,1.0,37.0,dap,1.0
+25SP,11,fruit_set,First Fruit (PDFPS),2025-05-04,124,49,1.25,49.0,dap,1.5
+25SP,11,first_harvest,First Commercial Harvest (CHPDT),2025-05-20,140,65,1.5,65.0,dap,1.0
+25SP,11,peak_harvest,Peak Harvest (CHPDT),2025-06-19,170,95,2.0,95.0,dap,1.0
+25SP,11,cessation,Pulling Date (SD-PM),2025-07-17,198,123,2.5,123.0,dap,0.5
+25SP,12,transplanting,Transplanting,2025-03-16,75,0,0.0,0.0,dap,0.0
+25SP,12,anthesis,First Anthesis (ADAPS),2025-04-22,112,37,1.0,37.0,dap,1.0
+25SP,12,fruit_set,First Fruit (PDFPS),2025-05-04,124,49,1.25,49.0,dap,1.5
+25SP,12,first_harvest,First Commercial Harvest (CHPDT),2025-05-20,140,65,1.5,65.0,dap,1.0
+25SP,12,peak_harvest,Peak Harvest (CHPDT),2025-06-19,170,95,2.0,95.0,dap,1.0
+25SP,12,cessation,Pulling Date (SD-PM),2025-07-17,198,123,2.5,123.0,dap,0.5
+25SP,13,transplanting,Transplanting,2025-03-16,75,0,0.0,0.0,dap,0.0
+25SP,13,anthesis,First Anthesis (ADAPS),2025-04-22,112,37,1.0,37.0,dap,1.0
+25SP,13,fruit_set,First Fruit (PDFPS),2025-05-04,124,49,1.25,49.0,dap,1.5
+25SP,13,first_harvest,First Commercial Harvest (CHPDT),2025-05-20,140,65,1.5,65.0,dap,1.0
+25SP,13,peak_harvest,Peak Harvest (CHPDT),2025-06-19,170,95,2.0,95.0,dap,1.0
+25SP,13,cessation,Pulling Date (SD-PM),2025-07-17,198,123,2.5,123.0,dap,0.5
+25SP,14,transplanting,Transplanting,2025-03-16,75,0,0.0,0.0,dap,0.0
+25SP,14,anthesis,First Anthesis (ADAPS),2025-04-22,112,37,1.0,37.0,dap,1.0
+25SP,14,fruit_set,First Fruit (PDFPS),2025-05-04,124,49,1.25,49.0,dap,1.5
+25SP,14,first_harvest,First Commercial Harvest (CHPDT),2025-05-20,140,65,1.5,65.0,dap,1.0
+25SP,14,peak_harvest,Peak Harvest (CHPDT),2025-06-19,170,95,2.0,95.0,dap,1.0
+25SP,14,cessation,Pulling Date (SD-PM),2025-07-17,198,123,2.5,123.0,dap,0.5
+26SP,1,transplanting,Transplanting,2026-03-16,75,0,0.0,0.0,dap,0.0
+26SP,1,anthesis,First Anthesis (ADAPS),2026-04-20,110,35,1.0,35.0,dap,1.0
+26SP,1,fruit_set,First Fruit (PDFPS),2026-05-02,122,47,1.25,47.0,dap,1.5
+26SP,1,first_harvest,First Commercial Harvest (CHPDT),2026-05-26,146,71,1.5,71.0,dap,1.0
+26SP,1,peak_harvest,Peak Harvest (CHPDT),2026-06-16,167,92,2.0,92.0,dap,1.0
+26SP,1,cessation,Pulling Date (SD-PM),2026-07-17,198,123,2.5,123.0,dap,0.5
+26SP,2,transplanting,Transplanting,2026-03-16,75,0,0.0,0.0,dap,0.0
+26SP,2,anthesis,First Anthesis (ADAPS),2026-04-20,110,35,1.0,35.0,dap,1.0
+26SP,2,fruit_set,First Fruit (PDFPS),2026-05-02,122,47,1.25,47.0,dap,1.5
+26SP,2,first_harvest,First Commercial Harvest (CHPDT),2026-05-26,146,71,1.5,71.0,dap,1.0
+26SP,2,peak_harvest,Peak Harvest (CHPDT),2026-06-16,167,92,2.0,92.0,dap,1.0
+26SP,2,cessation,Pulling Date (SD-PM),2026-07-17,198,123,2.5,123.0,dap,0.5
+26SP,3,transplanting,Transplanting,2026-03-16,75,0,0.0,0.0,dap,0.0
+26SP,3,anthesis,First Anthesis (ADAPS),2026-04-20,110,35,1.0,35.0,dap,1.0
+26SP,3,fruit_set,First Fruit (PDFPS),2026-05-02,122,47,1.25,47.0,dap,1.5
+26SP,3,first_harvest,First Commercial Harvest (CHPDT),2026-05-26,146,71,1.5,71.0,dap,1.0
+26SP,3,peak_harvest,Peak Harvest (CHPDT),2026-06-16,167,92,2.0,92.0,dap,1.0
+26SP,3,cessation,Pulling Date (SD-PM),2026-07-17,198,123,2.5,123.0,dap,0.5
+26SP,4,transplanting,Transplanting,2026-03-16,75,0,0.0,0.0,dap,0.0
+26SP,4,anthesis,First Anthesis (ADAPS),2026-04-20,110,35,1.0,35.0,dap,1.0
+26SP,4,fruit_set,First Fruit (PDFPS),2026-05-02,122,47,1.25,47.0,dap,1.5
+26SP,4,first_harvest,First Commercial Harvest (CHPDT),2026-05-26,146,71,1.5,71.0,dap,1.0
+26SP,4,peak_harvest,Peak Harvest (CHPDT),2026-06-16,167,92,2.0,92.0,dap,1.0
+26SP,4,cessation,Pulling Date (SD-PM),2026-07-17,198,123,2.5,123.0,dap,0.5
+26SP,5,transplanting,Transplanting,2026-03-16,75,0,0.0,0.0,dap,0.0
+26SP,5,anthesis,First Anthesis (ADAPS),2026-04-20,110,35,1.0,35.0,dap,1.0
+26SP,5,fruit_set,First Fruit (PDFPS),2026-05-02,122,47,1.25,47.0,dap,1.5
+26SP,5,first_harvest,First Commercial Harvest (CHPDT),2026-05-26,146,71,1.5,71.0,dap,1.0
+26SP,5,peak_harvest,Peak Harvest (CHPDT),2026-06-16,167,92,2.0,92.0,dap,1.0
+26SP,5,cessation,Pulling Date (SD-PM),2026-07-17,198,123,2.5,123.0,dap,0.5
+26SP,6,transplanting,Transplanting,2026-03-16,75,0,0.0,0.0,dap,0.0
+26SP,6,anthesis,First Anthesis (ADAPS),2026-04-20,110,35,1.0,35.0,dap,1.0
+26SP,6,fruit_set,First Fruit (PDFPS),2026-05-02,122,47,1.25,47.0,dap,1.5
+26SP,6,first_harvest,First Commercial Harvest (CHPDT),2026-05-26,146,71,1.5,71.0,dap,1.0
+26SP,6,peak_harvest,Peak Harvest (CHPDT),2026-06-16,167,92,2.0,92.0,dap,1.0
+26SP,6,cessation,Pulling Date (SD-PM),2026-07-17,198,123,2.5,123.0,dap,0.5
+26SP,7,transplanting,Transplanting,2026-03-16,75,0,0.0,0.0,dap,0.0
+26SP,7,anthesis,First Anthesis (ADAPS),2026-04-20,110,35,1.0,35.0,dap,1.0
+26SP,7,fruit_set,First Fruit (PDFPS),2026-05-02,122,47,1.25,47.0,dap,1.5
+26SP,7,first_harvest,First Commercial Harvest (CHPDT),2026-05-26,146,71,1.5,71.0,dap,1.0
+26SP,7,peak_harvest,Peak Harvest (CHPDT),2026-06-16,167,92,2.0,92.0,dap,1.0
+26SP,7,cessation,Pulling Date (SD-PM),2026-07-17,198,123,2.5,123.0,dap,0.5
+26SP,8,transplanting,Transplanting,2026-03-16,75,0,0.0,0.0,dap,0.0
+26SP,8,anthesis,First Anthesis (ADAPS),2026-04-20,110,35,1.0,35.0,dap,1.0
+26SP,8,fruit_set,First Fruit (PDFPS),2026-05-02,122,47,1.25,47.0,dap,1.5
+26SP,8,first_harvest,First Commercial Harvest (CHPDT),2026-05-26,146,71,1.5,71.0,dap,1.0
+26SP,8,peak_harvest,Peak Harvest (CHPDT),2026-06-16,167,92,2.0,92.0,dap,1.0
+26SP,8,cessation,Pulling Date (SD-PM),2026-07-17,198,123,2.5,123.0,dap,0.5
+26SP,9,transplanting,Transplanting,2026-03-16,75,0,0.0,0.0,dap,0.0
+26SP,9,anthesis,First Anthesis (ADAPS),2026-04-20,110,35,1.0,35.0,dap,1.0
+26SP,9,fruit_set,First Fruit (PDFPS),2026-05-02,122,47,1.25,47.0,dap,1.5
+26SP,9,first_harvest,First Commercial Harvest (CHPDT),2026-05-26,146,71,1.5,71.0,dap,1.0
+26SP,9,peak_harvest,Peak Harvest (CHPDT),2026-06-16,167,92,2.0,92.0,dap,1.0
+26SP,9,cessation,Pulling Date (SD-PM),2026-07-17,198,123,2.5,123.0,dap,0.5
+26SP,10,transplanting,Transplanting,2026-03-16,75,0,0.0,0.0,dap,0.0
+26SP,10,anthesis,First Anthesis (ADAPS),2026-04-20,110,35,1.0,35.0,dap,1.0
+26SP,10,fruit_set,First Fruit (PDFPS),2026-05-02,122,47,1.25,47.0,dap,1.5
+26SP,10,first_harvest,First Commercial Harvest (CHPDT),2026-05-26,146,71,1.5,71.0,dap,1.0
+26SP,10,peak_harvest,Peak Harvest (CHPDT),2026-06-16,167,92,2.0,92.0,dap,1.0
+26SP,10,cessation,Pulling Date (SD-PM),2026-07-17,198,123,2.5,123.0,dap,0.5
+26SP,11,transplanting,Transplanting,2026-03-16,75,0,0.0,0.0,dap,0.0
+26SP,11,anthesis,First Anthesis (ADAPS),2026-04-20,110,35,1.0,35.0,dap,1.0
+26SP,11,fruit_set,First Fruit (PDFPS),2026-05-02,122,47,1.25,47.0,dap,1.5
+26SP,11,first_harvest,First Commercial Harvest (CHPDT),2026-05-26,146,71,1.5,71.0,dap,1.0
+26SP,11,peak_harvest,Peak Harvest (CHPDT),2026-06-16,167,92,2.0,92.0,dap,1.0
+26SP,11,cessation,Pulling Date (SD-PM),2026-07-17,198,123,2.5,123.0,dap,0.5
+26SP,12,transplanting,Transplanting,2026-03-16,75,0,0.0,0.0,dap,0.0
+26SP,12,anthesis,First Anthesis (ADAPS),2026-04-20,110,35,1.0,35.0,dap,1.0
+26SP,12,fruit_set,First Fruit (PDFPS),2026-05-02,122,47,1.25,47.0,dap,1.5
+26SP,12,first_harvest,First Commercial Harvest (CHPDT),2026-05-26,146,71,1.5,71.0,dap,1.0
+26SP,12,peak_harvest,Peak Harvest (CHPDT),2026-06-16,167,92,2.0,92.0,dap,1.0
+26SP,12,cessation,Pulling Date (SD-PM),2026-07-17,198,123,2.5,123.0,dap,0.5
+25FA,1,transplanting,Transplanting,2025-08-13,225,0,0.0,0.0,dap,0.0
+25FA,1,anthesis,First Anthesis (ADAPS),2025-09-10,253,28,1.0,28.0,dap,1.0
+25FA,1,fruit_set,First Fruit (PDFPS),2025-09-17,260,35,1.25,35.0,dap,1.5
+25FA,1,first_harvest,First Commercial Harvest (CHPDT),2025-11-21,325,100,1.5,100.0,dap,1.0
+25FA,1,peak_harvest,Peak Harvest (CHPDT),2025-12-11,345,120,2.0,120.0,dap,1.0
+25FA,1,cessation,Final Harvest / Season Cessation (HDAT),2026-01-06,6,146,2.5,146.0,dap,2.0
+25FA,2,transplanting,Transplanting,2025-08-13,225,0,0.0,0.0,dap,0.0
+25FA,2,anthesis,First Anthesis (ADAPS),2025-09-10,253,28,1.0,28.0,dap,1.0
+25FA,2,fruit_set,First Fruit (PDFPS),2025-09-17,260,35,1.25,35.0,dap,1.5
+25FA,2,first_harvest,First Commercial Harvest (CHPDT),2025-11-21,325,100,1.5,100.0,dap,1.0
+25FA,2,peak_harvest,Peak Harvest (CHPDT),2025-12-11,345,120,2.0,120.0,dap,1.0
+25FA,2,cessation,Final Harvest / Season Cessation (HDAT),2026-01-06,6,146,2.5,146.0,dap,2.0
+25FA,3,transplanting,Transplanting,2025-08-13,225,0,0.0,0.0,dap,0.0
+25FA,3,anthesis,First Anthesis (ADAPS),2025-09-10,253,28,1.0,28.0,dap,1.0
+25FA,3,fruit_set,First Fruit (PDFPS),2025-09-17,260,35,1.25,35.0,dap,1.5
+25FA,3,first_harvest,First Commercial Harvest (CHPDT),2025-11-21,325,100,1.5,100.0,dap,1.0
+25FA,3,peak_harvest,Peak Harvest (CHPDT),2025-12-11,345,120,2.0,120.0,dap,1.0
+25FA,3,cessation,Final Harvest / Season Cessation (HDAT),2026-01-06,6,146,2.5,146.0,dap,2.0
+25FA,4,transplanting,Transplanting,2025-08-13,225,0,0.0,0.0,dap,0.0
+25FA,4,anthesis,First Anthesis (ADAPS),2025-09-10,253,28,1.0,28.0,dap,1.0
+25FA,4,fruit_set,First Fruit (PDFPS),2025-09-17,260,35,1.25,35.0,dap,1.5
+25FA,4,first_harvest,First Commercial Harvest (CHPDT),2025-11-21,325,100,1.5,100.0,dap,1.0
+25FA,4,peak_harvest,Peak Harvest (CHPDT),2025-12-11,345,120,2.0,120.0,dap,1.0
+25FA,4,cessation,Final Harvest / Season Cessation (HDAT),2026-01-06,6,146,2.5,146.0,dap,2.0
+25FA,5,transplanting,Transplanting,2025-08-13,225,0,0.0,0.0,dap,0.0
+25FA,5,anthesis,First Anthesis (ADAPS),2025-09-10,253,28,1.0,28.0,dap,1.0
+25FA,5,fruit_set,First Fruit (PDFPS),2025-09-17,260,35,1.25,35.0,dap,1.5
+25FA,5,first_harvest,First Commercial Harvest (CHPDT),2025-11-21,325,100,1.5,100.0,dap,1.0
+25FA,5,peak_harvest,Peak Harvest (CHPDT),2025-12-11,345,120,2.0,120.0,dap,1.0
+25FA,5,cessation,Final Harvest / Season Cessation (HDAT),2026-01-06,6,146,2.5,146.0,dap,2.0
+25FA,6,transplanting,Transplanting,2025-08-13,225,0,0.0,0.0,dap,0.0
+25FA,6,anthesis,First Anthesis (ADAPS),2025-09-10,253,28,1.0,28.0,dap,1.0
+25FA,6,fruit_set,First Fruit (PDFPS),2025-09-17,260,35,1.25,35.0,dap,1.5
+25FA,6,first_harvest,First Commercial Harvest (CHPDT),2025-11-21,325,100,1.5,100.0,dap,1.0
+25FA,6,peak_harvest,Peak Harvest (CHPDT),2025-12-11,345,120,2.0,120.0,dap,1.0
+25FA,6,cessation,Final Harvest / Season Cessation (HDAT),2026-01-06,6,146,2.5,146.0,dap,2.0
+25FA,7,transplanting,Transplanting,2025-08-13,225,0,0.0,0.0,dap,0.0
+25FA,7,anthesis,First Anthesis (ADAPS),2025-09-10,253,28,1.0,28.0,dap,1.0
+25FA,7,fruit_set,First Fruit (PDFPS),2025-09-17,260,35,1.25,35.0,dap,1.5
+25FA,7,first_harvest,First Commercial Harvest (CHPDT),2025-11-21,325,100,1.5,100.0,dap,1.0
+25FA,7,peak_harvest,Peak Harvest (CHPDT),2025-12-11,345,120,2.0,120.0,dap,1.0
+25FA,7,cessation,Final Harvest / Season Cessation (HDAT),2026-01-06,6,146,2.5,146.0,dap,2.0
+25FA,8,transplanting,Transplanting,2025-08-13,225,0,0.0,0.0,dap,0.0
+25FA,8,anthesis,First Anthesis (ADAPS),2025-09-10,253,28,1.0,28.0,dap,1.0
+25FA,8,fruit_set,First Fruit (PDFPS),2025-09-17,260,35,1.25,35.0,dap,1.5
+25FA,8,first_harvest,First Commercial Harvest (CHPDT),2025-11-21,325,100,1.5,100.0,dap,1.0
+25FA,8,peak_harvest,Peak Harvest (CHPDT),2025-12-11,345,120,2.0,120.0,dap,1.0
+25FA,8,cessation,Final Harvest / Season Cessation (HDAT),2026-01-06,6,146,2.5,146.0,dap,2.0
+25FA,9,transplanting,Transplanting,2025-08-13,225,0,0.0,0.0,dap,0.0
+25FA,9,anthesis,First Anthesis (ADAPS),2025-09-10,253,28,1.0,28.0,dap,1.0
+25FA,9,fruit_set,First Fruit (PDFPS),2025-09-17,260,35,1.25,35.0,dap,1.5
+25FA,9,first_harvest,First Commercial Harvest (CHPDT),2025-11-21,325,100,1.5,100.0,dap,1.0
+25FA,9,peak_harvest,Peak Harvest (CHPDT),2025-12-11,345,120,2.0,120.0,dap,1.0
+25FA,9,cessation,Final Harvest / Season Cessation (HDAT),2026-01-06,6,146,2.5,146.0,dap,2.0
+25FA,10,transplanting,Transplanting,2025-08-13,225,0,0.0,0.0,dap,0.0
+25FA,10,anthesis,First Anthesis (ADAPS),2025-09-10,253,28,1.0,28.0,dap,1.0
+25FA,10,fruit_set,First Fruit (PDFPS),2025-09-17,260,35,1.25,35.0,dap,1.5
+25FA,10,first_harvest,First Commercial Harvest (CHPDT),2025-11-21,325,100,1.5,100.0,dap,1.0
+25FA,10,peak_harvest,Peak Harvest (CHPDT),2025-12-11,345,120,2.0,120.0,dap,1.0
+25FA,10,cessation,Final Harvest / Season Cessation (HDAT),2026-01-06,6,146,2.5,146.0,dap,2.0
+25FA,11,transplanting,Transplanting,2025-08-13,225,0,0.0,0.0,dap,0.0
+25FA,11,anthesis,First Anthesis (ADAPS),2025-09-10,253,28,1.0,28.0,dap,1.0
+25FA,11,fruit_set,First Fruit (PDFPS),2025-09-17,260,35,1.25,35.0,dap,1.5
+25FA,11,first_harvest,First Commercial Harvest (CHPDT),2025-11-21,325,100,1.5,100.0,dap,1.0
+25FA,11,peak_harvest,Peak Harvest (CHPDT),2025-12-11,345,120,2.0,120.0,dap,1.0
+25FA,11,cessation,Final Harvest / Season Cessation (HDAT),2026-01-06,6,146,2.5,146.0,dap,2.0
+25FA,12,transplanting,Transplanting,2025-08-13,225,0,0.0,0.0,dap,0.0
+25FA,12,anthesis,First Anthesis (ADAPS),2025-09-10,253,28,1.0,28.0,dap,1.0
+25FA,12,fruit_set,First Fruit (PDFPS),2025-09-17,260,35,1.25,35.0,dap,1.5
+25FA,12,first_harvest,First Commercial Harvest (CHPDT),2025-11-21,325,100,1.5,100.0,dap,1.0
+25FA,12,peak_harvest,Peak Harvest (CHPDT),2025-12-11,345,120,2.0,120.0,dap,1.0
+25FA,12,cessation,Final Harvest / Season Cessation (HDAT),2026-01-06,6,146,2.5,146.0,dap,2.0

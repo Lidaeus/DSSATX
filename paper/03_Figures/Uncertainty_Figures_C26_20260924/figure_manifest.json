@@ -1,0 +1,195 @@
+{
+  "schema_version": 2,
+  "created_at": "2026-09-24T01:48:36Z",
+  "renderer": "R 4.5.2",
+  "package_versions": {
+    "ggplot2": "4.0.3",
+    "patchwork": "1.3.2",
+    "jsonlite": "2.0.0",
+    "svglite": "2.2.2"
+  },
+  "git_commit": "ed0b24a77941d7f4a07b484879bdae78c806e21a",
+  "git_dirty": true,
+  "profile_id": "general_q1_v1",
+  "profile": {
+    "path": "D:/Tomato_Cal/configs/figures/publication.json",
+    "sha256": "66a7e4cabbbabfad7471068bd70ba79d79a24848b4aba85f14e67e8db45ed58f"
+  },
+  "run_id": "full_gen_13trt_final_uncertainty_200x6_20260924",
+  "data_status": "legacy_layout_demo",
+  "science_validated": false,
+  "source_is_demo": true,
+  "demo_label_visible": true,
+  "publication_label_note": "",
+  "scientific_status_promoted": false,
+  "input_manifest": {
+    "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_data_conditional/paper_data_manifest.json",
+    "sha256": "d40eeb0951f8c3cd7bcaa524b668de4cdc84599d4575ecee4e2f0615703a8480"
+  },
+  "artifacts": [
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_model_performance_uncertainty.pdf",
+      "sha256": "27117bc60af7e8eace770f8085287b5a5fbac6d8e79f4fad8c1a86e6cbf3a343"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_model_performance_uncertainty.svg",
+      "sha256": "e2421710d6e4f496577fc61302e66e2ea2b0709477fad6ecf24415b1a141adb5"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_model_performance_uncertainty.png",
+      "sha256": "46359829208471c83380f53490477edd85fb0763c96cf3375e873d6345e30992"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_model_performance_uncertainty.source.csv",
+      "sha256": "a1fccdb66341fe3a91ff105354f921001746a3aa8c5e448dd34432b8e3f5795c"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_model_performance_uncertainty.metrics.csv",
+      "sha256": "66c0d3eae10053688718192668167b6e19e90eeb3f42d4cf22166f73258a8f80"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_treatment_residual_uncertainty.pdf",
+      "sha256": "881a2c1e06cde6765861d78e02cf7fd2a7746979e6dde4f2646d086b21249617"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_treatment_residual_uncertainty.svg",
+      "sha256": "a183af71d99a40b516747016fc0a7cf0b96649b0a14e06d7bb40519ad84bf462"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_treatment_residual_uncertainty.png",
+      "sha256": "ce9ecc33440f737481815055eb9491ef90951604a9e729e3106939d062cd5959"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_treatment_residual_uncertainty.forest.csv",
+      "sha256": "97024d7797ebe19c191b5bb093dfb9be89544eec13a3a349e019f809367bf40d"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_treatment_residual_uncertainty.rrmse.csv",
+      "sha256": "b4f8e89c4c7e052be5715451fe62cc0678fcdad9d005e0d9e644afd04ef9c8ab"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_treatment_residual_uncertainty.source.csv",
+      "sha256": "685841d714841219de1bc3f600e5baeee76268806b0e6b96f61031d8bf589e1d"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_selected_process_dynamics.pdf",
+      "sha256": "6eea38d1f9827db8f9dd47a1683d19d604bcae6d33107aaa2f51da85f79d9762"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_selected_process_dynamics.svg",
+      "sha256": "aa27bd7870cc17aa87b46edc296cc2a1afa3982d069f7d5fc0b5f0c6dfc5068d"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_selected_process_dynamics.png",
+      "sha256": "b015d3b02aae43eef0e59d873e70cf0e5c0afbf9f1c6ee9c46a9b2644c40fab5"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_selected_process_dynamics.observations.csv",
+      "sha256": "37b6e714ccd87137634d39ca296ab27c26be45c79212e15c5eb3303497775d4d"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_selected_process_dynamics.daily_simulation.csv",
+      "sha256": "67a4c8f5549102a2b9b64934e50132a6e38972d4375d401d2c6db2dbc31b88e3"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_selected_harvest_dynamics.pdf",
+      "sha256": "25a78664cb293f63df5357d14b1f08da7bb928989511806fb678377107b6df7a"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_selected_harvest_dynamics.svg",
+      "sha256": "84fa042fe0ed968bae51a60357c918f49dbcb6e333243cb1042a248d948341e8"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_selected_harvest_dynamics.png",
+      "sha256": "714fc595c6d26343a48f1979281b59a6aa19a1e9ab82c17ed86059dfcbb4040a"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_selected_harvest_dynamics.increment.csv",
+      "sha256": "7f6de9e5601c8dfa354409d31ce49ba347eb8db573c26f572285e7738ff7f127"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_selected_harvest_dynamics.cumulative.csv",
+      "sha256": "68985d85658e7ade7b1e6123ab3d2df19a71b9ffeba5d0cbc5e50656e8df0d9c"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_LAID.pdf",
+      "sha256": "91dd2a8601f19397679f3624906d7938072f8b71ecf01d9029e7ccf88f568923"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_LAID.svg",
+      "sha256": "ee1295da308370cb043ee518361530aa237504ff77ccf104ab10ed79270724b5"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_LAID.png",
+      "sha256": "ab930b3d935b95d0760fb189494ce82882b29d2d56c5c91753483b60a4599681"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_LAID.observations.csv",
+      "sha256": "3155b72dcb87fec7b5ff9f94928f3f4635b9a5de0860a6082f227af9d2768e9d"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_LAID.daily_simulation.csv",
+      "sha256": "bfd97de9cfabf647989e43a154b8fde094c5436a93316be0979c4fdb6be329b3"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_LWAD.pdf",
+      "sha256": "ba797f3b01715fa76ba6dc3534f7ce7de802a69cf5feda13cabe3781d1bc504e"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_LWAD.svg",
+      "sha256": "35afa81f1bd5593634daf18c3de1da8262b92d14f81967cbcafc5a249ac73394"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_LWAD.png",
+      "sha256": "b30c2c9a7a28e6f5ec27519bf0dc5ac208e682ce83f2bbf52346520bae75506a"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_LWAD.observations.csv",
+      "sha256": "20640a3a81c4f6f938911e4767e055ec7303500d3ac45d337cb2ab5a89244562"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_LWAD.daily_simulation.csv",
+      "sha256": "6efb66f2e4af65fe9c6e04116ecc823cd4be4da99564638c701c8c298ef8f4ac"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_DRY_CUM.pdf",
+      "sha256": "6d970307a7ea4b97b2ede45de97b1c32cd04c610a5f4d7d0605890795a738386"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_DRY_CUM.svg",
+      "sha256": "b5fe6360da91f56ce7520e8ac904804410add5be37e647a0639f91fc9ef1be94"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_DRY_CUM.png",
+      "sha256": "2c87ad4cd0df88168eb35225515191caa4d1fc26043bdf6468594c54d49ef055"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_DRY_CUM.observations.csv",
+      "sha256": "88d6b26ab332cdb59753b2bbe8e7aef0c2b731651ba806afdf4fa26dfa0fba3c"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_DRY_CUM.daily_simulation.csv",
+      "sha256": "d61da85034280e870eb4361299520a29c557c925749ccedbb5ea7d12d91f80e6"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_FRESH_CUM.pdf",
+      "sha256": "b8ac32e1a39554fae1c4fee69aface5cedbe714326063906c3a22a862de67875"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_FRESH_CUM.svg",
+      "sha256": "2a990812eb77a10824693eeedd8b10414da5ad68bb717afbfb4c78059eec4325"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_FRESH_CUM.png",
+      "sha256": "7e494aae047c18683034d8389f0121bcfec94d37f1a17390dd7d8cdedf941a26"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_FRESH_CUM.observations.csv",
+      "sha256": "32be4a37deda3627209034c204817d1d9eb831760fd04d707d31d92686634f2f"
+    },
+    {
+      "path": "D:/Tomato_Cal/workspace/runs/full_gen_13trt_final_uncertainty_200x6_20260924/paper_figures_conditional/DEMO_conditional_all_treatments_FRESH_CUM.daily_simulation.csv",
+      "sha256": "4862633e926a6e4c13440b0822cbae96c3bf70d945fadd3289b58caf0f93438f"
+    }
+  ]
+}

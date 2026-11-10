@@ -1,0 +1,185 @@
+{
+  "schema": "non_executable_joint65_water_first_N_pool_review_v1",
+  "approved": false,
+  "executable": false,
+  "status": "awaiting_user_review",
+  "latest_user_scope": "Optimize pending plan with water-response priority and modest N remobilization reduction, including senescence/organ N pool parameters; no formal calibration requested this turn",
+  "parent_proposal": "configs/calibration_proposals/joint65_et_environment_after_grid_20261012/proposal.json",
+  "base_run": "eggplant_26sp_n012_c31_joint67_20261011",
+  "active_count": 65,
+  "family_count": 17,
+  "target_count": 519,
+  "phi_budget": 100,
+  "datasets": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_refreshed_20261010",
+      "bundle_manifest_sha256": "c2b8fad69879eaa40afe6a994e5a05fd4d75d8c1ebc3f5293eb3e83bf126b602",
+      "roles": {
+        "validation": [
+          2,
+          3,
+          4,
+          5,
+          10,
+          11,
+          12,
+          13
+        ]
+      }
+    },
+    {
+      "season_id": "25FA",
+      "experiment_code": "XXQL2502",
+      "bundle_path": "data/user/experiments/xxql2502_refreshed_20261010",
+      "bundle_manifest_sha256": "ad3e9d6364687952d07a791379b609c499375a85610c3c9ff578af5d0f663d92",
+      "roles": {
+        "diagnostic": [
+          2,
+          5,
+          8,
+          11
+        ],
+        "validation": [
+          1,
+          3,
+          4,
+          6,
+          7,
+          9,
+          10,
+          12
+        ]
+      }
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_refreshed_20261010",
+      "bundle_manifest_sha256": "3eb23088d4ea456839522be4db423fd7897e837b8dbba756979503aca1646ff1",
+      "roles": {
+        "calibration": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "holdout": [
+          1,
+          2,
+          3
+        ]
+      }
+    }
+  ],
+  "model_method": "R",
+  "direct_joint": true,
+  "response_reference_case": "water_pool_l0.230_s0.070",
+  "balanced_reference_case": "env_pool_l0.230_s0.070",
+  "references_are_search_seeds_not_accepted_solutions": true,
+  "reference_limit": "Response seed passes all6 signs and25% effect but fails nonwater guards; balanced seed passes nonwater but effect only3.83%.",
+  "fixed_environment": {
+    "SLU1": 5.5,
+    "SALB": 0.13,
+    "SSKS": "original profile",
+    "TAV": 20.0,
+    "AMP": 6.0,
+    "weather": "current XXTW2403; original daily values unchanged",
+    "initial_soil_water": "measured; initial sample preirrigation",
+    "initial_soil_N": "shared pure-N prebasal reference",
+    "wind": "not fitted"
+  },
+  "mobilization": {
+    "rate_parameters": [
+      "NMOBMX",
+      "NVSMOB"
+    ],
+    "pool_floor_parameters": [
+      "PROLFF",
+      "PROSTF",
+      "PRORTF"
+    ],
+    "fixed_shell_floor": {
+      "PROSHF": 0.11
+    },
+    "carbon_reserve_ALPH_not_N_floor": true,
+    "NRCVR_is_refill_not_rate": true,
+    "no_fitted_soilN_scale": true,
+    "no_new_virtual_stress_gain_parameter": true,
+    "no_exact_internal_mobilization_flux_observed": true
+  },
+  "scientific_candidate_promotion": {
+    "all6_W2_W1_and_W3_W1_positive": true,
+    "minimum_simulated_observed_gain_ratio": 0.25,
+    "threshold": "review proposal, not a confidence bound or final fit accuracy",
+    "no_W3_over_W2_requirement": true,
+    "nonwater_guards": "original492 Phi and nonwaterPhi<=+10%; each protected family NRMSE<=baseline+max(2pp,10%baseline)",
+    "water_gate_not_forward_execution_failure": true,
+    "missing_true_date_mature_pool_still_fail": true
+  },
+  "composition_constraints": [
+    "PROLFF <= min(PROLFI,PROLFG)",
+    "PROSTF <= min(PROSTI,PROSTG)",
+    "PRORTF <= min(PRORTI,PRORTG)",
+    "PROSHF <= min(PROSHI,PROSHG)"
+  ],
+  "uncertainty": "Live tissue N concentrations indirectly constrain donor floor; no measured senesced/root N or cumulative mobilization target; WB100/VWC share samples.",
+  "execution_review": {
+    "n_reals": 200,
+    "noptmax": 6,
+    "n_agents": 6,
+    "proposed_lambda0": 100,
+    "proposed_lambda_multipliers": [
+      0.1,
+      1,
+      10
+    ],
+    "proposed_step_multipliers": [
+      0.05,
+      0.1,
+      0.25
+    ],
+    "minimum_member_retention": 0.98,
+    "feasibility": "all exact mature-fruit N dates, no pool/date fallback; feasibility screen before start",
+    "required_before_execution": [
+      "519 target builder and W sign operator",
+      "scientific postselection water sign/effect gates",
+      "physical composition relationships",
+      "independent KEP/SLDR/N-rate and pool-floor injection readback",
+      "true-date mature-fruit feasibility, new approved frozen bounds"
+    ]
+  },
+  "required_preflight": [
+    "519 target builder and W sign operator",
+    "scientific postselection water sign/effect gates",
+    "physical composition relationships",
+    "independent KEP/SLDR/N-rate and pool-floor injection readback",
+    "true-date mature-fruit feasibility, new approved frozen bounds"
+  ],
+  "report": "docs/reports/水响应优先与氮动员氮库约束待审方案修订_20261012.md",
+  "diagnostic_receipt": {
+    "status": "completed_diagnostic_proposal_support",
+    "cases": 66,
+    "successful_native_season_runs": 198,
+    "all_target_complete": true,
+    "positive6_cases": 54,
+    "positive6_and_min25pct_cases": 11,
+    "all_gates_pass_cases": 0,
+    "threshold_status": "25% of observed paired gain is a proposed conservative effect-size gate, not a confidence bound or accepted final fitting precision",
+    "guard_stage": "Scientific candidate-promotion gate only; wrong water response remains a valid forward output with residual, not a DSSAT execution failure",
+    "no_internal_mobilization_flux_observed": true,
+    "parameter_floors_indirectly_constrained_by_live_tissue_data": true,
+    "original_source_hashes_verified": true,
+    "formal_calibration_started": false,
+    "experiment_manifest_sha256": "3ab32e549772aca8976d785e9fe3d2f4ba432b939b6ab8a12c8ac3a24acf1051",
+    "script_sha256": "844098f3efa4d7376e590b25061adc717e58c5055d7457942f0d9c04f0b00b6f"
+  },
+  "original_formal_design_and_bundles_changed": false,
+  "formal_calibration_started": false
+}

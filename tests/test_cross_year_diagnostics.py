@@ -1,7 +1,7 @@
 import pandas as pd
 
 from src.reporting.analyze_results import _yyddd_day_difference
-from tools.calibration.plot_dynamics import _yyddd_to_dap_lookup
+from tools.calibration.plot_dynamics import _observation_dap, _yyddd_to_dap_lookup
 
 
 def test_cross_year_day_difference_is_calendar_safe() -> None:
@@ -17,6 +17,6 @@ def test_observation_dap_extends_beyond_terminal_output_across_year() -> None:
             "DAP": [140, 145, 146],
         }
     )
-    lookup = _yyddd_to_dap_lookup(daily, requested_codes=[26010])
+    lookup = _yyddd_to_dap_lookup(daily)
     assert lookup[26006] == 146
-    assert lookup[26010] == 150
+    assert _observation_dap(26010, lookup) == 150

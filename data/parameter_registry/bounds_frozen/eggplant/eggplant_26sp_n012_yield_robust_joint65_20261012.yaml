@@ -1,0 +1,12 @@
+bounds_id: "eggplant_26sp_n012_yield_robust_joint65_20261012"
+crop: "eggplant"
+created_at: "2026-10-12T12:27:16Z"
+approved_at: "2026-10-12T12:27:16Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "approved_bounds_proposal.csv"
+derived_from_sha256: "446a396fd1992c70f169eb5f87935175c5a8a7396077189a2ae8b12ac1bad77b"
+bounds_sha256: "482a4a85c575da114efd2e6081570a4cc5b01065151a21baa113bdbb4728769f"
+parameter_count: 104
+automatic_repairs: 0
+notes: "Explicitly approved robust joint65; FL-LF45–220PTD; no automatic repairs"

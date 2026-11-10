@@ -1,0 +1,36 @@
+{
+  "target": "D:\\三季节数据汇总\\数据质控_20261007\\更新数据核对与统计筛查.xlsx",
+  "backup": "D:\\三季节数据汇总\\数据质控_20261007\\预审_20261007\\修订前备份\\人工审核后_预审前.xlsx",
+  "original_sha256": "200826afbce1929a3528e9c4d056a169223ca22da3d812fc327d539166f60df6",
+  "result_sha256": "53eee01d74adc318af87a89b70c2f6cb473158662d74a93bfccfbc6a566ef878",
+  "pending_rows": 50,
+  "unique_locations": 49,
+  "retained_reviewed_rows": 167,
+  "counts_unique": {
+    "核验后倾向均值替代": 4,
+    "倾向保留原值": 35,
+    "优先核验，暂保留": 10
+  },
+  "counts_rows": {
+    "核验后倾向均值替代": 4,
+    "倾向保留原值": 36,
+    "优先核验，暂保留": 10
+  },
+  "changed_package_parts": [
+    "xl/styles.xml",
+    "xl/worksheets/sheet2.xml",
+    "xl/tables/table2.xml"
+  ],
+  "original_cells_preserved": 3926,
+  "other_five_sheets_byte_preserved": true,
+  "all_existing_cell_values_styles_formulas_preserved": true,
+  "original_review_status_and_decisions_preserved": true,
+  "raw_source_sha256_unchanged": {
+    "2025春\\2025春品质集优先采用品质集中的果实含水率.xlsx": "19db913ef91767cb88d7c1a1fe010b0ea35cd731529fe63bdea253ddb1fe292f",
+    "2026春\\2026春品质指标集.xlsx": "8e221179986bbc608e41a35d02954e1cd18edfc73b36a6db586c51026c832f5d",
+    "2026春\\2026春茎叶果氮磷钾.xlsx": "e7498f4dbc465337a76c83ebfca41a9418216a5bf0516b345f9ff396b6132be0"
+  },
+  "all_peer_means_independently_checked": true,
+  "all_scenario_mean_changes_checked": true,
+  "saved_workbook_visual_check": "已检查品质建议、养分建议、新增表头与处理响应预览，文本可读，建议及数值显示完整。"
+}

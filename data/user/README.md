@@ -1,5 +1,7 @@
 # 用户定义的 DSSAT 输入
 
+当前可用于新工作流的三个季节包列于 `configs/experiments/current_bundles.json`。2026-09-23 前的 77 个输入包已移至 `D:/Tomato_Cal_Cold_Storage/input_bundles_20260923/`，并由该目录的 `archive_index.csv` 记录。旧包只用于历史溯源；新率定、敏感性分析及验证需显式选择当前包。原有运行结果仍绑定当时的数据哈希，不随新包更新。
+
 每个实验使用一个不可覆盖的版本目录：`data/user/experiments/<bundle_id>/`。
 同一目录应放置 FileX（`.TMX`）、FileA（`.TMA`）、FileT（`.TMT`）、`SOIL.SOL`、所需气象文件和 `DSSBatch.v48`。运行时用 `--input-dir` 显式选择目录；不得依赖“最新文件”或静默回退。
 

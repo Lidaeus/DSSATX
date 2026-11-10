@@ -1,0 +1,165 @@
+{
+  "schema": "non_executable_joint65_ET_after_grid_review_v1",
+  "approved": false,
+  "executable": false,
+  "status": "awaiting_user_review",
+  "user_authorized_completed_scope": "small trials/grid and next formal calibration proposal; no new formal optimization authorized by this turn",
+  "base_run": "eggplant_26sp_n012_c31_joint67_20261011",
+  "active_count": 65,
+  "target_count": 513,
+  "family_count": 16,
+  "phi_budget": 100,
+  "model_method": "R",
+  "primary_reference_case": "R_ref_r0.020_d0.80_s5.5",
+  "secondary_water_reference_case": "R_r0.020_k0.90_d0.90",
+  "datasets": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_refreshed_20261010",
+      "bundle_manifest_sha256": "c2b8fad69879eaa40afe6a994e5a05fd4d75d8c1ebc3f5293eb3e83bf126b602",
+      "roles": {
+        "validation": [
+          2,
+          3,
+          4,
+          5,
+          10,
+          11,
+          12,
+          13
+        ]
+      }
+    },
+    {
+      "season_id": "25FA",
+      "experiment_code": "XXQL2502",
+      "bundle_path": "data/user/experiments/xxql2502_refreshed_20261010",
+      "bundle_manifest_sha256": "ad3e9d6364687952d07a791379b609c499375a85610c3c9ff578af5d0f663d92",
+      "roles": {
+        "diagnostic": [
+          2,
+          5,
+          8,
+          11
+        ],
+        "validation": [
+          1,
+          3,
+          4,
+          6,
+          7,
+          9,
+          10,
+          12
+        ]
+      }
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_refreshed_20261010",
+      "bundle_manifest_sha256": "3eb23088d4ea456839522be4db423fd7897e837b8dbba756979503aca1646ff1",
+      "roles": {
+        "calibration": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "holdout": [
+          1,
+          2,
+          3
+        ]
+      }
+    }
+  ],
+  "main_parameter_bounds": {
+    "RWUMX": [
+      0.012,
+      0.026
+    ],
+    "KEP": [
+      0.7,
+      0.9
+    ],
+    "SOIL_SLDR": [
+      0.65,
+      0.9
+    ]
+  },
+  "demonstrated_core": "conditional combinations around RWUMX .020-.026, KEP .85-.90, SLDR .80-.90; not all rectangular cross-products tested",
+  "initial_reference": {
+    "RWUMX": 0.02,
+    "KEP": 0.9,
+    "SOIL_SLDR": 0.8
+  },
+  "fixed_environment": {
+    "SLU1": 5.5,
+    "SALB": 0.13,
+    "SSKS": "original profile",
+    "TAV": 20.0,
+    "AMP": 6.0,
+    "weather": "current XXTW2403; original daily values unchanged",
+    "initial_soil_water": "measured; initial sample preirrigation",
+    "initial_soil_N": "shared pure-N prebasal reference",
+    "wind": "not fitted"
+  },
+  "objectives": "inherit C31-inspired joint design and reviewed adjacent-N + WB100 supplement; no unapproved reweighting in executed grid",
+  "ET_operator": "WB100 same observational water balance; retain model percolation; daily means and total not repeated targets",
+  "covariance_caveat": "WB100 and VWC share soil samples; diagonal review score not independent likelihood",
+  "engineering": {
+    "n_reals": 200,
+    "noptmax": 6,
+    "n_agents": 6,
+    "proposed_lambda0": 100,
+    "proposed_lambda_multipliers": [
+      0.1,
+      1,
+      10
+    ],
+    "proposed_step_multipliers": [
+      0.05,
+      0.1,
+      0.25
+    ],
+    "minimum_member_retention": 0.98,
+    "feasibility": "all exact mature-fruit N dates, no pool/date fallback; feasibility screen before start",
+    "required_before_execution": [
+      "KEP and SOIL_SLDR formal adapter independent injection/readback",
+      "WB100 exact interval parser and 513-target preflight",
+      "frozen new bounds/configuration with approved scientific scope"
+    ]
+  },
+  "method_decision": "retain R; S/F/D benefits conditional on assumed wind and default humidity; H unsupported PHSV, Z damages dry harvest; optional later S sensitivity only with credible wind and humidity",
+  "warning": "No setting met strong WB100>=10% AND VWC>=5% improvement with nonwater guards; no claim that ET or nitrogen-response problem solved",
+  "retrospective_external_check": "2025 metrics not used for ranking; autumn yield remains invalid",
+  "experiment_receipt": {
+    "status": "completed_diagnostic_only",
+    "supported_cases": 120,
+    "successful_native_season_runs": 360,
+    "original492_target_missing_cases": 6,
+    "guard_pass_cases": 59,
+    "admissible_weak_cases": 12,
+    "admissible_strong_cases": 0,
+    "baseline_original_phi": 137.43191419804663,
+    "baseline_nonwater_phi": 123.09407317047574,
+    "baseline_WB100_interval_NRMSE": 12.337349843226276,
+    "baseline_VWC_NRMSE": 14.8689101542745,
+    "baseline_proposed513_phi": 137.2694942903554,
+    "ranking_policy": "Only 2026 calibration data. 2025 metrics excluded from ranking.",
+    "uncertainty": "WB100 and VWC share soil samples; diagonal review weights are advisory, not covariance-correct likelihood",
+    "original_inputs_and_runs_unchanged": true,
+    "formal_calibration_started": false,
+    "manifest_sha256": "a19c286d7cc88f55b2f6a38180022e852b252731c4f6cbb2aabb09e88443ce67",
+    "review_script_sha256": "ab1fced03356b13794196cdd3a4ae66f9b5945e288f174c019d3e5187e61ea50"
+  },
+  "experiment_manifest_sha256": "a19c286d7cc88f55b2f6a38180022e852b252731c4f6cbb2aabb09e88443ce67",
+  "report": "docs/reports/蒸散与水分环境网格试验结果及下一轮率定方案_20261012.md"
+}

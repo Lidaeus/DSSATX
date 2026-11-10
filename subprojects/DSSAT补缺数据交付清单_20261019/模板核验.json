@@ -1,0 +1,10 @@
+{
+  "runs": 20,
+  "daily_water_skeleton_rows": 2504,
+  "soil_boundary_skeleton_rows": 780,
+  "organ_state_skeleton_rows": 360,
+  "harvest_event_skeleton_rows": 132,
+  "interval_requests": 24,
+  "no_simulated_values_filled": true,
+  "templates_are_requests_not_results": true
+}

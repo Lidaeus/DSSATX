@@ -1,0 +1,41 @@
+{
+  "season": "2026春",
+  "path": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\2026年灌水施肥数据-整理.xlsx",
+  "backup": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\本次修改前备份\\Excel\\2026春\\2026年灌水施肥数据-整理.xlsx",
+  "before_hash": "5a5ae71a93e9af561eae41fc165751693cc24a94b60f72bdf5885c752f6684cc",
+  "after_hash": "f2af43b5352475a9d3187aea04d847a09f90af0323c410a45599f01b3597960a",
+  "added_sheets": [],
+  "irrigation_preserved": true,
+  "fertilizer_rows": 132,
+  "fertilizer_dates": 12,
+  "totals": {
+    "N0": {
+      "N": 0.0,
+      "P": 66.3,
+      "K": 229.09,
+      "Ca": 56.0
+    },
+    "N1": {
+      "N": 120.0,
+      "P": 66.3,
+      "K": 229.09,
+      "Ca": 56.0
+    },
+    "N2": {
+      "N": 240.0,
+      "P": 66.3,
+      "K": 229.09,
+      "Ca": 56.0
+    },
+    "N3": {
+      "N": 361.0,
+      "P": 66.3,
+      "K": 229.09,
+      "Ca": 56.0
+    }
+  },
+  "tmx_verified_during_excel_write": true,
+  "tmx_changed_lines": 125,
+  "tmx_before_sha256": "50c977aa1b531094dd582a935a7d9d73233b9d462fbdd64038b15d557e98b3f5",
+  "tmx_after_sha256": "62d177a13f91dac760e632c208cd2744fefc7b816caf2ec365291ed33252cae4"
+}

@@ -181,7 +181,7 @@
   "seasons": {
     "25SP": {
       "experiment": "XXQL2501",
-      "bundle": "xxql2501_unified_20260914",
+      "bundle": "xxql2501_corrected_20260923",
       "season_name": "2025_spring",
       "role": "calibration_training",
       "treatments": [
@@ -270,7 +270,7 @@
     },
     "25FA": {
       "experiment": "XXQL2502",
-      "bundle": "xxql2502_unified_20260914",
+      "bundle": "xxql2502_corrected_20260923",
       "season_name": "2025_autumn",
       "role": "independent_validation_quarantine",
       "treatments": [
@@ -361,7 +361,7 @@
     },
     "26SP": {
       "experiment": "XXQL2601",
-      "bundle": "xxql2601_unified_20260914",
+      "bundle": "xxql2601_corrected_20260923",
       "season_name": "2026_spring",
       "role": "calibration_contrast_evaluation",
       "treatments": [

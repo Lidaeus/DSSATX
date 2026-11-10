@@ -16,14 +16,17 @@ source_utf8 <- function(name) {
   source(file.path(script_dir, name), local = FALSE, encoding = "UTF-8")
 }
 for (module in c(
-  "common.R", "sa_i18n.R", "fig_model_performance.R",
+  "common.R", "publication_fonts.R", "sa_i18n.R", "fig_model_performance.R",
   "fig_model_performance_uncertainty.R", "fig_treatment_residual_uncertainty.R",
   "fig_selected_dynamics.R", "fig_residual_diagnostics.R",
   "fig_all_treatment_dynamics.R", "fig_phi_convergence.R", "fig_posterior_demo.R",
   "fig_spearman_demo.R", "fig_equifinality_demo.R", "fig_sa_morris.R",
   "fig_sa_sobol.R", "fig_sa_interaction.R", "fig_sa_selection.R",
   "fig_water_nitrogen_response.R", "fig_standing_fruit_balance.R",
-  "fig_leaf_nitrogen.R"
+  "fig_leaf_nitrogen.R", "fig_model_framework.R", "fig_partition_ablation.R",
+  "fig_validation_sample.R", "fig_environment_management.R", "fig_sensitivity_update.R",
+  "fig_growth_dynamics.R", "fig_harvest_dynamics.R", "fig_management_response.R",
+  "fig_dual_morris_screening.R", "spring_figure_bundle.R"
 )) source_utf8(module)
 
 check_r_dependencies()
@@ -47,10 +50,38 @@ if (!is.null(args$formats)) profile$formats <- split_csv_arg(args$formats)
 figure_ids <- if (is.null(args$figure_ids)) "all" else args$figure_ids
 selected <- function(id) figure_ids == "all" || id %in% split_csv_arg(figure_ids)
 requested_ids <- if (figure_ids == "all") character() else split_csv_arg(figure_ids)
+is_refitted_partition_request <- "fig8_refitted_partition" %in% requested_ids
+if (is_refitted_partition_request && length(requested_ids) != 1L) {
+  stop("Fig8 refitted partition requires its own frozen bundle and figure selection")
+}
+is_dual_morris_request <- "fig3_dual_morris_screening" %in% requested_ids
+if (is_dual_morris_request && length(requested_ids) != 1L) {
+  stop("Fig3 Morris requires its own frozen bundle and figure selection")
+}
+spring_ids <- c("fig4_spring_evaluation", "fig5_spring_growth", "fig6_spring_harvest")
+is_spring_request <- any(requested_ids %in% spring_ids)
+if (is_spring_request && any(!requested_ids %in% spring_ids)) {
+  stop("Deterministic spring figures require their own frozen bundle and figure selection")
+}
+stage2_ids<-c("fig2_environment_stage2","fig3_sensitivity_stage2","fig4_validation_stage2",
+  "fig5_growth_stage2","fig6_harvest_stage2","fig7_response_stage2","fig8_forward_stage2",
+  "figs_weather_stage2","figs_density_stage2","figs_correlation_stage2","figs_contrasts_stage2")
+is_stage2_request<-any(requested_ids %in% stage2_ids)
+if(is_stage2_request && any(!requested_ids %in% stage2_ids))stop("Stage 2 figures require a dedicated bundle and selection")
+reconstruction_ids <- c("fig1_framework_prototype", "fig8_ablation_prototype", "fig4_validation_prototype")
+is_reconstruction_request <- any(requested_ids %in% reconstruction_ids)
+if (is_reconstruction_request && any(!requested_ids %in% reconstruction_ids)) {
+  stop("Reconstruction prototypes require their own frozen bundle and figure selection")
+}
+if (is_reconstruction_request && .Platform$OS.type == "windows") {
+  grDevices::windowsFonts("Microsoft YaHei" = grDevices::windowsFont("Microsoft YaHei"))
+}
 is_t4_request <- any(requested_ids %in% c("figs5_posterior", "figs6_spearman", "figs7_equifinality"))
 is_sa_request <- any(requested_ids %in% c("fig1_sa", "figs1_sa_stability", "figs1b_sa_effects",
                                           "fig_sa_summary",
                                           "figs1c_sa_interaction", "figs1d_sa_selection"))
+is_single_seed_request <- any(requested_ids %in% c("figs1d_single_seed_selection", "figs1b_single_seed_effects",
+                                                  "figs1_single_seed_ranking", "figs1b_single_seed_fresh"))
 is_sobol_request <- any(requested_ids %in% c("figs2_sobol_convergence", "figs2_sobol_results"))
 # Conditional-ensemble uncertainty figures (plan 2026-08-28): a dedicated
 # frozen bundle; the diagnostic figure ids deliberately claim no formal
@@ -58,10 +89,10 @@ is_sobol_request <- any(requested_ids %in% c("figs2_sobol_convergence", "figs2_s
 is_conditional_request <- any(requested_ids %in% c(
   "fig_model_performance_uncertainty", "diagnostic_conditional_residual_by_treatment",
   "fig4_dynamics_conditional", "figs4_all_treatments_conditional"))
-if (sum(c(is_t4_request, is_sa_request, is_sobol_request, is_conditional_request)) > 1) {
+if (sum(c(is_t4_request, is_sa_request, is_single_seed_request, is_sobol_request, is_conditional_request)) > 1) {
   stop("Morris SA, Sobol SA, T4, and conditional-ensemble figures require separate frozen bundles", call. = FALSE)
 }
-standard_ids <- c("fig2_phi", "fig3_performance", "figs3_residuals", "fig4_dynamics", "figs4_all_treatments", "fig_leaf_nitrogen")
+standard_ids <- c("fig2_phi", "fig3_performance", "figs3_residuals", "fig4_dynamics", "figs4_all_treatments", "fig_leaf_nitrogen", "fig_water_nitrogen_response")
 if (is_conditional_request && any(requested_ids %in% standard_ids)) {
   stop("Conditional-ensemble figures require a dedicated bundle and cannot be mixed with standard paper figures", call. = FALSE)
 }
@@ -83,8 +114,20 @@ if (is_sobol_request) {
 needs_trajectory <- selected("fig4_dynamics") || selected("figs4_all_treatments") || (selected("fig_leaf_nitrogen") && figure_ids != "all")
 needs_treatment_metadata <- selected("figs3_residuals") || selected("fig4_dynamics") || selected("figs4_all_treatments") || (selected("fig_leaf_nitrogen") && figure_ids != "all")
 
-bundle <- if (is_t4_request) {
+bundle <- if (is_refitted_partition_request) {
+  read_refitted_partition_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
+} else if (is_spring_request) {
+  read_spring_figure_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
+} else if (is_dual_morris_request) {
+  read_dual_morris_screening(input_dir, isTRUE(args$allow_unvalidated_demo))
+} else if (is_stage2_request) {
+  read_stage2_bundle(input_dir,isTRUE(args$allow_unvalidated_demo))
+} else if (is_reconstruction_request) {
+  read_reconstruction_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
+} else if (is_t4_request) {
   read_t4_demo_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
+} else if (is_single_seed_request) {
+  read_single_seed_sa_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
 } else if (is_sa_request) {
   read_sa_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
 } else if (is_sobol_request) {
@@ -94,21 +137,193 @@ bundle <- if (is_t4_request) {
 } else {
   read_paper_bundle(input_dir, isTRUE(args$allow_unvalidated_demo))
 }
-if (!is_t4_request && !is_sa_request && !is_sobol_request && !is_conditional_request) {
+if (!is_refitted_partition_request && !is_spring_request && !is_dual_morris_request && !is_stage2_request && !is_reconstruction_request && !is_t4_request && !is_sa_request && !is_single_seed_request && !is_sobol_request && !is_conditional_request) {
   require_calibration_scenario(bundle)
+}
+# A label override is presentation-only; the source gates above still apply.
+# The explicit author instruction is retained in the output manifest.
+label_note <- if (is.null(args$publication_label_note)) "" else trimws(args$publication_label_note)
+render_is_demo <- isTRUE(bundle$is_demo) && !nzchar(label_note)
+if ((is_refitted_partition_request || is_spring_request || is_dual_morris_request) && isTRUE(bundle$is_demo)) {
+  render_is_demo <- TRUE
+  label_note <- ""
 }
 variables <- split_csv_arg(if (is.null(args$variables)) "LAID,LWAD,SWAD,FRESH_INC" else args$variables)
 process_variables <- split_csv_arg(if (is.null(args$process_variables)) "LAID,LWAD" else args$process_variables)
 treatments <- split_csv_arg(if (is.null(args$treatments)) "2,13" else args$treatments)
-stem <- if (bundle$is_demo) "DEMO" else "Fig"
+stem <- if (render_is_demo) "DEMO" else "Fig"
 artifacts <- character()
+
+if (is_refitted_partition_request) {
+  profile$font_family <- "Times New Roman"
+  profile$mixed_times_simsun <- TRUE
+  scope <- if (is.null(bundle$manifest$growth_scope)) "process" else bundle$manifest$growth_scope
+  suffix <- switch(scope, season_end = "_season_end",
+    process_excluding_final_25sp = "_exclude_25sp_final_growth", process = "")
+  if (is.null(suffix)) stop("Unrecognized Fig8 growth evaluation scope: ", scope)
+  fig8_metric <- if (is.null(args$fig8_metric)) "nrmse_pct" else args$fig8_metric
+  if (!fig8_metric %in% c("nrmse_pct", "r2")) stop("Fig8 metric must be nrmse_pct or r2")
+  if (fig8_metric == "r2" && scope != "process") stop("Fig8 r2 versions require the full process bundle")
+  fig8_versions <- if (fig8_metric == "r2") c(with_terminal_yield = TRUE, process_only = FALSE) else
+    c(with_terminal_yield = TRUE)
+  for (version in names(fig8_versions)) {
+    result <- build_refitted_partition(bundle, profile, render_is_demo,
+      metric = fig8_metric, include_terminal_yield = fig8_versions[[version]])
+    version_suffix <- if (fig8_metric == "r2") paste0("_r2_", version) else suffix
+    base <- file.path(out_dir, paste0(if (render_is_demo) "DEMO_" else "", "Fig8_refitted_partition_ablation", version_suffix))
+    artifacts <- c(artifacts, save_figure_set(result$plot, base, profile, profile$double_column_width_mm, result$height_mm))
+    for (field in c("source", "metrics")) {
+      destination <- paste0(base, ".", field, ".csv")
+      utils::write.csv(result[[field]], destination, row.names = FALSE, fileEncoding = "UTF-8")
+      artifacts <- c(artifacts, destination)
+    }
+  }
+}
+
+if (is_spring_request) {
+  profile$font_family <- "Times New Roman"
+  profile$mixed_times_simsun <- TRUE
+  status_note <- if (!render_is_demo) NULL else if (bundle$manifest$engineering_status == "engineering_failed")
+    sprintf("DEMO · 工程门未通过（末轮 %d/%d）", bundle$manifest$retained, bundle$manifest$members) else
+    "DEMO · 科学审查待完成"
+  order <- unlist(bundle$manifest$treatment_order)
+  specs <- list(
+    list(id = spring_ids[1], stem = "Fig4_multivariable_evaluation", kind = "evaluation"),
+    list(id = spring_ids[2], stem = "Fig5_canopy_organ_dynamics", kind = "growth"),
+    list(id = spring_ids[3], stem = "Fig6_harvest_dynamics", kind = "harvest"),
+    list(id = spring_ids[3], stem = "Fig6_harvest_dynamics_smooth_visual", kind = "smooth")
+  )
+  for (spec in specs) {
+    if (!selected(spec$id)) next
+    result <- switch(spec$kind,
+      evaluation = build_spring_one_to_one(bundle$comparison, profile, status_note),
+      growth = build_spring_growth(bundle$comparison, bundle$trajectory, bundle$selection, profile, order, status_note),
+      harvest = build_spring_harvest(bundle$comparison, bundle$selection, profile, order, status_note),
+      smooth = build_spring_harvest(bundle$comparison, bundle$selection, profile, order, status_note, smooth = TRUE))
+    base <- file.path(out_dir, paste0(if (render_is_demo) "DEMO_" else "", spec$stem))
+    artifacts <- c(artifacts, save_figure_set(result$plot, base, profile, profile$double_column_width_mm, result$height_mm))
+    for (field in names(result)[vapply(result, is.data.frame, logical(1))]) {
+      destination <- paste0(base, ".", field, ".csv")
+      utils::write.csv(result[[field]], destination, row.names = FALSE, fileEncoding = "UTF-8")
+      artifacts <- c(artifacts, destination)
+    }
+  }
+}
+
+if (is_dual_morris_request) {
+  profile$font_family <- "Times New Roman"
+  profile$mixed_times_simsun <- TRUE
+  result <- build_dual_morris_screening(bundle, profile, render_is_demo)
+  base <- file.path(out_dir, paste0(if (render_is_demo) "DEMO_" else "", "Fig3_dual_morris_screening"))
+  artifacts <- save_figure_set(result$plot, base, profile, result$width_mm, result$height_mm)
+  for (field in c("heatmap", "ranking", "supplement_labels", "summary")) {
+    destination <- paste0(base, ".", field, ".csv")
+    utils::write.csv(result[[field]], destination, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, destination)
+  }
+}
+
+if(is_stage2_request) {
+  t<-bundle$tables
+  stage2_specs<-list(
+    list(id="fig2_environment_stage2",name="Fig2_environment_management",kind="environment"),
+    list(id="fig3_sensitivity_stage2",name="Fig3_sensitivity_ensemble_update",kind="sensitivity"),
+    list(id="fig4_validation_stage2",name="Fig4_multivariable_performance",kind="validation"),
+    list(id="fig5_growth_stage2",name="Fig5_growth_dynamics",kind="growth"),
+    list(id="fig6_harvest_stage2",name="Fig6_harvest_dynamics",kind="harvest"),
+    list(id="fig6_harvest_stage2",name="Fig6_harvest_dynamics_smooth_visual",kind="harvest_smooth"),
+    list(id="fig7_response_stage2",name="Fig7_water_nitrogen_response",kind="response"),
+    list(id="fig8_forward_stage2",name="Fig8_partition_forward_comparison",kind="forward"),
+    list(id="figs_weather_stage2",name="FigS_weather_comparison",kind="weather"),
+    list(id="figs_density_stage2",name="FigS_parameter_density_141",kind="density"),
+    list(id="figs_correlation_stage2",name="FigS_parameter_correlation_141",kind="correlation"),
+    list(id="figs_contrasts_stage2",name="FigS_management_contrasts",kind="contrasts")
+  )
+  for(spec in stage2_specs) {
+    if(!selected(spec$id))next
+    result<-switch(spec$kind,
+      environment=build_environment_management(t$weather_daily,t$management_events,t$season_dates,profile,render_is_demo),
+      sensitivity=build_sensitivity_update(t$morris_process_scores,t$parameter_intervals,profile,render_is_demo),
+      validation=build_validation_sample(t$validation_sample_pairs,t$performance_metrics,profile,render_is_demo),
+      growth=build_growth_dynamics(t$comparison,t$simulation_trajectory,t$representative_treatments,profile,render_is_demo),
+      harvest=build_harvest_dynamics(t$comparison,t$representative_treatments,profile,render_is_demo),
+      harvest_smooth=build_harvest_dynamics(t$comparison,t$representative_treatments,profile,render_is_demo,smooth=TRUE),
+      response=build_management_response(t$terminal_pairs,t$treatment_metadata,profile,render_is_demo),
+      forward=build_partition_forward_compact(t$partition_function,t$ablation_metrics,profile,render_is_demo),
+      weather=build_weather_reference_comparison(t$weather_stripes,t$weather_daily_difference,t$season_dates,profile,render_is_demo),
+      density=build_stage2_density(t$parameter_samples,t$parameter_intervals,profile,render_is_demo),
+      correlation=build_spearman_structure(t$spearman_correlation,profile,render_is_demo),
+      contrasts=build_management_contrasts(t$water_nitrogen_contrasts,t$water_nitrogen_contrast_summary,profile,render_is_demo))
+    if(spec$kind=="correlation")result$plot<-result$plot+
+      ggplot2::labs(title=NULL,subtitle=NULL,fill="Spearman ρ",caption="参考IES的141个非base成员；上三角与对角线参数名；两两秩相关不等于可辨识性。")+
+      ggplot2::theme(plot.caption=ggplot2::element_text(size=5.7,hjust=0))
+    if(is.null(result$metrics) && spec$kind %in% c("validation","growth","harvest","harvest_smooth")) result$metrics<-t$performance_metrics
+    base<-file.path(out_dir,paste0(if(render_is_demo)"DEMO_" else "",spec$name))
+    artifacts<-c(artifacts,save_figure_set(result$plot,base,profile,profile$double_column_width_mm,result$height_mm))
+    for(field in setdiff(names(result),c("plot","height_mm","width_mm"))) {
+      if(!is.data.frame(result[[field]]))next
+      destination<-paste0(base,".",field,".csv")
+      utils::write.csv(result[[field]],destination,row.names=FALSE,fileEncoding="UTF-8")
+      artifacts<-c(artifacts,destination)
+    }
+  }
+}
+
+if (is_reconstruction_request) {
+  specifications <- list(
+    list(id="fig1_framework_prototype", name="Fig1_framework_prototype", kind="framework"),
+    list(id="fig8_ablation_prototype", name="Fig8_ablation_prototype", kind="ablation"),
+    list(id="fig8_ablation_prototype", name="Fig8_ablation_prototype_smooth_visual", kind="smooth"),
+    list(id="fig4_validation_prototype", name="Fig4_validation_prototype", kind="validation")
+  )
+  for (spec in specifications) {
+    if (!selected(spec$id)) next
+    result <- switch(spec$kind,
+      framework=build_model_framework(bundle$nodes,bundle$edges,profile,render_is_demo),
+      ablation=build_partition_ablation(bundle$events,bundle$function_data,bundle$metrics,profile,render_is_demo),
+      smooth=build_partition_ablation(bundle$events,bundle$function_data,bundle$metrics,profile,render_is_demo,smooth=TRUE),
+      validation=build_validation_sample(bundle$pairs,bundle$metrics,profile,render_is_demo)
+    )
+    base <- file.path(out_dir,paste0(if(render_is_demo) "DEMO_" else "",spec$name))
+    artifacts <- c(artifacts,save_figure_set(result$plot,base,profile,profile$double_column_width_mm,result$height_mm))
+    for (field in intersect(c("source","edges","metrics","function_source"),names(result))) {
+      destination <- paste0(base,".",field,".csv")
+      utils::write.csv(result[[field]],destination,row.names=FALSE,fileEncoding="UTF-8")
+      artifacts <- c(artifacts,destination)
+    }
+  }
+}
+
+if (is_single_seed_request) {
+  specifications <- list(
+    list(id="figs1d_single_seed_selection", name="FigS1d_single_seed_elbow", builder="elbow"),
+    list(id="figs1b_single_seed_effects", name="FigS1b_single_seed_mu_sigma", builder="geometry"),
+    list(id="figs1_single_seed_ranking", name="FigS1_single_seed_core_ranking", builder="ranking"),
+    list(id="figs1b_single_seed_fresh", name="FigS1b_single_seed_fresh_yield", builder="fresh")
+  )
+  for (spec in specifications) {
+    if (!selected(spec$id)) next
+    result <- switch(spec$builder,
+      elbow=build_single_seed_selection(bundle$rankings,bundle$summary,profile,render_is_demo),
+      geometry=build_single_seed_geometry(bundle$effects,bundle$summary,profile,render_is_demo),
+      ranking=build_single_seed_ranking(bundle$effects,bundle$summary,profile,render_is_demo),
+      fresh=build_single_seed_geometry(bundle$effects,bundle$summary,profile,render_is_demo,responses="FRESH_END")
+    )
+    base <- file.path(out_dir,paste0(if(render_is_demo) "DEMO_" else "",spec$name))
+    width <- if(is.null(result$width_mm)) profile$double_column_width_mm else result$width_mm
+    artifacts <- c(artifacts,save_figure_set(result$plot,base,profile,width,result$height_mm))
+    source <- paste0(base,".source.csv")
+    utils::write.csv(result$source,source,row.names=FALSE,fileEncoding="UTF-8")
+    artifacts <- c(artifacts,source)
+  }
+}
 
 if (is_sa_request) {
   if (selected("fig1_sa")) {
     result <- build_morris_main(
-      bundle$rankings, bundle$group_summary, bundle$focus, profile, bundle$is_demo, lang = lang
+      bundle$rankings, bundle$group_summary, bundle$focus, profile, render_is_demo, lang = lang
     )
-    base <- file.path(out_dir, if (bundle$is_demo) "DEMO_Fig1_sa_morris" else "Fig1_sa_morris")
+    base <- file.path(out_dir, if (render_is_demo) "DEMO_Fig1_sa_morris" else "Fig1_sa_morris")
     artifacts <- c(artifacts, save_figure_set(
       result$plot, base, profile, profile$double_column_width_mm, result$height_mm
     ))
@@ -120,9 +335,9 @@ if (is_sa_request) {
   }
   if (selected("figs1_sa_stability")) {
     result <- build_morris_stability(
-      bundle$seed_rankings, bundle$stability, bundle$focus, profile, bundle$is_demo, lang = lang
+      bundle$seed_rankings, bundle$stability, bundle$focus, profile, render_is_demo, lang = lang
     )
-    base <- file.path(out_dir, if (bundle$is_demo) "DEMO_FigS1_sa_stability" else "FigS1_sa_stability")
+    base <- file.path(out_dir, if (render_is_demo) "DEMO_FigS1_sa_stability" else "FigS1_sa_stability")
     artifacts <- c(artifacts, save_figure_set(
       result$plot, base, profile, profile$double_column_width_mm, result$height_mm
     ))
@@ -143,9 +358,9 @@ if (is_sa_request) {
            call. = FALSE)
     }
     result <- build_morris_response_effects(
-      bundle$effects, bundle$focus, profile, bundle$is_demo, lang = lang
+      bundle$effects, bundle$focus, profile, render_is_demo, lang = lang
     )
-    base <- file.path(out_dir, if (bundle$is_demo) "DEMO_FigS1b_sa_effects" else "FigS1b_sa_effects")
+    base <- file.path(out_dir, if (render_is_demo) "DEMO_FigS1b_sa_effects" else "FigS1b_sa_effects")
     artifacts <- c(artifacts, save_figure_set(
       result$plot, base, profile, profile$double_column_width_mm, result$height_mm
     ))
@@ -162,9 +377,9 @@ if (is_sa_request) {
     }
     result <- build_sa_summary(
       bundle$rankings, bundle$group_summary, bundle$focus, sobol_effects,
-      profile, bundle$is_demo, lang = lang
+      profile, render_is_demo, lang = lang
     )
-    base <- file.path(out_dir, if (bundle$is_demo) "DEMO_Fig_sa_summary" else "Fig_sa_summary")
+    base <- file.path(out_dir, if (render_is_demo) "DEMO_Fig_sa_summary" else "Fig_sa_summary")
     artifacts <- c(artifacts, save_figure_set(
       result$plot, base, profile, profile$double_column_width_mm, result$height_mm
     ))
@@ -189,8 +404,8 @@ if (is_sa_request) {
            call. = FALSE)
     }
     summary_data <- utils::read.csv(interaction_csv, stringsAsFactors = FALSE, check.names = FALSE)
-    result <- build_morris_interaction(summary_data, profile, bundle$is_demo, lang = lang)
-    base <- file.path(out_dir, if (bundle$is_demo) "DEMO_FigS1c_sa_interaction" else "FigS1c_sa_interaction")
+    result <- build_morris_interaction(summary_data, profile, render_is_demo, lang = lang)
+    base <- file.path(out_dir, if (render_is_demo) "DEMO_FigS1c_sa_interaction" else "FigS1c_sa_interaction")
     artifacts <- c(artifacts, save_figure_set(
       result$plot, base, profile, profile$column_width_mm, result$height_mm
     ))
@@ -216,9 +431,9 @@ if (is_sa_request) {
       param_labels <- utils::read.csv(labels_csv, stringsAsFactors = FALSE, check.names = FALSE)
     }
     result <- build_selection_rationality(
-      cross_summary, sobol_candidates, param_labels, profile, bundle$is_demo, lang = lang
+      cross_summary, sobol_candidates, param_labels, profile, render_is_demo, lang = lang
     )
-    base <- file.path(out_dir, if (bundle$is_demo) "DEMO_FigS1d_sa_selection" else "FigS1d_sa_selection")
+    base <- file.path(out_dir, if (render_is_demo) "DEMO_FigS1d_sa_selection" else "FigS1d_sa_selection")
     artifacts <- c(artifacts, save_figure_set(
       result$plot, base, profile, profile$column_width_mm, result$height_mm
     ))
@@ -233,16 +448,16 @@ if (is_sobol_request && selected("figs2_sobol_convergence")) {
     if (isTRUE(bundle$has_effects)) {
       build_sobol_multiseason_effects(bundle$rankings, bundle$metrics, bundle$run_scale,
                                       bundle$summary, bundle$effects, bundle$response_scales,
-                                      profile, bundle$is_demo, lang = lang)
+                                      profile, render_is_demo, lang = lang)
     } else {
       build_sobol_multiseason_convergence(bundle$rankings, bundle$metrics, bundle$run_scale,
-                                          bundle$summary, profile, bundle$is_demo)
+                                          bundle$summary, profile, render_is_demo)
     }
   } else {
-    build_sobol_convergence(bundle$rankings, bundle$metrics, bundle$run_scale, profile, bundle$is_demo)
+    build_sobol_convergence(bundle$rankings, bundle$metrics, bundle$run_scale, profile, render_is_demo)
   }
   figure_stem <- if (isTRUE(bundle$has_effects)) "FigS2_sobol_effects" else "FigS2_sobol_convergence"
-  base <- file.path(out_dir, if (bundle$is_demo) paste0("DEMO_", figure_stem) else figure_stem)
+  base <- file.path(out_dir, if (render_is_demo) paste0("DEMO_", figure_stem) else figure_stem)
   artifacts <- c(artifacts, save_figure_set(result$plot, base, profile,
                                              profile$double_column_width_mm, result$height_mm))
   ranking_source <- paste0(base, ".ranking_source.csv")
@@ -271,8 +486,8 @@ if (is_sobol_request && selected("figs2_sobol_results")) {
     stop("figs2_sobol_results requires the multi-season Sobol effects bundle", call. = FALSE)
   }
   result <- build_sobol_results(bundle$effects, bundle$response_scales,
-                                profile, bundle$is_demo, lang = lang)
-  base <- file.path(out_dir, if (bundle$is_demo) "DEMO_FigS2_sobol_results" else "FigS2_sobol_results")
+                                profile, render_is_demo, lang = lang)
+  base <- file.path(out_dir, if (render_is_demo) "DEMO_FigS2_sobol_results" else "FigS2_sobol_results")
   artifacts <- c(artifacts, save_figure_set(
     result$plot, base, profile, profile$double_column_width_mm, result$height_mm
   ))
@@ -286,22 +501,31 @@ if (is_sobol_request && selected("figs2_sobol_results")) {
 if (is_t4_request) {
   if (figure_ids == "all") stop("T4 demo bundles require explicit --figure-ids", call. = FALSE)
   if (selected("figs5_posterior")) {
-    result <- build_posterior_contraction(bundle$posterior, profile, bundle$is_demo)
-    base <- file.path(out_dir, "DEMO_FigS5_posterior_contraction")
+    result <- build_posterior_contraction(bundle$posterior, profile, render_is_demo)
+    base <- file.path(out_dir, if (render_is_demo) "DEMO_FigS5_posterior_contraction" else "FigS5_posterior_contraction")
     artifacts <- c(artifacts, save_figure_set(result$plot, base, profile, profile$double_column_width_mm, result$height_mm))
     source_path <- paste0(base, ".source.csv"); utils::write.csv(result$source, source_path, row.names = FALSE)
     artifacts <- c(artifacts, source_path)
+
+    if (!is.null(bundle$posterior_samples)) {
+      dens_result <- build_posterior_contraction(bundle$posterior, profile, render_is_demo, posterior_samples = bundle$posterior_samples)
+      dens_base <- file.path(out_dir, if (render_is_demo) "DEMO_FigS5_posterior_density" else "FigS5_posterior_density")
+      artifacts <- c(artifacts, save_figure_set(dens_result$plot, dens_base, profile, profile$double_column_width_mm, dens_result$height_mm))
+      dens_source <- paste0(dens_base, ".source.csv"); utils::write.csv(dens_result$source, dens_source, row.names = FALSE)
+      artifacts <- c(artifacts, dens_source)
+    }
   }
   if (selected("figs6_spearman")) {
-    result <- build_spearman_structure(bundle$spearman, profile, bundle$is_demo)
-    base <- file.path(out_dir, "DEMO_FigS6_spearman_structure")
-    artifacts <- c(artifacts, save_figure_set(result$plot, base, profile, profile$column_width_mm, result$height_mm))
+    result <- build_spearman_structure(bundle$spearman, profile, render_is_demo)
+    base <- file.path(out_dir, if (render_is_demo) "DEMO_FigS6_spearman_structure" else "FigS6_spearman_structure")
+    width_mm <- if (result$height_mm > 100) profile$double_column_width_mm else profile$column_width_mm
+    artifacts <- c(artifacts, save_figure_set(result$plot, base, profile, width_mm, result$height_mm))
     source_path <- paste0(base, ".source.csv"); utils::write.csv(result$source, source_path, row.names = FALSE)
     artifacts <- c(artifacts, source_path)
   }
   if (selected("figs7_equifinality")) {
-    result <- build_candidate_prediction_distance(bundle$pair_predictions, profile, bundle$is_demo)
-    base <- file.path(out_dir, "DEMO_FigS7_candidate_prediction_distance")
+    result <- build_candidate_prediction_distance(bundle$pair_predictions, profile, render_is_demo)
+    base <- file.path(out_dir, if (render_is_demo) "DEMO_FigS7_candidate_prediction_distance" else "FigS7_candidate_prediction_distance")
     artifacts <- c(artifacts, save_figure_set(result$plot, base, profile, profile$double_column_width_mm, result$height_mm))
     source_path <- paste0(base, ".source.csv"); utils::write.csv(result$source, source_path, row.names = FALSE)
     distance_path <- paste0(base, ".distance_source.csv"); utils::write.csv(result$distance_source, distance_path, row.names = FALSE)
@@ -310,8 +534,8 @@ if (is_t4_request) {
 }
 
 if (selected("fig3_performance")) {
-  performance <- build_model_performance(bundle$comparison, variables, profile, bundle$is_demo)
-  performance_base <- file.path(out_dir, paste0(stem, if (bundle$is_demo) "_model_performance" else "3_model_performance"))
+  performance <- build_model_performance(bundle$comparison, variables, profile, render_is_demo)
+  performance_base <- file.path(out_dir, paste0(stem, if (render_is_demo) "_model_performance" else "3_model_performance"))
   artifacts <- c(artifacts, save_figure_set(performance$plot, performance_base, profile,
                                            profile$double_column_width_mm, performance$height_mm))
   performance_source <- paste0(performance_base, ".source.csv")
@@ -343,10 +567,10 @@ if (is_conditional_request) {
   if (figure_ids == "all") {
     stop("Conditional-ensemble bundles require explicit --figure-ids", call. = FALSE)
   }
-  conditional_stem <- if (bundle$is_demo) "DEMO_conditional" else "conditional"
+  conditional_stem <- if (render_is_demo) "DEMO_conditional" else "conditional"
   if (selected("fig_model_performance_uncertainty")) {
     result <- build_model_performance_uncertainty(
-      bundle$prediction, bundle$treatment_metadata, "FRESH_CUM", profile, bundle$is_demo
+      bundle$prediction, bundle$treatment_metadata, "FRESH_CUM", profile, render_is_demo
     )
     base <- file.path(out_dir, paste0(conditional_stem, "_model_performance_uncertainty"))
     artifacts <- c(artifacts, save_figure_set(
@@ -361,7 +585,7 @@ if (is_conditional_request) {
   if (selected("diagnostic_conditional_residual_by_treatment")) {
     result <- build_treatment_residual_uncertainty(
       bundle$residual_members, bundle$treatment_metadata, "FRESH_CUM",
-      "terminal_relative_error_pct", profile, bundle$is_demo
+      "terminal_relative_error_pct", profile, render_is_demo
     )
     base <- file.path(out_dir, paste0(conditional_stem, "_treatment_residual_uncertainty"))
     artifacts <- c(artifacts, save_figure_set(
@@ -384,7 +608,7 @@ if (is_conditional_request) {
                                           c("season_id", "treatment")]
     process <- build_process_dynamics_conditional(
       bundle$prediction, bundle$trajectory, bundle$treatment_metadata,
-      process_variables, season_treatments, profile, bundle$is_demo
+      process_variables, season_treatments, profile, render_is_demo
     )
     process_base <- file.path(out_dir, paste0(conditional_stem, "_selected_process_dynamics"))
     artifacts <- c(artifacts, save_figure_set(
@@ -398,7 +622,7 @@ if (is_conditional_request) {
 
     harvest <- build_harvest_dynamics_conditional(
       bundle$prediction, bundle$treatment_metadata, "FRESH_INC", "FRESH_CUM",
-      season_treatments, profile, bundle$is_demo
+      season_treatments, profile, render_is_demo
     )
     harvest_base <- file.path(out_dir, paste0(conditional_stem, "_selected_harvest_dynamics"))
     artifacts <- c(artifacts, save_figure_set(
@@ -414,7 +638,7 @@ if (is_conditional_request) {
     all_variables <- unique(c(supplement_process_variables, "DRY_CUM", "FRESH_CUM"))
     all_results <- build_all_treatment_dynamics_conditional(
       bundle$prediction, bundle$trajectory, bundle$treatment_metadata,
-      all_variables, profile, bundle$is_demo
+      all_variables, profile, render_is_demo
     )
     for (variable in names(all_results)) {
       result <- all_results[[variable]]
@@ -433,10 +657,10 @@ if (is_conditional_request) {
 
 if (selected("figs3_residuals")) {
   residuals <- build_residual_diagnostics(bundle$comparison, bundle$treatment_metadata,
-                                          variables, profile, bundle$is_demo)
+                                          variables, profile, render_is_demo)
   for (role in names(residuals)) {
     result <- residuals[[role]]
-    residual_base <- file.path(out_dir, if (bundle$is_demo) {
+    residual_base <- file.path(out_dir, if (render_is_demo) {
       paste0("DEMO_residuals_", role)
     } else paste0("FigS3_residuals_", role))
     artifacts <- c(artifacts, save_figure_set(result$plot, residual_base, profile,
@@ -454,8 +678,8 @@ if (selected("figs3_residuals")) {
 if (selected("fig4_dynamics")) {
   process <- build_process_dynamics(bundle$comparison, bundle$trajectory,
                                     bundle$treatment_metadata, process_variables,
-                                    treatments, profile, bundle$is_demo)
-  process_base <- file.path(out_dir, paste0(stem, if (bundle$is_demo) "_process_dynamics" else "4_process_dynamics"))
+                                    treatments, profile, render_is_demo)
+  process_base <- file.path(out_dir, paste0(stem, if (render_is_demo) "_process_dynamics" else "4_process_dynamics"))
   artifacts <- c(artifacts, save_figure_set(process$plot, process_base, profile,
                                            profile$double_column_width_mm, process$height_mm))
   process_obs <- paste0(process_base, ".observations.csv")
@@ -466,8 +690,8 @@ if (selected("fig4_dynamics")) {
 
   harvest <- build_harvest_dynamics(bundle$comparison, bundle$treatment_metadata,
                                     "FRESH_INC", "FRESH_CUM", treatments,
-                                    profile, bundle$is_demo)
-  harvest_base <- file.path(out_dir, paste0(stem, if (bundle$is_demo) "_harvest_dynamics" else "4_harvest_dynamics"))
+                                    profile, render_is_demo)
+  harvest_base <- file.path(out_dir, paste0(stem, if (render_is_demo) "_harvest_dynamics" else "4_harvest_dynamics"))
   artifacts <- c(artifacts, save_figure_set(harvest$plot, harvest_base, profile,
                                            profile$double_column_width_mm, harvest$height_mm))
   harvest_increment <- paste0(harvest_base, ".increment.csv")
@@ -478,8 +702,8 @@ if (selected("fig4_dynamics")) {
 
   smooth <- build_cumulative_smooth(bundle$comparison, bundle$trajectory,
                                     bundle$treatment_metadata, "FRESH_CUM", treatments,
-                                    profile, bundle$is_demo)
-  smooth_base <- file.path(out_dir, paste0(stem, if (bundle$is_demo) "_cumulative_smooth" else "4_cumulative_smooth"))
+                                    profile, render_is_demo)
+  smooth_base <- file.path(out_dir, paste0(stem, if (render_is_demo) "_cumulative_smooth" else "4_cumulative_smooth"))
   artifacts <- c(artifacts, save_figure_set(smooth$plot, smooth_base, profile,
                                            profile$double_column_width_mm, smooth$height_mm))
   smooth_obs <- paste0(smooth_base, ".observations.csv")
@@ -494,11 +718,11 @@ if (selected("fig4_dynamics")) {
 if (selected("figs4_all_treatments")) {
   all_process <- build_all_treatment_process(
     bundle$comparison, bundle$trajectory, bundle$treatment_metadata,
-    supplement_process_variables, supplement_treatments, profile, bundle$is_demo
+    supplement_process_variables, supplement_treatments, profile, render_is_demo
   )
   for (variable in names(all_process)) {
     result <- all_process[[variable]]
-    process_all_base <- file.path(out_dir, if (bundle$is_demo) {
+    process_all_base <- file.path(out_dir, if (render_is_demo) {
       paste0("DEMO_all_treatments_", variable)
     } else paste0("FigS4_all_treatments_", variable))
     artifacts <- c(artifacts, save_figure_set(result$plot, process_all_base, profile,
@@ -512,11 +736,11 @@ if (selected("figs4_all_treatments")) {
 
   all_harvest <- build_all_treatment_harvest(
     bundle$comparison, bundle$trajectory, bundle$treatment_metadata,
-    "FRESH_INC", "FRESH_CUM", supplement_treatments, profile, bundle$is_demo
+    "FRESH_INC", "FRESH_CUM", supplement_treatments, profile, render_is_demo
   )
   for (kind in c("increment", "cumulative_event")) {
     result <- all_harvest[[kind]]
-    harvest_all_base <- file.path(out_dir, if (bundle$is_demo) {
+    harvest_all_base <- file.path(out_dir, if (render_is_demo) {
       paste0("DEMO_all_treatments_", kind)
     } else paste0("FigS4_all_treatments_", kind))
     artifacts <- c(artifacts, save_figure_set(result$plot, harvest_all_base, profile,
@@ -526,7 +750,7 @@ if (selected("figs4_all_treatments")) {
     artifacts <- c(artifacts, harvest_all_source)
   }
   smooth_all <- all_harvest$cumulative_smooth
-  smooth_all_base <- file.path(out_dir, if (bundle$is_demo) {
+  smooth_all_base <- file.path(out_dir, if (render_is_demo) {
     "DEMO_all_treatments_cumulative_smooth"
   } else "FigS4_all_treatments_cumulative_smooth")
   artifacts <- c(artifacts, save_figure_set(smooth_all$plot, smooth_all_base, profile,
@@ -541,8 +765,8 @@ if (selected("figs4_all_treatments")) {
 }
 
 if (selected("fig2_phi") && !is.null(bundle$phi)) {
-  convergence <- build_phi_convergence(bundle$phi, profile, bundle$is_demo)
-  convergence_base <- file.path(out_dir, paste0(stem, if (bundle$is_demo) "_phi_convergence" else "2_phi_convergence"))
+  convergence <- build_phi_convergence(bundle$phi, profile, render_is_demo)
+  convergence_base <- file.path(out_dir, paste0(stem, if (render_is_demo) "_phi_convergence" else "2_phi_convergence"))
   artifacts <- c(artifacts, save_figure_set(convergence$plot, convergence_base, profile,
                                            profile$column_width_mm, convergence$height_mm))
   convergence_source <- paste0(convergence_base, ".source.csv")
@@ -556,8 +780,8 @@ if (selected("fig_leaf_nitrogen")) {
   if (!is.null(bundle$comparison) && "LN%D" %in% bundle$comparison$variable &&
       !is.null(bundle$trajectory) && "LN%D" %in% bundle$trajectory$variable) {
     leaf_n_res <- build_leaf_nitrogen(bundle$comparison, bundle$trajectory,
-                                      bundle$treatment_metadata, profile, bundle$is_demo)
-    leaf_n_base <- file.path(out_dir, paste0(stem, if (bundle$is_demo) "_leaf_nitrogen" else "LeafN_leaf_nitrogen"))
+                                      bundle$treatment_metadata, profile, render_is_demo)
+    leaf_n_base <- file.path(out_dir, paste0(stem, if (render_is_demo) "_leaf_nitrogen" else "LeafN_leaf_nitrogen"))
     artifacts <- c(artifacts, save_figure_set(leaf_n_res$plot, leaf_n_base, profile,
                                              profile$double_column_width_mm, leaf_n_res$height_mm))
     leaf_n_source <- paste0(leaf_n_base, ".source.csv")
@@ -572,11 +796,32 @@ if (selected("fig_leaf_nitrogen")) {
   }
 }
 
+if (selected("fig_water_nitrogen_response")) {
+  if (!is.null(bundle$comparison) && !is.null(bundle$treatment_metadata) &&
+      "season_id" %in% names(bundle$comparison) && "season_id" %in% names(bundle$treatment_metadata)) {
+    wn_res <- build_water_nitrogen_response(bundle$comparison, bundle$treatment_metadata, profile, render_is_demo)
+    wn_base <- file.path(out_dir, paste0(stem, if (render_is_demo) "_water_nitrogen_response" else "6_water_nitrogen_response"))
+    artifacts <- c(artifacts, save_figure_set(wn_res$plot, wn_base, profile,
+                                             profile$double_column_width_mm, wn_res$height_mm))
+    wn_source <- paste0(wn_base, ".source.csv")
+    utils::write.csv(wn_res$source, wn_source, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, wn_source)
+    water_base <- file.path(out_dir, if (render_is_demo) "DEMO_water_response" else "Fig6_water_response")
+    artifacts <- c(artifacts, save_figure_set(wn_res$water_plot, water_base, profile,
+        profile$double_column_width_mm, wn_res$water_height_mm))
+    water_source <- paste0(water_base, ".source.csv")
+    utils::write.csv(wn_res$water_source, water_source, row.names = FALSE, fileEncoding = "UTF-8")
+    artifacts <- c(artifacts, water_source)
+  } else if (figure_ids != "all") {
+    stop("fig_water_nitrogen_response requires season_id in both comparison and treatment_metadata", call. = FALSE)
+  }
+}
+
 manifest <- list(
   schema_version = 2,
   created_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
   renderer = paste0("R ", getRversion()),
-  package_versions = as.list(vapply(required_packages,
+  package_versions = as.list(vapply(unique(c(required_packages,if(is_single_seed_request) "ggrepel" else character())),
     function(package) as.character(utils::packageVersion(package)), character(1))),
   git_commit = trimws(system2("git", c("-C", shQuote(project_root), "rev-parse", "HEAD"),
                               stdout = TRUE, stderr = FALSE)[[1]]),
@@ -585,10 +830,76 @@ manifest <- list(
   profile_id = profile$profile_id,
   profile = sha256_record(profile_path),
   run_id = bundle$manifest$run_id,
-  data_status = if (is_sa_request || is_sobol_request || is_conditional_request) bundle$manifest$data_status else if (bundle$is_demo) "legacy_layout_demo" else "science_validated",
+  data_status = bundle$manifest$data_status,
+  science_validated = identical(bundle$manifest$data_status, "science_validated"),
+  source_is_demo = isTRUE(bundle$is_demo),
+  demo_label_visible = render_is_demo,
+  publication_label_note = label_note,
+  scientific_status_promoted = FALSE,
   input_manifest = sha256_record(file.path(input_dir, "paper_data_manifest.json")),
   artifacts = lapply(artifacts, sha256_record)
 )
 manifest_path <- file.path(out_dir, "figure_manifest.json")
+if (is_refitted_partition_request) {
+  manifest$figure_id <- "fig8_refitted_partition"
+  manifest$runs <- bundle$manifest$runs
+  manifest$matching <- bundle$manifest$matching
+  manifest$growth_scope <- scope
+  manifest$comparison_metric <- fig8_metric
+  manifest$include_terminal_yield <- as.list(fig8_versions)
+  manifest$growth_sampling_dates <- bundle$manifest$growth_sampling_dates
+  manifest$excluded_growth_dates <- bundle$manifest$excluded_growth_dates
+  manifest$retained_coefficients <- bundle$manifest$retained_coefficients
+  manifest$renderer_sources <- lapply(file.path(script_dir, c("common.R", "publication_fonts.R",
+    "make_all.R", "fig_partition_ablation.R")), sha256_record)
+  manifest$font_policy <- list(latin_digits = "Times New Roman", chinese = "SimSun")
+}
+if (is_spring_request) {
+  manifest$figure_ids <- as.list(requested_ids)
+  manifest$validation_refresh <- bundle$manifest$validation_refresh
+  manifest$selection <- bundle$manifest$selection
+  manifest$engineering_status <- bundle$manifest$engineering_status
+  manifest$renderer_sources <- lapply(file.path(script_dir, c("common.R", "publication_fonts.R",
+    "make_all.R", "spring_figure_bundle.R", "fig_validation_sample.R", "fig_growth_dynamics.R",
+    "fig_harvest_dynamics.R")), sha256_record)
+  manifest$font_policy <- list(latin_digits = "Times New Roman", chinese = "SimSun")
+}
+if (is_dual_morris_request) {
+  manifest$figure_id <- "fig3_dual_morris_screening"
+  manifest$selection_status <- bundle$manifest$selection_status
+  manifest$renderer_sources <- lapply(file.path(script_dir, c("common.R", "publication_fonts.R",
+    "make_all.R", "fig_dual_morris_screening.R")), sha256_record)
+  manifest$font_policy <- list(latin_digits = "Times New Roman", chinese = "SimSun")
+}
 jsonlite::write_json(manifest, manifest_path, auto_unbox = TRUE, pretty = TRUE)
+if(is_stage2_request) {
+  renderers<-file.path(script_dir,c("common.R","publication_fonts.R","make_all.R",
+    "fig_environment_management.R","fig_sensitivity_update.R","fig_validation_sample.R",
+    "fig_growth_dynamics.R","fig_harvest_dynamics.R","fig_management_response.R",
+    "fig_partition_ablation.R","fig_spearman_demo.R"))
+  for(spec in stage2_specs) {
+    if(!selected(spec$id))next
+    name<-paste0(if(render_is_demo)"DEMO_" else "",spec$name)
+    per_figure<-manifest;per_figure$figure_id<-spec$id
+    per_figure$ablation_design<-bundle$manifest$ablation
+    per_figure$font_policy<-list(latin_digits="Times New Roman",chinese="SimSun",explicit_glyph_runs=TRUE)
+    per_figure$artifacts<-Filter(function(a)startsWith(basename(a$path),paste0(name,".")),manifest$artifacts)
+    per_figure$renderer_sources<-lapply(renderers,sha256_record)
+    jsonlite::write_json(per_figure,file.path(out_dir,paste0(name,".figure_manifest.json")),auto_unbox=TRUE,pretty=TRUE)
+  }
+}
+if (is_reconstruction_request) {
+  for (spec in specifications) {
+    if (!selected(spec$id)) next
+    name <- paste0(if(render_is_demo) "DEMO_" else "",spec$name)
+    per_figure <- manifest
+    per_figure$figure_id <- spec$id
+    per_figure$design_number_is_provisional <- TRUE
+    per_figure$artifacts <- Filter(function(a) startsWith(basename(a$path),paste0(name,".")),manifest$artifacts)
+    per_figure$renderer_sources <- lapply(file.path(script_dir,c("common.R","make_all.R",
+      switch(spec$kind,framework="fig_model_framework.R",ablation="fig_partition_ablation.R",
+        smooth="fig_partition_ablation.R",validation="fig_validation_sample.R"))),sha256_record)
+    jsonlite::write_json(per_figure,file.path(out_dir,paste0(name,".figure_manifest.json")),auto_unbox=TRUE,pretty=TRUE)
+  }
+}
 cat(normalizePath(manifest_path, winslash = "/", mustWork = TRUE), "\n")

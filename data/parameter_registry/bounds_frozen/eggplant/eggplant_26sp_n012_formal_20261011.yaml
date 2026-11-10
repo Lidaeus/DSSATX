@@ -1,0 +1,12 @@
+bounds_id: "eggplant_26sp_n012_formal_20261011"
+crop: "eggplant"
+created_at: "2026-10-11T01:09:09Z"
+approved_at: "2026-10-11T01:09:09Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_26sp_n012_review_20261011.csv"
+derived_from_sha256: "eeaca6253b6dd57317455fb4fa53523be4962ea857e2acfc91efea45141f03a8"
+bounds_sha256: "eeaca6253b6dd57317455fb4fa53523be4962ea857e2acfc91efea45141f03a8"
+parameter_count: 99
+automatic_repairs: 0
+notes: "User approved formal calibration on 2026-10-11; 53 candidates, current measured inputs fixed, 2025 W1/W3 validation locked"

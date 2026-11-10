@@ -1,0 +1,1317 @@
+[
+  {
+    "file": "已填数据_stable79_20261019/00_交付说明与使用限制.md",
+    "bytes": 5050,
+    "sha256": "9928fdd07eeb647b1f8051b4b9042a5f2ec39eb00818cfd4714d51a04b22a709"
+  },
+  {
+    "file": "已填数据_stable79_20261019/01_运行与处理对应.csv",
+    "bytes": 9659,
+    "sha256": "bd0f062c0a7cb5d6d1c45fd5fea3963730842fb7f67d5f3f0137896f8b51355d"
+  },
+  {
+    "file": "已填数据_stable79_20261019/02_逐日水量.csv",
+    "bytes": 1222093,
+    "sha256": "9faa6af39ec9afdff75d84b8a756ab68c730ac8594abf27e4c4fe96d6f8d0957"
+  },
+  {
+    "file": "已填数据_stable79_20261019/03_边界土壤水.csv",
+    "bytes": 1442067,
+    "sha256": "054eb415f1981e1a6701fb2ef950e23e63a21971a44de7589c9f0bd2cde4a3b3"
+  },
+  {
+    "file": "已填数据_stable79_20261019/04_器官状态.csv",
+    "bytes": 415757,
+    "sha256": "7eea26d4678e934236fa657a82a1d4f9362674a8ede0f910279cf8618b7228cf"
+  },
+  {
+    "file": "已填数据_stable79_20261019/05_采收与其他移出.csv",
+    "bytes": 87774,
+    "sha256": "86fd786e43b781512075e94f332fd074653dfe65df3765c533fe8c0ece686af3"
+  },
+  {
+    "file": "已填数据_stable79_20261019/06_变量映射与支持情况.csv",
+    "bytes": 9269,
+    "sha256": "eab72332319410e58a5911d9e2d8fc2294ab281ed02e785ba6394ff6297de744"
+  },
+  {
+    "file": "已填数据_stable79_20261019/07_校准与验证记录.csv",
+    "bytes": 628202,
+    "sha256": "3ab3943f26d018d8676b51d5b248b423c16b4dcc9cd697ba7aa977ec12954f8c"
+  },
+  {
+    "file": "已填数据_stable79_20261019/08_分期与观测窗口ET汇总.csv",
+    "bytes": 87817,
+    "sha256": "ccca73c055f27b5f8eec377bc07bf7403a2f904e0e1c8e2d9a75c6525c890469"
+  },
+  {
+    "file": "已填数据_stable79_20261019/09_逐日180cm水量与100cm贮水.csv",
+    "bytes": 917766,
+    "sha256": "5feedc729865eee702911f9c339f78c91be1ef5c9b6757326a23b87661badcab"
+  },
+  {
+    "file": "已填数据_stable79_20261019/10_逐日器官干物质与N状态.csv",
+    "bytes": 5345877,
+    "sha256": "dff129d06211429a1744cac9559e3d3e074c5dfacbc886aff179951d5af9f185"
+  },
+  {
+    "file": "已填数据_stable79_20261019/11_逐日根吸N与采出损失账本.csv",
+    "bytes": 1127085,
+    "sha256": "ce19fa82b890d51e0ee7e25edc7a62b99cfe06a82ae470c27b517e4ce9a0d6b4"
+  },
+  {
+    "file": "已填数据_stable79_20261019/12_原生P输出_未经补缺适用性验证.csv",
+    "bytes": 715406,
+    "sha256": "989870addfec3ea793d951d03ab0cad713fe7c62eda1d3f748d47a471a818fa3"
+  },
+  {
+    "file": "已填数据_stable79_20261019/13_采收前后干物质对账.csv",
+    "bytes": 11495,
+    "sha256": "8b73b37880bcdeef33a9e61d5c39b96db9a943a99135bb920a517ec6832362ce"
+  },
+  {
+    "file": "已填数据_stable79_20261019/14_P状态时点不一致记录.csv",
+    "bytes": 1184,
+    "sha256": "d81ca4aaa4a52facc3f280ed0a72d010460af1556b5a4e1ef4088e9ecfb99f50"
+  },
+  {
+    "file": "已填数据_stable79_20261019/15_实测与模型投入对照.csv",
+    "bytes": 1078,
+    "sha256": "a9c6a67eb8c90806696e06ed2595a9ffbcf1edcf9f76c935ad48e4f5892bd353"
+  },
+  {
+    "file": "已填数据_stable79_20261019/16_原1123目标逐项对账.csv",
+    "bytes": 545222,
+    "sha256": "28da226bd1dbcf5802e2b188b78747a8ec352848ef7a74053fcf1cd78a516c8d"
+  },
+  {
+    "file": "已填数据_stable79_20261019/17_原始诊断逐项对账.csv",
+    "bytes": 156289,
+    "sha256": "67aaede933604cba2db93c827a6edd19ac21f4033d635306195e4b72a061e2af"
+  },
+  {
+    "file": "已填数据_stable79_20261019/18_率定与诊断指标汇总.csv",
+    "bytes": 11635,
+    "sha256": "2666c4d202c663c74ec053bda07d45471c2d994636bb57a7daaacfb65b3e2067"
+  },
+  {
+    "file": "已填数据_stable79_20261019/19_逐缺项交付状态.csv",
+    "bytes": 2953,
+    "sha256": "f20c29b62b08e647ed2dd0185e7e342ef1d5a3f5752f09aa2fea1538902fde6d"
+  },
+  {
+    "file": "已填数据_stable79_20261019/交付核验.json",
+    "bytes": 2260,
+    "sha256": "1b70f4869c9e589df8f16483377179dd982ef005804360f733dc5558515fc001"
+  },
+  {
+    "file": "已填数据_stable79_20261019/原冻结率定配置_含原路径.json",
+    "bytes": 193816,
+    "sha256": "656b74c9f3896e7d9830519da8955a681753258df3edc586c626a6ffe7105634"
+  },
+  {
+    "file": "已填数据_stable79_20261019/原始运行收据.json",
+    "bytes": 4652,
+    "sha256": "cdaa21eb0b8e663b28c6c906f59e8a0797447d94fcdc5760a1bfa22cc47ebb7c"
+  },
+  {
+    "file": "已填数据_stable79_20261019/原最佳候选审计.json",
+    "bytes": 3932,
+    "sha256": "a49a99b4d49eeb5e649ddf6c0ae50475b37e54417d74e8543c61bd0c1a1c74be"
+  },
+  {
+    "file": "已填数据_stable79_20261019/原率定运行登记.json",
+    "bytes": 3720,
+    "sha256": "7036e189f9cc118f0cb320d629a258fab4920615444277f91ef63ca59829da6f"
+  },
+  {
+    "file": "已填数据_stable79_20261019/字段核查源码/FreshWt.for",
+    "bytes": 20756,
+    "sha256": "e44d60fc7f283848555ded61cb11aee84a87b1de4ee087fefca28b2caf371c4e"
+  },
+  {
+    "file": "已填数据_stable79_20261019/字段核查源码/GROW.for",
+    "bytes": 80897,
+    "sha256": "a3c003fa55dff6c7d88133b5f8f5130848bdf16294dacf98a7cc57aa06feaf12"
+  },
+  {
+    "file": "已填数据_stable79_20261019/字段核查源码/N_BUFFER_V2.f90",
+    "bytes": 39994,
+    "sha256": "6e0bc84d8754366e6184ed9f95ca16453b7c88728df06106f585d97ad2762b25"
+  },
+  {
+    "file": "已填数据_stable79_20261019/字段核查源码/OpPlantP.for",
+    "bytes": 18464,
+    "sha256": "b5efee7a9f06b0fb9589b4dc15d79473e1150249d9a71f249674239d83540b0e"
+  },
+  {
+    "file": "已填数据_stable79_20261019/字段核查源码/OPWBAL.for",
+    "bytes": 18428,
+    "sha256": "4430a5b4648f33aef4dd992bc0e930fcb131c5298ee8f43886f0048509f8f066"
+  },
+  {
+    "file": "已填数据_stable79_20261019/字段核查源码/P_CGRO.for",
+    "bytes": 8034,
+    "sha256": "6893582827b122750ceb26e43d6932e11372b091ff1f434243f811644eef88bb"
+  },
+  {
+    "file": "已填数据_stable79_20261019/字段核查源码/PET.for",
+    "bytes": 65789,
+    "sha256": "2d7b8c08e5dfa94d2a80c875856a23b16d32863d70b5c3cbc26f07533a565b9d"
+  },
+  {
+    "file": "已填数据_stable79_20261019/最佳参数_120项.csv",
+    "bytes": 2595,
+    "sha256": "1fd25fe4d7a41521dadbd26b41cdec3775360c0e301077d7e109f650ff91effe"
+  },
+  {
+    "file": "已填数据_stable79_20261019/运行说明_已填写.md",
+    "bytes": 3755,
+    "sha256": "023c4495023eab3f1f584d0fc1b9e153f747339634b229f5f2a134f3b1b127b0"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/FormalObjectives.OUT",
+    "bytes": 31629,
+    "sha256": "1b7d61febefec4a3b9b2f3ca68ef60d04fd51b64b741422db4b5e83aa7ed90d1"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/last_success.json",
+    "bytes": 4652,
+    "sha256": "cdaa21eb0b8e663b28c6c906f59e8a0797447d94fcdc5760a1bfa22cc47ebb7c"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/all_parameter_readback.csv",
+    "bytes": 6134,
+    "sha256": "ab26a1fb12f2bd418dbe98d5241a01f4d651c9a8b991a0cac7611a4f3b3a98dc"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/CAllocation.csv",
+    "bytes": 424360,
+    "sha256": "ae3a0e7a170d6df1a27ef302a17035dba68fb6577800d3e9d6bedd6955ef6a63"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/capacity_audit.csv",
+    "bytes": 133879,
+    "sha256": "3a18e09a6f960663ce78e0560df8230cf61afaccbdb66b814edb9520bd92a64f"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/CH2OPools.csv",
+    "bytes": 774013,
+    "sha256": "61bda6dd5aed7ed8932e17acb69d87c089e5da6e195a01c58cb658c2f4481124"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/CNCParam.OUT",
+    "bytes": 103,
+    "sha256": "def3dba9ef43637756b9cfb8bb0ce8aae0c0f67ebf9d6b18511b4d0177c5a5bd"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/CohortSync.csv",
+    "bytes": 280249,
+    "sha256": "d8e4a7112e96b897afd1573fdf0c56261a92f73d2f69e9d8c11275ff612a60f3"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/DATA.CDE",
+    "bytes": 125801,
+    "sha256": "01df7311b56facaf16d33b21976c16f57ae5082cb8f697970401e27ef12b4a94"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/DETAIL.CDE",
+    "bytes": 52900,
+    "sha256": "026abc527a4d15f582387b6a6bfca4e6568320a9503c81386a0389b3d1b9ffa1"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/DMState.csv",
+    "bytes": 352245,
+    "sha256": "207a8f2090a35cc1fd6bf8016f154660313263bb5a3470241d90bf8df59df487"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/DSCSM048.EXE",
+    "bytes": 15080922,
+    "sha256": "dcdac47dbde6bc224d2f492845ac43973af60f2414cbf4cb7be85a8f722e070b"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/DSSAT48.INH",
+    "bytes": 5459,
+    "sha256": "72629917e7b09e56db499f66a885eb8aa20b4b4485fd3085cdfd8c561deca06a"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/DSSAT48.INP",
+    "bytes": 7912,
+    "sha256": "aa8c0b6defbbb37d3d3e68723fe8a85c57f16c4e46d037c366ce8ebad51d5df4"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/DSSATPRO.v48",
+    "bytes": 4964,
+    "sha256": "535e36a478d9648411fd5b18bfbc518ab6d14d184b51a8d2823dcda1e30f42b2"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/DSSBatch.v48",
+    "bytes": 1225,
+    "sha256": "7af3c66abaa1ffb095fa972e46dd831a963d2d146e3736e55a446416c9f20064"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/ECONOMIC.CDE",
+    "bytes": 2891,
+    "sha256": "db2abdc821f20ee401806edf6bfeed3b08c09011830f561b84c32a02929ccd8c"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/ET.OUT",
+    "bytes": 190227,
+    "sha256": "cab7b13df8a6d988fb4ec9e237b00d3f538cf7b63a48e2bcaf7a295eb270c894"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/ETPhot.OUT",
+    "bytes": 108328,
+    "sha256": "5352fd5e38f797f81b2c49d94af5515f3ee86cdfb4d9c8900523cf458acf88c6"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/Evaluate.OUT",
+    "bytes": 4030,
+    "sha256": "4260ae09e17242085ac8704d0031c2674b2d438819cb1b6364a2cd5a12a361b4"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/fertilizer_event_audit.csv",
+    "bytes": 5810,
+    "sha256": "3696a183b368351a7081b0d834835c3a36753d0b2960d8f47a3ebff3b4377cf4"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/FileA_values.csv",
+    "bytes": 827,
+    "sha256": "01d452c4c521d72c7c1ed35bda2e5dd23917ef9e0a24b8dc256eea7f6a07f242"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/FileT_values.csv",
+    "bytes": 12053,
+    "sha256": "cfb6ed96cd384f8115bb305236be3a122a66119f13a38b6435cec3af4cf275ad"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/FreshWt.OUT",
+    "bytes": 148645,
+    "sha256": "5e98cfb70cd5e23b73964c59f75eb6dbc2f9bcffa0b55b397731624a76754ec8"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/fruit_quality_match_audit.csv",
+    "bytes": 16346,
+    "sha256": "0477cc3229c8e7c2531a3b83f10dad78f4a006c1eee2ae2ba2a7f181017c4b7c"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/GCOEFF.CDE",
+    "bytes": 3693,
+    "sha256": "94a8fb795a993e7d2db20ce03034f8988000b99b3794b0145a06e5b043965eb5"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/GHG.OUT",
+    "bytes": 114972,
+    "sha256": "ea623a42b16f3151583ff13d306e23bd1e9169514d671f6d4ccbb3fa6fbbf4ba"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/growth_replicates.csv",
+    "bytes": 13604,
+    "sha256": "60896e73ce1825b70db34cc7ff4cc6beb97476fe60750d404707fb7debfd19a7"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/GRSTAGE.CDE",
+    "bytes": 38657,
+    "sha256": "8a0aa69bf591a7b4f4c14766ad35594619c73372a141579232a3ad40f73db39b"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/harvest_increment_reconciliation.csv",
+    "bytes": 2738,
+    "sha256": "a72dfb7ab8ea473370cabf3dcb28b09ccb6313717ac7d906b27c65dc9f6b4865"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/harvest_replicates.csv",
+    "bytes": 38199,
+    "sha256": "6f9ded63a4306bb72da2096e08d30df1922cd6d5308f71a69d39890eec7b53d6"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/harvest_schedule_audit.csv",
+    "bytes": 838,
+    "sha256": "54abf95221abca07f6623790ee49cbd6488e103f0de1c8ed8f6babdd6bf2bb5c"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/INFO.OUT",
+    "bytes": 245085,
+    "sha256": "d2cb6e55043674d4f87b9be08cd844b43382e80a1066a0af7fc1cbaeb44c8573"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/injected_inputs.json",
+    "bytes": 4518,
+    "sha256": "cc473356c400b8611dd4bb2c83f66dc154c3e6d4a48796c594e2912e5df29f09"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/irrigation_event_audit.csv",
+    "bytes": 4873,
+    "sha256": "b293a0cfc64e223916dc63139b1e7e2fb9f2d48232bf437b8b26863761e2fc2e"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/JDATE.CDE",
+    "bytes": 4090,
+    "sha256": "2e5d9902fa71575cbf16a537db704e12c7ca2fde229911fc52d63e24d72b4e22"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/joint_parameter_injection_audit.csv",
+    "bytes": 2491,
+    "sha256": "f740c57ddec7517b21bd2e91bbac504174842af7c79b3361e0371cdd9fcd2aaa"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/LUN.LST",
+    "bytes": 1096,
+    "sha256": "a09ca91bba9d69258ffead8bf472af3319d02e033563b39887056de5eda39812"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/manual_value_markers.csv",
+    "bytes": 3834,
+    "sha256": "d0dccc40c96b3dcfc798fce357252fdd43fcdc297205f0bc67597d7a341ae97e"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/Methane.OUT",
+    "bytes": 220076,
+    "sha256": "1ae147441a6deb078cd660fcc26a01733927019fc85954d4683eb1a6a1490af9"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/MgmtEvent.OUT",
+    "bytes": 32950,
+    "sha256": "b1d9b25d32e41dc9706e9bc8dd1c01844f9a97ccf0224489a9e3a9ae009564cf"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/MgmtOps.OUT",
+    "bytes": 107306,
+    "sha256": "3dbe4ced044844b42813f7117793b886a59d2bd4eabfcf8d0c20d298dc8a57b4"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/MODEL.ERR",
+    "bytes": 24084,
+    "sha256": "eae58ca2786b6d7e15c1d3b60d36818be9b1d7e08592a8ef3db54715a2002812"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/Mulch.OUT",
+    "bytes": 53402,
+    "sha256": "e7788c51568341b1c5041a674ffbb47755b2f6e3e019e5b453f9b9d9c1b3b887"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/N2O.OUT",
+    "bytes": 587244,
+    "sha256": "ed38194c4e95705ec55bf878caf756441f4f83abff1259e4b9c6d34ab7728dff"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/NAcceptance.csv",
+    "bytes": 496375,
+    "sha256": "b8c0bd41d27520ee2e1de80ffbb0f62d8bf0cafd9193e303d06acf3f033a8444"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/native.log",
+    "bytes": 842,
+    "sha256": "e885520e74c11749fd5a1bfd1b7ae7ebbcac2cc98ea4e78f2a8ec376e3eb5a76"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/NBufferParam.OUT",
+    "bytes": 566,
+    "sha256": "b3bc1613e8001e6ca6c05a72d3c59824eeffbeea6d2c203c24bdeb0efda90476"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/NCBalance.csv",
+    "bytes": 400319,
+    "sha256": "37d7ad79cb098b4e5f94d226821810109e50029643c9d78b3cb1e704efe9b092"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/NFlux.csv",
+    "bytes": 472357,
+    "sha256": "dbe30c44af6a9795d8e4b7ee1eae388c10b434425f6fa97ce4d38b42a494535c"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/nitrogen_balance_audit.csv",
+    "bytes": 316,
+    "sha256": "fac63bac70dfa7cfa5b944fd4ee854a473369bca94eda50891bc934e09bf59d8"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/observation_uncertainty.csv",
+    "bytes": 93681,
+    "sha256": "b4a07b169633e4a6e24cc568c3ad859c4fc72e3ac8806eb6f547f9c43c31a2d5"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/OrganNState.csv",
+    "bytes": 544336,
+    "sha256": "80c6ecc6dc66a94457853ec7d4c383ed59120df914b6b6a176146663938b7ace"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/OUTPUT.CDE",
+    "bytes": 7131,
+    "sha256": "1a009a6932dd65d65cbaec5ea8470df14e97e3e04f587b6f15884fbb8a066292"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/OUTPUT.LST",
+    "bytes": 2964,
+    "sha256": "687f67d62bce0ea14b8c38f6bae2f27428b881e7d4506484bbb2ed2317124fad"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/OVERVIEW.OUT",
+    "bytes": 82831,
+    "sha256": "0ef3b269b636ccf0094e6bbe6533e011c43ada07d09c6ef0a4a0c2fd1306b710"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/parameters.csv",
+    "bytes": 2595,
+    "sha256": "1fd25fe4d7a41521dadbd26b41cdec3775360c0e301077d7e109f650ff91effe"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/PEST.CDE",
+    "bytes": 731,
+    "sha256": "160d4c21c50942134a8a9c640638f86a38e936cf598cf2bdbb4650186d0dc3c6"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/PhotoN.csv",
+    "bytes": 139036,
+    "sha256": "310ad3295be0a4ed560aefbfbea38d3c3cd24e4c2beb40ef480caec0d9e6e474"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/physics.json",
+    "bytes": 251,
+    "sha256": "6bd99d6206eb715b6eeb934e5996c7396ebcae349e2c6c43269df02a246d900c"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/plant_npk_source_values.csv",
+    "bytes": 5598,
+    "sha256": "146f76456c3df7202bdb169aa49075df1461eba56e6754af29a84d3262425a4c"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/PlantC.OUT",
+    "bytes": 128662,
+    "sha256": "a9ecdf3eaa1528a8516960a003ee89c41a2fb52e7ee315df215f5f3b37c06463"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/PlantGro.OUT",
+    "bytes": 335845,
+    "sha256": "ee85ba252b070a86128d33790d51694b67167c2df6084bb2734876a09a331190"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/PlantN.OUT",
+    "bytes": 148022,
+    "sha256": "425e54037e55b56c5e5c92191510d52a39f8405e2dc994b3ada543c0549ee4a3"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/PlantNBal.OUT",
+    "bytes": 35930,
+    "sha256": "7251a426c01d2b9fd89d328b3e574b0600c3787759d8356de94eeda26b1b6eea"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/PlantP.OUT",
+    "bytes": 282584,
+    "sha256": "19d2af8a009afedd1bd7ac654b812070389bed2fae225fab71adf7cd83f710b6"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/PlantPBal.OUT",
+    "bytes": 127386,
+    "sha256": "5a13eb65ad74a3a137367b3329e59a2978d544eab4222808a44c1d23a99685fd"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/RootNSupply.csv",
+    "bytes": 3045621,
+    "sha256": "6b186f5e556f50f24e138feb15cd99ed6a25355a584960606c43faa527c66855"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/RunList.OUT",
+    "bytes": 327,
+    "sha256": "0b0eb81d4efaa8e57ce83fe9336aeecfd29c82371361838cd0463632baaaaac2"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SIMULATION.CDE",
+    "bytes": 10959,
+    "sha256": "8c779399372b22c1f653fe78c84c306c57e37fe9d50d4db1d8779398a8389405"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SOIL.CDE",
+    "bytes": 6398,
+    "sha256": "327acada3ff407d4157d98f8fed932aaa4b1f5905155320cdc1f22f50b7ecee4"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SOIL.SOL",
+    "bytes": 1521,
+    "sha256": "a5f5f41aeb175313e888ad1f5e355fc13adcf2e9a7f310f6cac340509d287e23"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SOIL.SOL.base",
+    "bytes": 1521,
+    "sha256": "cb46bdbb9f1dce8ec6b2450d29b158b6f9ddfd6f287679cdad127283bb3a44aa"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/soil_depth_mapping_audit.csv",
+    "bytes": 99295,
+    "sha256": "6988dc1d50ab0f2c01fb8596919285c6f3a7e6b010a030818e5379e48f71748a"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/soil_water_layer_mapping.csv",
+    "bytes": 601,
+    "sha256": "d0611ba0f29523dc43ce80e425c11a73f6b66c6e5a1caf9f17315491b0d02b08"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/soil_water_observations.csv",
+    "bytes": 36446,
+    "sha256": "9b3a136421bdf2fd19318a6703480df9c1d55d4020e9546c198c165a97a40c91"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/soil_water_samples.csv",
+    "bytes": 81291,
+    "sha256": "5608b8e25646db210e2afecfaa797b89ffc896dadeb3f9b695f634d53dbc8f18"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SoilCBal.OUT",
+    "bytes": 281478,
+    "sha256": "75be69534780014ddcf71d0ffe006194a721769cd935106aa200236b1557c6a3"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SoilCBalSum.OUT",
+    "bytes": 2843,
+    "sha256": "a6fe19a07b8cb8d9c8f24b706b8a3edc14eefd00d839ccc05a59636cf511f913"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SoilDyn.OUT",
+    "bytes": 321340,
+    "sha256": "c97a0045d84e3e5e2d1bcd069589a0149207a43e6b4b3ed92eb5544d55905ad4"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SoilNBalSum.OUT",
+    "bytes": 3642,
+    "sha256": "46889dd8c513307da0e2e3351f5931885a49f252b834347db19a081d508c6054"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SoilNi.OUT",
+    "bytes": 393396,
+    "sha256": "897648c6cfd7ab9fa8a77697553035421e8fdf2b0c2d7b5b7b4ed4365052e4bf"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SoilNiBal.OUT",
+    "bytes": 204151,
+    "sha256": "649ae95524e0cdfa5bc0e2cbb994b425ab909bc8ff11cf6c87efd82e0f479af0"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SoilNoBal.OUT",
+    "bytes": 147440,
+    "sha256": "a69985de96af73ea9478956a5da45db6c98ca47961a8ea5b25f0cd0406cef4ef"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SoilOrg.OUT",
+    "bytes": 193760,
+    "sha256": "b49e9288bbfb6e38ea267b6f6d1dfdefe8c28c3ec07f1da73d59dad46707959f"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SoilPBalSum.OUT",
+    "bytes": 2038,
+    "sha256": "2f49bbf4576c695bbac1188187d18967882c89e17ea1abe58f12bef748699f20"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SoilPi.OUT",
+    "bytes": 256422,
+    "sha256": "50fc8af3f655b9464185a4e76c554a2aff63bde1d140254ee7ae1663ecb37ad5"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SoilPiBal.OUT",
+    "bytes": 124327,
+    "sha256": "bdea9be53e56513f23031918fb25489dec423caadeeb7bdda6c014cb2fd8e23a"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SoilPoBal.OUT",
+    "bytes": 147152,
+    "sha256": "5d7b27d80279098623b88c81a845d674089d98a75290d85a8cf324d0877cfed4"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SoilTemp.OUT",
+    "bytes": 111919,
+    "sha256": "0585b9a18bacfd72bc1e069a6f59d97edf92a6ce5ba97339735b4845e4dca0d8"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SoilWat.OUT",
+    "bytes": 246607,
+    "sha256": "79efb9f535837c04b3bcd423624cf4c7f04fc72e3ff157f3a251f8372e2dc952"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SoilWatBal.OUT",
+    "bytes": 212324,
+    "sha256": "9da9d52ed5587b8621ef0e37dc88f7ec19f8412f65214a6edcef1491997f356d"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SOMLIT1.OUT",
+    "bytes": 3847987,
+    "sha256": "e2bcbfd9d9cf61eda69e7d745d5c6e29c5b6c6c32c261e83e5d38ecf9e3e2819"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SOMLITC.OUT",
+    "bytes": 521210,
+    "sha256": "6e115e881286157146d930c2c89930f0302cfa18e0167d3b6005713dba2a3a56"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SOMLITN.OUT",
+    "bytes": 468522,
+    "sha256": "e5999317d9222fa8e0305323f57833b201b3308fa2321615e581e368e14b2b71"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/SOMLITP.OUT",
+    "bytes": 417578,
+    "sha256": "75aa4f35be84dab3dba216c813e7011339dd5e722c5ec33ba7edf75d1faa6530"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/standing_npk_calculation_audit.csv",
+    "bytes": 9689,
+    "sha256": "72579d397918cf262e4d6e20aefc8022ed132b975ebfaf8583bca0c810bd2983"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/Summary.OUT",
+    "bytes": 7506,
+    "sha256": "f639a11b101c552e73eefcb97d9d728234ab488c58cdc3c1ae55615cb3004531"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/TMGRO048.CUL",
+    "bytes": 2879,
+    "sha256": "8f9c60d876363311d3b024e96fd390f2dcc2811017990eab15e751c43a11a8fb"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/TMGRO048.CUL.base",
+    "bytes": 2923,
+    "sha256": "92a373800d68b46d07601777e1579fff7b976f74190814bc6e0494eda7c4455b"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/TMGRO048.ECO",
+    "bytes": 2772,
+    "sha256": "4e859909235cab78a3aff4c9e85366106941e08918582fa12800e1bbe2a1c14e"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/TMGRO048.ECO.base",
+    "bytes": 2820,
+    "sha256": "9f2d43d335a4455679d701116d861a1915c1010a79d002e60ca4db74fe3d73ff"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/TMGRO048.SPE",
+    "bytes": 10208,
+    "sha256": "4d11537008fcb93ad94ee41ccccf0221988e2ddac430719184ccac7ed440893b"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/TMGRO048.SPE.base",
+    "bytes": 10017,
+    "sha256": "bb69a425533863c5d43fb2c9ccf4f03ccdffaeeb542c869c3b1ad6ee31b169bd"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/treatment_metadata.csv",
+    "bytes": 178,
+    "sha256": "f3e9108f1994177c24c2696eb8ff5b054e72d588a8f939ed3c10031fcee006c1"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/WARNING.OUT",
+    "bytes": 35692,
+    "sha256": "1dfe2d1b3cfcd2e6f22be998bf20f99980c69bbd71e2ac07c24a3fd1f336f83c"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/WEATHER.CDE",
+    "bytes": 10249,
+    "sha256": "c4739d8054e1c125282f3eb14344a388a9db98b8996d6ac82fa28b41414f4bfb"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/Weather.OUT",
+    "bytes": 157459,
+    "sha256": "735e9ab391e6d16edc3866c6217ffcae617b8cec0510ede01d5552201fc20423"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/XXQL2501.TMA",
+    "bytes": 996,
+    "sha256": "f0fe58e6022e33ae3c4aa3007c1f41744350e8aa7dbc9114044ef8ca5ffcd76f"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/XXQL2501.TMT",
+    "bytes": 12056,
+    "sha256": "055854c82967a8ba0216684fcf4dba4aa678e8737ec30ff4c7719734d857655b"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/XXQL2501.TMX",
+    "bytes": 19548,
+    "sha256": "cbd5e5bd609f5d0e03524c56e3dc7584ae9da637b6eaf20a276927d8e350c313"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/25SP/XXTW2403.WTH",
+    "bytes": 5172,
+    "sha256": "b9f520285c335f47ec5105a6f7b363089462a7a1736334b7918ff3ea14820920"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/all_parameter_readback.csv",
+    "bytes": 6068,
+    "sha256": "ff5b057250f8111c085f4bf2ae89f9cebb4ecbaa85dd9efc4453dd493ceb448e"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/CAllocation.csv",
+    "bytes": 668124,
+    "sha256": "0a54804971060b9634d6e9db9f8089fba6a99e6411cd54de3d55fbbe3229d254"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/capacity_audit.csv",
+    "bytes": 211075,
+    "sha256": "38ba6b60198e17908f095b5f0e242b2f2240da2c28d3ff86daeec813aca69f7c"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/CH2OPools.csv",
+    "bytes": 1218817,
+    "sha256": "3e80d32e9b44f0747fbea51372334dc672e06c7255a3402e9580b96771a2ee7a"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/CNCParam.OUT",
+    "bytes": 103,
+    "sha256": "def3dba9ef43637756b9cfb8bb0ce8aae0c0f67ebf9d6b18511b4d0177c5a5bd"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/CohortSync.csv",
+    "bytes": 451801,
+    "sha256": "99f2a23f2e6c1f1785429d30c1e0ec4f501eab78f880518d832af5eee061a76f"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/DATA.CDE",
+    "bytes": 125801,
+    "sha256": "01df7311b56facaf16d33b21976c16f57ae5082cb8f697970401e27ef12b4a94"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/DETAIL.CDE",
+    "bytes": 52900,
+    "sha256": "026abc527a4d15f582387b6a6bfca4e6568320a9503c81386a0389b3d1b9ffa1"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/DMState.csv",
+    "bytes": 554609,
+    "sha256": "5f6c417033eb2cdeeeeb5150e0f147d8f276a15ebb3d3678cbf3a71583dad509"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/DSCSM048.EXE",
+    "bytes": 15080922,
+    "sha256": "dcdac47dbde6bc224d2f492845ac43973af60f2414cbf4cb7be85a8f722e070b"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/DSSAT48.INH",
+    "bytes": 6769,
+    "sha256": "45376883c7296caf737ed7ad701516201dac4690752c4750188d0a28373f6ec4"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/DSSAT48.INP",
+    "bytes": 9202,
+    "sha256": "3096f4ae289287683a61344b149302ad2fc9b38fe05d3c23a88f9de1e424f40e"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/DSSATPRO.v48",
+    "bytes": 4964,
+    "sha256": "535e36a478d9648411fd5b18bfbc518ab6d14d184b51a8d2823dcda1e30f42b2"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/DSSBatch.v48",
+    "bytes": 1741,
+    "sha256": "c8196718057c91ce57683903a41287f385d62a0c4f2527e35f89a81b784b8299"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/ECONOMIC.CDE",
+    "bytes": 2891,
+    "sha256": "db2abdc821f20ee401806edf6bfeed3b08c09011830f561b84c32a02929ccd8c"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/ET.OUT",
+    "bytes": 287515,
+    "sha256": "2f0deaea093ced8a39ef7bf9b64e94a1229f55d81fe93fe89bbd55a3dd4bf04f"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/ETPhot.OUT",
+    "bytes": 163700,
+    "sha256": "a3bcc3376df0da2fef58deb24ed8a4edcb934260b5b34bc80e2ed776bad4d209"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/Evaluate.OUT",
+    "bytes": 5746,
+    "sha256": "f817586186a933c30ef00641578c5982d17ae2c5a4140dc95975a3e0ea8c4908"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/fertilizer_event_audit.csv",
+    "bytes": 15867,
+    "sha256": "7c0c35bcceaad6013db41b31ba1d7bf89ffb9354ca5f7ec632b9c9eecb84988b"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/FileA_values.csv",
+    "bytes": 1200,
+    "sha256": "7b9e8ab5c7a52d8d9c140f86ecb9b4ddfdba356420ea4e71db12acc45023280d"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/FileT_values.csv",
+    "bytes": 12018,
+    "sha256": "2a99f4158c3c915f72c1c49855e9e042d5d5e385b2fdaf4ee22909c252619da1"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/FreshWt.OUT",
+    "bytes": 238353,
+    "sha256": "fd13d400a457534e18e47c5ed0ecf4ac33c7ddeb0a10f3cfd36bac083dc07cd4"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/fruit_quality_match_audit.csv",
+    "bytes": 13443,
+    "sha256": "d8cb6a71a6ed89898909bc519b0c732c385d371dd471f43804cef60df71c19b9"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/GCOEFF.CDE",
+    "bytes": 3693,
+    "sha256": "94a8fb795a993e7d2db20ce03034f8988000b99b3794b0145a06e5b043965eb5"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/GHG.OUT",
+    "bytes": 173728,
+    "sha256": "ba34aa1b7ab8f67e170d61ed35c040451a73193d7c5a9993cbfe7a27aa8c9f80"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/growth_replicates.csv",
+    "bytes": 16416,
+    "sha256": "051926946a86dc82ce1276cd45af720692672778a9446e4791939975f47af5ef"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/GRSTAGE.CDE",
+    "bytes": 38657,
+    "sha256": "8a0aa69bf591a7b4f4c14766ad35594619c73372a141579232a3ad40f73db39b"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/harvest_increment_reconciliation.csv",
+    "bytes": 2324,
+    "sha256": "1988e6704c15bc132d03ef78d2bdfe4e4aaebfefcc7c0cb328865653682d678d"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/harvest_replicates.csv",
+    "bytes": 31848,
+    "sha256": "2b40b32f3d126508f15ac79ca4d465e1eee3efe6c6ad33740f4b69dcbfa23af0"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/harvest_schedule_audit.csv",
+    "bytes": 526,
+    "sha256": "be250aaa01f87efcf4e101d605b6b5573f6afa7339fb273400f5214515db7f6f"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/INFO.OUT",
+    "bytes": 478001,
+    "sha256": "ff689962562353615caa8b82a2d9bf60aa653943396078a77217b08a0d54d5b2"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/injected_inputs.json",
+    "bytes": 4518,
+    "sha256": "917a4cb7cb961cdacaf45b001732500b7b00fa23b7b2520b0fe4019b2f4e3395"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/irrigation_event_audit.csv",
+    "bytes": 5889,
+    "sha256": "dcb534b8a4c6078a142700debd67cf88ba2ac7d9201a7088bf1d78a3f35fbc32"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/JDATE.CDE",
+    "bytes": 4090,
+    "sha256": "2e5d9902fa71575cbf16a537db704e12c7ca2fde229911fc52d63e24d72b4e22"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/joint_parameter_injection_audit.csv",
+    "bytes": 2491,
+    "sha256": "f740c57ddec7517b21bd2e91bbac504174842af7c79b3361e0371cdd9fcd2aaa"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/LUN.LST",
+    "bytes": 1096,
+    "sha256": "224e32ab2c67157868e8495dc2b5722fc2d00cae15d4b7b1756f165afb21f3f5"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/manual_value_markers.csv",
+    "bytes": 61,
+    "sha256": "1b8e804c9305b054d0b4f12db025cfe7e6f4ad322d21326887298f64ff9cebe4"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/Methane.OUT",
+    "bytes": 332572,
+    "sha256": "6ff832b5bc98b4233a9340795951b3e2925f7825d6e764c08e7d12d551828a79"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/MgmtEvent.OUT",
+    "bytes": 54962,
+    "sha256": "0005c8f59d997e8a1d56f1aeb0180585d2b401688d4e579e1946e3eaaabe8078"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/MgmtOps.OUT",
+    "bytes": 162162,
+    "sha256": "20ad279ea82e0a923b8fe5d4212bba827eef181e4af24e695ef6a30f3c7bb575"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/MODEL.ERR",
+    "bytes": 24084,
+    "sha256": "eae58ca2786b6d7e15c1d3b60d36818be9b1d7e08592a8ef3db54715a2002812"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/Mulch.OUT",
+    "bytes": 80674,
+    "sha256": "4d336d3d849c733dd8d8979494794391316a76c61805fa7d4fd491318b58ebfd"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/N2O.OUT",
+    "bytes": 887584,
+    "sha256": "ee88865559408cefded48c69f82a49e154337a2e1ffa9340e823f65ecd3fa1f2"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/NAcceptance.csv",
+    "bytes": 781539,
+    "sha256": "e7bfcb27eaa5c35830a27235b3171f34c46608a6be962018ca7933396ef4db1b"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/native.log",
+    "bytes": 1162,
+    "sha256": "4e8413977cfad730b3e43ae9e8a7de26b3a10b735570dbccd7981ef7b80f0a98"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/NBufferParam.OUT",
+    "bytes": 566,
+    "sha256": "b3bc1613e8001e6ca6c05a72d3c59824eeffbeea6d2c203c24bdeb0efda90476"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/NCBalance.csv",
+    "bytes": 630283,
+    "sha256": "2bcf702ea75a2654379d552c8a7cf6dd7fd848f9912d25beb2db1c96d182c9a7"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/NFlux.csv",
+    "bytes": 743721,
+    "sha256": "c70d79da91dc7c0f602f35006a6db27fbd8cb68aaac5ce800921b874378bb901"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/nitrogen_balance_audit.csv",
+    "bytes": 418,
+    "sha256": "87967dc71644d0276fe4136889acf8d837134bdba8c9e32dae2eb4346332b6f6"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/observation_uncertainty.csv",
+    "bytes": 110975,
+    "sha256": "1e38d3991b351639f537eca4054d1f08be2dadd1b2652c1ad9c84100392b921e"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/OrganNState.csv",
+    "bytes": 857100,
+    "sha256": "57bde053e8598d712c1fa199ca846025699a8ec42e1f745d05d999fe1fb6192b"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/OUTPUT.CDE",
+    "bytes": 7131,
+    "sha256": "1a009a6932dd65d65cbaec5ea8470df14e97e3e04f587b6f15884fbb8a066292"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/OUTPUT.LST",
+    "bytes": 2964,
+    "sha256": "687f67d62bce0ea14b8c38f6bae2f27428b881e7d4506484bbb2ed2317124fad"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/OVERVIEW.OUT",
+    "bytes": 124233,
+    "sha256": "c09a8ccdc17dd22c4c889725483643bc9441d333712aad22c79a44ae9be6fac7"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/parameters.csv",
+    "bytes": 2595,
+    "sha256": "1fd25fe4d7a41521dadbd26b41cdec3775360c0e301077d7e109f650ff91effe"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/PEST.CDE",
+    "bytes": 731,
+    "sha256": "160d4c21c50942134a8a9c640638f86a38e936cf598cf2bdbb4650186d0dc3c6"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/PhotoN.csv",
+    "bytes": 218852,
+    "sha256": "e015f3261ad3e0ede295ae87b46ad7e55667baca37964271fc1e92aec1ec76f4"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/physics.json",
+    "bytes": 251,
+    "sha256": "07da75f1558de80a5b99a7c3407cc34bb799d0a343f84399ad20be329660f7ff"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/plant_npk_source_values.csv",
+    "bytes": 30714,
+    "sha256": "600d9297514da9c5c2dc10edd38ca65908b95e39ef9864ee4c81d28b3a9ac8e2"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/PlantC.OUT",
+    "bytes": 202342,
+    "sha256": "d1f6e90bb6459dbc396e464156f0f2267e1def8ff4e7027446cf27c8330978fe"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/PlantGro.OUT",
+    "bytes": 528161,
+    "sha256": "a300489182ce37b35c101eaa7280da8720363bfebe5112ee58c499d686777946"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/PlantN.OUT",
+    "bytes": 232822,
+    "sha256": "f8cfdad89c08a5433def2f6412b3ce372430c775a02ecfb012eae5bf514fa17f"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/PlantNBal.OUT",
+    "bytes": 53886,
+    "sha256": "4d2958521d5d8c5ebfa504fdaf958240d4552a5e3d226b8d074d8c6446b962d7"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/PlantP.OUT",
+    "bytes": 444668,
+    "sha256": "efc569da8ac352e2b186ab6aa324e6ef888d0642cf39fee1f896052d59a445ce"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/PlantPBal.OUT",
+    "bytes": 199998,
+    "sha256": "fba9b1c049da89245e61eec7c74126fa139291f4abba4927e227728d1dd975fe"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/RootNSupply.csv",
+    "bytes": 4795913,
+    "sha256": "13a709d13d998eac4a3d821702399409f84a9e98d8c7a41bfb9592be7d29ed63"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/RunList.OUT",
+    "bytes": 467,
+    "sha256": "c0fc855f01301fd9afd521f3f9997f97519fdd3163f60c33eafa15f67dc25dfc"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SIMULATION.CDE",
+    "bytes": 10959,
+    "sha256": "8c779399372b22c1f653fe78c84c306c57e37fe9d50d4db1d8779398a8389405"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SOIL.CDE",
+    "bytes": 6398,
+    "sha256": "327acada3ff407d4157d98f8fed932aaa4b1f5905155320cdc1f22f50b7ecee4"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SOIL.SOL",
+    "bytes": 1535,
+    "sha256": "0c878ed89cd73408b5b7d5513035408cdf87cb30d844b67192e87fe9584a1c57"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SOIL.SOL.base",
+    "bytes": 1535,
+    "sha256": "04fc617f3a65939117c1460bc06716465d3e34dfffe206db8a1cf6a2c74a4d6f"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/soil_depth_mapping_audit.csv",
+    "bytes": 146494,
+    "sha256": "79db36cbf6fc6d6228932446885c417d3a9445cfed67acd697a1129680a9a9fd"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/soil_water_layer_mapping.csv",
+    "bytes": 601,
+    "sha256": "e97391e6e315f3cfd65339507a6381284f1ffed0aaf5b39f6246ea2d87a3a8df"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/soil_water_observations.csv",
+    "bytes": 54523,
+    "sha256": "5045fcfdbb700518219ea5317a25962e6c25a2b01bc953eec723461a660375a8"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/soil_water_samples.csv",
+    "bytes": 98053,
+    "sha256": "9c361cc495cd5eae8a07dd48390db4046de4fd24337086d3c4b04a0c8000a01a"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SoilCBal.OUT",
+    "bytes": 425254,
+    "sha256": "9f5414b78f998233c6c357a67e595dbfebf7f58bc13645cf87737b63717f5b45"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SoilCBalSum.OUT",
+    "bytes": 3779,
+    "sha256": "be3187e84f7474c32ba3d8601e3bbd4125744d68a722de882d1fa20b4129adbe"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SoilDyn.OUT",
+    "bytes": 485752,
+    "sha256": "e257076794cc603199503e01b7e53e5c1c6c1993baba8ec4b69f01ac383a8642"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SoilNBalSum.OUT",
+    "bytes": 4810,
+    "sha256": "ce1d502f8a53b4e85dc9cd7e9d1b578278d33d17a5cb4176d122c8e34f5bc963"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SoilNi.OUT",
+    "bytes": 594548,
+    "sha256": "afd6f93e812bb0f1c005893f3e36a2f8b838d9f9166a6c7a16808cc51a77b23e"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SoilNiBal.OUT",
+    "bytes": 308415,
+    "sha256": "2067430f2ef653ca88a2c13f8fdca3df8dbf7c0ddd6319ddcc0c1c87f3a3b872"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SoilNoBal.OUT",
+    "bytes": 222704,
+    "sha256": "8afd6760cd7178e58ecc3e3f1a4aeddc8097c4efaafb5b3fc7ecb8718d11233a"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SoilOrg.OUT",
+    "bytes": 292840,
+    "sha256": "a2aa3df9390a5c6433f068a0161d67b2d790c277ff847e76f7b4b5c575bdb462"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SoilPBalSum.OUT",
+    "bytes": 2650,
+    "sha256": "548dc4b9f00538ed9da2a30b9327615ef7f111d99a47b4790230468d59a3ec75"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SoilPi.OUT",
+    "bytes": 387514,
+    "sha256": "e5c0105ab74f703efe88672354a97ff17d9d91e8086bc71b437e5027eca74311"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SoilPiBal.OUT",
+    "bytes": 187803,
+    "sha256": "de2d422bce67f89f718732720b46bcb446b16b0b16dcf7145c296a589393b846"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SoilPoBal.OUT",
+    "bytes": 222272,
+    "sha256": "5a0390b2c6e3a48e4bfbac810b00d34ca26a0e6f6279d8901721776e7b9d5561"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SoilTemp.OUT",
+    "bytes": 169119,
+    "sha256": "928295b9c9309222069feb893d2ae99609d0084bb3a06eae18f089440636dcb2"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SoilWat.OUT",
+    "bytes": 372691,
+    "sha256": "ad9617093a187ba9b90ad12ad1066aac0e7bc8934ff575d4a9c26c831dfc6995"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SoilWatBal.OUT",
+    "bytes": 320812,
+    "sha256": "1261e00d47f69c532ecfa607be24b39ce5ca5d6e37259cc2550f426b84f83175"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SOMLIT1.OUT",
+    "bytes": 5815015,
+    "sha256": "04b8d5686fbed04f0569a55bdf51d9ec2f8ee853a2ebd25795174f84d0bb427d"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SOMLITC.OUT",
+    "bytes": 787694,
+    "sha256": "36d4b30bc193f0cb7121f5593b7f63c9b641fa4ab99090abc9e1b772815c27b1"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SOMLITN.OUT",
+    "bytes": 708062,
+    "sha256": "c84e55328a9a44a059313cf07b7c0f638457cc28935de474acf89c4f08e21e4e"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/SOMLITP.OUT",
+    "bytes": 631070,
+    "sha256": "248e7e70ad031506c9fc2d0ebf37e2a96356fa359f9dc2deab2fa015ab840f5c"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/standing_npk_calculation_audit.csv",
+    "bytes": 57550,
+    "sha256": "02f50765a9fe46886e58cfc8dba9b69cdd6488867b9580310b9a8e4d9efcf02f"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/Summary.OUT",
+    "bytes": 10442,
+    "sha256": "ce11e3507e37c10f5ef2f97ad0483ac64f19949b6fb3321faa74bf89b32440b1"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/TMGRO048.CUL",
+    "bytes": 2879,
+    "sha256": "8f9c60d876363311d3b024e96fd390f2dcc2811017990eab15e751c43a11a8fb"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/TMGRO048.CUL.base",
+    "bytes": 2923,
+    "sha256": "92a373800d68b46d07601777e1579fff7b976f74190814bc6e0494eda7c4455b"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/TMGRO048.ECO",
+    "bytes": 2772,
+    "sha256": "4e859909235cab78a3aff4c9e85366106941e08918582fa12800e1bbe2a1c14e"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/TMGRO048.ECO.base",
+    "bytes": 2820,
+    "sha256": "9f2d43d335a4455679d701116d861a1915c1010a79d002e60ca4db74fe3d73ff"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/TMGRO048.SPE",
+    "bytes": 10208,
+    "sha256": "4d11537008fcb93ad94ee41ccccf0221988e2ddac430719184ccac7ed440893b"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/TMGRO048.SPE.base",
+    "bytes": 10017,
+    "sha256": "bb69a425533863c5d43fb2c9ccf4f03ccdffaeeb542c869c3b1ad6ee31b169bd"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/treatment_metadata.csv",
+    "bytes": 237,
+    "sha256": "b24ba4e8fbf80a643652b6a89202e9850cd60f1dfdcd5000d9e259a4425b5e52"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/WARNING.OUT",
+    "bytes": 56762,
+    "sha256": "9bbccb490da7ce5ee4d695d5b33cd9ec098e8ff6fc5bd9a478bdbcbf50655057"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/WEATHER.CDE",
+    "bytes": 10249,
+    "sha256": "c4739d8054e1c125282f3eb14344a388a9db98b8996d6ac82fa28b41414f4bfb"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/Weather.OUT",
+    "bytes": 237983,
+    "sha256": "47969da9d902f6bd4f948b962341089239207cbac870c942517fc13646175f67"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/XXQL2601.TMA",
+    "bytes": 1340,
+    "sha256": "70a2ab0866982ad192941481cf99e9e30306df2169d30267adfef14bfe93356f"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/XXQL2601.TMT",
+    "bytes": 12056,
+    "sha256": "8f4497aea6cc7b57e4e7947f9fe279ffae52a3e9430b0579eeb0b46e754fc08c"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/XXQL2601.TMX",
+    "bytes": 29589,
+    "sha256": "cf612bcd9d65c3c1bd670a3a0aac1f43165bc436bb28936c8d48468cee27d3db"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/26SP/XXTW2403.WTH",
+    "bytes": 5211,
+    "sha256": "8dbc5f13b54bca7a0e5b33a9ba03383397c9da552a8a38ab0d37ae28beb944f8"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/comparison.csv",
+    "bytes": 545222,
+    "sha256": "28da226bd1dbcf5802e2b188b78747a8ec352848ef7a74053fcf1cd78a516c8d"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/diagnostic_comparison.csv",
+    "bytes": 156289,
+    "sha256": "67aaede933604cba2db93c827a6edd19ac21f4033d635306195e4b72a061e2af"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/diagnostic_metrics.csv",
+    "bytes": 2310,
+    "sha256": "6ddcaedc21d2f4569bb1c096019cd909c2904f29fdc8a08231fae33f71d14865"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/full_parameter_readback_audit.json",
+    "bytes": 302,
+    "sha256": "67b46bb3c187742dd44e5027f6b52df6e5795a5b68d8a7f78f8b8eea45742dbb"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/metrics.csv",
+    "bytes": 2521,
+    "sha256": "898fc5e53a73e67553e8312c4a7f64986f746a957bf54bf006a26314b939d019"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/parameters.csv",
+    "bytes": 2595,
+    "sha256": "1fd25fe4d7a41521dadbd26b41cdec3775360c0e301077d7e109f650ff91effe"
+  },
+  {
+    "file": "原始模型输出/stable79_checkpointed150x5_20261019/native_trials/621182324abe4736a92ac7b7a5f04e67/receipt.json",
+    "bytes": 4694,
+    "sha256": "8af4ea56f9a464a7da0c841bb364129a98ef14d2756394db60b89ddf20d2f037"
+  }
+]

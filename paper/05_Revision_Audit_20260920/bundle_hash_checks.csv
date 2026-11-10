@@ -1,0 +1,10 @@
+bundle,data_status,artifact,hash_matches
+paper_data_c15,legacy_layout_demo,comparison.csv,True
+paper_data_c15,legacy_layout_demo,simulation_trajectory.csv,True
+paper_data_c15,legacy_layout_demo,treatment_metadata.csv,True
+paper_data_c15,legacy_layout_demo,phi_ensemble.csv,True
+paper_data_posterior,tooling_demo,posterior_diagnostics.csv,True
+paper_data_posterior,tooling_demo,posterior_samples.csv,True
+paper_data_posterior,tooling_demo,spearman_correlation.csv,True
+paper_data_posterior,tooling_demo,candidate_pairs.csv,True
+paper_data_posterior,tooling_demo,candidate_pair_predictions.csv,True

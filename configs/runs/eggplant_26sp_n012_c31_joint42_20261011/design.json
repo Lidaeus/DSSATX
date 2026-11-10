@@ -1,0 +1,169 @@
+{
+  "schema": "formal_joint_n_v1",
+  "design_id": "eggplant_26sp_n012_c31_joint42_20261011",
+  "approved": true,
+  "executable": true,
+  "approval": {
+    "user_statement": "整体准许上述方案；先后运行现行42个自由参数版、类似C31批次的67个自由参数版；确认正常运行即可，不必持续监测。",
+    "recorded_at": "2026-10-11T15:42:36.878138+00:00",
+    "review_sha256": "73f01a43dd3710f77dbcf09572db8854a8ae89a0e71eb008ada055ee6478e9c7"
+  },
+  "status": "approved_ready",
+  "runtime_preflight_passed": true,
+  "datasets": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_refreshed_20261010",
+      "bundle_manifest_sha256": "c2b8fad69879eaa40afe6a994e5a05fd4d75d8c1ebc3f5293eb3e83bf126b602",
+      "roles": {
+        "validation": [
+          2,
+          3,
+          4,
+          5,
+          10,
+          11,
+          12,
+          13
+        ]
+      }
+    },
+    {
+      "season_id": "25FA",
+      "experiment_code": "XXQL2502",
+      "bundle_path": "data/user/experiments/xxql2502_refreshed_20261010",
+      "bundle_manifest_sha256": "ad3e9d6364687952d07a791379b609c499375a85610c3c9ff578af5d0f663d92",
+      "roles": {
+        "diagnostic": [
+          2,
+          5,
+          8,
+          11
+        ],
+        "validation": [
+          1,
+          3,
+          4,
+          6,
+          7,
+          9,
+          10,
+          12
+        ]
+      }
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_refreshed_20261010",
+      "bundle_manifest_sha256": "3eb23088d4ea456839522be4db423fd7897e837b8dbba756979503aca1646ff1",
+      "roles": {
+        "calibration": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "holdout": [
+          1,
+          2,
+          3
+        ]
+      }
+    }
+  ],
+  "bounds_id": "eggplant_26sp_n012_c31_joint42_20261011",
+  "bounds_sha256": "ff8553b882cbb1b1c5ef46b636ec16e18380a0adcb5de23d0ec56f85b9e2f131",
+  "active_parameters": [
+    "CMOBMX",
+    "DSWBAR",
+    "EM-FL",
+    "FL-SD",
+    "FL-SH",
+    "FNPGN1",
+    "FNPGN2",
+    "FRLFF",
+    "FRSTMF",
+    "KCAN",
+    "LFMAX",
+    "LNGSH",
+    "LNREF",
+    "PGEFF",
+    "PODUR",
+    "PROLFF",
+    "PROLFI",
+    "PROSHF",
+    "PROSHI",
+    "PROSTF",
+    "PROSTI",
+    "RHGHT",
+    "RTNH4",
+    "RTNO3",
+    "RWDTH",
+    "RWUMX",
+    "SENPOR_LATE",
+    "SENRTE",
+    "SFDUR",
+    "SIZLF",
+    "SLAVR",
+    "SWBAR_REC",
+    "TB1",
+    "TB2",
+    "TM1",
+    "TM2",
+    "TO11",
+    "TO12",
+    "VSSINK",
+    "XFRT",
+    "XMAGE",
+    "YSWBAR_MID"
+  ],
+  "active_parameter_count": 42,
+  "calibration_observations_sha256": "78bd446d0bb3ff9ac23b658dce75220ac7c53da6fc89437f3f6c844c7254ed36",
+  "evaluation_catalog_sha256": "4e315e7b93ea4f4ed0c470eb2712794c9b8e209355d8ae1c5bf4aaf65a72da2f",
+  "runtime_hashes": {
+    "src/calibration/single_season_n.py": "6d1b0e3ea1d8022b71b6493650cc537950dfbce6edb812cd91609246e4ec0a98",
+    "src/dssat/run_dssat.py": "e1e796b5144cb2a43c76fc541355131b985cc2f2ad910e2cf0a8662eddf84ef4",
+    "src/dssat/array_expander.py": "a587f5dff068336e38f554cc6a38a20e19b46cf7aa449b887fa1e8d7e2d8f548",
+    "src/calibration/observation_policy.py": "c7c7c8f069da8e768811f53b106f53916d2607cd313c60690ff1823c0bd71d31",
+    "src/common/param_registry.py": "6b72d5c063a34a1a8201b1ae78519d20f134c7c864aff0cd0d07f39fb14acca6",
+    "src/common/input_manifest.py": "394eefb0ad23fc0f0f877d77985e46d5dea9dea389fc5b1d1880630848b5ab1a",
+    "src/common/project.py": "eb0110d08267f7436cd1b3a050f44d8caac8ab7f0c8b57d23c8572380aba4c02",
+    "tools/calibration/launch_formal_26sp_n012_20261011.py": "46b7aa11cd23bbb7aa891e588f43ba71cb866d9cbe614eb15c4948fd44123411",
+    "data/templates/genotype/TMGRO048.CUL.base": "92a373800d68b46d07601777e1579fff7b976f74190814bc6e0494eda7c4455b",
+    "data/templates/genotype/TMGRO048.ECO.base": "9f2d43d335a4455679d701116d861a1915c1010a79d002e60ca4db74fe3d73ff",
+    "data/templates/genotype/TMGRO048.SPE.base": "59fb51f8d4314615973038843994160cf612443c789ba938092ba0af0bb1d0f7",
+    "data/templates/DSSATPRO.v48": "eeb4a0e044ad88b91fdcef849fd6e3f428b40fbb9a477ed63b567e841c39e464",
+    "data/templates/DSSAT48.INH": "ce1e187d753802b7dc8847d459fa15d9c7637628a9471352d16210d6e6762789",
+    "data/templates/DSSAT48.INP": "77a87607f549748f1b7056f742579eb14f3973cba5db11c8169fad8f27fca46a",
+    "src/reporting/quality_gate.py": "5a73eb27d9dbc937818c10db6adb806b15898bd4024de87b9bf124638dff14db",
+    "src/common/quality.py": "d62fe02d655e5c55519aa321f615f91d724e1f57f85aad6aeaeb14a468b78ae2",
+    "src/calibration/engineering_gate.py": "aa749198739fbaecc200d3ae6b83d914c49a95953df76cab20efe3c6cab88127",
+    "tools/parallel/run_parallel.py": "dd2c0a2ec6c03c29f33f7ebe2dd0961870b388b0247c87a8f4b37ad8d51e0d73",
+    "src/calibration/joint_n_objectives.py": "9120091935930e2648ee94c20d40806359079b16d89b5fdc9f0a4ab60a2774ba",
+    "tools/calibration/launch_c31_joint_pair_20261011.py": "1f6519b92541e9aab6c43f34519df78658d0f160de55203d487a182e1cbc3ab3",
+    "src/dssat/forward_joint.py": "b9d663683967bdba0369daf3540582fc1a5215b29c8ab01e1dfa1527f8c99eec"
+  },
+  "dssat_executable": "D:\\Tomato_Cal\\workspace\\DSCSM048.EXE",
+  "dssat_executable_sha256": "92173d5f63bc60d58839630b9a29f57632a19b373cab0faa8ad70362d98f5c7a",
+  "noptmax": 6,
+  "ies_num_reals": 200,
+  "workers": 6,
+  "seed": 20261011,
+  "staged_calibration": false,
+  "phi_budget_total": 100,
+  "target_count": 492,
+  "parameter_start": "frozen midpoints, no earlier fitted-member warm start",
+  "scope": "genotype only; soil, initial state, management, TAV/AMP=20/6 fixed",
+  "c31_activation_reference_sha256": "b567938ba9277e94b0967d6a01e590c002c095d87e63a93d70e1f0818c20d406",
+  "joint_method": "Sobol full frozen domain; physical and native-output feasibility only",
+  "uncertainty_interpretation": "feasibility-conditioned optimization ensemble, not Bayesian posterior",
+  "selection_rule": "minimum complete 492-row fixed calibration Phi, no validation selection",
+  "preparation_repair": "C31 phosphorus anchors now explicitly injected and independently read back; source inputs/bounds/targets unchanged"
+}

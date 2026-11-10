@@ -4,8 +4,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PROPOSAL = "data/parameter_registry/bounds_proposals/eggplant/eggplant_p1_xxql2501_v3_candidate_20260716.csv"
-FILEX = "data/user/experiments/xxql2501_20260716/XXQL2501.TMX"
-INPUT_MANIFEST = "data/user/experiments/xxql2501_20260716/input_manifest.json"
+FILEX = "data/user/experiments/xxql2501_final_20261105/XXQL2501.TMX"
+INPUT_MANIFEST = "data/user/experiments/xxql2501_final_20261105/input_manifest.json"
 
 
 def _check_attr(attribute: str, path: str) -> str:

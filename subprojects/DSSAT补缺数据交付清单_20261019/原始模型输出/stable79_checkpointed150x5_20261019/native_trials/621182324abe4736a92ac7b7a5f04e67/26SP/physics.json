@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "strict_capacity": true,
+  "nominal_capacity_passed": true,
+  "over_capacity_records": 0,
+  "max_capacity_excess_g_m2": -2.4979182755957997e-05,
+  "max_n_residual": 4.745088517665863e-07,
+  "max_soil_n_residual": 0.0001
+}

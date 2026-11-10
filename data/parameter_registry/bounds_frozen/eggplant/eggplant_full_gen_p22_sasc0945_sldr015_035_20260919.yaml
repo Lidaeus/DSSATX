@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_gen_p22_sasc0945_sldr015_035_20260919"
+crop: "eggplant"
+created_at: "2026-09-19T03:26:35Z"
+approved_at: "2026-09-19T03:26:35Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_gen_p22_sasc0945_sldr_20260918.csv"
+derived_from_sha256: "be68367eb615b69bc9e3721f42bb94fb4b45bc570c022f1e16f0bceac9791272"
+bounds_sha256: "4884c7f333a33e158c93cde0d91dd349a36ac3076b713243adde80f433035ee9"
+parameter_count: 165
+automatic_repairs: 0
+notes: "Refreshed 25SP soil base nutrients, SASC_RATIO=0.945 fixed, literature SSKS fixed, SOIL_SLDR active in [0.15, 0.35], scale 150x5"

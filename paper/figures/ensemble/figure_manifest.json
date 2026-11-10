@@ -1,0 +1,112 @@
+{
+  "schema_version": 2,
+  "created_at": "2026-10-05T13:12:39Z",
+  "renderer": "R 4.5.2",
+  "package_versions": {
+    "ggplot2": "4.0.3",
+    "patchwork": "1.3.2",
+    "jsonlite": "2.0.0",
+    "svglite": "2.2.2"
+  },
+  "git_commit": "ed0b24a77941d7f4a07b484879bdae78c806e21a",
+  "git_dirty": true,
+  "profile_id": "general_q1_v1",
+  "profile": {
+    "path": "D:/Tomato_Cal/configs/figures/publication.json",
+    "sha256": "66a7e4cabbbabfad7471068bd70ba79d79a24848b4aba85f14e67e8db45ed58f"
+  },
+  "run_id": "full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927",
+  "data_status": "tooling_demo",
+  "science_validated": false,
+  "source_is_demo": true,
+  "demo_label_visible": false,
+  "publication_label_note": "User requested parameter replacement and triangular heatmap on 2026-10-05; scientific status unchanged.",
+  "scientific_status_promoted": false,
+  "input_manifest": {
+    "path": "D:/Tomato_Cal/paper/paper_data/ensemble/paper_data_manifest.json",
+    "sha256": "4eaaf6a6d96c1076197252c8b9dbbbe6eb6b6d9edb0106be7082f74e8e7c1280"
+  },
+  "artifacts": [
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS7_candidate_prediction_distance.pdf",
+      "sha256": "379d0f2029dd87ed68eade81bbf97acb23bc4593ef104415ebd7b145cf1040c4",
+      "retained_from_manifest_sha256": "7dc4217419ee684fde2ce1cecf3e86cdebd75567ffa69cac8c0c78760ca1de89"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS7_candidate_prediction_distance.svg",
+      "sha256": "2eb3e2d376574b1c42ce8e6fdb25010e2b8bc811f2c3e4f36a7ebfb64a53cf32",
+      "retained_from_manifest_sha256": "7dc4217419ee684fde2ce1cecf3e86cdebd75567ffa69cac8c0c78760ca1de89"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS7_candidate_prediction_distance.png",
+      "sha256": "f32a6933b6dddea7e5d595ef4f0555e3c31d6b274fb34ecd2b849c1ebede7711",
+      "retained_from_manifest_sha256": "7dc4217419ee684fde2ce1cecf3e86cdebd75567ffa69cac8c0c78760ca1de89"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS7_candidate_prediction_distance.source.csv",
+      "sha256": "064a06c3a96cd22633cf36ed14af407b7f2148167e8792d71b733509ae5654e3",
+      "retained_from_manifest_sha256": "7dc4217419ee684fde2ce1cecf3e86cdebd75567ffa69cac8c0c78760ca1de89"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS7_candidate_prediction_distance.distance_source.csv",
+      "sha256": "4fa66b0002b36cea8bcb557c6b3480d8976870916d98921c61cb4f01d0f929d1",
+      "retained_from_manifest_sha256": "7dc4217419ee684fde2ce1cecf3e86cdebd75567ffa69cac8c0c78760ca1de89"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS5_posterior_contraction.pdf",
+      "sha256": "8c4aa6f9f5034bad638f90345663aab58ad5231cb36f0762cea35ba5c829c374"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS5_posterior_contraction.svg",
+      "sha256": "fe0e8f41bd351b79339d54c513c61109da49ea12f9ed702d010ce1ae8a7699eb"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS5_posterior_contraction.png",
+      "sha256": "3c807f313fb7d919f29fff92245571138edeb6ce62000310d0919743bb5ee4da"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS5_posterior_contraction.source.csv",
+      "sha256": "eb65f4fd65d557edd089bd9f6936b86a2b8900c5c4673313f7efc2cc41dbf206"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS5_posterior_density.pdf",
+      "sha256": "780acd90d2821c9af144280782e9b695e4e70a48d3ce598a66a1ecd737dafcce"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS5_posterior_density.svg",
+      "sha256": "539d9b1bf389a4aee75146855ea87f63f76ba7d81815db0a1c90c47588896d9a"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS5_posterior_density.png",
+      "sha256": "83065af12e237cd007741d17c38a52e715c3d1ec471ddf47dfd6a1fcd997b941"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS5_posterior_density.source.csv",
+      "sha256": "5b8c8c1a63e2f471f488822c52c4a3b924f3c94c24ee0e2029110c64b2279691"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS6_spearman_structure.pdf",
+      "sha256": "4bdecefcdd769d57be1740b091f88f47add0aed5153395562a6c716ef333d97c"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS6_spearman_structure.svg",
+      "sha256": "d46ae5c228f1b33380b3821d1042fb96c323f5b50eef2677e4978387a2c9be90"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS6_spearman_structure.png",
+      "sha256": "79e752de3440c46319df4776e180418cbf7f5021f2bd08467ff18c0f82b3a23f"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/ensemble/FigS6_spearman_structure.source.csv",
+      "sha256": "49361395c685249f250b83672de344219be094c086c4e48cccd978a6e3f856c6"
+    }
+  ],
+  "retained_artifact_provenance": {
+    "previous_manifest_sha256": "7dc4217419ee684fde2ce1cecf3e86cdebd75567ffa69cac8c0c78760ca1de89",
+    "previous_input_manifest": {
+      "path": "D:/Tomato_Cal/paper/paper_data/ensemble/paper_data_manifest.json",
+      "sha256": "deff531854ce2062dda69aec0116ff9ddf928506b0b24f7374bf3349c89c73c4"
+    },
+    "note": "Unrendered FigS7 artifacts retain their previous renderer/input provenance; candidate CSV hashes did not change."
+  }
+}

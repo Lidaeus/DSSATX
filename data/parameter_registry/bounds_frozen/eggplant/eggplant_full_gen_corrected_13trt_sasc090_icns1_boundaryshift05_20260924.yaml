@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_gen_corrected_13trt_sasc090_icns1_boundaryshift05_20260924"
+crop: "eggplant"
+created_at: "2026-09-23T20:15:57Z"
+approved_at: "2026-09-23T20:15:57Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_gen_corrected_13trt_sasc090_icns1_boundaryshift05_20260924.csv"
+derived_from_sha256: "5c4b0e65ca1fe2258e5b79c815c6dda93cdb3a51c729d81779042948980e4398"
+bounds_sha256: "5c4b0e65ca1fe2258e5b79c815c6dda93cdb3a51c729d81779042948980e4398"
+parameter_count: 168
+automatic_repairs: 0
+notes: "User-authorized 5%-of-span outward translations for parameters repeatedly at/near bounds; SASC and raw Excel ICNS fixed values carried forward."

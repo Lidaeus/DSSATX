@@ -4,6 +4,9 @@ build_model_performance <- function(comparison, variables, profile, is_demo = FA
   if ("season_id" %in% names(comparison) && length(unique(comparison$season_id)) > 1L) {
     if (anyNA(comparison$season_id) || any(!nzchar(comparison$season_id))) stop("Missing season_id")
     seasons <- unique(as.character(comparison$season_id))
+    seasons <- c(intersect(c("25SP", "26SP", "25FA"), seasons),
+                 setdiff(seasons, c("25SP", "26SP", "25FA")))
+    single_variable <- length(variables) == 1L
     parts <- lapply(seasons, function(season) {
       part <- build_model_performance(comparison[comparison$season_id == season, , drop = FALSE],
                                       variables, profile, is_demo, facet_columns = 4L)
@@ -11,16 +14,26 @@ build_model_performance <- function(comparison, variables, profile, is_demo = FA
       part$plot <- part$plot + patchwork::plot_annotation(title = season)
       part
     })
-    return(list(plot = patchwork::wrap_plots(lapply(parts, `[[`, "plot"), ncol = 1L) +
+    return(list(plot = patchwork::wrap_plots(lapply(parts, `[[`, "plot"),
+                                             ncol = if (single_variable) length(parts) else 1L) +
                   patchwork::plot_annotation(
                     caption = if (isTRUE(is_demo)) "DEMO: layout QA only; not scientific evidence" else NULL,
                     theme = ggplot2::theme(plot.caption = ggplot2::element_text(size = 5))),
                 source = do.call(rbind, lapply(parts, `[[`, "source")),
                 metrics = do.call(rbind, lapply(parts, `[[`, "metrics")),
-                height_mm = min(profile$max_height_mm, 78 * length(parts))))
+                height_mm = if (single_variable) 83 else min(profile$max_height_mm, 78 * length(parts))))
   }
   data <- comparison[comparison$variable %in% variables, , drop = FALSE]
+  if ("simulation_date_gap_days" %in% names(data)) {
+    data <- data[!is.finite(data$simulation_date_gap_days) | data$simulation_date_gap_days == 0, , drop = FALSE]
+  }
   if (nrow(data) == 0) stop("No requested model-performance variables are available")
+  mass <- data$variable %in% c("FRESH_CUM", "FRESH_INC", "DRY_CUM", "DRY_INC") &
+    data$unit %in% c("kg ha⁻¹", "kg ha-1")
+  data$observed[mass] <- data$observed[mass] / 1000
+  data$simulated[mass] <- data$simulated[mass] / 1000
+  data$observed_se[mass] <- data$observed_se[mass] / 1000
+  data$unit[mass] <- "t ha⁻¹"
   inferential <- data$dataset_role %in% c("calibration", "validation")
   if (any(inferential)) data <- data[inferential, , drop = FALSE]
 
@@ -52,10 +65,10 @@ build_model_performance <- function(comparison, variables, profile, is_demo = FA
     padding <- max(diff(range(values)), 1) * 0.05
     limits <- c(min(0, min(values)) - padding, max(values) + padding)
     metric <- metrics[metrics$variable == variable, ]
-    role_names <- c(calibration = "Calibration", validation = "Validation",
+    role_names <- c(calibration = "Calibration", validation = "Held-out",
                     legacy_unsplit = "Legacy", diagnostic = "Diagnostic")
     metric_text <- paste(vapply(seq_len(nrow(metric)), function(index) {
-      sprintf("%s: n = %d\nRMSE = %.3g; Bias = %.3g",
+      sprintf("%s (n = %d)\nRMSE %.3g\nBias %+.3g",
               role_names[[metric$dataset_role[[index]]]], metric$n[[index]],
               metric$rmse[[index]], metric$bias[[index]])
     }, character(1)), collapse = "\n")
@@ -70,24 +83,24 @@ build_model_performance <- function(comparison, variables, profile, is_demo = FA
       ggplot2::geom_point(ggplot2::aes(colour = dataset_role, shape = dataset_role),
                           size = 1.7, stroke = 0.55, fill = "white", alpha = 0.9) +
       ggplot2::annotate("label", x = limits[[1]] + 0.04 * diff(limits),
-                        y = limits[[2]] - 0.04 * diff(limits), hjust = 0, vjust = 1,
+                        y = limits[[1]] + 0.92 * diff(limits), hjust = 0, vjust = 1,
                         label = metric_text, size = 2.1,
                         linewidth = 0, fill = "white", alpha = 0.82) +
       ggplot2::scale_colour_manual(values = c(calibration = palette$calibration,
                                               validation = palette$validation,
                                               legacy_unsplit = palette$neutral,
                                               diagnostic = palette$neutral),
-                                   labels = c(calibration = "Calibration", validation = "Validation",
+                                   labels = c(calibration = "Calibration", validation = "Held-out",
                                               legacy_unsplit = "Legacy unsplit", diagnostic = "Diagnostic"),
                                    drop = FALSE) +
       ggplot2::scale_shape_manual(values = c(calibration = 16, validation = 2,
                                              legacy_unsplit = 1, diagnostic = 1),
-                                  labels = c(calibration = "Calibration", validation = "Validation",
+                                  labels = c(calibration = "Calibration", validation = "Held-out",
                                              legacy_unsplit = "Legacy unsplit", diagnostic = "Diagnostic"),
                                   drop = FALSE) +
       ggplot2::coord_equal(xlim = limits, ylim = limits, expand = FALSE) +
       ggplot2::labs(title = paste(if ("season_id" %in% names(frame)) frame$season_id[[1]] else "",
-                                  frame$variable_label[[1]]), x = paste0("Observed", suffix),
+                                  if (variable == "FRESH_CUM") "Fresh yield" else frame$variable_label[[1]]), x = paste0("Observed", suffix),
                     y = paste0("Simulated", suffix)) +
       theme_q1(profile)
   })

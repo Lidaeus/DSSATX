@@ -1,0 +1,8 @@
+season_id,facility_type,location,treatment,cultivar,rootstock,grafting_method,event_type,event_label,calendar_date,doy,dap,target_stage_index,observed_value,unit,uncertainty_se
+CSG_SG24WI,Sunken_Solar_Greenhouse,Shouguang_36.88N_118.74E,1,Solanum_melongena_cv_Brilliance,Solanum_torvum,Cleft_Grafting,transplanting,Overwintering Transplanting,2024-10-25,299,0,0.0,0.0,dap,0.0
+CSG_SG24WI,Sunken_Solar_Greenhouse,Shouguang_36.88N_118.74E,1,Solanum_melongena_cv_Brilliance,Solanum_torvum,Cleft_Grafting,anthesis,First Anthesis (ADAPS),2024-12-05,340,41,1.0,41.0,dap,1.0
+CSG_SG24WI,Sunken_Solar_Greenhouse,Shouguang_36.88N_118.74E,1,Solanum_melongena_cv_Brilliance,Solanum_torvum,Cleft_Grafting,fruit_set,First Fruit Set (PDFPS),2024-12-20,355,56,1.25,56.0,dap,1.5
+CSG_SG24WI,Sunken_Solar_Greenhouse,Shouguang_36.88N_118.74E,1,Solanum_melongena_cv_Brilliance,Solanum_torvum,Cleft_Grafting,first_harvest,First Commercial Harvest (CHPDT),2025-01-15,15,82,1.5,82.0,dap,1.5
+CSG_SG24WI,Sunken_Solar_Greenhouse,Shouguang_36.88N_118.74E,1,Solanum_melongena_cv_Brilliance,Solanum_torvum,Cleft_Grafting,winter_trough,Mid-Winter Dormancy Trough,2025-01-28,28,95,1.7,95.0,dap,2.0
+CSG_SG24WI,Sunken_Solar_Greenhouse,Shouguang_36.88N_118.74E,1,Solanum_melongena_cv_Brilliance,Solanum_torvum,Cleft_Grafting,spring_resumption,Spring Active Growth Resumption,2025-03-20,79,146,2.0,146.0,dap,2.0
+CSG_SG24WI,Sunken_Solar_Greenhouse,Shouguang_36.88N_118.74E,1,Solanum_melongena_cv_Brilliance,Solanum_torvum,Cleft_Grafting,cessation,Terminal Plant Pulling (SD-PM),2025-06-20,171,238,2.5,238.0,dap,1.0

@@ -1,0 +1,95 @@
+{
+  "schema": "non_executable_response_revision_review_v1",
+  "status": "awaiting_user_review",
+  "approved": false,
+  "executable": false,
+  "base_run": "eggplant_26sp_n012_c31_joint67_20261011",
+  "active_count": 64,
+  "target_count": 495,
+  "phi_budget": 100,
+  "datasets": [
+    {
+      "season_id": "25SP",
+      "experiment_code": "XXQL2501",
+      "bundle_path": "data/user/experiments/xxql2501_refreshed_20261010",
+      "bundle_manifest_sha256": "c2b8fad69879eaa40afe6a994e5a05fd4d75d8c1ebc3f5293eb3e83bf126b602",
+      "roles": {
+        "validation": [
+          2,
+          3,
+          4,
+          5,
+          10,
+          11,
+          12,
+          13
+        ]
+      }
+    },
+    {
+      "season_id": "25FA",
+      "experiment_code": "XXQL2502",
+      "bundle_path": "data/user/experiments/xxql2502_refreshed_20261010",
+      "bundle_manifest_sha256": "ad3e9d6364687952d07a791379b609c499375a85610c3c9ff578af5d0f663d92",
+      "roles": {
+        "diagnostic": [
+          2,
+          5,
+          8,
+          11
+        ],
+        "validation": [
+          1,
+          3,
+          4,
+          6,
+          7,
+          9,
+          10,
+          12
+        ]
+      }
+    },
+    {
+      "season_id": "26SP",
+      "experiment_code": "XXQL2601",
+      "bundle_path": "data/user/experiments/xxql2601_refreshed_20261010",
+      "bundle_manifest_sha256": "3eb23088d4ea456839522be4db423fd7897e837b8dbba756979503aca1646ff1",
+      "roles": {
+        "calibration": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "holdout": [
+          1,
+          2,
+          3
+        ]
+      }
+    }
+  ],
+  "initial_mineral_N": "retain approved shared prebasal pure-N reference, no fitted scaling",
+  "initial_water": "retain measured values; user confirmed 2026-03-14 sampling before 18 mm irrigation; no evidence of duplicate irrigation; 2-day carry-back remains an explicit temporal approximation",
+  "SASC": "diagnostic only, no formal activation recommended from this grid",
+  "bounds_and_registry": "review table only; KEP physical registry and formal injection integration required before freeze",
+  "execution": "direct joint; no staged calibration or validation-based selection; no launch now",
+  "files": [
+    "parameter_scope_review.csv",
+    "objective_budget_review.csv",
+    "adjacent_N_targets_review.csv"
+  ],
+  "diagnostic_receipt_sha256": "03cbd49c849e1c632ea95e3f1dc50816d3a853a6a921969d8ea6c0d43e81333c",
+  "initial_water_sampling_confirmation": {
+    "date": "2026-03-14",
+    "timing": "before_18mm_irrigation",
+    "user_statement": "灌水前取样",
+    "formal_inputs_changed": false
+  }
+}

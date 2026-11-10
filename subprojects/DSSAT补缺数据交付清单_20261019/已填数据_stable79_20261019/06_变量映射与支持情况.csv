@@ -1,0 +1,37 @@
+﻿target_field,source_file,native_variable,native_definition,native_unit,output_frequency,stock_flow_cumulative,organ_scope,event_inclusion,support_status,conversion_formula,notes
+ET_actual_mm,ET.OUT,ETAA,FROP=1时为当日实际量，非潜在/参考ET,mm/d,daily; FROP=1,FLOW,植株与土壤,见state_timing/event_timing；过程账本为当日日末已扣采出,DIRECT,,EFAA=EMAA=0已逐点核查；ETAA=EPAA+ESAA在0.001mm打印误差内
+transp_actual_mm,ET.OUT,EPAA,FROP=1时为当日实际量，非潜在/参考ET,mm/d,daily; FROP=1,FLOW,植株与土壤,见state_timing/event_timing；过程账本为当日日末已扣采出,DIRECT,,EFAA=EMAA=0已逐点核查；ETAA=EPAA+ESAA在0.001mm打印误差内
+evap_soil_actual_mm,ET.OUT,ESAA,FROP=1时为当日实际量，非潜在/参考ET,mm/d,daily; FROP=1,FLOW,植株与土壤,见state_timing/event_timing；过程账本为当日日末已扣采出,DIRECT,,EFAA=EMAA=0已逐点核查；ETAA=EPAA+ESAA在0.001mm打印误差内
+irrigation_applied_mm,SoilWatBal.OUT,IRRD,进入模型水量平衡的当日量,mm/d,daily; FROP=1,FLOW,0–180cm模型剖面,见state_timing/event_timing；过程账本为当日日末已扣采出,DIRECT,,本批EFIR=1且径流为0；不把施用水与有效水重复相加
+irrigation_infiltrated_mm,SoilWatBal.OUT,IRRD,进入模型水量平衡的当日量,mm/d,daily; FROP=1,FLOW,0–180cm模型剖面,见state_timing/event_timing；过程账本为当日日末已扣采出,DIRECT,,本批EFIR=1且径流为0；不把施用水与有效水重复相加
+precip_effective_mm,SoilWatBal.OUT,PRED,进入模型水量平衡的当日量,mm/d,daily; FROP=1,FLOW,0–180cm模型剖面,见state_timing/event_timing；过程账本为当日日末已扣采出,DIRECT,,本批EFIR=1且径流为0；不把施用水与有效水重复相加
+runoff_mm,SoilWatBal.OUT,ROFD,进入模型水量平衡的当日量,mm/d,daily; FROP=1,FLOW,0–180cm模型剖面,见state_timing/event_timing；过程账本为当日日末已扣采出,DIRECT,,本批EFIR=1且径流为0；不把施用水与有效水重复相加
+drainage_below100_mm,SoilWatBal.OUT,none at 100cm,100cm界面独立通量未打印,mm/d,daily; FROP=1,FLOW,100cm界面,见state_timing/event_timing；过程账本为当日日末已扣采出,NOT_EXPORTED,,DRND为180cm剖面底部排水，不能替代；也未将ET与ΔS100残差冒充界面通量
+capillary_into100_mm,SoilWatBal.OUT,none at 100cm,100cm界面独立通量未打印,mm/d,daily; FROP=1,FLOW,100cm界面,见state_timing/event_timing；过程账本为当日日末已扣采出,NOT_EXPORTED,,DRND为180cm剖面底部排水，不能替代；也未将ET与ΔS100残差冒充界面通量
+theta_v_m3_m3,SoilWat.OUT,SW1D..SW13D,真实13层液态体积含水率,m3/m3,daily; FROP=1,STOCK,0–180cm原生层,见state_timing/event_timing；过程账本为当日日末已扣采出,DIRECT,,BOD由前日EOD近似；不混同灌水前瞬时值
+layer_storage_mm,SoilWat.OUT,SW1D..SW13D,层贮水由真实层厚计算,m3/m3,daily; FROP=1,STOCK,各原生层,见state_timing/event_timing；过程账本为当日日末已扣采出,DERIVED,theta × (bottom_cm-top_cm) × 10,
+stem_drymatter_kg_ha,DMState.csv,stem_dm,已扣采出/损失的日末器官干物质,g/m2,daily; FROP=1,STOCK,stem,见state_timing/event_timing；过程账本为当日日末已扣采出,DERIVED,native × 10,
+stem_N_kg_ha,OrganNState.csv,stem_n,器官总N，储备库是子集，不能再加,g N/m2,daily; FROP=1,STOCK,stem,见state_timing/event_timing；过程账本为当日日末已扣采出,DERIVED,native × 10,
+stem_P_kg_ha,PlantP.OUT,SHPAD aggregated,P仅有合并shoot及root等通用池；无独立茎叶P且时点/多次采收未验证,kg/ha,daily; FROP=1,STOCK,stem,见state_timing/event_timing；过程账本为当日日末已扣采出,UNSUPPORTED,,未做干物质×实测浓度混合估算；P原值仅另表供审查
+stem_K_kg_ha,POTAS=N,none,K模拟关闭,kg/ha,daily; FROP=1,STOCK,stem,见state_timing/event_timing；过程账本为当日日末已扣采出,UNSUPPORTED,,未做干物质×实测浓度混合估算；P原值仅另表供审查
+leaf_drymatter_kg_ha,DMState.csv,leaf_dm,已扣采出/损失的日末器官干物质,g/m2,daily; FROP=1,STOCK,leaf,见state_timing/event_timing；过程账本为当日日末已扣采出,DERIVED,native × 10,
+leaf_N_kg_ha,OrganNState.csv,leaf_n,器官总N，储备库是子集，不能再加,g N/m2,daily; FROP=1,STOCK,leaf,见state_timing/event_timing；过程账本为当日日末已扣采出,DERIVED,native × 10,
+leaf_P_kg_ha,PlantP.OUT,SHPAD aggregated,P仅有合并shoot及root等通用池；无独立茎叶P且时点/多次采收未验证,kg/ha,daily; FROP=1,STOCK,leaf,见state_timing/event_timing；过程账本为当日日末已扣采出,UNSUPPORTED,,未做干物质×实测浓度混合估算；P原值仅另表供审查
+leaf_K_kg_ha,POTAS=N,none,K模拟关闭,kg/ha,daily; FROP=1,STOCK,leaf,见state_timing/event_timing；过程账本为当日日末已扣采出,UNSUPPORTED,,未做干物质×实测浓度混合估算；P原值仅另表供审查
+root_drymatter_kg_ha,DMState.csv,root_dm,已扣采出/损失的日末器官干物质,g/m2,daily; FROP=1,STOCK,root,见state_timing/event_timing；过程账本为当日日末已扣采出,DERIVED,native × 10,
+root_N_kg_ha,OrganNState.csv,root_n,器官总N，储备库是子集，不能再加,g N/m2,daily; FROP=1,STOCK,root,见state_timing/event_timing；过程账本为当日日末已扣采出,DERIVED,native × 10,
+root_P_kg_ha,PlantP.OUT,RTPAD,P仅有合并shoot及root等通用池；无独立茎叶P且时点/多次采收未验证,kg/ha,daily; FROP=1,STOCK,root,见state_timing/event_timing；过程账本为当日日末已扣采出,NOT_EXPORTED,,未做干物质×实测浓度混合估算；P原值仅另表供审查
+root_K_kg_ha,POTAS=N,none,K模拟关闭,kg/ha,daily; FROP=1,STOCK,root,见state_timing/event_timing；过程账本为当日日末已扣采出,UNSUPPORTED,,未做干物质×实测浓度混合估算；P原值仅另表供审查
+fruit_onplant_drymatter_kg_ha,DMState.csv,shell_dm+seed_dm,全部在株整果，含所有成熟度，日末已扣采出,g/m2,daily; FROP=1,STOCK,fruit shell+seed,见state_timing/event_timing；过程账本为当日日末已扣采出,DERIVED,(shell_dm+seed_dm) × 10,不使用累计已采量；FreshWt.TOPOW为同日采出前cohort总量，只用于对账
+fruit_onplant_N_kg_ha,OrganNState.csv,fruit_n,全部在株果皮/果肉及种子总N,g N/m2,daily; FROP=1,STOCK,whole fruit,见state_timing/event_timing；过程账本为当日日末已扣采出,DERIVED,fruit_n × 10,不是GNAD种子N；预采收等价状态加回NCBalance.harvest_n
+fruit_onplant_P_kg_ha,PlantP.OUT,SLPAD+SDPAD,P通用池尚未匹配当日在株库；K关闭,kg/ha,daily; FROP=1,STOCK,whole fruit,见state_timing/event_timing；过程账本为当日日末已扣采出,NOT_EXPORTED,,部分果DM=0但原生P>0，见14表；未作为可靠补缺值
+fruit_onplant_K_kg_ha,POTAS=N,none,P通用池尚未匹配当日在株库；K关闭,kg/ha,daily; FROP=1,STOCK,whole fruit,见state_timing/event_timing；过程账本为当日日末已扣采出,UNSUPPORTED,,部分果DM=0但原生P>0，见14表；未作为可靠补缺值
+harvest_drymatter_kg_ha,DMState.csv,harvest_dm,当日整果采出干重,g/m2,daily; FROP=1,FLOW,whole fruit,见state_timing/event_timing；过程账本为当日日末已扣采出,DERIVED,harvest_dm × 10,与FreshWt.HPODW逐点对账
+harvest_freshmass_kg_ha,FreshWt.OUT,HFPOW,当日整果采出鲜重,kg/ha,daily; FROP=1,FLOW,whole fruit,见state_timing/event_timing；过程账本为当日日末已扣采出,DIRECT,,
+harvest_N_kg_ha,NCBalance.csv,harvest_n,本次真实整果N采出,g N/m2,daily; FROP=1,FLOW,whole fruit,见state_timing/event_timing；过程账本为当日日末已扣采出,DERIVED,harvest_n × 10,累计N另在11表；不重复加CHPDTN
+harvest_P_kg_ha,not available,none,无可核验的逐次整果P/K采出量,kg/ha,daily; FROP=1,FLOW,whole fruit,见state_timing/event_timing；过程账本为当日日末已扣采出,UNSUPPORTED,,
+harvest_K_kg_ha,not available,none,无可核验的逐次整果P/K采出量,kg/ha,daily; FROP=1,FLOW,whole fruit,见state_timing/event_timing；过程账本为当日日末已扣采出,UNSUPPORTED,,
+pruning_export,management MC=0,none,无对应已模拟整枝事件，不能填0事件冒充实测未整枝,kg/ha,daily; FROP=1,FLOW,leaf/stem,见state_timing/event_timing；过程账本为当日日末已扣采出,UNSUPPORTED,,
+litter_export,NCBalance.csv,outside_loss-harvest_n,有非采收全株N损失合计，未分解到落叶/根/整枝,g N/m2,daily; FROP=1,FLOW,whole plant,见state_timing/event_timing；过程账本为当日日末已扣采出,NOT_EXPORTED,,合计N另在11表；不冒充完整落叶DM/N事件
+N_uptake_cumulative_kg_ha,NCBalance.csv,root_input,模型累计实际根吸N，不含初始苗/种子N和内部转运,g N/m2/d,daily; FROP=1,CUMULATIVE,root to whole plant,见state_timing/event_timing；过程账本为当日日末已扣采出,DERIVED,cumsum(root_input) × 10,
+DAT,calendar date,date-transplant_date,本研究定植日为DAT0，独立于DAS和DAP,day,daily; FROP=1,STOCK,calendar,见state_timing/event_timing；过程账本为当日日末已扣采出,DERIVED,date - transplant_date,

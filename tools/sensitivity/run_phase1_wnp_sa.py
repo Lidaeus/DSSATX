@@ -32,17 +32,17 @@ DEFAULT_OUT_DIR = PROJECT_ROOT / "workspace" / "runs" / "sa_wnp_phase1_20260914"
 SEASON_BUNDLES = {
     "25SP": {
         "experiment": "XXQL2501",
-        "bundle_dir": PROJECT_ROOT / "data" / "user" / "experiments" / "xxql2501_unified_20260914",
+        "bundle_dir": PROJECT_ROOT / "data" / "user" / "experiments" / "xxql2501_corrected_20260923",
         "role": "calibration_training",
     },
     "25FA": {
         "experiment": "XXQL2502",
-        "bundle_dir": PROJECT_ROOT / "data" / "user" / "experiments" / "xxql2502_unified_20260914",
+        "bundle_dir": PROJECT_ROOT / "data" / "user" / "experiments" / "xxql2502_corrected_20260923",
         "role": "independent_validation_quarantine",
     },
     "26SP": {
         "experiment": "XXQL2601",
-        "bundle_dir": PROJECT_ROOT / "data" / "user" / "experiments" / "xxql2601_unified_20260914",
+        "bundle_dir": PROJECT_ROOT / "data" / "user" / "experiments" / "xxql2601_corrected_20260923",
         "role": "calibration_contrast_evaluation",
     },
 }

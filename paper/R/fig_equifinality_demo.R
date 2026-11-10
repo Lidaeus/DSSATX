@@ -18,7 +18,7 @@ build_candidate_prediction_distance <- function(data, profile, is_demo = FALSE) 
     ggplot2::scale_colour_manual(values = c(Validation = profile$palette$simulated,
                                             Diagnostic = profile$palette$negative)) +
     ggplot2::scale_shape_manual(values = c(Validation = 16, Diagnostic = 17)) +
-    ggplot2::labs(title = "Deterministic prediction distance", subtitle = "Normalized RMS; dashed reference = 1 σ",
+    ggplot2::labs(title = "Deterministic prediction distance", subtitle = "RMS normalized by fixed scales; reference = 1",
                   x = "Prediction distance", y = NULL, caption = demo_caption(is_demo)) +
     theme_q1(profile) + demo_watermark(is_demo)
   list(plot = parameter_plot + prediction_plot + patchwork::plot_layout(widths = c(1, 1.25)),

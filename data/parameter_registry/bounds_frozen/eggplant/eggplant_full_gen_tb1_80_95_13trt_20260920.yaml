@@ -1,0 +1,12 @@
+bounds_id: eggplant_full_gen_tb1_80_95_13trt_20260920
+crop: eggplant
+created_at: '2026-09-20'
+description: Adjusted TB1 reproductive base temperature bounds to [8.0, 9.5] with
+  init=8.58 to prevent autumn runaway growth while preserving spring high-precision
+  response. SASC_RATIO=0.94, SOIL_SLDR=0.24, SLLL 0-4cm=[0.18, 0.20], SLU1=1.0, EFIR=0.95,
+  ICNS_26SP=0.70 fixed.
+num_parameters: 165
+num_active: 70
+num_fixed: 93
+source_proposal: D:\Tomato_Cal\data\parameter_registry\bounds_frozen\eggplant\eggplant_full_gen_sasc094_sldr024_slll018_020_20260919.csv
+sha256: 7b70e2f05f3fb43d3774f6d8ea0c7ffcc28a1eee9ca01ee208851f73cb9f795c

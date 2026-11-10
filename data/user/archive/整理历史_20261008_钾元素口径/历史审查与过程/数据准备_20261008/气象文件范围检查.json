@@ -1,0 +1,29 @@
+[
+  {
+    "file": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2501_corrected_20260923\\XXLI2502.WTH",
+    "rows": 564,
+    "start": "2025-01-01",
+    "end": "2026-07-18",
+    "duplicates": [],
+    "missing_dates": [],
+    "physical_check_issues": []
+  },
+  {
+    "file": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2502_corrected_20260923\\XXLI2502.WTH",
+    "rows": 564,
+    "start": "2025-01-01",
+    "end": "2026-07-18",
+    "duplicates": [],
+    "missing_dates": [],
+    "physical_check_issues": []
+  },
+  {
+    "file": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2601_corrected_20260923\\XXQL2601.WTH",
+    "rows": 199,
+    "start": "2026-01-01",
+    "end": "2026-07-18",
+    "duplicates": [],
+    "missing_dates": [],
+    "physical_check_issues": []
+  }
+]

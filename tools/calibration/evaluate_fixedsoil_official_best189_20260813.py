@@ -306,8 +306,12 @@ def _plot_metrics(metrics: pd.DataFrame, out_root: Path) -> list[Path]:
             for j in range(table.shape[1]):
                 value = table.iloc[i, j]
                 if np.isfinite(value):
+                    rgba = image.cmap(image.norm(value))
+                    brightness = 0.2126 * rgba[0] + 0.7152 * rgba[1] + 0.0722 * rgba[2]
                     ax.text(j, i, f"{value:.2f}", ha="center", va="center", fontsize=7,
-                            color="white" if value < np.nanpercentile(table.to_numpy(float), 55) else "black")
+                            color="black" if brightness > 0.50 else "white")
+                else:
+                    ax.text(j, i, "NA", ha="center", va="center", fontsize=7, color="#555555")
         fig.colorbar(image, ax=ax, label=label)
         fig.tight_layout()
         path = out_root / f"metrics_heatmap_{metric}.png"

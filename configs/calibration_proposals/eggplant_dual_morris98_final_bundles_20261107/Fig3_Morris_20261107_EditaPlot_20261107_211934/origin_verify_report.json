@@ -1,0 +1,2442 @@
+{
+  "figure": "Fig3",
+  "page": {
+    "width_cm": 18.296466666666667,
+    "height_cm": 13.796433333333333,
+    "page_geometry_readback_source": "labtalk_printer_dots",
+    "page_width_dots": 4322.0,
+    "page_height_dots": 3259.0,
+    "page_resx": 600.0,
+    "page_resy": 600.0,
+    "page_bridge_width_cm": 18.29562,
+    "page_bridge_height_cm": 13.79728,
+    "page_bridge_geometry_consistent": true
+  },
+  "layer_count": 5,
+  "layers": [
+    {
+      "geometry": {
+        "layer_unit": 1.0,
+        "left_percent": 9.509,
+        "top_percent": 12.49,
+        "width_percent": 21.01,
+        "height_percent": 57.99,
+        "factor": 1.0,
+        "geometry_readback_source": "labtalk_crosscheck",
+        "layer_x_left_percent": 9.509,
+        "layer_x_top_percent": 12.49,
+        "layer_x_width_percent": 21.01,
+        "layer_x_height_percent": 57.99,
+        "bridge_layer_unit": 1.0,
+        "bridge_left_percent": 9.509,
+        "bridge_top_percent": 12.49,
+        "bridge_width_percent": 21.01,
+        "bridge_height_percent": 57.99,
+        "bridge_factor": 1.0,
+        "bridge_geometry_consistent": true
+      },
+      "xlim": [
+        0.5,
+        7.5,
+        1
+      ],
+      "ylim": [
+        0.5,
+        16.5,
+        1
+      ],
+      "tick_font": "Times New Roman"
+    },
+    {
+      "geometry": {
+        "layer_unit": 1.0,
+        "left_percent": 31.49,
+        "top_percent": 12.49,
+        "width_percent": 21.01,
+        "height_percent": 57.99,
+        "factor": 1.0,
+        "geometry_readback_source": "labtalk_crosscheck",
+        "layer_x_left_percent": 31.49,
+        "layer_x_top_percent": 12.49,
+        "layer_x_width_percent": 21.01,
+        "layer_x_height_percent": 57.99,
+        "bridge_layer_unit": 1.0,
+        "bridge_left_percent": 31.49,
+        "bridge_top_percent": 12.49,
+        "bridge_width_percent": 21.01,
+        "bridge_height_percent": 57.99,
+        "bridge_factor": 1.0,
+        "bridge_geometry_consistent": true
+      },
+      "xlim": [
+        0.5,
+        7.5,
+        1
+      ],
+      "ylim": [
+        0.5,
+        16.5,
+        1
+      ],
+      "tick_font": "Times New Roman"
+    },
+    {
+      "geometry": {
+        "layer_unit": 1.0,
+        "left_percent": 60.0,
+        "top_percent": 13.01,
+        "width_percent": 36.51,
+        "height_percent": 35.01,
+        "factor": 1.0,
+        "geometry_readback_source": "labtalk_crosscheck",
+        "layer_x_left_percent": 60.0,
+        "layer_x_top_percent": 13.01,
+        "layer_x_width_percent": 36.51,
+        "layer_x_height_percent": 35.01,
+        "bridge_layer_unit": 1.0,
+        "bridge_left_percent": 60.0,
+        "bridge_top_percent": 13.01,
+        "bridge_width_percent": 36.51,
+        "bridge_height_percent": 35.01,
+        "bridge_factor": 1.0,
+        "bridge_geometry_consistent": true
+      },
+      "xlim": [
+        0,
+        128,
+        25
+      ],
+      "ylim": [
+        0,
+        104,
+        25
+      ],
+      "tick_font": "Times New Roman"
+    },
+    {
+      "geometry": {
+        "layer_unit": 1.0,
+        "left_percent": 60.0,
+        "top_percent": 62.5,
+        "width_percent": 36.51,
+        "height_percent": 20.99,
+        "factor": 1.0,
+        "geometry_readback_source": "labtalk_crosscheck",
+        "layer_x_left_percent": 60.0,
+        "layer_x_top_percent": 62.5,
+        "layer_x_width_percent": 36.51,
+        "layer_x_height_percent": 20.99,
+        "bridge_layer_unit": 1.0,
+        "bridge_left_percent": 60.0,
+        "bridge_top_percent": 62.5,
+        "bridge_width_percent": 36.51,
+        "bridge_height_percent": 20.99,
+        "bridge_factor": 1.0,
+        "bridge_geometry_consistent": true
+      },
+      "xlim": [
+        48,
+        72,
+        4
+      ],
+      "ylim": [
+        97.2,
+        99.65,
+        0.8
+      ],
+      "tick_font": "Times New Roman"
+    },
+    {
+      "geometry": {
+        "layer_unit": 1.0,
+        "left_percent": 9.509,
+        "top_percent": 86.01,
+        "width_percent": 23.0,
+        "height_percent": 1.994,
+        "factor": 1.0,
+        "geometry_readback_source": "labtalk_crosscheck",
+        "layer_x_left_percent": 9.509,
+        "layer_x_top_percent": 86.01,
+        "layer_x_width_percent": 23.0,
+        "layer_x_height_percent": 1.994,
+        "bridge_layer_unit": 1.0,
+        "bridge_left_percent": 9.509,
+        "bridge_top_percent": 86.01,
+        "bridge_width_percent": 23.0,
+        "bridge_height_percent": 1.994,
+        "bridge_factor": 1.0,
+        "bridge_geometry_consistent": true
+      },
+      "xlim": [
+        0,
+        35,
+        5
+      ],
+      "ylim": [
+        0.5,
+        2.5,
+        1
+      ],
+      "tick_font": "Times New Roman"
+    }
+  ],
+  "labels": [
+    {
+      "layer": 1,
+      "name": "MorrisText1",
+      "text": "(a) ",
+      "font_family": "Times New Roman",
+      "size_pt": 9.0,
+      "color": "#20252A",
+      "left": 86.0,
+      "top": 97.0,
+      "width": 104.0,
+      "height": 87.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText2",
+      "text": "双季过程敏感性",
+      "font_family": "SimSun",
+      "size_pt": 9.0,
+      "color": "#20252A",
+      "left": 190.0,
+      "top": 97.0,
+      "width": 527.0,
+      "height": 77.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText3",
+      "text": "25SP",
+      "font_family": "Times New Roman",
+      "size_pt": 8.0,
+      "color": "#175979",
+      "left": 792.0,
+      "top": 273.0,
+      "width": 144.0,
+      "height": 78.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText4",
+      "text": "PGEFF",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 198.0,
+      "top": 433.0,
+      "width": 173.0,
+      "height": 69.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText5",
+      "text": "EM-FL",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 198.0,
+      "top": 551.0,
+      "width": 173.0,
+      "height": 69.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText6",
+      "text": "TO12",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 234.0,
+      "top": 670.0,
+      "width": 137.0,
+      "height": 69.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText7",
+      "text": "TRIFL",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 211.0,
+      "top": 788.0,
+      "width": 160.0,
+      "height": 69.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText8",
+      "text": "TO11",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 234.0,
+      "top": 906.0,
+      "width": 137.0,
+      "height": 69.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText9",
+      "text": "SLAVR",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 181.0,
+      "top": 1024.0,
+      "width": 190.0,
+      "height": 69.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText10",
+      "text": "FL-SD",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 211.0,
+      "top": 1142.0,
+      "width": 160.0,
+      "height": 69.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText11",
+      "text": "TB2",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 267.0,
+      "top": 1260.0,
+      "width": 104.0,
+      "height": 69.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText12",
+      "text": "TM2",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 253.0,
+      "top": 1378.0,
+      "width": 118.0,
+      "height": 69.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText13",
+      "text": "TO22",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 234.0,
+      "top": 1497.0,
+      "width": 137.0,
+      "height": 69.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText14",
+      "text": "YLEAF(4)",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#A24915",
+      "left": 119.0,
+      "top": 1615.0,
+      "width": 252.0,
+      "height": 69.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText15",
+      "text": "RTNO3",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#A24915",
+      "left": 182.0,
+      "top": 1733.0,
+      "width": 189.0,
+      "height": 69.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText16",
+      "text": "NVSMOB",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#A24915",
+      "left": 121.0,
+      "top": 1851.0,
+      "width": 250.0,
+      "height": 69.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText17",
+      "text": "RWUEP1",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#A24915",
+      "left": 137.0,
+      "top": 1969.0,
+      "width": 234.0,
+      "height": 69.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText18",
+      "text": "RWUMX",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#A24915",
+      "left": 139.0,
+      "top": 2087.0,
+      "width": 232.0,
+      "height": 69.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText19",
+      "text": "PROLFF",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#A24915",
+      "left": 160.0,
+      "top": 2205.0,
+      "width": 211.0,
+      "height": 69.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText20",
+      "text": "物候",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 465.0,
+      "top": 2523.0,
+      "width": 65.0,
+      "height": 120.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText21",
+      "text": "冠层",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 594.0,
+      "top": 2523.0,
+      "width": 65.0,
+      "height": 120.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText22",
+      "text": "生物量",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 724.0,
+      "top": 2465.0,
+      "width": 65.0,
+      "height": 178.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText23",
+      "text": "产量",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 854.0,
+      "top": 2523.0,
+      "width": 65.0,
+      "height": 120.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText24",
+      "text": "灌溉响应",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 983.0,
+      "top": 2407.0,
+      "width": 65.0,
+      "height": 236.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText25",
+      "text": "施氮响应",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 1113.0,
+      "top": 2407.0,
+      "width": 65.0,
+      "height": 236.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText26",
+      "text": "水氮交互",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 1243.0,
+      "top": 2407.0,
+      "width": 65.0,
+      "height": 236.0
+    },
+    {
+      "layer": 2,
+      "name": "MorrisText27",
+      "text": "26SP",
+      "font_family": "Times New Roman",
+      "size_pt": 8.0,
+      "color": "#175979",
+      "left": 1743.0,
+      "top": 273.0,
+      "width": 144.0,
+      "height": 78.0
+    },
+    {
+      "layer": 2,
+      "name": "MorrisText28",
+      "text": "物候",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 1415.0,
+      "top": 2523.0,
+      "width": 65.0,
+      "height": 120.0
+    },
+    {
+      "layer": 2,
+      "name": "MorrisText29",
+      "text": "冠层",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 1545.0,
+      "top": 2523.0,
+      "width": 65.0,
+      "height": 120.0
+    },
+    {
+      "layer": 2,
+      "name": "MorrisText30",
+      "text": "生物量",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 1675.0,
+      "top": 2465.0,
+      "width": 65.0,
+      "height": 178.0
+    },
+    {
+      "layer": 2,
+      "name": "MorrisText31",
+      "text": "产量",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 1804.0,
+      "top": 2523.0,
+      "width": 65.0,
+      "height": 120.0
+    },
+    {
+      "layer": 2,
+      "name": "MorrisText32",
+      "text": "灌溉响应",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 1934.0,
+      "top": 2407.0,
+      "width": 65.0,
+      "height": 236.0
+    },
+    {
+      "layer": 2,
+      "name": "MorrisText33",
+      "text": "施氮响应",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 2064.0,
+      "top": 2407.0,
+      "width": 65.0,
+      "height": 236.0
+    },
+    {
+      "layer": 2,
+      "name": "MorrisText34",
+      "text": "水氮交互",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 2193.0,
+      "top": 2407.0,
+      "width": 65.0,
+      "height": 236.0
+    },
+    {
+      "layer": 3,
+      "name": "MorrisText35",
+      "text": "(b) Morris ",
+      "font_family": "Times New Roman",
+      "size_pt": 9.0,
+      "color": "#20252A",
+      "left": 2593.0,
+      "top": 97.0,
+      "width": 333.0,
+      "height": 87.0
+    },
+    {
+      "layer": 3,
+      "name": "MorrisText36",
+      "text": "累计重要性与参数筛选",
+      "font_family": "SimSun",
+      "size_pt": 9.0,
+      "color": "#20252A",
+      "left": 2926.0,
+      "top": 97.0,
+      "width": 752.0,
+      "height": 77.0
+    },
+    {
+      "layer": 3,
+      "name": "MorrisText37",
+      "text": "累计重要性（",
+      "font_family": "SimSun",
+      "size_pt": 7.5,
+      "color": "#20252A",
+      "left": 2584.0,
+      "top": 267.0,
+      "width": 374.0,
+      "height": 64.0
+    },
+    {
+      "layer": 3,
+      "name": "MorrisText38",
+      "text": "%",
+      "font_family": "Times New Roman",
+      "size_pt": 7.5,
+      "color": "#20252A",
+      "left": 2958.0,
+      "top": 267.0,
+      "width": 54.0,
+      "height": 72.0
+    },
+    {
+      "layer": 3,
+      "name": "MorrisText39",
+      "text": "）",
+      "font_family": "SimSun",
+      "size_pt": 7.5,
+      "color": "#20252A",
+      "left": 3012.0,
+      "top": 267.0,
+      "width": 64.0,
+      "height": 64.0
+    },
+    {
+      "layer": 3,
+      "name": "MorrisText40",
+      "text": "参数排名",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 3936.0,
+      "top": 1724.0,
+      "width": 234.0,
+      "height": 60.0
+    },
+    {
+      "layer": 3,
+      "name": "MorrisText41",
+      "text": "单项得分前四",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#175979",
+      "left": 2982.0,
+      "top": 873.0,
+      "width": 350.0,
+      "height": 60.0
+    },
+    {
+      "layer": 3,
+      "name": "MorrisText42",
+      "text": "1  PGEFF  10.8%",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#175979",
+      "left": 2982.0,
+      "top": 997.0,
+      "width": 412.0,
+      "height": 69.0
+    },
+    {
+      "layer": 3,
+      "name": "MorrisText43",
+      "text": "2  EM-FL  10.0%",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#175979",
+      "left": 2982.0,
+      "top": 1111.0,
+      "width": 412.0,
+      "height": 69.0
+    },
+    {
+      "layer": 3,
+      "name": "MorrisText44",
+      "text": "3  TO12  8.2%",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#175979",
+      "left": 3587.0,
+      "top": 997.0,
+      "width": 347.0,
+      "height": 69.0
+    },
+    {
+      "layer": 3,
+      "name": "MorrisText45",
+      "text": "4  TRIFL  7.9%",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#175979",
+      "left": 3587.0,
+      "top": 1111.0,
+      "width": 370.0,
+      "height": 69.0
+    },
+    {
+      "layer": 4,
+      "name": "MorrisText46",
+      "text": "截点附近（排名",
+      "font_family": "SimSun",
+      "size_pt": 8.0,
+      "color": "#20252A",
+      "left": 2593.0,
+      "top": 1867.0,
+      "width": 471.0,
+      "height": 69.0
+    },
+    {
+      "layer": 4,
+      "name": "MorrisText47",
+      "text": " 48–72",
+      "font_family": "Times New Roman",
+      "size_pt": 8.0,
+      "color": "#20252A",
+      "left": 3064.0,
+      "top": 1867.0,
+      "width": 189.0,
+      "height": 78.0
+    },
+    {
+      "layer": 4,
+      "name": "MorrisText48",
+      "text": "）",
+      "font_family": "SimSun",
+      "size_pt": 8.0,
+      "color": "#20252A",
+      "left": 3253.0,
+      "top": 1867.0,
+      "width": 69.0,
+      "height": 69.0
+    },
+    {
+      "layer": 4,
+      "name": "MorrisText49",
+      "text": "52 PROSHI · 98.018%",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#175979",
+      "left": 2645.0,
+      "top": 2085.0,
+      "width": 537.0,
+      "height": 69.0
+    },
+    {
+      "layer": 4,
+      "name": "MorrisText50",
+      "text": "98%",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#7D8993",
+      "left": 4041.0,
+      "top": 2538.0,
+      "width": 108.0,
+      "height": 69.0
+    },
+    {
+      "layer": 4,
+      "name": "MorrisText51",
+      "text": "阈值外补充（排名）",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#A24915",
+      "left": 2593.0,
+      "top": 2871.0,
+      "width": 524.0,
+      "height": 60.0
+    },
+    {
+      "layer": 4,
+      "name": "MorrisText52",
+      "text": "53  YLEAF(4)",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#A24915",
+      "left": 2593.0,
+      "top": 2985.0,
+      "width": 340.0,
+      "height": 69.0
+    },
+    {
+      "layer": 4,
+      "name": "MorrisText53",
+      "text": "54  RTNO3",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#A24915",
+      "left": 3122.0,
+      "top": 2985.0,
+      "width": 277.0,
+      "height": 69.0
+    },
+    {
+      "layer": 4,
+      "name": "MorrisText54",
+      "text": "55  NVSMOB",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#A24915",
+      "left": 3652.0,
+      "top": 2985.0,
+      "width": 338.0,
+      "height": 69.0
+    },
+    {
+      "layer": 4,
+      "name": "MorrisText55",
+      "text": "57  RWUEP1",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#A24915",
+      "left": 2593.0,
+      "top": 3079.0,
+      "width": 322.0,
+      "height": 69.0
+    },
+    {
+      "layer": 4,
+      "name": "MorrisText56",
+      "text": "59  RWUMX",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#A24915",
+      "left": 3122.0,
+      "top": 3079.0,
+      "width": 320.0,
+      "height": 69.0
+    },
+    {
+      "layer": 4,
+      "name": "MorrisText57",
+      "text": "68  PROLFF",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#A24915",
+      "left": 3652.0,
+      "top": 3079.0,
+      "width": 299.0,
+      "height": 69.0
+    },
+    {
+      "layer": 5,
+      "name": "MorrisText58",
+      "text": "组内归一化重要性（",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 410.0,
+      "top": 2688.0,
+      "width": 524.0,
+      "height": 60.0
+    },
+    {
+      "layer": 5,
+      "name": "MorrisText59",
+      "text": "%",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 934.0,
+      "top": 2688.0,
+      "width": 50.0,
+      "height": 69.0
+    },
+    {
+      "layer": 5,
+      "name": "MorrisText60",
+      "text": "）",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#20252A",
+      "left": 984.0,
+      "top": 2688.0,
+      "width": 60.0,
+      "height": 60.0
+    },
+    {
+      "layer": 5,
+      "name": "MorrisText61",
+      "text": "跨季秩相关",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#175979",
+      "left": 410.0,
+      "top": 3014.0,
+      "width": 292.0,
+      "height": 60.0
+    },
+    {
+      "layer": 5,
+      "name": "MorrisText62",
+      "text": " ρ = 0.937–0.994",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#175979",
+      "left": 702.0,
+      "top": 3014.0,
+      "width": 400.0,
+      "height": 69.0
+    },
+    {
+      "layer": 5,
+      "name": "MorrisText63",
+      "text": "前",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#7D8993",
+      "left": 1469.0,
+      "top": 2802.0,
+      "width": 60.0,
+      "height": 60.0
+    },
+    {
+      "layer": 5,
+      "name": "MorrisText64",
+      "text": " 10 ",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#7D8993",
+      "left": 1529.0,
+      "top": 2802.0,
+      "width": 90.0,
+      "height": 69.0
+    },
+    {
+      "layer": 5,
+      "name": "MorrisText65",
+      "text": "项及",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#7D8993",
+      "left": 1619.0,
+      "top": 2802.0,
+      "width": 118.0,
+      "height": 60.0
+    },
+    {
+      "layer": 5,
+      "name": "MorrisText66",
+      "text": " 6 ",
+      "font_family": "Times New Roman",
+      "size_pt": 7.0,
+      "color": "#7D8993",
+      "left": 1737.0,
+      "top": 2802.0,
+      "width": 61.0,
+      "height": 69.0
+    },
+    {
+      "layer": 5,
+      "name": "MorrisText67",
+      "text": "项补充",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#7D8993",
+      "left": 1798.0,
+      "top": 2802.0,
+      "width": 176.0,
+      "height": 60.0
+    },
+    {
+      "layer": 5,
+      "name": "MorrisText68",
+      "text": "棕色为阈值外补充",
+      "font_family": "SimSun",
+      "size_pt": 7.0,
+      "color": "#A24915",
+      "left": 1469.0,
+      "top": 2933.0,
+      "width": 466.0,
+      "height": 60.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText69",
+      "text": "双季有效配对轨迹",
+      "font_family": "SimSun",
+      "size_pt": 6.5,
+      "color": "#647078",
+      "left": 86.0,
+      "top": 3167.0,
+      "width": 434.0,
+      "height": 56.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText70",
+      "text": " 40 ",
+      "font_family": "Times New Roman",
+      "size_pt": 6.5,
+      "color": "#647078",
+      "left": 520.0,
+      "top": 3167.0,
+      "width": 84.0,
+      "height": 63.0
+    },
+    {
+      "layer": 1,
+      "name": "MorrisText71",
+      "text": "条；科学审查待完成",
+      "font_family": "SimSun",
+      "size_pt": 6.5,
+      "color": "#647078",
+      "left": 604.0,
+      "top": 3167.0,
+      "width": 488.0,
+      "height": 56.0
+    }
+  ],
+  "plot_count": 9,
+  "source_tables": [
+    {
+      "range": "[Book2]1",
+      "rows": 224,
+      "columns": [
+        "season_id",
+        "response_group",
+        "parameter",
+        "group_score",
+        "score_percent",
+        "display_order",
+        "process_order"
+      ],
+      "source": "morris_heatmap.csv"
+    },
+    {
+      "range": "[Book3]1",
+      "rows": 126,
+      "columns": [
+        "parameter",
+        "core_rank",
+        "core_score",
+        "core_cumulative",
+        "selection",
+        "score_percent",
+        "cumulative_percent"
+      ],
+      "source": "morris_elbow.csv"
+    },
+    {
+      "range": "[Book4]1",
+      "rows": 7,
+      "columns": [
+        "response_group",
+        "rho",
+        "rho_ci_low",
+        "rho_ci_high",
+        "overlap",
+        "overlap_ci_low",
+        "overlap_ci_high",
+        "jaccard",
+        "jaccard_ci_low",
+        "jaccard_ci_high",
+        "n_top25",
+        "n_top26",
+        "shared_top10",
+        "valid_paired_bootstrap"
+      ],
+      "source": "cross_season_stability.csv"
+    },
+    {
+      "range": "[Book5]1",
+      "rows": 58,
+      "columns": [
+        "parameter",
+        "location",
+        "core_rank",
+        "core_score",
+        "core_cumulative_at_rank",
+        "morris_lower",
+        "morris_upper",
+        "selection",
+        "selection_note",
+        "previous_80x4_active",
+        "26SP_direct_W2_W1_rank",
+        "26SP_direct_N2_N0_rank",
+        "26SP_direct_VWC_rank"
+      ],
+      "source": "selected_parameters.csv"
+    },
+    {
+      "range": "[Book6]1",
+      "rows": 6,
+      "columns": [
+        "score",
+        "core_52",
+        "proposed_58"
+      ],
+      "source": "coverage_by_response.csv"
+    }
+  ],
+  "matrix": [
+    {
+      "sheet": "[MBook1]1",
+      "values": [
+        [
+          0.0,
+          0.02578680945287,
+          0.06023500862336,
+          0.02846738066758,
+          0.16295126024924,
+          0.19819530381172,
+          0.3061686265401699
+        ],
+        [
+          0.0,
+          0.13876115895589,
+          0.15433349014403,
+          0.07712748800797,
+          0.24112138456626,
+          0.15527116042346,
+          0.32990214679442
+        ],
+        [
+          0.0,
+          0.22209465668856,
+          0.12694030346913,
+          0.0650403974579,
+          0.29593763024355,
+          0.18074219748765,
+          0.33180041791991
+        ],
+        [
+          0.0,
+          0.13490233147353,
+          0.16197237646763,
+          0.10756362292657,
+          0.37850179069092,
+          0.79473066507603,
+          0.66891611350196
+        ],
+        [
+          0.0,
+          0.14029708960854,
+          0.18820967759331,
+          0.0755273953591099,
+          0.33264572682204,
+          0.49577863099859,
+          0.6943361440933999
+        ],
+        [
+          0.0,
+          0.29121655544139,
+          0.26663511876681,
+          0.09508585267962,
+          0.27226119879978,
+          0.31661428989334,
+          0.43144352814226
+        ],
+        [
+          7.47394620121892,
+          0.69580213290114,
+          0.76969215730571,
+          0.94230124114871,
+          0.94674470790833,
+          0.60756220499961,
+          0.7586503067425899
+        ],
+        [
+          6.37757305289773,
+          0.6568975821341699,
+          0.91511331798239,
+          1.47297180467301,
+          1.12176009901413,
+          0.8337455381939101,
+          1.00232106695513
+        ],
+        [
+          12.27400667660407,
+          0.92634432258949,
+          1.14247652919704,
+          1.06790987413426,
+          1.34523658971288,
+          1.07984079486878,
+          0.94545139613113
+        ],
+        [
+          17.45933106322717,
+          0.61414619846142,
+          0.96275744583849,
+          2.8164566689966497,
+          2.18521550789426,
+          1.3694614623747,
+          1.47894112747997
+        ],
+        [
+          0.03445805393857,
+          12.45589332141136,
+          6.56986669079339,
+          5.95925129516268,
+          4.86412291399628,
+          6.880399484286,
+          4.69019222791721
+        ],
+        [
+          0.0,
+          10.47609442899531,
+          10.39283363447377,
+          6.566854984573,
+          6.24057786743321,
+          7.77829442162445,
+          6.459817746416601
+        ],
+        [
+          0.0,
+          12.835980611257538,
+          12.0636905164271,
+          7.868754378802111,
+          9.21384409503197,
+          7.67721382949945,
+          6.86102332557616
+        ],
+        [
+          24.25641259407492,
+          2.64601478284893,
+          2.9352923545473,
+          3.28507860288894,
+          2.31136665985523,
+          2.06106298236825,
+          1.76735197641411
+        ],
+        [
+          32.12427235803859,
+          2.57536892100305,
+          2.97651615804908,
+          2.00076616829951,
+          1.73933937742413,
+          1.61506143679053,
+          1.46220612532263
+        ],
+        [
+          0.0,
+          14.02795552266827,
+          16.6166380776621,
+          12.90285078102467,
+          9.32682788662813,
+          13.81294968202636,
+          12.06863797784602
+        ]
+      ],
+      "rows": [
+        "PROLFF",
+        "RWUMX",
+        "RWUEP1",
+        "NVSMOB",
+        "RTNO3",
+        "YLEAF(4)",
+        "TO22",
+        "TM2",
+        "TB2",
+        "FL-SD",
+        "SLAVR",
+        "TO11",
+        "TRIFL",
+        "TO12",
+        "EM-FL",
+        "PGEFF"
+      ],
+      "columns": [
+        "phenology",
+        "canopy",
+        "biomass",
+        "yield_harvest",
+        "water_response",
+        "nitrogen_response",
+        "water_nitrogen_interaction"
+      ],
+      "zlim": [
+        0,
+        35
+      ]
+    },
+    {
+      "sheet": "[MBook2]1",
+      "values": [
+        [
+          0.0,
+          0.0236645335284,
+          0.0991343332673899,
+          0.16501456977204,
+          0.18592802024994,
+          0.23004384431646,
+          0.32704661748644
+        ],
+        [
+          0.0,
+          0.1213858018983,
+          0.15212359446592,
+          0.07136651541709,
+          0.59842784380851,
+          0.13226603266583,
+          0.35625634691113
+        ],
+        [
+          0.0,
+          0.1998534186196,
+          0.13354682173422,
+          0.0566712184924299,
+          0.4262445845878599,
+          0.1241178390039599,
+          0.32279618792166
+        ],
+        [
+          0.0,
+          0.11307805375891,
+          0.2315568757500999,
+          0.14974171834761,
+          0.36760697501599,
+          0.5716606847521599,
+          0.72214068820849
+        ],
+        [
+          0.0,
+          0.14027652598126,
+          0.2384039699402,
+          0.17879038369796,
+          0.6716203798445299,
+          0.56568798388776,
+          1.30151592380329
+        ],
+        [
+          0.0,
+          0.24717266847783,
+          0.17812007813067,
+          0.1214860698719999,
+          0.23684463480617,
+          0.37553533444967,
+          0.52456852092855
+        ],
+        [
+          7.67372055866375,
+          0.6635487372586399,
+          0.83298205764884,
+          0.95330634415229,
+          0.94750738210975,
+          0.57748439912494,
+          0.8205431736474301
+        ],
+        [
+          7.543326549727131,
+          0.84358497762228,
+          1.06987732294806,
+          1.41013901802504,
+          1.37153638129446,
+          1.07563756853718,
+          1.36909438583941
+        ],
+        [
+          11.66755908172541,
+          0.9258874678361,
+          1.1523755368692,
+          1.07559595924823,
+          1.33504202074779,
+          1.14654245714069,
+          1.35798177554474
+        ],
+        [
+          17.33465193138456,
+          0.65936659721675,
+          1.0755975259533,
+          2.06607345875422,
+          1.81531385757798,
+          1.36169348752861,
+          1.6512496570256
+        ],
+        [
+          0.02285191956124,
+          12.51375382851303,
+          6.90907965818026,
+          6.65024409018676,
+          4.6658769005228296,
+          6.87727823251407,
+          3.92494391539583
+        ],
+        [
+          0.05820721769499,
+          10.28610420818448,
+          9.52637822926279,
+          6.35405125133863,
+          5.491147269532419,
+          7.80143623434286,
+          4.6063610245963496
+        ],
+        [
+          0.0,
+          11.90441336599224,
+          10.34163973021551,
+          8.229494818208929,
+          8.15422463082578,
+          7.23917736688665,
+          4.50284988244508
+        ],
+        [
+          23.56748613313914,
+          2.69648371790052,
+          2.99134251285512,
+          3.03344635716808,
+          2.25270279391746,
+          2.19688320550282,
+          2.00185110797816
+        ],
+        [
+          32.13219660810374,
+          2.62000474592226,
+          3.135690221518049,
+          2.15450578804872,
+          1.7602561637400802,
+          1.50659967527385,
+          1.67134533997123
+        ],
+        [
+          0.0,
+          13.72568429269701,
+          15.85635697545658,
+          12.954568490069173,
+          8.32879972965104,
+          14.753896225561,
+          8.62995629719277
+        ]
+      ],
+      "rows": [
+        "PROLFF",
+        "RWUMX",
+        "RWUEP1",
+        "NVSMOB",
+        "RTNO3",
+        "YLEAF(4)",
+        "TO22",
+        "TM2",
+        "TB2",
+        "FL-SD",
+        "SLAVR",
+        "TO11",
+        "TRIFL",
+        "TO12",
+        "EM-FL",
+        "PGEFF"
+      ],
+      "columns": [
+        "phenology",
+        "canopy",
+        "biomass",
+        "yield_harvest",
+        "water_response",
+        "nitrogen_response",
+        "water_nitrogen_interaction"
+      ],
+      "zlim": [
+        0,
+        35
+      ]
+    },
+    {
+      "sheet": "[MBook3]1",
+      "values": [
+        [
+          0.0,
+          0.25,
+          0.5,
+          0.75,
+          1.0,
+          1.25,
+          1.5,
+          1.75,
+          2.0,
+          2.25,
+          2.5,
+          2.75,
+          3.0,
+          3.25,
+          3.5,
+          3.75,
+          4.0,
+          4.25,
+          4.5,
+          4.75,
+          5.0,
+          5.25,
+          5.5,
+          5.75,
+          6.0,
+          6.25,
+          6.5,
+          6.75,
+          7.0,
+          7.25,
+          7.5,
+          7.75,
+          8.0,
+          8.25,
+          8.5,
+          8.75,
+          9.0,
+          9.25,
+          9.5,
+          9.75,
+          10.0,
+          10.25,
+          10.5,
+          10.75,
+          11.0,
+          11.25,
+          11.5,
+          11.75,
+          12.0,
+          12.25,
+          12.5,
+          12.75,
+          13.0,
+          13.25,
+          13.5,
+          13.75,
+          14.0,
+          14.25,
+          14.5,
+          14.75,
+          15.0,
+          15.25,
+          15.5,
+          15.75,
+          16.0,
+          16.25,
+          16.5,
+          16.75,
+          17.0,
+          17.25,
+          17.5,
+          17.75,
+          18.0,
+          18.25,
+          18.5,
+          18.75,
+          19.0,
+          19.25,
+          19.5,
+          19.75,
+          20.0,
+          20.25,
+          20.5,
+          20.75,
+          21.0,
+          21.25,
+          21.5,
+          21.75,
+          22.0,
+          22.25,
+          22.5,
+          22.75,
+          23.0,
+          23.25,
+          23.5,
+          23.75,
+          24.0,
+          24.25,
+          24.5,
+          24.75,
+          25.0,
+          25.25,
+          25.5,
+          25.75,
+          26.0,
+          26.25,
+          26.5,
+          26.75,
+          27.0,
+          27.25,
+          27.5,
+          27.75,
+          28.0,
+          28.25,
+          28.5,
+          28.75,
+          29.0,
+          29.25,
+          29.5,
+          29.75,
+          30.0,
+          30.25,
+          30.5,
+          30.75,
+          31.0,
+          31.25,
+          31.5,
+          31.75,
+          32.0,
+          32.25,
+          32.5,
+          32.75,
+          33.0,
+          33.25,
+          33.5,
+          33.75,
+          34.0,
+          34.25,
+          34.5,
+          34.75,
+          35.0
+        ],
+        [
+          0.0,
+          0.25,
+          0.5,
+          0.75,
+          1.0,
+          1.25,
+          1.5,
+          1.75,
+          2.0,
+          2.25,
+          2.5,
+          2.75,
+          3.0,
+          3.25,
+          3.5,
+          3.75,
+          4.0,
+          4.25,
+          4.5,
+          4.75,
+          5.0,
+          5.25,
+          5.5,
+          5.75,
+          6.0,
+          6.25,
+          6.5,
+          6.75,
+          7.0,
+          7.25,
+          7.5,
+          7.75,
+          8.0,
+          8.25,
+          8.5,
+          8.75,
+          9.0,
+          9.25,
+          9.5,
+          9.75,
+          10.0,
+          10.25,
+          10.5,
+          10.75,
+          11.0,
+          11.25,
+          11.5,
+          11.75,
+          12.0,
+          12.25,
+          12.5,
+          12.75,
+          13.0,
+          13.25,
+          13.5,
+          13.75,
+          14.0,
+          14.25,
+          14.5,
+          14.75,
+          15.0,
+          15.25,
+          15.5,
+          15.75,
+          16.0,
+          16.25,
+          16.5,
+          16.75,
+          17.0,
+          17.25,
+          17.5,
+          17.75,
+          18.0,
+          18.25,
+          18.5,
+          18.75,
+          19.0,
+          19.25,
+          19.5,
+          19.75,
+          20.0,
+          20.25,
+          20.5,
+          20.75,
+          21.0,
+          21.25,
+          21.5,
+          21.75,
+          22.0,
+          22.25,
+          22.5,
+          22.75,
+          23.0,
+          23.25,
+          23.5,
+          23.75,
+          24.0,
+          24.25,
+          24.5,
+          24.75,
+          25.0,
+          25.25,
+          25.5,
+          25.75,
+          26.0,
+          26.25,
+          26.5,
+          26.75,
+          27.0,
+          27.25,
+          27.5,
+          27.75,
+          28.0,
+          28.25,
+          28.5,
+          28.75,
+          29.0,
+          29.25,
+          29.5,
+          29.75,
+          30.0,
+          30.25,
+          30.5,
+          30.75,
+          31.0,
+          31.25,
+          31.5,
+          31.75,
+          32.0,
+          32.25,
+          32.5,
+          32.75,
+          33.0,
+          33.25,
+          33.5,
+          33.75,
+          34.0,
+          34.25,
+          34.5,
+          34.75,
+          35.0
+        ]
+      ],
+      "rows": [],
+      "columns": [],
+      "zlim": [
+        0,
+        35
+      ]
+    }
+  ],
+  "status": "passed_native_reopen_and_visual_review",
+  "data_status": "science_pending",
+  "scientific_status_promoted": false,
+  "source_hashes": {
+    "morris_heatmap.csv": "eea0ff92a833b99fdaad349f8fea3aa7edbd77b16a7bdcdaf813cc26641a7a4b",
+    "morris_elbow.csv": "f6f43e8e7eed3a49464818bfe5cb73c92383309e902d843ed8324373ccfafe68",
+    "cross_season_stability.csv": "bcbe8aec67f0b2d33d5459cac6f3c39f6d98bf30005fd450e54036a9338d74df",
+    "selected_parameters.csv": "e6f4377e9b5b9d0d6dd82ed3a8771694f3fb8049d0fdadcdf2597320343d2ce2",
+    "coverage_by_response.csv": "ea86d07800d5fdca23c79d9e1401e35149b606f6e20790910ed4357cfa777827"
+  },
+  "environment": {
+    "origin_version": "10.10",
+    "origin_version_raw": 10.100178,
+    "origin_product": "2024",
+    "origin_compatibility_status": "compatible_unverified",
+    "origin_supported_by_originpro": true,
+    "origin_verified_baseline": false,
+    "originpro_version": "1.1.15",
+    "originext_version": "1.2.5",
+    "python_version": "3.12.14",
+    "python_architecture_bits": 64,
+    "connection_mode": "new_isolated",
+    "session_ownership": "editaplot"
+  },
+  "origin_axis_state": {
+    "1": {
+      "x": {
+        "limits": [
+          0.5,
+          7.5,
+          1
+        ],
+        "font_code": 349,
+        "size_pt": 7.0
+      },
+      "y": {
+        "limits": [
+          0.5,
+          16.5,
+          1
+        ],
+        "font_code": 349,
+        "size_pt": 7.0
+      }
+    },
+    "2": {
+      "x": {
+        "limits": [
+          0.5,
+          7.5,
+          1
+        ],
+        "font_code": 349,
+        "size_pt": 7.0
+      },
+      "y": {
+        "limits": [
+          0.5,
+          16.5,
+          1
+        ],
+        "font_code": 349,
+        "size_pt": 7.0
+      }
+    },
+    "3": {
+      "x": {
+        "limits": [
+          0,
+          128,
+          25
+        ],
+        "font_code": 349,
+        "size_pt": 7.0
+      },
+      "y": {
+        "limits": [
+          0,
+          104,
+          25
+        ],
+        "font_code": 349,
+        "size_pt": 7.0
+      }
+    },
+    "4": {
+      "x": {
+        "limits": [
+          48,
+          72,
+          4
+        ],
+        "font_code": 349,
+        "size_pt": 7.0
+      },
+      "y": {
+        "limits": [
+          97.2,
+          99.65,
+          0.8
+        ],
+        "font_code": 349,
+        "size_pt": 7.0
+      }
+    },
+    "5": {
+      "x": {
+        "limits": [
+          0,
+          35,
+          5
+        ],
+        "font_code": 349,
+        "size_pt": 7.0
+      },
+      "y": {
+        "limits": [
+          0.5,
+          2.5,
+          1
+        ],
+        "font_code": 349,
+        "size_pt": 7.0
+      }
+    }
+  },
+  "origin_text_state": {
+    "MorrisText1": {
+      "text": "(a) ",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 9.0
+    },
+    "MorrisText2": {
+      "text": "双季过程敏感性",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 9.0
+    },
+    "MorrisText3": {
+      "text": "25SP",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 8.0
+    },
+    "MorrisText4": {
+      "text": "PGEFF",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText5": {
+      "text": "EM-FL",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText6": {
+      "text": "TO12",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText7": {
+      "text": "TRIFL",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText8": {
+      "text": "TO11",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText9": {
+      "text": "SLAVR",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText10": {
+      "text": "FL-SD",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText11": {
+      "text": "TB2",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText12": {
+      "text": "TM2",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText13": {
+      "text": "TO22",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText14": {
+      "text": "YLEAF(4)",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText15": {
+      "text": "RTNO3",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText16": {
+      "text": "NVSMOB",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText17": {
+      "text": "RWUEP1",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText18": {
+      "text": "RWUMX",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText19": {
+      "text": "PROLFF",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText20": {
+      "text": "物候",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText21": {
+      "text": "冠层",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText22": {
+      "text": "生物量",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText23": {
+      "text": "产量",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText24": {
+      "text": "灌溉响应",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText25": {
+      "text": "施氮响应",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText26": {
+      "text": "水氮交互",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText27": {
+      "text": "26SP",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 8.0
+    },
+    "MorrisText28": {
+      "text": "物候",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText29": {
+      "text": "冠层",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText30": {
+      "text": "生物量",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText31": {
+      "text": "产量",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText32": {
+      "text": "灌溉响应",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText33": {
+      "text": "施氮响应",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText34": {
+      "text": "水氮交互",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText35": {
+      "text": "(b) Morris ",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 9.0
+    },
+    "MorrisText36": {
+      "text": "累计重要性与参数筛选",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 9.0
+    },
+    "MorrisText37": {
+      "text": "累计重要性（",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.5
+    },
+    "MorrisText38": {
+      "text": "%",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.5
+    },
+    "MorrisText39": {
+      "text": "）",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.5
+    },
+    "MorrisText40": {
+      "text": "参数排名",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText41": {
+      "text": "单项得分前四",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText42": {
+      "text": "1  PGEFF  10.8%",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText43": {
+      "text": "2  EM-FL  10.0%",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText44": {
+      "text": "3  TO12  8.2%",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText45": {
+      "text": "4  TRIFL  7.9%",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText46": {
+      "text": "截点附近（排名",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 8.0
+    },
+    "MorrisText47": {
+      "text": " 48–72",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 8.0
+    },
+    "MorrisText48": {
+      "text": "）",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 8.0
+    },
+    "MorrisText49": {
+      "text": "52 PROSHI · 98.018%",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText50": {
+      "text": "98%",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText51": {
+      "text": "阈值外补充（排名）",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText52": {
+      "text": "53  YLEAF(4)",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText53": {
+      "text": "54  RTNO3",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText54": {
+      "text": "55  NVSMOB",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText55": {
+      "text": "57  RWUEP1",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText56": {
+      "text": "59  RWUMX",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText57": {
+      "text": "68  PROLFF",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText58": {
+      "text": "组内归一化重要性（",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText59": {
+      "text": "%",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText60": {
+      "text": "）",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText61": {
+      "text": "跨季秩相关",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText62": {
+      "text": " ρ = 0.937–0.994",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText63": {
+      "text": "前",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText64": {
+      "text": " 10 ",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText65": {
+      "text": "项及",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText66": {
+      "text": " 6 ",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 7.0
+    },
+    "MorrisText67": {
+      "text": "项补充",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText68": {
+      "text": "棕色为阈值外补充",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 7.0
+    },
+    "MorrisText69": {
+      "text": "双季有效配对轨迹",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 6.5
+    },
+    "MorrisText70": {
+      "text": " 40 ",
+      "font_code": 349,
+      "family": "Times New Roman",
+      "size_pt": 6.5
+    },
+    "MorrisText71": {
+      "text": "条；科学审查待完成",
+      "font_code": 326,
+      "family": "SimSun",
+      "size_pt": 6.5
+    }
+  },
+  "font_contract": {
+    "mode": "per_object_v1",
+    "expected_by_path": {
+      "origin_axis_state.1.x.font_code": 349,
+      "origin_axis_state.1.y.font_code": 349,
+      "origin_axis_state.2.x.font_code": 349,
+      "origin_axis_state.2.y.font_code": 349,
+      "origin_axis_state.3.x.font_code": 349,
+      "origin_axis_state.3.y.font_code": 349,
+      "origin_axis_state.4.x.font_code": 349,
+      "origin_axis_state.4.y.font_code": 349,
+      "origin_axis_state.5.x.font_code": 349,
+      "origin_axis_state.5.y.font_code": 349,
+      "origin_text_state.MorrisText1.font_code": 349,
+      "origin_text_state.MorrisText2.font_code": 326,
+      "origin_text_state.MorrisText3.font_code": 349,
+      "origin_text_state.MorrisText4.font_code": 349,
+      "origin_text_state.MorrisText5.font_code": 349,
+      "origin_text_state.MorrisText6.font_code": 349,
+      "origin_text_state.MorrisText7.font_code": 349,
+      "origin_text_state.MorrisText8.font_code": 349,
+      "origin_text_state.MorrisText9.font_code": 349,
+      "origin_text_state.MorrisText10.font_code": 349,
+      "origin_text_state.MorrisText11.font_code": 349,
+      "origin_text_state.MorrisText12.font_code": 349,
+      "origin_text_state.MorrisText13.font_code": 349,
+      "origin_text_state.MorrisText14.font_code": 349,
+      "origin_text_state.MorrisText15.font_code": 349,
+      "origin_text_state.MorrisText16.font_code": 349,
+      "origin_text_state.MorrisText17.font_code": 349,
+      "origin_text_state.MorrisText18.font_code": 349,
+      "origin_text_state.MorrisText19.font_code": 349,
+      "origin_text_state.MorrisText20.font_code": 326,
+      "origin_text_state.MorrisText21.font_code": 326,
+      "origin_text_state.MorrisText22.font_code": 326,
+      "origin_text_state.MorrisText23.font_code": 326,
+      "origin_text_state.MorrisText24.font_code": 326,
+      "origin_text_state.MorrisText25.font_code": 326,
+      "origin_text_state.MorrisText26.font_code": 326,
+      "origin_text_state.MorrisText27.font_code": 349,
+      "origin_text_state.MorrisText28.font_code": 326,
+      "origin_text_state.MorrisText29.font_code": 326,
+      "origin_text_state.MorrisText30.font_code": 326,
+      "origin_text_state.MorrisText31.font_code": 326,
+      "origin_text_state.MorrisText32.font_code": 326,
+      "origin_text_state.MorrisText33.font_code": 326,
+      "origin_text_state.MorrisText34.font_code": 326,
+      "origin_text_state.MorrisText35.font_code": 349,
+      "origin_text_state.MorrisText36.font_code": 326,
+      "origin_text_state.MorrisText37.font_code": 326,
+      "origin_text_state.MorrisText38.font_code": 349,
+      "origin_text_state.MorrisText39.font_code": 326,
+      "origin_text_state.MorrisText40.font_code": 326,
+      "origin_text_state.MorrisText41.font_code": 326,
+      "origin_text_state.MorrisText42.font_code": 349,
+      "origin_text_state.MorrisText43.font_code": 349,
+      "origin_text_state.MorrisText44.font_code": 349,
+      "origin_text_state.MorrisText45.font_code": 349,
+      "origin_text_state.MorrisText46.font_code": 326,
+      "origin_text_state.MorrisText47.font_code": 349,
+      "origin_text_state.MorrisText48.font_code": 326,
+      "origin_text_state.MorrisText49.font_code": 349,
+      "origin_text_state.MorrisText50.font_code": 349,
+      "origin_text_state.MorrisText51.font_code": 326,
+      "origin_text_state.MorrisText52.font_code": 349,
+      "origin_text_state.MorrisText53.font_code": 349,
+      "origin_text_state.MorrisText54.font_code": 349,
+      "origin_text_state.MorrisText55.font_code": 349,
+      "origin_text_state.MorrisText56.font_code": 349,
+      "origin_text_state.MorrisText57.font_code": 349,
+      "origin_text_state.MorrisText58.font_code": 326,
+      "origin_text_state.MorrisText59.font_code": 349,
+      "origin_text_state.MorrisText60.font_code": 326,
+      "origin_text_state.MorrisText61.font_code": 326,
+      "origin_text_state.MorrisText62.font_code": 349,
+      "origin_text_state.MorrisText63.font_code": 326,
+      "origin_text_state.MorrisText64.font_code": 349,
+      "origin_text_state.MorrisText65.font_code": 326,
+      "origin_text_state.MorrisText66.font_code": 349,
+      "origin_text_state.MorrisText67.font_code": 326,
+      "origin_text_state.MorrisText68.font_code": 326,
+      "origin_text_state.MorrisText69.font_code": 326,
+      "origin_text_state.MorrisText70.font_code": 349,
+      "origin_text_state.MorrisText71.font_code": 326
+    }
+  },
+  "source_data_modified": false,
+  "exports": {
+    "png": true,
+    "pdf": true,
+    "tif": true
+  },
+  "independent_reopen": {
+    "passed": true,
+    "source_columns_checked": 44,
+    "native_xy_plots_checked": 9,
+    "matrix_checked": 3,
+    "pixel_identity": true,
+    "project_file_not_modified": true
+  },
+  "known_visual_issue": {
+    "text_overline": "author explicitly accepted deferral on 2026-10-31"
+  },
+  "visual_qa": {
+    "status": "passed_with_author_accepted_overline",
+    "png_reviewed": true,
+    "pdf_reviewed": true,
+    "tif_matches_png": true,
+    "scope": "full figure, axis and label fit, six distinct zoom markers, shared heatmap scale"
+  }
+}

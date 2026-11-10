@@ -1,0 +1,55 @@
+{
+  "schema_version": 2,
+  "created_at": "2026-10-05T15:16:45Z",
+  "renderer": "R 4.5.2",
+  "package_versions": {
+    "ggplot2": "4.0.3",
+    "patchwork": "1.3.2",
+    "jsonlite": "2.0.0",
+    "svglite": "2.2.2"
+  },
+  "git_commit": "ed0b24a77941d7f4a07b484879bdae78c806e21a",
+  "git_dirty": true,
+  "profile_id": "general_q1_v1",
+  "profile": {
+    "path": "D:/Tomato_Cal/configs/figures/publication.json",
+    "sha256": "66a7e4cabbbabfad7471068bd70ba79d79a24848b4aba85f14e67e8db45ed58f"
+  },
+  "run_id": "c31_scheme1_dual_spring_precision",
+  "data_status": "legacy_layout_demo",
+  "science_validated": false,
+  "source_is_demo": true,
+  "demo_label_visible": false,
+  "publication_label_note": "User requested paired nitrogen-response curves on 2026-10-05; scientific status unchanged.",
+  "scientific_status_promoted": false,
+  "input_manifest": {
+    "path": "D:/Tomato_Cal/paper/paper_data/terminal/paper_data_manifest.json",
+    "sha256": "4db92b815a71f1859c364bae97d7d8a2775619822a92d8e241d31b1f0ae31b9d"
+  },
+  "artifacts": [
+    {
+      "path": "D:/Tomato_Cal/paper/03_Figures/Main_Figures/Fig6_water_nitrogen_response.pdf",
+      "sha256": "51c0512ee4ab577835e646ff00dfebd52b5dc4ef302c749b41517ed0b7aac797"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/03_Figures/Main_Figures/Fig6_water_nitrogen_response.svg",
+      "sha256": "0134783116cac887a7907e423cdfa875f935e4daef1042692fda82e47316747c"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/03_Figures/Main_Figures/Fig6_water_nitrogen_response.png",
+      "sha256": "06981ca40318eefaf8d58e2e9d2e300d0738f6f594e34e2467642df25c0568b2"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/03_Figures/Main_Figures/Fig6_water_nitrogen_response.source.csv",
+      "sha256": "e10c083fcc6625417f65eb6ed3208cf354df551d42158c5f206a6b51b4be9347"
+    }
+  ],
+  "visual_revision": {
+    "removed_panel": "b",
+    "geometry": "two lines and vertically paired points",
+    "x_axis": "N0,N1,N2,N3; observed and simulated share the same position",
+    "y_axis": "data-driven positive ranges by season; shared across water levels within each season",
+    "values_and_treatment_mapping_unchanged": true,
+    "scientific_status_promoted": false
+  }
+}

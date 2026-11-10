@@ -1,0 +1,55 @@
+{
+  "schema_version": 2,
+  "created_at": "2026-09-27T04:03:09Z",
+  "renderer": "R 4.5.2",
+  "package_versions": {
+    "ggplot2": "4.0.3",
+    "patchwork": "1.3.2",
+    "jsonlite": "2.0.0",
+    "svglite": "2.2.2"
+  },
+  "git_commit": "ed0b24a77941d7f4a07b484879bdae78c806e21a",
+  "git_dirty": true,
+  "profile_id": "general_q1_v1",
+  "profile": {
+    "path": "D:/Tomato_Cal/configs/figures/publication.json",
+    "sha256": "66a7e4cabbbabfad7471068bd70ba79d79a24848b4aba85f14e67e8db45ed58f"
+  },
+  "run_id": "c31_scheme1_dual_spring_precision",
+  "data_status": "legacy_layout_demo",
+  "science_validated": false,
+  "source_is_demo": true,
+  "demo_label_visible": false,
+  "publication_label_note": "User authorized clean C31 champion figures on 2026-09-27; scientific status unchanged.",
+  "scientific_status_promoted": false,
+  "input_manifest": {
+    "path": "D:/Tomato_Cal/paper/paper_data/leaf_n/paper_data_manifest.json",
+    "sha256": "5200a5e4aa3a84b119cbab1556b7b00f8e3ea86e4b069309ed9cee1ab99a55b1"
+  },
+  "artifacts": [
+    {
+      "path": "D:/Tomato_Cal/paper/figures/leaf_n/FigLeafN_leaf_nitrogen.pdf",
+      "sha256": "c06d57afed039b278c5445bbed025ca3a9fa83917402ca7790431bc9aef9f50c"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/leaf_n/FigLeafN_leaf_nitrogen.svg",
+      "sha256": "bcc7cc0bae5ee02b7b6e0dd8cd58d23370f6878a7e5cbb026f97d3f23638194e"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/leaf_n/FigLeafN_leaf_nitrogen.png",
+      "sha256": "ead03d94b633d03ac192d58915ce3db50cb19c05c7ad12d38a1d7e899e353bcb"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/leaf_n/FigLeafN_leaf_nitrogen.source.csv",
+      "sha256": "12063386524337df450be88f2092bd64b2be8f44e07b19df6ca31f11ba366c54"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/leaf_n/FigLeafN_leaf_nitrogen.metrics.csv",
+      "sha256": "0d9953f18e3bd53bf16647ec3a5c9baacf93c88d714c1d1c1f17816afe50c200"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/leaf_n/FigLeafN_leaf_nitrogen.daily_simulation.csv",
+      "sha256": "6adbd2da4380c98f85fff12fb42fd0031542f87be17734b060ef5a654069ba92"
+    }
+  ]
+}

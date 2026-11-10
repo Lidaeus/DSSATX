@@ -64,6 +64,7 @@ def remove_obsolete_dirs():
 
 
 def main():
+    raise SystemExit("Retired alias synchronizer: current bundle IDs are in configs/experiments/current_bundles.json")
     print("Starting bundle synchronization and cleanup...")
     # 1. Sync aliases
     sync_bundle(REFRESH_25, EXP_DIR / "XXQL2501")

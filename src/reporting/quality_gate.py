@@ -57,7 +57,7 @@ def _canonical_real_name(value: object) -> str:
     try:
         number = float(text)
     except (TypeError, ValueError):
-        return text
+        return text.lower()
     if number.is_integer():
         return str(int(number))
     return text
@@ -101,15 +101,15 @@ def _write_member_status(
         if "dropping par:obs realizations:" not in line.lower():
             continue
         payload = re.split(r"dropping\s+par:obs\s+realizations:", line, maxsplit=1, flags=re.IGNORECASE)[1]
-        for match in re.finditer(r"\d+\s*:\s*([^\s,]+)", payload):
-            screened[str(match.group(1))] = "REC: explicit PEST++ realization drop"
+        for match in re.finditer(r"[^\s,:]+\s*:\s*([^\s,]+)", payload):
+            screened[_canonical_real_name(match.group(1))] = "REC: explicit PEST++ realization drop"
     model_failed: dict[str, str] = {}
     for line in rec_text.splitlines():
         if "run failed for run_id" not in line.lower():
             continue
         match = re.search(r"REALIZATION\s*:\s*([^\s,]+)", line, flags=re.IGNORECASE)
         if match:
-            model_failed[str(match.group(1))] = "REC: PEST++ reports model-run failure"
+            model_failed[_canonical_real_name(match.group(1))] = "REC: PEST++ reports model-run failure"
     for evidence_path in (run_dir / "member_failure_evidence.json", run_dir / "agent_failure_evidence.json"):
         if not evidence_path.is_file():
             continue
@@ -118,7 +118,7 @@ def _write_member_status(
             entries = payload if isinstance(payload, list) else payload.get("members", [])
             for item in entries:
                 if isinstance(item, dict) and item.get("real_name") is not None:
-                    model_failed[str(item["real_name"])] = str(item.get("evidence_source") or evidence_path.name)
+                    model_failed[_canonical_real_name(item["real_name"])] = str(item.get("evidence_source") or evidence_path.name)
         except Exception:
             continue
     phi_cols = []

@@ -1,0 +1,53 @@
+{
+  "prepared_at": "2026-10-11T09:02:00.471845+00:00",
+  "source_run": "eggplant_26sp_n012_formal_20261011_r2",
+  "source_design_sha256": "2f58d1cd6e5ff367b28916eaf710c97ff1affad6078540218aa39b0ca3ca7b43",
+  "source_status_sha256": "fb7154e60b9714e5c1fdb461110e64e1444217188adf003efe8cbec97dfe3d2e",
+  "bounds_unchanged": true,
+  "targets_weights_roles_unchanged": true,
+  "source_initial_prior_width_divisor": 8.0,
+  "windows_copy_policy": "reuse SHA-256-identical DSSAT executable; bounded retry of WinError32/33 only",
+  "operational_changes": {
+    "initial_sigma_width_divisor": 8.0,
+    "feasibility_screen_all_initial_members": true,
+    "feasibility_screen_uses_observed_values": false,
+    "ies_bad_phi_sigma": 1e+300,
+    "ies_initial_lambda": 10.0,
+    "lambda_scale_fac": [
+      0.25,
+      0.5
+    ],
+    "ies_lambda_mults": [
+      0.1,
+      1.0,
+      10.0
+    ],
+    "maximum_stage_attempts": 3,
+    "retry_sigma_divisors": [
+      8.0,
+      12.0,
+      16.0
+    ],
+    "retry_initial_lambdas": [
+      10.0,
+      100.0,
+      1000.0
+    ],
+    "retry_scale_factors": [
+      [
+        0.25,
+        0.5
+      ],
+      [
+        0.1,
+        0.25
+      ],
+      [
+        0.05,
+        0.1
+      ]
+    ],
+    "retry_condition": "engineering retention/Phi-finiteness failure only; same anchor, bounds, targets, weights and seed",
+    "ensemble_interpretation": "feasibility-conditioned local optimization ensemble; not a posterior uncertainty sample"
+  }
+}

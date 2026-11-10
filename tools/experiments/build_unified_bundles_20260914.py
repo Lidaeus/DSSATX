@@ -452,6 +452,7 @@ def build_season(src: Path, dst: Path, season: str, excode: str,
 
 
 def main() -> int:
+    raise SystemExit("Retired 2026-09-14 builder: use build_corrected_bundles_20260923.py")
     import argparse
     parser = argparse.ArgumentParser(description="Build unified bundles for 25SP, 26SP, 25FA")
     parser.add_argument("--force", action="store_true", help="Overwrite existing output bundles")

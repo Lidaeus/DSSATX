@@ -25,7 +25,8 @@ build_leaf_nitrogen <- function(comparison, trajectory, treatment_metadata,
   sim_data <- attach_treatment_metadata(sim_data, treatment_metadata, unique(as.character(sim_data$treatment)))
 
   # Ensure nitrogen levels and water levels follow canonical factor orders
-  nitrogen_levels_order <- c("N3", "N2", "N1", "N0")
+  nitrogen_levels_order <- c("N3", "N2", "N1", "N0", "CK")
+  if ("CK" %in% treatment_metadata$nitrogen_level) profile$nitrogen_colors$CK <- "#707070"
   water_levels_order <- c("W3", "W2", "W1", "CK")
   obs_data$nitrogen_level <- factor(obs_data$nitrogen_level, levels = nitrogen_levels_order)
   sim_data$nitrogen_level <- factor(sim_data$nitrogen_level, levels = nitrogen_levels_order)
@@ -78,7 +79,7 @@ build_leaf_nitrogen <- function(comparison, trajectory, treatment_metadata,
   limits <- c(val_min, val_max)
 
   annot_text <- sprintf(
-    "n = %d\nRMSE = %.2f %%\nNRMSE = %.1f %%\nR\u00B2 = %.3f\nd = %.3f\nBias = %+.2f %%",
+    "n = %d\nRMSE = %.2f pp\nNRMSE = %.1f %%\nR\u00B2 = %.3f\nd = %.3f\nBias = %+.2f pp",
     n_pts, rmse, nrmse, r2, d_index, bias
   )
 
@@ -104,7 +105,8 @@ build_leaf_nitrogen <- function(comparison, trajectory, treatment_metadata,
       linewidth = 0, fill = "white", alpha = 0.85
     ) +
     ggplot2::coord_equal(xlim = limits, ylim = limits, expand = FALSE) +
-    management_scales(profile) +
+    ggplot2::scale_fill_manual(values = unlist(profile$nitrogen_colors), guide = "none") +
+    ggplot2::scale_shape_manual(values = unlist(profile$water_shapes), guide = "none") +
     ggplot2::labs(
       title = "Leaf N 1:1 Evaluation",
       x = "Observed leaf N [%]",
@@ -142,7 +144,7 @@ build_leaf_nitrogen <- function(comparison, trajectory, treatment_metadata,
         x = time, y = simulated, colour = nitrogen_level,
         group = interaction(treatment, if ("season_id" %in% names(sim_plot)) season_id else 1)
       ),
-      linewidth = profile$data_linewidth_pt, lineend = "round"
+      linewidth = line_width_mm(profile$data_linewidth_pt), lineend = "round"
     ) +
     (if ("observed_se" %in% names(obs_plot)) {
       err_dyn <- obs_plot[is.finite(obs_plot$observed_se) & obs_plot$observed_se > 0, , drop = FALSE]
@@ -169,8 +171,9 @@ build_leaf_nitrogen <- function(comparison, trajectory, treatment_metadata,
     dynamics_theme(profile)
 
   # 6. Compose with patchwork
-  composite <- (p_scatter | p_dynamics) +
-    patchwork::plot_layout(widths = c(1, 1.75), guides = "collect") +
+  p_scatter <- p_scatter + ggplot2::guides(colour = "none", fill = "none", shape = "none")
+  composite <- (p_scatter / p_dynamics) +
+    patchwork::plot_layout(heights = c(1, 1), guides = "collect") +
     patchwork::plot_annotation(
       tag_levels = "a",
       caption = demo_caption(is_demo),
@@ -180,8 +183,8 @@ build_leaf_nitrogen <- function(comparison, trajectory, treatment_metadata,
       )
     ) &
     ggplot2::theme(
-      legend.position = "top",
-      legend.box = "horizontal",
+      legend.position = "bottom",
+      legend.box = "vertical",
       legend.title = ggplot2::element_text(face = "bold", size = profile$font_size_pt)
     )
 
@@ -190,6 +193,6 @@ build_leaf_nitrogen <- function(comparison, trajectory, treatment_metadata,
     source = obs_data,
     metrics = metrics,
     daily = sim_plot,
-    height_mm = min(profile$max_height_mm, 96.0)
+    height_mm = min(profile$max_height_mm, 158.0)
   )
 }

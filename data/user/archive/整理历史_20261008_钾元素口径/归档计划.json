@@ -1,0 +1,114 @@
+[
+  {
+    "source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\数据准备_20261008",
+    "destination": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\历史审查与过程\\数据准备_20261008",
+    "relative": "数据准备_20261008",
+    "category": "历史审查与过程",
+    "directory": true
+  },
+  {
+    "source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\目录合并记录",
+    "destination": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\历史审查与过程\\目录合并记录",
+    "relative": "目录合并记录",
+    "category": "历史审查与过程",
+    "directory": true
+  },
+  {
+    "source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\数据质控_20261003",
+    "destination": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\历史审查与过程\\数据质控_20261003",
+    "relative": "数据质控_20261003",
+    "category": "历史审查与过程",
+    "directory": true
+  },
+  {
+    "source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\数据质控_20261007",
+    "destination": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\历史审查与过程\\数据质控_20261007",
+    "relative": "数据质控_20261007",
+    "category": "历史审查与过程",
+    "directory": true
+  },
+  {
+    "source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\数据质控_20261008",
+    "destination": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\历史审查与过程\\数据质控_20261008",
+    "relative": "数据质控_20261008",
+    "category": "历史审查与过程",
+    "directory": true
+  },
+  {
+    "source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\generate_dssat_all_seasons.py",
+    "destination": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\旧脚本与操作说明\\generate_dssat_all_seasons.py",
+    "relative": "generate_dssat_all_seasons.py",
+    "category": "旧脚本与操作说明",
+    "directory": false
+  },
+  {
+    "source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\generate_dssat_v2.py",
+    "destination": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\旧脚本与操作说明\\generate_dssat_v2.py",
+    "relative": "generate_dssat_v2.py",
+    "category": "旧脚本与操作说明",
+    "directory": false
+  },
+  {
+    "source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\_check_2025spring_yield.py",
+    "destination": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\旧脚本与操作说明\\_check_2025spring_yield.py",
+    "relative": "_check_2025spring_yield.py",
+    "category": "旧脚本与操作说明",
+    "directory": false
+  },
+  {
+    "source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\_check_data.py",
+    "destination": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\旧脚本与操作说明\\_check_data.py",
+    "relative": "_check_data.py",
+    "category": "旧脚本与操作说明",
+    "directory": false
+  },
+  {
+    "source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\_check_spring_moisture.py",
+    "destination": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\旧脚本与操作说明\\_check_spring_moisture.py",
+    "relative": "_check_spring_moisture.py",
+    "category": "旧脚本与操作说明",
+    "directory": false
+  },
+  {
+    "source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\_inspect_all.py",
+    "destination": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\旧脚本与操作说明\\_inspect_all.py",
+    "relative": "_inspect_all.py",
+    "category": "旧脚本与操作说明",
+    "directory": false
+  },
+  {
+    "source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\_inspect_excel.py",
+    "destination": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\旧脚本与操作说明\\_inspect_excel.py",
+    "relative": "_inspect_excel.py",
+    "category": "旧脚本与操作说明",
+    "directory": false
+  },
+  {
+    "source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\源数据QA记录_20260818.json",
+    "destination": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\旧脚本与操作说明\\源数据QA记录_20260818.json",
+    "relative": "源数据QA记录_20260818.json",
+    "category": "旧脚本与操作说明",
+    "directory": false
+  },
+  {
+    "source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\DSSAT_FileA_FileT_Excel操作指南.md",
+    "destination": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\旧脚本与操作说明\\DSSAT_FileA_FileT_Excel操作指南.md",
+    "relative": "DSSAT_FileA_FileT_Excel操作指南.md",
+    "category": "旧脚本与操作说明",
+    "directory": false
+  },
+  {
+    "source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025秋\\generate_dssat_filea_filet.py",
+    "destination": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\旧脚本与操作说明\\2025秋\\generate_dssat_filea_filet.py",
+    "relative": "2025秋\\generate_dssat_filea_filet.py",
+    "category": "旧脚本与操作说明",
+    "directory": false
+  },
+  {
+    "source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\__pycache__",
+    "destination": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\旧脚本与操作说明\\__pycache__",
+    "relative": "__pycache__",
+    "category": "旧脚本与操作说明",
+    "directory": true
+  }
+]

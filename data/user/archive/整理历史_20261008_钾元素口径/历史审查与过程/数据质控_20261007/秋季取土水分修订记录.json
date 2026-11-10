@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-07",
+  "file": "D:\\三季节数据汇总\\2025秋\\20260106_2号棚取土.xlsx",
+  "cells_changed": "Sheet1!H2:H241",
+  "count": 240,
+  "formula": "(C-D)/(D-B*100)",
+  "raw_weights_unchanged": true,
+  "other_package_components_identical": true,
+  "backup": "D:\\三季节数据汇总\\数据质控_20261007\\修订前备份\\20260106_2号棚取土.xlsx",
+  "sha256_before": "1b6ed0d2d34d3d532244977d5956f306f363729110a783220d91e797aa4d5538",
+  "sha256_after": "786e1ad1202054257ebfa45377ffa1511978c8b7bfe2cef64413ef1de90589f6",
+  "first_value": 0.20516129032258065
+}

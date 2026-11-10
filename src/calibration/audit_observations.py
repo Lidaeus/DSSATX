@@ -125,7 +125,7 @@ def audit_observation_bundle(input_dir: str | Path) -> tuple[dict[str, Any], pd.
         ("HWAHF", "CHFPW", "last"),
         ("LAIX", "LAID", "max"),
         ("LWAM", "LWAD", "last"),
-        ("SNAM", "SNAD", "last"),
+        ("SNAM", "SNAM" if len(_valid_values(t, "SNAM")) else "SNAD", "last"),
     )
     duplicate_fields: list[str] = []
     for summary_column, time_column, operation in comparisons:
@@ -168,18 +168,20 @@ def audit_observation_bundle(input_dir: str | Path) -> tuple[dict[str, Any], pd.
         )
 
     total_n = len(_valid_values(t, "CNAM"))
-    organ_n = len(_valid_values(t, "SNAD")) + len(_valid_values(t, "LNAD"))
+    # The current FileT process reader consumes SNAM/LNAM; historical tables
+    # used SNAD/LNAD. Both are organ N, never a substitute for whole-plant CNAM.
+    organ_n = sum(len(_valid_values(t, column)) for column in ("SNAM", "LNAM", "SNAD", "LNAD"))
     if total_n == 0 and organ_n > 0:
         add(
             "ORGAN_N_WITHOUT_TOTAL_PLANT_N",
             "warning",
-            "SNAD/LNAD are available but CNAM is absent; use organ N only after matching simulated definitions, and do not infer total plant N by silent summation.",
+            "Organ N (SNAM/LNAM or historical SNAD/LNAD) is available but CNAM is absent; use organ N only after matching simulated definitions, and do not infer total plant N by silent summation.",
         )
     elif total_n == 0:
         add(
             "PLANT_N_OBSERVATIONS_UNAVAILABLE",
             "warning",
-            "No usable CNAM/SNAD/LNAD observations are available; N-process parameters need external priors and response-level validation.",
+            "No usable CNAM/SNAM/LNAM/SNAD/LNAD observations are available; N-process parameters need external priors and response-level validation.",
         )
 
     factors = parse_filex(filex)["treatments"]
@@ -215,7 +217,7 @@ def audit_observation_bundle(input_dir: str | Path) -> tuple[dict[str, Any], pd.
         "observation_row_counts": {"FileA": len(a), "FileT": len(t), "harvest_events": len(harvest)},
         "available_counts": {
             column: len(_valid_values(t, column))
-            for column in ("LAID", "SWAD", "LWAD", "CHFPW", "CHPDT", "CNAM", "SNAD", "LNAD")
+            for column in ("LAID", "SWAD", "LWAD", "CHFPW", "CHPDT", "CNAM", "SNAM", "LNAM", "SNAD", "LNAD")
         },
         "bundle_summary": bundle_summary,
         "findings": findings,

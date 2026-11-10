@@ -21,26 +21,31 @@ build_posterior_contraction <- function(data, profile, is_demo = FALSE, posterio
   
   # If detailed posterior sample realizations are available, draw full density distributions
   if (!is.null(posterior_samples) && nrow(posterior_samples) > 0 && "parameter" %in% names(posterior_samples)) {
-    plot_data <- merge(posterior_samples, data, by = "parameter")
+    diagnostics <- data[, required, drop = FALSE]
+    plot_data <- merge(posterior_samples, diagnostics, by = "parameter")
+    plot_data$parameter <- factor(plot_data$parameter, levels = levels(data$parameter))
+    distinct_values <- tapply(plot_data$value, plot_data$parameter, function(x) length(unique(x)))
+    if (any(distinct_values < 2)) stop("Exclude constant parameters from the density bundle")
     
     plot <- ggplot2::ggplot(plot_data, ggplot2::aes(x = value)) +
-      # Prior uniform background band
-      ggplot2::geom_rect(ggplot2::aes(xmin = prior_q05, xmax = prior_q95, ymin = -Inf, ymax = Inf),
+      # Empirical prior 5–95% interval background band
+      ggplot2::geom_rect(data = data, ggplot2::aes(xmin = prior_q05, xmax = prior_q95, ymin = -Inf, ymax = Inf),
+                         inherit.aes = FALSE,
                          fill = "#F2F4F4", colour = "#BDC3C7", linetype = "dashed", linewidth = 0.4, alpha = 0.6) +
       # Posterior Kernel Density Curve
       ggplot2::geom_density(ggplot2::aes(y = ggplot2::after_stat(scaled)),
                             fill = "#3498DB", colour = "#1B4F72", alpha = 0.55, linewidth = 0.8) +
       # Median & Prior lines
-      ggplot2::geom_vline(ggplot2::aes(xintercept = posterior_median), colour = "#C0392B", linewidth = 0.9, linetype = "solid") +
-      ggplot2::geom_vline(ggplot2::aes(xintercept = prior_median), colour = "#7F8C8D", linewidth = 0.7, linetype = "dotted") +
+      ggplot2::geom_vline(data = data, ggplot2::aes(xintercept = posterior_median), colour = "#C0392B", linewidth = 0.9, linetype = "solid") +
+      ggplot2::geom_vline(data = data, ggplot2::aes(xintercept = prior_median), colour = "#7F8C8D", linewidth = 0.7, linetype = "dotted") +
       # Facet by parameter with free scales
       ggplot2::facet_wrap(~parameter, scales = "free", ncol = 4) +
       # Labels & Themes
       ggplot2::labs(
-        title = "Parameter Posterior Density & Prior Contraction Diagnostic",
-        subtitle = "Prior range (shaded dashed box) vs PEST++ IES posterior ensemble density (blue curve), median (red line), prior median (grey dotted)",
+        title = "Conditional-ensemble parameter density",
+        subtitle = "Grey band: prior 5–95%; blue: final ensemble density; red / dotted: final / prior median",
         x = "Parameter Value",
-        y = "Relative Posterior Density",
+        y = "Relative density",
         caption = demo_caption(is_demo)
       ) +
       theme_q1(profile) +
@@ -54,7 +59,7 @@ build_posterior_contraction <- function(data, profile, is_demo = FALSE, posterio
       demo_watermark(is_demo)
       
     height_calc <- max(110, ceiling(length(unique(data$parameter)) / 4) * 38)
-    return(list(plot = plot, source = data, height_mm = height_calc))
+    return(list(plot = plot, source = plot_data, height_mm = height_calc))
   }
   
   # Standard Interval & Shrinkage Multi-Panel Layout
@@ -76,9 +81,9 @@ build_posterior_contraction <- function(data, profile, is_demo = FALSE, posterio
     ggplot2::facet_wrap(~parameter, scales = "free_x", ncol = 4) +
     ggplot2::ylim(0.6, 1.55) +
     ggplot2::labs(
-      title = "Parameter Posterior Contraction & Boundary Confinement",
-      subtitle = "Prior 5–95% bounds (grey bar) vs Calibrated Posterior 5–95% interval (blue bar) & Median (red dot)",
-      x = "Parameter Physical Domain Scale", y = NULL, caption = demo_caption(is_demo)
+      title = "Conditional-ensemble contraction and boundary diagnostic",
+      subtitle = "Prior / final ensemble 5–95% intervals (grey / blue); red dot: final median",
+      x = "Parameter value (shrinkage refers to IQR)", y = NULL, caption = demo_caption(is_demo)
     ) +
     theme_q1(profile) +
     ggplot2::theme(
@@ -87,7 +92,8 @@ build_posterior_contraction <- function(data, profile, is_demo = FALSE, posterio
       axis.line.y = ggplot2::element_blank(),
       strip.background = ggplot2::element_rect(fill = "#EAEDED", colour = "#BDC3C7"),
       strip.text = ggplot2::element_text(face = "bold", size = profile$font_size_pt * 0.9),
-      panel.spacing = ggplot2::unit(4.5, "mm")
+      panel.spacing = ggplot2::unit(4.5, "mm"),
+      plot.margin = ggplot2::margin(3, 6, 3, 6, unit = "mm")
     ) +
     demo_watermark(is_demo)
     

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-23（产量与土壤源数据修订）
+
+- 根据 `data/user/ref/DSSAT文件/` 最新 Excel 重建 25SP、26SP、25FA 三季输入包；秋季初始氮采用用户指定的 `2025秋土壤养分数据集.xlsx`，26SP 采用单独的五层矿质氮表，25SP 的硝态氮/铵态氮列已为纯氮，不再二次换算。
+- 土壤观测按与 10L-B 网格的重叠厚度重映射；浓度按土壤干质量加权，含水量按厚度加权，逐处理生成剖面积分核对表。无实测的 80、100 cm 初始氮使用 `SNO3=1`、`SNH4=0.5` mg N/kg，并在层映射审计中标注；26SP 两层已有实测，保留实测。
+- 新包为 `xxql2501_corrected_20260923`、`xxql2601_corrected_20260923`、`xxql2502_corrected_20260923`。77 个旧包冷备份至 `D:/Tomato_Cal_Cold_Storage/input_bundles_20260923/`；项目内只保留三个新包。当前包及 manifest 哈希见 `configs/experiments/current_bundles.json`。旧率定设计已设为需重新验证、不可直接执行。
+- 将依赖旧包的 21 份试验规格、129 份率定/管理/敏感性分析设计、5 份入口/矩阵文件及 34 份测试文件归档至 `docs/archive/data_pipeline/legacy_bundle_contracts_20260923/`；当前测试只检查新包。三季重建、剖面积分及全套回归结果见 `docs/reports/bundle_refresh_20260923.md`。
+
 ## 2026-09-14（项目代码全域静态分析与代码净化实施）
 
 - **根目录与非受控目录物理清理**：

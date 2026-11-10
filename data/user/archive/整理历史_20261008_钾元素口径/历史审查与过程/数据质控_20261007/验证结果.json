@@ -1,0 +1,75 @@
+{
+  "current_books": 19,
+  "current_sheets": 22,
+  "source_changed_files": [
+    "2025春\\2025春土壤含水量数据集.xlsx",
+    "2025秋\\20260106_2号棚取土.xlsx"
+  ],
+  "reference_unchanged": true,
+  "formula_error_cells": 0,
+  "2025春\\2025春土壤含水量数据集.xlsx": {
+    "changed_cells": 1,
+    "only_sheet1_package_part_changed": true
+  },
+  "2025秋\\20260106_2号棚取土.xlsx": {
+    "changed_cells": 240,
+    "only_sheet1_package_part_changed": true
+  },
+  "soil_240_recalculated": {
+    "first": 0.20516129032258065,
+    "min": 0.16294117647058823,
+    "max": 0.2717461687891215,
+    "relative_increase_min": 0.26655779319681994,
+    "relative_increase_max": 0.46562756357670776,
+    "wet_dry_box_order_valid": true
+  },
+  "C257_manual_moisture": {
+    "stored_E257": 0.175147685809355,
+    "recomputed_from_rounded_weight": 0.17521194993944286,
+    "keep_manual_E257": true
+  },
+  "height_check": {
+    "F86": 114,
+    "F95": 124,
+    "F97": 126,
+    "F100": 131
+  },
+  "simple_formulas": {
+    "checked": 4196,
+    "mismatch": 0,
+    "unsupported_or_external": 914,
+    "empty_cache": 0
+  },
+  "water_density_relation_failures": [],
+  "reference_autumn_vs_current_spring": {
+    "matching_measurements": 355,
+    "measurements_compared": 360,
+    "differences": [
+      [
+        "H12",
+        1.63075257787599,
+        1.53075257787599
+      ],
+      [
+        "H13",
+        1.72832548373737,
+        1.32832548373737
+      ],
+      [
+        "L13",
+        1.23638102381005,
+        1.03638102381005
+      ],
+      [
+        "H25",
+        1.44810963330962,
+        1.14810963330962
+      ],
+      [
+        "L25",
+        1.02312749145351,
+        0.92312749145351
+      ]
+    ]
+  }
+}

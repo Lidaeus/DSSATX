@@ -1,0 +1,44 @@
+﻿field,unit,definition,required
+season,,2025春或2026春,必填
+run_id,,运行唯一标识；模板标识可沿用，另填原始运行号,必填
+W,,水水平；2025仅W1/W3，2026 W1/W2/W3,必填
+N,,氮水平N0—N3,必填
+block_id,,真实区组1/2/3；处理级运行留空，不复制,条件必填
+ensemble_id,,参数/情景集合编号，不是生物重复,如有
+date,YYYY-MM-DD,日历日期；DAT另按定植日计算,必填
+state_timing,,BOD/EOD/PRE_IRRIGATION/POST_TRANSPLANT/PRE_HARVEST/POST_HARVEST等，需解释日输出近似,必填
+organ,,stem/leaf/fruit_onplant/root；移出表可为fruit/stem/leaf,必填
+value_origin,,SIMULATED模型直接；DERIVED由模型量派生；HYBRID模型与实测/代理结合；OBSERVED仅核验,必填
+source_file,,原输出相对路径和Run号，便于追溯,必填
+ET_actual_mm,mm/d,该日实际土壤蒸发＋实际蒸腾；非ETo/潜在ET,必需
+transp_actual_mm,mm/d,该日实际植株蒸腾,ET配套
+evap_soil_actual_mm,mm/d,该日实际土壤蒸发,ET配套
+irrigation_applied_mm,mm/d,实际施用灌水，区别入渗有效水,ET配套
+irrigation_infiltrated_mm,mm/d,真正进入水量平衡的有效灌水；勿与施用水重复相加,ET配套
+precip_effective_mm,mm/d,温室内到达土壤的有效降水；露地降水不直接照搬,ET配套
+runoff_mm,mm/d,地表径流，模拟值原样报告,ET配套
+drainage_below100_mm,mm/d,跨100 cm边界向下通量；模型底部不在100 cm时不能冒名替代,尽可能提供
+capillary_into100_mm,mm/d,跨100 cm边界向上净补给，定义方向须说明,尽可能提供
+balance_depth_cm,cm,报告通量和贮水对应的深度范围,水量配套
+layer_top_cm,cm,模型真实土层上界；模板20 cm层可改为实际层界,必填
+layer_bottom_cm,cm,模型真实土层下界,必填
+theta_v_m3_m3,m3/m3,体积含水率；百分数须先除100，重量含水率须另标,土壤水核心
+layer_storage_mm,mm,该层液态水贮量；=体积含水率×层厚cm×10,与含水率至少一项
+drymatter_kg_ha,kg DM/ha,该器官在株存量，或移出表指定范围的干物质量；果包括整果,养分核心
+freshmass_kg_ha,kg fresh/ha,鲜重仅辅助；不得与干基浓度直接相乘,可选
+number_per_ha,个/ha,在株果数，仅辅助,可选
+fruit_maturity_group,,total/immature/mature；整果合计避免再加子组,如有
+event_type,,HARVEST/PRUNING/LEAF_LITTER/OTHER；无模拟不要填0事件,必填
+event_timing,,管理事件前后及当天序号，说明收支归属,必填
+quantity_scope,,EVENT为本次/当日量；CUMULATIVE为累计移出，不能混合相加,必填
+observed_I_mm,mm/season,项目核定的实测全季施用灌水，预填基线，不是模拟结果,已预填
+observed_N_kg_ha,kg N/ha/season,项目核定的实测全季施纯氮，预填基线,已预填
+support_status,,DIRECT/DERIVED/HYBRID/UNSUPPORTED/NOT_EXPORTED,变量表必填
+stock_flow_cumulative,,STOCK/FLOW/CUMULATIVE；说明是否已扣采收,变量表必填
+data_use,,CALIBRATION/VALIDATION/CHECK；与校准资料重用须说明,验证表必填
+N_kg_ha,kg element/ha,器官N元素存量，或移出表指定范围移出量；非肥料投入量,如支持优先提供
+N_g_kg_DM,g element/kg DM,器官N干基浓度；与mg/g数值相同，百分数需乘10,未给存量时与干物质配套
+P_kg_ha,kg element/ha,器官P元素存量，或移出表指定范围移出量；非肥料投入量,如支持优先提供
+P_g_kg_DM,g element/kg DM,器官P干基浓度；与mg/g数值相同，百分数需乘10,未给存量时与干物质配套
+K_kg_ha,kg element/ha,器官K元素存量，或移出表指定范围移出量；非肥料投入量,如支持优先提供
+K_g_kg_DM,g element/kg DM,器官K干基浓度；与mg/g数值相同，百分数需乘10,未给存量时与干物质配套

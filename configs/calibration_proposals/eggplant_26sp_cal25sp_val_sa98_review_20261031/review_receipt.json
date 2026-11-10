@@ -1,0 +1,119 @@
+{
+  "approved": false,
+  "executable": false,
+  "static_checks_passed": true,
+  "native_forward_executed": false,
+  "input_files_checked": 66,
+  "genetic_parameters_in_sa": 86,
+  "active_recommended": 41,
+  "active_strict": 40,
+  "objective_budget_sum": 100.0,
+  "calibration_targets": 665,
+  "validation_in_objective": false,
+  "artifact_hashes": {
+    "bounds_proposal_recommended41.csv": "c3948209c65dfff54b2abe3def014dc6941e769eda32e39f21a5e7e8b70afd45",
+    "bounds_proposal_strict40.csv": "2d8497e25de46b6cbbed3d5acdf997d0026d1f921abe434337fb25f3d6d34d55",
+    "observation_evidence_catalog.csv": "c376a4945e14949612777943b4581a4dda6b690c240dc6923857cbe0a757f91e",
+    "parameter_range_comparison.csv": "28ced5ad96d79e3983c725e65cc85ae2ed593da33a09351273f6ed6f1b5a981a",
+    "proposal.json": "62265ab70b285f7f859430192fedc770f911058ba2d6d81b97ec8e83b78862d1",
+    "proposed_calibration_targets.csv": "dbe0c1c3709b6df481107addb31f757e4c9950f7f82de1d981bad17c534625cb",
+    "proposed_fixed_genotype.csv": "714352518acfc336ad2db42cb18262d1d74ef9ca330e2c4ffc42c058ec7c3292",
+    "proposed_fixed_genotype_strict40.csv": "b7bdd4f9bc61eb6bd83972be65e75fd52ce6799c13ab8279bdc22a04fefcc0e2",
+    "proposed_fixed_non_genetic.csv": "c344adcb1289cbd5fd04d4a8b403f6b1bbc0ec1f8f80fe448826ecda22b22641",
+    "proposed_objective_policy.csv": "2f68318d2d6366e89f587f0a23057bd942ed34f5d435ccfbcb17be11f658cd4f"
+  },
+  "checks": [
+    {
+      "family": "FINAL_FRESH_YIELD",
+      "n": 12,
+      "budget": 25.0,
+      "verified_budget": 24.999999999980727
+    },
+    {
+      "family": "FINAL_DRY_YIELD",
+      "n": 12,
+      "budget": 20.0,
+      "verified_budget": 19.999999999998533
+    },
+    {
+      "family": "HARVEST_DRY_CUMULATIVE_EARLY",
+      "n": 48,
+      "budget": 5.0,
+      "verified_budget": 4.999999999999366
+    },
+    {
+      "family": "HARVEST_DRY_EVENT",
+      "n": 60,
+      "budget": 10.0,
+      "verified_budget": 9.999999999999538
+    },
+    {
+      "family": "CANOPY_LAI",
+      "n": 48,
+      "budget": 10.0,
+      "verified_budget": 9.999999999999996
+    },
+    {
+      "family": "LEAF_DRY_MASS",
+      "n": 48,
+      "budget": 6.0,
+      "verified_budget": 5.9999999999997
+    },
+    {
+      "family": "STEM_DRY_MASS",
+      "n": 48,
+      "budget": 6.0,
+      "verified_budget": 5.999999999999579
+    },
+    {
+      "family": "HEIGHT",
+      "n": 48,
+      "budget": 3.0,
+      "verified_budget": 2.9999999999999982
+    },
+    {
+      "family": "LEAF_N_CONCENTRATION",
+      "n": 48,
+      "budget": 3.0,
+      "verified_budget": 3.0
+    },
+    {
+      "family": "STEM_N_CONCENTRATION",
+      "n": 48,
+      "budget": 3.0,
+      "verified_budget": 3.0
+    },
+    {
+      "family": "FRUIT_N_CONCENTRATION",
+      "n": 36,
+      "budget": 2.0,
+      "verified_budget": 1.9999999999999996
+    },
+    {
+      "family": "ANTHESIS",
+      "n": 12,
+      "budget": 3.0,
+      "verified_budget": 3.0
+    },
+    {
+      "family": "SOIL_WATER",
+      "n": 180,
+      "budget": 2.0,
+      "verified_budget": 1.999999999999993
+    },
+    {
+      "family": "W_SIGNED_CONTRAST",
+      "n": 8,
+      "budget": 1.0,
+      "verified_budget": 1.0000000000000004
+    },
+    {
+      "family": "N_ADJACENT_SIGNED_CONTRAST",
+      "n": 9,
+      "budget": 1.0,
+      "verified_budget": 1.0
+    }
+  ],
+  "center_physical_relations_passed": true,
+  "duplicate_target_keys": 0
+}

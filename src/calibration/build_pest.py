@@ -75,7 +75,7 @@ STAGE_ACTIVE_PARAMS = {
     "S4": {
         "PROLFI", "PROSTI", "PROLFF", "PROLFG", "PRORTI",
         "NMOBMX", "CMOBMX", "NSTFAC", "NSLOPE", "NVSMOB",
-        "RTNO3", "RTNH4", "FNPGN1", "FNPGN2",
+        "RTNO3", "RTNH4", "FNPGN1", "FNPGN2", "FNPGN3",
         "OPTSDP_FS", "OPTLFP_FS", "OPTSTP_FS",
     },
     "S5": {
@@ -959,10 +959,10 @@ SPE_DIRECT_BOUNDS_EGGPLANT = {
     "PROSHI": (0.15, 0.30),
     "PROSHG": (0.10, 0.22),
     "PROSHF": (0.05, 0.15),
-    "FNPGN1": (1.5, 2.5),
-    "FNPGN2": (4.0, 5.0),
-    "FNPGN3": (15.0, 25.0),
-    "FNPGN4": (15.0, 25.0),
+    "FNPGN1": (1.5, 3.5),
+    "FNPGN2": (4.0, 5.3),
+    "FNPGN3": (4.8, 6.0),
+    "FNPGN4": (6.0, 10.0),
 }
 
 
@@ -2419,10 +2419,11 @@ def _resolve_filex_path(filex, input_dir=None):
     stem = Path(p).stem
     candidates = [
         Path(dir_) / p if dir_ else Path("__no_user_input__"),
-        PROJECT_ROOT / "data" / "user" / "experiments" / f"{stem.lower()}_v20260917_refresh" / p,
-        PROJECT_ROOT / "data" / "raw" / "experiments" / p,
-        PROJECT_ROOT / "data" / "user" / "experiments" / stem / p,
-        PROJECT_ROOT / "data" / "user" / "experiments" / f"{stem.lower()}_unified_20260914" / p,
+        PROJECT_ROOT / "data" / "user" / "experiments" / {
+            "XXQL2501": "xxql2501_corrected_20260923",
+            "XXQL2502": "xxql2502_corrected_20260923",
+            "XXQL2601": "xxql2601_corrected_20260923",
+        }.get(stem.upper(), "__unknown_bundle__") / p,
         Path(WORKSPACE) / p,
     ]
     for candidate in candidates:
@@ -3374,26 +3375,25 @@ def apply_tighten_params_csv(params, tighten_csv_paths, tighten_frac=0.05):
 
     tighten_map = {}
     for p in tighten_csv_paths:
-        tighten_map.update(_load_init_overrides(p))
+        raw_m = _load_init_overrides(p)
+        for k, v in raw_m.items():
+            k_clean = str(k).strip().upper()
+            if k_clean:
+                tighten_map[k_clean] = v
 
     if not tighten_map:
         return params
 
-    existing = {str(p.get("name", "")).strip().upper(): p for p in (params or [])}
+    names_in_params = {str(p.get("name", "")).strip().upper() for p in (params or [])}
     missing = []
-    for k_raw, v in tighten_map.items():
-        name = str(k_raw).strip().upper()
-        if not name:
+    for p in (params or []):
+        name = str(p.get("name", "")).strip().upper()
+        if not name or name not in tighten_map:
             continue
         try:
-            val = float(v)
+            val = float(tighten_map[name])
         except Exception:
             continue
-        if name not in existing:
-            missing.append(name)
-            continue
-
-        p = existing[name]
         try:
             lb0 = float(p.get("lower"))
             ub0 = float(p.get("upper"))
@@ -3416,6 +3416,11 @@ def apply_tighten_params_csv(params, tighten_csv_paths, tighten_frac=0.05):
         p["lower"] = lb
         p["upper"] = ub
         p["status"] = "none" if float(lb) != float(ub) else "fixed"
+
+    for k_raw in tighten_map:
+        name = str(k_raw).strip().upper()
+        if name and name not in names_in_params:
+            missing.append(name)
 
     if missing:
         preview = ", ".join(missing[:12])
@@ -4065,10 +4070,12 @@ if __name__ == "__main__":
                 trt_to_run[(fx, tn)] = int(e["run"])
 
             contrast_specs = [
-                (1, "XXQL2501", 2, 5, 4044.0),
-                (2, "XXQL2501", 10, 13, 8842.0),
-                (3, "XXQL2601", 2, 11, 17941.0),
-                (4, "XXQL2601", 3, 12, 12077.0),
+                (1, "XXQL2501", 2, 5, 4095.0),
+                (2, "XXQL2501", 10, 13, 11590.0),
+                (3, "XXQL2601", 2, 11, 9523.0),
+                (4, "XXQL2601", 3, 12, 16497.0),
+                (5, "XXQL2501", 5, 5, 3347.0),
+                (6, "XXQL2601", 1, 9, 5789.0),
             ]
 
             rows = []
@@ -4076,7 +4083,7 @@ if __name__ == "__main__":
                 run_n3 = trt_to_run.get((fx, n3_tn))
                 run_n0 = trt_to_run.get((fx, n0_tn))
                 if run_n3 is None or run_n0 is None:
-                    return None  # All 4 pairs must exist in the batch
+                    continue  # Gracefully skip pairs not present in current batch
                 rows.append({
                     "@RUN": run_n3,
                     "TN": n3_tn,
@@ -4087,6 +4094,8 @@ if __name__ == "__main__":
                     "PEN_MONOM": 0.0,
                     "PEN_MONOS": -99.0,
                 })
+            if not rows:
+                return None
             return pd.DataFrame(rows)
 
         if mode == "eggplant_staged_s1":

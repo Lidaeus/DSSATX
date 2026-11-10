@@ -23,16 +23,16 @@ LAYER_BOTTOMS = [2, 4, 15, 30, 40, 60, 80, 100, 140, 180]
 # Shared physical parameters across both profiles (10 layers)
 PHYSICAL_LAYERS = [
     # SLB, SLLL,  SDUL,  SSAT,  SRGF,  SSKS, SBDM, SLCL, SLSI, SLCF
-    (  2, 0.142, 0.296, 0.492, 1.000, 3.50, 1.36, 15.0, 20.0, 0),
-    (  4, 0.142, 0.296, 0.492, 1.000, 3.50, 1.36, 15.0, 20.0, 0),
-    ( 15, 0.142, 0.296, 0.492, 1.000, 3.50, 1.36, 15.0, 20.0, 0),
-    ( 30, 0.149, 0.303, 0.448, 0.900, 2.37, 1.49, 15.0, 20.0, 0),
-    ( 40, 0.152, 0.306, 0.426, 0.800, 1.80, 1.55, 15.0, 20.0, 0),
-    ( 60, 0.171, 0.330, 0.443, 0.650, 1.20, 1.56, 15.0, 20.0, 0),
-    (  80, 0.157, 0.315, 0.463, 0.200, 1.50, 1.51, 15.0, 20.0, 0),
-    ( 100, 0.167, 0.331, 0.498, 0.200, 1.60, 1.47, 15.0, 20.0, 0),
-    ( 140, 0.165, 0.300, 0.420, 0.050, 1.00, 1.55, 15.0, 20.0, 0),
-    ( 180, 0.160, 0.280, 0.380, 0.000, 0.80, 1.60, 15.0, 20.0, 0),
+    (  2, 0.142, 0.296, 0.492, 1.000, 2.03, 1.36, 15.0, 20.0, 0),
+    (  4, 0.142, 0.296, 0.492, 1.000, 2.03, 1.36, 15.0, 20.0, 0),
+    ( 15, 0.142, 0.296, 0.492, 1.000, 2.03, 1.36, 15.0, 20.0, 0),
+    ( 30, 0.149, 0.303, 0.448, 0.900, 1.96, 1.49, 15.0, 20.0, 0),
+    ( 40, 0.152, 0.306, 0.426, 0.800, 1.81, 1.55, 15.0, 20.0, 0),
+    ( 60, 0.171, 0.330, 0.443, 0.650, 0.33, 1.56, 15.0, 20.0, 0),
+    ( 80, 0.157, 0.315, 0.463, 0.200, 2.03, 1.51, 15.0, 20.0, 0),
+    ( 100, 0.167, 0.331, 0.498, 0.200, 1.43, 1.47, 15.0, 20.0, 0),
+    ( 140, 0.165, 0.300, 0.420, 0.000, 0.16, 1.55, 15.0, 20.0, 0),
+    ( 180, 0.160, 0.280, 0.380, 0.000, 0.59, 1.60, 15.0, 20.0, 0),
 ]
 
 # Chemical parameters for XXSL2501 (9号棚 / 25SP)
@@ -99,14 +99,22 @@ def format_profile(soil_id: str, desc: str, chem_layers: list[tuple[float, float
     return lines
 
 
-def build_soil_sol(dst_path: Path, src_sol_path: Path = RAW_SOL) -> None:
+def build_soil_sol(
+    dst_path: Path,
+    src_sol_path: Path = RAW_SOL,
+    *,
+    chem_25sp: list[tuple[float, float, float]] | None = None,
+    chem_26sp: list[tuple[float, float, float]] | None = None,
+    chem_25fa: list[tuple[float, float, float]] | None = None,
+) -> None:
     text = src_sol_path.read_text(encoding="utf-8-sig")
     lines = text.splitlines()
 
-    p25_lines = format_profile("XXSL2501", "Plot 9 Fields (2025 Spring 10L-B Scheme)", CHEM_25SP)
-    p26_lines = format_profile("XXSL2601", "Plot 2 Fields (2026 Spring & 2025 Autumn 10L-B Scheme)", CHEM_26SP)
+    p25_lines = format_profile("XXSL2501", "Plot 9 Fields (2025 Spring 10L-B Scheme)", chem_25sp or CHEM_25SP)
+    p26_lines = format_profile("XXSL2601", "Plot 2 Fields (2026 Spring & 2025 Autumn 10L-B Scheme)", chem_26sp or CHEM_26SP)
+    pfa_lines = format_profile("XXSL2502", "Plot 2 Fields (2025 Autumn 10L-B Scheme)", chem_25fa) if chem_25fa else []
 
-    both_profiles = p25_lines + p26_lines
+    both_profiles = p25_lines + p26_lines + pfa_lines
 
     # 1. If XXSL2501 is already present, replace the existing XXSL2501 and XXSL2601 profiles
     xxsl25_idx = None
@@ -118,7 +126,7 @@ def build_soil_sol(dst_path: Path, src_sol_path: Path = RAW_SOL) -> None:
     if xxsl25_idx is not None:
         target_end = len(lines)
         for j in range(xxsl25_idx + 1, len(lines)):
-            if lines[j].startswith("*") and not lines[j].startswith("*XXSL2501") and not lines[j].startswith("*XXSL2601"):
+            if lines[j].startswith("*") and not lines[j].startswith(("*XXSL2501", "*XXSL2601", "*XXSL2502")):
                 target_end = j
                 break
         new_lines = lines[:xxsl25_idx] + both_profiles + lines[target_end:]

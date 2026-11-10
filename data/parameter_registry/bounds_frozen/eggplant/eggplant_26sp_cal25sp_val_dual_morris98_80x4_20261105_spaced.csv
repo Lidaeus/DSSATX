@@ -1,0 +1,127 @@
+﻿name,native_name,pest_name,init,lower,upper,status,pargp,location,file,cultivar,ecotype,mode,basis
+PGEFF,PGEFF,pgeff,0.065,0.05,0.08,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+EM-FL,EM-FL,em-fl,29.5,24.0,35.0,active,cul,CUL,TMGRO048.CUL,TM0008,TM0001,eggplant_stage2,Late anthesis target; late-date Morris vector evidence and historical temperature limits
+TO12,TO12,to12,25.25,23.0,27.5,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Late anthesis target; late-date Morris vector evidence and historical temperature limits
+TO11,TO11,to11,24.5,22.0,27.0,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+TRIFL,TRIFL,trifl,1.025,0.75,1.3,active,eco,ECO,TMGRO048.ECO,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+SLAVR,SLAVR,slavr,187.5,115.0,260.0,active,cul,CUL,TMGRO048.CUL,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+FL-SD,FL-SD,fl-sd,17.35,8.85,25.85,active,cul,CUL,TMGRO048.CUL,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+TB2,TB2,tb2,11.0,9.5,12.5,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Late anthesis target; late-date Morris vector evidence and historical temperature limits
+TM2,TM2,tm2,39.0,34.0,44.0,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Late anthesis target; late-date Morris vector evidence and historical temperature limits
+SLAREF,SLAREF,slaref,317.5,260.0,375.0,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+TO22,TO22,to22,30.5,28.0,33.0,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+VSSINK,VSSINK,vssink,9.5,4.0,15.0,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+PODUR,PODUR,podur,14.0,6.0,22.0,active,cul,CUL,TMGRO048.CUL,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+SFDUR,SFDUR,sfdur,42.5,20.0,65.0,active,cul,CUL,TMGRO048.CUL,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+TB1,TB1,tb1,8.8,8.0,9.6,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+EM-V1,EM-V1,em-v1,36.75,35.0,38.5,active,eco,ECO,TMGRO048.ECO,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+FINREF,FINREF,finref,375.0,150.0,600.0,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+LFMAX,LFMAX,lfmax,2.3,1.8,2.8,active,cul,CUL,TMGRO048.CUL,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+RNO3C,RNO3C,rno3c,2.555,2.17,2.94,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+LNGSH,LNGSH,lngsh,29.0,18.0,40.0,active,eco,ECO,TMGRO048.ECO,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+XMAGE,XMAGE,xmage,11.5,5.0,18.0,active,eco,ECO,TMGRO048.ECO,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+SWBAR_REC,XSWBAR(3),swbar_rec,0.6,0.35,0.85,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+XFRT,XFRT,xfrt,0.865,0.78,0.95,active,cul,CUL,TMGRO048.CUL,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+YSWBAR_MID,YSWBAR(3),yswbar_mid,0.625,0.3,0.95,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+PM06,PM06,pm06,0.325,0.1,0.55,active,eco,ECO,TMGRO048.ECO,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+XFINT,XFINT,xfint,0.235,0.12,0.35,active,eco,ECO,TMGRO048.ECO,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PROLFI,PROLFI,prolfi,0.32,0.28,0.36,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+XFPHT,XFPHT,xfpht,52.5,35.0,70.0,active,eco,ECO,TMGRO048.ECO,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+TO21,TO21,to21,30.5,28.0,33.0,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+TM1,TM1,tm1,41.75,36.0,47.5,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+SIZREF,SIZREF,sizref,300.0,225.0,375.0,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PROSTI,PROSTI,prosti,0.205,0.16,0.25,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+RWDTH,RWDTH,rwdth,1.375,0.625,2.125,active,eco,ECO,TMGRO048.ECO,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+SENPOR_LATE,SENPOR(4),senpor_late,0.17,0.12,0.22,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+FL-SH,FL-SH,fl-sh,2.5,1.0,4.0,active,cul,CUL,TMGRO048.CUL,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+NMOBMX,NMOBMX,nmobmx,0.09,0.06,0.12,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+DSWBAR,DSWBAR,dswbar,6.5,5.0,8.0,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+LNREF,LNREF,lnref,5.05,3.6,6.5,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Envelope of reviewed Morris lower edge and C31 upper edge
+SIZLF,SIZLF,sizlf,280.0,260.0,300.0,active,cul,CUL,TMGRO048.CUL,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+THRSH,THRSH,thrsh,8.5,7.5,9.5,active,cul,CUL,TMGRO048.CUL,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+FNPGN2,FNPGN(2),fnpgn2,4.6,4.0,5.2,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+NSTFAC,NSTFAC,nstfac,0.89,0.8,0.98,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+RHGHT,RHGHT,rhght,1.0,0.6,1.4,active,eco,ECO,TMGRO048.ECO,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+FNPGN1,FNPGN(1),fnpgn1,2.95,2.4,3.5,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+CMOBMX,CMOBMX,cmobmx,0.0955,0.0005,0.1905,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+FRLFF,FRLFF,frlff,0.215,0.08,0.35,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+ALPHL,ALPHL,alphl,0.04,0.028,0.052,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PROSHI,PROSHI,proshi,0.215,0.18,0.25,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+RTNO3,RTNO3,rtno3,0.015,0.01,0.02,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+FRLFMX,FRLFMX,frlfmx,0.7,0.6,0.8,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+SENRTE,SENRTE,senrte,1.3,0.8,1.8,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PROLFG,PROLFG,prolfg,0.2,0.15,0.25,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+ATOP,ATOP,atop,1.1,0.6,1.6,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,C31 and joint67 historical active working domain
+NVSMOB,NVSMOB,nvsmob,0.4,0.4,0.4,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+YLEAF(4),YLEAF(4),yleaf_4,0.505,0.505,0.505,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+RWUEP1,RWUEP1,rwuep1,1.5,1.5,1.5,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+SDLIP,SDLIP,sdlip,0.05,0.05,0.05,fixed,cul,CUL,TMGRO048.CUL,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+SDPRO,SDPRO,sdpro,0.3,0.3,0.3,fixed,cul,CUL,TMGRO048.CUL,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+CADSTF,CADSTF,cadstf,0.7,0.7,0.7,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+RWUMX,RWUMX,rwumx,0.04,0.02,0.06,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PORPT,PORPT,porpt,0.25,0.1,0.4,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+RNH4C,RNH4C,rnh4c,2.48,2.48,2.48,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+FRSTMF,FRSTMF,frstmf,0.5,0.5,0.5,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+RFAC1,RFAC1,rfac1,10000.0,10000.0,10000.0,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PRORTI,PRORTI,prorti,0.144,0.144,0.144,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+TM3,TM3,tm3,39.5,39.5,39.5,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+ALPHS,ALPHS,alphs,0.08,0.056,0.104,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PROSTF,PROSTF,prostf,0.06,0.035,0.085,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+KEP,KEP,kep,0.7,0.7,0.7,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PROLFF,PROLFF,prolff,0.075,0.04,0.11,active,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+RTSEN,RTSEN,rtsen,0.015,0.015,0.015,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+YSTEM(4),YSTEM(4),ystem_4,0.33,0.33,0.33,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+TO23,TO23,to23,30.5,30.5,30.5,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+CADPR1,CADPR1,cadpr1,0.25,0.25,0.25,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+RTNH4,RTNH4,rtnh4,0.029,0.029,0.029,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+NSLOPE,NSLOPE,nslope,0.3,0.3,0.3,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+SETMAX,SETMAX,setmax,0.325,0.325,0.325,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PCARSD,PCARSD,pcarsd,0.55,0.55,0.55,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PROSHF,PROSHF,proshf,0.1095,0.1095,0.1095,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+ALPHR,ALPHR,alphr,0.04,0.04,0.04,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PROSTG,PROSTG,prostg,0.125,0.125,0.125,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+ALPHSH,ALPHSH,alphsh,0.08,0.08,0.08,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+RTDEPI,RTDEPI,rtdepi,10.0,10.0,10.0,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+SDPROS,SDPROS,sdpros,0.325,0.325,0.325,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+TURSLA,TURSLA,tursla,1.5,1.5,1.5,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+YRTFAC(2),YRTFAC(2),yrtfac_2,2.85,2.85,2.85,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+TO13,TO13,to13,23.75,23.75,23.75,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+NSLA,NSLA,nsla,1.0,1.0,1.0,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+RPRO,RPRO,rpro,0.28,0.28,0.28,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PRORTF,PRORTF,prortf,0.06,0.06,0.06,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PRORTG,PRORTG,prortg,0.119,0.119,0.119,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+TB3,TB3,tb3,10.0,10.0,10.0,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+SHLAG,SHLAG,shlag,0.0022,0.0022,0.0022,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris center rounded to fit the native field with a separator
+KCAN,KCAN,kcan,0.68,0.68,0.68,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+RTSDF,RTSDF,rtsdf,0.0125,0.0125,0.0125,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+FNPGN3,FNPGN(3),fnpgn3,12.7,12.7,12.7,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+RLDSM,RLDSM,rldsm,0.1,0.1,0.1,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+TCMP,TCMP,tcmp,95.0,95.0,95.0,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+YTRFAC(2),YTRFAC(2),ytrfac_2,0.125,0.125,0.125,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+XFRMAX,XFRMAX,xfrmax,0.2,0.2,0.2,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+FNPGN4,FNPGN(4),fnpgn4,25.0,25.0,25.0,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+NRCVR,NRCVR,nrcvr,0.2,0.2,0.2,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PROMAX,PROMAX,promax,0.052,0.052,0.052,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+ICMP,ICMP,icmp,0.0175,0.0175,0.0175,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+WTPSD,WTPSD,wtpsd,0.004,0.004,0.004,fixed,cul,CUL,TMGRO048.CUL,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+JU-R0,JU-R0,ju-r0,11.0,11.0,11.0,fixed,eco,ECO,TMGRO048.ECO,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+SDPDV,SDPDV,sdpdv,200.0,200.0,200.0,fixed,cul,CUL,TMGRO048.CUL,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+SENDAY,SENDAY,senday,0.015,0.015,0.015,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+FL-VS,FL-VS,fl-vs,100.0,100.0,100.0,fixed,eco,ECO,TMGRO048.ECO,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+KC_SLOPE,KC_SLOPE,kc_slope,0.2,0.2,0.2,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+RFLWAB,RFLWAB,rflwab,0.04,0.04,0.04,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PROSHG,PROSHG,proshg,0.145,0.145,0.145,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PROMIN,PROMIN,promin,0.021,0.021,0.021,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PARMAX,PARMAX,parmax,41.0,41.0,41.0,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PL-EM,PL-EM,pl-em,7.5,7.5,7.5,fixed,eco,ECO,TMGRO048.ECO,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PHTMAX,PHTMAX,phtmax,61.0,61.0,61.0,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PM09,PM09,pm09,0.84,0.84,0.84,fixed,eco,ECO,TMGRO048.ECO,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+PORMIN,PORMIN,pormin,0.015,0.015,0.015,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+SENMAX_LATE,SENMAX(4),senmax_late,0.575,0.575,0.575,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+SENRT2,SENRT2,senrt2,0.015,0.015,0.015,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+RTEXF,RTEXF,rtexf,0.15,0.15,0.15,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+THETA,THETA,theta,0.89,0.89,0.89,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+XMPAGE,XMPAGE,xmpage,105.0,105.0,105.0,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+WTFSD,WTFSD,wtfsd,0.555,0.555,0.555,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+XSWFAC(3),XSWFAC(3),xswfac_3,0.515,0.515,0.515,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value
+YSWFAC(2),YSWFAC(2),yswfac_2,0.6,0.6,0.6,fixed,spe,SPE,TMGRO048.SPE,TM0008,TM0001,eggplant_stage2,Morris range or reviewed fixed value

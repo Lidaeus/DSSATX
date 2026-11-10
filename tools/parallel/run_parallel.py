@@ -26,6 +26,7 @@ import sys
 import time
 import urllib.request
 from datetime import datetime, timezone
+from pathlib import Path
 
 _PROJECT_ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 if _PROJECT_ROOT not in sys.path:
@@ -453,6 +454,15 @@ def _assess_completed_sensitivity(run_dir, case):
     quality = assess_morris_audit(audit, run_id=os.path.basename(run_dir))
     quality.write(audit_dir, stem="morris_run_quality")
     result = load_morris_summary(os.path.join(run_dir, f"{case}.mio"))
+    profile_path = Path(run_dir) / 'runtime' / 'config' / 'output_profile.json'
+    if profile_path.is_file():
+        profile = json.loads(profile_path.read_text(encoding='utf-8'))
+        if profile.get('contract_version') == 'expanded_morris_20261030':
+            actual = set(result['obs'].astype(str).str.upper())
+            expected = set(profile['ranking_observations']) | set(profile['diagnostic_observations'])
+            if actual != expected:
+                raise ValueError('Native Morris summary differs from frozen response contract')
+            result = result[result['obs'].astype(str).str.upper().isin(profile['ranking_observations'])]
     result_quality = assess_morris(result, run_id=os.path.basename(run_dir))
     result_quality.write(audit_dir, stem="morris_result_quality")
     status = "validated" if quality.science_validated and result_quality.science_validated else "failed"

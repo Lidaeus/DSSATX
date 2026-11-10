@@ -1,0 +1,85 @@
+"season_id","treatment","run_id","ensemble_iteration","dataset_role","variable","time","date_code","dap","harvest_number","observed","observed_se","sim_mean","sim_median","sim_q025","sim_q25","sim_q75","sim_q975","n_members_expected","n_members_valid","source_file","variable_label","unit","treatment_label","water_level","nitrogen_level","panel_label"
+"26SP","1","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",72,26146,72,1,10867,NA,12526.3194968553,12483.2,11181.695,11884.85,13072.8,14150.22,159,159,"XXQL2601.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN1 (W3-N3)","W3","N3","TN1 (W3-N3)
+26SP"
+"26SP","1","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",84,26158,84,2,27986,NA,28648.9855345912,28608.9,26012.24,27565.7,29966.6,31389.34,159,159,"XXQL2601.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN1 (W3-N3)","W3","N3","TN1 (W3-N3)
+26SP"
+"26SP","1","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",93,26167,93,3,39794,NA,43064.2490566038,43033.2,39256.7,41389.25,44734.7,46965.71,159,159,"XXQL2601.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN1 (W3-N3)","W3","N3","TN1 (W3-N3)
+26SP"
+"26SP","1","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",108,26182,108,4,51934,NA,60126.8440251572,60129,54507.71,57585.65,62526.3,65623.86,159,159,"XXQL2601.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN1 (W3-N3)","W3","N3","TN1 (W3-N3)
+26SP"
+"26SP","1","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",123,26198,123,5,66681,NA,74993.8440251572,75025.7,68074.815,72054.2,78085.9,81640.685,159,159,"XXQL2601.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN1 (W3-N3)","W3","N3","TN1 (W3-N3)
+26SP"
+"26SP","12","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",72,26146,72,1,4126,NA,12411.613836478,12394.2,10969.03,11836.1,13007,14027.265,159,159,"XXQL2601.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN12 (W1-N0)","W1","N0","TN12 (W1-N0)
+26SP"
+"26SP","12","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",84,26158,84,2,14789,NA,29962.693081761,29965.7,26870.24,28749.35,31097.35,32764.975,159,159,"XXQL2601.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN12 (W1-N0)","W1","N0","TN12 (W1-N0)
+26SP"
+"26SP","12","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",93,26167,93,3,34665,NA,44092.1295597484,43977.4,40549.72,42635.3,45624.1,47635.76,159,159,"XXQL2601.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN12 (W1-N0)","W1","N0","TN12 (W1-N0)
+26SP"
+"26SP","12","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",108,26182,108,4,44230,NA,58912.6371069182,58711.8,54763.34,57309.15,60372.85,63015.48,159,159,"XXQL2601.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN12 (W1-N0)","W1","N0","TN12 (W1-N0)
+26SP"
+"26SP","12","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",123,26198,123,5,51579,NA,68577.8987421383,68539.1,63336.745,66909.15,70535,74066.68,159,159,"XXQL2601.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN12 (W1-N0)","W1","N0","TN12 (W1-N0)
+26SP"
+"25SP","13","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",66,25140,66,1,2459,NA,3485.63522012579,3484.7,2143.58,2862.15,3978.05,5027.255,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN13 (W1-N0)","W1","N0","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",72,25146,72,2,9353,NA,9317.47672955975,9256.9,6905.155,8348.7,10258.95,12224.315,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN13 (W1-N0)","W1","N0","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",79,25153,79,3,20399,NA,20123.8798742138,20178.7,16230.225,18919.2,21072.55,23538.84,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN13 (W1-N0)","W1","N0","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",84,25158,84,4,26827,NA,24822.7201257862,24658.8,20250.085,23522.35,26473.15,29233.02,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN13 (W1-N0)","W1","N0","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",89,25163,89,5,32754,NA,31808.9327044025,31894.7,27084.15,30488.8,33035.2,36164.26,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN13 (W1-N0)","W1","N0","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",96,25170,96,6,41821,NA,40647.0257861635,40687.1,36241.96,39022.15,42141.05,45036.855,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN13 (W1-N0)","W1","N0","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",101,25175,101,7,45845,NA,45501.3125786164,45487.6,41101.845,43773.85,47037.65,50517.045,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN13 (W1-N0)","W1","N0","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",110,25184,110,8,50120,NA,50163.2842767296,50244.2,44543.775,48010,51959.4,56117.25,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN13 (W1-N0)","W1","N0","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",118,25192,118,9,55252,NA,50912.7477987421,51040.5,44992.515,48591.5,52792.95,57211.56,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN13 (W1-N0)","W1","N0","TN13 (W1-N0)
+25SP"
+"25SP","14","full_gen_13trt_final_uncertainty_200x6_20260924",6,"validation","FRESH_CUM",66,25140,66,1,2817,NA,4127.78176100629,4098.5,2509.785,3391.15,4734.7,5945.63,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN14 (CK-N2)","CK","N2","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_uncertainty_200x6_20260924",6,"validation","FRESH_CUM",72,25146,72,2,13885,NA,10861.4874213836,10868.3,8156.605,9919.65,11785.05,13625.55,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN14 (CK-N2)","CK","N2","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_uncertainty_200x6_20260924",6,"validation","FRESH_CUM",79,25153,79,3,25197,NA,21244.1075471698,21215.3,17460.205,20311.05,22247.9,24309.595,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN14 (CK-N2)","CK","N2","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_uncertainty_200x6_20260924",6,"validation","FRESH_CUM",84,25158,84,4,38165,NA,27633.7113207547,27840.2,23389.13,26488.2,28772.9,31110.825,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN14 (CK-N2)","CK","N2","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_uncertainty_200x6_20260924",6,"validation","FRESH_CUM",89,25163,89,5,44163,NA,34303.6163522013,34316.5,30240.77,33217.05,35576.15,38320.89,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN14 (CK-N2)","CK","N2","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_uncertainty_200x6_20260924",6,"validation","FRESH_CUM",96,25170,96,6,52342,NA,44757.7364779874,44708.9,40886.6,43246.5,46317.35,48579.72,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN14 (CK-N2)","CK","N2","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_uncertainty_200x6_20260924",6,"validation","FRESH_CUM",101,25175,101,7,55194,NA,51802.5163522012,51626.6,47605.6,50018,53434.25,56242.225,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN14 (CK-N2)","CK","N2","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_uncertainty_200x6_20260924",6,"validation","FRESH_CUM",110,25184,110,8,60182,NA,62637.9698113207,62488.1,58310.74,60799.75,64461.25,67482.26,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN14 (CK-N2)","CK","N2","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_uncertainty_200x6_20260924",6,"validation","FRESH_CUM",118,25192,118,9,66318,NA,69570.8855345912,69746.9,64314.88,67332.95,71605.65,74932.185,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN14 (CK-N2)","CK","N2","TN14 (CK-N2)
+25SP"
+"25SP","2","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",66,25140,66,1,4944,NA,4143.08867924528,4129.7,2514.695,3402.35,4763.4,5986.22,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN2 (W3-N3)","W3","N3","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",72,25146,72,2,14754,NA,10892.4704402516,10917.5,8169.66,9967.55,11813.6,13652.445,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN2 (W3-N3)","W3","N3","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",79,25153,79,3,27870,NA,21267.8955974843,21245,17469.335,20326.25,22265.45,24326.135,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN2 (W3-N3)","W3","N3","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",84,25158,84,4,36459,NA,27697.5094339623,27874.9,23478.76,26571.4,28826.45,31119.495,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN2 (W3-N3)","W3","N3","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",89,25163,89,5,44571,NA,34342.827672956,34328.2,30252.37,33248.65,35602.9,38371.75,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN2 (W3-N3)","W3","N3","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",96,25170,96,6,54765,NA,44790.5893081761,44767.9,41005.11,43275,46367.2,48592.135,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN2 (W3-N3)","W3","N3","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",101,25175,101,7,59082,NA,51836.0974842767,51672.3,47678.885,50066.6,53454.9,56243.385,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN2 (W3-N3)","W3","N3","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",110,25184,110,8,65542,NA,62672.1515723271,62499.5,58338.145,60845.1,64497.15,67480.79,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN2 (W3-N3)","W3","N3","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",118,25192,118,9,69105,NA,69606.9433962264,69770,64354.28,67381.6,71631.2,74951.33,159,159,"XXQL2501.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN2 (W3-N3)","W3","N3","TN2 (W3-N3)
+25SP"
+"26SP","5","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",72,26146,72,1,10118,NA,12517.1025157233,12471.9,11175.88,11883.2,13056.55,14134.495,159,159,"XXQL2601.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN5 (W2-N2)","W2","N2","TN5 (W2-N2)
+26SP"
+"26SP","5","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",84,26158,84,2,26604,NA,28623.5981132075,28613.1,25991.885,27539.15,29941,31366.98,159,159,"XXQL2601.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN5 (W2-N2)","W2","N2","TN5 (W2-N2)
+26SP"
+"26SP","5","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",93,26167,93,3,49129,NA,43040.0603773585,43018,39231.85,41361.7,44722.75,46934.255,159,159,"XXQL2601.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN5 (W2-N2)","W2","N2","TN5 (W2-N2)
+26SP"
+"26SP","5","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",108,26182,108,4,62109,NA,60111.3314465409,60105.5,54634.365,57571.75,62508.5,65598.555,159,159,"XXQL2601.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN5 (W2-N2)","W2","N2","TN5 (W2-N2)
+26SP"
+"26SP","5","full_gen_13trt_final_uncertainty_200x6_20260924",6,"calibration","FRESH_CUM",123,26198,123,5,74315,NA,74974.7968553459,75012.1,68075.915,72021.7,78066.1,81608.645,159,159,"XXQL2601.TMT+FreshWt.OUT","Cumulative fresh harvest","kg ha⁻¹","TN5 (W2-N2)","W2","N2","TN5 (W2-N2)
+26SP"

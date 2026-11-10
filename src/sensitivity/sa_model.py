@@ -2,6 +2,7 @@ import argparse
 import csv
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -17,6 +18,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.sensitivity.output_contract import load_output_contract, observation_names
+from src.sensitivity.strict_forward import validate_responses, preserve_record, read_genotype_parameters
 
 
 def _verify_runtime_bundle() -> None:
@@ -349,6 +351,9 @@ def derive_water_nitrogen_responses(values, contract):
                 )
                 for row in design["nitrogen_series"][water]
             ]
+            complete = all(y is not None and math.isfinite(float(y)) and float(y) != -99.0 for _, y in points)
+            if contract.get('require_complete_nitrogen_series') and not complete:
+                raise ValueError(f'Incomplete nitrogen dose series: {water}/{feature}')
             slope = _linear_slope(points)
             if slope is not None:
                 slopes[water] = slope
@@ -417,6 +422,9 @@ def compute_indicators(
         with open(obs_order_path, "r", encoding="utf-8", errors="ignore") as f:
             ordered_names = [ln.strip() for ln in f.readlines() if ln.strip()]
     contract = load_output_contract(output_profile) if output_profile else load_output_contract()
+    strict = contract.get('contract_version') == 'expanded_morris_20261030'
+    started = time.perf_counter()
+    record_values, record_error, actual_parameters = {}, '', {}
     if not ordered_names:
         ordered_names = observation_names(contract)
 
@@ -447,6 +455,8 @@ def compute_indicators(
         if not os.path.exists(param_csv_path):
             _wait_for_file(param_csv_path, timeout_s=3.0, poll_s=0.05)
         if not os.path.exists(param_csv_path):
+            if strict:
+                raise FileNotFoundError(param_csv_path)
             _write_out({})
             return
 
@@ -456,6 +466,8 @@ def compute_indicators(
         except FileNotFoundError:
             _wait_for_file(param_csv_path, timeout_s=3.0, poll_s=0.05)
             if not os.path.exists(param_csv_path):
+                if strict:
+                    raise FileNotFoundError(param_csv_path)
                 _write_out({})
                 return
             shutil.copy(param_csv_path, param_snapshot)
@@ -472,6 +484,9 @@ def compute_indicators(
                 d = os.path.join(run_dir, item)
                 if os.path.isfile(s):
                     shutil.copy2(s, d)
+            if strict:
+                for filename in ('TMGRO048.CUL','TMGRO048.ECO','TMGRO048.SPE'):
+                    shutil.copy2(os.path.join(staging_dir,filename),os.path.join(run_dir,filename+'.base'))
 
         active_batch_path = os.path.join(run_dir, os.path.basename(batch_path))
         if not os.path.exists(active_batch_path):
@@ -527,9 +542,15 @@ def compute_indicators(
 
         sub_env = os.environ.copy()
         sub_env["PYTHONIOENCODING"] = "utf-8"
+        if strict and any(sub_env.get(k) for k in ('DSSAT_CUSTOM_EXE','DSSAT_SPE_BASE')):
+            raise ValueError('Custom DSSAT executable/SPE override prohibited in this sensitivity run')
         proc = subprocess.run(cmd, cwd=run_dir, env=sub_env, capture_output=True, text=True, encoding="utf-8", errors="replace")
+        if strict:
+            Path(run_dir,'console.txt').write_text(proc.stdout+'\n'+proc.stderr,encoding='utf-8')
         dssat_ok = proc.returncode == 0
         if not dssat_ok:
+            if strict:
+                raise RuntimeError(f'DSSAT sensitivity run failed with exit code {proc.returncode}')
             print(f"RUNNER_ADVISORY DSSAT sensitivity run failed with exit code {proc.returncode}", file=sys.stderr, flush=True)
             _write_out({})
             return
@@ -710,8 +731,13 @@ def compute_indicators(
                 continue
             _emit(f"MEAN_{key}", sum(finite) / float(len(finite)))
 
+        if strict:
+            validate_responses(values, contract)
+            actual_parameters = read_genotype_parameters(run_dir, cultivar)
+            record_values = values
         _write_out(values)
     except Exception as exc:
+        record_error = f'{type(exc).__name__}: {exc}'
         if failure_artifact_dir:
             artifact_root = os.path.abspath(failure_artifact_dir)
             os.makedirs(artifact_root, exist_ok=True)
@@ -728,6 +754,13 @@ def compute_indicators(
                 json.dump(context, handle, ensure_ascii=False, indent=2)
         raise
     finally:
+        if strict:
+            parameters = _read_param_csv_as_dict(param_csv_path)
+            record = preserve_record(run_dir,workspace_dir,parameters,record_values,record_error,time.perf_counter()-started)
+            record_path = record/'record.json'
+            payload = json.loads(record_path.read_text(encoding='utf-8'))
+            payload['actual_parameters'] = actual_parameters
+            record_path.write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
         keep_all = os.environ.get("DSSAT_KEEP_RUNS", "").strip().lower() in {"1", "true", "yes", "on"}
         if not keep_all:
             try:

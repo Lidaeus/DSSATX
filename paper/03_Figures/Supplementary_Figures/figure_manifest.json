@@ -1,0 +1,195 @@
+{
+  "schema_version": 2,
+  "created_at": "2026-09-29T14:48:37Z",
+  "renderer": "R 4.5.2",
+  "package_versions": {
+    "ggplot2": "4.0.3",
+    "patchwork": "1.3.2",
+    "jsonlite": "2.0.0",
+    "svglite": "2.2.2"
+  },
+  "git_commit": "ed0b24a77941d7f4a07b484879bdae78c806e21a",
+  "git_dirty": true,
+  "profile_id": "general_q1_v1",
+  "profile": {
+    "path": "D:/Tomato_Cal/configs/figures/publication.json",
+    "sha256": "66a7e4cabbbabfad7471068bd70ba79d79a24848b4aba85f14e67e8db45ed58f"
+  },
+  "run_id": "full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927",
+  "data_status": "legacy_layout_demo",
+  "science_validated": false,
+  "source_is_demo": true,
+  "demo_label_visible": false,
+  "publication_label_note": "User authorized clean C31 champion figures on 2026-09-27; scientific status unchanged.",
+  "scientific_status_promoted": false,
+  "input_manifest": {
+    "path": "D:/Tomato_Cal/paper/paper_data/conditional/paper_data_manifest.json",
+    "sha256": "e53eace06bf808ea2122ce2009ba1fb0dd5e4d51e9f00283ebbc597b4f7b6c8f"
+  },
+  "artifacts": [
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_model_performance_uncertainty.pdf",
+      "sha256": "c14e0871b2430502f24df5ee6e906b570894f92d2cae4da8678a4ecfb86ecb84"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_model_performance_uncertainty.svg",
+      "sha256": "85a2a57177950ebd9241a33b4b33b39d524bbf48fd0acf68ec7f501dff43cff1"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_model_performance_uncertainty.png",
+      "sha256": "c8ca15467b795337db552705d7acd493ecc38a89e038f2c926d1e1682b391fad"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_model_performance_uncertainty.source.csv",
+      "sha256": "f382d670ebc5c427ae53ca5a2b67987c05a6d83b330240d10ae26af8d3fb6ac5"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_model_performance_uncertainty.metrics.csv",
+      "sha256": "e92aeba29c57121070475a6078a980c95fdda03f74c03c39ff52105ca7da9a69"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_treatment_residual_uncertainty.pdf",
+      "sha256": "9dbc96c8f35dd4d3be017cd2588b0a8b8783ebe3301807abf37cca71e37a5e46"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_treatment_residual_uncertainty.svg",
+      "sha256": "a68c802abb0db41b43c168e5f2e77b408933576693b5da03c5a02d40af63bbd2"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_treatment_residual_uncertainty.png",
+      "sha256": "efd04f8f9e59167a8576dbc86050e1c803bce8fcf9f5fb60a290b741010fb535"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_treatment_residual_uncertainty.forest.csv",
+      "sha256": "2854858bf757ec0a2443a986e2f26231659d92f6875543fca03f83187d0b54bd"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_treatment_residual_uncertainty.rrmse.csv",
+      "sha256": "40c8790d46193d5cc573086ccc042939d189eddbdb1742ec1bce5902a9a65598"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_treatment_residual_uncertainty.source.csv",
+      "sha256": "625196d4a29f961808ee718777f8506b7210ae8eb8ea3a1b778dd7ccf0e1ecfa"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_selected_process_dynamics.pdf",
+      "sha256": "4da25847bc46145533c3193f8e3f89b611b98bd31912696241ee54aa8d511548"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_selected_process_dynamics.svg",
+      "sha256": "27636dd8d289c2e6bc34c313b0a158da34ff85e569cb8491a1d794167db269f6"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_selected_process_dynamics.png",
+      "sha256": "e2cd2472bcbb1bfe594480066594fd79cddde72f2b2728c228bde15bdefd20cb"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_selected_process_dynamics.observations.csv",
+      "sha256": "f193740fcb73ab3d0665cfdf6287e4833eaeb7c9b2f417be65e872919e9874b7"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_selected_process_dynamics.daily_simulation.csv",
+      "sha256": "a59b0a14039733a3d29c03e7fd61414b861c46af5fb3422048a7c2317f3baf97"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_selected_harvest_dynamics.pdf",
+      "sha256": "f44b69b88811872d110fc41f9ec2e28a3e5012ac2b34dba0ec7e63fabf7ba15c"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_selected_harvest_dynamics.svg",
+      "sha256": "4854d137888971e34b1923d94eda25298e6a8331fe18b8f95befb4dd2a6921ce"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_selected_harvest_dynamics.png",
+      "sha256": "03b065d2bdb1c9f390ef5e836e37a18dd037c9b1161a51d1d7b53a0bb9f3955c"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_selected_harvest_dynamics.increment.csv",
+      "sha256": "022dd5582fb9184fa37d00f0210fa714c7494c9a5447d50feeb1a4c94a13d5fe"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_selected_harvest_dynamics.cumulative.csv",
+      "sha256": "dd8c715dbc5ec55a94b4135c415cfb7f2da8e756135525aa7186d24a151e29b2"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_LAID.pdf",
+      "sha256": "55fb068ff6d2d83afe1672e0ab8c08fceb909e2bfe1965924d67363fca35fe37"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_LAID.svg",
+      "sha256": "e50204adb5bcf4d037b4f82fb25980c6358678272c754b758dd9e1d3b54065c0"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_LAID.png",
+      "sha256": "fe3f40025d0be99bafd2e4ffae55101a9c578a9eb84a5b3da43d3e895782d0b0"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_LAID.observations.csv",
+      "sha256": "8030056c4296eff228c2eacb49d9fd5609e0f8c63a3c0330f5795463dc8c2471"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_LAID.daily_simulation.csv",
+      "sha256": "7a84b9d11ac3fffa0c108e337334bc50205b6f95deffd8423d6a70dac32b5c60"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_LWAD.pdf",
+      "sha256": "8c138a5911f47b21eb10b8e58e334bcef7245ccb1f1c8a6892bf0c03754f29f4"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_LWAD.svg",
+      "sha256": "247fd264b88c43efdb6375f20833e72c009d55268611362949f5561dca26e7a5"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_LWAD.png",
+      "sha256": "9fbd133639b1236a4983b9184ce160891e29b0f6387b96d57fc762b52e8d92b8"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_LWAD.observations.csv",
+      "sha256": "58c60a70015150c560481c8b709eff87facba08c8028547930fa2f603f6fe523"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_LWAD.daily_simulation.csv",
+      "sha256": "d1566da1011f0fd1515227a1ad15c924a18058b62448103f9d3933c95b78fce2"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_DRY_CUM.pdf",
+      "sha256": "7134ebb14c8003d11892f270c91dae3ae07c464700de1193dbecec4b5991d97c"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_DRY_CUM.svg",
+      "sha256": "b707ccc31804e2531234348d40272ea9ff2f06ab4f02e392006ed3f5570d122e"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_DRY_CUM.png",
+      "sha256": "3c90a750ef5304109e9f1707cca21e8ab0ae03e6a5515996fde4b265b772b7a8"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_DRY_CUM.observations.csv",
+      "sha256": "1e29deecfcc2feba862eac8668a28c692a6982df4ebf855a9105d48dea14e80d"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_DRY_CUM.daily_simulation.csv",
+      "sha256": "46d251943354082cefc36794435d05e33c740da13756012df4076364558a7add"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_FRESH_CUM.pdf",
+      "sha256": "28071d220c71332b47ea2a8783db74e09c7e02223edfc3b9c828374e510dd4b1"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_FRESH_CUM.svg",
+      "sha256": "e6860733b38120acd72bf4206e83d00b446a2fab640b0e32751f0145e6be2e74"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_FRESH_CUM.png",
+      "sha256": "e13500cb99901602282a7ba6e6c854afec2bc3b874e2468dc3896850a023de01"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_FRESH_CUM.observations.csv",
+      "sha256": "25018ca4a6b68e5d1902bd440b3e893d69ddbee168f6cdc68ddd559f8756193b"
+    },
+    {
+      "path": "D:/Tomato_Cal/paper/figures/conditional/conditional_all_treatments_FRESH_CUM.daily_simulation.csv",
+      "sha256": "f1994d4c11cc6e74eee8d7a886a3f11a110a66e7b8412920c000ca408a76afec"
+    }
+  ]
+}

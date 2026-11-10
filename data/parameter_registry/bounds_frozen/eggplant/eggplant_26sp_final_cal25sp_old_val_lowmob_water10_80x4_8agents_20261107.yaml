@@ -1,0 +1,12 @@
+bounds_id: "eggplant_26sp_final_cal25sp_old_val_lowmob_water10_80x4_8agents_20261107"
+crop: "eggplant"
+created_at: "2026-11-07T02:57:50Z"
+approved_at: "2026-11-07T02:57:50Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "approved_trial_bounds.csv"
+derived_from_sha256: "04592037358112d05e7074a1363395b1a6ddef30301a8cc986d9913e70dbf4b5"
+bounds_sha256: "42393f29db1171325e121d5043434f99b4353bd7ce10664afd15cafc9e5931a3"
+parameter_count: 126
+automatic_repairs: 0
+notes: "User-requested XSWBAR3 and PROSHI intervals; existing shell protein order remains enforced."

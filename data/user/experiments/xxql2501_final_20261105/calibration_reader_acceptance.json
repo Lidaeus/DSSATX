@@ -1,0 +1,18 @@
+{
+  "independent_FileA": {
+    "checked_cells": 40,
+    "failures": 0,
+    "method": "direct_source_terminal_mass_peak_LAI_and_per_plot_quality_weighted_dry_yield"
+  },
+  "input_audit_errors": 0,
+  "process_treatments_read": 8,
+  "harvest_treatments_read": 8,
+  "harvest_events_in_source": 72,
+  "NPK_source_rows": 72,
+  "exact_NPK_dates": [
+    "2025-07-04",
+    "2025-07-13"
+  ],
+  "smoke_treatments": 8,
+  "smoke_passed": true
+}

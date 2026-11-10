@@ -1,0 +1,102 @@
+{
+  "as_of": "2026-10-11",
+  "status": "complete_frozen_and_promoted",
+  "completed_decisions": [
+    "D1",
+    "D2",
+    "D3",
+    "D4",
+    "D5",
+    "D6",
+    "D7"
+  ],
+  "pending_decision": null,
+  "selected_weather_boundary": {
+    "TAV": 20.0,
+    "AMP": 6.0,
+    "selection": "existing",
+    "user_confirmed_on": "2026-10-11"
+  },
+  "staging_root": "workspace/staging/input_refresh_20261010",
+  "candidate_root": "workspace/qa/thermal_boundary_inputs_20261010",
+  "bundles": {
+    "25SP": "xxql2501_refreshed_20261010",
+    "25FA": "xxql2502_refreshed_20261010",
+    "26SP": "xxql2601_refreshed_20261010"
+  },
+  "verification": {
+    "treatments_per_scenario": 32,
+    "weather_scenarios_passed": [
+      "existing",
+      "source"
+    ],
+    "formal_reader_missing_values": 0,
+    "relevant_tests_passed": 28,
+    "report": "docs/reports/三季DSSAT输入重建执行记录_20261010.md",
+    "simulation_evidence": "workspace/audits/input_refresh_20261010/thermal_scenario_smoke.json",
+    "reader_evidence": "workspace/audits/input_refresh_20261010/calibration_reader_acceptance.json"
+  },
+  "current_bundle_index_changed": true,
+  "formal_calibration_proposal": "configs/calibration_proposals/eggplant_26sp_n012_review_20261011/proposal.json",
+  "parameter_calibration_started": false,
+  "formal_calibration_started": true,
+  "formal_run_id": "eggplant_26sp_n012_formal_20261011_r3",
+  "formal_run_started_at": "2026-10-11T01:33:18.898160+00:00",
+  "formal_calibration_previous_run_id": "eggplant_26sp_n012_formal_20261011_r2",
+  "formal_calibration_previous_status": "stopped_for_WinError32_repair",
+  "formal_repair_report": "docs/reports/正式率定故障检查与重跑记录_20261011.md",
+  "formal_calibration_status": "completed_pending_scientific_review",
+  "formal_calibration_completed_at": "2026-10-11T14:02:25.994706+00:00",
+  "formal_result_report": "docs/reports/正式率定结果报告_20261011_r3.md",
+  "formal_fit_review": "needs_revision",
+  "approved_joint_pair": {
+    "run_ids": [
+      "eggplant_26sp_n012_c31_joint42_20261011",
+      "eggplant_26sp_n012_c31_joint67_20261011"
+    ],
+    "sequence_dir": "D:\\Tomato_Cal\\workspace\\runs\\eggplant_26sp_n012_c31_joint_pair_20261011",
+    "status": "completed_needs_revision",
+    "startup_confirmation": "D:\\Tomato_Cal\\workspace\\runs\\eggplant_26sp_n012_c31_joint_pair_20261011\\startup_confirmation.json",
+    "report": "docs/reports/C31目标结构两版联合率定启动记录_20261011.md",
+    "progress_monitoring_requested": false,
+    "engineering_status": "both_failed",
+    "scientific_review": "needs_revision",
+    "result_report": "docs/reports/42与67参数联合率定结果报告_20261012.md",
+    "result_summary": "workspace\\runs\\eggplant_26sp_n012_c31_joint_pair_20261011\\result_review_20261012\\result_summary.json"
+  },
+  "water_n_response_diagnosis": {
+    "status": "completed_review_pending",
+    "n_cases": 117,
+    "season_runs": 351,
+    "report": "docs/reports/67参数版水氮响应机理诊断与调整建议_20261012.md",
+    "proposed_active_count": 64,
+    "new_formal_calibration_started": false,
+    "initial_water_sampling_confirmation": {
+      "date": "2026-03-14",
+      "timing": "before_18mm_irrigation",
+      "conclusion": "no evidence of duplicate 18mm irrigation",
+      "two_day_carry_back": "retained temporal approximation"
+    }
+  },
+  "et_environment_small_trials": {
+    "status": "completed_proposal_pending_review",
+    "successful_cases": 120,
+    "successful_native_season_runs": 360,
+    "strong_admissible_cases": 0,
+    "report": "docs/reports/蒸散与水分环境网格试验结果及下一轮率定方案_20261012.md",
+    "proposal": "configs/calibration_proposals/joint65_et_environment_after_grid_20261012/proposal.json",
+    "formal_run_started": false
+  },
+  "water_first_N_pool_revision": {
+    "status": "diagnostics_completed_pending_review",
+    "cases": 66,
+    "native_season_runs": 198,
+    "proposal": "configs/calibration_proposals/joint65_water_first_N_pool_revision_20261012/proposal.json",
+    "report": "docs/reports/水响应优先与氮动员氮库约束待审方案修订_20261012.md",
+    "active_count": 65,
+    "target_count": 519,
+    "phi_budget": 100,
+    "all_scientific_candidate_gates_pass_cases": 0,
+    "formal_run_started": false
+  }
+}

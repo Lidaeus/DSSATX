@@ -27,7 +27,7 @@ def _workspace_dir_from_this_file():
 
 def _write_params_csv_and_tpl(param_df, params_csv_path, tpl_path):
     df = param_df.copy()
-    df = df[df["status"].astype(str).str.lower().isin(["active", "adjustable", "free", "log", "none", "both"]) | (df["status"].astype(str).str.lower() == "active")]
+    df = df[df["status"].astype(str).str.lower().isin(["active", "fixed"])]
     rows = []
     for _, r in df.iterrows():
         name = str(r["name"]).strip().upper()
@@ -39,9 +39,13 @@ def _write_params_csv_and_tpl(param_df, params_csv_path, tpl_path):
     with open(tpl_path, "w", encoding="utf-8") as f:
         f.write("ptf ~\n")
         f.write("name,value\n")
+        statuses = dict(zip(df['name'].astype(str).str.upper(), df['status'].astype(str).str.lower()))
         for _, r in out_df.iterrows():
             name = str(r["name"]).strip().upper()
-            f.write(f"{name},~ {name} ~\n")
+            if statuses[name] == 'fixed':
+                f.write(f"{name},{float(r['value']):.17g}\n")
+            else:
+                f.write(f"{name},~ {name} ~\n")
 
     return out_df
 
@@ -103,16 +107,27 @@ def _prepare_runtime_bundle(case_dir, workspace_dir, input_dir, output_profile):
         (project_root / "data" / "templates" / "DSSATPRO.v48", Path("data/templates/DSSATPRO.v48")),
     )
     copied = [_copy_runtime_file(source, runtime_root, relative) for source, relative in required]
+    # Freeze transitive local imports as well; strict SA must not fall through
+    # to mutable code in the parent checkout.
+    for package in ('common', 'dssat', 'sensitivity', 'calibration'):
+        for source in sorted((project_root / 'src' / package).glob('*.py')):
+            copied.append(_copy_runtime_file(source, runtime_root, source.relative_to(project_root)))
+    contract = load_output_contract(output_profile)
     for filename in ("TMGRO048.CUL.base", "TMGRO048.ECO.base", "TMGRO048.SPE.base"):
+        source = project_root / 'data' / 'templates' / 'genotype' / filename
+        if contract.get('runtime_genotype_source') == 'input_bundle':
+            source = Path(input_dir) / filename.removesuffix('.base')
         copied.append(
             _copy_runtime_file(
-                project_root / "data" / "templates" / "genotype" / filename,
+                source,
                 runtime_root,
                 Path("data/templates/genotype") / filename,
             )
         )
 
     custom_exe = os.environ.get("DSSAT_CUSTOM_EXE", "").strip()
+    if contract.get('official_executable_only') and (custom_exe or os.environ.get('DSSAT_SPE_BASE')):
+        raise ValueError('This approved sensitivity contract prohibits custom executable/SPE overrides')
     executable_candidates = (
         Path(custom_exe) if custom_exe else Path("__missing_custom_exe__"),
         Path(os.environ.get("DSSAT48_HOME", r"C:\DSSAT48")) / "DSCSM048.EXE",
@@ -182,6 +197,9 @@ def build_case(
     case_dir = os.path.abspath(case_dir)
     workspace_dir = os.path.abspath(workspace_dir)
     contract = load_output_contract(output_profile)
+    if contract.get('contract_version') == 'expanded_morris_20261030':
+        from src.sensitivity.strict_forward import validate_parameter_domain
+        validate_parameter_domain(pd.read_csv(param_review_csv))
     if input_dir:
         input_dir = os.path.abspath(input_dir)
         contract = load_output_contract(output_profile, bundle_name=Path(input_dir).name)
@@ -223,7 +241,7 @@ def build_case(
     tpl_name = "sa_params.csv.tpl"
     params_csv = os.path.join(case_dir, params_csv_name)
     tpl_path = os.path.join(case_dir, tpl_name)
-    _write_params_csv_and_tpl(review_df[review_df["status"].str.lower() == "active"], params_csv, tpl_path)
+    _write_params_csv_and_tpl(review_df, params_csv, tpl_path)
 
     out_name = "SA_Indicators.OUT"
     ins_name = "SA_Indicators.OUT.ins"
@@ -282,6 +300,9 @@ def build_case(
     pst.parameter_data.loc[:, "partrans"] = "none"
 
     pst.observation_data.loc[:, "weight"] = 1.0
+    diagnostics = {str(n).lower() for n in contract.get('diagnostic_observations', [])}
+    if diagnostics:
+        pst.observation_data.loc[pst.observation_data.index.isin(diagnostics), 'weight'] = 0.0
 
     if runtime_root is not None:
         model_script = "runtime/src/sensitivity/sa_model.py"

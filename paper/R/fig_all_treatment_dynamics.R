@@ -30,14 +30,14 @@ build_all_treatment_process <- function(comparison, trajectory, treatment_metada
       ggplot2::geom_line(
         data = simulations,
         ggplot2::aes(x = time, y = simulated, colour = nitrogen_level, group = treatment),
-        linewidth = profile$data_linewidth_pt, lineend = "round"
+        linewidth = line_width_mm(profile$data_linewidth_pt), lineend = "round"
       ) +
       ggplot2::geom_point(
         data = observations,
         ggplot2::aes(x = time, y = observed, fill = nitrogen_level, shape = water_level),
         colour = "#202020", size = 1.55, stroke = 0.4
       ) +
-      ggplot2::facet_wrap(~treatment_label, ncol = facet_columns, scales = "free_y") +
+      ggplot2::facet_wrap(~treatment_label, ncol = facet_columns, scales = "fixed") +
       management_scales(profile) +
       ggplot2::labs(
         title = paste0(label, " across all treatments"),
@@ -115,7 +115,7 @@ conditional_matrix_plot <- function(data, events, panel_labels, y_limits, y_labe
     ggplot2::geom_line(
       data = data,
       ggplot2::aes(x = dap, y = sim_median, colour = nitrogen_level, group = treatment),
-      linewidth = profile$data_linewidth_pt * 0.9, lineend = "round"
+      linewidth = line_width_mm(profile$data_linewidth_pt) * 0.9, lineend = "round"
     )
   if (has_events) {
     # Observed points live in the event summary, not the daily trajectory
@@ -259,7 +259,7 @@ build_all_treatment_harvest <- function(comparison, trajectory, treatment_metada
       ggplot2::aes(y = observed, fill = nitrogen_level, shape = water_level),
       colour = "#202020", size = 1.55, stroke = 0.4
     ) +
-    ggplot2::facet_wrap(~treatment_label, ncol = facet_columns, scales = "free_y") +
+    ggplot2::facet_wrap(~treatment_label, ncol = facet_columns, scales = "fixed") +
     management_scales(profile) +
     ggplot2::labs(
       title = "Incremental fresh harvest across all treatments",
@@ -274,13 +274,13 @@ build_all_treatment_harvest <- function(comparison, trajectory, treatment_metada
   p_event <- ggplot2::ggplot(cumulative, ggplot2::aes(x = time)) +
     ggplot2::geom_line(
       ggplot2::aes(y = simulated, colour = nitrogen_level, group = treatment_label),
-      linewidth = profile$data_linewidth_pt, lineend = "round"
+      linewidth = line_width_mm(profile$data_linewidth_pt), lineend = "round"
     ) +
     ggplot2::geom_point(
       ggplot2::aes(y = observed, fill = nitrogen_level, shape = water_level),
       colour = "#202020", size = 1.55, stroke = 0.4
     ) +
-    ggplot2::facet_wrap(~treatment_label, ncol = facet_columns, scales = "free_y") +
+    ggplot2::facet_wrap(~treatment_label, ncol = facet_columns, scales = "fixed") +
     management_scales(profile) +
     ggplot2::labs(
       title = "Cumulative fresh harvest at observed events",
@@ -296,14 +296,14 @@ build_all_treatment_harvest <- function(comparison, trajectory, treatment_metada
     ggplot2::geom_line(
       data = smooth_curve,
       ggplot2::aes(x = time, y = simulated, colour = nitrogen_level, group = treatment_label),
-      linewidth = profile$data_linewidth_pt, lineend = "round"
+      linewidth = line_width_mm(profile$data_linewidth_pt), lineend = "round"
     ) +
     ggplot2::geom_point(
       data = cumulative,
       ggplot2::aes(x = time, y = observed, fill = nitrogen_level, shape = water_level),
       colour = "#202020", size = 1.55, stroke = 0.4
     ) +
-    ggplot2::facet_wrap(~treatment_label, ncol = facet_columns, scales = "free_y") +
+    ggplot2::facet_wrap(~treatment_label, ncol = facet_columns, scales = "fixed") +
     management_scales(profile) +
     ggplot2::labs(
       title = "Smoothed cumulative fresh harvest across all treatments",

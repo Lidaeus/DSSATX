@@ -118,7 +118,7 @@ def replace_initial_profile(
             return rendered.rjust(6)
 
         lines[index] = (
-            f"{row_ic:3d}{int(depth):6d}"
+            f"{row_ic:2d}{int(depth):6d}"
             f"{field(row['sh2o'])}{field(row['snh4'])}{field(row['sno3'])}"
         )
         changed_depths.add(depth)

@@ -1,0 +1,37 @@
+[
+  {
+    "file": "01_运行与处理对应.csv",
+    "columns": 21,
+    "rows": 20
+  },
+  {
+    "file": "02_逐日水量.csv",
+    "columns": 20,
+    "rows": 2504
+  },
+  {
+    "file": "03_边界土壤水.csv",
+    "columns": 15,
+    "rows": 780
+  },
+  {
+    "file": "04_器官状态.csv",
+    "columns": 23,
+    "rows": 360
+  },
+  {
+    "file": "05_采收与其他移出.csv",
+    "columns": 19,
+    "rows": 132
+  },
+  {
+    "file": "06_变量映射与支持情况.csv",
+    "columns": 12,
+    "rows": 27
+  },
+  {
+    "file": "07_校准与验证记录.csv",
+    "columns": 15,
+    "rows": 0
+  }
+]

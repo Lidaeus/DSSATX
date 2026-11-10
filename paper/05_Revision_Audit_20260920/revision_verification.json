@@ -1,0 +1,21 @@
+{
+  "verification_date": "2026-09-20",
+  "markdown_table_row_counts": [
+    12,
+    7,
+    9,
+    16
+  ],
+  "numeric_tables_match_recomputed_data": true,
+  "parameter_bounds_and_locations_match_frozen_file": true,
+  "relative_links_exist": true,
+  "combined_matches_sections": true,
+  "audited_sources_unchanged": true,
+  "science_validation_granted": false,
+  "section_sha256": {
+    "03_Results_Section_C15.md": "32957299b79260c1b3188bd11805bfaa4ec1f2da8114d03946856738955c515a",
+    "04_Discussion_Section_C15.md": "f4d499e60a607e1b7eef654b38875d26edd54ef260f76be0942a0478e9ff326d",
+    "00_Combined_Results_Discussion.md": "51275beef93208d19d891aa27c870a7b95715e2eba7fdff9dcf91bbe8e4f0097",
+    "修订说明与投稿前工作清单.md": "93910298c4a9108cd722b1e509b63f78d9042dd965a545e4835a694de09a2728"
+  }
+}

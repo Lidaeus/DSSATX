@@ -1,9 +1,0 @@
-{
-  "source_bundle": "D:\\Tomato_Cal\\data\\user\\experiments\\xxql2601_formal_scheme4_soil_20260830",
-  "nitrogen_multiplier": 1.5,
-  "scaled_fields": [
-    "SNH4",
-    "SNO3"
-  ],
-  "scope": "*INITIAL CONDITIONS only"
-}

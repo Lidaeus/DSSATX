@@ -14,6 +14,98 @@ focus_join <- function(data, focus, domain_column = "ranking_domain") {
   )
 }
 
+single_seed_primary_responses <- c("ADAPS", "LAI_AUC", "FRUITD_END")
+
+single_seed_selection_class <- function(d) {
+  ifelse(d$elbow_core,"Elbow core",ifelse(d$display_core,"Response-specific addition","Other"))
+}
+
+single_seed_unit <- function(response) {
+  switch(response,ADAPS=quote(d),LAI_AUC=quote(LAI %.% d),
+         FRUITD_END=quote(kg~DM~ha^{-1}),FRESH_END=quote(kg~fresh~ha^{-1}),quote(LAI))
+}
+
+build_single_seed_geometry <- function(effects, summary, profile, is_demo=TRUE,
+                                      responses=single_seed_primary_responses) {
+  if (!requireNamespace("ggrepel",quietly=TRUE)) stop("ggrepel is required for core parameter labels")
+  colours <- c("Elbow core"="#0072B2","Response-specific addition"="#D55E00","Other"="#BEC3C9")
+  parts <- list();source <- effects[effects$response %in% responses,,drop=FALSE]
+  for (j in seq_along(responses)) {
+    d <- source[source$response==responses[[j]],,drop=FALSE]
+    d$selection <- factor(single_seed_selection_class(d),levels=names(colours))
+    d$label <- ifelse(d$rank<=5,paste0(d$rank,"  ",d$parameter),"")
+    labels <- d[d$rank<=5,,drop=FALSE];labels$label <- paste0(labels$rank,"  ",labels$parameter)
+    unit <- single_seed_unit(responses[[j]])
+    xmax <- max(c(d$mu_star,labels$ci_high))*1.34;ymax <- max(d$sigma)*1.20
+    p <- ggplot2::ggplot(d,ggplot2::aes(mu_star,sigma)) +
+      ggplot2::geom_abline(slope=1,intercept=0,linetype="dotted",colour="#929AA2",linewidth=.35) +
+      ggplot2::geom_point(data=d[!d$display_core,],ggplot2::aes(colour=selection),size=1.2,alpha=.75) +
+      ggplot2::geom_segment(data=labels,ggplot2::aes(x=ci_low,xend=ci_high,y=sigma,yend=sigma),
+                            colour="#65717B",linewidth=.35,alpha=.7) +
+      ggplot2::geom_point(data=d[d$display_core,],ggplot2::aes(colour=selection),size=1.85) +
+      ggrepel::geom_text_repel(data=d,ggplot2::aes(label=label),size=2.25,colour="#202A33",
+                               seed=20261030,box.padding=.32,point.padding=.25,min.segment.length=0,
+                               segment.colour="#8A939B",segment.size=.25,max.overlaps=Inf,
+                               max.time=2,max.iter=20000) +
+      ggplot2::scale_colour_manual(values=colours,drop=FALSE,name=NULL) +
+      ggplot2::scale_x_continuous(limits=c(0,xmax),expand=ggplot2::expansion(mult=c(.02,.02)),labels=scales::label_number()) +
+      ggplot2::scale_y_continuous(limits=c(0,ymax),expand=ggplot2::expansion(mult=c(.02,.02)),labels=scales::label_number()) +
+      ggplot2::labs(title=paste0(letters[[j]],"  ",d$response_label[[1]]),
+                    x=bquote(mu^"*"~"["*.(unit)*"]"),y=bquote(sigma~"["*.(unit)*"]")) +
+      theme_q1(profile) + ggplot2::theme(plot.title=ggplot2::element_text(size=7.5,face="bold"),
+        axis.text=ggplot2::element_text(size=6.5),legend.position="bottom",legend.text=ggplot2::element_text(size=6.5),
+        plot.margin=ggplot2::margin(5,6,4,5))
+    parts[[j]] <- p
+  }
+  caption <- if (length(responses)==1) paste0(
+    "Labels: response-wise Top 5. Spans: 95% trajectory-bootstrap intervals for mu*.\n",
+    "Dotted line: sigma = mu*. Sigma indicates nonlinearity and/or interactions;\n",
+    "it is not a confidence interval or a pairwise interaction estimate.\n",
+    if(is_demo) "DEMO - current-run review; science_pending." else "") else paste0(
+    "Labels: response-wise Top 5. Horizontal spans: 95% trajectory-bootstrap intervals for mu*. Dotted line: sigma = mu*.\n",
+    "Sigma reflects nonlinearity and/or interactions; it is not a confidence interval or a pairwise interaction estimate. ",
+    if(is_demo) "DEMO - current-run review; science_pending." else "")
+  plot <- patchwork::wrap_plots(parts,ncol=length(parts),guides="collect")+
+    patchwork::plot_annotation(title="Core-parameter elementary-effects geometry",
+      subtitle="Equal-weight mean of eight treatment outputs; 30 trajectories, one seed",
+      caption=caption,
+      theme=ggplot2::theme(plot.title=ggplot2::element_text(size=9,face="bold"),plot.subtitle=ggplot2::element_text(size=7),
+                           plot.caption=ggplot2::element_text(size=5.7,hjust=0))) &
+    ggplot2::theme(legend.position="bottom")
+  list(plot=plot,source=source,height_mm=if(length(responses)==1) 114 else 99,
+       width_mm=if(length(responses)==1) 110 else profile$double_column_width_mm)
+}
+
+build_single_seed_ranking <- function(effects, summary, profile, is_demo=TRUE) {
+  d <- effects[effects$response %in% single_seed_primary_responses & effects$display_core,,drop=FALSE]
+  parts <- list()
+  for (j in seq_along(single_seed_primary_responses)) {
+    part <- d[d$response==single_seed_primary_responses[[j]],,drop=FALSE]
+    part <- part[order(part$rank),,drop=FALSE]
+    part$parameter <- factor(part$parameter,levels=rev(part$parameter))
+    part$selection <- single_seed_selection_class(part)
+    p <- ggplot2::ggplot(part,ggplot2::aes(mu_star,parameter)) +
+      ggplot2::geom_segment(ggplot2::aes(x=0,xend=mu_star,yend=parameter,colour=selection),linewidth=.7,alpha=.55) +
+      ggplot2::geom_segment(ggplot2::aes(x=ci_low,xend=ci_high,yend=parameter),colour="#333F4A",linewidth=.4) +
+      ggplot2::geom_point(ggplot2::aes(colour=selection),size=1.7) +
+      ggplot2::scale_colour_manual(values=c("Elbow core"="#0072B2","Response-specific addition"="#D55E00"),name=NULL) +
+      ggplot2::scale_x_continuous(limits=c(0,NA),expand=ggplot2::expansion(mult=c(.02,.06)),labels=scales::label_number()) +
+      ggplot2::labs(title=paste0(letters[[j]],"  ",part$response_label[[1]]),x=bquote(mu^"*"~"["*.(single_seed_unit(single_seed_primary_responses[[j]]))*"]"),y=NULL) +
+      theme_q1(profile) + ggplot2::theme(axis.text.y=ggplot2::element_text(size=7),axis.text.x=ggplot2::element_text(size=6.5),
+        plot.title=ggplot2::element_text(size=7.5,face="bold"),legend.text=ggplot2::element_text(size=6.5),
+        plot.margin=ggplot2::margin(4,6,4,4))
+    parts[[j]] <- p
+  }
+  plot <- patchwork::wrap_plots(parts,ncol=3,guides="collect")+patchwork::plot_annotation(
+    title="Response-specific ranking of screening candidates",
+    subtitle="Elbow-core candidates plus response-wise Top-5 additions; ordering is independent within each output",
+    caption=paste0("Points: mu*. Black spans: 95% trajectory-bootstrap intervals. Zeros are retained; these are screening candidates, not calibrated estimates.\n",
+                   if(is_demo) "DEMO - current-run review; science_pending. No cross-seed stability analysis." else ""),
+    theme=ggplot2::theme(plot.title=ggplot2::element_text(size=9,face="bold"),plot.subtitle=ggplot2::element_text(size=6.5),
+                        plot.caption=ggplot2::element_text(size=6,hjust=0))) & ggplot2::theme(legend.position="bottom")
+  list(plot=plot,source=d,height_mm=116)
+}
+
 build_morris_main <- function(rankings, group_summary, focus, profile, is_demo = FALSE,
                             lang = SA_DEFAULT_LANG) {
   validate_sa_columns(

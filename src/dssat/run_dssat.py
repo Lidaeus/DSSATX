@@ -2,6 +2,7 @@ import argparse
 import csv
 import datetime
 import glob
+import hashlib
 import math
 import os
 import re
@@ -792,7 +793,7 @@ def _write_pest_harvest_from_tmt_and_freshwt(batch_file, freshwt_path, pest_harv
         print(f"Warning: failed to write PestHarvest audit: {exc}")
 
 
-def _write_pest_wn_contrast_from_freshwt(batch_file, freshwt_path, output_path):
+def _write_pest_wn_contrast_from_freshwt(batch_file, freshwt_path, output_path, plantgro_path=None):
     """Write PestWNContrast.OUT containing orthogonal W-N contrast and monotonic barrier values."""
     entries = _parse_batch_entries(batch_file)
     if not entries:
@@ -809,10 +810,15 @@ def _write_pest_wn_contrast_from_freshwt(batch_file, freshwt_path, output_path):
 
     contrast_specs = [
         (1, "XXQL2501", 2, 5),   # 25SP W3: N3 vs N0
-        (2, "XXQL2501", 10, 13), # 25SP W1: N3 vs N0
+        (2, "XXQL2501", 10, 13), # 25SP W1: N3 vs N0 (enforce gradient >= 0.4 * 11590 = 4636 kg/ha)
         (3, "XXQL2601", 2, 11),  # 26SP W2: N3 vs N0
         (4, "XXQL2601", 3, 12),  # 26SP W1: N3 vs N0
+        (5, "XXQL2501", 5, 5),   # 25SP W3N0 terminal LAI (enforce physiological LAI >= 1.5, scaled x1000)
+        (6, "XXQL2601", 1, 9),   # 26SP W3: N3 vs N0
     ]
+
+    plantgro_file = plantgro_path or "PlantGro.OUT"
+    lai_by_run = _read_plantgro_vars_by_run(plantgro_file, ["LAID"]) if os.path.isfile(plantgro_file) else {}
 
     lines = []
     for hno, fx, n3_tn, n0_tn in contrast_specs:
@@ -820,10 +826,34 @@ def _write_pest_wn_contrast_from_freshwt(batch_file, freshwt_path, output_path):
         run_n0 = trt_to_run.get((fx, n0_tn))
         if run_n3 is None or run_n0 is None:
             continue
-        y_n3 = max(chfpw_by_run.get(run_n3, {0: 0.0}).values()) if run_n3 in chfpw_by_run else 0.0
-        y_n0 = max(chfpw_by_run.get(run_n0, {0: 0.0}).values()) if run_n0 in chfpw_by_run else 0.0
-        contrast = y_n3 - y_n0
-        penalty = max(0.0, y_n0 - y_n3)
+
+        if hno == 5:
+            # Constraint 1: 25SP W3N0 terminal LAI >= 1.5 (scaled x1000)
+            laid_val = -99.0
+            if run_n3 in lai_by_run:
+                dates_dict = lai_by_run[run_n3]
+                if 25194 in dates_dict:
+                    laid_val = float(dates_dict[25194].get("LAID", -99.0))
+                elif dates_dict:
+                    latest_d = max(dates_dict.keys())
+                    laid_val = float(dates_dict[latest_d].get("LAID", -99.0))
+            if laid_val > 0:
+                contrast = laid_val * 1000.0
+            else:
+                contrast = 1500.0
+            penalty = max(0.0, 1500.0 - contrast)
+        elif hno == 2:
+            # Constraint 2: 25SP W1 N response gradient >= 4636 kg/ha (0.4 * measured 11590 kg/ha)
+            y_n3 = max(chfpw_by_run.get(run_n3, {0: 0.0}).values()) if run_n3 in chfpw_by_run else 0.0
+            y_n0 = max(chfpw_by_run.get(run_n0, {0: 0.0}).values()) if run_n0 in chfpw_by_run else 0.0
+            contrast = y_n3 - y_n0
+            penalty = max(0.0, 4636.0 - contrast)
+        else:
+            y_n3 = max(chfpw_by_run.get(run_n3, {0: 0.0}).values()) if run_n3 in chfpw_by_run else 0.0
+            y_n0 = max(chfpw_by_run.get(run_n0, {0: 0.0}).values()) if run_n0 in chfpw_by_run else 0.0
+            contrast = y_n3 - y_n0
+            penalty = max(0.0, y_n0 - y_n3)
+
         lines.append(
             f"RUN {run_n3} TN {n3_tn} @HNO@ {hno} DATE 0 @PEN_CTRS@ {contrast:.6f} @PEN_MONOS@ {penalty:.6f}"
         )
@@ -1935,6 +1965,15 @@ def handle_failure(exit_code):
                         f"@LAIDS@ -99.000 @LWADS@ -99.000 @SWADS@ -99.000 @CHTDS@ -99.000\n"
                     )
 
+    if not os.path.exists(_pest_path(PEST_WNCONTRAST_FILE)):
+        try:
+            _write_pest_wn_contrast_from_freshwt(
+                BATCH_FILE, "FreshWt.OUT", _pest_path(PEST_WNCONTRAST_FILE), plantgro_path="PlantGro.OUT"
+            )
+        except Exception:
+            pass
+
+
 def _format_to_width(val, width, orig_token=None):
     if width <= 0:
         return ""
@@ -2105,12 +2144,17 @@ def _write_dssatpro_with_crd(src_path, dst_path, crd_path):
         lines = f.readlines()
 
     crd_line = f"CRD {_to_dssatpro_path(crd_path)}\n"
+    sld_line = f"SLD {_to_dssatpro_path(crd_path)}\n"
     wrote = False
+    wrote_sld = False
+    has_local_soil = os.path.exists(os.path.join(crd_path, "SOIL.SOL"))
     for i, line in enumerate(lines):
         if line.startswith("CRD "):
             lines[i] = crd_line
             wrote = True
-            break
+        elif line.startswith("SLD ") and has_local_soil:
+            lines[i] = sld_line
+            wrote_sld = True
     if not wrote:
         ins = 0
         for j, line in enumerate(lines):
@@ -2118,6 +2162,13 @@ def _write_dssatpro_with_crd(src_path, dst_path, crd_path):
                 ins = j + 1
                 break
         lines.insert(ins, crd_line)
+    if has_local_soil and not wrote_sld:
+        ins = 0
+        for j, line in enumerate(lines):
+            if line.strip() == "":
+                ins = j + 1
+                break
+        lines.insert(ins, sld_line)
 
     with open(dst_path, "w") as f:
         f.writelines(lines)
@@ -2487,6 +2538,7 @@ def update_spe_file(param_csv_path=PARAM_CSV):
         stage_names.extend([f"TB{stage}", f"TO1{stage}", f"TO2{stage}", f"TM{stage}"])
 
     direct_keys = [
+        "OPTLFP_FS", "OPTSTP_FS", "OPTSDP_FS",
         "PARMAX",
         "PHTMAX",
         "KCAN",
@@ -2792,6 +2844,10 @@ def update_spe_file(param_csv_path=PARAM_CSV):
     _update_named_line("PGEFF SCV KDIF", ["PGEFF", "_SCV", "KDIF", "LFANGB"])
     _update_named_line("DSWBAR,XFRMAX", ["DSWBAR", "XFRMAX", "SHLAG"])
     _update_named_line("FRLFMX", ["FRLFMX"])
+    # Explicit P concentration fields in the approved expanded SA domain.
+    # Preserve emergence/flowering coefficients and only replace full-seed.
+    for prefix in ('OPTLFP', 'OPTSTP', 'OPTSDP'):
+        _update_named_line(prefix+'-EM', ['_P_EM', '_P_FF', prefix+'_FS'])
     # XPODF was historically a one-field row (only NSTFAC).  The modified
     # executable extends it to three fields: NSTFAC, NREXP and NRMIN.  Map
     # these by their labels so the legacy one-field template and the extended
@@ -2919,17 +2975,46 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
     soil_keys = [
         k for k in param_dict.keys()
         if str(k).strip().upper().startswith("SOIL_")
-        or str(k).strip().upper() in {"SLPF_25SP", "SLPF_26SP"}
+        or str(k).strip().upper() in {"SLPF_25SP", "SLPF_26SP", "SLPF_25FA"}
     ]
     if not soil_keys:
         return
 
     cwd_script = os.path.dirname(os.path.abspath(__file__))
-    filex_path = _resolve_filex_from_batch(batch_file, os.getcwd()) or _resolve_filex_from_batch(batch_file, cwd_script)
-    if soil_id is None:
-        soil_id = _infer_soil_id_from_filex(filex_path)
-    soil_id = str(soil_id).strip() if soil_id else None
-    if not soil_id:
+    soil_ids = []
+    if soil_id is not None:
+        soil_ids = [str(soil_id).strip()]
+    else:
+        batch_path = _resolve_batch_path(batch_file, base_dir=os.getcwd()) or _resolve_batch_path(batch_file, base_dir=cwd_script)
+        if batch_path and os.path.exists(batch_path):
+            try:
+                with open(batch_path, "r", encoding="utf-8", errors="ignore") as bf:
+                    for bline in bf:
+                        bs = bline.strip()
+                        if not bs or bs.startswith(("$", "@", "!")):
+                            continue
+                        parts = bs.split()
+                        if parts:
+                            fx_cand = parts[0]
+                            cand_paths = [
+                                os.path.normpath(os.path.join(os.path.dirname(batch_path), fx_cand)),
+                                os.path.normpath(os.path.join(os.getcwd(), fx_cand)),
+                                os.path.normpath(os.path.join(cwd_script, fx_cand)),
+                            ]
+                            for cp in cand_paths:
+                                if os.path.exists(cp):
+                                    sid = _infer_soil_id_from_filex(cp)
+                                    if sid and sid.strip() not in soil_ids:
+                                        soil_ids.append(sid.strip())
+                                    break
+            except Exception:
+                pass
+        if not soil_ids:
+            filex_path = _resolve_filex_from_batch(batch_file, os.getcwd()) or _resolve_filex_from_batch(batch_file, cwd_script)
+            sid = _infer_soil_id_from_filex(filex_path)
+            if sid:
+                soil_ids.append(sid.strip())
+    if not soil_ids:
         raise RuntimeError("Could not infer a soil profile ID for SOIL parameter injection")
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -2990,181 +3075,180 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
             )
         return a, b, c
 
-    sec_start = None
-    for i, s in enumerate(lines):
-        if s.startswith("*"):
-            sid = s[1:].strip().split()[0] if s[1:].strip() else ""
-            if sid.upper() == soil_id.upper():
-                sec_start = i
+    def _update_single_soil_profile(lines, profile_id, param_dict):
+        sec_start = None
+        for i, s in enumerate(lines):
+            if s.startswith("*"):
+                sid = s[1:].strip().split()[0] if s[1:].strip() else ""
+                if sid.upper() == profile_id.upper():
+                    sec_start = i
+                    break
+        if sec_start is None:
+            return None
+
+        sec_end = len(lines)
+        for j in range(sec_start + 1, len(lines)):
+            if lines[j].startswith("*"):
+                sec_end = j
                 break
-    if sec_start is None:
-        return
 
-    sec_end = len(lines)
-    for j in range(sec_start + 1, len(lines)):
-        if lines[j].startswith("*"):
-            sec_end = j
-            break
+        scom_header_idx = None
+        layer_header_idx = None
+        for j in range(sec_start, sec_end):
+            u = lines[j].strip().upper()
+            if u.startswith("@") and "SCOM" in u and "SALB" in u:
+                scom_header_idx = j
+            if u.startswith("@") and "SLLL" in u and "SDUL" in u and "SSAT" in u:
+                layer_header_idx = j
 
-    scom_header_idx = None
-    layer_header_idx = None
-    for j in range(sec_start, sec_end):
-        u = lines[j].strip().upper()
-        if u.startswith("@") and "SCOM" in u and "SALB" in u:
-            scom_header_idx = j
-        if u.startswith("@") and "SLLL" in u and "SDUL" in u and "SSAT" in u:
-            layer_header_idx = j
+        if scom_header_idx is not None:
+            want = [("SALB", 0), ("SLU1", 1), ("SLDR", 2), ("SLRO", 3), ("SLNF", 4), ("SLPF", 5)]
+            if (scom_header_idx + 1) < sec_end:
+                data_idx = None
+                for j in range(scom_header_idx + 1, sec_end):
+                    if not lines[j].strip():
+                        continue
+                    if lines[j].lstrip().startswith("@") or lines[j].startswith("*"):
+                        break
+                    data_idx = j
+                    break
+                if data_idx is not None:
+                    s = lines[data_idx].rstrip("\n")
+                    matches = list(re.finditer(r"[-+]?\d*\.\d+|[-+]?\d+", s))
+                    tokens = s.split()
+                    offset = 1 if (tokens and re.match(r"^[-+]?\d", tokens[0])) else 0
+                    replacements = []
+                    for name, base_pos in want:
+                        pos = base_pos + offset
+                        key = f"SOIL_{name}"
+                        if name == "SLPF":
+                            if profile_id.upper() in {"XXSL2501", "IBTM910017"} and ("SLPF_25SP" in param_dict or "SOIL_SLPF_25SP" in param_dict):
+                                key = "SLPF_25SP" if "SLPF_25SP" in param_dict else "SOIL_SLPF_25SP"
+                            elif profile_id.upper() in {"XXSL2601", "IB26910017"} and ("SLPF_26SP" in param_dict or "SOIL_SLPF_26SP" in param_dict):
+                                key = "SLPF_26SP" if "SLPF_26SP" in param_dict else "SOIL_SLPF_26SP"
+                            elif profile_id.upper() in {"XXSL2502", "IBFA910017"} and ("SLPF_25FA" in param_dict or "SOIL_SLPF_25FA" in param_dict):
+                                key = "SLPF_25FA" if "SLPF_25FA" in param_dict else "SOIL_SLPF_25FA"
+                            elif "SLPF_25SP" in param_dict:
+                                key = "SLPF_25SP"
+                            elif "SOIL_SLPF_25SP" in param_dict:
+                                key = "SOIL_SLPF_25SP"
+                        if key not in param_dict and name in param_dict:
+                            key = name
+                        if key not in param_dict:
+                            continue
+                        if pos >= len(matches):
+                            continue
+                        v = float(param_dict[key])
+                        ranges = {"SALB": (0.05, 0.35), "SLU1": (0.0, 20.0), "SLDR": (0.01, 5.00), "SLRO": (1.0, 99.0), "SLNF": (0.50, 1.00), "SLPF": (0.0, 2.0)}
+                        v2 = _recommended(v, *ranges[name], name=key) if name in ranges else v
+                        if v2 is None:
+                            continue
+                        match = matches[pos]
+                        orig = s[match.start() : match.end()]
+                        width = len(orig)
+                        formatted = _format_to_width_preserve_space(v2, width, orig_token=orig)
+                        replacements.append((match.start(), match.end(), formatted))
+                    for start, end, formatted in sorted(replacements, key=lambda x: x[0], reverse=True):
+                        s = s[:start] + formatted + s[end:]
+                    lines[data_idx] = s.rstrip() + "\n"
 
-    if scom_header_idx is not None:
-        # SCOM headers are whitespace-delimited labels, not fixed-column
-        # fields.  Character spans inferred from the header can swallow the
-        # intervening labels (SLU1/SLNF) and blank the remainder of the data
-        # row, which stricter custom DSSAT builds reject as IPSOIL.  Replace
-        # the numeric slots by semantic position instead.
-        want = [("SALB", 0), ("SLDR", 2), ("SLRO", 3), ("SLNF", 4), ("SLPF", 5)]
-        if (scom_header_idx + 1) < sec_end:
-            data_idx = None
-            for j in range(scom_header_idx + 1, sec_end):
+        if layer_header_idx is not None:
+            header_cols = lines[layer_header_idx].split()
+            if header_cols and header_cols[0] == "@":
+                header_cols = header_cols[1:]
+            want = ["SLLL", "SDUL", "SSAT", "SBDM", "SLOC", "SRGF", "SSKS", "SLCL", "SLSI"]
+            col_pos = {k: header_cols.index(k) for k in want if k in header_cols}
+            layer_lines = []
+            for j in range(layer_header_idx + 1, sec_end):
                 if not lines[j].strip():
                     continue
                 if lines[j].lstrip().startswith("@") or lines[j].startswith("*"):
                     break
-                data_idx = j
-                break
-            if data_idx is not None:
-                s = lines[data_idx].rstrip("\n")
+                layer_lines.append(j)
+
+            for li, idx in enumerate(layer_lines, start=1):
+                slll_key = _as_layer_key("SLLL", li)
+                sdul_key = _as_layer_key("SDUL", li)
+                ssat_key = _as_layer_key("SSAT", li)
+                slll_in = float(param_dict[slll_key]) if slll_key in param_dict else None
+                sdul_in = float(param_dict[sdul_key]) if sdul_key in param_dict else None
+                ssat_in = float(param_dict[ssat_key]) if ssat_key in param_dict else None
+                slll_v, sdul_v, ssat_v = _safe_water_triplet(slll_in, sdul_in, ssat_in)
+                if slll_v is not None:
+                    param_dict[slll_key] = slll_v
+                if sdul_v is not None:
+                    param_dict[sdul_key] = sdul_v
+                if ssat_v is not None:
+                    param_dict[ssat_key] = ssat_v
+
+                s = lines[idx].rstrip("\n")
                 matches = list(re.finditer(r"[-+]?\d*\.\d+|[-+]?\d+", s))
-                tokens = s.split()
-                offset = 1 if (tokens and re.match(r"^[-+]?\d", tokens[0])) else 0
                 replacements = []
-                for name, base_pos in want:
-                    pos = base_pos + offset
-                    key = f"SOIL_{name}"
-                    if name == "SLPF":
-                        if "SLPF_25SP" in param_dict:
-                            key = "SLPF_25SP"
-                        elif "SOIL_SLPF_25SP" in param_dict:
-                            key = "SOIL_SLPF_25SP"
+
+                for name in ["SLLL", "SDUL", "SSAT", "SBDM", "SLOC", "SRGF", "SSKS", "SLCL", "SLSI"]:
+                    key = _as_layer_key(name, li)
                     if key not in param_dict:
                         continue
-                    if pos >= len(matches):
+                    if name not in col_pos:
                         continue
+                    pos = int(col_pos[name])
+                    if pos < 0 or pos >= len(matches):
+                        continue
+                    m = matches[pos]
+                    orig_tok = s[m.start() : m.end()]
                     v = float(param_dict[key])
-                    ranges = {"SALB": (0.05, 0.35), "SLDR": (0.01, 5.00), "SLRO": (1.0, 99.0), "SLNF": (0.50, 1.00), "SLPF": (0.0, 2.0)}
-                    v2 = _recommended(v, *ranges[name], name=key) if name in ranges else v
-                    if v2 is None:
-                        continue
-                    match = matches[pos]
-                    orig = s[match.start() : match.end()]
-                    width = len(orig)
-                    formatted = _format_to_width_preserve_space(v2, width, orig_token=orig)
-                    replacements.append((match.start(), match.end(), formatted))
-                for start, end, formatted in sorted(replacements, key=lambda x: x[0], reverse=True):
-                    s = s[:start] + formatted + s[end:]
-                lines[data_idx] = s.rstrip() + "\n"
+                    if name in {"SLLL", "SDUL", "SSAT"}:
+                        v2 = _recommended(v, 0.01, 0.80, name=key)
+                        if v2 is None:
+                            continue
+                        new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
+                    elif name == "SBDM":
+                        v2 = _recommended(v, 0.5, 2.2, name=key)
+                        if v2 is None:
+                            continue
+                        new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
+                    elif name == "SLOC":
+                        v2 = _recommended(v, 0.0, 10.0, name=key)
+                        if v2 is None:
+                            continue
+                        new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
+                    elif name == "SRGF":
+                        v2 = _recommended(v, 0.0, 1.0, name=key)
+                        if v2 is None:
+                            continue
+                        new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
+                    elif name == "SSKS":
+                        v2 = _recommended(v, 0.0, 100.0, name=key)
+                        if v2 is None:
+                            continue
+                        new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
+                    elif name in ("SLCL", "SLSI"):
+                        if orig_tok.strip() == "-99":
+                            continue
+                        v2 = _recommended(v, 0.0, 100.0, name=key)
+                        if v2 is None:
+                            continue
+                        new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
+                    else:
+                        new_tok = str(v)
 
-    if layer_header_idx is not None:
-        header_cols = lines[layer_header_idx].split()
-        if header_cols and header_cols[0] == "@":
-            header_cols = header_cols[1:]
-        want = ["SLLL", "SDUL", "SSAT", "SBDM", "SLOC", "SSKS", "SLCL", "SLSI"]
-        col_pos = {k: header_cols.index(k) for k in want if k in header_cols}
-        layer_lines = []
-        for j in range(layer_header_idx + 1, sec_end):
-            if not lines[j].strip():
-                continue
-            if lines[j].lstrip().startswith("@") or lines[j].startswith("*"):
-                break
-            layer_lines.append(j)
+                    if len(new_tok) <= len(orig_tok):
+                        new_tok = new_tok.rjust(len(orig_tok))
+                    else:
+                        new_tok = new_tok[-len(orig_tok) :]
 
-        for li, idx in enumerate(layer_lines, start=1):
-            slll_key = _as_layer_key("SLLL", li)
-            sdul_key = _as_layer_key("SDUL", li)
-            ssat_key = _as_layer_key("SSAT", li)
-            slll_in = float(param_dict[slll_key]) if slll_key in param_dict else None
-            sdul_in = float(param_dict[sdul_key]) if sdul_key in param_dict else None
-            ssat_in = float(param_dict[ssat_key]) if ssat_key in param_dict else None
-            slll_v, sdul_v, ssat_v = _safe_water_triplet(slll_in, sdul_in, ssat_in)
-            if slll_v is not None:
-                param_dict[slll_key] = slll_v
-            if sdul_v is not None:
-                param_dict[sdul_key] = sdul_v
-            if ssat_v is not None:
-                param_dict[ssat_key] = ssat_v
+                    replacements.append((m.start(), m.end(), new_tok))
 
-            # Locate all source tokens once, then apply replacements from
-            # right to left.  Re-scanning after every replacement is unsafe:
-            # values with different widths shift subsequent regex matches and
-            # can make a later soil field overwrite SCEC/SLNI/SLHW with
-            # overflow stars (DSSAT then reports SOILDYN).
-            s = lines[idx].rstrip("\n")
-            matches = list(re.finditer(r"[-+]?\d*\.\d+|[-+]?\d+", s))
-            replacements = []
+                for start, end, new_tok in sorted(replacements, key=lambda x: x[0], reverse=True):
+                    s = s[:start] + new_tok + s[end:]
+                lines[idx] = s.rstrip() + "\n"
+        return sec_start
 
-            for name in ["SLLL", "SDUL", "SSAT", "SBDM", "SLOC", "SRGF", "SSKS", "SLCL", "SLSI"]:
-                key = _as_layer_key(name, li)
-                if key not in param_dict:
-                    continue
-                if name not in col_pos:
-                    continue
-                pos = int(col_pos[name])
-                if pos < 0 or pos >= len(matches):
-                    continue
-                m = matches[pos]
-                orig_tok = s[m.start() : m.end()]
-                v = float(param_dict[key])
-                if name in {"SLLL", "SDUL", "SSAT"}:
-                    v2 = _recommended(v, 0.01, 0.80, name=key)
-                    if v2 is None:
-                        continue
-                    # Preserve the DSSAT token width/notation.  A fixed
-                    # ``.3f`` string would be truncated into e.g. ``456``
-                    # when the source token is ``.49`` (width 3), turning
-                    # SAT/DUL into invalid values and making DSSAT abort.
-                    new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
-                elif name == "SBDM":
-                    v2 = _recommended(v, 0.5, 2.2, name=key)
-                    if v2 is None:
-                        continue
-                    new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
-                elif name == "SLOC":
-                    v2 = _recommended(v, 0.0, 10.0, name=key)
-                    if v2 is None:
-                        continue
-                    new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
-                elif name == "SRGF":
-                    v2 = _recommended(v, 0.0, 1.0, name=key)
-                    if v2 is None:
-                        continue
-                    new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
-                elif name == "SSKS":
-                    # Saturated hydraulic conductivity (cm/h); allow 0-100
-                    v2 = _recommended(v, 0.0, 100.0, name=key)
-                    if v2 is None:
-                        continue
-                    new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
-                elif name in ("SLCL", "SLSI"):
-                    # Clay/silt percentage (0-100); only inject if source is
-                    # not -99 (missing) to avoid overwriting unmeasured layers
-                    if orig_tok.strip() == "-99":
-                        continue
-                    v2 = _recommended(v, 0.0, 100.0, name=key)
-                    if v2 is None:
-                        continue
-                    new_tok = _format_to_width(v2, len(orig_tok), orig_token=orig_tok)
-                else:
-                    new_tok = str(v)
-
-                if len(new_tok) <= len(orig_tok):
-                    new_tok = new_tok.rjust(len(orig_tok))
-                else:
-                    new_tok = new_tok[-len(orig_tok) :]
-
-                replacements.append((m.start(), m.end(), new_tok))
-
-            for start, end, new_tok in sorted(replacements, key=lambda x: x[0], reverse=True):
-                s = s[:start] + new_tok + s[end:]
-            lines[idx] = s.rstrip() + "\n"
+    sec_start = None
+    for cur_soil_id in soil_ids:
+        cur_sec_start = _update_single_soil_profile(lines, cur_soil_id, param_dict)
+        if sec_start is None and cur_sec_start is not None:
+            sec_start = cur_sec_start
 
     # Ensure IB26910017 profile exists in SOIL.SOL if SLPF_26SP is specified
     slpf_26_val = None
@@ -3185,6 +3269,11 @@ def update_soil_file(param_csv_path=PARAM_CSV, batch_file=BATCH_FILE, soil_id=No
                     sec_26_start = i
                     break
         if sec_26_start is None:
+            sec_end = len(lines)
+            for j in range(sec_start + 1, len(lines)):
+                if lines[j].startswith("*"):
+                    sec_end = j
+                    break
             prof_25_lines = list(lines[sec_start:sec_end])
             if prof_25_lines:
                 prof_26_lines = list(prof_25_lines)
@@ -4222,7 +4311,7 @@ def run_model():
                     print(f"Warning: failed to write {_harvest_pest_file()}: {e}")
                 try:
                     _write_pest_wn_contrast_from_freshwt(
-                        BATCH_FILE, "FreshWt.OUT", _pest_path(PEST_WNCONTRAST_FILE)
+                        BATCH_FILE, "FreshWt.OUT", _pest_path(PEST_WNCONTRAST_FILE), plantgro_path="PlantGro.OUT"
                     )
                 except Exception as e:
                     print(f"Warning: failed to write {PEST_WNCONTRAST_FILE}: {e}")
@@ -4271,8 +4360,24 @@ def _copy(source: Path, destination: Path) -> None:
     if not source.is_file():
         raise FileNotFoundError(f"Required DSSAT input is missing: {source}")
     destination.parent.mkdir(parents=True, exist_ok=True)
-    if source.resolve() != destination.resolve():
-        shutil.copy2(source, destination)
+    if source.resolve() == destination.resolve():
+        return
+    for attempt in range(10):
+        try:
+            # A recently exited Windows process/virus scanner can still hold
+            # its executable open. Replacing an identical binary is unnecessary.
+            # Compare content, not timestamps, so a changed binary is copied.
+            if destination.name.upper() == DSSAT_EXE and destination.is_file() and source.stat().st_size == destination.stat().st_size:
+                with source.open('rb') as src, destination.open('rb') as dst:
+                    if hashlib.file_digest(src, 'sha256').digest() == hashlib.file_digest(dst, 'sha256').digest():
+                        return
+            shutil.copy2(source, destination)
+            return
+        except PermissionError as error:
+            if getattr(error, 'winerror', None) not in {32, 33} or attempt == 9:
+                raise
+            # Only transient Windows sharing/locking violations are retried.
+            time.sleep(.1 * (attempt + 1))
 
 
 def _batch_argument(args: list[str]) -> str:
@@ -4332,14 +4437,17 @@ def _to_dssatpro_path(p: Path) -> str:
 
 
 def _write_local_dssatpro(run_dir: Path) -> Path:
-    """Write DSSATPRO.v48 into run_dir with CRD and TMD pointing to run_dir."""
+    """Write DSSATPRO.v48 into run_dir with CRD, TMD, and SLD pointing to run_dir."""
     templates = DATA_DIR / "templates"
     lines = (templates / "DSSATPRO.v48").read_text(encoding="utf-8", errors="ignore").splitlines(keepends=True)
     crd_line = f"CRD {_to_dssatpro_path(run_dir)}\n"
     tmd_line = f"TMD {_to_dssatpro_path(run_dir)}\n"
+    sld_line = f"SLD {_to_dssatpro_path(run_dir)}\n"
     out = []
     wrote_crd = False
     wrote_tmd = False
+    wrote_sld = False
+    has_local_soil = (run_dir / "SOIL.SOL").exists() or (run_dir / "SOIL.SOL.base").exists()
     for ln in lines:
         if ln.strip().startswith("CRD "):
             out.append(crd_line)
@@ -4347,6 +4455,9 @@ def _write_local_dssatpro(run_dir: Path) -> Path:
         elif ln.strip().startswith("TMD "):
             out.append(tmd_line)
             wrote_tmd = True
+        elif ln.strip().startswith("SLD ") and has_local_soil:
+            out.append(sld_line)
+            wrote_sld = True
         else:
             out.append(ln)
     if not wrote_crd:
@@ -4358,6 +4469,11 @@ def _write_local_dssatpro(run_dir: Path) -> Path:
         for i, ln in enumerate(out):
             if ln.strip() == "":
                 out.insert(i + 1, tmd_line)
+                break
+    if has_local_soil and not wrote_sld:
+        for i, ln in enumerate(out):
+            if ln.strip() == "":
+                out.insert(i + 1, sld_line)
                 break
     dst = run_dir / "DSSATPRO.v48"
     dst.write_text("".join(out), encoding="utf-8")

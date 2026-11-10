@@ -1,0 +1,9 @@
+study_id,authors,year,species,tb,topt1,topt2,tmax,thermal_time_flowering,dif_effect,chilling_threshold
+adams_2001,Adams et al.,2001,Solanum lycopersicum,7.0,22.0,26.0,35.0,485.0,DIF modulates stem elongation; invariant to rate,< 10.0 C (delayed ripening)
+cockshull_1992,Cockshull et al.,1992,Solanum lycopersicum,7.2,24.0,26.0,36.0,480.0,Truss appearance 0.051/wk/C; negative DIF dwarfs stem,< 9.5 C (truss abortion)
+uzun_2006,Uzun,2006,Solanum melongena,11.0,25.0,27.5,37.0,610.0,Curvilinear interaction with light integral,< 11.5 C (bud drop > 80%)
+de_koning_1994,De Koning,1994,Solanum lycopersicum,8.0,23.0,25.0,34.0,500.0,Fruit sink strength drops 50% from 24 to 17 C,< 12.0 C (partitioning arrest)
+heuvelink_1995,Heuvelink,1995,Solanum lycopersicum,7.0,22.0,25.0,35.0,510.0,24-48h temperature integration window,< 10.0 C (growth cessation)
+yin_1995,Yin et al.,1995,Solanaceous / General,8.0,25.5,25.5,38.0,520.0,Beta developmental rate function (alpha=1.6-2.2),Smooth asymptotic approach to zero at Tb
+wang_engel_1998,Wang & Engel,1998,General Crop Phenology,7.5,24.0,28.0,37.0,500.0,Multiplicative photothermal temperature response,Zero accumulation below Tb
+xxql_baseline_c15,XXQL Project Baseline (C15),2026,Solanum melongena,9.21,26.0,32.0,41.5,580.0,Static piecewise linear four-cardinal model,Hard threshold Tb=9.21 C (knife-edge cutoff)

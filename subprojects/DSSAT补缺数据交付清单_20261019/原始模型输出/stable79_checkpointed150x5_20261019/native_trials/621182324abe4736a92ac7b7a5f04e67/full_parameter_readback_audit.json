@@ -1,0 +1,9 @@
+{
+  "trial": "D:\\Tomato_Cal\\subprojects\\DSSAT补缺数据交付清单_20261019\\原始模型输出\\stable79_checkpointed150x5_20261019\\native_trials\\621182324abe4736a92ac7b7a5f04e67",
+  "all_requested": 120,
+  "verified_seasons": {
+    "26SP": 119,
+    "25SP": 120
+  },
+  "passed": true
+}

@@ -1,0 +1,145 @@
+{
+  "formal_calibration_started": false,
+  "files": [
+    {
+      "name": "fruit_sampling_definition.json",
+      "sha256": "2a5bb03f06feaa0315d357b1bffe65ab1b67c1a5dae6c01f845f18e71f70816d"
+    },
+    {
+      "name": "fruit_semantics_candidates.csv",
+      "sha256": "7c3362476fcdf77d2a3227df51cdf985d6aa99dc1a81dde3697327ec4473f813"
+    },
+    {
+      "name": "nitrogen_output_readback.csv",
+      "sha256": "4c1b82d8412ace0ac9306b7dd503347af2d9e1b5adabbcbe2bb0070c1335d575"
+    },
+    {
+      "name": "objective_policy.csv",
+      "sha256": "de95e36b8a3e1839683d5de423e33a55c0c35a237e65f9684a5ae2b429a08244"
+    },
+    {
+      "name": "observation_catalog.csv",
+      "sha256": "e923837c9323a06d628dac5ad58674f39bc7a3c36744463adaab16f59b86f1b0"
+    },
+    {
+      "name": "observation_counts.csv",
+      "sha256": "32b6accd0964b59ea83074ed370f2660a770845d8163917ffc9404d32d58ecb0"
+    },
+    {
+      "name": "parameter_review.csv",
+      "sha256": "484d909191852135ef9ae8f21ae43ed702bb72340681b79ba2e2a0e5264e426e"
+    },
+    {
+      "name": "proposal.json",
+      "sha256": "008943c95d7a0f4cee83fda9ca7f1b2cc5bd2829ee48028392687a81cfe0b07d"
+    },
+    {
+      "name": "recent_parameter_comparison.csv",
+      "sha256": "db8ffb8e4602d45a6dcfe4cb6a37ec768e07c7d84ee5ea364c3bea6bf8479278"
+    },
+    {
+      "name": "treatment_roles.csv",
+      "sha256": "c3b41d6280e0171e51a3b18c98e9f7d11b87c38045d82c1d195891f170954377"
+    }
+  ],
+  "source_files": [
+    {
+      "path": "configs/experiments/current_bundles.json",
+      "sha256": "b03eea1decb86a7d8d4debcba05ad81f76f94104eaab6383799513e678fbf2de"
+    },
+    {
+      "path": "data/parameter_registry/bounds_frozen/eggplant/eggplant_full_gen_final_calib_scheme1_tb1_200x6_20260927.csv",
+      "sha256": "22f1c5efb7750b77b7d18716c08a33afb2d0970ca53343cec5a7231bd653e3c4"
+    },
+    {
+      "path": "workspace/runs/full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927/full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927.pst",
+      "sha256": "b567938ba9277e94b0967d6a01e590c002c095d87e63a93d70e1f0818c20d406"
+    },
+    {
+      "path": "configs/runs/full_gen_13trt_final_scheme1_tb1_tighten_200x6_20260927_design.json",
+      "sha256": "4a356ff704bbe108183c4a8c49e8324b9739e8549a77505fbd950582190ab0f8"
+    },
+    {
+      "path": "tools/calibration/prepare_formal_26sp_n012_20261011.py",
+      "sha256": "ecb5bb392bdbf098b7027ae586264093072d206704e80eb830aca375cb7a9dd6"
+    },
+    {
+      "path": "data/parameter_registry/bounds_frozen/eggplant/eggplant_full_gen_final_uncertainty_13trt_20260924.csv",
+      "sha256": "3bed4179f77ea903a1093c247bf5c64f481dbc8edf6be248918b059d35a79718"
+    },
+    {
+      "path": "data/parameter_registry/bounds_frozen/eggplant/eggplant_full_gen_final_calib_200x6_20260926.csv",
+      "sha256": "20a47dcb21d96afdc7f843d079b631ee859ce5c37526423a38ec24ff71bc360f"
+    },
+    {
+      "path": "data/templates/genotype/TMGRO048.CUL.base",
+      "sha256": "92a373800d68b46d07601777e1579fff7b976f74190814bc6e0494eda7c4455b"
+    },
+    {
+      "path": "data/templates/genotype/TMGRO048.ECO.base",
+      "sha256": "9f2d43d335a4455679d701116d861a1915c1010a79d002e60ca4db74fe3d73ff"
+    },
+    {
+      "path": "data/templates/genotype/TMGRO048.SPE.base",
+      "sha256": "59fb51f8d4314615973038843994160cf612443c789ba938092ba0af0bb1d0f7"
+    },
+    {
+      "path": "src/common/param_registry.py",
+      "sha256": "6b72d5c063a34a1a8201b1ae78519d20f134c7c864aff0cd0d07f39fb14acca6"
+    },
+    {
+      "path": "workspace/audits/input_refresh_20261010/fruit_sampling_metadata.json",
+      "sha256": "89b2fe60d24f022c4ec86ad8477fd93548dddee82921e02149c99065eec02f31"
+    },
+    {
+      "path": "workspace/audits/input_refresh_20261010/dssat_n_source/source_manifest.json",
+      "sha256": "1bb6e968ce4f789df06b3e4872eb0bbf0af35d1ac73ab46b9cfb44998f419694"
+    },
+    {
+      "path": "data/user/experiments/xxql2601_refreshed_20261010/input_manifest.json",
+      "sha256": "3eb23088d4ea456839522be4db423fd7897e837b8dbba756979503aca1646ff1"
+    },
+    {
+      "path": "data/user/experiments/xxql2601_refreshed_20261010/plant_npk_source_values.csv",
+      "sha256": "600d9297514da9c5c2dc10edd38ca65908b95e39ef9864ee4c81d28b3a9ac8e2"
+    },
+    {
+      "path": "data/user/experiments/xxql2601_refreshed_20261010/growth_replicates.csv",
+      "sha256": "051926946a86dc82ce1276cd45af720692672778a9446e4791939975f47af5ef"
+    },
+    {
+      "path": "data/user/experiments/xxql2601_refreshed_20261010/observation_uncertainty.csv",
+      "sha256": "1e38d3991b351639f537eca4054d1f08be2dadd1b2652c1ad9c84100392b921e"
+    },
+    {
+      "path": "data/user/experiments/xxql2601_refreshed_20261010/soil_water_observations.csv",
+      "sha256": "5045fcfdbb700518219ea5317a25962e6c25a2b01bc953eec723461a660375a8"
+    },
+    {
+      "path": "workspace/qa/input_smoke_xxql2601_refreshed_20261010/PlantN.OUT",
+      "sha256": "6c6cad7a81562e954850c511851010537e18cac106b177d68d0a9c8dbc86a316"
+    },
+    {
+      "path": "workspace/qa/input_smoke_xxql2601_refreshed_20261010/PlantGro.OUT",
+      "sha256": "3ef03e6a65878a2e45a74dbc249da521b4af18b7641175c651051e54c057b946"
+    },
+    {
+      "path": "workspace/qa/input_smoke_xxql2601_refreshed_20261010/FreshWt.OUT",
+      "sha256": "efceb6b8fe45b0c5b11e8e582f15cc887583b4f290fdd34229e7dff08913c0fd"
+    },
+    {
+      "path": "docs/reports/正式率定方案_2026N012_20261011.md",
+      "sha256": "9dffd24d7decefabe3fc71825bdb9768c0bf33f4431537eec78ad27850d67554"
+    },
+    {
+      "path": "data/parameter_registry/bounds_proposals/eggplant_26sp_n012_review_20261011.csv",
+      "sha256": "eeaca6253b6dd57317455fb4fa53523be4962ea857e2acfc91efea45141f03a8"
+    }
+  ],
+  "approved_bounds_created": false,
+  "positive_weight_observations": 423,
+  "fruit_sampling_definition_confirmed": true,
+  "fruit_operator_runtime_preflight_passed": false,
+  "proposed_fruit_concentrations": 27,
+  "pending_fruit_concentrations": 0
+}

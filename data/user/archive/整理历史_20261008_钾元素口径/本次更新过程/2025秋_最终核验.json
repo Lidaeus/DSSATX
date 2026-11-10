@@ -1,0 +1,41 @@
+{
+  "season": "2025秋",
+  "path": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025秋\\25年秋季茄子灌水施肥记录-整理.xlsx",
+  "backup": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径\\本次修改前备份\\Excel\\2025秋\\25年秋季茄子灌水施肥记录-整理.xlsx",
+  "before_hash": "b64e29c55a8776e886bfb76c60dc3217c1ea50900cfecec85cc89bb0507088c0",
+  "after_hash": "a148a1f37c5ade3008e74975cad3625135d5872d9920045388864c0034dfcf22",
+  "added_sheets": [],
+  "irrigation_preserved": true,
+  "fertilizer_rows": 55,
+  "fertilizer_dates": 5,
+  "totals": {
+    "N0": {
+      "N": 0.0,
+      "P": 66.8,
+      "K": 237.41,
+      "Ca": 56.0
+    },
+    "N1": {
+      "N": 120.0,
+      "P": 66.8,
+      "K": 237.41,
+      "Ca": 56.0
+    },
+    "N2": {
+      "N": 240.0,
+      "P": 66.8,
+      "K": 237.41,
+      "Ca": 56.0
+    },
+    "N3": {
+      "N": 360.0,
+      "P": 66.8,
+      "K": 237.41,
+      "Ca": 56.0
+    }
+  },
+  "tmx_verified_during_excel_write": true,
+  "tmx_changed_lines": 36,
+  "tmx_before_sha256": "fa3d9e782b86ab6e855fcd0843fea1413b4ea3e405f5a27257284d0da5f948e9",
+  "tmx_after_sha256": "a8ce5dda237400db7c2dea9d2a604bd2bb7752ed78d2598f3891e0b5020acb7e"
+}

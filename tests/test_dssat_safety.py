@@ -287,13 +287,13 @@ def test_run_directory_preparation_is_local_and_complete(tmp_path):
 
 
 def test_run_directory_uses_explicit_user_bundle_without_raw_fallback(tmp_path):
-    bundle = ROOT / "data" / "user" / "experiments" / "xxql2501_unified_20260914"  # T2: gitignored historical bundle -> unified bundle
+    bundle = ROOT / "data" / "user" / "experiments" / "xxql2501_final_20261105"
     batch = prepare_run_directory(
         tmp_path,
         ["--input-dir", str(bundle), "--batch", "DSSBatch.v48"],
     )
     assert batch == tmp_path / "DSSBatch.v48"
-    for name in ("XXQL2501.TMX", "XXQL2501.TMA", "XXQL2501.TMT", "XXLI2502.WTH"):
+    for name in ("XXQL2501.TMX", "XXQL2501.TMA", "XXQL2501.TMT", "XXTW2403.WTH"):
         assert (tmp_path / name).read_bytes() == (bundle / name).read_bytes()
     assert (tmp_path / "SOIL.SOL.base").read_bytes() == (bundle / "SOIL.SOL").read_bytes()
 

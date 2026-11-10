@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-05",
+  "source_bundle": "xxql2501_final_20261105",
+  "source_manifest_sha256": "96d872d28e63e726dd4e9b89dd4d88ad85f1bd17d9bcec6edf1a5279e35365c7",
+  "bundles": {
+    "observed": {
+      "path": "D:\\Tomato_Cal\\data\\user\\sa_bundles\\xxql2501_sa_observed_final_20261105",
+      "manifest_sha256": "0f71529c7709a46c3431448944babcd3732c89692af58d3b45dcd30d4770ee16",
+      "output_profile": "D:\\Tomato_Cal\\configs\\sa\\eggplant_25sp_observed_final_20261105_outputs.json",
+      "preflight": "D:\\Tomato_Cal\\workspace\\audits\\final_soil_cn_20261105\\observed_preflight.json"
+    },
+    "controlled": {
+      "path": "D:\\Tomato_Cal\\data\\user\\sa_bundles\\xxql2501_sa_controlled_final_20261105",
+      "manifest_sha256": "43148905956ade9fad07ca54bf70bba0ad5466d6a4983ca1235f50153e5f94c4",
+      "output_profile": "D:\\Tomato_Cal\\configs\\sa\\eggplant_25sp_controlled_final_20261105_outputs.json",
+      "preflight": "D:\\Tomato_Cal\\workspace\\audits\\final_soil_cn_20261105\\controlled_preflight.json"
+    }
+  }
+}

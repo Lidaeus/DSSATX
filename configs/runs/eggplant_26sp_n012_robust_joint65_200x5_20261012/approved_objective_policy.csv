@@ -1,0 +1,17 @@
+variable,family,phi_budget,n_targets,loss,delta,scale_policy,approved
+CHPDT,FINAL_DRY_YIELD,35.0,9,quadratic,,frozen_calibration_family_mean,True
+CHFPW,FINAL_FRESH_YIELD,35.0,9,quadratic,,frozen_calibration_family_mean,True
+CHPDT,HARVEST_DRY_CUMULATIVE_EARLY,2.0,36,pseudo_huber,0.15,frozen_calibration_family_mean,True
+HPODW,HARVEST_DRY_EVENT,5.0,45,pseudo_huber,0.15,frozen_calibration_family_mean,True
+LAID,CANOPY_LAI,3.0,36,pseudo_huber,0.15,frozen_calibration_family_mean,True
+LWAD,LEAF_DRY_MASS,2.0,36,pseudo_huber,0.15,frozen_calibration_family_mean,True
+SWAD,STEM_DRY_MASS,3.0,36,pseudo_huber,0.15,frozen_calibration_family_mean,True
+CHTD,HEIGHT,1.0,36,pseudo_huber,0.15,frozen_calibration_family_mean,True
+LEAF_N_PCT,LEAF_N_CONCENTRATION,1.5,36,pseudo_huber,0.15,frozen_calibration_family_mean,True
+STEM_N_PCT,STEM_N_CONCENTRATION,1.5,36,pseudo_huber,0.15,frozen_calibration_family_mean,True
+FRUIT_N_PCT,FRUIT_N_CONCENTRATION,1.0,27,pseudo_huber,0.15,frozen_calibration_family_mean,True
+ADAP,ANTHESIS,1.0,9,quadratic,,fixed_2_days,True
+VWC,SOIL_WATER,4.0,135,quadratic,,frozen_calibration_family_mean,True
+WB100_INTERVAL,WATER_BALANCE_100CM,2.0,18,quadratic,,frozen_calibration_family_mean,True
+W_FRESH_CONTRAST,W_SIGNED_CONTRAST,1.5,6,quadratic,,frozen_terminal_fresh_yield_mean,True
+N_ADJACENT_FRESH_CONTRAST,N_ADJACENT_SIGNED_CONTRAST,1.5,6,quadratic,,frozen_terminal_fresh_yield_mean,True

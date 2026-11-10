@@ -1,0 +1,106 @@
+{
+  "id": "Fig3",
+  "stem": "Fig3_Morris_20261107",
+  "run_id": "morris_dual_spring126_r40_final_bundles_sasc_default_20261107",
+  "data_status": "science_pending",
+  "proposal_status": "review_pending",
+  "scientific_status_promoted": false,
+  "paired_trajectories": 40,
+  "source_hashes": {
+    "morris_heatmap.csv": "eea0ff92a833b99fdaad349f8fea3aa7edbd77b16a7bdcdaf813cc26641a7a4b",
+    "morris_elbow.csv": "f6f43e8e7eed3a49464818bfe5cb73c92383309e902d843ed8324373ccfafe68",
+    "cross_season_stability.csv": "bcbe8aec67f0b2d33d5459cac6f3c39f6d98bf30005fd450e54036a9338d74df",
+    "selected_parameters.csv": "e6f4377e9b5b9d0d6dd82ed3a8771694f3fb8049d0fdadcdf2597320343d2ce2",
+    "coverage_by_response.csv": "ea86d07800d5fdca23c79d9e1401e35149b606f6e20790910ed4357cfa777827"
+  },
+  "upstream_sha256": {
+    "D:\\Tomato_Cal\\workspace\\runs\\morris_dual_spring126_r40_final_bundles_sasc_default_20261107\\results\\result_manifest.json": "bf22217461239c8d8a7b8377d95b60ae4ca92a045536d56b2735b0c8b8d88930",
+    "D:\\Tomato_Cal\\workspace\\runs\\morris_dual_spring126_r40_final_bundles_sasc_default_20261107\\results\\morris_process_scores.csv": "c852ac575b3effe73fc2386cb95fd0a7f756955673f85b5fcbd6dc4c72855fba",
+    "D:\\Tomato_Cal\\workspace\\runs\\morris_dual_spring126_r40_final_bundles_sasc_default_20261107\\results\\morris_cross_season_stability.csv": "8986931249a3716a9f769c0b11750665d009fff81c246da0cfb3514628b6eda2",
+    "D:\\Tomato_Cal\\configs\\calibration_proposals\\eggplant_dual_morris98_final_bundles_20261107\\proposal.json": "8b58d618d74145a42a3b22dcee3f83f7f945bdb0f80220727fb72c28ca457656",
+    "D:\\Tomato_Cal\\configs\\calibration_proposals\\eggplant_dual_morris98_final_bundles_20261107\\coverage_by_response.csv": "7b5e177dada10e96feac1daa9aba3ea3a2e9b20ae1a94faa9319a3e54f75cdf5",
+    "D:\\Tomato_Cal\\configs\\calibration_proposals\\eggplant_dual_morris98_final_bundles_20261107\\exact_gradient_effects.csv": "0ee5234f21a14e09bdacb6cd27351a1b9043f7121c4a53c13a3c6a8bd28dba5d",
+    "D:\\Tomato_Cal\\configs\\calibration_proposals\\eggplant_dual_morris98_final_bundles_20261107\\proposed_active_parameters.csv": "8fea2fabd795bdf8fed2d06dd9a3e820f3a3227302835ff1787e62224affa3d3",
+    "D:\\Tomato_Cal\\configs\\calibration_proposals\\eggplant_dual_morris98_final_bundles_20261107\\screening_126_parameters.csv": "8efe12f733d3e5830eac015e63a169c45cc702045337fe046db8d4b1a66e0a58"
+  },
+  "reference": {
+    "sha256": "e2eb13a397fb5fc2949509f75e3548774cc3e346042ad041900d6df338f27810",
+    "adopted": "paired seasonal heatmaps, common rows and sequential color scale",
+    "replaced": "right-hand IES panel",
+    "reference_bitmap_reused": false
+  },
+  "panel_a": {
+    "seasons": [
+      "25SP",
+      "26SP"
+    ],
+    "groups": [
+      "phenology",
+      "canopy",
+      "biomass",
+      "yield_harvest",
+      "water_response",
+      "nitrogen_response",
+      "water_nitrogen_interaction"
+    ],
+    "labels": [
+      "物候",
+      "冠层",
+      "生物量",
+      "产量",
+      "灌溉响应",
+      "施氮响应",
+      "水氮交互"
+    ],
+    "rows": [
+      "PGEFF",
+      "EM-FL",
+      "TO12",
+      "TRIFL",
+      "TO11",
+      "SLAVR",
+      "FL-SD",
+      "TB2",
+      "TM2",
+      "TO22",
+      "YLEAF(4)",
+      "RTNO3",
+      "NVSMOB",
+      "RWUEP1",
+      "RWUMX",
+      "PROLFF"
+    ],
+    "selection": "top 10 core plus all 6 mechanism supplements",
+    "unit": "percent of normalized group importance"
+  },
+  "panel_b": {
+    "n_ranks": 126,
+    "core_groups": [
+      "phenology",
+      "canopy",
+      "biomass",
+      "yield_harvest"
+    ],
+    "top_annotation_count": 4,
+    "threshold_percent": 98,
+    "first_crossing_rank": 52,
+    "zoom_ranks": [
+      48,
+      72
+    ],
+    "supplements": [
+      "YLEAF(4)",
+      "RTNO3",
+      "NVSMOB",
+      "RWUEP1",
+      "RWUMX",
+      "PROLFF"
+    ],
+    "statistic": "equal-weight group and season normalized Morris mu-star, not explained variance"
+  },
+  "scores": {
+    "rank_51": 97.86344602460711,
+    "rank_52": 98.01793150340048,
+    "selected": 98.64062948651716
+  }
+}

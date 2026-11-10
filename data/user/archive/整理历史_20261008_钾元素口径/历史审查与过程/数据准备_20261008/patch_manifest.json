@@ -1,0 +1,67 @@
+[
+  {
+    "season": "2025春",
+    "patch": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\数据准备_20261008\\2025春_artifact_patch.xlsx",
+    "patches": [
+      {
+        "sheet": "施肥数据",
+        "existing": true,
+        "changeRange": "A1:I19",
+        "addColumnWidths": [
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I"
+        ],
+        "renderRange": "A1:I15"
+      },
+      {
+        "sheet": "TMX施肥明细",
+        "existing": false,
+        "renderRange": "A19:N24"
+      }
+    ]
+  },
+  {
+    "season": "2025秋",
+    "patch": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\数据准备_20261008\\2025秋_artifact_patch.xlsx",
+    "patches": [
+      {
+        "sheet": "施肥数据",
+        "existing": false,
+        "changeRange": "A1:I11",
+        "addColumnWidths": [],
+        "renderRange": "A1:I7"
+      },
+      {
+        "sheet": "TMX施肥明细",
+        "existing": false,
+        "renderRange": "A20:N25"
+      }
+    ]
+  },
+  {
+    "season": "2026春",
+    "patch": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\数据准备_20261008\\2026春_artifact_patch.xlsx",
+    "patches": [
+      {
+        "sheet": "Sheet1",
+        "existing": true,
+        "changeRange": "A15:Z30",
+        "addColumnWidths": [
+          "Z"
+        ],
+        "renderRange": "L15:Z26"
+      },
+      {
+        "sheet": "TMX施肥明细",
+        "existing": false,
+        "renderRange": "A20:N25"
+      }
+    ]
+  }
+]

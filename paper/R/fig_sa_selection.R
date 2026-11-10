@@ -18,6 +18,42 @@ validate_selection_columns <- function(data, required, table_name) {
   invisible(TRUE)
 }
 
+build_single_seed_selection <- function(rankings, summary, profile, is_demo=TRUE) {
+  d <- rankings[order(rankings$rank), , drop=FALSE]
+  k <- summary$elbow_rank; k95 <- summary$k95
+  blue <- "#0072B2"; orange <- "#D55E00"; grey <- "#B7BDC4"
+  p1 <- ggplot2::ggplot(d, ggplot2::aes(rank, score)) +
+    ggplot2::geom_line(colour="#A4ADB5", linewidth=0.45) +
+    ggplot2::geom_point(ggplot2::aes(colour=elbow_core),size=1.5) +
+    ggplot2::scale_colour_manual(values=c("TRUE"=blue,"FALSE"=grey),guide="none") +
+    ggplot2::geom_vline(xintercept=k,colour=blue,linetype="dashed",linewidth=0.35) +
+    ggplot2::annotate("text",x=k+5,y=max(d$score)*.80,hjust=0,size=2.5,colour=blue,
+      label=sprintf("Elbow: %d parameters\n%.1f%% relative influence",k,100*summary$elbow_coverage)) +
+    ggplot2::scale_y_continuous(labels=scales::label_percent(accuracy=1),expand=ggplot2::expansion(mult=c(0,.12))) +
+    ggplot2::scale_x_continuous(breaks=c(1,k,20,40,60,86),expand=ggplot2::expansion(mult=c(.02,.03))) +
+    ggplot2::labs(title="a  Ranked influence",x="Parameter rank",y="Balanced relative influence") +
+    theme_q1(profile) + ggplot2::theme(axis.text=ggplot2::element_text(size=7),plot.title=ggplot2::element_text(size=8,face="bold"))
+  p2 <- ggplot2::ggplot(d,ggplot2::aes(rank,cumulative)) +
+    ggplot2::geom_line(colour=blue,linewidth=.65) +
+    ggplot2::geom_hline(yintercept=.95,colour=orange,linetype="dotted",linewidth=.35) +
+    ggplot2::geom_vline(xintercept=k95,colour=orange,linetype="dotted",linewidth=.35) +
+    ggplot2::geom_point(data=d[d$rank %in% c(k,k95),],size=2,colour=orange) +
+    ggplot2::annotate("text",x=k95+4,y=.84,hjust=0,size=2.5,colour=orange,
+                      label=sprintf("90%%: %d parameters\n95%%: %d parameters",summary$k90,k95)) +
+    ggplot2::scale_y_continuous(labels=scales::label_percent(accuracy=1),limits=c(0,1.03),breaks=c(0,.25,.5,.75,.95,1),expand=c(0,0)) +
+    ggplot2::scale_x_continuous(breaks=c(1,k,k95,60,86),expand=ggplot2::expansion(mult=c(.02,.03))) +
+    ggplot2::labs(title="b  Cumulative influence",x="Parameter rank",y="Cumulative relative influence") +
+    theme_q1(profile) + ggplot2::theme(axis.text=ggplot2::element_text(size=7),plot.title=ggplot2::element_text(size=8,face="bold"))
+  plot <- p1+p2+patchwork::plot_layout(ncol=2)+patchwork::plot_annotation(
+    title="Morris screening: phenology, LAI and harvested dry mass",
+    subtitle="2025 spring observed conditions | 30 trajectories | one seed (20261030)",
+    caption=paste0("Equal weight for three response-normalized influence shares; not variance explained. Elbow is a screening heuristic.\n",
+                   if(is_demo) "DEMO - current-run review; science_pending. Full original response contract did not pass." else ""),
+    theme=ggplot2::theme(plot.title=ggplot2::element_text(size=9,face="bold"),plot.subtitle=ggplot2::element_text(size=7),
+                        plot.caption=ggplot2::element_text(size=6,hjust=0)))
+  list(plot=plot,source=d,height_mm=93)
+}
+
 build_selection_rationality <- function(cross_season_summary, sobol_candidates,
                                         param_labels, profile, is_demo = FALSE,
                                         domain = "general_genetic",

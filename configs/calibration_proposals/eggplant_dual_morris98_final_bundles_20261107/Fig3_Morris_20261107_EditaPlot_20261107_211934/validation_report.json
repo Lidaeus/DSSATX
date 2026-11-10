@@ -1,0 +1,14 @@
+{
+  "technical_reopen_passed": true,
+  "original_source_hashes_passed": true,
+  "scientific_status": "science_pending",
+  "scientific_status_promoted": false,
+  "confirmed_design_hash": "63b4a4f6f664c744a7eb3edf87f6a4004f4f9204b9e6a900eeffbaf43f3dc861",
+  "known_text_overline": "author_accepted_defer",
+  "column_role_inventory": "D:\\Tomato_Cal\\configs\\calibration_proposals\\eggplant_dual_morris98_final_bundles_20261107\\Fig3_Morris_20261107_EditaPlot_20261107_211934\\column_roles.csv",
+  "native_plots_checked": 9,
+  "source_columns_checked": 44,
+  "visual_qa_passed": true,
+  "source_data_status": "science_pending",
+  "proposal_status": "review_pending"
+}

@@ -345,7 +345,7 @@ def load_2025_spring(root: Path) -> SeasonResult:
 
     yield_summary = []
     for (trno, date), grp in y.groupby(["TRNO", "日期"]):
-        yield_vals = grp["产量（千克每公顷）"].dropna().values
+        yield_vals = grp["产量"].dropna().values
         mean_yield = float(np.mean(yield_vals))
         sd, src, n = hybrid_sd(yield_vals)
         yield_summary.append({
@@ -901,7 +901,7 @@ def write_season_outputs(result: SeasonResult, out_dir: Path, generator_sha: str
         if col not in growth_out.columns:
             growth_out[col] = np.nan
     growth_tmt = growth_out[["TRNO", "DATE", "LAID", "LWAD", "SWAD", "CHTD", "SNAM", "LNAM", "CNAM"]].copy()
-    harvest_tmt = result.harvest[["TRNO", "DATE", "CHFPW", "HPODW", "CHPDT"]].copy()
+    harvest_tmt = result.harvest[["TRNO", "DATE", "HFPOW", "CHFPW", "HPODW", "CHPDT", "PDMCD"]].copy()
     tmt = growth_tmt.merge(harvest_tmt, on=["TRNO", "DATE"], how="outer").sort_values(["TRNO", "DATE"])
     for col in TMT_COLUMNS:
         if col not in tmt.columns:

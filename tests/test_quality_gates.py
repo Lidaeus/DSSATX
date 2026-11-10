@@ -15,6 +15,22 @@ from src.common.quality import (
 from src.reporting.quality_gate import assess_ies_run
 
 
+def test_alphabetic_uppercase_rec_members_distinguish_failures_and_screening(tmp_path):
+    names = ['real_000', 'real_001', 'base']
+    pd.DataFrame({'p': [1., 2., 3.]}, index=names).to_csv(tmp_path/'case.0.par.csv')
+    pd.DataFrame({'p': [2.9]}, index=['BASE']).to_csv(tmp_path/'case.1.par.csv')
+    pd.DataFrame({'o': [4.]}, index=['base']).to_csv(tmp_path/'case.1.obs.csv')
+    pd.DataFrame({'iteration': [0,1], 'real_000': [1.,None], 'real_001': [2.,None], 'base': [3.,2.]}).to_csv(tmp_path/'case.phi.actual.csv', index=False)
+    (tmp_path/'case.rec').write_text('...dropping par:obs realizations: REAL_001 : REAL_001 ,\n')
+    agents = tmp_path/'_agents/agent_01'
+    agents.mkdir(parents=True)
+    (agents/'panther_worker.rec').write_text('run failed for run_id: 4 ITERATION:0 REALIZATION:REAL_000\n')
+    report = assess_ies_run(tmp_path, 'case')
+    states = pd.read_csv(tmp_path/'ies_quality/case.member_status.csv').set_index('real_name').state.to_dict()
+    assert states == {'real_000': 'model_failed', 'real_001': 'high_phi_screened', 'base': 'retained'}
+    assert report.status == 'fail'  # Classification never relaxes the loss gate.
+
+
 def test_all_zero_morris_is_process_complete_but_scientifically_failed(tmp_path):
     report = assess_morris(pd.DataFrame({"par": ["A", "B"], "score": [0.0, 0.0]}), run_id="zero")
     assert report.process_completed

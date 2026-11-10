@@ -1,0 +1,114 @@
+{
+  "status": "editorial_audit_only_not_science_validated",
+  "n_prior": 150,
+  "n_iteration_6": 100,
+  "original_table1_rows": 55,
+  "harvest_event_coverage": [
+    {
+      "season": "25SP",
+      "n_treatments": 11,
+      "n_dates": 10,
+      "dates": [
+        25140,
+        25146,
+        25153,
+        25158,
+        25163,
+        25170,
+        25175,
+        25184,
+        25192,
+        25198
+      ]
+    },
+    {
+      "season": "26SP",
+      "n_treatments": 12,
+      "n_dates": 5,
+      "dates": [
+        26146,
+        26158,
+        26167,
+        26182,
+        26198
+      ]
+    }
+  ],
+  "between_season_fraction_of_observed_sst": 0.9714277729606762,
+  "tb1_diagnostics": {
+    "run_id": "full_gen_13trt_tb1_80_95_150x6",
+    "data_status": "tooling_demo",
+    "parameter": "TB1",
+    "prior_q05": 8.082018,
+    "prior_q95": 9.43369,
+    "prior_median": 8.750415,
+    "posterior_q05": 8.077952999999999,
+    "posterior_q95": 9.238754,
+    "posterior_median": 8.584215,
+    "iqr_shrinkage": 0.1137703161278793,
+    "frac_near_lower": 0.01,
+    "frac_near_upper": 0.0
+  },
+  "candidate_pairs": [
+    {
+      "run_id": "full_gen_13trt_tb1_80_95_150x6",
+      "data_status": "tooling_demo",
+      "pair_id": 1,
+      "real_a": 96,
+      "real_b": 97,
+      "phi_a": 1080.11,
+      "phi_b": 1056.01,
+      "parameter_distance": 16.525151178821414,
+      "d_validation": 0.9369096545039532,
+      "d_diagnostic": 0.4369039535030077,
+      "prediction_distance": 0.6869068040034805,
+      "classification": "prediction_similar"
+    },
+    {
+      "run_id": "full_gen_13trt_tb1_80_95_150x6",
+      "data_status": "tooling_demo",
+      "pair_id": 2,
+      "real_a": 81,
+      "real_b": 82,
+      "phi_a": 1052.62,
+      "phi_b": 1067.41,
+      "parameter_distance": 13.7019885258627,
+      "d_validation": 0.9234773656487112,
+      "d_diagnostic": 0.8574364252687224,
+      "prediction_distance": 0.8904568954587169,
+      "classification": "prediction_similar"
+    },
+    {
+      "run_id": "full_gen_13trt_tb1_80_95_150x6",
+      "data_status": "tooling_demo",
+      "pair_id": 3,
+      "real_a": 121,
+      "real_b": 148,
+      "phi_a": 1086.48,
+      "phi_b": 1077.31,
+      "parameter_distance": 12.92986975936052,
+      "d_validation": 0.7139846481125426,
+      "d_diagnostic": 1.0846211656970572,
+      "prediction_distance": 0.8993029069048,
+      "classification": "prediction_divergent"
+    }
+  ],
+  "source_sha256": {
+    "paper/04_References_and_Data/C15_all_35_treatments_final_yield.csv": "8833088a1c47d68e4b454131870ed7189671959be4f6a123e758c3d867c46977",
+    "paper/04_References_and_Data/C15_metrics_three_seasons.csv": "ab5e05cd10e03121b8106742e3ba1bee24dda761e2e94b7a7a29e85b8742390b",
+    "configs/figures/treatment_metadata_xxql2501_2601_joint.csv": "b9def87fbb461f410b5de4578c88ecef4e5df47384701ca8dfa605f3b60d71e6",
+    "workspace/runs/full_gen_13trt_tb1_80_95_150x6_20260920/c15_det_25sp/c15_25sp_deterministic_process_compare.csv": "185ac6443edd9e3622103ce41e68a58b00b166662b6385ecdd9c8e2e79fe9098",
+    "workspace/runs/full_gen_13trt_tb1_80_95_150x6_20260920/c15_det_25sp/c15_25sp_deterministic_harvest_compare.csv": "a12f8d6fbc91b139144400109330f90ff833cf0a9ef16b92abef0a9ae529e79f",
+    "workspace/runs/full_gen_13trt_tb1_80_95_150x6_20260920/c15_det_26sp/c15_26sp_deterministic_process_compare.csv": "a771a4a210c74c2139df41e48f9e7c657f61f0fb29c643e26f0e33a8d58049c4",
+    "workspace/runs/full_gen_13trt_tb1_80_95_150x6_20260920/c15_det_26sp/c15_26sp_deterministic_harvest_compare.csv": "fa56b26a10b25a5b7b7d2641f0f94f8645382f36b972d92c1c1372f17d90d79d",
+    "workspace/runs/full_gen_13trt_tb1_80_95_150x6_20260920/full_gen_13trt_tb1_80_95_150x6.0.par.csv": "b5a4e984b9b73025a8f9b6db74d0999413022722c8d40a65f37c44eb58663a10",
+    "workspace/runs/full_gen_13trt_tb1_80_95_150x6_20260920/full_gen_13trt_tb1_80_95_150x6.6.par.csv": "cdbc81e1af1323be2263293a734358576b245749ecfda78d6bc7b5a7dc11953e",
+    "paper/04_References_and_Data/C15_candidate_parameters.csv": "c409722d5e5fd45e21c552655b998ddca33cd9ca81de7643ba2372485a405972",
+    "data/parameter_registry/bounds_frozen/eggplant/eggplant_full_gen_tb1_80_95_13trt_20260920.csv": "7b70e2f05f3fb43d3774f6d8ea0c7ffcc28a1eee9ca01ee208851f73cb9f795c",
+    "workspace/runs/full_gen_13trt_tb1_80_95_150x6_20260920/paper_data_posterior/candidate_pair_predictions.csv": "1c2d6d527b34bd79b2e31c22ed0ba39c323f92eb0e6578e648d187de1d5f161b",
+    "workspace/runs/full_gen_13trt_tb1_80_95_150x6_20260920/paper_data_posterior/posterior_diagnostics.csv": "cde5318eaa409ed859ff5619c18c0d3b04bffc3a54232b889a33ff16b7f356f1",
+    "paper/02_Tables/Table1_Genetic_Parameters_Comparison.csv": "caf9041e0fc137b9444c0ac809e09784f700aaf9fad102c7fd1f3a8b3cc1b3b3",
+    "workspace/runs/full_gen_13trt_tb1_80_95_150x6_20260920/paper_data_c15/paper_data_manifest.json": "237e11151046fb260548a6919e57f14787665f497b1a30f9cad5b2f1d143ac23",
+    "workspace/runs/full_gen_13trt_tb1_80_95_150x6_20260920/paper_data_posterior/paper_data_manifest.json": "386b9e6ac123f717ffbffbc3f95f9fbd68f6bce2eef545064baa7f9c09e8d438"
+  }
+}

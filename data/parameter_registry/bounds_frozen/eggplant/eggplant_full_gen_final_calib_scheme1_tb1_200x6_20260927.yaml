@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_gen_final_calib_scheme1_tb1_200x6_20260927"
+crop: "eggplant"
+created_at: "2026-09-27T00:36:25Z"
+approved_at: "2026-09-27T00:36:25Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_gen_final_calib_scheme1_tb1_200x6_20260927.csv"
+derived_from_sha256: "110f3ec06d4e7330943af92a495a6c283319ce9e08b299876804f7dad0ef445f"
+bounds_sha256: "22f1c5efb7750b77b7d18716c08a33afb2d0970ca53343cec5a7231bd653e3c4"
+parameter_count: 168
+automatic_repairs: 0
+notes: "Scheme 1 100cm root depth truncation + T10/T12 soil water correction + TB1 [8.0, 9.6] optimal range"

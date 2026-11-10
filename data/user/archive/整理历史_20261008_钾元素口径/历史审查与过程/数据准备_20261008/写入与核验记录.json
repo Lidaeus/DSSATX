@@ -1,0 +1,126 @@
+[
+  {
+    "season": "2025春",
+    "path": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025春\\2025春季灌水及施肥整理结果.xlsx",
+    "backup": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\数据准备_20261008\\修订前备份\\2025春\\2025春季灌水及施肥整理结果.xlsx",
+    "before_hash": "7cc237b73494cf87992a34f566aa24fc90971c067306d94a6967fc7bf4736ceb",
+    "after_hash": "962b3757059257c2ab38f0cd3c470a08bca00b57a131cdf34193c069368645ee",
+    "added_sheets": [
+      "TMX施肥明细"
+    ],
+    "irrigation_preserved": true,
+    "fertilizer_rows": 48,
+    "fertilizer_dates": 13,
+    "totals": {
+      "N0": {
+        "N": 0.0,
+        "P": 65.5,
+        "K": 280.0,
+        "Ca": 120.0
+      },
+      "N1": {
+        "N": 122.0,
+        "P": 65.5,
+        "K": 280.0,
+        "Ca": 120.0
+      },
+      "N2": {
+        "N": 254.0,
+        "P": 65.5,
+        "K": 280.0,
+        "Ca": 120.0
+      },
+      "N3": {
+        "N": 364.0,
+        "P": 65.5,
+        "K": 280.0,
+        "Ca": 120.0
+      }
+    },
+    "tmx_unchanged": true,
+    "confirmed_K_corrections": 0
+  },
+  {
+    "season": "2025秋",
+    "path": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2025秋\\25年秋季茄子灌水施肥记录-整理.xlsx",
+    "backup": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\数据准备_20261008\\修订前备份\\2025秋\\25年秋季茄子灌水施肥记录-整理.xlsx",
+    "before_hash": "86d10ac87d50561711920fc1427f068886341cff563419f055ee4e7ca81b9dd1",
+    "after_hash": "5ddb67b4fb93175fd74623249cf9ffee845e7975e952febb60f48290de746c83",
+    "added_sheets": [
+      "施肥数据",
+      "TMX施肥明细"
+    ],
+    "irrigation_preserved": true,
+    "fertilizer_rows": 55,
+    "fertilizer_dates": 5,
+    "totals": {
+      "N0": {
+        "N": 0.0,
+        "P": 66.8,
+        "K": 286.0,
+        "Ca": 56.0
+      },
+      "N1": {
+        "N": 120.0,
+        "P": 66.8,
+        "K": 286.0,
+        "Ca": 56.0
+      },
+      "N2": {
+        "N": 240.0,
+        "P": 66.8,
+        "K": 286.0,
+        "Ca": 56.0
+      },
+      "N3": {
+        "N": 360.0,
+        "P": 66.8,
+        "K": 286.0,
+        "Ca": 56.0
+      }
+    },
+    "tmx_unchanged": true,
+    "confirmed_K_corrections": 0
+  },
+  {
+    "season": "2026春",
+    "path": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\2026春\\2026年灌水施肥数据-整理.xlsx",
+    "backup": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\数据准备_20261008\\修订前备份\\2026春\\2026年灌水施肥数据-整理.xlsx",
+    "before_hash": "663c65df750809d1eea7bcaf853d723bd22f33c884ed276d1741ba34295da9bd",
+    "after_hash": "5a5ae71a93e9af561eae41fc165751693cc24a94b60f72bdf5885c752f6684cc",
+    "added_sheets": [
+      "TMX施肥明细"
+    ],
+    "irrigation_preserved": true,
+    "fertilizer_rows": 132,
+    "fertilizer_dates": 12,
+    "totals": {
+      "N0": {
+        "N": 0.0,
+        "P": 66.3,
+        "K": 276.0,
+        "Ca": 56.0
+      },
+      "N1": {
+        "N": 120.0,
+        "P": 66.3,
+        "K": 276.0,
+        "Ca": 56.0
+      },
+      "N2": {
+        "N": 240.0,
+        "P": 66.3,
+        "K": 276.0,
+        "Ca": 56.0
+      },
+      "N3": {
+        "N": 361.0,
+        "P": 66.3,
+        "K": 276.0,
+        "Ca": 56.0
+      }
+    },
+    "tmx_unchanged": true,
+    "confirmed_K_corrections": 33
+  }
+]

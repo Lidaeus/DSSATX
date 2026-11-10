@@ -1,0 +1,69 @@
+{
+  "checked_on": "2026-10-19",
+  "passed": true,
+  "selected_run": "stable79_checkpointed150x5_20261018",
+  "parameters_sha256": "1fd25fe4d7a41521dadbd26b41cdec3775360c0e301077d7e109f650ff91effe",
+  "binary_sha256": "dcdac47dbde6bc224d2f492845ac43973af60f2414cbf4cb7be85a8f722e070b",
+  "original_frozen_dependencies_verified": 731,
+  "targets_exact": 1123,
+  "phi": 127.19135195285774,
+  "exact_replay_ledgers": {
+    "26SP": {
+      "NCBalance": true,
+      "DMState": true,
+      "OrganNState": true,
+      "RootNSupply": true,
+      "CAllocation": true,
+      "PhotoN": true,
+      "CH2OPools": true,
+      "CohortSync": true,
+      "NFlux": true,
+      "NAcceptance": true
+    },
+    "25SP": {
+      "NCBalance": true,
+      "DMState": true,
+      "OrganNState": true,
+      "RootNSupply": true,
+      "CAllocation": true,
+      "PhotoN": true,
+      "CH2OPools": true,
+      "CohortSync": true,
+      "NFlux": true,
+      "NAcceptance": true
+    }
+  },
+  "full_parameter_readback": {
+    "trial": "D:\\Tomato_Cal\\subprojects\\DSSAT补缺数据交付清单_20261019\\原始模型输出\\stable79_checkpointed150x5_20261019\\native_trials\\621182324abe4736a92ac7b7a5f04e67",
+    "all_requested": 120,
+    "verified_seasons": {
+      "26SP": 119,
+      "25SP": 120
+    },
+    "passed": true
+  },
+  "runs": 20,
+  "daily_water_rows": 2504,
+  "soil_boundary_rows": 3796,
+  "key_organ_rows": 640,
+  "daily_organ_rows": 9888,
+  "daily_organ_unit_pairs_verified": 9888,
+  "harvest_rows": 132,
+  "interval_rows": 244,
+  "no_false_block_replicates": true,
+  "no_false_independent_validation": true,
+  "P_K_core_values_blank": true,
+  "P_native_overflow_rows": 115,
+  "P_state_timing_mismatch_rows": 28,
+  "max_native_N_residual_kg_ha": 4.759058356285095e-06,
+  "max_ET_T_E_rounding_residual_mm": 0.001000000000000778,
+  "max_harvest_DM_rounding_residual_kg_ha": 0.0495094299316,
+  "templates_unchanged_empty": true,
+  "scientific_use_limits": [
+    "ET is simulated, not independently validated",
+    "100cm interface flux not exported",
+    "P organ timing/harvest not validated; K disabled",
+    "BOD is previous EOD approximation",
+    "initial transplant stock is modeled, not observed"
+  ]
+}

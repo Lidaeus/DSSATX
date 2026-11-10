@@ -1,0 +1,10 @@
+﻿variable,family,phi_budget,sigma_floor,cv_model,transform,n_eff,approved
+LAID,CANOPY_LAI,1.0,0.05,0.1,raw,1,False
+LWAD,LEAF_DRY_MASS,0.75,20.0,0.15,raw,1,False
+SWAD,STEM_DRY_MASS,0.75,25.0,0.15,raw,1,False
+CHTD,HEIGHT,0.25,0.03,0.1,raw,1,False
+HPODW,HARVEST_DRY_EVENT,2.0,25.0,0.2,raw,1,False
+VWC,SOIL_WATER,0.5,0.01,0.08,raw,1,False
+LEAF_N_PCT,LEAF_N_CONCENTRATION,1.0,0.15,0.1,raw,1,False
+STEM_N_PCT,STEM_N_CONCENTRATION,1.0,0.15,0.1,raw,1,False
+FRUIT_N_PCT,FRUIT_N_CONCENTRATION,0.75,0.15,0.2,raw,1,False

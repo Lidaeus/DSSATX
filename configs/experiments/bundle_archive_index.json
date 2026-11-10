@@ -1,0 +1,60 @@
+{
+  "created": "2026-10-28",
+  "purpose": "cold_provenance_only_not_active_inputs",
+  "bundles": {
+    "xxql2501_corrected_20260923": {
+      "archive_path": "D:\\Tomato_Cal_Cold_Storage\\bundle_retirement_20261028\\canonical\\xxql2501_corrected_20260923",
+      "manifest_sha256": "2e8c629ca2a1720564e5af1d6cf4ae96e01de411259a65e7cab586419bc67958",
+      "status": "retired;historical_reproduction_only"
+    },
+    "xxql2501_refreshed_20261010": {
+      "archive_path": "D:\\Tomato_Cal_Cold_Storage\\bundle_retirement_20261028\\canonical\\xxql2501_refreshed_20261010",
+      "manifest_sha256": "c2b8fad69879eaa40afe6a994e5a05fd4d75d8c1ebc3f5293eb3e83bf126b602",
+      "status": "retired;historical_reproduction_only"
+    },
+    "xxql2502_corrected_20260923": {
+      "archive_path": "D:\\Tomato_Cal_Cold_Storage\\bundle_retirement_20261028\\canonical\\xxql2502_corrected_20260923",
+      "manifest_sha256": "1ce7e16da3221e80e920630159031be83e3d0070fe55414625df2c51462edf2c",
+      "status": "retired;historical_reproduction_only"
+    },
+    "xxql2502_refreshed_20261010": {
+      "archive_path": "D:\\Tomato_Cal_Cold_Storage\\bundle_retirement_20261028\\canonical\\xxql2502_refreshed_20261010",
+      "manifest_sha256": "ad3e9d6364687952d07a791379b609c499375a85610c3c9ff578af5d0f663d92",
+      "status": "retired;historical_reproduction_only"
+    },
+    "xxql2601_corrected_20260923": {
+      "archive_path": "D:\\Tomato_Cal_Cold_Storage\\bundle_retirement_20261028\\canonical\\xxql2601_corrected_20260923",
+      "manifest_sha256": "b5c4acd50af7af778d29f37ff3cd5233108252f074bdbc21f8d39caf805ebfbb",
+      "status": "retired;historical_reproduction_only"
+    },
+    "xxql2601_refreshed_20261010": {
+      "archive_path": "D:\\Tomato_Cal_Cold_Storage\\bundle_retirement_20261028\\canonical\\xxql2601_refreshed_20261010",
+      "manifest_sha256": "3eb23088d4ea456839522be4db423fd7897e837b8dbba756979503aca1646ff1",
+      "status": "retired;historical_reproduction_only"
+    },
+    "xxql2501_refreshed_20261027": {
+      "archive_path": "D:\\Tomato_Cal_Cold_Storage\\bundle_retirement_20261105\\calibration\\xxql2501_refreshed_20261027",
+      "manifest_sha256": "7567423a28300d57000532753e7a19fffadbe9e0d8624b1d3c286d69c95b0d3a",
+      "status": "retired;historical_reproduction_only",
+      "superseded_by": "xxql2501_final_20261105"
+    },
+    "xxql2601_refreshed_20261027": {
+      "archive_path": "D:\\Tomato_Cal_Cold_Storage\\bundle_retirement_20261105\\calibration\\xxql2601_refreshed_20261027",
+      "manifest_sha256": "8bdd6a486ac8d17d60f4e42c2c30129c853e0b45fa6e762d4b557f5c9e4833f7",
+      "status": "retired;historical_reproduction_only",
+      "superseded_by": "xxql2601_final_20261105"
+    },
+    "xxql2501_sa_observed_20261029": {
+      "archive_path": "D:\\Tomato_Cal_Cold_Storage\\bundle_retirement_20261105\\sensitivity\\xxql2501_sa_observed_20261029",
+      "manifest_sha256": "fab9dc524c9685d73183d1d686d79936ee0408c39757a18fc16201c12bb17030",
+      "status": "retired;historical_reproduction_only",
+      "superseded_by": "xxql2501_sa_observed_final_20261105"
+    },
+    "xxql2501_sa_controlled_20261029": {
+      "archive_path": "D:\\Tomato_Cal_Cold_Storage\\bundle_retirement_20261105\\sensitivity\\xxql2501_sa_controlled_20261029",
+      "manifest_sha256": "55b324c328c2ec7fc0f12d0295ccb9b460079e4bd5a6ca741dc1e47c67e9c31a",
+      "status": "retired;historical_reproduction_only",
+      "superseded_by": "xxql2501_sa_controlled_final_20261105"
+    }
+  }
+}

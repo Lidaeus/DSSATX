@@ -1,0 +1,145 @@
+"season_id","treatment","run_id","ensemble_iteration","dataset_role","variable","time","date_code","dap","harvest_number","observed","observed_se","sim_mean","sim_median","sim_q025","sim_q25","sim_q75","sim_q975","n_members_expected","n_members_valid","source_file","variable_label","unit","treatment_label","water_level","nitrogen_level","variable_panel","panel_label"
+"25SP","13","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",45,25120,45,NA,0.212,0.0193287574119241,0.196872340425532,0.184,0.118,0.164,0.225,0.321,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN13 (W1-N0)","W1","N0","Leaf area index [m² m⁻²]","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",67,25142,67,NA,1.312,0.176318503941911,1.67084397163121,1.608,0.9955,1.372,1.968,2.4885,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN13 (W1-N0)","W1","N0","Leaf area index [m² m⁻²]","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",95,25170,95,NA,2.845,0.29646300996,2.83588652482269,2.825,2.2035,2.554,3.065,3.5645,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN13 (W1-N0)","W1","N0","Leaf area index [m² m⁻²]","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",119,25194,119,NA,3.39,0.229212522362584,2.92986524822695,2.884,2.316,2.656,3.183,3.6525,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN13 (W1-N0)","W1","N0","Leaf area index [m² m⁻²]","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",45,25120,45,NA,75,5.71482283189952,90.9858156028369,87,55.5,76,104,148,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN13 (W1-N0)","W1","N0","Leaf dry mass [kg ha⁻¹]","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",67,25142,67,NA,497,73.9585370325833,775.617021276596,755,487.5,647,874,1125,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN13 (W1-N0)","W1","N0","Leaf dry mass [kg ha⁻¹]","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",95,25170,95,NA,1080,143.230129511915,1372.90070921986,1385,1101.5,1264,1479,1643.5,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN13 (W1-N0)","W1","N0","Leaf dry mass [kg ha⁻¹]","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",119,25194,119,NA,1022,103.681054682136,1334.85106382979,1352,998,1229,1453,1668.5,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN13 (W1-N0)","W1","N0","Leaf dry mass [kg ha⁻¹]","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",45,25120,45,NA,111,6.68003742504486,74.5531914893617,72,48.5,64,83,106.5,141,141,"XXQL2501.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN13 (W1-N0)","W1","N0","Stem dry mass [kg ha⁻¹]","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",67,25142,67,NA,581,107.552485326932,576.021276595745,556,395.5,489,634,868.5,141,141,"XXQL2501.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN13 (W1-N0)","W1","N0","Stem dry mass [kg ha⁻¹]","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",95,25170,95,NA,1191,119.58331530778,1261.4609929078,1230,979,1137,1348,1698.5,141,141,"XXQL2501.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN13 (W1-N0)","W1","N0","Stem dry mass [kg ha⁻¹]","TN13 (W1-N0)
+25SP"
+"25SP","13","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",119,25194,119,NA,1683,246.603695227789,1222.83687943262,1208,930,1101,1309,1620,141,141,"XXQL2501.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN13 (W1-N0)","W1","N0","Stem dry mass [kg ha⁻¹]","TN13 (W1-N0)
+25SP"
+"25SP","14","full_gen_13trt_final_calib_200x8",8,"validation","LAID",45,25120,45,NA,0.279,0.0291532285869951,0.196574468085106,0.184,0.118,0.163,0.225,0.3195,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN14 (CK-N2)","CK","N2","Leaf area index [m² m⁻²]","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_calib_200x8",8,"validation","LAID",67,25142,67,NA,1.79,0.251946871230839,1.58589361702128,1.536,0.9305,1.303,1.859,2.431,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN14 (CK-N2)","CK","N2","Leaf area index [m² m⁻²]","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_calib_200x8",8,"validation","LAID",95,25170,95,NA,4.277,0.338455840057118,3.87236170212766,3.853,2.6905,3.39,4.325,5.14,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN14 (CK-N2)","CK","N2","Leaf area index [m² m⁻²]","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_calib_200x8",8,"validation","LAID",119,25194,119,NA,4.639,0.304408485021882,5.12229787234043,5.093,3.8565,4.648,5.621,6.426,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN14 (CK-N2)","CK","N2","Leaf area index [m² m⁻²]","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_calib_200x8",8,"validation","LWAD",45,25120,45,NA,93,8.20482175309129,90.8085106382979,87,55.5,75,103,148,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN14 (CK-N2)","CK","N2","Leaf dry mass [kg ha⁻¹]","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_calib_200x8",8,"validation","LWAD",67,25142,67,NA,669,118.679700454627,735.496453900709,714,454.5,625,822,1058.5,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN14 (CK-N2)","CK","N2","Leaf dry mass [kg ha⁻¹]","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_calib_200x8",8,"validation","LWAD",95,25170,95,NA,1591,56.1380004987709,1702.85106382979,1709,1189.5,1522,1870,2215,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN14 (CK-N2)","CK","N2","Leaf dry mass [kg ha⁻¹]","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_calib_200x8",8,"validation","LWAD",119,25194,119,NA,1510,170.69382062629,2224.17730496454,2220,1654,2021,2417,2807.5,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN14 (CK-N2)","CK","N2","Leaf dry mass [kg ha⁻¹]","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_calib_200x8",8,"validation","SWAD",45,25120,45,NA,123,10.3828175366805,74.4468085106383,72,48.5,64,83,106.5,141,141,"XXQL2501.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN14 (CK-N2)","CK","N2","Stem dry mass [kg ha⁻¹]","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_calib_200x8",8,"validation","SWAD",67,25142,67,NA,860,143.195487009891,544.255319148936,526,367,463,601,823.5,141,141,"XXQL2501.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN14 (CK-N2)","CK","N2","Stem dry mass [kg ha⁻¹]","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_calib_200x8",8,"validation","SWAD",95,25170,95,NA,1936,55.8846193062098,1430.04964539007,1387,1067.5,1271,1540,1992,141,141,"XXQL2501.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN14 (CK-N2)","CK","N2","Stem dry mass [kg ha⁻¹]","TN14 (CK-N2)
+25SP"
+"25SP","14","full_gen_13trt_final_calib_200x8",8,"validation","SWAD",119,25194,119,NA,2990,355.151038855302,2098.59574468085,2053,1683.5,1881,2232,2849.5,141,141,"XXQL2501.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN14 (CK-N2)","CK","N2","Stem dry mass [kg ha⁻¹]","TN14 (CK-N2)
+25SP"
+"25SP","2","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",45,25120,45,NA,0.295,0.00850356078449754,0.19654609929078,0.184,0.118,0.163,0.225,0.3195,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN2 (W3-N3)","W3","N3","Leaf area index [m² m⁻²]","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",67,25142,67,NA,1.698,0.234514641814407,1.58860992907801,1.544,0.949,1.298,1.856,2.4275,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN2 (W3-N3)","W3","N3","Leaf area index [m² m⁻²]","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",95,25170,95,NA,4.008,0.216174489425472,3.87549645390071,3.851,2.6975,3.389,4.32,5.1585,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN2 (W3-N3)","W3","N3","Leaf area index [m² m⁻²]","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",119,25194,119,NA,3.829,0.182716724282141,5.12373758865248,5.099,3.8645,4.644,5.627,6.428,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN2 (W3-N3)","W3","N3","Leaf area index [m² m⁻²]","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",45,25120,45,NA,114,9.36864984936464,90.7943262411348,87,55.5,75,103,148,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN2 (W3-N3)","W3","N3","Leaf dry mass [kg ha⁻¹]","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",67,25142,67,NA,662,98.1937121204815,736.858156028369,721,455,625,820,1069.5,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN2 (W3-N3)","W3","N3","Leaf dry mass [kg ha⁻¹]","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",95,25170,95,NA,1439,89.2429761942081,1704.35460992908,1708,1204.5,1526,1869,2220,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN2 (W3-N3)","W3","N3","Leaf dry mass [kg ha⁻¹]","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",119,25194,119,NA,1251,40.2182197517494,2224.90780141844,2217,1653,2020,2422,2815.5,141,141,"XXQL2501.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN2 (W3-N3)","W3","N3","Leaf dry mass [kg ha⁻¹]","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",45,25120,45,NA,148,12.9912124145516,74.4468085106383,72,48.5,64,83,106.5,141,141,"XXQL2501.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN2 (W3-N3)","W3","N3","Stem dry mass [kg ha⁻¹]","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",67,25142,67,NA,738,109.624765906249,545.290780141844,525,367,464,603,825,141,141,"XXQL2501.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN2 (W3-N3)","W3","N3","Stem dry mass [kg ha⁻¹]","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",95,25170,95,NA,1908,96.576374440129,1431,1390,1066.5,1270,1540,1994.5,141,141,"XXQL2501.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN2 (W3-N3)","W3","N3","Stem dry mass [kg ha⁻¹]","TN2 (W3-N3)
+25SP"
+"25SP","2","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",119,25194,119,NA,2577,286.428064791144,2098.70212765957,2055,1683,1890,2233,2849.5,141,141,"XXQL2501.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN2 (W3-N3)","W3","N3","Stem dry mass [kg ha⁻¹]","TN2 (W3-N3)
+25SP"
+"26SP","1","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",47,26122,47,NA,0.344,0.0564720344636937,0.268957446808511,0.26,0.1705,0.216,0.313,0.432,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN1 (W3-N3)","W3","N3","Leaf area index [m² m⁻²]","TN1 (W3-N3)
+26SP"
+"26SP","1","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",78,26153,78,NA,1.744,0.229550346780494,2.20209929078014,2.184,1.4235,1.82,2.504,3.2775,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN1 (W3-N3)","W3","N3","Leaf area index [m² m⁻²]","TN1 (W3-N3)
+26SP"
+"26SP","1","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",105,26180,105,NA,2.646,0.391443482510566,3.94823404255319,3.924,2.8885,3.487,4.3,5.335,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN1 (W3-N3)","W3","N3","Leaf area index [m² m⁻²]","TN1 (W3-N3)
+26SP"
+"26SP","1","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",123,26198,123,NA,2.792,0.287026263534125,4.93281560283688,4.884,3.7585,4.443,5.387,6.4275,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN1 (W3-N3)","W3","N3","Leaf area index [m² m⁻²]","TN1 (W3-N3)
+26SP"
+"26SP","1","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",47,26122,47,NA,184,27.9535131960189,119.496453900709,117,78,99,134,180.5,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN1 (W3-N3)","W3","N3","Leaf dry mass [kg ha⁻¹]","TN1 (W3-N3)
+26SP"
+"26SP","1","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",78,26153,78,NA,839,111.461393764837,913.921985815603,891,624.5,789,1018,1303,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN1 (W3-N3)","W3","N3","Leaf dry mass [kg ha⁻¹]","TN1 (W3-N3)
+26SP"
+"26SP","1","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",105,26180,105,NA,1323,186.34897182437,1603.10638297872,1595,1196,1426,1739,2073.5,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN1 (W3-N3)","W3","N3","Leaf dry mass [kg ha⁻¹]","TN1 (W3-N3)
+26SP"
+"26SP","1","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",123,26198,123,NA,1338,164.057410378197,2028.6170212766,2010,1505.5,1843,2190,2580,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN1 (W3-N3)","W3","N3","Leaf dry mass [kg ha⁻¹]","TN1 (W3-N3)
+26SP"
+"26SP","1","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",47,26122,47,NA,132,29.5116299109351,96.3120567375886,94,62.5,84,105,144,141,141,"XXQL2601.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN1 (W3-N3)","W3","N3","Stem dry mass [kg ha⁻¹]","TN1 (W3-N3)
+26SP"
+"26SP","1","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",78,26153,78,NA,1138,198.430121453372,712.843971631206,689,481,623,785,1031,141,141,"XXQL2601.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN1 (W3-N3)","W3","N3","Stem dry mass [kg ha⁻¹]","TN1 (W3-N3)
+26SP"
+"26SP","1","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",105,26180,105,NA,1807,348.63173736767,1409.02836879433,1381,1073.5,1248,1523,1886,141,141,"XXQL2601.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN1 (W3-N3)","W3","N3","Stem dry mass [kg ha⁻¹]","TN1 (W3-N3)
+26SP"
+"26SP","1","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",123,26198,123,NA,1902,69.1199999999999,1988.51773049645,1967,1561,1793,2124,2623.5,141,141,"XXQL2601.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN1 (W3-N3)","W3","N3","Stem dry mass [kg ha⁻¹]","TN1 (W3-N3)
+26SP"
+"26SP","12","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",47,26122,47,NA,0.239,0.00887705785758988,0.26954609929078,0.26,0.1705,0.216,0.313,0.432,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN12 (W1-N0)","W1","N0","Leaf area index [m² m⁻²]","TN12 (W1-N0)
+26SP"
+"26SP","12","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",78,26153,78,NA,1.426,0.246519421726138,2.23216312056738,2.236,1.43,1.86,2.569,3.133,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN12 (W1-N0)","W1","N0","Leaf area index [m² m⁻²]","TN12 (W1-N0)
+26SP"
+"26SP","12","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",105,26180,105,NA,2.735,0.206114046100696,3.41164539007092,3.414,2.646,3.082,3.709,4.445,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN12 (W1-N0)","W1","N0","Leaf area index [m² m⁻²]","TN12 (W1-N0)
+26SP"
+"26SP","12","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",123,26198,123,NA,2.533,0.116903123796335,3.73210638297872,3.724,3.0065,3.407,4.034,4.7115,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN12 (W1-N0)","W1","N0","Leaf area index [m² m⁻²]","TN12 (W1-N0)
+26SP"
+"26SP","12","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",47,26122,47,NA,122,3.53338364744051,119.702127659574,117,78.5,100,134,182,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN12 (W1-N0)","W1","N0","Leaf dry mass [kg ha⁻¹]","TN12 (W1-N0)
+26SP"
+"26SP","12","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",78,26153,78,NA,829,132.128552175523,930.723404255319,908,646.5,809,1051,1268.5,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN12 (W1-N0)","W1","N0","Leaf dry mass [kg ha⁻¹]","TN12 (W1-N0)
+26SP"
+"26SP","12","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",105,26180,105,NA,1367,81.890059836344,1427.92907801418,1412,1121,1326,1528,1731,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN12 (W1-N0)","W1","N0","Leaf dry mass [kg ha⁻¹]","TN12 (W1-N0)
+26SP"
+"26SP","12","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",123,26198,123,NA,1104,58.2416835264916,1570.10638297872,1581,1232,1474,1670,1886,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN12 (W1-N0)","W1","N0","Leaf dry mass [kg ha⁻¹]","TN12 (W1-N0)
+26SP"
+"26SP","12","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",47,26122,47,NA,87,4.50269919048564,96.4893617021277,94,62.5,84,105,144.5,141,141,"XXQL2601.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN12 (W1-N0)","W1","N0","Stem dry mass [kg ha⁻¹]","TN12 (W1-N0)
+26SP"
+"26SP","12","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",78,26153,78,NA,914,136.097707181275,733.702127659574,707,504.5,634,802,1084,141,141,"XXQL2601.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN12 (W1-N0)","W1","N0","Stem dry mass [kg ha⁻¹]","TN12 (W1-N0)
+26SP"
+"26SP","12","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",105,26180,105,NA,1839,61.850826186883,1311.51063829787,1289,1036.5,1191,1398,1741.5,141,141,"XXQL2601.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN12 (W1-N0)","W1","N0","Stem dry mass [kg ha⁻¹]","TN12 (W1-N0)
+26SP"
+"26SP","12","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",123,26198,123,NA,1763,74.1876829399598,1494.24113475177,1475,1195,1366,1589,1945,141,141,"XXQL2601.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN12 (W1-N0)","W1","N0","Stem dry mass [kg ha⁻¹]","TN12 (W1-N0)
+26SP"
+"26SP","5","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",47,26122,47,NA,0.426,0.0595150642411458,0.268950354609929,0.26,0.1705,0.216,0.313,0.432,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN5 (W2-N2)","W2","N2","Leaf area index [m² m⁻²]","TN5 (W2-N2)
+26SP"
+"26SP","5","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",78,26153,78,NA,1.356,0.109719293365219,2.20501418439716,2.189,1.426,1.819,2.503,3.279,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN5 (W2-N2)","W2","N2","Leaf area index [m² m⁻²]","TN5 (W2-N2)
+26SP"
+"26SP","5","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",105,26180,105,NA,3.113,0.210010714012405,3.95086524822695,3.923,2.894,3.487,4.304,5.3435,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN5 (W2-N2)","W2","N2","Leaf area index [m² m⁻²]","TN5 (W2-N2)
+26SP"
+"26SP","5","full_gen_13trt_final_calib_200x8",8,"calibration","LAID",123,26198,123,NA,2.655,0.24578197869437,4.93439007092199,4.882,3.7575,4.448,5.387,6.431,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf area index","m² m⁻²","TN5 (W2-N2)","W2","N2","Leaf area index [m² m⁻²]","TN5 (W2-N2)
+26SP"
+"26SP","5","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",47,26122,47,NA,197,24.6516226646442,119.489361702128,117,78,99,134,180.5,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN5 (W2-N2)","W2","N2","Leaf dry mass [kg ha⁻¹]","TN5 (W2-N2)
+26SP"
+"26SP","5","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",78,26153,78,NA,681,34.33284724575,915.177304964539,892,625,789,1018,1304,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN5 (W2-N2)","W2","N2","Leaf dry mass [kg ha⁻¹]","TN5 (W2-N2)
+26SP"
+"26SP","5","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",105,26180,105,NA,1557,59.13,1604.19858156028,1595,1196.5,1429,1740,2074,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN5 (W2-N2)","W2","N2","Leaf dry mass [kg ha⁻¹]","TN5 (W2-N2)
+26SP"
+"26SP","5","full_gen_13trt_final_calib_200x8",8,"calibration","LWAD",123,26198,123,NA,1423,78.9578058205774,2029.24113475177,2013,1508.5,1843,2190,2580.5,141,141,"XXQL2601.TMT+PlantGro.OUT","Leaf dry mass","kg ha⁻¹","TN5 (W2-N2)","W2","N2","Leaf dry mass [kg ha⁻¹]","TN5 (W2-N2)
+26SP"
+"26SP","5","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",47,26122,47,NA,138,21.6922405481776,96.3049645390071,94,62.5,84,105,144,141,141,"XXQL2601.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN5 (W2-N2)","W2","N2","Stem dry mass [kg ha⁻¹]","TN5 (W2-N2)
+26SP"
+"26SP","5","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",78,26153,78,NA,871,52.11,713.843971631206,689,482,623,787,1032,141,141,"XXQL2601.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN5 (W2-N2)","W2","N2","Stem dry mass [kg ha⁻¹]","TN5 (W2-N2)
+26SP"
+"26SP","5","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",105,26180,105,NA,2195,116.463234112745,1410.02127659574,1381,1074,1248,1523,1886.5,141,141,"XXQL2601.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN5 (W2-N2)","W2","N2","Stem dry mass [kg ha⁻¹]","TN5 (W2-N2)
+26SP"
+"26SP","5","full_gen_13trt_final_calib_200x8",8,"calibration","SWAD",123,26198,123,NA,2152,175.016958321187,1989.24822695035,1967,1554,1796,2126,2624.5,141,141,"XXQL2601.TMT+PlantGro.OUT","Stem dry mass","kg ha⁻¹","TN5 (W2-N2)","W2","N2","Stem dry mass [kg ha⁻¹]","TN5 (W2-N2)
+26SP"

@@ -35,6 +35,7 @@ def sha256(path: Path) -> str:
 
 
 def sync_files():
+    raise SystemExit("Retired 2026-09-17 sync: run from the three current input bundles instead")
     RAW_EXP.mkdir(parents=True, exist_ok=True)
     DSSAT_TOMATO.mkdir(parents=True, exist_ok=True)
 

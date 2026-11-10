@@ -6,11 +6,11 @@ attach_treatment_metadata <- function(data, treatment_metadata, treatments) {
   treatment_metadata$treatment <- as.character(treatment_metadata$treatment)
 
   if (!"season_id" %in% names(data) && "season_id" %in% names(treatment_metadata)) {
-    if ("year" %in% names(data) && any(!is.na(data$year))) {
-      data$season_id <- ifelse(data$year == 2025, "25SP", ifelse(data$year == 2026, "26SP", NA_character_))
-    } else if ("date_code" %in% names(data) && any(!is.na(data$date_code))) {
-      data$season_id <- ifelse(data$date_code < 26000, "25SP", "26SP")
+    seasons <- unique(as.character(treatment_metadata$season_id))
+    if (length(seasons) != 1L || anyNA(seasons)) {
+      stop("Multi-season trajectories require explicit season_id; year cannot distinguish spring from autumn", call. = FALSE)
     }
+    data$season_id <- seasons[[1]]
   }
 
   by_cols <- if ("season_id" %in% names(data) && "season_id" %in% names(treatment_metadata)) {
@@ -96,7 +96,7 @@ build_process_dynamics <- function(comparison, trajectory, treatment_metadata, v
       data = simulations,
       ggplot2::aes(x = time, y = simulated, colour = nitrogen_level,
                    group = interaction(treatment, statistic)),
-      linewidth = profile$data_linewidth_pt, lineend = "round"
+      linewidth = line_width_mm(profile$data_linewidth_pt), lineend = "round"
     ) +
     ggplot2::geom_point(
       data = observations,
@@ -160,7 +160,7 @@ build_harvest_dynamics <- function(comparison, treatment_metadata, increment_var
   p_cumulative <- ggplot2::ggplot(cumulative, ggplot2::aes(x = time)) +
     ggplot2::geom_line(
       ggplot2::aes(y = simulated, colour = nitrogen_level, group = treatment_label),
-      linewidth = profile$data_linewidth_pt, lineend = "round"
+      linewidth = line_width_mm(profile$data_linewidth_pt), lineend = "round"
     ) +
     ggplot2::geom_point(
       ggplot2::aes(y = observed, fill = nitrogen_level, shape = water_level),
@@ -199,7 +199,9 @@ monotone_cumulative_curve <- function(daily) {
   curves <- lapply(groups, function(frame) {
     frame <- frame[order(frame$time), , drop = FALSE]
     frame <- frame[!duplicated(frame$time), , drop = FALSE]
-    if (nrow(frame) < 4) stop("Smooth cumulative view requires at least four daily model values")
+    # monoH.FC is defined for two or more ordered nodes. Autumn has three
+    # genuine harvest events; do not fabricate a fourth node to draw the curve.
+    if (nrow(frame) < 2) stop("Visual interpolation requires at least two distinct harvest dates")
     tolerance <- max(1e-8, max(abs(frame$simulated), na.rm = TRUE) * 1e-8)
     if (any(diff(frame$simulated) < -tolerance)) {
       stop("Cumulative DSSAT trajectory decreases; refusing monotone visual interpolation")
@@ -208,6 +210,7 @@ monotone_cumulative_curve <- function(daily) {
     grid <- seq(min(frame$time), max(frame$time), length.out = max(240, nrow(frame) * 4))
     values <- interpolation(grid)
     values <- pmin(max(frame$simulated), pmax(min(frame$simulated), values))
+    if (any(diff(values) < -tolerance)) stop("Interpolated cumulative harvest decreases")
     result <- frame[rep(1, length(grid)), , drop = FALSE]
     result$time <- grid
     result$simulated <- values
@@ -264,7 +267,7 @@ build_process_dynamics_conditional <- function(prediction, trajectory, treatment
     ggplot2::geom_line(
       data = daily,
       ggplot2::aes(x = dap, y = sim_median, colour = nitrogen_level),
-      linewidth = profile$data_linewidth_pt, lineend = "round"
+      linewidth = line_width_mm(profile$data_linewidth_pt), lineend = "round"
     ) +
     ggplot2::geom_point(
       data = observations,
@@ -372,7 +375,7 @@ build_harvest_dynamics_conditional <- function(prediction, treatment_metadata,
     ggplot2::geom_line(
       data = cumulative,
       ggplot2::aes(x = dap, y = sim_median, colour = nitrogen_level, group = treatment),
-      linewidth = profile$data_linewidth_pt, lineend = "round"
+      linewidth = line_width_mm(profile$data_linewidth_pt), lineend = "round"
     ) +
     ggplot2::geom_point(
       data = cumulative,
@@ -420,7 +423,7 @@ build_cumulative_smooth <- function(comparison, trajectory, treatment_metadata,
     ggplot2::geom_line(
       data = curve,
       ggplot2::aes(x = time, y = simulated, colour = nitrogen_level, group = treatment_label),
-      linewidth = profile$data_linewidth_pt, lineend = "round"
+      linewidth = line_width_mm(profile$data_linewidth_pt), lineend = "round"
     ) +
     ggplot2::geom_point(
       data = observations,
@@ -430,7 +433,7 @@ build_cumulative_smooth <- function(comparison, trajectory, treatment_metadata,
     ggplot2::facet_wrap(~treatment_label, nrow = 1, scales = "free_y") +
     management_scales(profile) +
     ggplot2::labs(
-      title = "Continuous cumulative harvest trajectory",
+      title = "Cumulative harvest: visual interpolation",
       subtitle = "Smooth lines interpolate simulated cumulative values at harvest dates; points are observed means",
       x = "Days after planting",
       y = paste0(observations$variable_label[[1]], " [", observations$unit[[1]], "]"),

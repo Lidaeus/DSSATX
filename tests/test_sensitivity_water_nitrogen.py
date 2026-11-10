@@ -67,16 +67,14 @@ def test_sa_rejects_wrong_bundle_id_or_treatment_set(tmp_path):
         verify_manifest_integrity(bundle)
 
     # (b) Treatment-set mismatch is enforced by sa_build_sen_case against the
-    #     output contract. The symbi_n_candidate bundle (SYMBI=N, the correct
-    #     non-legume setting) carries a 10-treatment set that disagrees with
-    #     the SA output contract (which expects the counterfactual TN2-5,10-13
-    #     set), so the SA build must reject it on treatment-set grounds.
+    #     output contract. The current 2026 spring bundle carries 12 treatments;
+    #     the 2025 spring SA output contract expects TN2-5,10-13 instead.
     from src.sensitivity.sa_build_sen_case import build_case
 
     with pytest.raises(ValueError, match="treatments do not match"):
         build_case(
             param_review_csv="data/parameter_registry/bounds_frozen/eggplant/eggplant_p1_xxql2501_v3_20260716.csv",
-            input_dir="data/user/experiments/xxql2501_symbi_n_candidate_20260719",
+            input_dir="data/user/experiments/xxql2601_final_20261105",
             output_profile="configs/sa/eggplant_p1_outputs.json",
             case_dir=str(tmp_path / "wrong_treatment_case"),
             workspace_dir=str(tmp_path / "wrong_treatment_case"),

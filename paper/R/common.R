@@ -48,6 +48,8 @@ load_publication_profile <- function(path) {
   profile
 }
 
+line_width_mm <- function(points) points / ggplot2::.pt
+
 theme_q1 <- function(profile) {
   family <- profile$font_family[[1]]
   ggplot2::theme_classic(base_size = profile$font_size_pt, base_family = family) +
@@ -57,8 +59,8 @@ theme_q1 <- function(profile) {
       plot.caption = ggplot2::element_text(colour = "#666666", size = 5, hjust = 1),
       axis.title = ggplot2::element_text(colour = "#222222"),
       axis.text = ggplot2::element_text(colour = "#333333"),
-      axis.line = ggplot2::element_line(linewidth = profile$axes_linewidth_pt, colour = "#333333"),
-      axis.ticks = ggplot2::element_line(linewidth = profile$axes_linewidth_pt, colour = "#333333"),
+      axis.line = ggplot2::element_line(linewidth = line_width_mm(profile$axes_linewidth_pt), colour = "#333333"),
+      axis.ticks = ggplot2::element_line(linewidth = line_width_mm(profile$axes_linewidth_pt), colour = "#333333"),
       legend.position = "top",
       legend.justification = "left",
       legend.title = ggplot2::element_blank(),
@@ -75,6 +77,14 @@ demo_caption <- function(is_demo) {
 
 save_figure_set <- function(plot, output_base, profile, width_mm, height_mm, formats = profile$formats) {
   dir.create(dirname(output_base), recursive = TRUE, showWarnings = FALSE)
+  if (isTRUE(profile$mixed_times_simsun)) {
+    # Measure on the same font-capable backend used by the vector export.
+    # The default R PDF device only knows the PostScript core font database.
+    measure_path <- tempfile(fileext=".pdf")
+    grDevices::cairo_pdf(measure_path,family="Times New Roman")
+    plot <- tryCatch(publication_plot_grob(plot),finally=grDevices::dev.off())
+    unlink(measure_path)
+  }
   paths <- character()
   for (format in tolower(formats)) {
     path <- paste0(output_base, ".", format)
@@ -211,15 +221,21 @@ read_t4_demo_bundle <- function(input_dir, allow_demo = FALSE) {
   if (length(missing) > 0) stop("T4 bundle missing: ", paste(missing, collapse = ", "))
   read_csv <- function(name) utils::read.csv(file.path(input_dir, name), stringsAsFactors = FALSE,
                                               check.names = FALSE)
+  posterior_samples_path <- file.path(input_dir, "posterior_samples.csv")
+  posterior_samples <- if (file.exists(posterior_samples_path)) read_csv("posterior_samples.csv") else NULL
   bundle <- list(manifest = manifest, is_demo = is_demo,
                  posterior = read_csv("posterior_diagnostics.csv"),
                  spearman = read_csv("spearman_correlation.csv"),
                  pairs = read_csv("candidate_pairs.csv"),
-                 pair_predictions = read_csv("candidate_pair_predictions.csv"))
-  for (table in bundle[c("posterior", "spearman", "pairs", "pair_predictions")]) {
-    if (!all(c("run_id", "data_status") %in% names(table))) stop("T4 table lacks provenance columns")
+                 pair_predictions = read_csv("candidate_pair_predictions.csv"),
+                 posterior_samples = posterior_samples)
+  tables_to_check <- c("posterior", "spearman", "pairs", "pair_predictions")
+  if (!is.null(posterior_samples)) tables_to_check <- c(tables_to_check, "posterior_samples")
+  for (name in tables_to_check) {
+    table <- bundle[[name]]
+    if (!all(c("run_id", "data_status") %in% names(table))) stop("T4 table lacks provenance columns: ", name)
     if (length(unique(table$run_id)) != 1 || unique(table$run_id)[[1]] != manifest$run_id) {
-      stop("T4 table run_id does not match manifest")
+      stop("T4 table run_id does not match manifest: ", name)
     }
   }
   bundle
@@ -306,6 +322,43 @@ read_sa_bundle <- function(input_dir, allow_demo = FALSE) {
     }
   }
   bundle
+}
+
+read_single_seed_sa_bundle <- function(input_dir, allow_demo = FALSE) {
+  manifest <- jsonlite::fromJSON(file.path(input_dir, "paper_data_manifest.json"), simplifyVector = FALSE)
+  if (!identical(manifest$bundle_type, "morris_single_seed_review")) stop("Wrong single-seed bundle type")
+  is_demo <- !identical(manifest$data_status, "science_validated")
+  if (is_demo && !isTRUE(allow_demo)) stop("Single-seed review requires --allow-unvalidated-demo")
+  required <- c("balanced_rankings.csv", "scalar_morris_effects.csv", "review_summary.json")
+  listed <- vapply(manifest$artifacts, function(a) a$path, character(1))
+  if (!all(required %in% listed)) stop("Single-seed manifest does not bind required tables")
+  for (a in manifest$artifacts) {
+    if (!identical(basename(a$path), a$path)) stop("Artifact path must be a local filename")
+    p <- file.path(input_dir, a$path)
+    if (!file.exists(p) || !identical(tolower(sha256_file(p)), tolower(a$sha256))) stop("Single-seed artifact hash mismatch: ", a$path)
+  }
+  rankings <- utils::read.csv(file.path(input_dir, "balanced_rankings.csv"), stringsAsFactors = FALSE)
+  effects <- utils::read.csv(file.path(input_dir, "scalar_morris_effects.csv"), stringsAsFactors = FALSE)
+  parse_flag <- function(x) {
+    if (is.logical(x)) return(x)
+    y <- tolower(as.character(x))
+    if (any(!y %in% c("true", "false"))) stop("Invalid Boolean flag in single-seed data")
+    y == "true"
+  }
+  for (name in c("elbow_core", "response_top5", "display_core")) {
+    rankings[[name]] <- parse_flag(rankings[[name]])
+    effects[[name]] <- parse_flag(effects[[name]])
+  }
+  summary <- jsonlite::fromJSON(file.path(input_dir, "review_summary.json"), simplifyVector = TRUE)
+  if (nrow(rankings) != 86 || anyDuplicated(rankings$parameter) || abs(sum(rankings$score)-1)>1e-9) stop("Invalid balanced ranking")
+  if (any(!is.finite(effects$mu_star)) || any(!is.finite(effects$sigma)) || any(effects$n_valid != 30)) stop("Incomplete scalar Morris effects")
+  if (summary$focused_outputs_complete_trajectories != 30 || !identical(summary$cross_seed_analysis, FALSE)) stop("Wrong focused-output scope")
+  # Provenance comes from the hash-bound manifest, never from a filename guess.
+  for (name in c("run_id", "data_status")) {
+    rankings[[name]] <- manifest[[name]]
+    effects[[name]] <- manifest[[name]]
+  }
+  list(manifest=manifest, is_demo=is_demo, rankings=rankings, effects=effects, summary=summary)
 }
 
 read_sobol_bundle <- function(input_dir, allow_demo = FALSE) {
@@ -546,6 +599,58 @@ conditional_treatment_levels <- function(data, season_treatments) {
   labels
 }
 
+read_stage2_bundle <- function(input_dir, allow_demo=FALSE) {
+  manifest<-jsonlite::fromJSON(file.path(input_dir,"paper_data_manifest.json"),simplifyVector=FALSE)
+  if(!identical(manifest$bundle_type,"paper_reconstruction_stage2"))stop("Stage 2 requires its dedicated frozen bundle")
+  is_demo<-!identical(manifest$data_status,"science_validated")
+  if(is_demo && !isTRUE(allow_demo))stop("Stage 2 input is not science_validated; use --allow-unvalidated-demo")
+  required<-c("comparison.csv","simulation_trajectory.csv","representative_treatments.csv","terminal_pairs.csv",
+    "performance_metrics.csv","treatment_metadata.csv","weather_daily.csv","management_events.csv","season_dates.csv",
+    "weather_stripes.csv","weather_daily_difference.csv","morris_process_scores.csv","parameter_intervals.csv",
+    "parameter_samples.csv","spearman_correlation.csv","water_nitrogen_contrasts.csv","water_nitrogen_contrast_summary.csv",
+    "partition_function.csv","ablation_metrics.csv")
+  paths<-vapply(manifest$artifacts,function(a)a$path,character(1))
+  if(anyDuplicated(paths)||!all(required %in% paths))stop("Incomplete or duplicated stage 2 artifacts")
+  tables<-list()
+  for(a in manifest$artifacts) {
+    if(!identical(basename(a$path),a$path))stop("Stage 2 artifact must be a local filename")
+    path<-file.path(input_dir,a$path)
+    if(!identical(tolower(sha256_file(path)),tolower(a$sha256)))stop("Stage 2 manifest hash mismatch: ",a$path)
+    name<-sub("\\.csv$","",a$path)
+    tab<-utils::read.csv(path,fileEncoding="UTF-8",stringsAsFactors=FALSE,check.names=FALSE)
+    for(column in names(tab)) {
+      values<-tolower(as.character(tab[[column]]));present<-!is.na(values)
+      if(any(present) && all(values[present] %in% c("true","false"))) {
+        tab[[column]]<-ifelse(present,values=="true",NA)
+      }
+    }
+    tables[[name]]<-tab
+  }
+  list(manifest=manifest,is_demo=is_demo,tables=tables)
+}
+
+read_reconstruction_bundle <- function(input_dir, allow_demo = FALSE) {
+  path <- file.path(input_dir, "paper_data_manifest.json")
+  manifest <- jsonlite::fromJSON(path, simplifyVector = FALSE)
+  if (!identical(manifest$bundle_type, "paper_reconstruction_prototypes")) {
+    stop("Reconstruction figures require bundle_type=paper_reconstruction_prototypes")
+  }
+  is_demo <- !identical(manifest$data_status, "science_validated")
+  if (is_demo && !isTRUE(allow_demo)) stop("Input is not science_validated; use --allow-unvalidated-demo for prototypes")
+  required <- c(nodes="framework_nodes.csv", edges="framework_edges.csv", events="ablation_events.csv",
+                function_data="partition_function.csv", metrics="performance_metrics.csv", pairs="validation_sample_pairs.csv")
+  listed <- vapply(manifest$artifacts, function(a) a$path, character(1))
+  if (any(!required %in% listed) || anyDuplicated(listed)) stop("Incomplete or duplicated reconstruction artifacts")
+  for (artifact in manifest$artifacts) {
+    if (!identical(basename(artifact$path), artifact$path)) stop("Artifact path must be a local filename")
+    if (!identical(tolower(sha256_file(file.path(input_dir,artifact$path))),tolower(artifact$sha256))) {
+      stop("Manifest hash mismatch: ",artifact$path)
+    }
+  }
+  result <- lapply(required,function(name) utils::read.csv(file.path(input_dir,name),fileEncoding="UTF-8",stringsAsFactors=FALSE,check.names=FALSE))
+  c(list(manifest=manifest,is_demo=is_demo),result)
+}
+
 demo_watermark <- function(is_demo) {
   if (!isTRUE(is_demo)) return(NULL)
   ggplot2::annotate("text", x = Inf, y = Inf, label = "DEMO", hjust = 1.15, vjust = 1.5,
@@ -562,8 +667,10 @@ sha256_file <- function(path) {
   if (.Platform$OS.type == "windows") {
     output <- system2("certutil", c("-hashfile", shQuote(path), "SHA256"),
                       stdout = TRUE, stderr = TRUE)
-    candidates <- gsub("[^0-9A-Fa-f]", "", output)
-    candidates <- candidates[nchar(candidates) == 64]
+    # Match a whole hash line. Stripping arbitrary non-hex characters can
+    # accidentally turn a long filename in certutil's header into 64 hex digits.
+    candidates <- gsub("[[:space:]]", "", trimws(output))
+    candidates <- candidates[grepl("^[0-9A-Fa-f]{64}$", candidates)]
     if (length(candidates) == 0) stop("Unable to compute SHA-256 for ", path)
     return(tolower(candidates[[1]]))
   }

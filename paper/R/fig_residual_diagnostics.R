@@ -66,6 +66,9 @@ make_qq_data <- function(data) {
 build_residual_diagnostics <- function(comparison, treatment_metadata, variables,
                                        profile, is_demo = FALSE) {
   data <- comparison[comparison$variable %in% variables, , drop = FALSE]
+  if ("simulation_date_gap_days" %in% names(data)) {
+    data <- data[!is.finite(data$simulation_date_gap_days) | data$simulation_date_gap_days == 0, , drop = FALSE]
+  }
   if (nrow(data) == 0) stop("No requested variables are available for residual diagnostics")
   inferential <- data$dataset_role %in% c("calibration", "validation")
   if (any(inferential)) data <- data[inferential, , drop = FALSE]

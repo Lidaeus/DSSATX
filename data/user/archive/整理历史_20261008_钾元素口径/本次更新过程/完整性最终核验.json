@@ -1,0 +1,42 @@
+{
+  "seasons": [
+    {
+      "season": "2025春",
+      "fertilizer_entries": 48,
+      "tmx_changed_lines": 4,
+      "K_kg_ha": 232.4,
+      "fertilizer_other_fields_unchanged": true,
+      "nonfertilizer_bytes_unchanged": true,
+      "excel_details_match": true
+    },
+    {
+      "season": "2025秋",
+      "fertilizer_entries": 55,
+      "tmx_changed_lines": 36,
+      "K_kg_ha": 237.41,
+      "fertilizer_other_fields_unchanged": true,
+      "nonfertilizer_bytes_unchanged": true,
+      "excel_details_match": true
+    },
+    {
+      "season": "2026春",
+      "fertilizer_entries": 132,
+      "tmx_changed_lines": 125,
+      "K_kg_ha": 229.09,
+      "fertilizer_other_fields_unchanged": true,
+      "nonfertilizer_bytes_unchanged": true,
+      "excel_details_match": true
+    }
+  ],
+  "current_excel_count": 26,
+  "archive": {
+    "date": "2026-10-08",
+    "requested_directories": 5,
+    "legacy_items": 11,
+    "archived_files": 216,
+    "all_hashes_verified": true,
+    "source_items_absent": true,
+    "archive": "D:\\Tomato_Cal\\data\\user\\archive\\整理历史_20261008_钾元素口径"
+  },
+  "all_checks_passed": true
+}

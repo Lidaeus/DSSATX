@@ -1,0 +1,561 @@
+*EXP.DETAILS: XXQL2501TM 2025 SPRING,SOLARSET,N-RATE,DRIP-IRR
+
+*GENERAL
+@PEOPLE
+Lidaeus
+@ADDRESS
+Drip irrigated, states to be N rates but only one set of data here Trt 14?
+@SITE
+Quncy, FL
+
+*TREATMENTS                        -------------FACTOR LEVELS------------
+@N R O C TNAME.................... CU FL SA IC MP MI MF MR MC MT ME MH SM
+ 2 1 0 0 95F-180 N AI, N-B "off"    1  5  2  2  2  1  1  0  0  2  0  5  2
+ 3 1 0 0 95F-180 N AI, N-B "off"    1  5  3  3  2  1  2  0  0  2  0  5  2
+ 4 1 0 0 95F-180 N AI, N-B "off"    1  5  4  4  2  1  3  0  0  2  0  5  2
+ 5 1 0 0 95F-180 N AI, N-B "off"    1  5  5  5  2  1  4  0  0  2  0  5  2
+ 6 1 0 0 95F-180 N AI, N-B "off"    1  5  6  6  2  2  1  0  0  2  0  5  2
+ 9 1 0 0 95F-180 N AI, N-B "off"    1  5  9  9  2  2  4  0  0  2  0  5  2
+10 1 0 0 95F-180 N AI, N-B "off"    1  5 10 10  2  3  1  0  0  2  0  5  2
+11 1 0 0 95F-180 N AI, N-B "off"    1  5 11 11  2  3  2  0  0  2  0  5  2
+12 1 0 0 95F-180 N AI, N-B "off"    1  5 12 12  2  3  3  0  0  2  0  5  2
+13 1 0 0 95F-180 N AI, N-B "off"    1  5 13 13  2  3  4  0  0  2  0  5  2
+14 1 0 0 95F-180 N AI, N-B "off"    1  5 14 14  2  4  2  0  0  2  0  5  2
+
+*CULTIVARS
+@C CR INGENO CNAME
+ 1 TM TM0008 Brilliance
+
+*FIELDS
+@L ID_FIELD WSTA....  FLSA  FLOB  FLDT  FLDD  FLDS  FLST SLTX  SLDP  ID_SOIL    FLNAME
+ 5 AAXX2501 XXLI2502   -99     0 DR000     0     0  0000 SL     180  XXSL2501           Number 9 Fields
+@L ...........XCRD ...........YCRD .....ELEV .............AREA .SLEN .FLWR .SLAS FLHST FHDUR
+ 5             35.16           113.8      75               -99   -99   -99   -99 FH101   -99
+
+
+
+
+
+
+*SOIL ANALYSIS
+@A SADAT  SMHB  SMPX  SMKE  SANAME
+ 2 25071 SA012 SA001 SA001  2
+@A  SABL  SADM  SAOC  SANI SAPHW SAPHB  SAPX  SAKE  SASC
+ 2     2  1.36  0.81 0.074  8.26   -99  76.2   1.8   -99
+ 2     4  1.36  0.81 0.074  8.26   -99  76.2   1.8   -99
+ 2    15  1.36  0.81 0.074  8.26   -99  76.2   1.8   -99
+ 2    30  1.49  0.66 0.060  8.14   -99  49.4   0.9   -99
+ 2    40  1.55  0.59 0.054  8.08   -99  37.7   0.5   -99
+ 2    60  1.56  0.44 0.040  7.90   -99  30.2   0.3   -99
+ 2    80  1.51  0.10 0.010  8.00   -99  30.2   0.3   -99
+ 2   100  1.47  0.10 0.010  8.00   -99  30.2   0.3   -99
+ 2   140  1.55  0.10 0.010  8.00   -99  30.2   0.3   -99
+ 2   180  1.60  0.10 0.010  8.00   -99  30.2   0.3   -99
+@A SADAT  SMHB  SMPX  SMKE  SANAME
+ 3 25071 SA012 SA001 SA001  3
+@A  SABL  SADM  SAOC  SANI SAPHW SAPHB  SAPX  SAKE  SASC
+ 3     2  1.36  0.82 0.074  8.21   -99  67.6   1.6   -99
+ 3     4  1.36  0.82 0.074  8.21   -99  67.6   1.6   -99
+ 3    15  1.36  0.82 0.074  8.21   -99  67.6   1.6   -99
+ 3    30  1.49  0.63 0.057  8.16   -99  45.6   0.8   -99
+ 3    40  1.55  0.54 0.050  8.13   -99  35.9   0.5   -99
+ 3    60  1.56  0.31 0.028  7.96   -99  12.4   0.3   -99
+ 3    80  1.51  0.10 0.010  8.00   -99  12.4   0.3   -99
+ 3   100  1.47  0.10 0.010  8.00   -99  12.4   0.3   -99
+ 3   140  1.55  0.10 0.010  8.00   -99  12.4   0.3   -99
+ 3   180  1.60  0.10 0.010  8.00   -99  12.4   0.3   -99
+@A SADAT  SMHB  SMPX  SMKE  SANAME
+ 4 25071 SA012 SA001 SA001  4
+@A  SABL  SADM  SAOC  SANI SAPHW SAPHB  SAPX  SAKE  SASC
+ 4     2  1.36  0.72 0.065  8.19   -99  61.9   1.5   -99
+ 4     4  1.36  0.72 0.065  8.19   -99  61.9   1.5   -99
+ 4    15  1.36  0.72 0.065  8.19   -99  61.9   1.5   -99
+ 4    30  1.49  0.60 0.055  8.19   -99  43.1   0.8   -99
+ 4    40  1.55  0.55 0.050  8.19   -99  34.9   0.6   -99
+ 4    60  1.56  0.24 0.022  8.02   -99   6.2   0.2   -99
+ 4    80  1.51  0.10 0.010  8.00   -99   6.2   0.2   -99
+ 4   100  1.47  0.10 0.010  8.00   -99   6.2   0.2   -99
+ 4   140  1.55  0.10 0.010  8.00   -99   6.2   0.2   -99
+ 4   180  1.60  0.10 0.010  8.00   -99   6.2   0.2   -99
+@A SADAT  SMHB  SMPX  SMKE  SANAME
+ 5 25071 SA012 SA001 SA001  5
+@A  SABL  SADM  SAOC  SANI SAPHW SAPHB  SAPX  SAKE  SASC
+ 5     2  1.36  1.13 0.086  7.96   -99  75.7   1.3   -99
+ 5     4  1.36  1.13 0.086  7.96   -99  75.7   1.3   -99
+ 5    15  1.36  1.13 0.086  7.96   -99  75.7   1.3   -99
+ 5    30  1.49  0.82 0.062  7.91   -99  42.7   0.7   -99
+ 5    40  1.55  0.69 0.052  7.89   -99  28.2   0.5   -99
+ 5    60  1.56  0.34 0.026  7.99   -99   7.3   0.2   -99
+ 5    80  1.51  0.10 0.010  8.00   -99   7.3   0.2   -99
+ 5   100  1.47  0.10 0.010  8.00   -99   7.3   0.2   -99
+ 5   140  1.55  0.10 0.010  8.00   -99   7.3   0.2   -99
+ 5   180  1.60  0.10 0.010  8.00   -99   7.3   0.2   -99
+@A SADAT  SMHB  SMPX  SMKE  SANAME
+ 6 25071 SA012 SA001 SA001  6
+@A  SABL  SADM  SAOC  SANI SAPHW SAPHB  SAPX  SAKE  SASC
+ 6     2  1.36  0.93 0.085  8.02   -99  68.6   1.5   -99
+ 6     4  1.36  0.93 0.085  8.02   -99  68.6   1.5   -99
+ 6    15  1.36  0.93 0.085  8.02   -99  68.6   1.5   -99
+ 6    30  1.49  0.68 0.061  8.07   -99  46.1   0.9   -99
+ 6    40  1.55  0.56 0.051  8.09   -99  36.2   0.6   -99
+ 6    60  1.56  0.26 0.023  7.99   -99   9.4   0.3   -99
+ 6    80  1.51  0.10 0.010  8.00   -99   9.4   0.3   -99
+ 6   100  1.47  0.10 0.010  8.00   -99   9.4   0.3   -99
+ 6   140  1.55  0.10 0.010  8.00   -99   9.4   0.3   -99
+ 6   180  1.60  0.10 0.010  8.00   -99   9.4   0.3   -99
+@A SADAT  SMHB  SMPX  SMKE  SANAME
+ 9 25071 SA012 SA001 SA001  9
+@A  SABL  SADM  SAOC  SANI SAPHW SAPHB  SAPX  SAKE  SASC
+ 9     2  1.36  0.81 0.083  8.21   -99  60.6   1.3   -99
+ 9     4  1.36  0.81 0.083  8.21   -99  60.6   1.3   -99
+ 9    15  1.36  0.81 0.083  8.21   -99  60.6   1.3   -99
+ 9    30  1.49  0.70 0.072  8.09   -99  50.6   0.9   -99
+ 9    40  1.55  0.65 0.067  8.03   -99  46.1   0.7   -99
+ 9    60  1.56  0.37 0.039  8.02   -99  35.4   0.8   -99
+ 9    80  1.51  0.10 0.010  8.00   -99  35.4   0.8   -99
+ 9   100  1.47  0.10 0.010  8.00   -99  35.4   0.8   -99
+ 9   140  1.55  0.10 0.010  8.00   -99  35.4   0.8   -99
+ 9   180  1.60  0.10 0.010  8.00   -99  35.4   0.8   -99
+@A SADAT  SMHB  SMPX  SMKE  SANAME
+10 25071 SA012 SA001 SA001  10
+@A  SABL  SADM  SAOC  SANI SAPHW SAPHB  SAPX  SAKE  SASC
+10     2  1.36  0.88 0.080  8.18   -99  65.5   1.5   -99
+10     4  1.36  0.88 0.080  8.18   -99  65.5   1.5   -99
+10    15  1.36  0.88 0.080  8.18   -99  65.5   1.5   -99
+10    30  1.49  0.70 0.063  8.09   -99  47.0   1.0   -99
+10    40  1.55  0.62 0.056  8.04   -99  39.0   0.8   -99
+10    60  1.56  0.37 0.034  7.98   -99  15.1   0.4   -99
+10    80  1.51  0.10 0.010  8.00   -99  15.1   0.4   -99
+10   100  1.47  0.10 0.010  8.00   -99  15.1   0.4   -99
+10   140  1.55  0.10 0.010  8.00   -99  15.1   0.4   -99
+10   180  1.60  0.10 0.010  8.00   -99  15.1   0.4   -99
+@A SADAT  SMHB  SMPX  SMKE  SANAME
+11 25071 SA012 SA001 SA001  11
+@A  SABL  SADM  SAOC  SANI SAPHW SAPHB  SAPX  SAKE  SASC
+11     2  1.36  1.09 0.099  8.22   -99  75.7   1.3   -99
+11     4  1.36  1.09 0.099  8.22   -99  75.7   1.3   -99
+11    15  1.36  1.09 0.099  8.22   -99  75.7   1.3   -99
+11    30  1.49  0.75 0.068  8.04   -99  47.2   0.9   -99
+11    40  1.55  0.60 0.055  7.95   -99  34.6   0.7   -99
+11    60  1.56  0.28 0.026  8.06   -99   6.8   0.3   -99
+11    80  1.51  0.10 0.010  8.00   -99   6.8   0.3   -99
+11   100  1.47  0.10 0.010  8.00   -99   6.8   0.3   -99
+11   140  1.55  0.10 0.010  8.00   -99   6.8   0.3   -99
+11   180  1.60  0.10 0.010  8.00   -99   6.8   0.3   -99
+@A SADAT  SMHB  SMPX  SMKE  SANAME
+12 25071 SA012 SA001 SA001  12
+@A  SABL  SADM  SAOC  SANI SAPHW SAPHB  SAPX  SAKE  SASC
+12     2  1.36  1.00 0.090  8.10   -99  70.4   1.7   -99
+12     4  1.36  1.00 0.090  8.10   -99  70.4   1.7   -99
+12    15  1.36  1.00 0.090  8.10   -99  70.4   1.7   -99
+12    30  1.49  0.80 0.073  7.93   -99  50.8   1.0   -99
+12    40  1.55  0.72 0.065  7.85   -99  42.2   0.7   -99
+12    60  1.56  0.42 0.039  8.00   -99  20.8   0.3   -99
+12    80  1.51  0.10 0.010  8.00   -99  20.8   0.3   -99
+12   100  1.47  0.10 0.010  8.00   -99  20.8   0.3   -99
+12   140  1.55  0.10 0.010  8.00   -99  20.8   0.3   -99
+12   180  1.60  0.10 0.010  8.00   -99  20.8   0.3   -99
+@A SADAT  SMHB  SMPX  SMKE  SANAME
+13 25071 SA012 SA001 SA001  13
+@A  SABL  SADM  SAOC  SANI SAPHW SAPHB  SAPX  SAKE  SASC
+13     2  1.36  1.08 0.081  8.15   -99  68.7   1.6   -99
+13     4  1.36  1.08 0.081  8.15   -99  68.7   1.6   -99
+13    15  1.36  1.08 0.081  8.15   -99  68.7   1.6   -99
+13    30  1.49  0.82 0.062  8.04   -99  48.9   0.9   -99
+13    40  1.55  0.71 0.054  7.99   -99  40.3   0.6   -99
+13    60  1.56  0.43 0.032  8.11   -99  13.0   0.4   -99
+13    80  1.51  0.10 0.010  8.00   -99  13.0   0.4   -99
+13   100  1.47  0.10 0.010  8.00   -99  13.0   0.4   -99
+13   140  1.55  0.10 0.010  8.00   -99  13.0   0.4   -99
+13   180  1.60  0.10 0.010  8.00   -99  13.0   0.4   -99
+@A SADAT  SMHB  SMPX  SMKE  SANAME
+14 25071 SA012 SA001 SA001  14
+@A  SABL  SADM  SAOC  SANI SAPHW SAPHB  SAPX  SAKE  SASC
+14     2  1.36  1.08 0.081  8.15   -99  68.7   1.6   -99
+14     4  1.36  1.08 0.081  8.15   -99  68.7   1.6   -99
+14    15  1.36  1.08 0.081  8.15   -99  68.7   1.6   -99
+14    30  1.49  0.82 0.062  8.04   -99  48.9   0.9   -99
+14    40  1.55  0.71 0.054  7.99   -99  40.3   0.6   -99
+14    60  1.56  0.43 0.032  8.11   -99  13.0   0.4   -99
+14    80  1.51  0.10 0.010  8.00   -99  13.0   0.4   -99
+14   100  1.47  0.10 0.010  8.00   -99  13.0   0.4   -99
+14   140  1.55  0.10 0.010  8.00   -99  13.0   0.4   -99
+14   180  1.60  0.10 0.010  8.00   -99  13.0   0.4   -99
+
+*INITIAL CONDITIONS
+@C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
+  2   TM 25071  0.00   -99   -99     1   -99 0.000   -99   -99   -99   -99 2
+@C  ICBL  SH2O  SNH4  SNO3
+  2     2 0.179  1.50 12.84
+  2     4 0.179  1.50 12.84
+  2    15 0.179  1.50 12.84
+  2    30 0.214  1.18  6.30
+  2    40 0.232  1.04  3.43
+  2    60 0.267  1.59  4.15
+  2    80 0.286  0.50  1.00
+  2   100 0.279  0.50  1.00
+  2   140 0.279  0.50  1.00
+  2   180 0.279  0.50  1.00
+@C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
+  3   TM 25071  0.00   -99   -99     1   -99 0.000   -99   -99   -99   -99 3
+@C  ICBL  SH2O  SNH4  SNO3
+  3     2 0.189  1.68 11.42
+  3     4 0.189  1.68 11.42
+  3    15 0.189  1.68 11.42
+  3    30 0.243  1.23  5.86
+  3    40 0.269  1.03  3.42
+  3    60 0.288  1.04  4.04
+  3    80 0.306  0.50  1.00
+  3   100 0.208  0.50  1.00
+  3   140 0.208  0.50  1.00
+  3   180 0.208  0.50  1.00
+@C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
+  4   TM 25071  0.00   -99   -99     1   -99 0.000   -99   -99   -99   -99 4
+@C  ICBL  SH2O  SNH4  SNO3
+  4     2 0.170  1.27  9.55
+  4     4 0.170  1.27  9.55
+  4    15 0.170  1.27  9.55
+  4    30 0.222  0.99  5.29
+  4    40 0.249  0.87  3.42
+  4    60 0.321  0.66  3.91
+  4    80 0.300  0.50  1.00
+  4   100 0.231  0.50  1.00
+  4   140 0.231  0.50  1.00
+  4   180 0.231  0.50  1.00
+@C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
+  5   TM 25071  0.00   -99   -99     1   -99 0.000   -99   -99   -99   -99 5
+@C  ICBL  SH2O  SNH4  SNO3
+  5     2 0.202  1.60 11.03
+  5     4 0.202  1.60 11.03
+  5    15 0.202  1.60 11.03
+  5    30 0.240  1.06  5.97
+  5    40 0.260  0.82  3.74
+  5    60 0.281  0.62  3.43
+  5    80 0.299  0.50  1.00
+  5   100 0.255  0.50  1.00
+  5   140 0.255  0.50  1.00
+  5   180 0.255  0.50  1.00
+@C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
+  6   TM 25071  0.00   -99   -99     1   -99 0.000   -99   -99   -99   -99 6
+@C  ICBL  SH2O  SNH4  SNO3
+  6     2 0.197  1.06 13.63
+  6     4 0.197  1.06 13.63
+  6    15 0.197  1.06 13.63
+  6    30 0.234  1.07  6.53
+  6    40 0.253  1.08  3.41
+  6    60 0.270  0.64  3.47
+  6    80 0.261  0.50  1.00
+  6   100 0.242  0.50  1.00
+  6   140 0.242  0.50  1.00
+  6   180 0.242  0.50  1.00
+@C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
+  9   TM 25071  0.00   -99   -99     1   -99 0.000   -99   -99   -99   -99 9
+@C  ICBL  SH2O  SNH4  SNO3
+  9     2 0.208  1.61 10.39
+  9     4 0.208  1.61 10.39
+  9    15 0.208  1.61 10.39
+  9    30 0.235  1.57  5.58
+  9    40 0.248  1.55  3.46
+  9    60 0.288  1.13  4.44
+  9    80 0.283  0.50  1.00
+  9   100 0.288  0.50  1.00
+  9   140 0.288  0.50  1.00
+  9   180 0.280  0.50  1.00
+@C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
+ 10   TM 25071  0.00   -99   -99     1   -99 0.000   -99   -99   -99   -99 10
+@C  ICBL  SH2O  SNH4  SNO3
+ 10     2 0.216  1.95 11.17
+ 10     4 0.216  1.95 11.17
+ 10    15 0.216  1.95 11.17
+ 10    30 0.241  1.09  5.57
+ 10    40 0.254  0.71  3.12
+ 10    60 0.298  1.40  3.26
+ 10    80 0.317  0.50  1.00
+ 10   100 0.333  0.50  1.00
+ 10   140 0.300  0.50  1.00
+ 10   180 0.280  0.50  1.00
+@C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
+ 11   TM 25071  0.00   -99   -99     1   -99 0.000   -99   -99   -99   -99 11
+@C  ICBL  SH2O  SNH4  SNO3
+ 11     2 0.241  1.53 12.52
+ 11     4 0.241  1.53 12.52
+ 11    15 0.241  1.53 12.52
+ 11    30 0.255  0.91  6.19
+ 11    40 0.262  0.64  3.42
+ 11    60 0.317  1.07  3.31
+ 11    80 0.326  0.50  1.00
+ 11   100 0.369  0.50  1.00
+ 11   140 0.300  0.50  1.00
+ 11   180 0.280  0.50  1.00
+@C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
+ 12   TM 25071  0.00   -99   -99     1   -99 0.000   -99   -99   -99   -99 12
+@C  ICBL  SH2O  SNH4  SNO3
+ 12     2 0.216  2.14 13.63
+ 12     4 0.216  2.14 13.63
+ 12    15 0.216  2.14 13.63
+ 12    30 0.250  1.61  6.57
+ 12    40 0.268  1.38  3.47
+ 12    60 0.315  0.57  3.35
+ 12    80 0.326  0.50  1.00
+ 12   100 0.337  0.50  1.00
+ 12   140 0.300  0.50  1.00
+ 12   180 0.280  0.50  1.00
+@C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
+ 13   TM 25071  0.00   -99   -99     1   -99 0.000   -99   -99   -99   -99 13
+@C  ICBL  SH2O  SNH4  SNO3
+ 13     2 0.229  0.88 12.46
+ 13     4 0.229  0.88 12.46
+ 13    15 0.229  0.88 12.46
+ 13    30 0.274  0.74  6.16
+ 13    40 0.296  0.67  3.40
+ 13    60 0.305  0.73  2.78
+ 13    80 0.307  0.50  1.00
+ 13   100 0.327  0.50  1.00
+ 13   140 0.300  0.50  1.00
+ 13   180 0.280  0.50  1.00
+@C   PCR ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID ICNAME
+ 14   TM 25071  0.00   -99   -99     1   -99 0.000   -99   -99   -99   -99 14
+@C  ICBL  SH2O  SNH4  SNO3
+ 14     2 0.280  0.88 12.46
+ 14     4 0.280  0.88 12.46
+ 14    15 0.280  0.88 12.46
+ 14    30 0.302  0.74  6.16
+ 14    40 0.313  0.67  3.40
+ 14    60 0.315  0.73  2.78
+ 14    80 0.358  0.50  1.00
+ 14   100 0.377  0.50  1.00
+ 14   140 0.300  0.50  1.00
+ 14   180 0.280  0.50  1.00
+
+*PLANTING DETAILS
+@P PDATE EDATE  PPOP  PPOE  PLME  PLDS  PLRS  PLRD  PLDP  PLWT  PAGE  PENV  PLPH  SPRL                        PLNAME
+ 2 25075   -99   2.7   2.7     T     R    90    90     8   15.    25    20     1     8                        Eggplant
+
+*IRRIGATION AND WATER MANAGEMENT
+@I  EFIR  IDEP  ITHR  IEPT  IOFF  IAME  IAMT IRNAME
+ 1     1    20    80    95   -99   -99   -99 W3
+@I IDATE  IROP IRVAL
+ 1 25075 IR005    25
+ 1 25082 IR005    25
+ 1 25088 IR005    30
+ 1 25094 IR005    35
+ 1 25100 IR005    25
+ 1 25106 IR005    30
+ 1 25112 IR005  15.9
+ 1 25116 IR005  14.4
+ 1 25121 IR005  14.7
+ 1 25126 IR005  16.6
+ 1 25131 IR005  15.1
+ 1 25136 IR005  16.4
+ 1 25141 IR005  19.4
+ 1 25148 IR005  16.2
+ 1 25154 IR005    24
+ 1 25158 IR005    27
+ 1 25162 IR005  22.4
+ 1 25166 IR005  23.5
+ 1 25171 IR005    20
+ 1 25178 IR005  26.5
+ 1 25188 IR005  29.3
+@I  EFIR  IDEP  ITHR  IEPT  IOFF  IAME  IAMT IRNAME
+ 2     1    20    80    95   -99   -99   -99 W2
+@I IDATE  IROP IRVAL
+ 2 25075 IR005    25
+ 2 25082 IR005    25
+ 2 25088 IR005    30
+ 2 25094 IR005    35
+ 2 25100 IR005    25
+ 2 25106 IR005    30
+ 2 25112 IR005  10.8
+ 2 25116 IR005   9.7
+ 2 25121 IR005  10.5
+ 2 25126 IR005    11
+ 2 25131 IR005  10.1
+ 2 25136 IR005  10.9
+ 2 25141 IR005  12.9
+ 2 25148 IR005  12.4
+ 2 25154 IR005    16
+ 2 25158 IR005  18.1
+ 2 25162 IR005  16.5
+ 2 25166 IR005  15.7
+ 2 25171 IR005  13.4
+ 2 25178 IR005  17.7
+ 2 25188 IR005  19.6
+@I  EFIR  IDEP  ITHR  IEPT  IOFF  IAME  IAMT IRNAME
+ 3     1    20    80    95   -99   -99   -99 W1
+@I IDATE  IROP IRVAL
+ 3 25075 IR005    25
+ 3 25082 IR005    30
+ 3 25094 IR005    35
+ 3 25100 IR005    25
+ 3 25106 IR005    30
+ 3 25112 IR005   5.3
+ 3 25116 IR005     6
+ 3 25121 IR005   4.9
+ 3 25126 IR005   5.5
+ 3 25131 IR005     5
+ 3 25136 IR005   5.5
+ 3 25141 IR005   6.8
+ 3 25148 IR005   5.4
+ 3 25154 IR005  10.4
+ 3 25158 IR005     8
+ 3 25162 IR005   7.3
+ 3 25166 IR005   7.8
+ 3 25171 IR005   6.8
+ 3 25178 IR005   8.6
+ 3 25188 IR005   9.8
+@I  EFIR  IDEP  ITHR  IEPT  IOFF  IAME  IAMT IRNAME
+ 4     1    20    80    95   -99   -99   -99 ck
+@I IDATE  IROP IRVAL
+ 4 25075 IR005  25.8
+ 4 25082 IR005    25
+ 4 25088 IR005    30
+ 4 25094 IR005    35
+ 4 25100 IR005    25
+ 4 25106 IR005    30
+ 4 25112 IR005  13.3
+ 4 25116 IR005    12
+ 4 25121 IR005  12.3
+ 4 25126 IR005  13.9
+ 4 25131 IR005  12.8
+ 4 25136 IR005  13.7
+ 4 25141 IR005  16.2
+ 4 25148 IR005  14.1
+ 4 25154 IR005  19.7
+ 4 25158 IR005    26
+ 4 25162 IR005  18.2
+ 4 25166 IR005  19.6
+ 4 25171 IR005    17
+ 4 25178 IR005  21.6
+ 4 25188 IR005  24.4
+
+*FERTILIZERS (INORGANIC)
+@F FDATE  FMCD  FACD  FDEP  FAMN  FAMP  FAMK  FAMC  FAMO  FOCD FERNAME
+ 1 25069 FE018 AP002    25     0     0 232.4     0     0     0 N3
+ 1 25069 FE013 AP002    25     0   65.5    0   120     0     0 N3
+ 1 25069 FE005 AP002    25   108     0     0     0     0     0 N3
+ 1 25121 FE005 AP005     10   24     0     0     0     0     0 N3
+ 1 25126 FE005 AP005     10   24     0     0     0     0     0 N3
+ 1 25131 FE005 AP005     10   24     0     0     0     0     0 N3
+ 1 25136 FE005 AP005     10   24     0     0     0     0     0 N3
+ 1 25141 FE005 AP005     10   24     0     0     0     0     0 N3
+ 1 25148 FE005 AP005     10   24     0     0     0     0     0 N3
+ 1 25154 FE005 AP005     10    8     0     0     0     0     0 N3
+ 1 25158 FE005 AP005     10    8     0     0     0     0     0 N3
+ 1 25162 FE005 AP005     10   24     0     0     0     0     0 N3
+ 1 25166 FE005 AP005     10   24     0     0     0     0     0 N3
+ 1 25171 FE005 AP005     10   24     0     0     0     0     0 N3
+ 1 25178 FE005 AP005     10   24     0     0     0     0     0 N3
+ 2 25069 FE005 AP002    25    72     0     0     0     0     0 N2
+ 2 25069 FE018 AP002    25     0     0 232.4     0     0     0 N2
+ 2 25069 FE013 AP002    25     0   65.5    0   120     0     0 N2
+ 2 25121 FE005 AP005     10   17     0     0     0     0     0 N2
+ 2 25126 FE005 AP005     10   17     0     0     0     0     0 N2
+ 2 25131 FE005 AP005     10   17     0     0     0     0     0 N2
+ 2 25136 FE005 AP005     10   17     0     0     0     0     0 N2
+ 2 25141 FE005 AP005     10   17     0     0     0     0     0 N2
+ 2 25148 FE005 AP005     10   17     0     0     0     0     0 N2
+ 2 25154 FE005 AP005     10    6     0     0     0     0     0 N2
+ 2 25158 FE005 AP005     10    6     0     0     0     0     0 N2
+ 2 25162 FE005 AP005     10   17     0     0     0     0     0 N2
+ 2 25166 FE005 AP005     10   17     0     0     0     0     0 N2
+ 2 25171 FE005 AP005     10   17     0     0     0     0     0 N2
+ 2 25178 FE005 AP005     10   17     0     0     0     0     0 N2
+ 3 25069 FE005 AP002    25    36     0     0     0     0     0 N1
+ 3 25069 FE018 AP002    25     0     0 232.4     0     0     0 N1
+ 3 25069 FE013 AP002    25     0   65.5    0   120     0     0 N1
+ 3 25121 FE005 AP005     10    8     0     0     0     0     0 N1
+ 3 25126 FE005 AP005     10    8     0     0     0     0     0 N1
+ 3 25131 FE005 AP005     10    8     0     0     0     0     0 N1
+ 3 25136 FE005 AP005     10    8     0     0     0     0     0 N1
+ 3 25141 FE005 AP005     10    8     0     0     0     0     0 N1
+ 3 25148 FE005 AP005     10    8     0     0     0     0     0 N1
+ 3 25154 FE005 AP005     10    3     0     0     0     0     0 N1
+ 3 25158 FE005 AP005     10    3     0     0     0     0     0 N1
+ 3 25162 FE005 AP005     10    8     0     0     0     0     0 N1
+ 3 25166 FE005 AP005     10    8     0     0     0     0     0 N1
+ 3 25171 FE005 AP005     10    8     0     0     0     0     0 N1
+ 3 25178 FE005 AP005     10    8     0     0     0     0     0 N1
+ 4 25069 FE005 AP002    25     0     0     0     0     0     0 N0
+ 4 25069 FE018 AP002    25     0     0 232.4     0     0     0 N0
+ 4 25069 FE013 AP002    25     0   65.5    0   120     0     0 N0
+
+*RESIDUES AND ORGANIC FERTILIZER
+@R RDATE  RCOD  RAMT  RESN  RESP  RESK  RINP  RDEP  RMET RENAME
+ 1 25192   -99   -99   -99   -99   -99   -99   -99   -99 -99
+
+*CHEMICAL APPLICATIONS
+@C CDATE CHCOD CHAMT  CHME CHDEP   CHT..CHNAME
+ 1 25192   -99   -99   -99   -99   -99  -99
+
+*TILLAGE AND ROTATIONS
+@T TDATE TIMPL  TDEP TNAME
+ 2 25070 TI042    30 Number 9 tillage
+ 2 25085 TI015     5 Number 9 tillage
+ 2 25102 TI015     5 Number 9 tillage
+
+*ENVIRONMENT MODIFICATIONS
+@E ODATE EDAY  ERAD  EMAX  EMIN  ERAIN ECO2  EDEW  EWIND ENVNAME  
+ 2 25192 A   0 A   0 A   0 A   0 A   0 A   0 A   0 A   0 Number 9 Environmental
+
+*HARVEST DETAILS
+@H HDATE  HSTG  HCOM HSIZE   HPC  HBPC HNAME
+ 5 25139 GS000   -99   -99   -99   -99 byproduct
+ 5 25145 GS000   -99   -99   -99   -99 byproduct
+ 5 25152 GS000   -99   -99   -99   -99 byproduct
+ 5 25157 GS000   -99   -99   -99   -99 byproduct
+ 5 25162 GS000   -99   -99   -99   -99 byproduct
+ 5 25169 GS000   -99   -99   -99   -99 byproduct
+ 5 25174 GS000   -99   -99   -99   -99 byproduct
+ 5 25183 GS000   -99   -99   -99   -99 byproduct
+ 5 25191 GS000   -99   -99   -99   -99 byproduct
+ 5 25198 GS000   -99   -99   -99   -99 byproduct
+
+*SIMULATION CONTROLS
+@N GENERAL     NYERS NREPS START SDATE RSEED SNAME.................... SMODEL
+ 2 GE              1     1     S 25068  2150 Number 9 SImulation
+@N OPTIONS     WATER NITRO SYMBI PHOSP POTAS DISES  CHEM  TILL   CO2
+ 2 OP              Y     Y     N     Y     N     N     N     Y     M
+@N METHODS     WTHER INCON LIGHT EVAPO INFIL PHOTO HYDRO NSWIT MESOM MESEV MESOL
+ 2 ME              M     M     E     R     S     L     R     1     P     R     2
+@N MANAGEMENT  PLANT IRRIG FERTI RESID HARVS
+ 2 MA              R     R     R     N     R
+@N OUTPUTS     FNAME OVVEW SUMRY FROPT GROUT CAOUT WAOUT NIOUT MIOUT DIOUT VBOSE CHOUT OPOUT FMOPT
+ 2 OU              N     Y     Y     1     Y     Y     Y     Y     N     N     D     N     Y     A
+
+@  AUTOMATIC MANAGEMENT
+@N PLANTING    PFRST PLAST PH2OL PH2OU PH2OD PSTMX PSTMN
+ 2 PL          25064 25064    40   100    30    45    40
+@N IRRIGATION  IMDEP ITHRL ITHRU IROFF IMETH IRAMT IREFF
+ 2 IR             30    80   100 GS000 IR005    10     1
+@N NITROGEN    NMDEP NMTHR NAMNT NCODE NAOFF
+ 2 NI            200    50    25 SI001 SI001
+@N RESIDUES    RIPCN RTIME RIDEP
+ 2 RE            100    60    20
+@N HARVEST     HFRST HLAST HPCNP HPCNR
+ 2 HA            283 25283    75     0
+
+@N GENERAL     NYERS NREPS START SDATE RSEED SNAME.................... SMODEL
+ 3 GE              1     1     S 25068  2150 Number 9 SImulation
+@N OPTIONS     WATER NITRO SYMBI PHOSP POTAS DISES  CHEM  TILL   CO2
+ 3 OP              Y     Y     N     Y     N     N     N     Y     M
+@N METHODS     WTHER INCON LIGHT EVAPO INFIL PHOTO HYDRO NSWIT MESOM MESEV MESOL
+ 3 ME              M     M     E     R     S     L     R     1     P     R     2
+@N MANAGEMENT  PLANT IRRIG FERTI RESID HARVS
+ 3 MA              R     R     R     N     R
+@N OUTPUTS     FNAME OVVEW SUMRY FROPT GROUT CAOUT WAOUT NIOUT MIOUT DIOUT VBOSE CHOUT OPOUT FMOPT
+ 3 OU              N     Y     Y     1     Y     Y     Y     Y     N     N     D     N     Y     A
+
+@  AUTOMATIC MANAGEMENT
+@N PLANTING    PFRST PLAST PH2OL PH2OU PH2OD PSTMX PSTMN
+ 3 PL          25064 25064    40   100    30    45    40
+@N IRRIGATION  IMDEP ITHRL ITHRU IROFF IMETH IRAMT IREFF
+ 3 IR             30    80   100 GS000 IR005    10     1
+@N NITROGEN    NMDEP NMTHR NAMNT NCODE NAOFF
+ 3 NI            200    50    25 SI001 SI001
+@N RESIDUES    RIPCN RTIME RIDEP
+ 3 RE            100    60    20
+@N HARVEST     HFRST HLAST HPCNP HPCNR
+ 3 HA            283 25283    75     0
+
+
+

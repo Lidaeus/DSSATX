@@ -126,7 +126,10 @@ def build_25sp(root: Path, out_dir: Path, generator_sha: str) -> None:
     src_sha = sha256_file(path)
     df = pd.read_excel(path)
     df["TRNO"] = pd.to_numeric(df["小区号"], errors="coerce").astype(int)
-    df["日期"] = pd.to_datetime(df["取样日期"]).dt.normalize()
+    if pd.api.types.is_numeric_dtype(df["取样日期"]):
+        df["日期"] = pd.to_datetime(df["取样日期"], unit="D", origin="1899-12-30").dt.normalize()
+    else:
+        df["日期"] = pd.to_datetime(df["取样日期"]).dt.normalize()
     df = df[df["TRNO"].isin(SPRING25_INCLUDED_TN)].copy()
 
     dates = sorted(df["日期"].unique())

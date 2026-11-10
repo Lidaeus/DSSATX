@@ -1,0 +1,46 @@
+{
+  "version": "2026-10-07",
+  "authoritative_source": "当前Excel；不刷新外部链接，使用缓存",
+  "exclude_treatments": {
+    "2025春": [
+      1,
+      6,
+      7,
+      8,
+      9,
+      14
+    ]
+  },
+  "spring2026_growth_sheet": "2026生长指标汇总",
+  "drop_SPAD_technical_reads": "建议按表内批次保留前三次有效读数，排除第4批6次；原表不删",
+  "exclude_attached_SPAD_groups": [
+    "Z1",
+    "Z2",
+    "Z3"
+  ],
+  "soil_inorganic_N": "暂缓",
+  "missing": "保留缺失，不新增均值填补",
+  "user_confirmed_imputation": "保留，标记来源；不参与新异常值筛查",
+  "plant_fruit_stock": "不用于后续分析",
+  "pruning_dates25": [
+    "2025-06-09",
+    "2025-06-21"
+  ],
+  "units25quality": {
+    "Vc": "mg/kg",
+    "糖": "mg/g",
+    "蛋白": "mg/g"
+  },
+  "total_phenols_flavonoids_anthocyanins": "吸光度",
+  "yield": "kg/ha",
+  "dry_mass": "g/株（一般口径）",
+  "rain_mm": 0,
+  "TMX_virtual_harvest": "最后真实采收后增加虚拟操作，仅模型辅助，非实测产量或新的分析批次",
+  "units_all_seasons": {
+    "糖": "mg/g",
+    "蛋白": "mg/g",
+    "总酚/黄酮/花青素": "吸光度"
+  },
+  "soil_20260106_weight_units": "湿/干重为实际克数×100；盒重为g；H=(C-D)/(D-B*100)已修订",
+  "C257": "用户指定反算值6702；不是新增原始称重；E257及对应G257保留"
+}

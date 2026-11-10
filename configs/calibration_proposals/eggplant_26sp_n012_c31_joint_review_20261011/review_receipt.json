@@ -1,0 +1,22 @@
+{
+  "status": "proposal_checks_passed_not_runtime_preflight",
+  "source_files_unchanged": true,
+  "checks": [
+    "C31 PST/adjusted weights agree",
+    "492 calibration-only targets",
+    "14 budgets sum to 100",
+    "each family one-sigma loss equals declared budget",
+    "42 unchanged free parameters",
+    "no old N3 or 2025 contrast included",
+    "no execution enabled"
+  ],
+  "artifact_hashes": {
+    "c31_actual_objective_audit.csv": "271e39a653ad70efd8a943879796f2793d417c7565124df749cd1534c4db34c2",
+    "c31_actual_weights.csv": "db9374ed59f3ef04140118b747a8709b50e6377797e7d4003289d3bcebdf71b4",
+    "proposal.json": "73f01a43dd3710f77dbcf09572db8854a8ae89a0e71eb008ada055ee6478e9c7",
+    "proposed_calibration_targets.csv": "90b2f1edac4d9fc28c5a69fffb4455ed02046ddcc78e3a1dd9b6354a9418b270",
+    "proposed_objective_policy.csv": "841fdd685a53ed978f801f3d1e6be3931984cf4ad80bf71f43e55887f76af809",
+    "proposed_response_targets.csv": "99477e14de06e05c81f238b942de14e52853356d61762db2ccab53656de7da58",
+    "r3_actual_objective_audit.csv": "e9639c6b78d349767bbbecd8d67a645aa6b78d44bb86c0b6228a78b4ce662187"
+  }
+}

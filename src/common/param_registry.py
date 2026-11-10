@@ -155,8 +155,8 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     "NRMIN":   (0.0,  1.0),
     "FNPGN1":  (0.0, 10.0),
     "FNPGN2":  (0.5, 15.0),
-    "FNPGN3":  (5.0, 50.0),
-    "FNPGN4":  (5.0, 50.0),
+    "FNPGN3":  (2.0, 50.0),
+    "FNPGN4":  (2.0, 50.0),
     # A4 effective-concentration N-uptake response parameters.
     # NUPCMN floor stays 0.0: the a3_20260805 build hard-rejects negative
     # values (STOP 99, "Error key: NUPTAK") even though the formula
@@ -224,7 +224,9 @@ PHYSICAL_BOUNDS: dict[str, tuple[float, float]] = {
     "PROSHF":  (0.0,  1.0),
     # --- SOIL surface hydro ---
     "SOIL_SALB": (0.01, 0.50),
-    "SOIL_SLDR": (0.05, 2.50),
+    "SOIL_SLU1": (0.0, 20.0),
+    "SLU1":      (0.0, 20.0),
+    "SOIL_SLDR": (0.01, 2.50),
     "SOIL_SLRO": (20.0, 99.0),
     # DSSAT SLPF is the soil-profile fertility/productivity multiplier.  It is
     # not a measured mineral-N concentration; it is calibrated here as the
@@ -352,6 +354,8 @@ DEFAULT_BOUNDS: dict[str, tuple[float, float]] = {
     "TM3":    (34.0, 45.0),
     # --- SOIL surface ---
     "SOIL_SALB": (0.05, 0.35),
+    "SOIL_SLU1": (0.5, 10.0),
+    "SLU1":      (0.5, 10.0),
     "SOIL_SLDR": (0.10, 2.00),
     "SOIL_SLRO": (40.0, 95.0),
     "SOIL_SLPF": (0.70, 1.20),
@@ -497,7 +501,7 @@ def infer_parameter_group(name: str, location: str) -> str:
             return "SOIL_Phys"
         if "SLOC" in n or "SASC" in n:
             return "SOIL_Chem"
-        if n in {"SOIL_SALB", "SOIL_SLDR", "SOIL_SLRO"}:
+        if n in {"SOIL_SALB", "SOIL_SLU1", "SLU1", "SOIL_SLDR", "SOIL_SLRO"}:
             return "SOIL_SfcHyd"
         if n in {"SOIL_SLPF", "SLPF_25SP", "SLPF_26SP", "SOIL_SLPF_25SP", "SOIL_SLPF_26SP", "SOIL_SLNF", "SLNF"}:
             return "SOIL_Fert"

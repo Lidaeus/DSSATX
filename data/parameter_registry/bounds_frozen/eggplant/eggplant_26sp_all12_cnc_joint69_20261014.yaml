@@ -1,0 +1,12 @@
+bounds_id: "eggplant_26sp_all12_cnc_joint69_20261014"
+crop: "eggplant"
+created_at: "2026-10-14T15:00:32Z"
+approved_at: "2026-10-14T15:00:32Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "approved_bounds_proposal.csv"
+derived_from_sha256: "f34b6b3023ceb01df9909909eb8a20f10c25143a6bc8bc8696c18ab80dbcabd0"
+bounds_sha256: "321d4d079def26b938993fa825017500b0f577bed5104ad65f06a1ec87d021d7"
+parameter_count: 108
+automatic_repairs: 0
+notes: "User-authorized custom engine joint69: parent65bounds unchanged plus4active CNC; dedicated physical guards; no automatic repair"

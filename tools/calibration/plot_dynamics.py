@@ -64,7 +64,7 @@ MAPPING_CSV = os.path.join(ROOT, "configs", "runs", "e02_from_scratch_water_n_ma
 
 # Canonical publication palette / shapes (water -> shape, nitrogen -> color).
 WATER_MARKERS = {"W3": "o", "W2": "s", "W1": "^", "CK": "D"}
-NITROGEN_COLORS = {"N3": "#c0392b", "N2": "#e67e22", "N1": "#2980b9", "N0": "#7f8c8d"}
+NITROGEN_COLORS = {"N3": "#c0392b", "N2": "#e67e22", "N1": "#2980b9", "N0": "#707070"}
 WATER_ORDER = ["W3", "W2", "W1", "CK"]
 NITROGEN_ORDER = ["N3", "N2", "N1", "N0"]
 SEASON_COLORS = {"25SP": "#1f77b4", "25FA": "#2ca02c", "26SP": "#d62728"}
@@ -108,7 +108,7 @@ def _as_num(s):
 def _var_unit(name):
     return {
         "LAID": r"m$^2$ m$^{-2}$", "LAIX": r"m$^2$ m$^{-2}$",
-        "LWAD": r"g m$^{-2}$", "SWAD": r"g m$^{-2}$", "RWAD": r"g m$^{-2}$",
+        "LWAD": r"kg ha$^{-1}$", "SWAD": r"kg ha$^{-1}$", "RWAD": r"kg ha$^{-1}$",
         "DRY_CUM": r"kg ha$^{-1}$", "FRESH_CUM": r"kg ha$^{-1}$",
         "DRY_INC": r"kg ha$^{-1}$", "FRESH_INC": r"kg ha$^{-1}$",
     }.get(str(name).upper().replace("OBS_", "").replace("SIM_", ""), "")
@@ -548,8 +548,22 @@ def _yyddd_to_dap_lookup(daily_df):
     return dict(zip(code, daily_df["DAP"].astype(int)))
 
 
+def _observation_dap(code, lookup):
+    """Calendar position of an observation, including dates after model output.
+
+    This extends the date coordinate only, never the simulated trajectory.
+    """
+    if int(code) in lookup:
+        return lookup[int(code)]
+    if not lookup:
+        return np.nan
+    anchor = next(iter(lookup))
+    return lookup[anchor] + (_yyddd_to_date(code) - _yyddd_to_date(anchor)).days
+
+
 def _plot_dynamics_single_season(season_data, season_id, variable, kind, out_png,
-                                 registry_csv, y_label, title, curve_audit=None):
+                                 registry_csv, y_label, title, curve_audit=None,
+                                 harvest_curve="legacy_visual"):
     """One panel per WxN cell for a SINGLE season: simulated line + obs points.
 
     X axis is **DAP (days after planting)**. All panels share the SAME x and y
@@ -590,7 +604,7 @@ def _plot_dynamics_single_season(season_data, season_id, variable, kind, out_png
             if ok.any() and pg is not None:
                 lut = _yyddd_to_dap_lookup(pg[pg["TN"] == tn])
                 dcode = obs.loc[ok, "DATE"].astype(int)
-                dap = np.array([lut.get(int(c), np.nan) for c in dcode])
+                dap = np.array([_observation_dap(c, lut) for c in dcode])
                 fin = np.isfinite(dap)
                 if fin.any():
                     yerr = None
@@ -607,14 +621,28 @@ def _plot_dynamics_single_season(season_data, season_id, variable, kind, out_png
             pg = sd["plantgro"]
             pg_tn = pg[pg["TN"] == tn] if pg is not None else None
             fw_tn = fw[fw["TN"] == tn] if fw is not None else None
-            curve_dap, curve, curve_label, audit = _cumulative_fruit_curve(
-                pg_tn, fw_tn, kind=kind)
+            if harvest_curve == "native":
+                column = "CHPDT" if kind == "cum_dry" else "CHFPW"
+                ordered = fw_tn.sort_values("DAP")
+                curve_dap, curve = ordered["DAP"].to_numpy(), ordered[column].to_numpy()
+                if not np.isfinite(curve).all() or np.any(np.diff(curve)<-1e-6):
+                    raise ValueError("Invalid native cumulative harvest trajectory")
+                curve_label = "Native cumulative harvested mass"
+                audit = {"source":"native_harvest_event_step","kind":kind,
+                         "native_column":column,"visual_proxy_used":False}
+            elif harvest_curve == "legacy_visual":
+                curve_dap, curve, curve_label, audit = _cumulative_fruit_curve(
+                    pg_tn, fw_tn, kind=kind)
+            else:
+                raise ValueError("Unknown harvest curve mode")
             audit.update({"season_id": season_id, "TN": int(tn), "water": w, "nitrogen": n})
             if curve_audit is not None:
                 curve_audit.append(audit)
             if curve_dap is not None:
-                ax.plot(curve_dap, curve, color="#1f3a93", lw=1.35, alpha=0.95,
-                        zorder=3)
+                if harvest_curve == "native":
+                    ax.step(curve_dap, curve, where="post", color="#1f3a93", lw=1.35, alpha=.95, zorder=3)
+                else:
+                    ax.plot(curve_dap, curve, color="#1f3a93", lw=1.35, alpha=0.95,zorder=3)
             cmp = sd["compare"]
             obs_col = "OBS_DRY_CUM" if kind == "cum_dry" else "OBS_FRESH_CUM"
             o = _as_num(cmp[cmp["TN"] == tn].get(obs_col))
@@ -622,7 +650,7 @@ def _plot_dynamics_single_season(season_data, season_id, variable, kind, out_png
             if ok.any() and fw is not None:
                 lut = _yyddd_to_dap_lookup(fw[fw["TN"] == tn])
                 sub = cmp[cmp["TN"] == tn].loc[ok].sort_values("DATE")
-                dap = np.array([lut.get(int(c), np.nan) for c in sub["DATE"].astype(int)])
+                dap = np.array([_observation_dap(c, lut) for c in sub["DATE"].astype(int)])
                 fin = np.isfinite(dap)
                 if fin.any():
                     obs_y = o.reindex(sub.index).to_numpy()[fin]
@@ -664,7 +692,9 @@ def _plot_dynamics_single_season(season_data, season_id, variable, kind, out_png
         if curve_audit is not None:
             labels_seen = [r.get("source") for r in curve_audit
                            if r.get("season_id") == season_id and r.get("kind") == kind]
-        if labels_seen and all(x == "plantgro_gwad" for x in labels_seen):
+        if harvest_curve == "native":
+            model_label = "Native CHPDT/CHFPW (harvest-event step)"
+        elif labels_seen and all(x == "plantgro_gwad" for x in labels_seen):
             model_label = "PlantGro GWAD (validated direct output)"
         elif labels_seen and all(x == "freshwt_reconstruction" for x in labels_seen):
             model_label = ("FreshWt reconstruction (visual): "
@@ -674,10 +704,10 @@ def _plot_dynamics_single_season(season_data, season_id, variable, kind, out_png
         handles = [
             Line2D([0], [0], color="#1f3a93", lw=1.6, label=model_label),
         ] + _wn_legend_handles()
-        legend_title = "Observed: points ±1 SE; water = shape; nitrogen = color"
+        legend_title = "Observed: points" + (" ±1 SE" if reg is not None else "") + "; water = shape; nitrogen = color"
         ncol = 4
-        subtitle = ("Line = continuous model fruit-mass trajectory; "
-                    "points = harvest-event observations ±1 SE")
+        subtitle = (("Step = native cumulative harvested mass; " if harvest_curve == "native" else "Line = continuous model fruit-mass trajectory; ") +
+                    "points = harvest-event observations" + (" ±1 SE" if reg is not None else ""))
     else:
         handles = _wn_legend_handles()
         legend_title = "Simulated = blue line | Observed: marker = water, color = nitrogen"

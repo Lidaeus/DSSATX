@@ -247,6 +247,28 @@ def evaluate_single_candidate(cand_tag: str, param_csv_path: Path, phi_val: floa
     obs_delta_w3_25 = (get_term_obs("25SP", "W3", "N3") - get_term_obs("25SP", "W3", "N0")) / 1000.0
     w3_fit_pct = (delta_w3_25 / obs_delta_w3_25 * 100.0) if obs_delta_w3_25 > 0 else 0.0
 
+    # Process metrics (LAID, LWAD, SWAD) from calib_dir
+    csv_25 = deterministic_process_compare("25SP", str(CALIB_BATCH), var_names=["LAID", "LWAD", "SWAD"], run_dir=str(calib_dir))
+    csv_26 = deterministic_process_compare("26SP", str(CALIB_BATCH), var_names=["LAID", "LWAD", "SWAD"], run_dir=str(calib_dir))
+    df_p25 = pd.read_csv(csv_25)
+    df_p26 = pd.read_csv(csv_26)
+
+    # 25SP organ metrics (RUN 1..4: TN 2, 5, 10, 13)
+    p25_sub = df_p25[df_p25["RUN"] <= 4]
+    p26_sub = df_p26[df_p26["RUN"] >= 5]
+
+    _, _, _, _, swad_nrmse_25, swad_d_25, swad_r2_25, swad_bias_25 = calc_stats_clean(p25_sub["OBS_SWAD"], p25_sub["SIM_SWAD"])
+    _, _, _, _, lwad_nrmse_25, lwad_d_25, lwad_r2_25, lwad_bias_25 = calc_stats_clean(p25_sub["OBS_LWAD"], p25_sub["SIM_LWAD"])
+    _, _, _, _, laid_nrmse_25, laid_d_25, laid_r2_25, laid_bias_25 = calc_stats_clean(p25_sub["OBS_LAID"], p25_sub["SIM_LAID"])
+
+    _, _, _, _, swad_nrmse_26, swad_d_26, swad_r2_26, swad_bias_26 = calc_stats_clean(p26_sub["OBS_SWAD"], p26_sub["SIM_SWAD"])
+    _, _, _, _, lwad_nrmse_26, lwad_d_26, lwad_r2_26, lwad_bias_26 = calc_stats_clean(p26_sub["OBS_LWAD"], p26_sub["SIM_LWAD"])
+    _, _, _, _, laid_nrmse_26, laid_d_26, laid_r2_26, laid_bias_26 = calc_stats_clean(p26_sub["OBS_LAID"], p26_sub["SIM_LAID"])
+
+    # W3N0 terminal LAI (checking senescence stability, TN=5 in 25SP)
+    w3n0_25_rows = p25_sub[p25_sub["TN"] == 5]
+    w3n0_final_lai_25 = float(w3n0_25_rows.sort_values("DATE").iloc[-1]["SIM_LAID"]) if not w3n0_25_rows.empty else np.nan
+
     # Balanced penalty score
     resp_bonus = 0.0
     if delta_w1_25 > 0:
@@ -281,10 +303,14 @@ def evaluate_single_candidate(cand_tag: str, param_csv_path: Path, phi_val: floa
         "delta_26W1_ton": delta_w1_26,
         "delta_26W2_ton": delta_w2_26,
         "delta_26W3_ton": delta_w3_26,
+        "swad_d_26": swad_d_26,
+        "swad_r2_26": swad_r2_26,
+        "lwad_bias_26": lwad_bias_26,
+        "w3n0_final_lai_25": w3n0_final_lai_25,
         "balanced_score": score,
     }
 
-    print(f"[{cand_tag}] 2-Spring NRMSE: {nrmse_sp:.2f}%, d: {d_sp:.4f} | 25W3: {delta_w3_25:.2f}t ({w3_fit_pct:.1f}%) | 25W1: {delta_w1_25:+.2f}t | 26W1: {delta_w1_26:+.2f}t, 26W2: {delta_w2_26:+.2f}t, 26W3: {delta_w3_26:+.2f}t | Score: {score:.3f}")
+    print(f"[{cand_tag}] 2-Spring NRMSE: {nrmse_sp:.2f}%, d: {d_sp:.4f} | 25FA: {nrmse_fa:.2f}% | 25W3: {delta_w3_25:.2f}t ({w3_fit_pct:.1f}%) | 26W1/W2/W3: {delta_w1_26:+.2f}/{delta_w2_26:+.2f}/{delta_w3_26:+.2f}t | Score: {score:.3f}")
     return summary_entry, df_term
 
 
@@ -296,32 +322,46 @@ def main():
 
     df_phi = pd.read_csv(phi_csv)
     print("Phi table loaded. Total iterations:", len(df_phi))
-    last_iter = len(df_phi) - 1
     
-    par_csv = RUN_DIR / f"{CASE_PREFIX}.{last_iter}.par.csv"
-    if not par_csv.exists():
-        par_csv = RUN_DIR / f"{CASE_PREFIX}.par.csv"
-    df_par = pd.read_csv(par_csv)
-    valid_reals = set(df_par["real_name"].astype(str))
+    # Check Iteration 8
+    par8_csv = RUN_DIR / f"{CASE_PREFIX}.8.par.csv"
+    df_par8 = pd.read_csv(par8_csv)
+    valid_reals8 = set(df_par8["real_name"].astype(str))
+    cols8 = [c for c in df_phi.columns if str(c) in valid_reals8 and str(c).lower() != "base"]
+    phi_series8 = df_phi.iloc[8][cols8].astype(float)
+    sorted_reals8 = phi_series8.sort_values()
 
-    cols = [c for c in df_phi.columns if str(c) in valid_reals and str(c).lower() != "base"]
-    phi_series = df_phi.iloc[last_iter][cols].astype(float)
-    sorted_reals = phi_series.sort_values()
+    # Check Iteration 7
+    par7_csv = RUN_DIR / f"{CASE_PREFIX}.7.par.csv"
+    df_par7 = pd.read_csv(par7_csv)
+    valid_reals7 = set(df_par7["real_name"].astype(str))
+    cols7 = [c for c in df_phi.columns if str(c) in valid_reals7 and str(c).lower() != "base"]
+    phi_series7 = df_phi.iloc[7][cols7].astype(float)
+    sorted_reals7 = phi_series7.sort_values()
 
-    print(f"\nTop 15 Realizations at Iteration {last_iter} by Phi:")
-    for rank, (real, val) in enumerate(sorted_reals.head(15).items(), 1):
-        print(f"  {rank:2d}. Realization {real}: Phi = {val:.2f}")
-
-    # Select top 12 realizations from the latest iteration
+    # Build candidate pool:
+    # 1. Top 8 from Iteration 8
     top_candidates = []
-    for real, phi_v in sorted_reals.head(12).items():
-        p_csv = RUN_DIR / f"candidate_iter{last_iter}_real{real}_params.csv"
-        build_candidate_param_csv(real, df_par, FROZEN_BOUNDS_CSV, p_csv)
-        top_candidates.append((f"iter{last_iter}_real{real}", p_csv, phi_v))
+    print("\n--- Iteration 8 Candidates ---")
+    for real, phi_v in sorted_reals8.head(8).items():
+        p_csv = RUN_DIR / f"candidate_iter8_real{real}_params.csv"
+        build_candidate_param_csv(real, df_par8, FROZEN_BOUNDS_CSV, p_csv)
+        top_candidates.append((f"iter8_real{real}", p_csv, phi_v))
+        print(f"  iter8_real{real}: Phi = {phi_v:.2f}")
 
-    # Also add the historical champion iter5_real13 from 150x5 run as a benchmark
+    # 2. Top 4 from Iteration 7
+    print("\n--- Iteration 7 Candidates ---")
+    for real, phi_v in sorted_reals7.head(4).items():
+        p_csv = RUN_DIR / f"candidate_iter7_real{real}_params.csv"
+        build_candidate_param_csv(real, df_par7, FROZEN_BOUNDS_CSV, p_csv)
+        top_candidates.append((f"iter7_real{real}", p_csv, phi_v))
+        print(f"  iter7_real{real}: Phi = {phi_v:.2f}")
+
+    # 3. Benchmark champion from 150x5
     if BENCHMARK_ITER5_REAL13_CSV.exists():
         top_candidates.append(("baseline_150x5_real13", BENCHMARK_ITER5_REAL13_CSV, 597.58))
+        print(f"\n--- Baseline Benchmark ---")
+        print(f"  baseline_150x5_real13: Phi = 597.58 (from 150x5 run)")
 
     summaries = []
     all_term_dfs = []
@@ -343,7 +383,7 @@ def main():
     df_ranked.to_csv(RUN_DIR / "candidates_ranked_balanced.csv", index=False)
 
     print("\n================ FINAL RANKING OF CANDIDATES (Balanced Score) ================")
-    print(df_ranked[["candidate", "phi", "spring_pooled_nrmse", "spring_pooled_d", "25fa_nrmse", "delta_25W3_ton", "match_25W3_pct", "delta_25W1_ton", "delta_26W1_ton", "delta_26W2_ton", "delta_26W3_ton", "balanced_score"]].to_string(index=False))
+    print(df_ranked[["candidate", "phi", "spring_pooled_nrmse", "spring_pooled_d", "25fa_nrmse", "delta_25W3_ton", "match_25W3_pct", "delta_25W1_ton", "delta_26W1_ton", "delta_26W2_ton", "delta_26W3_ton", "swad_d_26", "lwad_bias_26", "balanced_score"]].to_string(index=False))
 
     return 0
 

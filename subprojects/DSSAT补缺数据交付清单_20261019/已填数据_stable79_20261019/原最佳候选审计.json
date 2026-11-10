@@ -1,0 +1,130 @@
+{
+  "available": true,
+  "best_native_trial": "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v13\\runs\\stable79_checkpointed150x5_20261018\\stages\\step_01\\worker_05\\native_trials\\a9663dab66404e5bbb1afba5dbf73e5e",
+  "replay_trial": "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v13\\runs\\stable79_checkpointed150x5_20261018\\champion_replay\\native_trials\\e7fe718c6c6c4e32a1792c7e643faa1b",
+  "all_1123_predictions_exact": true,
+  "ten_ledgers_each_season_exact": {
+    "26SP": {
+      "NCBalance": true,
+      "DMState": true,
+      "OrganNState": true,
+      "RootNSupply": true,
+      "CAllocation": true,
+      "PhotoN": true,
+      "CH2OPools": true,
+      "CohortSync": true,
+      "NFlux": true,
+      "NAcceptance": true
+    },
+    "25SP": {
+      "NCBalance": true,
+      "DMState": true,
+      "OrganNState": true,
+      "RootNSupply": true,
+      "CAllocation": true,
+      "PhotoN": true,
+      "CH2OPools": true,
+      "CohortSync": true,
+      "NFlux": true,
+      "NAcceptance": true
+    }
+  },
+  "phi": 127.19135195285774,
+  "replayed_phi": 127.19135195285774,
+  "common_guardrail_passed": false,
+  "guardrails": {
+    "26SP_FINAL_FRESH_YIELD": {
+      "value": 5.601897715920185,
+      "limit": 7.767174660262939,
+      "passed": true
+    },
+    "26SP_FINAL_DRY_YIELD": {
+      "value": 7.05654276247972,
+      "limit": 7.075582754786219,
+      "passed": true
+    },
+    "26SP_LEAF_N_CONCENTRATION": {
+      "value": 0.3577013717405475,
+      "limit": 0.40479279368373633,
+      "passed": true
+    },
+    "26SP_STEM_N_CONCENTRATION": {
+      "value": 0.4709254637355552,
+      "limit": 0.5179762676209485,
+      "passed": true
+    },
+    "26SP_N_ADJACENT_SIGNED_CONTRAST": {
+      "value": 2293.3791199402253,
+      "limit": 3833.6602461167054,
+      "passed": true
+    },
+    "26SP_W_SIGNED_CONTRAST": {
+      "value": 3512.2643114876787,
+      "limit": 7060.4424054578585,
+      "passed": true
+    },
+    "25SP_FINAL_FRESH_YIELD": {
+      "value": 5.500407537510183,
+      "limit": 7.158406415599992,
+      "passed": true
+    },
+    "25SP_FINAL_DRY_YIELD": {
+      "value": 3.620925651847461,
+      "limit": 6.3104655635334,
+      "passed": true
+    },
+    "25SP_LEAF_N_CONCENTRATION": {
+      "value": 0.5918695887598125,
+      "limit": 1.0221902986716374,
+      "passed": true
+    },
+    "25SP_STEM_N_CONCENTRATION": {
+      "value": 0.7182556551625631,
+      "limit": 1.1204284144870986,
+      "passed": true
+    },
+    "25SP_N_ADJACENT_SIGNED_CONTRAST": {
+      "value": 1628.0321429054577,
+      "limit": 3280.129940035406,
+      "passed": true
+    },
+    "25SP_W_SIGNED_CONTRAST": {
+      "value": 1921.13137369624,
+      "limit": 7038.248143320184,
+      "passed": true
+    },
+    "26SP_N1_water_pair": {
+      "value": 2995.9500000000044,
+      "limit": 4820.955746529934,
+      "simulated": 3479.0999999999913,
+      "observed": 6475.049999999996,
+      "passed": true
+    },
+    "26SP_N2_water_pair": {
+      "value": 7417.199999999997,
+      "limit": 5345.215700044286,
+      "simulated": 3384.600000000006,
+      "observed": 10801.800000000003,
+      "passed": false
+    },
+    "25SP_N0_water_pair": {
+      "value": 2290.399999999994,
+      "limit": 6719.969322077291,
+      "simulated": 6582.600000000006,
+      "observed": 8873.0,
+      "passed": true
+    },
+    "25SP_N2_water_pair": {
+      "value": 1429.4000000000015,
+      "limit": 6147.3779992357695,
+      "simulated": 7382.5999999999985,
+      "observed": 8812.0,
+      "passed": true
+    }
+  },
+  "native_archive_selection": "all attempted complete vectors, including preflight/lambda candidates; not lossy PEST CSV parameter exports",
+  "independent_validation_claim": false,
+  "final_scientific_acceptance": false,
+  "selection": "minimum_native_phi",
+  "independent_replay_season_calls": 2
+}

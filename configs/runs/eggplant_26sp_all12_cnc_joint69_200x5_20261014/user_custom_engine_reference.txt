@@ -1,0 +1,214 @@
+ ### 一、最新自定义 DSSAT 可执行文件信息
+  最新编译并完成全量后验闭环审计的沙箱自定义 DSSAT 引擎属性如下：
+  • 绝对文件路径:
+  dscsm048_cnc.exe
+  (在脚本或配置中亦可写为正斜杠：D:/Tomato_Cal/subprojects/critical_n/bin/dscsm048_cnc.exe)
+  • 编译工具链: WinLibs GCC / gfortran 16.2.0 (x86_64-w64-mingw32) + Ninja + CMake 4.4.2
+  • 文件大小: 14,936,893 字节 (~14.24 MB)
+  • SHA-256 哈希: 56c65127d0bba53ac4d1b5591d71fdb8f87525a44bf393c4e857acc0dfb2cc89
+  • 沙箱隔离说明: 生产环境官方原生文件 DSCSM048.EXE 保持未做任何改动（SHA-256: 92173d5f...）。
+  ──────
+  ### 二、底层 Fortran 机理核心修改说明
+
+  本版本针对茄子/番茄水氮试验中原版 CROPGRO (TMGRO048) 模型的生理缺陷进行了底层重构，主要修改集中在以下模块：
+
+  #### 1. 临界氮动态稀释与 F1 条件分支加固 (DEMAND.for)
+
+  • 连续渐近稀释曲线:
+
+                                                                      -CNC_B
+                                                   ⎡max⎛CNC_W0, W   ⎞⎤
+                                                   ⎢   ⎝         eff⎠⎥
+    N ⎛W   ⎞ = CNC_NC_INF + (CNC_A - CNC_NC_INF) · ⎢─────────────────⎥
+     c⎝ eff⎠                                       ⎣     CNC_W0      ⎦
+
+  在封垄阈值 W_{eff} = CNC_W0 处满足严格 C⁰ 连续，消除任何跨阈值台阶突变。
+
+  • 根除 F1 倒置死锁:
+  在顶端新生幼叶与茎秆需氮上确立结构性下界：
+               ⎛                   ⎛                        1.05 × N ⎞⎞
+               ⎜                   ⎜                                c⎟⎟
+    FNINL = min⎜PROLFI × 0.16,  max⎜PROLFG × 0.16 + 0.002,  ─────────⎟⎟
+               ⎝                   ⎝                          100.0  ⎠⎠
+    FNINS = max(PROSTG × 0.16 + 0.001,  min(PROSTI × 0.16,  FNINS))
+  结构性保证 FNINL > FNINLG 且 FNINS > FNINSG，使 VEGGR.for 中的 NGRVEG > NGRVGG
+  恒成立，杜绝了分支误判与氮素数值泄漏。
+  • 老组织补氮需求解耦: 老叶回补目标 NVSTL 随有效生物量异速稀释，打破高氮处理全季叶氮“一条平线”的非生理现象。
+
+  #### 2. 液泡缓冲氮与化学计量学对称 (GROW.for 与 MOBIL.for)
+
+  • 安全缓冲动员: 将叶片动员解耦为“液泡安全缓冲氮（c_{opt,L} = PROLFG × 0.16
+  以上）”与“代谢功能蛋白”。安全缓冲动员扣减干物质 β_{sol} = 4.4 g DM/g
+  N（游离硝酸盐/氨基酸溶质化学计量比），且不扣减叶面积。
+  • 对称回注: 根系吸氮充裕时优先回填功能蛋白亏缺（增加 6.25 × NADLF_{func} 并恢复叶面积），饱和后回补安全缓冲（增加
+  4.4 × NADLF_{buf} 且不膨胀叶面积），彻底消除质量滞后与虚假干物质漂移。
+  • Bug 修正: 修正第 783 行累计种子氮计算误用果壳氮浓度 PCNSH 的拼写错误，更正为种子氮 PCNSD。
+
+  #### 3. 净化光合作用模块 (PHOTO.for)
+
+  • 清除 0.675 毒乘子: 完全剔除日冠层光合中的冗余 S_{NNI} 乘子，避免在 NNI = 1.0 时强加 32.5%
+  的非生理光合抑制；光合由功能叶比叶氮 SLN（g N/m²）平滑驱动。
+
+  #### 4. 原生保持不变的模块
+
+  • 土壤氮吸收函数 (NUPTAK.for): 经阶段 3
+  严格审计，在地上部缓冲与化学计量对称建立后，低氮处理（N0）生长平稳无早衰，因此严格维持原生官方代码未动，确保土壤水
+  氮扩散模块 100% 官方兼容。
+  ──────
+  ### 三、新增 4 个临界氮参数及 PEST 推荐率定边界
+
+  这 4 个参数直接在物种参数模板文件 TMGRO048.SPE.base 的第 40~42 行注入：
+
+   参数名称   | 所在文件 / 卡片           | 先验初始… | 推荐下界… | 推荐上界… | 物理含义与农艺意义
+  ------------|---------------------------|-----------|-----------|-----------|--------------------------------------
+   CNC_A      | TMGRO048.SPE (!*CRITICAL) | 4.85      | 4.20      | 5.20      | 封垄前幼苗期地上部最大临界氮浓度
+              |                           |           |           |           | (%)，决定冠层早期最大需氮包络
+   CNC_B      | TMGRO048.SPE (!*CRITICAL) | 0.38      | 0.30      | 0.45      | 临界氮异速稀释幂指数，决定随生物量增
+              |                           |           |           |           | 长冠层需氮的稀释衰减斜率
+   CNC_W0     | TMGRO048.SPE (!*CRITICAL) | 1.00      | 0.80      | 1.50      | 稀释起始有效存量生物量阈值 (t
+              |                           |           |           |           | DM/ha)，保护幼苗封垄前充分吸收积累氮
+              |                           |           |           |           | 素
+   CNC_NC_INF | TMGRO048.SPE (!*CRITICAL) | 1.70      | 1.40      | 2.00      | 无限生长多次分批采收群体的终末渐近下
+              |                           |           |           |           | 限浓度 (%)，防止成熟期组织需氮坍塌
+  ──────
+  ### 四、PEST-IES 模板与注入规范（关键避坑提示）
+
+  在编写 PEST 模板文件（如 TMGRO048.SPE.tpl）时，必须严格遵循 DSSAT 的 6 列定宽规范（Fortran 4F6.0）：
+  #### 1. .base 模板卡片格式（当前规范基准）
+  在 TMGRO048.SPE.base:40-42：
+
+    !*CRITICAL NITROGEN DILUTION PARAMETERS
+    @ CNC_A  CNC_B CNC_W0 CNC_NC_INF
+      4.85  0.38  1.00
+
+▸ Thought for 11s
+  Executable path is `D:\Tomato_Cal\subprojects\critical_n\bin\dscsm048_cnc.exe`. The modification scope only includ...
+  接续上文，为您提供关于最新自定义版本 DSSAT 可执行文件、修改说明及 PEST-IES 定制率定规范的完整技术手册：
+  ──────
+  ### 一、最新自定义 DSSAT 可执行文件信息
+  最新编译并完成全量后验闭环审计的沙箱自定义 DSSAT 引擎属性如下：
+  • 绝对文件路径:
+  dscsm048_cnc.exe
+  (跨平台或 Python 字符串建议使用正斜杠：D:/Tomato_Cal/subprojects/critical_n/bin/dscsm048_cnc.exe)
+  • 编译工具链: WinLibs GCC / gfortran 16.2.0 (x86_64-w64-mingw32) + Ninja + CMake 4.4.2
+  • 文件大小: 14,936,893 字节 (~14.24 MB)
+  • SHA-256 哈希: 56c65127d0bba53ac4d1b5591d71fdb8f87525a44bf393c4e857acc0dfb2cc89
+  • 沙箱隔离状态: 官方原生文件 DSCSM048.EXE 保持未动（SHA-256: 92173d5f...），与自定义测试环境 100% 隔离。
+  ──────
+  ### 二、底层 Fortran 生理机制重构说明
+
+  本版本针对温室茄子水氮试验中原版 CROPGRO (TMGRO048) 模型的生理死锁进行了底层重构，主要修改集中在以下模块：
+
+  #### 1. 连续渐近稀释与根除 F1 倒置死锁 (DEMAND.for)
+
+  • 连续渐近稀释曲线:
+
+                                                                      -CNC_B
+                                                   ⎡max⎛CNC_W0, W   ⎞⎤
+                                                   ⎢   ⎝         eff⎠⎥
+    N ⎛W   ⎞ = CNC_NC_INF + (CNC_A - CNC_NC_INF) · ⎢─────────────────⎥
+     c⎝ eff⎠                                       ⎣     CNC_W0      ⎦
+  在封垄阈值 W_{eff} = CNC_W0 处满足严格 C⁰ 连续，杜绝分界点跳变间断。
+
+  • 根除 F1 倒置死锁与漏氮:
+  在顶端新生幼叶与茎秆需氮上确立结构性下界：
+               ⎛                   ⎛                        1.05 × N ⎞⎞
+               ⎜                   ⎜                                c⎟⎟
+    FNINL = min⎜PROLFI × 0.16,  max⎜PROLFG × 0.16 + 0.002,  ─────────⎟⎟
+               ⎝                   ⎝                          100.0  ⎠⎠
+    FNINS = max(PROSTG × 0.16 + 0.001,  min(PROSTI × 0.16,  FNINS))
+
+  结构性保证 FNINL > FNINLG 且 FNINS > FNINSG 恒成立，使 VEGGR.for 中最大需求恒大于最小需求（NGRVEG >
+  NGRVGG），彻底消除了原版中跨阈值时引发的条件分支非连续跳变与氮素数值泄漏。
+  • 老组织补氮需求解耦: 老叶回补目标 NVSTL 随有效生物量异速稀释，打破了高氮处理全季叶氮“一条水平平线”的非生理僵局。
+  #### 2. 液泡安全缓冲库与化学计量学对称 (GROW.for 与 MOBIL.for)
+
+  • 安全缓冲动员: 将叶片动员解耦为“液泡安全缓冲氮（PROLFG × 0.16 以上）”与“代谢功能蛋白”。安全缓冲动员扣减干物质
+  β_{sol} = 4.4 g DM/g N（游离硝酸盐/氨基酸溶质化学计量比），且不扣减叶面积。
+  • 对称回注: 根系吸氮充裕时优先回填功能蛋白亏缺（增加 6.25 × NADLF_{func}
+  并恢复功能叶面积），饱和后回补安全缓冲（增加 4.4 × NADLF_{buf} 且不膨胀叶面积），彻底消除质量滞后与虚假干物质漂移。
+  • 代码 Bug 修正: 修正第 783 行累计种子氮计算误用果壳氮浓度 PCNSH 的拼写错误，更正为种子氮 PCNSD。
+  #### 3. 彻底净化光合作用模块 (PHOTO.for)
+
+  • 清除 0.675 毒乘子: 完全剔除日冠层光合中的冗余 S_{NNI} 乘子，避免在 NNI = 1.0 时强加 32.5%
+  的非生理光合抑制；光合由功能叶比叶氮 SLN（g N/m²）平滑驱动。
+  #### 4. 原生保持不变的模块
+  • 土壤氮吸收函数 (NUPTAK.for): 经阶段 3
+  严格审计，在地上部缓冲与化学计量对称建立后，低氮处理（N0）生长平稳无早衰，因此严格维持原生官方代码未动，确保土壤水
+  氮扩散模块 100% 官方兼容。
+  ──────
+  ### 三、新增 4 个临界氮参数及 PEST 推荐率定边界
+
+  这 4 个参数在物种参数模板文件 TMGRO048.SPE.base 的第 40~42 行注入：
+   参数名称   | 所在文件 / 卡片           | 先验初始… | 推荐下界… | 推荐上界… | 物理含义与农艺意义
+  ------------|---------------------------|-----------|-----------|-----------|--------------------------------------
+   CNC_A      | TMGRO048.SPE (!*CRITICAL) | 4.85      | 4.20      | 5.20      | 封垄前幼苗期地上部最大临界氮浓度
+              |                           |           |           |           | (%)，决定冠层早期最大需氮包络
+   CNC_B      | TMGRO048.SPE (!*CRITICAL) | 0.38      | 0.30      | 0.45      | 临界氮异速稀释幂指数，决定随生物量增
+              |                           |           |           |           | 长冠层需氮的稀释衰减斜率
+   CNC_W0     | TMGRO048.SPE (!*CRITICAL) | 1.00      | 0.80      | 1.50      | 稀释起始有效存量生物量阈值 (t
+              |                           |           |           |           | DM/ha)，保护幼苗封垄前充分吸收积累氮
+              |                           |           |           |           | 素
+   CNC_NC_INF | TMGRO048.SPE (!*CRITICAL) | 1.70      | 1.40      | 2.00      | 无限生长多次分批采收群体的终末渐近下
+              |                           |           |           |           | 限浓度 (%)，防止成熟期组织需氮坍塌
+  ──────
+  ### 四、PEST-IES 模板与控制文件定制规范
+
+  在定制 PEST-IES 时，请注意以下关键规范：
+
+  #### 1. SPE 模板文件 (TMGRO048.SPE.tpl) 格式规范
+  DSSAT 的 Fortran 读取函数采用 4F6.0 定宽格式。每一列必须严格占用 6 个字符宽度（含负号或小数点）：
+    ptf ~
+    ... (上方常规参数省略)
+    !*CRITICAL NITROGEN DILUTION PARAMETERS
+    @ CNC_A  CNC_B CNC_W0 CNC_NC_INF
+    ~ cnc_a~~ cnc_b~~cnc_w0~~cnc_inf~
+    !*NITROGEN FIXATION PARAMETERS
+    ...
+
+  注：请确保每个 ~param~ 占位符展开后的实际字符宽度恰好为 6 列。若使用 Python 的 _format_to_width(val,
+  6)，会自动格式化为如   4.85  0.38  1.00  1.70。
+
+  #### 2. PEST 控制文件 (.pst) 参数块配置参考
+
+    *parameter groups
+    pargpnme        inctyp          derinc          derinlnd        forcen          derincmul       dermthd
+    spe_nitrogen    relative        0.01            0.0             switch          2.0             parabolic
+
+    *parameter data
+    # parnme        partrans  parchglim  parval1   parlbnd   parubnd  pargp         scale  offset  dercom
+    cnc_a           none      factor     4.8500    4.2000    5.2000   spe_nitrogen  1.0    0.0     1
+    cnc_b           none      factor     0.3800    0.3000    0.4500   spe_nitrogen  1.0    0.0     1
+    cnc_w0          none      factor     1.0000    0.8000    1.5000   spe_nitrogen  1.0    0.0     1
+    cnc_nc_inf      none      factor     1.7000    1.4000    2.0000   spe_nitrogen  1.0    0.0     1
+
+  #### 3. 模型执行命令（Model Command Line）配置
+
+  在 PEST 控制文件中的 *model command line 块，或者并行代理调度脚本中，黑盒调用命令直接指向自定义执行体：
+
+    # 格式：<自定义执行体路径> B <批处理文件名>
+    D:\Tomato_Cal\subprojects\critical_n\bin\dscsm048_cnc.exe B DSSBatch.v48
+
+  #### 4. 输出提取文件推荐（Instruction Files）
+
+  • 鲜产提取: FreshWt.OUT（变量 CHFPW）
+  • 干物质与 LAI 提取: PlantGro.OUT（变量 LAID, CWAD, LWAD, SWAD）
+  • 组织氮浓度提取: PlantN.OUT（变量 LN%D, SN%D）
+  • 终末物候与采收: Evaluate.OUT（变量 ADAPS, CWAMS）
+  ──────
+  ### 五、快速单次沙箱测试验证命令
+
+  在开展大规模 PEST-IES 集合平滑率定前，可通过以下 Python 脚本在任意沙箱目录快速验证该执行体与模板注入链路：
+
+    python -c "
+    import subprocess
+    from pathlib import Path
+
+    exe = Path(r'D:\Tomato_Cal\subprojects\critical_n\bin\dscsm048_cnc.exe')
+    assert exe.is_file(), f'Executable not found: {exe}'
+
+    # 验证 --help 或版本信息
+    res = subprocess.run([str(exe)], capture_output=True, text=True)
+    print('[+] Return Code:', res.returncode)
+    print('[+] Engine Banner:', res.stdout.splitlines()[0] if res.stdout else 'Running OK')
+    "

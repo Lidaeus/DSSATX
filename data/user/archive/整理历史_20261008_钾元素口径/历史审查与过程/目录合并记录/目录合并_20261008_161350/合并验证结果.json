@@ -1,0 +1,2700 @@
+{
+  "source_files_before": 179,
+  "target_files_before": 32,
+  "base_union_files": 195,
+  "source_only_files_copied": 163,
+  "target_files_replaced": 0,
+  "different_content_conflicts": 2,
+  "same_bytes_pairs": 14,
+  "source_unchanged": true,
+  "all_selected_versions_hash_verified": true,
+  "conflict_versions_both_preserved": true,
+  "season_source_workbooks": 24,
+  "all_season_excel_openable": true,
+  "spad_original_reads_unchanged": true,
+  "spad_count_standardization_only": true,
+  "skipped": [
+    {
+      "path": "D:\\三季节数据汇总\\数据质控_20261003\\node_modules",
+      "reason": "运行时依赖、缓存或外部链接目录，不属于项目数据文件"
+    },
+    {
+      "path": "D:\\三季节数据汇总\\数据质控_20261003\\__pycache__",
+      "reason": "运行时依赖、缓存或外部链接目录，不属于项目数据文件"
+    },
+    {
+      "path": "D:\\三季节数据汇总\\数据质控_20261007\\node_modules",
+      "reason": "运行时依赖、缓存或外部链接目录，不属于项目数据文件"
+    },
+    {
+      "path": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\__pycache__",
+      "reason": "运行时依赖、缓存或外部链接目录，不属于项目数据文件"
+    }
+  ],
+  "output_dir": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\目录合并记录\\目录合并_20261008_161350",
+  "conflicts": [
+    {
+      "relative_path": "2026春\\2026春品质指标集.xlsx",
+      "chosen_side": "参照",
+      "current_time": "2026-10-08T11:16:08.402279+08:00",
+      "reference_time": "2026-10-08T16:00:25.300155+08:00",
+      "cells": [
+        {
+          "sheet": "Sheet1",
+          "address": "B6",
+          "current": "=B2+1",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B7",
+          "current": "=B3+1",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B8",
+          "current": "=B4+1",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B9",
+          "current": "=B5+1",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B10",
+          "current": "=B6+1",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B11",
+          "current": "=B7+1",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B12",
+          "current": "=B8+1",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B13",
+          "current": "=B9+1",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B14",
+          "current": "=B10+1",
+          "reference": "4",
+          "current_cache": "4",
+          "reference_cache": "4"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B15",
+          "current": "=B11+1",
+          "reference": "4",
+          "current_cache": "4",
+          "reference_cache": "4"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B16",
+          "current": "=B12+1",
+          "reference": "4",
+          "current_cache": "4",
+          "reference_cache": "4"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B17",
+          "current": "=B13+1",
+          "reference": "4",
+          "current_cache": "4",
+          "reference_cache": "4"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B18",
+          "current": "=B14+1",
+          "reference": "5",
+          "current_cache": "5",
+          "reference_cache": "5"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B19",
+          "current": "=B15+1",
+          "reference": "5",
+          "current_cache": "5",
+          "reference_cache": "5"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B20",
+          "current": "=B16+1",
+          "reference": "5",
+          "current_cache": "5",
+          "reference_cache": "5"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B21",
+          "current": "=B17+1",
+          "reference": "5",
+          "current_cache": "5",
+          "reference_cache": "5"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B22",
+          "current": "=B18+1",
+          "reference": "6",
+          "current_cache": "6",
+          "reference_cache": "6"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B23",
+          "current": "=B19+1",
+          "reference": "6",
+          "current_cache": "6",
+          "reference_cache": "6"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B24",
+          "current": "=B20+1",
+          "reference": "6",
+          "current_cache": "6",
+          "reference_cache": "6"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B25",
+          "current": "=B21+1",
+          "reference": "6",
+          "current_cache": "6",
+          "reference_cache": "6"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B26",
+          "current": "=B22+1",
+          "reference": "7",
+          "current_cache": "7",
+          "reference_cache": "7"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B27",
+          "current": "=B23+1",
+          "reference": "7",
+          "current_cache": "7",
+          "reference_cache": "7"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B28",
+          "current": "=B24+1",
+          "reference": "7",
+          "current_cache": "7",
+          "reference_cache": "7"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B29",
+          "current": "=B25+1",
+          "reference": "7",
+          "current_cache": "7",
+          "reference_cache": "7"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B30",
+          "current": "=B26+1",
+          "reference": "8",
+          "current_cache": "8",
+          "reference_cache": "8"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B31",
+          "current": "=B27+1",
+          "reference": "8",
+          "current_cache": "8",
+          "reference_cache": "8"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B32",
+          "current": "=B28+1",
+          "reference": "8",
+          "current_cache": "8",
+          "reference_cache": "8"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B33",
+          "current": "=B29+1",
+          "reference": "8",
+          "current_cache": "8",
+          "reference_cache": "8"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B34",
+          "current": "=B30+1",
+          "reference": "9",
+          "current_cache": "9",
+          "reference_cache": "9"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B35",
+          "current": "=B31+1",
+          "reference": "9",
+          "current_cache": "9",
+          "reference_cache": "9"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B36",
+          "current": "=B32+1",
+          "reference": "9",
+          "current_cache": "9",
+          "reference_cache": "9"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B37",
+          "current": "=B33+1",
+          "reference": "9",
+          "current_cache": "9",
+          "reference_cache": "9"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B38",
+          "current": "=B34+1",
+          "reference": "10",
+          "current_cache": "10",
+          "reference_cache": "10"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B39",
+          "current": "=B35+1",
+          "reference": "10",
+          "current_cache": "10",
+          "reference_cache": "10"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B40",
+          "current": "=B36+1",
+          "reference": "10",
+          "current_cache": "10",
+          "reference_cache": "10"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B41",
+          "current": "=B37+1",
+          "reference": "10",
+          "current_cache": "10",
+          "reference_cache": "10"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B42",
+          "current": "=B38+1",
+          "reference": "11",
+          "current_cache": "11",
+          "reference_cache": "11"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B43",
+          "current": "=B39+1",
+          "reference": "11",
+          "current_cache": "11",
+          "reference_cache": "11"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B44",
+          "current": "=B40+1",
+          "reference": "11",
+          "current_cache": "11",
+          "reference_cache": "11"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B45",
+          "current": "=B41+1",
+          "reference": "11",
+          "current_cache": "11",
+          "reference_cache": "11"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B46",
+          "current": "=B42+1",
+          "reference": "12",
+          "current_cache": "12",
+          "reference_cache": "12"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B47",
+          "current": "=B43+1",
+          "reference": "12",
+          "current_cache": "12",
+          "reference_cache": "12"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B48",
+          "current": "=B44+1",
+          "reference": "12",
+          "current_cache": "12",
+          "reference_cache": "12"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B49",
+          "current": "=B45+1",
+          "reference": "12",
+          "current_cache": "12",
+          "reference_cache": "12"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I61",
+          "current": "=AVERAGE(I59:I60)",
+          "reference": "304.488281805781",
+          "current_cache": "222.124469371958",
+          "reference_cache": "304.488281805781"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F86",
+          "current": "=[1]硬度!B2",
+          "reference": "7.295",
+          "current_cache": "7.295",
+          "reference_cache": "7.295"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G86",
+          "current": "=[1]半果重!H2",
+          "reference": "0.937616493590475",
+          "current_cache": "0.937616493590475",
+          "reference_cache": "0.937616493590475"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H86",
+          "current": "=[1]固形物!B2",
+          "reference": "4.35507428194123",
+          "current_cache": "4.35507428194123",
+          "reference_cache": "4.35507428194123"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I86",
+          "current": "=[1]VC!H2",
+          "reference": "155.385043813137",
+          "current_cache": "155.385043813137",
+          "reference_cache": "155.385043813137"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J86",
+          "current": "=[1]蛋白质!G2",
+          "reference": "14.0267016713601",
+          "current_cache": "14.0267016713601",
+          "reference_cache": "14.0267016713601"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K86",
+          "current": "=[1]糖!F2",
+          "reference": "24.9921371515195",
+          "current_cache": "24.9921371515195",
+          "reference_cache": "24.9921371515195"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F87",
+          "current": "=[1]硬度!B3",
+          "reference": "9.46666666666667",
+          "current_cache": "9.46666666666667",
+          "reference_cache": "9.46666666666667"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G87",
+          "current": "=[1]半果重!H3",
+          "reference": "0.933712715855573",
+          "current_cache": "0.933712715855573",
+          "reference_cache": "0.933712715855573"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H87",
+          "current": "=[1]固形物!B3",
+          "reference": "4.35571090980701",
+          "current_cache": "4.35571090980701",
+          "reference_cache": "4.35571090980701"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I87",
+          "current": "=[1]VC!H3",
+          "reference": "215.028927762633",
+          "current_cache": "215.028927762633",
+          "reference_cache": "215.028927762633"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J87",
+          "current": "=[1]蛋白质!G3",
+          "reference": "12.0628498808419",
+          "current_cache": "12.0628498808419",
+          "reference_cache": "12.0628498808419"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K87",
+          "current": "=[1]糖!F3",
+          "reference": "22.2091139591811",
+          "current_cache": "22.2091139591811",
+          "reference_cache": "22.2091139591811"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F88",
+          "current": "=[1]硬度!B4",
+          "reference": "8.41",
+          "current_cache": "8.41",
+          "reference_cache": "8.41"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G88",
+          "current": "=[1]半果重!H4",
+          "reference": "0.934919571045576",
+          "current_cache": "0.934919571045576",
+          "reference_cache": "0.934919571045576"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H88",
+          "current": "=[1]固形物!B4",
+          "reference": "4.33121713479543",
+          "current_cache": "4.33121713479543",
+          "reference_cache": "4.33121713479543"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I88",
+          "current": "=[1]VC!H4",
+          "reference": "227.352631926751",
+          "current_cache": "227.352631926751",
+          "reference_cache": "227.352631926751"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J88",
+          "current": "=[1]蛋白质!G4",
+          "reference": "12.776129982965",
+          "current_cache": "12.776129982965",
+          "reference_cache": "12.776129982965"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K88",
+          "current": "=[1]糖!F4",
+          "reference": "23.7392351101098",
+          "current_cache": "23.7392351101098",
+          "reference_cache": "23.7392351101098"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B89",
+          "current": "=B86+1",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E89",
+          "current": "=E86",
+          "reference": "1",
+          "current_cache": "1",
+          "reference_cache": "1"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F89",
+          "current": "=[1]硬度!B5",
+          "reference": "7.31875",
+          "current_cache": "7.31875",
+          "reference_cache": "7.31875"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G89",
+          "current": "=[1]半果重!H5",
+          "reference": "0.937364107710319",
+          "current_cache": "0.937364107710319",
+          "reference_cache": "0.937364107710319"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H89",
+          "current": "=[1]固形物!B5",
+          "reference": "4.22328098191896",
+          "current_cache": "4.22328098191896",
+          "reference_cache": "4.22328098191896"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I89",
+          "current": "=[1]VC!H5",
+          "reference": "183.890253740329",
+          "current_cache": "183.890253740329",
+          "reference_cache": "183.890253740329"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J89",
+          "current": "=[1]蛋白质!G5",
+          "reference": "14.4293430475012",
+          "current_cache": "14.4293430475012",
+          "reference_cache": "14.4293430475012"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K89",
+          "current": "=[1]糖!F5",
+          "reference": "22.9336581146616",
+          "current_cache": "22.9336581146616",
+          "reference_cache": "22.9336581146616"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B90",
+          "current": "=B87+1",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E90",
+          "current": "=E87",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F90",
+          "current": "=[1]硬度!B6",
+          "reference": "8.59666666666667",
+          "current_cache": "8.59666666666667",
+          "reference_cache": "8.59666666666667"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G90",
+          "current": "=[1]半果重!H6",
+          "reference": "0.937658101451205",
+          "current_cache": "0.937658101451205",
+          "reference_cache": "0.937658101451205"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H90",
+          "current": "=[1]固形物!B6",
+          "reference": "4.37142857142857",
+          "current_cache": "4.37142857142857",
+          "reference_cache": "4.37142857142857"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I90",
+          "current": "=[1]VC!H6",
+          "reference": "223.242126412554",
+          "current_cache": "223.242126412554",
+          "reference_cache": "223.242126412554"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J90",
+          "current": "=[1]蛋白质!G6",
+          "reference": "16.7176960970064",
+          "current_cache": "16.7176960970064",
+          "reference_cache": "16.7176960970064"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K90",
+          "current": "=[1]糖!F6",
+          "reference": "21.1881619569553",
+          "current_cache": "21.1881619569553",
+          "reference_cache": "21.1881619569553"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B91",
+          "current": "=B88+1",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E91",
+          "current": "=E88",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F91",
+          "current": "=[1]硬度!B7",
+          "reference": "7.83166666666667",
+          "current_cache": "7.83166666666667",
+          "reference_cache": "7.83166666666667"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G91",
+          "current": "=[1]半果重!H7",
+          "reference": "0.935445155659005",
+          "current_cache": "0.935445155659005",
+          "reference_cache": "0.935445155659005"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H91",
+          "current": "=[1]固形物!B7",
+          "reference": "4.34214092140921",
+          "current_cache": "4.34214092140921",
+          "reference_cache": "4.34214092140921"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I91",
+          "current": "=[1]VC!H7",
+          "reference": "186.557986607414",
+          "current_cache": "186.557986607414",
+          "reference_cache": "186.557986607414"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J91",
+          "current": "=[1]蛋白质!G7",
+          "reference": "15.5466276625383",
+          "current_cache": "15.5466276625383",
+          "reference_cache": "15.5466276625383"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K91",
+          "current": "=[1]糖!F7",
+          "reference": "22.3833702216561",
+          "current_cache": "22.3833702216561",
+          "reference_cache": "22.3833702216561"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B92",
+          "current": "=B89+1",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E92",
+          "current": "=E89",
+          "reference": "1",
+          "current_cache": "1",
+          "reference_cache": "1"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F92",
+          "current": "=[1]硬度!B8",
+          "reference": "8.62833333333333",
+          "current_cache": "8.62833333333333",
+          "reference_cache": "8.62833333333333"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G92",
+          "current": "=[1]半果重!H8",
+          "reference": "0.932924563359346",
+          "current_cache": "0.932924563359346",
+          "reference_cache": "0.932924563359346"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H92",
+          "current": "=[1]固形物!B8",
+          "reference": "4.37197553842063",
+          "current_cache": "4.37197553842063",
+          "reference_cache": "4.37197553842063"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I92",
+          "current": "=[1]VC!H8",
+          "reference": "190.764003334869",
+          "current_cache": "190.764003334869",
+          "reference_cache": "190.764003334869"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J92",
+          "current": "=[1]蛋白质!G8",
+          "reference": "13.5582442445556",
+          "current_cache": "13.5582442445556",
+          "reference_cache": "13.5582442445556"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K92",
+          "current": "=[1]糖!F8",
+          "reference": "22.9149762440721",
+          "current_cache": "22.9149762440721",
+          "reference_cache": "22.9149762440721"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B93",
+          "current": "=B90+1",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E93",
+          "current": "=E90",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F93",
+          "current": "=[1]硬度!B9",
+          "reference": "6.52666666666667",
+          "current_cache": "6.52666666666667",
+          "reference_cache": "6.52666666666667"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G93",
+          "current": "=[1]半果重!H9",
+          "reference": "0.93594677216328",
+          "current_cache": "0.93594677216328",
+          "reference_cache": "0.93594677216328"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H93",
+          "current": "=[1]固形物!B9",
+          "reference": "4.19115751482341",
+          "current_cache": "4.19115751482341",
+          "reference_cache": "4.19115751482341"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I93",
+          "current": "=[1]VC!H9",
+          "reference": "161.796231616864",
+          "current_cache": "161.796231616864",
+          "reference_cache": "161.796231616864"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J93",
+          "current": "=[1]蛋白质!G9",
+          "reference": "11.8121880740043",
+          "current_cache": "11.8121880740043",
+          "reference_cache": "11.8121880740043"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K93",
+          "current": "=[1]糖!F9",
+          "reference": "22.1668170479634",
+          "current_cache": "22.1668170479634",
+          "reference_cache": "22.1668170479634"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B94",
+          "current": "=B91+1",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E94",
+          "current": "=E91",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F94",
+          "current": "=[1]硬度!B10",
+          "reference": "8.20666666666667",
+          "current_cache": "8.20666666666667",
+          "reference_cache": "8.20666666666667"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G94",
+          "current": "=[1]半果重!H10",
+          "reference": "0.941233752487404",
+          "current_cache": "0.941233752487404",
+          "reference_cache": "0.941233752487404"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H94",
+          "current": "=[1]固形物!B10",
+          "reference": "4.17261219792865",
+          "current_cache": "4.17261219792865",
+          "reference_cache": "4.17261219792865"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I94",
+          "current": "=[1]VC!H10",
+          "reference": "223.244936705059",
+          "current_cache": "223.244936705059",
+          "reference_cache": "223.244936705059"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J94",
+          "current": "=[1]蛋白质!G10",
+          "reference": "13.5624225458086",
+          "current_cache": "13.5624225458086",
+          "reference_cache": "13.5624225458086"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K94",
+          "current": "=[1]糖!F10",
+          "reference": "19.9445541950049",
+          "current_cache": "19.9445541950049",
+          "reference_cache": "19.9445541950049"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B95",
+          "current": "=B92+1",
+          "reference": "4",
+          "current_cache": "4",
+          "reference_cache": "4"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E95",
+          "current": "=E92",
+          "reference": "1",
+          "current_cache": "1",
+          "reference_cache": "1"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F95",
+          "current": "=[1]硬度!B11",
+          "reference": "7.625",
+          "current_cache": "7.625",
+          "reference_cache": "7.625"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G95",
+          "current": "=[1]半果重!H11",
+          "reference": "0.937983512999366",
+          "current_cache": "0.937983512999366",
+          "reference_cache": "0.937983512999366"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H95",
+          "current": "=[1]固形物!B11",
+          "reference": "4.3601784425638",
+          "current_cache": "4.3601784425638",
+          "reference_cache": "4.3601784425638"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I95",
+          "current": "=[1]VC!H11",
+          "reference": "222.565488125121",
+          "current_cache": "222.565488125121",
+          "reference_cache": "222.565488125121"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J95",
+          "current": "=[1]蛋白质!G11",
+          "reference": "12.7124346506141",
+          "current_cache": "12.7124346506141",
+          "reference_cache": "12.7124346506141"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K95",
+          "current": "=[1]糖!F11",
+          "reference": "21.7517227556407",
+          "current_cache": "21.7517227556407",
+          "reference_cache": "21.7517227556407"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B96",
+          "current": "=B93+1",
+          "reference": "4",
+          "current_cache": "4",
+          "reference_cache": "4"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E96",
+          "current": "=E93",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F96",
+          "current": "=[1]硬度!B12",
+          "reference": "8.32166666666667",
+          "current_cache": "8.32166666666667",
+          "reference_cache": "8.32166666666667"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G96",
+          "current": "=[1]半果重!H12",
+          "reference": "0.937866927592955",
+          "current_cache": "0.937866927592955",
+          "reference_cache": "0.937866927592955"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H96",
+          "current": "=[1]固形物!B12",
+          "reference": "4.30466455696202",
+          "current_cache": "4.30466455696202",
+          "reference_cache": "4.30466455696202"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I96",
+          "current": "=[1]VC!H12",
+          "reference": "194.468396704192",
+          "current_cache": "194.468396704192",
+          "reference_cache": "194.468396704192"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J96",
+          "current": "=[1]蛋白质!G12",
+          "reference": "16.2822515271743",
+          "current_cache": "16.2822515271743",
+          "reference_cache": "16.2822515271743"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K96",
+          "current": "=[1]糖!F12",
+          "reference": "22.2162006966002",
+          "current_cache": "22.2162006966002",
+          "reference_cache": "22.2162006966002"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B97",
+          "current": "=B94+1",
+          "reference": "4",
+          "current_cache": "4",
+          "reference_cache": "4"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E97",
+          "current": "=E94",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F97",
+          "current": "=[1]硬度!B13",
+          "reference": "8.585",
+          "current_cache": "8.585",
+          "reference_cache": "8.585"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G97",
+          "current": "=[1]半果重!H13",
+          "reference": "0.938166732516792",
+          "current_cache": "0.938166732516792",
+          "reference_cache": "0.938166732516792"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H97",
+          "current": "=[1]固形物!B13",
+          "reference": "4.29818181818182",
+          "current_cache": "4.29818181818182",
+          "reference_cache": "4.29818181818182"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I97",
+          "current": "=[1]VC!H13",
+          "reference": "242.319014427793",
+          "current_cache": "242.319014427793",
+          "reference_cache": "242.319014427793"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J97",
+          "current": "=[1]蛋白质!G13",
+          "reference": "14.3399405192509",
+          "current_cache": "14.3399405192509",
+          "reference_cache": "14.3399405192509"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K97",
+          "current": "=[1]糖!F13",
+          "reference": "19.7182091465213",
+          "current_cache": "19.7182091465213",
+          "reference_cache": "19.7182091465213"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B98",
+          "current": "=B95+1",
+          "reference": "5",
+          "current_cache": "5",
+          "reference_cache": "5"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E98",
+          "current": "=E95",
+          "reference": "1",
+          "current_cache": "1",
+          "reference_cache": "1"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F98",
+          "current": "=[1]硬度!B14",
+          "reference": "7.35",
+          "current_cache": "7.35",
+          "reference_cache": "7.35"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G98",
+          "current": "=[1]半果重!H14",
+          "reference": "0.935031555374593",
+          "current_cache": "0.935031555374593",
+          "reference_cache": "0.935031555374593"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H98",
+          "current": "=[1]固形物!B14",
+          "reference": "4.22056788984782",
+          "current_cache": "4.22056788984782",
+          "reference_cache": "4.22056788984782"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I98",
+          "current": "=[1]VC!H14",
+          "reference": "215.309659230917",
+          "current_cache": "215.309659230917",
+          "reference_cache": "215.309659230917"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J98",
+          "current": "=[1]蛋白质!G14",
+          "reference": "13.2222478424139",
+          "current_cache": "13.2222478424139",
+          "reference_cache": "13.2222478424139"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K98",
+          "current": "=[1]糖!F14",
+          "reference": "20.4139402902583",
+          "current_cache": "20.4139402902583",
+          "reference_cache": "20.4139402902583"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B99",
+          "current": "=B96+1",
+          "reference": "5",
+          "current_cache": "5",
+          "reference_cache": "5"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E99",
+          "current": "=E96",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F99",
+          "current": "=[1]硬度!B15",
+          "reference": "8.44",
+          "current_cache": "8.44",
+          "reference_cache": "8.44"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G99",
+          "current": "=[1]半果重!H15",
+          "reference": "0.936764316491346",
+          "current_cache": "0.936764316491346",
+          "reference_cache": "0.936764316491346"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H99",
+          "current": "=[1]固形物!B15",
+          "reference": "4.1770169274992",
+          "current_cache": "4.1770169274992",
+          "reference_cache": "4.1770169274992"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I99",
+          "current": "=[1]VC!H15",
+          "reference": "227.113451941342",
+          "current_cache": "227.113451941342",
+          "reference_cache": "227.113451941342"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J99",
+          "current": "=[1]蛋白质!G15",
+          "reference": "11.5998463949217",
+          "current_cache": "11.5998463949217",
+          "reference_cache": "11.5998463949217"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K99",
+          "current": "=[1]糖!F15",
+          "reference": "22.3278042999546",
+          "current_cache": "22.3278042999546",
+          "reference_cache": "22.3278042999546"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B100",
+          "current": "=B97+1",
+          "reference": "5",
+          "current_cache": "5",
+          "reference_cache": "5"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E100",
+          "current": "=E97",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F100",
+          "current": "=[1]硬度!B16",
+          "reference": "7.475",
+          "current_cache": "7.475",
+          "reference_cache": "7.475"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G100",
+          "current": "=[1]半果重!H16",
+          "reference": "0.935308062121984",
+          "current_cache": "0.935308062121984",
+          "reference_cache": "0.935308062121984"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H100",
+          "current": "=[1]固形物!B16",
+          "reference": "4.48236434108527",
+          "current_cache": "4.48236434108527",
+          "reference_cache": "4.48236434108527"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I100",
+          "current": "=[1]VC!H16",
+          "reference": "210.924699222222",
+          "current_cache": "210.924699222222",
+          "reference_cache": "210.924699222222"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J100",
+          "current": "=[1]蛋白质!G16",
+          "reference": "15.1785161118711",
+          "current_cache": "15.1785161118711",
+          "reference_cache": "15.1785161118711"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K100",
+          "current": "=[1]糖!F16",
+          "reference": "23.4439450734394",
+          "current_cache": "23.4439450734394",
+          "reference_cache": "23.4439450734394"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B101",
+          "current": "=B98+1",
+          "reference": "6",
+          "current_cache": "6",
+          "reference_cache": "6"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E101",
+          "current": "=E98",
+          "reference": "1",
+          "current_cache": "1",
+          "reference_cache": "1"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F101",
+          "current": "=[1]硬度!B17",
+          "reference": "8.3025",
+          "current_cache": "8.3025",
+          "reference_cache": "8.3025"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G101",
+          "current": "=[1]半果重!H17",
+          "reference": "0.940625277555733",
+          "current_cache": "0.940625277555733",
+          "reference_cache": "0.940625277555733"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H101",
+          "current": "=[1]固形物!B17",
+          "reference": "4.21868649976758",
+          "current_cache": "4.21868649976758",
+          "reference_cache": "4.21868649976758"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I101",
+          "current": "=[1]VC!H17",
+          "reference": "186.257978701319",
+          "current_cache": "186.257978701319",
+          "reference_cache": "186.257978701319"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J101",
+          "current": "=[1]蛋白质!G17",
+          "reference": "11.7959114805708",
+          "current_cache": "11.7959114805708",
+          "reference_cache": "11.7959114805708"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K101",
+          "current": "=[1]糖!F17",
+          "reference": "22.5235556022635",
+          "current_cache": "22.5235556022635",
+          "reference_cache": "22.5235556022635"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B102",
+          "current": "=B99+1",
+          "reference": "6",
+          "current_cache": "6",
+          "reference_cache": "6"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E102",
+          "current": "=E99",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F102",
+          "current": "=[1]硬度!B18",
+          "reference": "9.29666666666667",
+          "current_cache": "9.29666666666667",
+          "reference_cache": "9.29666666666667"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G102",
+          "current": "=[1]半果重!H18",
+          "reference": "0.934943878209263",
+          "current_cache": "0.934943878209263",
+          "reference_cache": "0.934943878209263"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H102",
+          "current": "=[1]固形物!B18",
+          "reference": "4.34545573256725",
+          "current_cache": "4.34545573256725",
+          "reference_cache": "4.34545573256725"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I102",
+          "current": "=[1]VC!H18",
+          "reference": "248.234158459706",
+          "current_cache": "248.234158459706",
+          "reference_cache": "248.234158459706"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J102",
+          "current": "=[1]蛋白质!G18",
+          "reference": "14.1704892445901",
+          "current_cache": "14.1704892445901",
+          "reference_cache": "14.1704892445901"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K102",
+          "current": "=[1]糖!F18",
+          "reference": "22.337853196087",
+          "current_cache": "22.337853196087",
+          "reference_cache": "22.337853196087"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B103",
+          "current": "=B100+1",
+          "reference": "6",
+          "current_cache": "6",
+          "reference_cache": "6"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E103",
+          "current": "=E100",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F103",
+          "current": "=[1]硬度!B19",
+          "reference": "7.50125",
+          "current_cache": "7.50125",
+          "reference_cache": "7.50125"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G103",
+          "current": "=[1]半果重!H19",
+          "reference": "0.944278738286921",
+          "current_cache": "0.944278738286921",
+          "reference_cache": "0.944278738286921"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H103",
+          "current": "=[1]固形物!B19",
+          "reference": "4.20330188679245",
+          "current_cache": "4.20330188679245",
+          "reference_cache": "4.20330188679245"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I103",
+          "current": "=[1]VC!H19",
+          "reference": "277.913293827521",
+          "current_cache": "277.913293827521",
+          "reference_cache": "277.913293827521"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J103",
+          "current": "=[1]蛋白质!G19",
+          "reference": "15.6108741701607",
+          "current_cache": "15.6108741701607",
+          "reference_cache": "15.6108741701607"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K103",
+          "current": "=[1]糖!F19",
+          "reference": "21.3368242553112",
+          "current_cache": "21.3368242553112",
+          "reference_cache": "21.3368242553112"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B104",
+          "current": "=B101+1",
+          "reference": "7",
+          "current_cache": "7",
+          "reference_cache": "7"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E104",
+          "current": "=E101",
+          "reference": "1",
+          "current_cache": "1",
+          "reference_cache": "1"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F104",
+          "current": "=[1]硬度!B20",
+          "reference": "7.805",
+          "current_cache": "7.805",
+          "reference_cache": "7.805"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G104",
+          "current": "=[1]半果重!H20",
+          "reference": "0.949495574673516",
+          "current_cache": "0.949495574673516",
+          "reference_cache": "0.949495574673516"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H104",
+          "current": "=[1]固形物!B20",
+          "reference": "4.04602915223217",
+          "current_cache": "4.04602915223217",
+          "reference_cache": "4.04602915223217"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I104",
+          "current": "=[1]VC!H20",
+          "reference": "238.172923872648",
+          "current_cache": "238.172923872648",
+          "reference_cache": "238.172923872648"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J104",
+          "current": "=[1]蛋白质!G20",
+          "reference": "16.5308351564693",
+          "current_cache": "16.5308351564693",
+          "reference_cache": "16.5308351564693"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K104",
+          "current": "=[1]糖!F20",
+          "reference": "20.4284582186711",
+          "current_cache": "20.4284582186711",
+          "reference_cache": "20.4284582186711"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B105",
+          "current": "=B102+1",
+          "reference": "7",
+          "current_cache": "7",
+          "reference_cache": "7"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E105",
+          "current": "=E102",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F105",
+          "current": "=[1]硬度!B21",
+          "reference": "6.25166666666667",
+          "current_cache": "6.25166666666667",
+          "reference_cache": "6.25166666666667"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G105",
+          "current": "=[1]半果重!H21",
+          "reference": "0.942135090430869",
+          "current_cache": "0.942135090430869",
+          "reference_cache": "0.942135090430869"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H105",
+          "current": "=[1]固形物!B21",
+          "reference": "4.06800713153724",
+          "current_cache": "4.06800713153724",
+          "reference_cache": "4.06800713153724"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I105",
+          "current": "=[1]VC!H21",
+          "reference": "261.39759303422",
+          "current_cache": "261.39759303422",
+          "reference_cache": "261.39759303422"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J105",
+          "current": "=[1]蛋白质!G21",
+          "reference": "10.0729666076536",
+          "current_cache": "10.0729666076536",
+          "reference_cache": "10.0729666076536"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K105",
+          "current": "=[1]糖!F21",
+          "reference": "20.4453464348891",
+          "current_cache": "20.4453464348891",
+          "reference_cache": "20.4453464348891"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B106",
+          "current": "=B103+1",
+          "reference": "7",
+          "current_cache": "7",
+          "reference_cache": "7"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E106",
+          "current": "=E103",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F106",
+          "current": "=[1]硬度!B22",
+          "reference": "7.34166666666667",
+          "current_cache": "7.34166666666667",
+          "reference_cache": "7.34166666666667"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G106",
+          "current": "=[1]半果重!H22",
+          "reference": "0.941684614664294",
+          "current_cache": "0.941684614664294",
+          "reference_cache": "0.941684614664294"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H106",
+          "current": "=[1]固形物!B22",
+          "reference": "4.22036498280878",
+          "current_cache": "4.22036498280878",
+          "reference_cache": "4.22036498280878"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I106",
+          "current": "=[1]VC!H22",
+          "reference": "255.593680905838",
+          "current_cache": "255.593680905838",
+          "reference_cache": "255.593680905838"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J106",
+          "current": "=[1]蛋白质!G22",
+          "reference": "13.1306685248103",
+          "current_cache": "13.1306685248103",
+          "reference_cache": "13.1306685248103"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K106",
+          "current": "=[1]糖!F22",
+          "reference": "21.1753705914151",
+          "current_cache": "21.1753705914151",
+          "reference_cache": "21.1753705914151"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B107",
+          "current": "=B104+1",
+          "reference": "8",
+          "current_cache": "8",
+          "reference_cache": "8"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E107",
+          "current": "=E104",
+          "reference": "1",
+          "current_cache": "1",
+          "reference_cache": "1"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F107",
+          "current": "=[1]硬度!B23",
+          "reference": "7.03",
+          "current_cache": "7.03",
+          "reference_cache": "7.03"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G107",
+          "current": "=[1]半果重!H23",
+          "reference": "0.944166345783596",
+          "current_cache": "0.944166345783596",
+          "reference_cache": "0.944166345783596"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H107",
+          "current": "=[1]固形物!B23",
+          "reference": "4.0508803965045",
+          "current_cache": "4.0508803965045",
+          "reference_cache": "4.0508803965045"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I107",
+          "current": "=[1]VC!H23",
+          "reference": "270.795469452152",
+          "current_cache": "270.795469452152",
+          "reference_cache": "270.795469452152"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J107",
+          "current": "=[1]蛋白质!G23",
+          "reference": "16.9437768087196",
+          "current_cache": "16.9437768087196",
+          "reference_cache": "16.9437768087196"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K107",
+          "current": "=[1]糖!F23",
+          "reference": "21.2544908413772",
+          "current_cache": "21.2544908413772",
+          "reference_cache": "21.2544908413772"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B108",
+          "current": "=B105+1",
+          "reference": "8",
+          "current_cache": "8",
+          "reference_cache": "8"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E108",
+          "current": "=E105",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F108",
+          "current": "=[1]硬度!B24",
+          "reference": "8.01166666666667",
+          "current_cache": "8.01166666666667",
+          "reference_cache": "8.01166666666667"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G108",
+          "current": "=[1]半果重!H24",
+          "reference": "0.933060328676195",
+          "current_cache": "0.933060328676195",
+          "reference_cache": "0.933060328676195"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H108",
+          "current": "=[1]固形物!B24",
+          "reference": "4.46553388685074",
+          "current_cache": "4.46553388685074",
+          "reference_cache": "4.46553388685074"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I108",
+          "current": "=[1]VC!H24",
+          "reference": "260.838947838182",
+          "current_cache": "260.838947838182",
+          "reference_cache": "260.838947838182"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J108",
+          "current": "=[1]蛋白质!G24",
+          "reference": "11.7872409330139",
+          "current_cache": "11.7872409330139",
+          "reference_cache": "11.7872409330139"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K108",
+          "current": "=[1]糖!F24",
+          "reference": "21.0042635479637",
+          "current_cache": "21.0042635479637",
+          "reference_cache": "21.0042635479637"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B109",
+          "current": "=B106+1",
+          "reference": "8",
+          "current_cache": "8",
+          "reference_cache": "8"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E109",
+          "current": "=E106",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F109",
+          "current": "=[1]硬度!B25",
+          "reference": "8.12833333333333",
+          "current_cache": "8.12833333333333",
+          "reference_cache": "8.12833333333333"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G109",
+          "current": "=[1]半果重!H25",
+          "reference": "0.93740803955035",
+          "current_cache": "0.93740803955035",
+          "reference_cache": "0.93740803955035"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H109",
+          "current": "=[1]固形物!B25",
+          "reference": "4.1893883951908",
+          "current_cache": "4.1893883951908",
+          "reference_cache": "4.1893883951908"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I109",
+          "current": "=[1]VC!H25",
+          "reference": "275.189394103555",
+          "current_cache": "275.189394103555",
+          "reference_cache": "275.189394103555"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J109",
+          "current": "=[1]蛋白质!G25",
+          "reference": "13.4579114828367",
+          "current_cache": "13.4579114828367",
+          "reference_cache": "13.4579114828367"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K109",
+          "current": "=[1]糖!F25",
+          "reference": "21.9534433420679",
+          "current_cache": "21.9534433420679",
+          "reference_cache": "21.9534433420679"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B110",
+          "current": "=B107+1",
+          "reference": "9",
+          "current_cache": "9",
+          "reference_cache": "9"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E110",
+          "current": "=E107",
+          "reference": "1",
+          "current_cache": "1",
+          "reference_cache": "1"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F110",
+          "current": "=[1]硬度!B26",
+          "reference": "7.42833333333333",
+          "current_cache": "7.42833333333333",
+          "reference_cache": "7.42833333333333"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G110",
+          "current": "=[1]半果重!H26",
+          "reference": "0.939635499703023",
+          "current_cache": "0.939635499703023",
+          "reference_cache": "0.939635499703023"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H110",
+          "current": "=[1]固形物!B26",
+          "reference": "4.20510576221736",
+          "current_cache": "4.20510576221736",
+          "reference_cache": "4.20510576221736"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I110",
+          "current": "=[1]VC!H26",
+          "reference": "261.94148661664",
+          "current_cache": "261.94148661664",
+          "reference_cache": "261.94148661664"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J110",
+          "current": "=[1]蛋白质!G26",
+          "reference": "12.4637046299191",
+          "current_cache": "12.4637046299191",
+          "reference_cache": "12.4637046299191"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K110",
+          "current": "=[1]糖!F26",
+          "reference": "22.2899860881248",
+          "current_cache": "22.2899860881248",
+          "reference_cache": "22.2899860881248"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B111",
+          "current": "=B108+1",
+          "reference": "9",
+          "current_cache": "9",
+          "reference_cache": "9"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E111",
+          "current": "=E108",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F111",
+          "current": "=[1]硬度!B27",
+          "reference": "6.93333333333333",
+          "current_cache": "6.93333333333333",
+          "reference_cache": "6.93333333333333"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G111",
+          "current": "=[1]半果重!H27",
+          "reference": "0.941164651910391",
+          "current_cache": "0.941164651910391",
+          "reference_cache": "0.941164651910391"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H111",
+          "current": "=[1]固形物!B27",
+          "reference": "4.18501654018291",
+          "current_cache": "4.18501654018291",
+          "reference_cache": "4.18501654018291"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I111",
+          "current": "=[1]VC!H27",
+          "reference": "310.438272459406",
+          "current_cache": "310.438272459406",
+          "reference_cache": "310.438272459406"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J111",
+          "current": "=[1]蛋白质!G27",
+          "reference": "12.0758314953249",
+          "current_cache": "12.0758314953249",
+          "reference_cache": "12.0758314953249"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K111",
+          "current": "=[1]糖!F27",
+          "reference": "20.9536532248498",
+          "current_cache": "20.9536532248498",
+          "reference_cache": "20.9536532248498"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B112",
+          "current": "=B109+1",
+          "reference": "9",
+          "current_cache": "9",
+          "reference_cache": "9"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E112",
+          "current": "=E109",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F112",
+          "current": "=[1]硬度!B28",
+          "reference": "6.08166666666667",
+          "current_cache": "6.08166666666667",
+          "reference_cache": "6.08166666666667"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G112",
+          "current": "=[1]半果重!H28",
+          "reference": "0.939128065395095",
+          "current_cache": "0.939128065395095",
+          "reference_cache": "0.939128065395095"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H112",
+          "current": "=[1]固形物!B28",
+          "reference": "4.05312644742937",
+          "current_cache": "4.05312644742937",
+          "reference_cache": "4.05312644742937"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I112",
+          "current": "=[1]VC!H28",
+          "reference": "227.237389063391",
+          "current_cache": "227.237389063391",
+          "reference_cache": "227.237389063391"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J112",
+          "current": "=[1]蛋白质!G28",
+          "reference": "14.5309334511815",
+          "current_cache": "14.5309334511815",
+          "reference_cache": "14.5309334511815"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K112",
+          "current": "=[1]糖!F28",
+          "reference": "20.2762255304852",
+          "current_cache": "20.2762255304852",
+          "reference_cache": "20.2762255304852"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B113",
+          "current": "=B110+1",
+          "reference": "10",
+          "current_cache": "10",
+          "reference_cache": "10"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E113",
+          "current": "=E110",
+          "reference": "1",
+          "current_cache": "1",
+          "reference_cache": "1"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F113",
+          "current": "=[1]硬度!B29",
+          "reference": "8.44",
+          "current_cache": "8.44",
+          "reference_cache": "8.44"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G113",
+          "current": "=[1]半果重!H29",
+          "reference": "0.931940172486581",
+          "current_cache": "0.931940172486581",
+          "reference_cache": "0.931940172486581"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H113",
+          "current": "=[1]固形物!B29",
+          "reference": "4.51725724804418",
+          "current_cache": "4.51725724804418",
+          "reference_cache": "4.51725724804418"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I113",
+          "current": "=[1]VC!H29",
+          "reference": "272.34292710343",
+          "current_cache": "272.34292710343",
+          "reference_cache": "272.34292710343"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J113",
+          "current": "=[1]蛋白质!G29",
+          "reference": "15.2750217313494",
+          "current_cache": "15.2750217313494",
+          "reference_cache": "15.2750217313494"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K113",
+          "current": "=[1]糖!F29",
+          "reference": "23.2720156965209",
+          "current_cache": "23.2720156965209",
+          "reference_cache": "23.2720156965209"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B114",
+          "current": "=B111+1",
+          "reference": "10",
+          "current_cache": "10",
+          "reference_cache": "10"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E114",
+          "current": "=E111",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F114",
+          "current": "=[1]硬度!B30",
+          "reference": "12.2275",
+          "current_cache": "12.2275",
+          "reference_cache": "12.2275"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G114",
+          "current": "=[1]半果重!H30",
+          "reference": "0.927071178529755",
+          "current_cache": "0.927071178529755",
+          "reference_cache": "0.927071178529755"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H114",
+          "current": "=[1]固形物!B30",
+          "reference": "4.66777357990323",
+          "current_cache": "4.66777357990323",
+          "reference_cache": "4.66777357990323"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I114",
+          "current": "=[1]VC!H30",
+          "reference": "245.377743999037",
+          "current_cache": "245.377743999037",
+          "reference_cache": "245.377743999037"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J114",
+          "current": "=[1]蛋白质!G30",
+          "reference": "13.6505691091824",
+          "current_cache": "13.6505691091824",
+          "reference_cache": "13.6505691091824"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K114",
+          "current": "=[1]糖!F30",
+          "reference": "24.3879753901889",
+          "current_cache": "24.3879753901889",
+          "reference_cache": "24.3879753901889"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B115",
+          "current": "=B112+1",
+          "reference": "10",
+          "current_cache": "10",
+          "reference_cache": "10"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E115",
+          "current": "=E112",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F115",
+          "current": "=[1]硬度!B31",
+          "reference": "7.535",
+          "current_cache": "7.535",
+          "reference_cache": "7.535"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G115",
+          "current": "=[1]半果重!H31",
+          "reference": "0.936308161708619",
+          "current_cache": "0.936308161708619",
+          "reference_cache": "0.936308161708619"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H115",
+          "current": "=[1]固形物!B31",
+          "reference": "4.35683553548901",
+          "current_cache": "4.35683553548901",
+          "reference_cache": "4.35683553548901"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I115",
+          "current": "=[1]VC!H31",
+          "reference": "322.679554210808",
+          "current_cache": "322.679554210808",
+          "reference_cache": "322.679554210808"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J115",
+          "current": "=[1]蛋白质!G31",
+          "reference": "12.9364397637947",
+          "current_cache": "12.9364397637947",
+          "reference_cache": "12.9364397637947"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K115",
+          "current": "=[1]糖!F31",
+          "reference": "22.4236756123936",
+          "current_cache": "22.4236756123936",
+          "reference_cache": "22.4236756123936"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B116",
+          "current": "=B113+1",
+          "reference": "11",
+          "current_cache": "11",
+          "reference_cache": "11"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E116",
+          "current": "=E113",
+          "reference": "1",
+          "current_cache": "1",
+          "reference_cache": "1"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F116",
+          "current": "=[1]硬度!B32",
+          "reference": "7.14166666666667",
+          "current_cache": "7.14166666666667",
+          "reference_cache": "7.14166666666667"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G116",
+          "current": "=[1]半果重!H32",
+          "reference": "0.940966952643479",
+          "current_cache": "0.940966952643479",
+          "reference_cache": "0.940966952643479"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H116",
+          "current": "=[1]固形物!B32",
+          "reference": "4.23731840597094",
+          "current_cache": "4.23731840597094",
+          "reference_cache": "4.23731840597094"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I116",
+          "current": "=[1]VC!H32",
+          "reference": "305.541668980117",
+          "current_cache": "305.541668980117",
+          "reference_cache": "305.541668980117"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J116",
+          "current": "=[1]蛋白质!G32",
+          "reference": "12.3788782413669",
+          "current_cache": "12.3788782413669",
+          "reference_cache": "12.3788782413669"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K116",
+          "current": "=[1]糖!F32",
+          "reference": "21.2313463599595",
+          "current_cache": "21.2313463599595",
+          "reference_cache": "21.2313463599595"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B117",
+          "current": "=B114+1",
+          "reference": "11",
+          "current_cache": "11",
+          "reference_cache": "11"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E117",
+          "current": "=E114",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F117",
+          "current": "=[1]硬度!B33",
+          "reference": "7.2925",
+          "current_cache": "7.2925",
+          "reference_cache": "7.2925"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G117",
+          "current": "=[1]半果重!H33",
+          "reference": "0.93705035971223",
+          "current_cache": "0.93705035971223",
+          "reference_cache": "0.93705035971223"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H117",
+          "current": "=[1]固形物!B33",
+          "reference": "4.60737376945062",
+          "current_cache": "4.60737376945062",
+          "reference_cache": "4.60737376945062"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I117",
+          "current": "=[1]VC!H33",
+          "reference": "326.946209957297",
+          "current_cache": "326.946209957297",
+          "reference_cache": "326.946209957297"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J117",
+          "current": "=[1]蛋白质!G33",
+          "reference": "16.3487456335345",
+          "current_cache": "16.3487456335345",
+          "reference_cache": "16.3487456335345"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K117",
+          "current": "=[1]糖!F33",
+          "reference": "24.3969636207344",
+          "current_cache": "24.3969636207344",
+          "reference_cache": "24.3969636207344"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B118",
+          "current": "=B115+1",
+          "reference": "11",
+          "current_cache": "11",
+          "reference_cache": "11"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E118",
+          "current": "=E115",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F118",
+          "current": "=[1]硬度!B34",
+          "reference": "7.03833333333333",
+          "current_cache": "7.03833333333333",
+          "reference_cache": "7.03833333333333"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G118",
+          "current": "=[1]半果重!H34",
+          "reference": "0.936648346287684",
+          "current_cache": "0.936648346287684",
+          "reference_cache": "0.936648346287684"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H118",
+          "current": "=[1]固形物!B34",
+          "reference": "4.49970578620464",
+          "current_cache": "4.49970578620464",
+          "reference_cache": "4.49970578620464"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I118",
+          "current": "=[1]VC!H34",
+          "reference": "301.261776750719",
+          "current_cache": "301.261776750719",
+          "reference_cache": "301.261776750719"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J118",
+          "current": "=[1]蛋白质!G34",
+          "reference": "16.3277059959168",
+          "current_cache": "16.3277059959168",
+          "reference_cache": "16.3277059959168"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K118",
+          "current": "=[1]糖!F34",
+          "reference": "25.5921155085501",
+          "current_cache": "25.5921155085501",
+          "reference_cache": "25.5921155085501"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B119",
+          "current": "=B116+1",
+          "reference": "12",
+          "current_cache": "12",
+          "reference_cache": "12"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E119",
+          "current": "=E116",
+          "reference": "1",
+          "current_cache": "1",
+          "reference_cache": "1"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F119",
+          "current": "=[1]硬度!B35",
+          "reference": "7.045",
+          "current_cache": "7.045",
+          "reference_cache": "7.045"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G119",
+          "current": "=[1]半果重!H35",
+          "reference": "0.938989974006684",
+          "current_cache": "0.938989974006684",
+          "reference_cache": "0.938989974006684"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H119",
+          "current": "=[1]固形物!B35",
+          "reference": "4.32959065082645",
+          "current_cache": "4.32959065082645",
+          "reference_cache": "4.32959065082645"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I119",
+          "current": "=[1]VC!H35",
+          "reference": "280.229909987568",
+          "current_cache": "280.229909987568",
+          "reference_cache": "280.229909987568"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J119",
+          "current": "=[1]蛋白质!G35",
+          "reference": "14.0311433636551",
+          "current_cache": "14.0311433636551",
+          "reference_cache": "14.0311433636551"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K119",
+          "current": "=[1]糖!F35",
+          "reference": "23.3974870842399",
+          "current_cache": "23.3974870842399",
+          "reference_cache": "23.3974870842399"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B120",
+          "current": "=B117+1",
+          "reference": "12",
+          "current_cache": "12",
+          "reference_cache": "12"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E120",
+          "current": "=E117",
+          "reference": "2",
+          "current_cache": "2",
+          "reference_cache": "2"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F120",
+          "current": "=[1]硬度!B36",
+          "reference": "9.55",
+          "current_cache": "9.55",
+          "reference_cache": "9.55"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G120",
+          "current": "=[1]半果重!H36",
+          "reference": "0.929805319440636",
+          "current_cache": "0.929805319440636",
+          "reference_cache": "0.929805319440636"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H120",
+          "current": "=[1]固形物!B36",
+          "reference": "4.63810846560847",
+          "current_cache": "4.63810846560847",
+          "reference_cache": "4.63810846560847"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I120",
+          "current": "=[1]VC!H36",
+          "reference": "279.91362182262",
+          "current_cache": "279.91362182262",
+          "reference_cache": "279.91362182262"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J120",
+          "current": "=[1]蛋白质!G36",
+          "reference": "12.9006904647381",
+          "current_cache": "12.9006904647381",
+          "reference_cache": "12.9006904647381"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K120",
+          "current": "=[1]糖!F36",
+          "reference": "20.2250958578161",
+          "current_cache": "20.2250958578161",
+          "reference_cache": "20.2250958578161"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "B121",
+          "current": "=B118+1",
+          "reference": "12",
+          "current_cache": "12",
+          "reference_cache": "12"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "E121",
+          "current": "=E118",
+          "reference": "3",
+          "current_cache": "3",
+          "reference_cache": "3"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "F121",
+          "current": "=[1]硬度!B37",
+          "reference": "9.04166666666667",
+          "current_cache": "9.04166666666667",
+          "reference_cache": "9.04166666666667"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G121",
+          "current": "=[1]半果重!H37",
+          "reference": "0.923251718457081",
+          "current_cache": "0.923251718457081",
+          "reference_cache": "0.923251718457081"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "H121",
+          "current": "=[1]固形物!B37",
+          "reference": "4.50596896140072",
+          "current_cache": "4.50596896140072",
+          "reference_cache": "4.50596896140072"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "I121",
+          "current": "=[1]VC!H37",
+          "reference": "294.648152566811",
+          "current_cache": "294.648152566811",
+          "reference_cache": "294.648152566811"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "J121",
+          "current": "=[1]蛋白质!G37",
+          "reference": "12.0265612515706",
+          "current_cache": "12.0265612515706",
+          "reference_cache": "12.0265612515706"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K121",
+          "current": "=[1]糖!F37",
+          "reference": "20.9910708005624",
+          "current_cache": "20.9910708005624",
+          "reference_cache": "20.9910708005624"
+        }
+      ],
+      "sheet_changes": [
+        {
+          "sheet": "Sheet2",
+          "side": "仅当前"
+        }
+      ]
+    },
+    {
+      "relative_path": "2026春\\2026春土壤养分数据集.xlsx",
+      "chosen_side": "参照",
+      "current_time": "2026-10-07T22:46:12.882835+08:00",
+      "reference_time": "2026-10-08T15:59:20.275741+08:00",
+      "cells": [
+        {
+          "sheet": "Sheet1",
+          "address": "F30",
+          "current": "=AVERAGE(F26:F29,F31:F37)",
+          "reference": "9.90545182464373",
+          "current_cache": "9.90545182464373",
+          "reference_cache": "9.90545182464373"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "G30",
+          "current": "=AVERAGE(G26:G29,G31:G37)",
+          "reference": "189.697317685934",
+          "current_cache": "189.697317685934",
+          "reference_cache": "189.697317685934"
+        },
+        {
+          "sheet": "Sheet1",
+          "address": "K30",
+          "current": "0.726647391916647",
+          "reference": "0.48515938",
+          "current_cache": "0.726647391916647",
+          "reference_cache": "0.48515938"
+        }
+      ],
+      "sheet_changes": []
+    }
+  ]
+}

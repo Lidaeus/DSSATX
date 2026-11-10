@@ -15,7 +15,7 @@ def _parameter_csv(path: Path, **values: float) -> Path:
 
 
 def test_numeric_scom_does_not_shift_soil_scalar_injection(tmp_path, monkeypatch) -> None:
-    source = Path(__file__).resolve().parents[1] / "data/raw/soil/SOIL.SOL"
+    source = Path(__file__).resolve().parents[1] / "data/user/experiments/xxql2501_final_20261105/SOIL.SOL"
     (tmp_path / "SOIL.SOL.base").write_bytes(source.read_bytes())
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(run_dssat, "SOIL_BASE_FILE", "SOIL.SOL.base")
@@ -29,10 +29,10 @@ def test_numeric_scom_does_not_shift_soil_scalar_injection(tmp_path, monkeypatch
         SOIL_SLNF=0.88,
         SOIL_SLPF=0.93,
     )
-    run_dssat.update_soil_file(str(params), soil_id="IBTM910017")
+    run_dssat.update_soil_file(str(params), soil_id="XXSL2501")
 
     lines = (tmp_path / "SOIL.SOL").read_text(encoding="utf-8").splitlines()
-    profile = next(i for i, line in enumerate(lines) if line.startswith("*IBTM910017"))
+    profile = next(i for i, line in enumerate(lines) if line.startswith("*XXSL2501"))
     header = next(i for i in range(profile, profile + 10) if "SCOM" in lines[i] and "SLPF" in lines[i])
     names = lines[header].split()[1:]
     row = dict(zip(names, lines[header + 1].split()))

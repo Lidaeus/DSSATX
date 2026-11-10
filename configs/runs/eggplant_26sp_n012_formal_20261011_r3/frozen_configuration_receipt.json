@@ -1,0 +1,18 @@
+{
+  "frozen_at": "2026-10-11T09:02:02.335661+00:00",
+  "design_sha256": "0ba8c99562ed9fb7e03b62d697c9b124a189e417f62e58732b830b7d43883b17",
+  "files": {
+    "approval_receipt.json": "d1a81b003805deb7fd41eda7d8af8995a593d4b6ab07dd501d376f360a3e40d1",
+    "calibration_observations.csv": "c4bd2c5e5ab2f25a253d68d689de6353377f5367475a4d9d7f462f64d4ad26f8",
+    "design.json": "0ba8c99562ed9fb7e03b62d697c9b124a189e417f62e58732b830b7d43883b17",
+    "locked_evaluation_observations.csv": "4e315e7b93ea4f4ed0c470eb2712794c9b8e209355d8ae1c5bf4aaf65a72da2f",
+    "repair_receipt.json": "3b7875b46a838fb7b4a7aff329ced1670e0bf2df179f565e1de35b6d4284be12",
+    "review_fruit_sampling_definition.json": "2a5bb03f06feaa0315d357b1bffe65ab1b67c1a5dae6c01f845f18e71f70816d",
+    "review_objective_policy.csv": "de95e36b8a3e1839683d5de423e33a55c0c35a237e65f9684a5ae2b429a08244",
+    "review_observation_catalog.csv": "e923837c9323a06d628dac5ad58674f39bc7a3c36744463adaab16f59b86f1b0",
+    "review_parameter_review.csv": "484d909191852135ef9ae8f21ae43ed702bb72340681b79ba2e2a0e5264e426e",
+    "review_proposal.json": "008943c95d7a0f4cee83fda9ca7f1b2cc5bd2829ee48028392687a81cfe0b07d",
+    "review_proposal_receipt.json": "1f9afedc8e057036fa2a98572ce8492a123679d0f7b54fc61e9b814d5f39bfbc",
+    "review_recent_parameter_comparison.csv": "db8ffb8e4602d45a6dcfe4cb6a37ec768e07c7d84ee5ea364c3bea6bf8479278"
+  }
+}

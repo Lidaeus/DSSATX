@@ -1,0 +1,12 @@
+bounds_id: "eggplant_full_gen_physiol_repair_13trt_20260921"
+crop: "eggplant"
+created_at: "2026-09-21T15:12:16Z"
+approved_at: "2026-09-21T15:12:16Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "eggplant_full_gen_physiol_repair_13trt_20260921.csv"
+derived_from_sha256: "8afb4ae4586d0d7a31cc8971569c46811097200fdf54ad3ac2d3482a8fe741b5"
+bounds_sha256: "d57a16a09f833a16a6bf36ad9573630b8e2d856440fd313e55a0f2c422653a7e"
+parameter_count: 166
+automatic_repairs: 0
+notes: "Physiological repair calibration bounds: senrte [0.80, 1.80], nmobmx [0.06, 0.12], FNPGN1 [2.40, 3.50] with init=3.20, FNPGN2 [4.50, 5.30], lnref [4.50, 5.30], nslope [0.15, 0.38], nstfac [0.80, 0.98], ICNS_25SP=0.75 fixed, SOIL_SLU1=1.70 fixed."

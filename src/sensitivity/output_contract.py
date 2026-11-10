@@ -115,6 +115,18 @@ def load_output_contract(
     contract["fruit_time_points"] = fruit_time_points
     contract["time_points"] = sorted(set(lai_time_points) | set(fruit_time_points))
     contract["path"] = str(profile_path)
+    if contract.get('contract_version') == 'expanded_morris_20261030':
+        if not contract.get('execution_allowed'):
+            raise ValueError('Sensitivity output contract has not been authorized for execution')
+        names = observation_names(contract)
+        ranked = list(contract.get('ranking_observations', []))
+        diagnostic = list(contract.get('diagnostic_observations', []))
+        if (len(names) != contract['observation_count'] or len(set(ranked)) != len(ranked)
+                or len(set(diagnostic)) != len(diagnostic) or set(ranked) & set(diagnostic)
+                or set(ranked) | set(diagnostic) != set(names)):
+            raise ValueError('Ranked/diagnostic responses must partition the exact output contract')
+        if len(ranked) != contract['ranked_observation_count']:
+            raise ValueError('Ranked response count does not match declaration')
     return contract
 
 

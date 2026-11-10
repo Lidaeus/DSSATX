@@ -1,0 +1,12 @@
+bounds_id: "eggplant_final_springs_56_no_xfpht_xfint_200x4_8agents_20261107"
+crop: "eggplant"
+created_at: "2026-11-07T14:05:53Z"
+approved_at: "2026-11-07T14:05:53Z"
+approved_by: "Lidaeus"
+review_status: "approved"
+derived_from: "approved_trial_bounds.csv"
+derived_from_sha256: "c8a38356af4208afdc96a935c79860216f724c69686f3f4ebe2fd2ac22ecd063"
+bounds_sha256: "0c55144f0d076d172d16c0955ec45901a607f5493889d3e9995cfddb82c9fec1"
+parameter_count: 124
+automatic_repairs: 0
+notes: "Remove XFPHT and XFINT from calibration and retain native ECO template fields."

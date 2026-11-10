@@ -642,6 +642,7 @@ def assemble_bundle(src_dir: Path, dst_dir: Path, ref_obs_dir: Path, season_id: 
 
 
 def main() -> int:
+    raise SystemExit("Retired 2026-09-17 builder: use build_corrected_bundles_20260923.py")
     parser = argparse.ArgumentParser(description="Assemble refreshed bundles for 25SP, 26SP, 25FA")
     parser.parse_args()
 

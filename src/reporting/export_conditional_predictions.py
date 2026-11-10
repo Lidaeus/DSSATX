@@ -228,11 +228,11 @@ def load_two_season_metadata(path: Path) -> pd.DataFrame:
     unknown_role = set(frame["dataset_role"]) - {"calibration", "validation"}
     if unknown_role:
         raise ValueError(f"unknown dataset roles in frozen metadata: {sorted(unknown_role)}")
-    expected = {"25SP": 10, "26SP": 12}
-    for season, count in expected.items():
+    expected = {"25SP": (10, 11), "26SP": (12,)}
+    for season, counts in expected.items():
         actual = int((frame["season_id"] == season).sum())
-        if actual != count:
-            raise ValueError(f"{season} must list {count} treatments, found {actual}")
+        if actual not in counts:
+            raise ValueError(f"{season} must list one of {counts} treatments, found {actual}")
     return frame
 
 

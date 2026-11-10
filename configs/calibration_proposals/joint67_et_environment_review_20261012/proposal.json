@@ -1,0 +1,90 @@
+{
+  "schema": "non_executable_ET_environment_review_v1",
+  "approved": false,
+  "executable": false,
+  "status": "awaiting_review_and_process_diagnostic",
+  "parent_proposal": "configs/calibration_proposals/joint67_response_revision_20261012/proposal.json",
+  "report": "docs/reports/两春季实测耗水与模拟ET对比及环境参数建议_20261012.md",
+  "active_count_current_proposed": 64,
+  "soil_parameters_not_yet_added": true,
+  "target_count_proposed": 513,
+  "family_count_proposed": 16,
+  "phi_budget": 100,
+  "observation_definition": "observed I - delta soil storage 0-100cm; rain/runoff/deep percolation assumed zero; not independent true ET",
+  "observation_dates_2026": [
+    "2026-03-14",
+    "2026-05-02",
+    "2026-07-17"
+  ],
+  "original_dates_2025": [
+    "2025-03-12",
+    "2025-05-01",
+    "2025-05-24",
+    "2025-07-12"
+  ],
+  "proposed_operator": "WB100 = delta IRRC + delta PREC - delta ROFC - delta volume water stock0to100; model drainage retained",
+  "boundary_policy": "morning [start,end) approximation; exact hours unknown except first preirrigation sample; evening sensitivity exported",
+  "parameters": {
+    "RWUMX": {
+      "lower": 0.008,
+      "upper": 0.025,
+      "init": 0.012,
+      "status": "previous_review_suggestion_not_frozen"
+    },
+    "KEP": {
+      "lower": 0.7,
+      "upper": 0.9,
+      "init": 0.85,
+      "status": "previous_review_suggestion_not_frozen"
+    },
+    "SOIL_SLDR": {
+      "diagnostic_values": [
+        0.1,
+        0.25,
+        0.4,
+        0.65,
+        0.9
+      ],
+      "baseline": 0.65,
+      "status": "diagnostic_only_not_formal_bounds"
+    },
+    "SSKS": {
+      "diagnostic_common_scales": [
+        0.5,
+        1,
+        2
+      ],
+      "status": "diagnostic_only_not_formal_bounds"
+    },
+    "SALB": {
+      "diagnostic_values": [
+        0.08,
+        0.13,
+        0.2
+      ],
+      "baseline": 0.13,
+      "status": "secondary_probe_only"
+    },
+    "SLU1": {
+      "diagnostic_values": [
+        2,
+        5.5,
+        8
+      ],
+      "baseline": 5.5,
+      "status": "secondary_probe_only"
+    }
+  },
+  "uncertainty": {
+    "repeat_sd": "use reported SD, n_eff=1 provisional",
+    "floor_mm": 10,
+    "method_cv": 0.1,
+    "provisional": true,
+    "correlation_with_vwc": "shared source soil samples, unknown covariance; no claim of independence"
+  },
+  "selection_policy": "2026 process fit only; 2025 retrospective locked external checks, no validation-optimal selection",
+  "new_model_runs": false,
+  "formal_calibration_launched": false,
+  "weather_and_frozen_inputs_changed": false,
+  "receipt_sha256": "4ab4d7d45c60f7025209c0cb5a8c934431ef107ea62fe4deb65794a96b734108"
+}

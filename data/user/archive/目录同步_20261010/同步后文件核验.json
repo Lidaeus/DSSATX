@@ -1,0 +1,170 @@
+[
+  {
+    "file": "2025春\\2025年春季茄子植株样氮磷钾测定.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "10d637dd8793a0e14847cd6689579ea092bc47a015cba60b0c811650e7fdf4aa",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025春\\2025春产量数据集.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "8b4f898d328505cb54b9bb53756cea715220c1ce1ffb8ef4dffe7b3f057955e0",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025春\\2025春作物生长指标集.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "4f9bb1b18c784ddaf796ef7f0a3ab3d2a1310a44320bb64496ea2b5dd4401fd5",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025春\\2025春初始土壤基础养分.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "185a541cda581ae697811f693f73fba005c72abd6b7c0a5006ee17d1b150792c",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025春\\2025春品质集优先采用品质集中的果实含水率.xlsx",
+    "action": "源较新，替换目标",
+    "destination_sha256": "2ecd56c89fe0d471dc25e3930cbce6c6c55e54708090532dab654571a83fcf9e",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025春\\2025春土壤含水量数据集.xlsx",
+    "action": "源较新，替换目标",
+    "destination_sha256": "37cf4750ce5f8e9ef51aec0230b71b8e495f89baaa12b51377cdd020ef2a6596",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025春\\2025春土壤有机质估算与校准集.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "53d1707f63b99ac92370d5f18182163f783bb90b4208223895abffa5049e933a",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025春\\2025春季历次灌水记录原始及整理.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "1647edbcbb21be62b7ee9c0d49486f46c4d905dbcdfbdd7bb9426f50cb0eb868",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025春\\2025春季灌水及施肥整理结果.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "f1013d6c50fb2c3720530f17e270c1691ac50b8d4a2709f665f3f9d1b26b092e",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025秋\\2025 2号棚秋季取土.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "213e47c26f13b230334587872fceabd0db4656f7631266dc8ab10ba4ceb4a73b",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025秋\\2025年秋季茄子植株样氮磷钾测定.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "669ab10882dd4f7ff7e6d4572d97e7927726b465a63c9761037646a879cad4ef",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025秋\\2025年秋季茄子生长指标集.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "0c81be6f3a2fa4779fd439bb78a44eb94673a5a953476f664518daec1ee55d86",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025秋\\2025秋土壤养分数据集.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "dcf64c68eb77c76041b396c205273f259a4a5d9fc3827c2cc3a4efa882925435",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025秋\\2025秋季2号棚1130日spad窄数据.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "0be1885e4915d8d5ba1a7db4f8d690a9602ee7dc37504767ac22b88db730f22f",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025秋\\2025秋季产量集.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "32ae0d5107684f37ee88f87add3683c4de9d841532a5321d32b6557a9f9bd69d",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025秋\\20260106_2号棚取土.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "786e1ad1202054257ebfa45377ffa1511978c8b7bfe2cef64413ef1de90589f6",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025秋\\25年秋季2号棚品质指标集.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "43c342bc9eb8427efbcc17339e42e751cb8e4f4267ccfa453fc5e65056723c95",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2025秋\\25年秋季茄子灌水施肥记录-整理.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "a148a1f37c5ade3008e74975cad3625135d5872d9920045388864c0034dfcf22",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2026春\\20260519_SPAD.xlsx",
+    "action": "源较新，替换目标",
+    "destination_sha256": "f8258ecc5bfa47da63629ddd9a35d31456e0f26c7cd549b1e172bb17683a1253",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2026春\\2026年灌水施肥数据-整理.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "f2af43b5352475a9d3187aea04d847a09f90af0323c410a45599f01b3597960a",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2026春\\2026春LI6400_数据整理.xlsx",
+    "action": "新增到目标",
+    "destination_sha256": "b4b57e9ee178251f67034fc7c56d7d462208b5e7f6b65ed82704ec227c144562",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2026春\\2026春产量集.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "fdfaa8781803cc5f1e081b6c739138f75d2a1159b3932be8ff9df4b51a5da86e",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2026春\\2026春品质指标集.xlsx",
+    "action": "目标较新，保留目标",
+    "destination_sha256": "3b431bc32774404a0ec750284b0703023cce650804262f8aa85ab5c48664958d",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2026春\\2026春土壤养分数据集.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "cc9fb4e2629820b05f853bd879f2a682b1f135b957845ef7d2a1a5e8ff58c6b9",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2026春\\2026春土壤含水量数据集.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "cb13eaff04bb45caa4eca0144261520a99aaa9241a9e19bc326faf1754522530",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2026春\\2026春生长指标集结果.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "b3266862d81a14324ec6c4e7f818b457e2ede8b88c0a85074ba13ed3eddb9f42",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2026春\\2026春茎叶果氮磷钾.xlsx",
+    "action": "相同，保留目标",
+    "destination_sha256": "7cf13bed2f93397a96c8cd730549a94a1f3c8944aec8b8ebde1b3fd40af3aaaf",
+    "matches_selected_version": true
+  },
+  {
+    "file": "2026春\\LI600_分系统清洗结果.xlsx",
+    "action": "新增到目标",
+    "destination_sha256": "16ccd4c885056ac2c5a6e816d228748006a520274e73bab611f0746b62e96552",
+    "matches_selected_version": true
+  }
+]

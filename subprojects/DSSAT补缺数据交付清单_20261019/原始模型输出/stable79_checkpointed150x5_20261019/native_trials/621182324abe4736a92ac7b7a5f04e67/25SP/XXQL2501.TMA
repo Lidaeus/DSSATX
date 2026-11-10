@@ -1,0 +1,12 @@
+*EXP.DATA (A): XXQL2501 EGGPLANT; rebuilt 2026-10-10
+! Current workbooks; no imputation. See decision_record.json and provenance tables.
+! MDAT missing: former PODD proxy is not an observed physiological maturity date.
+@TRNO   PDAT  ADAT  MDAT  HDAT  HWAM  LWAM  SWAM  LAIX  HIAM  SNAM  CNAM  HWAH HWAHF
+     2 25075 25112   -99 25192   -99  1251  2577 4.008   -99   -99   -99  3644 69105
+     3 25075 25112   -99 25192   -99  1185  2160 3.895   -99   -99   -99  3657 69584
+     4 25075 25112   -99 25192   -99  1460  2817 4.472   -99   -99   -99  3706 67085
+     5 25075 25112   -99 25192   -99  1027  1714 3.347   -99   -99   -99  3310 64125
+    10 25075 25112   -99 25192   -99  1256  2474 4.015   -99   -99   -99  3361 60003
+    11 25075 25112   -99 25192   -99  1260  2389 3.952   -99   -99   -99  3405 60772
+    12 25075 25112   -99 25192   -99  1338  2533 4.209   -99   -99   -99  3309 59129
+    13 25075 25112   -99 25192   -99  1022  1683 3.390   -99   -99   -99  2984 55252
