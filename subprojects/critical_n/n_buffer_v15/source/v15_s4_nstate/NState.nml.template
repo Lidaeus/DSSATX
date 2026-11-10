@@ -1,0 +1,20 @@
+&NSTATE
+! Plant-N state characterization for the v15_s4_nstate variant.
+!   nstate_mode = 1 : frozen S1 piecewise psi on total organ N (default;
+!                     this file absent reproduces S1 byte-for-byte)
+!   nstate_mode = 2 : fused psi* -- functional-N basis (v4 functional N
+!                     fused with the S2 signal N) on the unified dilution
+!                     curve; two-sided anchoring: -1 at the reference-band
+!                     floor (floor_ratio), +1 at physical capacity
+!                     (cap_density). Deficiency side is the NNI deficit:
+!                     psi* = (NNI_f - 1)/(1 - r_min).
+!   state_tau     : optional first-order relaxation (days) of the published
+!                   growth-side state (nb_get_psi: XNSTRES / root partition
+!                   / photo / PODS); the root-uptake feedback
+!                   (nb_get_uptake_psi) always reads the instantaneous
+!                   state. 0 disables relaxation (default).
+! Placement: run directory (name NState.nml), or any path exported as
+! DSSAT_NSTATE_NML (calibration sandboxes).
+ nstate_mode = 2
+ state_tau   = 0.0
+/

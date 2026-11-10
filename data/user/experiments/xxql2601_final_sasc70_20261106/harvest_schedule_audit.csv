@@ -1,0 +1,7 @@
+factor,observed_harvest_date,model_execution_date,model_output_date,role
+3,2026-05-26,2026-05-25,2026-05-26,measured_harvest;one_day_CRGRO_output_lag
+3,2026-06-07,2026-06-06,2026-06-07,measured_harvest;one_day_CRGRO_output_lag
+3,2026-06-16,2026-06-15,2026-06-16,measured_harvest;one_day_CRGRO_output_lag
+3,2026-07-01,2026-06-30,2026-07-01,measured_harvest;one_day_CRGRO_output_lag
+3,2026-07-17,2026-07-16,2026-07-17,measured_harvest;one_day_CRGRO_output_lag
+3,,2026-07-17,,terminal_observation_only;no_measured_harvest

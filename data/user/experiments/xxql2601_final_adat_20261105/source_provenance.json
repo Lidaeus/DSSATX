@@ -1,0 +1,165 @@
+{
+  "generator": "tools\\experiments\\refresh_spring_inputs_20261027.py",
+  "generator_sha256": "5a936168c8baf9815fa8c467ceacd36a0444e7f03be62b43d49effa9f07960ba",
+  "transformation_helper_sha256": "c045c6cd27e27b36cb3da014ae66b20aa9a7cef7037376d2d7b02f331e1ee764",
+  "baseline_bundle": "xxql2601_refreshed_20261010",
+  "baseline_manifest_sha256": "3eb23088d4ea456839522be4db423fd7897e837b8dbba756979503aca1646ff1",
+  "sources": [
+    {
+      "season": "26SP",
+      "origin": "D:\\三季节数据汇总\\2026春\\20260519_SPAD.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\spring_input_refresh_20261027\\source_snapshot\\2026春\\20260519_SPAD.xlsx",
+      "sha256": "f8258ecc5bfa47da63629ddd9a35d31456e0f26c7cd549b1e172bb17683a1253",
+      "size_bytes": 11612,
+      "differs_from_maintained_source": false,
+      "excel_error_count": 0,
+      "uncached_formula_count": 0
+    },
+    {
+      "season": "26SP",
+      "origin": "D:\\三季节数据汇总\\2026春\\2026年灌水施肥数据-整理.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\spring_input_refresh_20261027\\source_snapshot\\2026春\\2026年灌水施肥数据-整理.xlsx",
+      "sha256": "f2af43b5352475a9d3187aea04d847a09f90af0323c410a45599f01b3597960a",
+      "size_bytes": 22623,
+      "differs_from_maintained_source": false,
+      "excel_error_count": 0,
+      "uncached_formula_count": 0
+    },
+    {
+      "season": "26SP",
+      "origin": "D:\\三季节数据汇总\\2026春\\2026春LI6400_数据整理.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\spring_input_refresh_20261027\\source_snapshot\\2026春\\2026春LI6400_数据整理.xlsx",
+      "sha256": "b4b57e9ee178251f67034fc7c56d7d462208b5e7f6b65ed82704ec227c144562",
+      "size_bytes": 42618,
+      "differs_from_maintained_source": false,
+      "excel_error_count": 0,
+      "uncached_formula_count": 0
+    },
+    {
+      "season": "26SP",
+      "origin": "D:\\三季节数据汇总\\2026春\\2026春产量集.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\spring_input_refresh_20261027\\source_snapshot\\2026春\\2026春产量集.xlsx",
+      "sha256": "fdfaa8781803cc5f1e081b6c739138f75d2a1159b3932be8ff9df4b51a5da86e",
+      "size_bytes": 19698,
+      "differs_from_maintained_source": false,
+      "excel_error_count": 0,
+      "uncached_formula_count": 0
+    },
+    {
+      "season": "26SP",
+      "origin": "D:\\三季节数据汇总\\2026春\\2026春品质指标集-修正.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\spring_input_refresh_20261027\\source_snapshot\\2026春\\2026春品质指标集-修正.xlsx",
+      "sha256": "0cbe2867b86006904a2f8cba576989525677f65890e523b1d60d7f61f5300e63",
+      "size_bytes": 18536,
+      "differs_from_maintained_source": true,
+      "excel_error_count": 0,
+      "uncached_formula_count": 0
+    },
+    {
+      "season": "26SP",
+      "origin": "D:\\三季节数据汇总\\2026春\\2026春土壤养分数据集.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\spring_input_refresh_20261027\\source_snapshot\\2026春\\2026春土壤养分数据集.xlsx",
+      "sha256": "cc9fb4e2629820b05f853bd879f2a682b1f135b957845ef7d2a1a5e8ff58c6b9",
+      "size_bytes": 15633,
+      "differs_from_maintained_source": false,
+      "excel_error_count": 0,
+      "uncached_formula_count": 0
+    },
+    {
+      "season": "26SP",
+      "origin": "D:\\三季节数据汇总\\2026春\\2026春土壤含水量数据集.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\spring_input_refresh_20261027\\source_snapshot\\2026春\\2026春土壤含水量数据集.xlsx",
+      "sha256": "cb13eaff04bb45caa4eca0144261520a99aaa9241a9e19bc326faf1754522530",
+      "size_bytes": 62064,
+      "differs_from_maintained_source": false,
+      "excel_error_count": 0,
+      "uncached_formula_count": 0
+    },
+    {
+      "season": "26SP",
+      "origin": "D:\\三季节数据汇总\\2026春\\2026春生长指标集结果.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\spring_input_refresh_20261027\\source_snapshot\\2026春\\2026春生长指标集结果.xlsx",
+      "sha256": "1b44476284e8d08681189618e960a2b62d57bc798bf8a5b7cacf73ab1e9c9209",
+      "size_bytes": 20861,
+      "differs_from_maintained_source": true,
+      "excel_error_count": 0,
+      "uncached_formula_count": 0
+    },
+    {
+      "season": "26SP",
+      "origin": "D:\\三季节数据汇总\\2026春\\2026春茎叶果氮磷钾.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\spring_input_refresh_20261027\\source_snapshot\\2026春\\2026春茎叶果氮磷钾.xlsx",
+      "sha256": "35792c8b45c37405a1b0652aff82f6ecd348af308ab36fa986a51060623b62c0",
+      "size_bytes": 33749,
+      "differs_from_maintained_source": true,
+      "excel_error_count": 0,
+      "uncached_formula_count": 0
+    },
+    {
+      "season": "26SP",
+      "origin": "D:\\三季节数据汇总\\2026春\\LI600_分系统清洗结果.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\spring_input_refresh_20261027\\source_snapshot\\2026春\\LI600_分系统清洗结果.xlsx",
+      "sha256": "16ccd4c885056ac2c5a6e816d228748006a520274e73bab611f0746b62e96552",
+      "size_bytes": 434434,
+      "differs_from_maintained_source": false,
+      "excel_error_count": 0,
+      "uncached_formula_count": 0
+    },
+    {
+      "season": "shared",
+      "origin": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\三季实验初始硝态氮铵态氮参考.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\spring_input_refresh_20261027\\source_snapshot\\三季实验初始硝态氮铵态氮参考.xlsx",
+      "sha256": "fe76981d0ac181f3a4435d56ed55efa3fe21f56766eb0a0051658e511405645a",
+      "role": "inherited_approved_prebasal_N"
+    }
+  ],
+  "marker_registry_source": "D:\\Tomato_Cal\\data\\user\\ref\\DSSAT文件\\人工处理值标记.csv",
+  "marker_registry_sha256": "ec406990546c0b0fda6aa40eaa7b26dd2c8533df93d64ab88f2afab4c4ae080c",
+  "final_soil_revision": {
+    "supersedes_bundle": "xxql2601_refreshed_20261027",
+    "supersedes_manifest_sha256": "8bdd6a486ac8d17d60f4e42c2c30129c853e0b45fa6e762d4b557f5c9e4833f7",
+    "date": "2026-11-05",
+    "source": {
+      "origin": "D:\\三季节数据汇总\\2026春\\2026春土壤养分全氮-有机碳集.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\final_soil_cn_20261105\\source_snapshot\\2026春土壤养分全氮-有机碳集.xlsx",
+      "sheet": "Sheet1",
+      "sha256": "020d9b42daa113e962272c88da12e790ae40da05dc247765c34b5b01fe7c6c7f"
+    },
+    "fields": [
+      "organic_c_pct",
+      "total_n_gkg"
+    ],
+    "method": "three replicates per treatment and source layer; dry-soil-mass overlap; SOL equal-treatment mean",
+    "deep_prior": "inherit SOC=0.10 percent and TN=0.10 g/kg only below sampled interval",
+    "other_chemistry_source": {
+      "origin": "D:\\三季节数据汇总\\2026春\\2026春土壤养分数据集.xlsx",
+      "snapshot": "D:\\Tomato_Cal\\workspace\\audits\\final_soil_cn_20261105\\source_snapshot\\2026春土壤养分数据集.xlsx",
+      "sheet": "Sheet1",
+      "sha256": "0f1e2e6b652836d1d1e3054c9f7758e97148586e686ce458a23c69218b731d27"
+    },
+    "treatment_join": {
+      "key": "plot_number",
+      "user_confirmed": "2026-11-05",
+      "sampling_date": "2026-01-06",
+      "source_water_label_conflicts": [
+        4,
+        6,
+        7,
+        9,
+        10,
+        12
+      ],
+      "bundle_water_nitrogen_groups_preserved": true
+    }
+  },
+  "anthesis_revision": {
+    "parent_bundle": "xxql2601_final_20261105",
+    "parent_manifest_sha256": "0988c35a4c898da5200a8518a9a5975507e6a9fa1e7fb47681b34db00a1baa37",
+    "source": "User supplied revised observed anthesis date",
+    "old_adat": 26110,
+    "new_adat": 26122,
+    "date": "2026-05-02",
+    "treatments": 12,
+    "inherited_input_audits": "Historical audit snapshots from the parent bundle"
+  }
+}

@@ -1,0 +1,19 @@
+&ROOTUPTAKE
+! Root kernel selection for the v15_s3_v4root variant (DSSAT-CSM 4.8.2.0).
+!   root_kernel = 1 : frozen S1 dual-channel additive kinetics (default;
+!                     this file absent reproduces S1 byte-for-byte)
+!   root_kernel = 2 : v4-R2 simultaneous kernel -- membrane Michaelis-Menten
+!                     at the root-surface concentration solved jointly with
+!                     (mass flow + effective diffusion) supply (bisection)
+! Engineering values follow 4864 research/n_integration_v2/stage5_engineering.nml
+! and are UNCALIBRATED (not part of the PEST parameter domain).
+!   root_v      g N / m root / d     membrane Vmax per unit root length
+!   root_k      mg N / L water       membrane half-saturation constant
+!   diffusion_k L water / m root / d effective diffusion conductance
+! Placement: run directory (name RootUptake.nml), or any path exported as
+! DSSAT_ROOT_UPTAKE_NML (used by calibration sandboxes).
+ root_kernel   = 2
+ root_v        = 0.0002
+ root_k        = 10.0
+ diffusion_k   = 0.005
+/

@@ -1,0 +1,41 @@
+{
+  "purpose": "Paired 100 x 2 constrained IES pilot; stage 3 predicted-capacity expansion not adopted",
+  "pilots": [
+    {
+      "name": "v15_s1_interface",
+      "run_id": "v15_s1_interface_100x2_20261028",
+      "design": "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\configs\\v15_s1_interface_fresh76_joint_pilot_20261028.json",
+      "design_sha256": "78e07104400d34c6035ef9b917b26bba26f222006354828ee1a39b92911efaa6",
+      "center": "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v14\\runs\\fresh76_a100x2_tcp_recovered_20261018\\best_parameters.csv",
+      "members": 100,
+      "iterations": 2,
+      "workers": 3,
+      "seed": 20261028,
+      "port": 4897,
+      "max_preflight_attempts": 300,
+      "local_fraction": 0.05,
+      "broad_fraction": 0.0,
+      "parameter_domain_unchanged": true,
+      "objective_and_exclusions_unchanged": true,
+      "TRIFL_upper": 0.85
+    },
+    {
+      "name": "v15_s2_weighted_joint",
+      "run_id": "v15_s2_weighted_joint_100x2_20261028",
+      "design": "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\configs\\v15_s2_weighted_joint_fresh76_joint_pilot_20261028.json",
+      "design_sha256": "a6d9eeebf8cf6a7718319d37c781ec1e0cc42786dd40f9cf9cdb86bfbed692cd",
+      "center": "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v14\\runs\\fresh76_a100x2_tcp_recovered_20261018\\best_parameters.csv",
+      "members": 100,
+      "iterations": 2,
+      "workers": 3,
+      "seed": 20261028,
+      "port": 4898,
+      "max_preflight_attempts": 300,
+      "local_fraction": 0.05,
+      "broad_fraction": 0.0,
+      "parameter_domain_unchanged": true,
+      "objective_and_exclusions_unchanged": true,
+      "TRIFL_upper": 0.85
+    }
+  ]
+}

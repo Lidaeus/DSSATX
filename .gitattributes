@@ -17,3 +17,8 @@
 *.SOL -text whitespace=-blank-at-eol,-blank-at-eof
 *.WTH -text whitespace=-blank-at-eol,-blank-at-eof
 *.v48 -text whitespace=-blank-at-eol,-blank-at-eof
+
+# Preserve archived 26SP inputs and frozen plotting data byte for byte.
+fixtures/** -text
+docs/handoff/** -text
+subprojects/critical_n/vnext_v15_s1/source/** -text

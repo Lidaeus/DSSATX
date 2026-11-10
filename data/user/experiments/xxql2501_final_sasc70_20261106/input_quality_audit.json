@@ -1,0 +1,911 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-27T15:04:38Z",
+  "input_dir": "D:\\Tomato_Cal\\workspace\\staging\\spring_input_refresh_20261027\\xxql2501_refreshed_20261027",
+  "filex": "XXQL2501.TMX",
+  "filea": "XXQL2501.TMA",
+  "filet": "XXQL2501.TMT",
+  "observation_row_counts": {
+    "FileA": 8,
+    "FileT": 96,
+    "harvest_events": 72
+  },
+  "available_counts": {
+    "LAID": 32,
+    "SWAD": 32,
+    "LWAD": 32,
+    "CHFPW": 72,
+    "CHPDT": 72,
+    "CNAM": 0,
+    "SNAM": 8,
+    "LNAM": 8,
+    "SNAD": 0,
+    "LNAD": 0
+  },
+  "bundle_summary": {
+    "root": "D:\\Tomato_Cal\\workspace\\staging\\spring_input_refresh_20261027\\xxql2501_refreshed_20261027",
+    "filex": "XXQL2501.TMX",
+    "soil_id": "XXSL2501",
+    "weather_station": "XXTW2403",
+    "treatments": [
+      2,
+      3,
+      4,
+      5,
+      10,
+      11,
+      12,
+      13
+    ],
+    "treatment_factors": {
+      "2": {
+        "CU": 1,
+        "FL": 5,
+        "SA": 2,
+        "IC": 2,
+        "MP": 2,
+        "MI": 1,
+        "MF": 1,
+        "MR": 0,
+        "MC": 0,
+        "MT": 2,
+        "ME": 0,
+        "MH": 5,
+        "SM": 2
+      },
+      "3": {
+        "CU": 1,
+        "FL": 5,
+        "SA": 3,
+        "IC": 3,
+        "MP": 2,
+        "MI": 1,
+        "MF": 2,
+        "MR": 0,
+        "MC": 0,
+        "MT": 2,
+        "ME": 0,
+        "MH": 5,
+        "SM": 2
+      },
+      "4": {
+        "CU": 1,
+        "FL": 5,
+        "SA": 4,
+        "IC": 4,
+        "MP": 2,
+        "MI": 1,
+        "MF": 3,
+        "MR": 0,
+        "MC": 0,
+        "MT": 2,
+        "ME": 0,
+        "MH": 5,
+        "SM": 2
+      },
+      "5": {
+        "CU": 1,
+        "FL": 5,
+        "SA": 5,
+        "IC": 5,
+        "MP": 2,
+        "MI": 1,
+        "MF": 4,
+        "MR": 0,
+        "MC": 0,
+        "MT": 2,
+        "ME": 0,
+        "MH": 5,
+        "SM": 2
+      },
+      "10": {
+        "CU": 1,
+        "FL": 5,
+        "SA": 10,
+        "IC": 10,
+        "MP": 2,
+        "MI": 3,
+        "MF": 1,
+        "MR": 0,
+        "MC": 0,
+        "MT": 2,
+        "ME": 0,
+        "MH": 5,
+        "SM": 2
+      },
+      "11": {
+        "CU": 1,
+        "FL": 5,
+        "SA": 11,
+        "IC": 11,
+        "MP": 2,
+        "MI": 3,
+        "MF": 2,
+        "MR": 0,
+        "MC": 0,
+        "MT": 2,
+        "ME": 0,
+        "MH": 5,
+        "SM": 2
+      },
+      "12": {
+        "CU": 1,
+        "FL": 5,
+        "SA": 12,
+        "IC": 12,
+        "MP": 2,
+        "MI": 3,
+        "MF": 3,
+        "MR": 0,
+        "MC": 0,
+        "MT": 2,
+        "ME": 0,
+        "MH": 5,
+        "SM": 2
+      },
+      "13": {
+        "CU": 1,
+        "FL": 5,
+        "SA": 13,
+        "IC": 13,
+        "MP": 2,
+        "MI": 3,
+        "MF": 4,
+        "MR": 0,
+        "MC": 0,
+        "MT": 2,
+        "ME": 0,
+        "MH": 5,
+        "SM": 2
+      }
+    },
+    "soil_profile": {
+      "soil_id": "XXSL2501",
+      "latitude": 35.16,
+      "longitude": 113.8,
+      "surface": {
+        "SCOM": -99.0,
+        "SALB": 0.13,
+        "SLU1": 5.5,
+        "SLDR": 0.65,
+        "SLRO": 75.0,
+        "SLNF": 1.0,
+        "SLPF": 0.933
+      },
+      "layers": [
+        {
+          "SLB": 2.0,
+          "SLMH": -99.0,
+          "SLLL": 0.142,
+          "SDUL": 0.296,
+          "SSAT": 0.492,
+          "SRGF": 1.0,
+          "SSKS": 2.03,
+          "SBDM": 1.36,
+          "SLOC": 0.94,
+          "SLCL": 15.0,
+          "SLSI": 20.0,
+          "SLCF": 0.0,
+          "SLNI": 0.081,
+          "SLHW": 8.16,
+          "SLHB": -99.0,
+          "SCEC": -99.0,
+          "SADC": -99.0
+        },
+        {
+          "SLB": 4.0,
+          "SLMH": -99.0,
+          "SLLL": 0.142,
+          "SDUL": 0.296,
+          "SSAT": 0.492,
+          "SRGF": 1.0,
+          "SSKS": 2.03,
+          "SBDM": 1.36,
+          "SLOC": 0.94,
+          "SLCL": 15.0,
+          "SLSI": 20.0,
+          "SLCF": 0.0,
+          "SLNI": 0.081,
+          "SLHW": 8.16,
+          "SLHB": -99.0,
+          "SCEC": -99.0,
+          "SADC": -99.0
+        },
+        {
+          "SLB": 15.0,
+          "SLMH": -99.0,
+          "SLLL": 0.142,
+          "SDUL": 0.296,
+          "SSAT": 0.492,
+          "SRGF": 1.0,
+          "SSKS": 2.03,
+          "SBDM": 1.36,
+          "SLOC": 0.94,
+          "SLCL": 15.0,
+          "SLSI": 20.0,
+          "SLCF": 0.0,
+          "SLNI": 0.081,
+          "SLHW": 8.16,
+          "SLHB": -99.0,
+          "SCEC": -99.0,
+          "SADC": -99.0
+        },
+        {
+          "SLB": 30.0,
+          "SLMH": -99.0,
+          "SLLL": 0.149,
+          "SDUL": 0.303,
+          "SSAT": 0.448,
+          "SRGF": 0.9,
+          "SSKS": 1.96,
+          "SBDM": 1.49,
+          "SLOC": 0.72,
+          "SLCL": 15.0,
+          "SLSI": 20.0,
+          "SLCF": 0.0,
+          "SLNI": 0.063,
+          "SLHW": 8.06,
+          "SLHB": -99.0,
+          "SCEC": -99.0,
+          "SADC": -99.0
+        },
+        {
+          "SLB": 40.0,
+          "SLMH": -99.0,
+          "SLLL": 0.152,
+          "SDUL": 0.306,
+          "SSAT": 0.426,
+          "SRGF": 0.8,
+          "SSKS": 1.81,
+          "SBDM": 1.55,
+          "SLOC": 0.63,
+          "SLCL": 15.0,
+          "SLSI": 20.0,
+          "SLCF": 0.0,
+          "SLNI": 0.054,
+          "SLHW": 8.02,
+          "SLHB": -99.0,
+          "SCEC": -99.0,
+          "SADC": -99.0
+        },
+        {
+          "SLB": 60.0,
+          "SLMH": -99.0,
+          "SLLL": 0.171,
+          "SDUL": 0.33,
+          "SSAT": 0.443,
+          "SRGF": 0.65,
+          "SSKS": 0.33,
+          "SBDM": 1.56,
+          "SLOC": 0.35,
+          "SLCL": 15.0,
+          "SLSI": 20.0,
+          "SLCF": 0.0,
+          "SLNI": 0.031,
+          "SLHW": 8.0,
+          "SLHB": -99.0,
+          "SCEC": -99.0,
+          "SADC": -99.0
+        },
+        {
+          "SLB": 80.0,
+          "SLMH": -99.0,
+          "SLLL": 0.157,
+          "SDUL": 0.315,
+          "SSAT": 0.463,
+          "SRGF": 0.2,
+          "SSKS": 2.03,
+          "SBDM": 1.51,
+          "SLOC": 0.1,
+          "SLCL": 15.0,
+          "SLSI": 20.0,
+          "SLCF": 0.0,
+          "SLNI": 0.01,
+          "SLHW": 8.0,
+          "SLHB": -99.0,
+          "SCEC": -99.0,
+          "SADC": -99.0
+        },
+        {
+          "SLB": 100.0,
+          "SLMH": -99.0,
+          "SLLL": 0.167,
+          "SDUL": 0.331,
+          "SSAT": 0.498,
+          "SRGF": 0.2,
+          "SSKS": 1.43,
+          "SBDM": 1.47,
+          "SLOC": 0.1,
+          "SLCL": 15.0,
+          "SLSI": 20.0,
+          "SLCF": 0.0,
+          "SLNI": 0.01,
+          "SLHW": 8.0,
+          "SLHB": -99.0,
+          "SCEC": -99.0,
+          "SADC": -99.0
+        },
+        {
+          "SLB": 140.0,
+          "SLMH": -99.0,
+          "SLLL": 0.165,
+          "SDUL": 0.3,
+          "SSAT": 0.42,
+          "SRGF": 0.0,
+          "SSKS": 0.16,
+          "SBDM": 1.55,
+          "SLOC": 0.1,
+          "SLCL": 15.0,
+          "SLSI": 20.0,
+          "SLCF": 0.0,
+          "SLNI": 0.01,
+          "SLHW": 8.0,
+          "SLHB": -99.0,
+          "SCEC": -99.0,
+          "SADC": -99.0
+        },
+        {
+          "SLB": 180.0,
+          "SLMH": -99.0,
+          "SLLL": 0.16,
+          "SDUL": 0.28,
+          "SSAT": 0.38,
+          "SRGF": 0.0,
+          "SSKS": 0.59,
+          "SBDM": 1.6,
+          "SLOC": 0.1,
+          "SLCL": 15.0,
+          "SLSI": 20.0,
+          "SLCF": 0.0,
+          "SLNI": 0.01,
+          "SLHW": 8.0,
+          "SLHB": -99.0,
+          "SCEC": -99.0,
+          "SADC": -99.0
+        }
+      ]
+    },
+    "initial_conditions": {
+      "2": [
+        {
+          "depth": 2.0,
+          "sh2o": 0.179,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 4.0,
+          "sh2o": 0.179,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 15.0,
+          "sh2o": 0.179,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 30.0,
+          "sh2o": 0.214,
+          "snh4": 1.54,
+          "sno3": 5.01
+        },
+        {
+          "depth": 40.0,
+          "sh2o": 0.232,
+          "snh4": 1.33,
+          "sno3": 3.51
+        },
+        {
+          "depth": 60.0,
+          "sh2o": 0.267,
+          "snh4": 1.05,
+          "sno3": 3.6
+        },
+        {
+          "depth": 80.0,
+          "sh2o": 0.286,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 100.0,
+          "sh2o": 0.279,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 140.0,
+          "sh2o": 0.279,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 180.0,
+          "sh2o": 0.279,
+          "snh4": 0.5,
+          "sno3": 1.0
+        }
+      ],
+      "3": [
+        {
+          "depth": 2.0,
+          "sh2o": 0.189,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 4.0,
+          "sh2o": 0.189,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 15.0,
+          "sh2o": 0.189,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 30.0,
+          "sh2o": 0.243,
+          "snh4": 1.54,
+          "sno3": 5.01
+        },
+        {
+          "depth": 40.0,
+          "sh2o": 0.269,
+          "snh4": 1.33,
+          "sno3": 3.51
+        },
+        {
+          "depth": 60.0,
+          "sh2o": 0.288,
+          "snh4": 1.05,
+          "sno3": 3.6
+        },
+        {
+          "depth": 80.0,
+          "sh2o": 0.306,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 100.0,
+          "sh2o": 0.208,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 140.0,
+          "sh2o": 0.208,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 180.0,
+          "sh2o": 0.208,
+          "snh4": 0.5,
+          "sno3": 1.0
+        }
+      ],
+      "4": [
+        {
+          "depth": 2.0,
+          "sh2o": 0.17,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 4.0,
+          "sh2o": 0.17,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 15.0,
+          "sh2o": 0.17,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 30.0,
+          "sh2o": 0.222,
+          "snh4": 1.54,
+          "sno3": 5.01
+        },
+        {
+          "depth": 40.0,
+          "sh2o": 0.249,
+          "snh4": 1.33,
+          "sno3": 3.51
+        },
+        {
+          "depth": 60.0,
+          "sh2o": 0.321,
+          "snh4": 1.05,
+          "sno3": 3.6
+        },
+        {
+          "depth": 80.0,
+          "sh2o": 0.3,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 100.0,
+          "sh2o": 0.231,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 140.0,
+          "sh2o": 0.231,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 180.0,
+          "sh2o": 0.231,
+          "snh4": 0.5,
+          "sno3": 1.0
+        }
+      ],
+      "5": [
+        {
+          "depth": 2.0,
+          "sh2o": 0.202,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 4.0,
+          "sh2o": 0.202,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 15.0,
+          "sh2o": 0.202,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 30.0,
+          "sh2o": 0.24,
+          "snh4": 1.54,
+          "sno3": 5.01
+        },
+        {
+          "depth": 40.0,
+          "sh2o": 0.26,
+          "snh4": 1.33,
+          "sno3": 3.51
+        },
+        {
+          "depth": 60.0,
+          "sh2o": 0.281,
+          "snh4": 1.05,
+          "sno3": 3.6
+        },
+        {
+          "depth": 80.0,
+          "sh2o": 0.299,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 100.0,
+          "sh2o": 0.255,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 140.0,
+          "sh2o": 0.255,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 180.0,
+          "sh2o": 0.255,
+          "snh4": 0.5,
+          "sno3": 1.0
+        }
+      ],
+      "10": [
+        {
+          "depth": 2.0,
+          "sh2o": 0.216,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 4.0,
+          "sh2o": 0.216,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 15.0,
+          "sh2o": 0.216,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 30.0,
+          "sh2o": 0.241,
+          "snh4": 1.54,
+          "sno3": 5.01
+        },
+        {
+          "depth": 40.0,
+          "sh2o": 0.254,
+          "snh4": 1.33,
+          "sno3": 3.51
+        },
+        {
+          "depth": 60.0,
+          "sh2o": 0.298,
+          "snh4": 1.05,
+          "sno3": 3.6
+        },
+        {
+          "depth": 80.0,
+          "sh2o": 0.317,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 100.0,
+          "sh2o": 0.333,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 140.0,
+          "sh2o": 0.3,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 180.0,
+          "sh2o": 0.28,
+          "snh4": 0.5,
+          "sno3": 1.0
+        }
+      ],
+      "11": [
+        {
+          "depth": 2.0,
+          "sh2o": 0.241,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 4.0,
+          "sh2o": 0.241,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 15.0,
+          "sh2o": 0.241,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 30.0,
+          "sh2o": 0.255,
+          "snh4": 1.54,
+          "sno3": 5.01
+        },
+        {
+          "depth": 40.0,
+          "sh2o": 0.262,
+          "snh4": 1.33,
+          "sno3": 3.51
+        },
+        {
+          "depth": 60.0,
+          "sh2o": 0.317,
+          "snh4": 1.05,
+          "sno3": 3.6
+        },
+        {
+          "depth": 80.0,
+          "sh2o": 0.326,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 100.0,
+          "sh2o": 0.369,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 140.0,
+          "sh2o": 0.3,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 180.0,
+          "sh2o": 0.28,
+          "snh4": 0.5,
+          "sno3": 1.0
+        }
+      ],
+      "12": [
+        {
+          "depth": 2.0,
+          "sh2o": 0.216,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 4.0,
+          "sh2o": 0.216,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 15.0,
+          "sh2o": 0.216,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 30.0,
+          "sh2o": 0.25,
+          "snh4": 1.54,
+          "sno3": 5.01
+        },
+        {
+          "depth": 40.0,
+          "sh2o": 0.268,
+          "snh4": 1.33,
+          "sno3": 3.51
+        },
+        {
+          "depth": 60.0,
+          "sh2o": 0.315,
+          "snh4": 1.05,
+          "sno3": 3.6
+        },
+        {
+          "depth": 80.0,
+          "sh2o": 0.326,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 100.0,
+          "sh2o": 0.337,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 140.0,
+          "sh2o": 0.3,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 180.0,
+          "sh2o": 0.28,
+          "snh4": 0.5,
+          "sno3": 1.0
+        }
+      ],
+      "13": [
+        {
+          "depth": 2.0,
+          "sh2o": 0.229,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 4.0,
+          "sh2o": 0.229,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 15.0,
+          "sh2o": 0.229,
+          "snh4": 2.01,
+          "sno3": 8.41
+        },
+        {
+          "depth": 30.0,
+          "sh2o": 0.274,
+          "snh4": 1.54,
+          "sno3": 5.01
+        },
+        {
+          "depth": 40.0,
+          "sh2o": 0.296,
+          "snh4": 1.33,
+          "sno3": 3.51
+        },
+        {
+          "depth": 60.0,
+          "sh2o": 0.305,
+          "snh4": 1.05,
+          "sno3": 3.6
+        },
+        {
+          "depth": 80.0,
+          "sh2o": 0.307,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 100.0,
+          "sh2o": 0.327,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 140.0,
+          "sh2o": 0.3,
+          "snh4": 0.5,
+          "sno3": 1.0
+        },
+        {
+          "depth": 180.0,
+          "sh2o": 0.28,
+          "snh4": 0.5,
+          "sno3": 1.0
+        }
+      ]
+    },
+    "simulation_options": {
+      "2": {
+        "WATER": "Y",
+        "NITRO": "Y",
+        "SYMBI": "N",
+        "PHOSP": "Y",
+        "POTAS": "N",
+        "DISES": "N",
+        "CHEM": "N",
+        "TILL": "Y",
+        "CO2": "M"
+      },
+      "3": {
+        "WATER": "Y",
+        "NITRO": "Y",
+        "SYMBI": "N",
+        "PHOSP": "Y",
+        "POTAS": "N",
+        "DISES": "N",
+        "CHEM": "N",
+        "TILL": "Y",
+        "CO2": "M"
+      }
+    },
+    "observation_files": [
+      "XXQL2501.TMA",
+      "XXQL2501.TMT"
+    ],
+    "observations_required": true
+  },
+  "findings": [
+    {
+      "code": "FILEA_DERIVED_DUPLICATES",
+      "severity": "info",
+      "message": "FileA fields duplicate FileT evidence and must remain diagnostic-only: HWAH=last(CHPDT), HWAHF=last(CHFPW), LAIX=max(LAID), LWAM=last(LWAD)"
+    },
+    {
+      "code": "ORGAN_N_WITHOUT_TOTAL_PLANT_N",
+      "severity": "warning",
+      "message": "Organ N (SNAM/LNAM or historical SNAD/LNAD) is available but CNAM is absent; use organ N only after matching simulated definitions, and do not infer total plant N by silent summation."
+    }
+  ],
+  "error_count": 0,
+  "warning_count": 1,
+  "safe_for_direct_formal_use": true
+}

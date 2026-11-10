@@ -1,0 +1,641 @@
+trno,column,target_top_cm,target_bottom_cm,mapped_value,contributions
+2,organic_c_pct,0.0,2,0.8095666666666667,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.8095666666666667}]"
+2,organic_c_pct,2.0,4,0.8095666666666667,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.8095666666666667}]"
+2,organic_c_pct,4.0,15,0.8095666666666667,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 0.8095666666666667}]"
+2,organic_c_pct,15.0,30,0.6559799701046337,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 0.8095666666666667}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5886}]"
+2,organic_c_pct,30.0,40,0.5886,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5886}]"
+2,organic_c_pct,40.0,60,0.4414,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.4414}]"
+2,organic_c_pct,60.0,80,0.1,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.1}]"
+2,organic_c_pct,80.0,100,0.1,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.1}]"
+2,organic_c_pct,100.0,140,0.1,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.1}]"
+2,organic_c_pct,140.0,180,0.1,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.1}]"
+2,total_n_gkg,0.0,2,0.7359435155482938,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.735943515548294}]"
+2,total_n_gkg,2.0,4,0.7359435155482938,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.735943515548294}]"
+2,total_n_gkg,4.0,15,0.7359435155482941,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 0.735943515548294}]"
+2,total_n_gkg,15.0,30,0.5963240162572347,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 0.735943515548294}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5350715907618023}]"
+2,total_n_gkg,30.0,40,0.5350715907618023,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5350715907618023}]"
+2,total_n_gkg,40.0,60,0.40127023348956,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.40127023348956}]"
+2,total_n_gkg,60.0,80,0.1,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.1}]"
+2,total_n_gkg,80.0,100,0.1,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.1}]"
+2,total_n_gkg,100.0,140,0.1,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.1}]"
+2,total_n_gkg,140.0,180,0.1,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.1}]"
+2,ph,0.0,2,8.256666666666666,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 8.256666666666666}]"
+2,ph,2.0,4,8.256666666666666,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 8.256666666666666}]"
+2,ph,4.0,15,8.256666666666666,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 11.0, ""value"": 8.256666666666666}]"
+2,ph,15.0,30,8.141111111111112,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 5.0, ""value"": 8.256666666666666}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 8.083333333333334}]"
+2,ph,30.0,40,8.083333333333334,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 8.083333333333334}]"
+2,ph,40.0,60,7.903333333333333,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 7.903333333333333}]"
+2,ph,60.0,80,8.0,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.0}]"
+2,ph,80.0,100,8.0,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.0}]"
+2,ph,100.0,140,8.0,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 8.0}]"
+2,ph,140.0,180,8.0,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 8.0}]"
+2,available_p,0.0,2,76.15065243179123,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 76.15065243179123}]"
+2,available_p,2.0,4,76.15065243179123,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 76.15065243179123}]"
+2,available_p,4.0,15,76.15065243179123,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 76.15065243179123}]"
+2,available_p,15.0,30,49.39509758549701,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 76.15065243179123}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 37.65717674970343}]"
+2,available_p,30.0,40,37.65717674970343,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 37.65717674970343}]"
+2,available_p,40.0,60,30.183867141162498,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 30.183867141162498}]"
+2,available_p,60.0,80,30.183867141162498,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 30.183867141162498}]"
+2,available_p,80.0,100,30.183867141162498,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 30.183867141162498}]"
+2,available_p,100.0,140,30.183867141162498,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 30.183867141162498}]"
+2,available_p,140.0,180,30.183867141162498,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 30.183867141162498}]"
+2,available_k,0.0,2,1.8158582712993132,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.8158582712993132}]"
+2,available_k,2.0,4,1.8158582712993132,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.8158582712993132}]"
+2,available_k,4.0,15,1.8158582712993132,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 1.8158582712993132}]"
+2,available_k,15.0,30,0.9169910682756512,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 1.8158582712993132}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5226493275943027}]"
+2,available_k,30.0,40,0.5226493275943027,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5226493275943027}]"
+2,available_k,40.0,60,0.32034535422262694,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.32034535422262694}]"
+2,available_k,60.0,80,0.32034535422262694,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.32034535422262694}]"
+2,available_k,80.0,100,0.32034535422262694,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.32034535422262694}]"
+2,available_k,100.0,140,0.32034535422262694,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.32034535422262694}]"
+2,available_k,140.0,180,0.32034535422262694,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.32034535422262694}]"
+2,SH2O,0.0,2,0.17914654986537468,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 0.17914654986537468}]"
+2,SH2O,2.0,4,0.17914654986537468,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 0.17914654986537468}]"
+2,SH2O,4.0,15,0.17914654986537468,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 11.0, ""value"": 0.17914654986537468}]"
+2,SH2O,15.0,30,0.21446091372740336,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 5.0, ""value"": 0.17914654986537468}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 0.23211809565841768}]"
+2,SH2O,30.0,40,0.23211809565841768,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 0.23211809565841768}]"
+2,SH2O,40.0,60,0.2668353302732347,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.2668353302732347}]"
+2,SH2O,60.0,80,0.286484870309243,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.286484870309243}]"
+2,SH2O,80.0,100,0.27896154626414,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.27896154626414}]"
+2,SH2O,100.0,140,0.27896154626414,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 0.27896154626414}]"
+2,SH2O,140.0,180,0.27896154626414,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 0.27896154626414}]"
+2,SNH4,,2,2.01386091172926,
+2,SNH4,,4,2.01386091172926,
+2,SNH4,,15,2.01386091172926,
+2,SNH4,,30,1.539423824201689,
+2,SNH4,,40,1.33128368257669,
+2,SNH4,,60,1.04823144985888,
+2,SNH4,,80,0.5,
+2,SNH4,,100,0.5,
+2,SNH4,,140,0.5,
+2,SNH4,,180,0.5,
+2,SNO3,,2,8.41483359665204,
+2,SNO3,,4,8.41483359665204,
+2,SNO3,,15,8.41483359665204,
+2,SNO3,,30,5.005406617449411,
+2,SNO3,,40,3.50965800721858,
+2,SNO3,,60,3.60060129396256,
+2,SNO3,,80,1.0,
+2,SNO3,,100,1.0,
+2,SNO3,,140,1.0,
+2,SNO3,,180,1.0,
+3,organic_c_pct,0.0,2,0.8189000000000001,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.8189000000000001}]"
+3,organic_c_pct,2.0,4,0.8189000000000001,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.8189000000000001}]"
+3,organic_c_pct,4.0,15,0.8189000000000001,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 0.8189000000000001}]"
+3,organic_c_pct,15.0,30,0.6282662182361735,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 0.8189000000000001}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5446333333333333}]"
+3,organic_c_pct,30.0,40,0.5446333333333333,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5446333333333333}]"
+3,organic_c_pct,40.0,60,0.30793333333333334,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.30793333333333334}]"
+3,organic_c_pct,60.0,80,0.1,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.1}]"
+3,organic_c_pct,80.0,100,0.1,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.1}]"
+3,organic_c_pct,100.0,140,0.1,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.1}]"
+3,organic_c_pct,140.0,180,0.1,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.1}]"
+3,total_n_gkg,0.0,2,0.7444616818075918,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.7444616818075916}]"
+3,total_n_gkg,2.0,4,0.7444616818075918,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.7444616818075916}]"
+3,total_n_gkg,4.0,15,0.7444616818075916,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 0.7444616818075916}]"
+3,total_n_gkg,15.0,30,0.5711512689854837,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 0.7444616818075916}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.49511831368288167}]"
+3,total_n_gkg,30.0,40,0.49511831368288167,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.49511831368288167}]"
+3,total_n_gkg,40.0,60,0.27992779288301234,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.27992779288301234}]"
+3,total_n_gkg,60.0,80,0.1,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.1}]"
+3,total_n_gkg,80.0,100,0.1,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.1}]"
+3,total_n_gkg,100.0,140,0.1,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.1}]"
+3,total_n_gkg,140.0,180,0.1,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.1}]"
+3,ph,0.0,2,8.213333333333333,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 8.213333333333333}]"
+3,ph,2.0,4,8.213333333333333,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 8.213333333333333}]"
+3,ph,4.0,15,8.213333333333333,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 11.0, ""value"": 8.213333333333333}]"
+3,ph,15.0,30,8.157777777777778,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 5.0, ""value"": 8.213333333333333}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 8.13}]"
+3,ph,30.0,40,8.13,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 8.13}]"
+3,ph,40.0,60,7.963333333333334,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 7.963333333333334}]"
+3,ph,60.0,80,8.0,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.0}]"
+3,ph,80.0,100,8.0,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.0}]"
+3,ph,100.0,140,8.0,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 8.0}]"
+3,ph,140.0,180,8.0,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 8.0}]"
+3,available_p,0.0,2,67.6097271648873,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 67.6097271648873}]"
+3,available_p,2.0,4,67.6097271648873,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 67.6097271648873}]"
+3,available_p,4.0,15,67.6097271648873,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 67.6097271648873}]"
+3,available_p,15.0,30,45.55391538866636,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 67.6097271648873}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 35.87781731909847}]"
+3,available_p,30.0,40,35.87781731909847,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 35.87781731909847}]"
+3,available_p,40.0,60,12.390272835112697,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 12.390272835112697}]"
+3,available_p,60.0,80,12.390272835112697,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 12.390272835112697}]"
+3,available_p,80.0,100,12.390272835112697,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 12.390272835112697}]"
+3,available_p,100.0,140,12.390272835112697,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 12.390272835112697}]"
+3,available_p,140.0,180,12.390272835112697,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 12.390272835112697}]"
+3,available_k,0.0,2,1.5784585661542367,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.5784585661542367}]"
+3,available_k,2.0,4,1.5784585661542367,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.5784585661542367}]"
+3,available_k,4.0,15,1.5784585661542367,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 1.5784585661542367}]"
+3,available_k,15.0,30,0.8474951090593854,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 1.5784585661542367}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5268143665919667}]"
+3,available_k,30.0,40,0.5268143665919667,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5268143665919667}]"
+3,available_k,40.0,60,0.274068140978849,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.274068140978849}]"
+3,available_k,60.0,80,0.274068140978849,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.274068140978849}]"
+3,available_k,80.0,100,0.274068140978849,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.274068140978849}]"
+3,available_k,100.0,140,0.274068140978849,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.274068140978849}]"
+3,available_k,140.0,180,0.274068140978849,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.274068140978849}]"
+3,SH2O,0.0,2,0.18877767434101,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 0.18877767434101}]"
+3,SH2O,2.0,4,0.18877767434101,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 0.18877767434101}]"
+3,SH2O,4.0,15,0.18877767434101,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 11.0, ""value"": 0.18877767434101}]"
+3,SH2O,15.0,30,0.2425307293539725,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 5.0, ""value"": 0.18877767434101}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 0.2694072568604537}]"
+3,SH2O,30.0,40,0.2694072568604537,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 0.2694072568604537}]"
+3,SH2O,40.0,60,0.28768106712246866,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.28768106712246866}]"
+3,SH2O,60.0,80,0.30620002369327365,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.30620002369327365}]"
+3,SH2O,80.0,100,0.2079880379534253,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.20798803795342533}]"
+3,SH2O,100.0,140,0.2079880379534253,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 0.20798803795342533}]"
+3,SH2O,140.0,180,0.2079880379534253,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 0.20798803795342533}]"
+3,SNH4,,2,2.01386091172926,
+3,SNH4,,4,2.01386091172926,
+3,SNH4,,15,2.01386091172926,
+3,SNH4,,30,1.539423824201689,
+3,SNH4,,40,1.33128368257669,
+3,SNH4,,60,1.04823144985888,
+3,SNH4,,80,0.5,
+3,SNH4,,100,0.5,
+3,SNH4,,140,0.5,
+3,SNH4,,180,0.5,
+3,SNO3,,2,8.41483359665204,
+3,SNO3,,4,8.41483359665204,
+3,SNO3,,15,8.41483359665204,
+3,SNO3,,30,5.005406617449411,
+3,SNO3,,40,3.50965800721858,
+3,SNO3,,60,3.60060129396256,
+3,SNO3,,80,1.0,
+3,SNO3,,100,1.0,
+3,SNO3,,140,1.0,
+3,SNO3,,180,1.0,
+4,organic_c_pct,0.0,2,0.7184,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.7184}]"
+4,organic_c_pct,2.0,4,0.7184,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.7184}]"
+4,organic_c_pct,4.0,15,0.7184,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 0.7184}]"
+4,organic_c_pct,15.0,30,0.603296860986547,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 0.7184}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5528}]"
+4,organic_c_pct,30.0,40,0.5528,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5528}]"
+4,organic_c_pct,40.0,60,0.2411,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.2411}]"
+4,organic_c_pct,60.0,80,0.1,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.1}]"
+4,organic_c_pct,80.0,100,0.1,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.1}]"
+4,organic_c_pct,100.0,140,0.1,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.1}]"
+4,organic_c_pct,140.0,180,0.1,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.1}]"
+4,total_n_gkg,0.0,2,0.653074638434649,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.653074638434649}]"
+4,total_n_gkg,2.0,4,0.653074638434649,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.653074638434649}]"
+4,total_n_gkg,4.0,15,0.6530746384346489,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 0.653074638434649}]"
+4,total_n_gkg,15.0,30,0.5484563607751686,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 0.653074638434649}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5025593099310094}]"
+4,total_n_gkg,30.0,40,0.5025593099310094,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5025593099310094}]"
+4,total_n_gkg,40.0,60,0.21919081661397732,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.21919081661397732}]"
+4,total_n_gkg,60.0,80,0.1,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.1}]"
+4,total_n_gkg,80.0,100,0.1,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.1}]"
+4,total_n_gkg,100.0,140,0.1,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.1}]"
+4,total_n_gkg,140.0,180,0.1,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.1}]"
+4,ph,0.0,2,8.193333333333333,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 8.193333333333333}]"
+4,ph,2.0,4,8.193333333333333,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 8.193333333333333}]"
+4,ph,4.0,15,8.193333333333333,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 11.0, ""value"": 8.193333333333333}]"
+4,ph,15.0,30,8.193333333333333,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 5.0, ""value"": 8.193333333333333}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 8.193333333333333}]"
+4,ph,30.0,40,8.193333333333333,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 8.193333333333333}]"
+4,ph,40.0,60,8.023333333333333,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.023333333333333}]"
+4,ph,60.0,80,8.0,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.0}]"
+4,ph,80.0,100,8.0,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.0}]"
+4,ph,100.0,140,8.0,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 8.0}]"
+4,ph,140.0,180,8.0,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 8.0}]"
+4,available_p,0.0,2,61.8564650059312,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 61.8564650059312}]"
+4,available_p,2.0,4,61.8564650059312,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 61.8564650059312}]"
+4,available_p,4.0,15,61.8564650059312,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 61.8564650059312}]"
+4,available_p,15.0,30,43.13994435844651,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 61.8564650059312}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 34.928825622775804}]"
+4,available_p,30.0,40,34.928825622775804,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 34.928825622775804}]"
+4,available_p,40.0,60,6.162514827995257,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 6.162514827995257}]"
+4,available_p,60.0,80,6.162514827995257,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 6.162514827995257}]"
+4,available_p,80.0,100,6.162514827995257,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 6.162514827995257}]"
+4,available_p,100.0,140,6.162514827995257,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 6.162514827995257}]"
+4,available_p,140.0,180,6.162514827995257,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 6.162514827995257}]"
+4,available_k,0.0,2,1.4910622296625116,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.4910622296625118}]"
+4,available_k,2.0,4,1.4910622296625116,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.4910622296625118}]"
+4,available_k,4.0,15,1.4910622296625118,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 1.4910622296625118}]"
+4,available_k,15.0,30,0.8452424603613518,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 1.4910622296625118}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5619150777001977}]"
+4,available_k,30.0,40,0.5619150777001977,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5619150777001977}]"
+4,available_k,40.0,60,0.23797263932656568,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.23797263932656568}]"
+4,available_k,60.0,80,0.23797263932656568,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.23797263932656568}]"
+4,available_k,80.0,100,0.23797263932656568,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.23797263932656568}]"
+4,available_k,100.0,140,0.23797263932656568,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.23797263932656568}]"
+4,available_k,140.0,180,0.23797263932656568,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.23797263932656568}]"
+4,SH2O,0.0,2,0.16990969419353133,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 0.16990969419353133}]"
+4,SH2O,2.0,4,0.16990969419353133,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 0.16990969419353133}]"
+4,SH2O,4.0,15,0.16990969419353133,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 11.0, ""value"": 0.16990969419353133}]"
+4,SH2O,15.0,30,0.2224117875698549,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 5.0, ""value"": 0.16990969419353133}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 0.2486628342580167}]"
+4,SH2O,30.0,40,0.2486628342580167,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 0.2486628342580167}]"
+4,SH2O,40.0,60,0.3213037114895767,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.3213037114895767}]"
+4,SH2O,60.0,80,0.30027131381983535,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.30027131381983535}]"
+4,SH2O,80.0,100,0.23140325255834768,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.23140325255834768}]"
+4,SH2O,100.0,140,0.23140325255834768,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 0.23140325255834768}]"
+4,SH2O,140.0,180,0.23140325255834768,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 0.23140325255834768}]"
+4,SNH4,,2,2.01386091172926,
+4,SNH4,,4,2.01386091172926,
+4,SNH4,,15,2.01386091172926,
+4,SNH4,,30,1.539423824201689,
+4,SNH4,,40,1.33128368257669,
+4,SNH4,,60,1.04823144985888,
+4,SNH4,,80,0.5,
+4,SNH4,,100,0.5,
+4,SNH4,,140,0.5,
+4,SNH4,,180,0.5,
+4,SNO3,,2,8.41483359665204,
+4,SNO3,,4,8.41483359665204,
+4,SNO3,,15,8.41483359665204,
+4,SNO3,,30,5.005406617449411,
+4,SNO3,,40,3.50965800721858,
+4,SNO3,,60,3.60060129396256,
+4,SNO3,,80,1.0,
+4,SNO3,,100,1.0,
+4,SNO3,,140,1.0,
+4,SNO3,,180,1.0,
+5,organic_c_pct,0.0,2,1.1310666666666667,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.1310666666666667}]"
+5,organic_c_pct,2.0,4,1.1310666666666667,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.1310666666666667}]"
+5,organic_c_pct,4.0,15,1.1310666666666667,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 1.1310666666666667}]"
+5,organic_c_pct,15.0,30,0.8237079222720479,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 1.1310666666666667}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.6888666666666667}]"
+5,organic_c_pct,30.0,40,0.6888666666666667,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.6888666666666667}]"
+5,organic_c_pct,40.0,60,0.34146666666666664,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.34146666666666664}]"
+5,organic_c_pct,60.0,80,0.1,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.1}]"
+5,organic_c_pct,80.0,100,0.1,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.1}]"
+5,organic_c_pct,100.0,140,0.1,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.1}]"
+5,organic_c_pct,140.0,180,0.1,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.1}]"
+5,total_n_gkg,0.0,2,0.8568603114415163,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.8568603114415163}]"
+5,total_n_gkg,2.0,4,0.8568603114415163,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.8568603114415163}]"
+5,total_n_gkg,4.0,15,0.8568603114415163,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 0.8568603114415163}]"
+5,total_n_gkg,15.0,30,0.6240077136575716,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 0.8568603114415163}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5218530255975183}]"
+5,total_n_gkg,30.0,40,0.5218530255975183,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5218530255975183}]"
+5,total_n_gkg,40.0,60,0.2586888613959207,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.2586888613959207}]"
+5,total_n_gkg,60.0,80,0.1,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.1}]"
+5,total_n_gkg,80.0,100,0.1,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.1}]"
+5,total_n_gkg,100.0,140,0.1,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.1}]"
+5,total_n_gkg,140.0,180,0.1,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.1}]"
+5,ph,0.0,2,7.956666666666667,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 7.956666666666667}]"
+5,ph,2.0,4,7.956666666666667,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 7.956666666666667}]"
+5,ph,4.0,15,7.956666666666667,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 11.0, ""value"": 7.956666666666667}]"
+5,ph,15.0,30,7.912222222222223,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 5.0, ""value"": 7.956666666666667}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 7.890000000000001}]"
+5,ph,30.0,40,7.890000000000001,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 7.890000000000001}]"
+5,ph,40.0,60,7.986666666666667,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 7.986666666666667}]"
+5,ph,60.0,80,8.0,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.0}]"
+5,ph,80.0,100,8.0,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.0}]"
+5,ph,100.0,140,8.0,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 8.0}]"
+5,ph,140.0,180,8.0,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 8.0}]"
+5,available_p,0.0,2,75.67615658362986,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 75.67615658362986}]"
+5,available_p,2.0,4,75.67615658362986,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 75.67615658362986}]"
+5,available_p,4.0,15,75.67615658362986,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 75.67615658362986}]"
+5,available_p,15.0,30,42.695503460308814,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 75.67615658362986}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 28.226571767496996}]"
+5,available_p,30.0,40,28.226571767496996,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 28.226571767496996}]"
+5,available_p,40.0,60,7.289442467378411,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 7.289442467378411}]"
+5,available_p,60.0,80,7.289442467378411,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 7.289442467378411}]"
+5,available_p,80.0,100,7.289442467378411,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 7.289442467378411}]"
+5,available_p,100.0,140,7.289442467378411,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 7.289442467378411}]"
+5,available_p,140.0,180,7.289442467378411,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 7.289442467378411}]"
+5,available_k,0.0,2,1.311378742764883,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.311378742764883}]"
+5,available_k,2.0,4,1.311378742764883,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.311378742764883}]"
+5,available_k,4.0,15,1.311378742764883,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 1.311378742764883}]"
+5,available_k,15.0,30,0.7148038433323465,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 1.311378742764883}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.45308066164581434}]"
+5,available_k,30.0,40,0.45308066164581434,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.45308066164581434}]"
+5,available_k,40.0,60,0.23882624258973664,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.23882624258973664}]"
+5,available_k,60.0,80,0.23882624258973664,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.23882624258973664}]"
+5,available_k,80.0,100,0.23882624258973664,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.23882624258973664}]"
+5,available_k,100.0,140,0.23882624258973664,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.23882624258973664}]"
+5,available_k,140.0,180,0.23882624258973664,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.23882624258973664}]"
+5,SH2O,0.0,2,0.20174726485910166,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 0.20174726485910166}]"
+5,SH2O,2.0,4,0.20174726485910166,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 0.20174726485910166}]"
+5,SH2O,4.0,15,0.20174726485910163,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 11.0, ""value"": 0.20174726485910166}]"
+5,SH2O,15.0,30,0.2402565073216361,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 5.0, ""value"": 0.20174726485910166}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 0.2595111285529033}]"
+5,SH2O,30.0,40,0.2595111285529033,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 0.2595111285529033}]"
+5,SH2O,40.0,60,0.281106234672484,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.281106234672484}]"
+5,SH2O,60.0,80,0.2991578477263293,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.2991578477263293}]"
+5,SH2O,80.0,100,0.254699834810158,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.254699834810158}]"
+5,SH2O,100.0,140,0.254699834810158,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 0.254699834810158}]"
+5,SH2O,140.0,180,0.254699834810158,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 0.254699834810158}]"
+5,SNH4,,2,2.01386091172926,
+5,SNH4,,4,2.01386091172926,
+5,SNH4,,15,2.01386091172926,
+5,SNH4,,30,1.539423824201689,
+5,SNH4,,40,1.33128368257669,
+5,SNH4,,60,1.04823144985888,
+5,SNH4,,80,0.5,
+5,SNH4,,100,0.5,
+5,SNH4,,140,0.5,
+5,SNH4,,180,0.5,
+5,SNO3,,2,8.41483359665204,
+5,SNO3,,4,8.41483359665204,
+5,SNO3,,15,8.41483359665204,
+5,SNO3,,30,5.005406617449411,
+5,SNO3,,40,3.50965800721858,
+5,SNO3,,60,3.60060129396256,
+5,SNO3,,80,1.0,
+5,SNO3,,100,1.0,
+5,SNO3,,140,1.0,
+5,SNO3,,180,1.0,
+10,organic_c_pct,0.0,2,0.8827,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.8827000000000002}]"
+10,organic_c_pct,2.0,4,0.8827,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.8827000000000002}]"
+10,organic_c_pct,4.0,15,0.8827000000000002,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 0.8827000000000002}]"
+10,organic_c_pct,15.0,30,0.6973255605381167,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 0.8827000000000002}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.616}]"
+10,organic_c_pct,30.0,40,0.616,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.616}]"
+10,organic_c_pct,40.0,60,0.3706666666666667,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.3706666666666667}]"
+10,organic_c_pct,60.0,80,0.1,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.1}]"
+10,organic_c_pct,80.0,100,0.1,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.1}]"
+10,organic_c_pct,100.0,140,0.1,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.1}]"
+10,organic_c_pct,140.0,180,0.1,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.1}]"
+10,total_n_gkg,0.0,2,0.8024394329274284,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.8024394329274284}]"
+10,total_n_gkg,2.0,4,0.8024394329274284,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.8024394329274284}]"
+10,total_n_gkg,4.0,15,0.8024394329274284,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 0.8024394329274284}]"
+10,total_n_gkg,15.0,30,0.633947939733215,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 0.8024394329274284}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5600290911060762}]"
+10,total_n_gkg,30.0,40,0.5600290911060762,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5600290911060762}]"
+10,total_n_gkg,40.0,60,0.336977341010223,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.336977341010223}]"
+10,total_n_gkg,60.0,80,0.1,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.1}]"
+10,total_n_gkg,80.0,100,0.1,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.1}]"
+10,total_n_gkg,100.0,140,0.1,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.1}]"
+10,total_n_gkg,140.0,180,0.1,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.1}]"
+10,ph,0.0,2,8.176666666666668,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 8.176666666666668}]"
+10,ph,2.0,4,8.176666666666668,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 8.176666666666668}]"
+10,ph,4.0,15,8.176666666666668,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 11.0, ""value"": 8.176666666666668}]"
+10,ph,15.0,30,8.085555555555556,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 5.0, ""value"": 8.176666666666668}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 8.040000000000001}]"
+10,ph,30.0,40,8.040000000000001,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 8.040000000000001}]"
+10,ph,40.0,60,7.976666666666667,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 7.976666666666667}]"
+10,ph,60.0,80,8.0,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.0}]"
+10,ph,80.0,100,8.0,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.0}]"
+10,ph,100.0,140,8.0,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 8.0}]"
+10,ph,140.0,180,8.0,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 8.0}]"
+10,available_p,0.0,2,65.47449584816131,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 65.47449584816131}]"
+10,available_p,2.0,4,65.47449584816131,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 65.47449584816131}]"
+10,available_p,4.0,15,65.47449584816131,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 65.47449584816131}]"
+10,available_p,15.0,30,47.04655591550569,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 65.47449584816131}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 38.9620403321471}]"
+10,available_p,30.0,40,38.9620403321471,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 38.9620403321471}]"
+10,available_p,40.0,60,15.118623962040333,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 15.118623962040333}]"
+10,available_p,60.0,80,15.118623962040333,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 15.118623962040333}]"
+10,available_p,80.0,100,15.118623962040331,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 15.118623962040333}]"
+10,available_p,100.0,140,15.118623962040333,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 15.118623962040333}]"
+10,available_p,140.0,180,15.118623962040333,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 15.118623962040333}]"
+10,available_k,0.0,2,1.4589902489644306,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.4589902489644306}]"
+10,available_k,2.0,4,1.4589902489644306,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.4589902489644306}]"
+10,available_k,4.0,15,1.4589902489644306,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 1.4589902489644306}]"
+10,available_k,15.0,30,0.9783966620398221,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 1.4589902489644306}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.7675556045503164}]"
+10,available_k,30.0,40,0.7675556045503164,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.7675556045503164}]"
+10,available_k,40.0,60,0.3811672641108867,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.3811672641108867}]"
+10,available_k,60.0,80,0.3811672641108867,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.3811672641108867}]"
+10,available_k,80.0,100,0.3811672641108867,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.3811672641108867}]"
+10,available_k,100.0,140,0.3811672641108867,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.3811672641108867}]"
+10,available_k,140.0,180,0.3811672641108867,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.3811672641108867}]"
+10,SH2O,0.0,2,0.21602654667344065,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 0.21602654667344065}]"
+10,SH2O,2.0,4,0.21602654667344065,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 0.21602654667344065}]"
+10,SH2O,4.0,15,0.21602654667344065,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 11.0, ""value"": 0.21602654667344065}]"
+10,SH2O,15.0,30,0.24104881946051754,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 5.0, ""value"": 0.21602654667344065}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 0.253559955854056}]"
+10,SH2O,30.0,40,0.253559955854056,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 0.253559955854056}]"
+10,SH2O,40.0,60,0.298220541955413,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.298220541955413}]"
+10,SH2O,60.0,80,0.3169306162699673,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.3169306162699673}]"
+10,SH2O,80.0,100,0.3332159243602633,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.3332159243602633}]"
+10,SH2O,100.0,140,0.3,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 0.3}]"
+10,SH2O,140.0,180,0.28,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 0.28}]"
+10,SNH4,,2,2.01386091172926,
+10,SNH4,,4,2.01386091172926,
+10,SNH4,,15,2.01386091172926,
+10,SNH4,,30,1.539423824201689,
+10,SNH4,,40,1.33128368257669,
+10,SNH4,,60,1.04823144985888,
+10,SNH4,,80,0.5,
+10,SNH4,,100,0.5,
+10,SNH4,,140,0.5,
+10,SNH4,,180,0.5,
+10,SNO3,,2,8.41483359665204,
+10,SNO3,,4,8.41483359665204,
+10,SNO3,,15,8.41483359665204,
+10,SNO3,,30,5.005406617449411,
+10,SNO3,,40,3.50965800721858,
+10,SNO3,,60,3.60060129396256,
+10,SNO3,,80,1.0,
+10,SNO3,,100,1.0,
+10,SNO3,,140,1.0,
+10,SNO3,,180,1.0,
+11,organic_c_pct,0.0,2,1.0908333333333333,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.0908333333333333}]"
+11,organic_c_pct,2.0,4,1.0908333333333333,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.0908333333333333}]"
+11,organic_c_pct,4.0,15,1.0908333333333333,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 1.0908333333333333}]"
+11,organic_c_pct,15.0,30,0.751849028400598,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 1.0908333333333333}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.6031333333333334}]"
+11,organic_c_pct,30.0,40,0.6031333333333334,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.6031333333333334}]"
+11,organic_c_pct,40.0,60,0.2833,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.2833}]"
+11,organic_c_pct,60.0,80,0.1,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.1}]"
+11,organic_c_pct,80.0,100,0.1,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.1}]"
+11,organic_c_pct,100.0,140,0.1,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.1}]"
+11,organic_c_pct,140.0,180,0.1,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.1}]"
+11,total_n_gkg,0.0,2,0.991662458507102,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.991662458507102}]"
+11,total_n_gkg,2.0,4,0.991662458507102,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.991662458507102}]"
+11,total_n_gkg,4.0,15,0.991662458507102,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 0.991662458507102}]"
+11,total_n_gkg,15.0,30,0.6834899828129247,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 0.991662458507102}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5482917354116084}]"
+11,total_n_gkg,30.0,40,0.5482917354116084,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5482917354116084}]"
+11,total_n_gkg,40.0,60,0.257542378641672,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.257542378641672}]"
+11,total_n_gkg,60.0,80,0.1,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.1}]"
+11,total_n_gkg,80.0,100,0.1,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.1}]"
+11,total_n_gkg,100.0,140,0.1,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.1}]"
+11,total_n_gkg,140.0,180,0.1,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.1}]"
+11,ph,0.0,2,8.223333333333334,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 8.223333333333334}]"
+11,ph,2.0,4,8.223333333333334,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 8.223333333333334}]"
+11,ph,4.0,15,8.223333333333334,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 11.0, ""value"": 8.223333333333334}]"
+11,ph,15.0,30,8.043333333333333,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 5.0, ""value"": 8.223333333333334}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 7.953333333333333}]"
+11,ph,30.0,40,7.953333333333333,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 7.953333333333333}]"
+11,ph,40.0,60,8.06,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.06}]"
+11,ph,60.0,80,8.0,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.0}]"
+11,ph,80.0,100,8.0,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.0}]"
+11,ph,100.0,140,8.0,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 8.0}]"
+11,ph,140.0,180,8.0,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 8.0}]"
+11,available_p,0.0,2,75.73546856465003,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 75.73546856465003}]"
+11,available_p,2.0,4,75.73546856465003,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 75.73546856465003}]"
+11,available_p,4.0,15,75.73546856465003,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 75.73546856465003}]"
+11,available_p,15.0,30,47.165977796573166,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 75.73546856465003}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 34.63226571767493}]"
+11,available_p,30.0,40,34.63226571767493,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 34.63226571767493}]"
+11,available_p,40.0,60,6.814946619217079,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 6.814946619217079}]"
+11,available_p,60.0,80,6.814946619217079,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 6.814946619217079}]"
+11,available_p,80.0,100,6.814946619217079,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 6.814946619217079}]"
+11,available_p,100.0,140,6.814946619217079,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 6.814946619217079}]"
+11,available_p,140.0,180,6.814946619217079,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 6.814946619217079}]"
+11,available_k,0.0,2,1.2674726605091198,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.2674726605091198}]"
+11,available_k,2.0,4,1.2674726605091198,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.2674726605091198}]"
+11,available_k,4.0,15,1.2674726605091198,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 1.2674726605091198}]"
+11,available_k,15.0,30,0.855608568169304,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 1.2674726605091198}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.674919805078288}]"
+11,available_k,30.0,40,0.674919805078288,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.674919805078288}]"
+11,available_k,40.0,60,0.2997905310936853,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.2997905310936853}]"
+11,available_k,60.0,80,0.2997905310936853,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.2997905310936853}]"
+11,available_k,80.0,100,0.2997905310936853,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.2997905310936853}]"
+11,available_k,100.0,140,0.2997905310936853,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.2997905310936853}]"
+11,available_k,140.0,180,0.2997905310936853,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.2997905310936853}]"
+11,SH2O,0.0,2,0.24077976525550895,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 0.24077976525550895}]"
+11,SH2O,2.0,4,0.24077976525550895,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 0.24077976525550895}]"
+11,SH2O,4.0,15,0.24077976525550895,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 11.0, ""value"": 0.24077976525550895}]"
+11,SH2O,15.0,30,0.2549314614829105,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 5.0, ""value"": 0.24077976525550895}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 0.26200730959661134}]"
+11,SH2O,30.0,40,0.26200730959661134,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 0.26200730959661134}]"
+11,SH2O,40.0,60,0.31709768681352396,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.31709768681352396}]"
+11,SH2O,60.0,80,0.326310399002147,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.326310399002147}]"
+11,SH2O,80.0,100,0.3692086765404983,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.3692086765404983}]"
+11,SH2O,100.0,140,0.3,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 0.3}]"
+11,SH2O,140.0,180,0.28,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 0.28}]"
+11,SNH4,,2,2.01386091172926,
+11,SNH4,,4,2.01386091172926,
+11,SNH4,,15,2.01386091172926,
+11,SNH4,,30,1.539423824201689,
+11,SNH4,,40,1.33128368257669,
+11,SNH4,,60,1.04823144985888,
+11,SNH4,,80,0.5,
+11,SNH4,,100,0.5,
+11,SNH4,,140,0.5,
+11,SNH4,,180,0.5,
+11,SNO3,,2,8.41483359665204,
+11,SNO3,,4,8.41483359665204,
+11,SNO3,,15,8.41483359665204,
+11,SNO3,,30,5.005406617449411,
+11,SNO3,,40,3.50965800721858,
+11,SNO3,,60,3.60060129396256,
+11,SNO3,,80,1.0,
+11,SNO3,,100,1.0,
+11,SNO3,,140,1.0,
+11,SNO3,,180,1.0,
+12,organic_c_pct,0.0,2,0.9953333333333333,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.9953333333333333}]"
+12,organic_c_pct,2.0,4,0.9953333333333333,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.9953333333333333}]"
+12,organic_c_pct,4.0,15,0.9953333333333333,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 0.9953333333333333}]"
+12,organic_c_pct,15.0,30,0.8030545590433483,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 0.9953333333333333}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.7187}]"
+12,organic_c_pct,30.0,40,0.7187,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.7187}]"
+12,organic_c_pct,40.0,60,0.4247666666666667,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.4247666666666667}]"
+12,organic_c_pct,60.0,80,0.1,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.1}]"
+12,organic_c_pct,80.0,100,0.1,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.1}]"
+12,organic_c_pct,100.0,140,0.1,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.1}]"
+12,organic_c_pct,140.0,180,0.1,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.1}]"
+12,total_n_gkg,0.0,2,0.9048572686803895,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.9048572686803896}]"
+12,total_n_gkg,2.0,4,0.9048572686803895,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.9048572686803896}]"
+12,total_n_gkg,4.0,15,0.9048572686803896,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 0.9048572686803896}]"
+12,total_n_gkg,15.0,30,0.7300709291474415,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 0.9048572686803896}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.653390470513632}]"
+12,total_n_gkg,30.0,40,0.653390470513632,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.653390470513632}]"
+12,total_n_gkg,40.0,60,0.3861496262575663,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.3861496262575663}]"
+12,total_n_gkg,60.0,80,0.1,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.1}]"
+12,total_n_gkg,80.0,100,0.1,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.1}]"
+12,total_n_gkg,100.0,140,0.1,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.1}]"
+12,total_n_gkg,140.0,180,0.1,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.1}]"
+12,ph,0.0,2,8.096666666666668,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 8.096666666666668}]"
+12,ph,2.0,4,8.096666666666668,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 8.096666666666668}]"
+12,ph,4.0,15,8.096666666666668,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 11.0, ""value"": 8.096666666666668}]"
+12,ph,15.0,30,7.930000000000001,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 5.0, ""value"": 8.096666666666668}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 7.846666666666667}]"
+12,ph,30.0,40,7.846666666666667,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 7.846666666666667}]"
+12,ph,40.0,60,7.996666666666667,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 7.996666666666667}]"
+12,ph,60.0,80,8.0,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.0}]"
+12,ph,80.0,100,8.0,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.0}]"
+12,ph,100.0,140,8.0,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 8.0}]"
+12,ph,140.0,180,8.0,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 8.0}]"
+12,available_p,0.0,2,70.3973902728351,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 70.3973902728351}]"
+12,available_p,2.0,4,70.3973902728351,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 70.3973902728351}]"
+12,available_p,4.0,15,70.3973902728351,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 70.3973902728351}]"
+12,available_p,15.0,30,50.77390166445909,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 70.3973902728351}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 42.164887307236064}]"
+12,available_p,30.0,40,42.164887307236064,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 42.164887307236064}]"
+12,available_p,40.0,60,20.812574139976267,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 20.812574139976267}]"
+12,available_p,60.0,80,20.812574139976267,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 20.812574139976267}]"
+12,available_p,80.0,100,20.812574139976267,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 20.812574139976267}]"
+12,available_p,100.0,140,20.812574139976267,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 20.812574139976267}]"
+12,available_p,140.0,180,20.812574139976267,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 20.812574139976267}]"
+12,available_k,0.0,2,1.6699375878670397,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.6699375878670397}]"
+12,available_k,2.0,4,1.6699375878670397,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.6699375878670397}]"
+12,available_k,4.0,15,1.6699375878670397,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 1.6699375878670397}]"
+12,available_k,15.0,30,0.9660563001777009,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 1.6699375878670397}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.657256767513991}]"
+12,available_k,30.0,40,0.657256767513991,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.657256767513991}]"
+12,available_k,40.0,60,0.33679880027602266,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.33679880027602266}]"
+12,available_k,60.0,80,0.33679880027602266,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.33679880027602266}]"
+12,available_k,80.0,100,0.33679880027602266,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.33679880027602266}]"
+12,available_k,100.0,140,0.33679880027602266,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.33679880027602266}]"
+12,available_k,140.0,180,0.33679880027602266,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.33679880027602266}]"
+12,SH2O,0.0,2,0.21561703868102336,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 0.21561703868102336}]"
+12,SH2O,2.0,4,0.21561703868102336,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 0.21561703868102336}]"
+12,SH2O,4.0,15,0.21561703868102333,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 11.0, ""value"": 0.21561703868102336}]"
+12,SH2O,15.0,30,0.25043134986348964,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 5.0, ""value"": 0.21561703868102336}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 0.2678385054547227}]"
+12,SH2O,30.0,40,0.2678385054547227,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 0.2678385054547227}]"
+12,SH2O,40.0,60,0.314880793861791,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.314880793861791}]"
+12,SH2O,60.0,80,0.32596273579920737,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.32596273579920737}]"
+12,SH2O,80.0,100,0.3372888202166377,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.3372888202166377}]"
+12,SH2O,100.0,140,0.3,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 0.3}]"
+12,SH2O,140.0,180,0.28,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 0.28}]"
+12,SNH4,,2,2.01386091172926,
+12,SNH4,,4,2.01386091172926,
+12,SNH4,,15,2.01386091172926,
+12,SNH4,,30,1.539423824201689,
+12,SNH4,,40,1.33128368257669,
+12,SNH4,,60,1.04823144985888,
+12,SNH4,,80,0.5,
+12,SNH4,,100,0.5,
+12,SNH4,,140,0.5,
+12,SNH4,,180,0.5,
+12,SNO3,,2,8.41483359665204,
+12,SNO3,,4,8.41483359665204,
+12,SNO3,,15,8.41483359665204,
+12,SNO3,,30,5.005406617449411,
+12,SNO3,,40,3.50965800721858,
+12,SNO3,,60,3.60060129396256,
+12,SNO3,,80,1.0,
+12,SNO3,,100,1.0,
+12,SNO3,,140,1.0,
+12,SNO3,,180,1.0,
+13,organic_c_pct,0.0,2,1.0754666666666666,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.0754666666666666}]"
+13,organic_c_pct,2.0,4,1.0754666666666666,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.0754666666666666}]"
+13,organic_c_pct,4.0,15,1.0754666666666666,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 1.0754666666666666}]"
+13,organic_c_pct,15.0,30,0.8244547085201793,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 1.0754666666666666}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.7143333333333333}]"
+13,organic_c_pct,30.0,40,0.7143333333333333,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.7143333333333333}]"
+13,organic_c_pct,40.0,60,0.4278,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.4278}]"
+13,organic_c_pct,60.0,80,0.1,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.1}]"
+13,organic_c_pct,80.0,100,0.1,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.1}]"
+13,organic_c_pct,100.0,140,0.1,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.1}]"
+13,organic_c_pct,140.0,180,0.1,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.1}]"
+13,total_n_gkg,0.0,2,0.8147306182420824,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.8147306182420824}]"
+13,total_n_gkg,2.0,4,0.8147306182420824,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 0.8147306182420824}]"
+13,total_n_gkg,4.0,15,0.8147306182420825,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 0.8147306182420824}]"
+13,total_n_gkg,15.0,30,0.6245748209613983,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 0.8147306182420824}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5411516324769691}]"
+13,total_n_gkg,30.0,40,0.5411516324769691,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5411516324769691}]"
+13,total_n_gkg,40.0,60,0.32409554798985035,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.32409554798985035}]"
+13,total_n_gkg,60.0,80,0.1,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.1}]"
+13,total_n_gkg,80.0,100,0.1,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.1}]"
+13,total_n_gkg,100.0,140,0.1,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.1}]"
+13,total_n_gkg,140.0,180,0.1,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.1}]"
+13,ph,0.0,2,8.146666666666667,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 8.146666666666667}]"
+13,ph,2.0,4,8.146666666666667,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 8.146666666666667}]"
+13,ph,4.0,15,8.146666666666667,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 11.0, ""value"": 8.146666666666667}]"
+13,ph,15.0,30,8.044444444444444,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 5.0, ""value"": 8.146666666666667}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 7.993333333333333}]"
+13,ph,30.0,40,7.993333333333334,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 7.993333333333333}]"
+13,ph,40.0,60,8.106666666666667,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.106666666666667}]"
+13,ph,60.0,80,8.0,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.0}]"
+13,ph,80.0,100,8.0,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 8.0}]"
+13,ph,100.0,140,8.0,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 8.0}]"
+13,ph,140.0,180,8.0,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 8.0}]"
+13,available_p,0.0,2,68.73665480427043,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 68.73665480427043}]"
+13,available_p,2.0,4,68.73665480427043,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 68.73665480427043}]"
+13,available_p,4.0,15,68.73665480427043,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 68.73665480427043}]"
+13,available_p,15.0,30,48.948262930277835,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 68.73665480427043}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 40.26690391459076}]"
+13,available_p,30.0,40,40.26690391459076,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 40.26690391459076}]"
+13,available_p,40.0,60,13.0427046263345,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 13.0427046263345}]"
+13,available_p,60.0,80,13.0427046263345,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 13.0427046263345}]"
+13,available_p,80.0,100,13.0427046263345,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 13.0427046263345}]"
+13,available_p,100.0,140,13.0427046263345,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 13.0427046263345}]"
+13,available_p,140.0,180,13.0427046263345,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 13.0427046263345}]"
+13,available_k,0.0,2,1.6308265761175234,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.6308265761175234}]"
+13,available_k,2.0,4,1.6308265761175234,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.72, ""value"": 1.6308265761175234}]"
+13,available_k,4.0,15,1.6308265761175234,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 14.96, ""value"": 1.6308265761175234}]"
+13,available_k,15.0,30,0.9123298131854652,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 6.800000000000001, ""value"": 1.6308265761175234}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5971183300926913}]"
+13,available_k,30.0,40,0.5971183300926913,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 15.5, ""value"": 0.5971183300926913}]"
+13,available_k,40.0,60,0.35277964378657833,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 31.200000000000003, ""value"": 0.3527796437865784}]"
+13,available_k,60.0,80,0.3527796437865784,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 30.2, ""value"": 0.3527796437865784}]"
+13,available_k,80.0,100,0.3527796437865784,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""deep_prior"", ""overlap_cm"": 20, ""weight"": 29.4, ""value"": 0.3527796437865784}]"
+13,available_k,100.0,140,0.3527796437865784,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 62.0, ""value"": 0.3527796437865784}]"
+13,available_k,140.0,180,0.3527796437865784,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 64.0, ""value"": 0.3527796437865784}]"
+13,SH2O,0.0,2,0.228756476497655,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 0.228756476497655}]"
+13,SH2O,2.0,4,0.228756476497655,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 2, ""weight"": 2.0, ""value"": 0.228756476497655}]"
+13,SH2O,4.0,15,0.22875647649765496,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 11, ""weight"": 11.0, ""value"": 0.228756476497655}]"
+13,SH2O,15.0,30,0.273708682953041,"[{""source_top_cm"": 0, ""source_bottom_cm"": 20, ""source"": ""measured"", ""overlap_cm"": 5, ""weight"": 5.0, ""value"": 0.228756476497655}, {""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 0.296184786180734}]"
+13,SH2O,30.0,40,0.296184786180734,"[{""source_top_cm"": 20, ""source_bottom_cm"": 40, ""source"": ""measured"", ""overlap_cm"": 10, ""weight"": 10.0, ""value"": 0.296184786180734}]"
+13,SH2O,40.0,60,0.305291699032745,"[{""source_top_cm"": 40, ""source_bottom_cm"": 60, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.305291699032745}]"
+13,SH2O,60.0,80,0.306907851047999,"[{""source_top_cm"": 60, ""source_bottom_cm"": 80, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.306907851047999}]"
+13,SH2O,80.0,100,0.3268358970957163,"[{""source_top_cm"": 80, ""source_bottom_cm"": 100, ""source"": ""measured"", ""overlap_cm"": 20, ""weight"": 20.0, ""value"": 0.3268358970957163}]"
+13,SH2O,100.0,140,0.3,"[{""source_top_cm"": 100, ""source_bottom_cm"": 140, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 0.3}]"
+13,SH2O,140.0,180,0.28,"[{""source_top_cm"": 140, ""source_bottom_cm"": 180, ""source"": ""deep_prior"", ""overlap_cm"": 40, ""weight"": 40.0, ""value"": 0.28}]"
+13,SNH4,,2,2.01386091172926,
+13,SNH4,,4,2.01386091172926,
+13,SNH4,,15,2.01386091172926,
+13,SNH4,,30,1.539423824201689,
+13,SNH4,,40,1.33128368257669,
+13,SNH4,,60,1.04823144985888,
+13,SNH4,,80,0.5,
+13,SNH4,,100,0.5,
+13,SNH4,,140,0.5,
+13,SNH4,,180,0.5,
+13,SNO3,,2,8.41483359665204,
+13,SNO3,,4,8.41483359665204,
+13,SNO3,,15,8.41483359665204,
+13,SNO3,,30,5.005406617449411,
+13,SNO3,,40,3.50965800721858,
+13,SNO3,,60,3.60060129396256,
+13,SNO3,,80,1.0,
+13,SNO3,,100,1.0,
+13,SNO3,,140,1.0,
+13,SNO3,,180,1.0,

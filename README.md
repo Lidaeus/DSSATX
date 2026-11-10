@@ -161,3 +161,5 @@ tests/               单元、集成和科研质量门测试
 - [历史归档](docs/archive/README.md)
 
 发生冲突时，以根 README、文档索引列出的“当前规范”和代码质量门为准；`docs/archive/` 中的参数、边界、命令和科研结论只用于追溯。
+
+macOS 开发请从 [README_macOS.md](README_macOS.md) 开始。

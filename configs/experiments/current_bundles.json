@@ -1,14 +1,14 @@
 {
   "as_of": "2026-11-06",
-  "notes": "Current final spring bundles; 26SP uses latest soil CN workbook and SASC/SAOC 0.70.",
+  "notes": "Final spring bundles with SASC/SAOC 0.70",
   "bundles": {
     "25SP": {
       "bundle_id": "xxql2501_final_sasc70_20261106",
       "manifest_sha256": "8b0b12fb1362675752108a6a56a3e1a98faf74abad51e4ebd940f696587c171d"
     },
     "26SP": {
-      "bundle_id": "xxql2601_final_20261105",
-      "manifest_sha256": "0baba7c64d3ec962046973f7b7626979978a23e3378f9f747f2b636dd45ca3b9"
+      "bundle_id": "xxql2601_final_sasc70_20261106",
+      "manifest_sha256": "2333a67f5c92f6217564eb49062147610e6a11316361e65e599951163b3fab6c"
     }
   }
 }

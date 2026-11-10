@@ -1,0 +1,12 @@
+{
+  "build_platform": "Windows x86_64 (WinLibs gfortran, CMake, Ninja)",
+  "macos_hardware_validation": "pending: run README_macOS.md commands on target Mac",
+  "python_selected_tests_passed": 38,
+  "diagnostic_contract_tests_passed": 6,
+  "native_nitrogen_checks_passed": 29,
+  "native_reserve_checks_passed": 1002,
+  "native_smoke_treatments_per_case": 12,
+  "native_smoke_cases": ["frozen V6-compatible config on V7", "V7 area_shape2"],
+  "frozen_atlas_pages_regenerated": 20,
+  "source_engine_fortran_changed": false
+}

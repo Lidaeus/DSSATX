@@ -1,0 +1,194 @@
+{
+  "model": "DSSAT 4.8.2.000 / frozen V15 S1 interface",
+  "archive": "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP",
+  "binary_sha256": "107ec95f443af66eb30d53769496836414131d6befd6ab2f34cd00ef98b137fc",
+  "days": 126,
+  "treatments": 12,
+  "rows": 1512,
+  "pre_freshwt_zero_days": 480,
+  "diagnostic_N_points": 24,
+  "layer_uptake_max_abs_error_kg_ha": 6.854534149169922e-07,
+  "plant_N_max_abs_residual_g_m2": 4.847534000873566e-07,
+  "clipped_potential_vs_stock_max_abs_kg_ha": 6.530983986952066e-08,
+  "source_hashes": {
+    "D:\\Tomato_Cal\\configs\\figures\\publication.json": "66a7e4cabbbabfad7471068bd70ba79d79a24848b4aba85f14e67e8db45ed58f",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\final_audit.json": "e5a5a12d994dac6469233b21fc4ad7e299e191b17e0469a1b5e0bb9d2858b60c",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\run_manifest.json": "94662ce6f880b1a74ca2a3013877fd1a3ac516c34e85fe34d0feedbd2a3dfee0",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\CNCParam.OUT": "917badb9cc37c55555acdff5428ecd36269c0275c555e9c2c5a9f6995ef09ce2",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\DSCSM048.EXE": "107ec95f443af66eb30d53769496836414131d6befd6ab2f34cd00ef98b137fc",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\ET.OUT": "a17bdcaf4fb0f0c432844175f613e050d3d7db6d5e9ea72a1fc1dfcc97648fdf",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\fertilizer_event_audit.csv": "7c0c35bcceaad6013db41b31ba1d7bf89ffb9354ca5f7ec632b9c9eecb84988b",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\FreshWt.OUT": "906270e504d7e48dfbf5f52768e0c194576294440f2178564231492a27801de2",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\injected_inputs.json": "57f1224224df76d58198e8e3dc1db8cbc0cc4ea78efbb3ee70642dc0d7795b93",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\irrigation_event_audit.csv": "dcb534b8a4c6078a142700debd67cf88ba2ac7d9201a7088bf1d78a3f35fbc32",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\NAcceptance.csv": "c880ee26b07a8b523f82818f8f7f4bd71ae275b672951e2f4eb9154b6eb19854",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\native_precision_audit.json": "4c05f89d18da1bdfdd8ea4be29fcf62befcd2b4a58a575009e4905c9789a250c",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\NBufferParam.OUT": "a294d9d5ba98d750b00be348ade9b0b75218e593f8cc3ace3fb39abe5fbc50ac",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\NCBalance.csv": "5a26e7ed3cfa03b3f4327309c0137b923d35eea9543dd6cf75d2871cefcb6b84",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\NDecision.csv": "225e93eb9f67377763dc25791c31f353f7d79e52fffa4b4c39bf212d5ae1ddb0",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\NFlux.csv": "5528ba659a4542d21aa0a144fb4703c51dc81bbedefadc4f12743fa99e478a57",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\OrganNState.csv": "ccc38fa2a0c033d4f633b952ed166262a393d2145e85617a48cfc78a7aaecb4a",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\OVERVIEW.OUT": "e138b524e3c9d51aa8379abb59c6ca2079f0eff32215dee3b05e8df18a747109",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\parameters.csv": "986ccbddf2966177075b86c5ca78e611a07251dae636a4f1eb6765e454ba2b71",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\PhotoN.csv": "604e94c3e6676ba1bec5b0f99551a9035ae1ac4ef3a6d9d212f9353bbff0d166",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\plant_npk_source_values.csv": "600d9297514da9c5c2dc10edd38ca65908b95e39ef9864ee4c81d28b3a9ac8e2",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\PlantC.OUT": "071c23bff88d85d3e4fa75971c69317941fd5db89f272748d3ea5a367d63ae77",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\PlantGro.OUT": "8319784c639cc9717931e1b120fd28d7a2e49a4313f270586b650d5596d3967d",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\RootNSupply.csv": "fa1798d5156d9dd7dc9ab4d06b21374736d967d0973ed85c789deaed12656b14",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\SOIL.SOL": "2d9b83da6e5ffcd62ac66c6e3f2a54a8540ad875a9c07f392c3ca832c23bc8d9",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\SoilWat.OUT": "da7efb8b23adb13d2707c03baa3c5469b412c4cd51c8cf31c8240d8b70402d93",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\TMGRO048.CUL": "112e2e003af55c223e8c1b1fba6799c4dd374de4d062587b51efc47f21d12f9d",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\TMGRO048.ECO": "fc277229058054079b6189c31ec64562eb08e74dad3b1aa72a6ddb60a435d537",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\TMGRO048.SPE": "898908cd3ded3bf768898f5d26d8547f7a3bc2e778381ec0e1e5b8af51bef638",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\treatment_metadata.csv": "b24ba4e8fbf80a643652b6a89202e9850cd60f1dfdcd5000d9e259a4425b5e52",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\XXQL2601.TMX": "cf612bcd9d65c3c1bd670a3a0aac1f43165bc436bb28936c8d48468cee27d3db",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\comparison.csv": "a4762642fa7376a8cad841283396c227034460db930983e92639c6aff4eb5ba4",
+    "D:\\Tomato_Cal\\subprojects\\critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\receipt.json": "3eaaf6665b6416a946703fbf4a692bf58619a12b8cb3b78d8d313e63b771f9e8",
+    "D:\\Tomato_Cal_worktrees\\dssat4864-n-diagnostic-atlas-20261103\\research\\n_diagnostics\\data.py": "af494ebe26126ff3d813a4f5c9d85ea2152104731ba1b80bb9a3bf343356ff77",
+    "D:\\Tomato_Cal_worktrees\\v15-s1-baseline-20261101\\subprojects\\critical_n\\vnext_v15_s1\\freeze_manifest.json": "8a014aa1b923d51be8623045c1adccccc5bdeb3f8000641cab8251a85936272e",
+    "D:\\Tomato_Cal_worktrees\\v15-s1-baseline-20261101\\subprojects\\critical_n\\vnext_v15_s1\\source\\Plant\\CROPGRO\\CROPGRO.for": "d1ffe4b8b6c4828e92959abca4f49ba97a44781647268f72c58ba7ca6b6cd881",
+    "D:\\Tomato_Cal_worktrees\\v15-s1-baseline-20261101\\subprojects\\critical_n\\vnext_v15_s1\\source\\Plant\\CROPGRO\\DEMAND.for": "98369bd65d379150034b89d34d3efc714771b9610716065ceff93d0a76cd5a04",
+    "D:\\Tomato_Cal_worktrees\\v15-s1-baseline-20261101\\subprojects\\critical_n\\vnext_v15_s1\\source\\Plant\\CROPGRO\\N_BUFFER_V2.f90": "a6855db44aa2796081b491d801b51a2cfed1adf49a0e202a57ced7487dcc45e9",
+    "D:\\Tomato_Cal_worktrees\\v15-s1-baseline-20261101\\subprojects\\critical_n\\vnext_v15_s1\\source\\Plant\\CROPGRO\\NUPTAK.for": "82221f5b528d879fb5af9b8a58b751b7f174432bccaaa822e44d7ced8e37ecea",
+    "D:\\Tomato_Cal_worktrees\\v15-s1-baseline-20261101\\subprojects\\critical_n\\vnext_v15_s1\\source\\Plant\\CROPGRO\\PHOTO.for": "a928549f46720e280dffb12f54e6704a21da1dfce7aef112b28f1b5bbe96075e",
+    "D:\\Tomato_Cal_worktrees\\v15-s1-baseline-20261101\\subprojects\\critical_n\\vnext_v15_s1\\source\\Plant\\CROPGRO\\PODS.for": "1699b2a9b0f1721a8f914a15f7005130caab237605caedc5e59c7790051e7874",
+    "D:\\Tomato_Cal_worktrees\\v15-s1-baseline-20261101\\subprojects\\critical_n\\vnext_v15_s1\\source\\Plant\\CROPGRO\\VEGGR.for": "feb1767eb1ed13aaaa0fc0edfcdc9931627fc9ea266eab0041d920c6ffeaf924",
+    "D:\\Tomato_Cal_worktrees\\v15-s1-baseline-20261101\\subprojects\\critical_n\\vnext_v15_s1\\source\\SPAM\\ETPHR.for": "bbbb7c22661790448f0632b09390b0828efac45e9a990c62d1e21a96feec1b20"
+  },
+  "parameters_echo": {
+    "CNC_A": 4.44619989,
+    "CNC_B": 0.201199993,
+    "CNC_W0": 1.12460005,
+    "CNC_NC_INF": 2.17820001,
+    "ENABLE": 1.0,
+    "KMOB": 0.034,
+    "KFILL": 0.322,
+    "PROTECT": 0.02,
+    "TARGET": 0.08,
+    "CAPACITY": 0.101,
+    "DELTA": 0.1,
+    "TRANSPORT_EXTRA_CH2O_PER_N": 0.0,
+    "SOIL_ALPHA": 0.028,
+    "UPTAKE_MODE": 1.0,
+    "STEM_BMULT": 0.548,
+    "STEM_TARGET": 0.089,
+    "BETA_GROW": 1.793,
+    "ALPHA_H": 4.582,
+    "ALPHA_L": 2.393,
+    "ROOT_DEPTH_MAX": 40.0
+  },
+  "pages": [
+    {
+      "page": 1,
+      "id": "water",
+      "title": "水分输入与植株水分限制"
+    },
+    {
+      "page": 2,
+      "id": "root_layers",
+      "title": "净吸氮来自哪些土层"
+    },
+    {
+      "page": 3,
+      "id": "root_zone",
+      "title": "根长与根系实际接触的水氮环境"
+    },
+    {
+      "page": 4,
+      "id": "root_limits",
+      "title": "潜力、需求上限与实际吸氮"
+    },
+    {
+      "page": 5,
+      "id": "root_feedback",
+      "title": "根系氮反馈与富氮抑制"
+    },
+    {
+      "page": 6,
+      "id": "assimilation",
+      "title": "吸收结算与氮同化碳成本"
+    },
+    {
+      "page": 7,
+      "id": "requests",
+      "title": "氮需求与旧组织回补"
+    },
+    {
+      "page": 8,
+      "id": "reserves",
+      "title": "叶与茎的氮库组成"
+    },
+    {
+      "page": 9,
+      "id": "turnover",
+      "title": "快速与慢速动员及果根氮库"
+    },
+    {
+      "page": 10,
+      "id": "concentration",
+      "title": "叶、茎与冠层氮浓度"
+    },
+    {
+      "page": 11,
+      "id": "dilution",
+      "title": "器官氮参照带与实际浓度轨迹"
+    },
+    {
+      "page": 12,
+      "id": "stress",
+      "title": "氮状态与实际生长、光合反馈"
+    },
+    {
+      "page": 13,
+      "id": "growth",
+      "title": "LAI、茎叶干重与冠层光合"
+    },
+    {
+      "page": 14,
+      "id": "yield_events",
+      "title": "鲜果产量与真实采收事件"
+    },
+    {
+      "page": 15,
+      "id": "yield_smooth",
+      "title": "鲜果产量与真实采收事件 · 单调曲线预览"
+    },
+    {
+      "page": 16,
+      "id": "N_contrasts",
+      "title": "同日氮响应差值"
+    },
+    {
+      "page": 17,
+      "id": "W_contrasts",
+      "title": "同日水响应差值"
+    }
+  ],
+  "generator_sha256": "35b902b9f7b80f04c192d445e88b2cab0b294efee89b46aeb64581a422b578af",
+  "artifacts": {
+    "diagnostic_atlas.pdf": "68ae334c537baccd3b055d961422949b173cc34dc16a07d68105d1c387804fd4",
+    "diagnostic_contrasts.csv": "443771b8da0b1e2d43098a21979c22a49d1ff0fd9dc92fc0ca0143cb0b3cbe0d",
+    "diagnostic_daily.csv": "6fb0448db196035ecadcf07834cad7cb241179a10a632df505e5a46ed30d05c3",
+    "diagnostic_fertilization_events.csv": "74379478d88172c4b351854b941e81d0e2d76f2a9928331239c232d2d3cf8d32",
+    "diagnostic_irrigation_events.csv": "59afbe9fc8bec5027414d1e4771fde712f422f1889a56ba0702e04bca3da68a8",
+    "diagnostic_observations.csv": "c801795428f660a64533ce5f192beffb4de7f8ef0514f354d55b079951e0f7c1",
+    "diagnostic_root_layers.csv": "56e3f3b6c57ba90013c02ab3986c4e3682e03ddb908d5887cb599d2334343caa",
+    "diagnostic_root_limits.png": "638238538d43b584a8adcfbd56e7f258e30f12df72fae44cec1b3c0906d93b23",
+    "diagnostic_variable_catalogue.json": "88325e15b21b14305ff38f0fde6b9bc2fb6f146392083f9c3dcb240d86f31e22"
+  },
+  "parameter_inventory": {
+    "path": "../diagnostic_parameter_inventory.csv",
+    "rows": 78,
+    "sha256": "91c522e46857a8923d9df74a1d4836d1abef881e49feebf388e97fa6b7d08d81",
+    "sources": {
+      "critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\selected_deterministic\\native_trials\\be4b381f697e49129ac0799c6ad7222f\\26SP\\joint_parameter_injection_audit.csv": "ef151bdb98ea169e928584f3bc41204deafb42e33ee98559e623101fa0a6a6cf",
+      "critical_n\\n_buffer_v15\\runs\\v15_s1_interface_100x2_20261028\\run_manifest.json": "94662ce6f880b1a74ca2a3013877fd1a3ac516c34e85fe34d0feedbd2a3dfee0"
+    }
+  },
+  "verification": {
+    "page_count": 17,
+    "all_source_hashes_rechecked": true,
+    "all_artifact_hashes_rechecked": true,
+    "all_pdf_pages_rendered_and_visually_reviewed": true
+  }
+}

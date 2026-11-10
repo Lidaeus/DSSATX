@@ -3,6 +3,8 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import json
+import os
+import re
 import shutil
 import subprocess
 import sys
@@ -22,7 +24,8 @@ ID = "eggplant_26sp_cal25sp_val_dual_morris98_80x4_20261105"
 BOUNDS_ID = ID + "_spaced"
 REVIEW = ROOT / "configs/calibration_proposals/eggplant_26sp_cal25sp_val_dual_morris98_20261105"
 INDEX = ROOT / "configs/experiments/current_bundles.json"
-EXE = Path("C:/DSSAT48/DSCSM048.EXE")
+# macOS-port: native engine via DSSAT_CUSTOM_EXE (Windows default kept).
+EXE = Path(os.environ.get("DSSAT_CUSTOM_EXE", r"C:/DSSAT48/DSCSM048.EXE"))
 MEMBERS, UPDATES, WORKERS, SEED = 80, 4, 6, 20261105
 DATES = {"25SP": "2025-05-01", "26SP": "2026-05-02"}
 PREVIOUS = {"25SP": 25112, "26SP": 26110}
@@ -207,7 +210,16 @@ def prepare(run):
     review = read(REVIEW / "proposal.json")
     for name, digest in review["proposal_sha256"].items():
         assert native.sha(REVIEW / name) == digest, name
-    assert native.sha(EXE) == native.EXE_HASH
+    # macOS-port: cross-platform binaries cannot match the Windows
+    # fingerprint; register the native build with DSSAT_ENGINE_SHA256.
+    engine_sha = os.environ.get("DSSAT_ENGINE_SHA256", "").strip().lower()
+    if engine_sha:
+        assert native.sha(EXE) == engine_sha, "engine fingerprint mismatch"
+    elif os.name != "nt":
+        print(f"[macOS-port] engine {EXE} sha256={native.sha(EXE)} "
+              "(unregistered; set DSSAT_ENGINE_SHA256 to pin)")
+    else:
+        assert native.sha(EXE) == native.EXE_HASH
     index = read(INDEX)
     datasets = {}
     catalog = {}
@@ -298,6 +310,28 @@ def values_for(b, values):
 def simulate(run, work, ctx, values):
     for p in ctx.payload.iterdir():
         shutil.copy2(p, work / p.name)
+    env = None
+    if os.name != "nt":
+        # macOS-port: native builds resolve DSSATPRO.L48 (OSDefs) from the
+        # run directory and locate standard data files cwd-first (CSREADS);
+        # copy the flat standard data + write run-relative records. The
+        # payload's Windows DSSATPRO.v48 stays untouched for provenance.
+        std = Path(os.environ["DSSAT_STD_DATA_DIR"])
+        for pattern in ("*.CDE", "MODEL.ERR", "*.SDA", "*.WDA"):
+            for p in sorted(std.glob(pattern)):
+                shutil.copy2(p, work / p.name)
+        template = (std / "DSSATPRO.L48.in").read_text(
+            encoding="ascii", errors="ignore")
+        profile = []
+        for line in template.splitlines():
+            m = re.fullmatch(r"([A-Z0-9]{3}) // \S+(.*)", line)
+            if m:
+                code, tail = m.groups()
+                line = f"{code}    .{tail}"
+            profile.append(line)
+        (work / "DSSATPRO.L48").write_text("\n".join(profile) + "\n",
+                                           encoding="ascii")
+        env = dict(os.environ, DSSAT_HOME=str(work))
     lines = {ext: rows.copy() for ext, rows in ctx.templates.items()}
     for name, value in values.items():
         ext, row, offset = ctx.fields[name]
@@ -314,7 +348,8 @@ def simulate(run, work, ctx, values):
                 raise ValueError(f"Genotype readback mismatch: {name}")
     with (work / "model.log").open("wb") as log:
         proc = subprocess.run([str(EXE), "CRGRO048", "B", "DSSBatch.v48"], cwd=work,
-                              stdout=log, stderr=subprocess.STDOUT, timeout=150)
+                              stdout=log, stderr=subprocess.STDOUT, timeout=150,
+                              env=env)
     err = work / "ERROR.OUT"
     if proc.returncode or (err.exists() and err.read_text(errors="replace").strip()):
         msg = err.read_text(errors="replace").strip() if err.exists() else ""

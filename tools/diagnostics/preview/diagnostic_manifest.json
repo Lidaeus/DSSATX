@@ -1,0 +1,9 @@
+{
+  "source_sha256": {
+    "D:\\Research_Artifacts\\DSSAT_diagnostics_macOS_20261108\\examples\\terminal\\terminal_fresh_yield_for_plot.csv": "6d969495e440f0ae8dd1588a6d1a3c4902abbf4d6734b39cd7a362180e84c149",
+    "D:\\Research_Artifacts\\DSSAT_diagnostics_macOS_20261108\\examples\\terminal\\treatment_metadata.csv": "931c6157169ccc78802d7408c5c1a0bf09199afb3bbe6bbd8760e20a74aa1fc7"
+  },
+  "renderer_sha256": "ca31416ea907286907d9323b5f92bdcf7bd176ca10b851517951c87cb9bc28f4",
+  "diagnostic_only": true,
+  "fresh_yield": "cumulative harvested fresh fruit"
+}

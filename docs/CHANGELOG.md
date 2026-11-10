@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-11-10（spring58 参数率定线 macOS 适配）
+
+- 适配 Windows 便携包 eggplant_spring58_calibration_portable_20261109（sha 9f2eaf29…）：率定线 eggplant_final_springs_58_restored_bounds_40x3_8agents_20261107（58 参数×511 目标×族预算 Phi=97×40×3×8 代理）落地 macOS。**目标函数与权重设计逐字节保留**（族预算制、伪 Huber δ=1.5、带符号水氮对比、鲜产最大预算族 22、诊断零预算、98% 保留率+确定性复算验收）；src/calibration 目标函数核心件与项目本就同源，零数学改动。
+- 按用户决定切换验证集：xxql2501_refreshed_lwad_20261108（LWAD 修订包）替代 xxql2501_refreshed_20261027（不引入项目）；锁定验证观测表（568 行）与 25SP 载荷以包自带构建函数重建。
+- 引擎考证：Windows 官方实为 4.8.5.000（非 4.8.6.4）；构建 tag v4.8.5.0 并修复两处 gfortran 严格 FORMAT 缺逗号（OPSOILNI 运行时 T52X 构造、OPSWBL 重复组）；残余 Phi Δ≈+2% 溯源为 CO2048.WDA 数据表（tag 版止于 2023，Windows 安装器表未随包；暂用 4.8.5.62 表，提供 Windows 文件后可逐位等价），全程记录于 design.json 的 port_macos 节。
+- 修复两个 macOS 专属缺陷：run_parallel 的 manager 就绪等待（511 观测大 pst 超出原 10 秒窗导致 agent 握手竞态）；pestpp-ies 5.2.27 apple 构建 execv 剥命令首 token 前导斜杠（绝对路径解释器无法启动，改用 V15 验证过的裸 python 形态）。
+- 二级 40×3 复跑进行中；完成后 finalize（选优+确定性复算+LWAD 验证季+梯度诊断）与 Windows round_quality 对照。文档：docs/率定目标函数设计_spring58_20261109.md、docs/spring58运行指南_macOS.md。
+
+## 2026-11-08（V15 S4 nstate：植株氮状态融合 ψ*）
+
+- 新增变体 v15_s4_nstate（subprojects/critical_n/n_buffer_v15/source/v15_s4_nstate/，双 overlay：S3 的 NUPTAK.for + 修改的 N_BUFFER_V2.f90）：融合 v4 功能氮基准/参考带/NNI/growth_tau 与 V15 ψ 双侧锚定，得到连续的植株氮状态表征 ψ*——功能氮基准（复用 nb_uptake_signal，锁死储备不再冒充奢侈）+ 统一稀释曲线（新增 nb_curve_conc，消除 plan/commit 双基准）+ 双侧锚定（亏缺侧 (NNI_f−1)/(1−r_eff) 锚 −1 于参考带下沿、奢侈侧锚 +1 于物理容量）；可选 state_tau 一阶松弛仅作用于生长侧发布态（nb_get_psi），根吸负反馈（nb_get_uptake_psi）恒瞬时。NState.nml/DSSAT_NSTATE_NML 选择 nstate_mode，与 RootUptake.nml 组成单二进制 2×2 因子矩阵；不新增率定参数。
+- 验证：19 项原生属性测试全过（值连续/双侧锚点/NNI 线性/储备语义/松弛与 getter 分流）；双锚回归硬门通过——(1,1) 与 S1 冻结二进制、(2,1) 与 S3 二进制均逐字节一致；(2,2)/(1,2) 12 处理全跑通、既有账本字节稳定、ψ* 专用账本 NStatePsi.csv 落盘。诊断证据：率定参数重放显示假奢侈修正确实可见（后期总氮基准 ψ 振荡 +0.6~0.8 而 ψ* 仅 +0.2~0.5），NNI_f 梯度正确；鲜果产量 2×2 显示状态融合使平台下移、氮响应更陡。变体登记于 mechanism_variants.json（sha cf9464ba…）。
+
+## 2026-11-07（macOS 平台移植 + V15 S3 v4root 根系吸氮变体）
+
+- macOS 开发环境搭建（部署至 ~/dev/Tomato_Cal、Makefile 任务入口、两根清理规范、归档交接包）；posix 率定接线落地：run_dssat.py 增加 DSSATPRO.L48 生成（DSSAT_STD_DATA_DIR）、DSSAT_HOME 注入与 posix 路径格式，V15 S1 引擎 50×4 PEST++ IES 联合率定实跑验证通过（Phi 4523→207、零模型失败）。
+- 新增 V15 世代机制变体 v15_s3_v4root（subprojects/critical_n/n_buffer_v15/source/v15_s3_v4root/）：以覆盖文件 NUPTAK.for 移植 4864 引擎 n_v4 世代的 v4-R2 联立根系吸氮核（膜 Michaelis-Menten 在根表浓度与质流+扩散供给二分联解，替代 S1 质流+主动相加），负反馈以 nb_feedback_response(ψ,α_H) 经 poolfactor 乘 root_v（与 v4 pool_beta/QH1 同拓扑，键控 V15 现有 ψ，不引入 Q3 池）；RootUptake.nml/DSSAT_ROOT_UPTAKE_NML 选择内核，nml 缺失逐字节复现 S1（回归①验证）。
+- 验证：19 项原生属性测试全过（含满奢侈 ψ 吸收降 98%）；26SP 12 处理回归②通过（RootKernelLedger 972 层-日，守恒断言未触发）；确定性 A/B 显示 S1 植株 N 对施氮梯度钝化而 S3 恢复梯度响应（W3：49→64→70→73 kg/ha）；同种子 50×4 IES A/B 见两 run 目录。root_v/root_k/diffusion_k 为 UNCALIBRATED 工程值，未进入率定域；变体登记于 n_buffer_v15/configs/mechanism_variants.json。
+
 ## 2026-09-23（产量与土壤源数据修订）
 
 - 根据 `data/user/ref/DSSAT文件/` 最新 Excel 重建 25SP、26SP、25FA 三季输入包；秋季初始氮采用用户指定的 `2025秋土壤养分数据集.xlsx`，26SP 采用单独的五层矿质氮表，25SP 的硝态氮/铵态氮列已为纯氮，不再二次换算。

@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-15",
+  "scope": "2026 spring 12 treatments",
+  "nature": "architecture and development plan only",
+  "new_model_code_or_runs_created": false,
+  "baseline_release": "V6g",
+  "baseline_scientific_acceptance": "failed",
+  "files_inspected_sha256": {
+    "README.md": "0971bc1418cc67b1a03afdaa45e5df0efd258083d562a10890ace5e33ebcf551",
+    "prepare_focus.py": "4dcdd309f603d4e5f7929e29009f6c27dda31f11625df32e70f175553db98c89",
+    "forward.py": "c0f5d7eca1b18be8d5e86c36f06327df75f1969cb9678790011a0920cf4c9cb6",
+    "launch_ies.py": "7405da94de37aced64ad3fd2bf683cf8d44b52044ae9363f3a7f5c91173f832e",
+    "objective.py": "7d9bf1f520af301fb23c0dd48f4281230c8eda372711404c1e4fd488124bab04",
+    "audit_ies.py": "c10a0f258b8a9bfd7e07d26dec3c802938ddff945931ab202cae8600895097a0",
+    "patches/integrate.py": "b41c5e4d146f7f981a7bb5a5404f8698a8fd794e9a88b1e3c6480dadea96f97d",
+    "build_release.py": "e1870381f0f88afa9444f4e6fad29c863a41dab15d2f0daa8cd7641b493490c6",
+    "vendor/CMakeLists.txt": "d27f583406045d4453e1de76cc9e4665152fb4f9f31ea44d25ed7c4d0b74d54a",
+    "vendor/Plant/CROPGRO/N_BUFFER_V2.f90": "0bae0868daffc391f7ada2938cdf609fd8de3f1a2845e03c613584d05886ca38",
+    "vendor/Plant/CROPGRO/N_BUFFER_MOD.for": "f35aafc2d4cfe98402849723c1a7acd133a3a1929ff804a84ee2d086549f084b",
+    "vendor/Plant/CROPGRO/CROPGRO.for": "0e1d9d203d776e44849b6aea4bc2e31622133f8881c8abfa1ff90c3758187b28",
+    "vendor/Plant/CROPGRO/DEMAND.for": "02234e80f87c03460fc759ca019677b0d10ccc0d7b017ec5ad18be2445980a5e",
+    "vendor/Plant/CROPGRO/NUPTAK.for": "16100e144ed0dc000576414e2d706369fd4e8d9deb2d0b0f444db2c258f23f2c",
+    "vendor/SPAM/ETPHR.for": "bbbb7c22661790448f0632b09390b0828efac45e9a990c62d1e21a96feec1b20",
+    "runtime/src/calibration/reviewfix_joint.py": "ebd1748d9aa4509c5dc01a2a430475179bd121b224fd954cab3207772d3a8120",
+    "runs/mechanism02_200x5_v6g/audit.json": "b91b819043ef5520aba5b94511ef9dfe7fece1dcdb6d5c52729a058713ac6cae",
+    "manifests/final_delivery.json": "8ff9f468d831c5d2bccea06a674d41f12e1e0760d68fbef2931b9b086634e4f7"
+  },
+  "plan_sha256": "273a582ce8ab882784b0dbfecb5e1083f6373d4955fab38a28822698285b1b84",
+  "backlog_sha256": "d9ffc1bc0c33f2d61b08fd3bb89e55972ffad5ad03590dc6d9290bc495762e4f"
+}

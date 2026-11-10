@@ -192,7 +192,8 @@ REGISTRY_HEADER = [
 
 
 def _project_root() -> str:
-    return os.path.dirname(os.path.abspath(__file__))
+    # tools/ 的上一级才是仓库根；此前返回 tools/ 本身，骨架会被创建到 tools/ 下
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def create_dirs(root: str, *, dry_run: bool = False) -> list[str]:
