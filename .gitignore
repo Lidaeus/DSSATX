@@ -121,3 +121,10 @@ data/user/experiments/xxql2601_sa_source_candidate_20260720/
 .DS_Store
 /.local/
 /subprojects/critical_n/dssat_csm_os_4864/
+
+# Root handoff/export zips
+/*.zip
+
+# In-progress S4 base85 calibration run artifacts (process files)
+data/parameter_registry/bounds_frozen/eggplant/eggplant_s4_base85_s4point_40x3_*
+data/parameter_registry/bounds_proposals/eggplant/eggplant_s4_base85_s4point_40x3_*
