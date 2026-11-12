@@ -5,6 +5,9 @@ module CG_Nitrogen
   use iso_fortran_env, only: real64
   use ieee_arithmetic, only: ieee_is_finite, ieee_next_after
   use ModuleDefs, only: ControlType, SwitchType, NL
+  use RootNUptake, only: rnk_dp, rnk_params, rnk_layer, rnk_diag, &
+    rnk_NO3, rnk_NH4, rnk_layer_A, rnk_membrane, rnk_validate, &
+    RNK_MODE_A, RNK_MODE_B
   implicit none
   private
   integer, parameter :: dp=real64
@@ -79,6 +82,15 @@ module CG_Nitrogen
   real(dp), save :: org_begin=0,org_off_begin=0,leak_begin=0,legacy_n_res=0,legacy_c_overrun=0
   real(dp), save :: r_mf(NL)=0,r_diff(NL)=0,r_mem(NL)=0,r_cr(NL)=0,r_bulk(NL)=0
   real(dp), save :: r_candidate3(NL)=0,r_candidate4(NL)=0,r_final3(NL)=0,r_final4(NL)=0
+  ! --- RootNUptake 公共核 (T2 2026-11-12): 0=off(冻结行为), 1=A(等效根际运输) ---
+  integer, save :: rnk_mode=0
+  real(dp), save :: rnk_km_high(2)=0, rnk_km_low(2)=0
+  real(dp), save :: rnk_vmax_high(2)=0, rnk_vmax_low(2)=0
+  real(dp), save :: rnk_kd(2)=0, rnk_residual(2)=0, rnk_nh4_diff=0
+  type(rnk_params), save :: rnk_par
+  integer, save :: r_rnk_branch(2,NL)=0
+  real(dp), save :: r_rnk_cap(2,NL)=0, r_rnk_mf4(NL)=0, r_rnk_bulk4(NL)=0, r_rnk_cr4(NL)=0
+  logical, save :: r_rnk_capped(2,NL)=.false.
   integer,save::root_output_unit=0
   logical,save::root_opened=.false.
   public :: NI_LOAD, NI_RESET, NI_ENABLED, NI_CURVES, NI_FEEDBACK
@@ -990,6 +1002,9 @@ contains
       photo_reference_mode,photo_sln_ref,leaf_expansion_mode,v4_diagnostics,common_acceptance,reserve_mode, &
       reserve_capacity,reserve_fill_tau,reserve_protect,build_min_leaf,build_min_stem, &
       remob_rate_mode,remob_rate_max,functional_rate_max,lai_cn_mode,lai_cn_shape
+    namelist /ROOTNUPTAKE/ rnk_mode,rnk_km_high,rnk_km_low,rnk_vmax_high,rnk_vmax_low, &
+      rnk_kd,rnk_residual,rnk_nh4_diff
+    logical :: rnk_present
     if(loaded) then
       if(NI_ENABLED()) then
         if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
@@ -1081,6 +1096,50 @@ contains
        max(state_timing,pods_n_state,remob_mode,luxury_priority)>1) error stop 'NI v3: switches must be 0 or 1'
     if(ni_stage/=5.and.max(state_timing,pods_n_state,remob_mode,luxury_priority)>0) &
       error stop 'NI v3: opt-in modes require stage5; stage0 cannot silently activate them'
+    ! --- RootNUptake 公共核配置: &ROOTNUPTAKE 缺席即 mode=0(冻结行为) ---
+    inquire(file=trim(path),exist=exists)
+    if(exists) then
+      open(newunit=unit,file=trim(path),status='old',action='read',iostat=ios)
+      if(ios/=0) error stop 'RNK: cannot reopen configuration'
+      rnk_present=.false.
+      do
+        read(unit,'(A)',iostat=ios) message
+        if(ios/=0) exit
+        if(index(adjustl(message),'&ROOTNUPTAKE')==1) rnk_present=.true.
+      end do
+      if(rnk_present) then
+        rewind(unit)
+        read(unit,nml=ROOTNUPTAKE,iostat=ios,iomsg=message)
+        close(unit)
+        if(ios/=0) then
+          write(*,'(A)') trim(message)
+          error stop 'RNK: invalid ROOTNUPTAKE namelist'
+        end if
+        if(rnk_mode<0.or.rnk_mode>2) error stop 'RNK: transport mode must be 0(off),1(A),2(B)'
+        if(rnk_mode==2) error stop 'RNK: radial transport B is delivered with T3; not in this build'
+        if(rnk_mode==1) then
+          if(.not.NI_ENABLED()) error stop 'RNK: common kernel requires enabled NI integration'
+          if(NI_ROOT_MODE()<=0) error stop 'RNK: common kernel requires actual-water root mode (root_mode>=1)'
+          rnk_par%km_high=rnk_km_high; rnk_par%km_low=rnk_km_low
+          rnk_par%vmax_high=rnk_vmax_high; rnk_par%vmax_low=rnk_vmax_low
+          rnk_par%kd_sorption=rnk_kd; rnk_par%residual_ppm=rnk_residual
+          rnk_par%source_tag(rnk_NO3)='v15-engineering'
+          rnk_par%source_tag(rnk_NH4)='literature-prior'
+          block
+            character(160) :: rnk_msg
+            rnk_msg=rnk_validate(rnk_par,NL)
+            if(len_trim(rnk_msg)>0) then
+              write(*,'(A)') trim(rnk_msg)
+              error stop 'RNK: parameter validation failed'
+            end if
+          end block
+          if(rnk_nh4_diff<=0) error stop 'RNK: positive NH4 effective diffusion prior required'
+        end if
+      else
+        close(unit)
+        rnk_mode=0
+      end if
+    end if
     if(.not.NI_ENABLED()) return
     if(budget_revision<0.or.budget_revision>1) error stop 'NI: budget_revision must be 0 or 1'
     if(min(state_timing,pods_n_state)<0.or.max(state_timing,pods_n_state)>1) &
@@ -1146,6 +1205,7 @@ contains
     reserve_n=0;reserve_begin=0;reserve_fill=0;reserve_release=0;reserve_sen_recovery=0;reserve_litter=0
     reserve_pending=.false.;reserve_residual=0
     lai_accept_calls=0;lai_area_calls=0;lai_dm_raw=0;lai_dm_request=0;lai_area=0
+    r_rnk_branch=0; r_rnk_cap=0; r_rnk_mf4=0; r_rnk_bulk4=0; r_rnk_cr4=0; r_rnk_capped=.false.
   end subroutine
   subroutine NI_BEGIN(weights)
     real,intent(in)::weights(3)
@@ -1591,8 +1651,13 @@ contains
     integer::l
     if(.not.water_ready.or.water_run/=control%RUN.or.water_day/=control%YRDOY) &
       error stop 'NI: missing or stale actual root water snapshot'
-    if(legacy_nh4<0) error stop 'NI: native NH4 species capacity was not initialized'
+    if(legacy_nh4<0 .and. rnk_mode/=RNK_MODE_A) error stop 'NI: native NH4 species capacity was not initialized'
     feedback=exp(-pool_beta*sum(q3)/max(q_no3_max*sum(carrier),1.e-12_dp))
+    if(rnk_mode==RNK_MODE_A) then
+      ! 公共核 A 臂: 双形态双亲和米氏 + 等效根际运输 (T2 2026-11-12)
+      call NI_ROOT_UPTAKE_RNK(nlayr,bd,depth,ll,dul,sat,no3,nh4,kg2ppm,uno3,unh4,feedback)
+      return
+    end if
     uno3=0; unh4=0
     do l=1,nlayr
       theta=theta_snapshot(l)
@@ -1612,6 +1677,49 @@ contains
       potential=.1_dp*length*sqrt(wet)*max(0._dp,1-exp(-.08_dp*real(nh4(l),dp)))*legacy_nh4
       potential=min(potential,max(0._dp,real(nh4(l)-.5,dp)/real(kg2ppm(l),dp)/10))
       unh4(l)=flux32(10*potential)
+    end do
+    r_candidate3(1:nlayr)=real(uno3(1:nlayr),dp)/10
+    r_candidate4(1:nlayr)=real(unh4(1:nlayr),dp)/10
+  end subroutine
+  subroutine NI_ROOT_UPTAKE_RNK(nlayr,bd,depth,ll,dul,sat,no3,nh4,kg2ppm,uno3,unh4,feedback)
+    ! RootNUptake 公共核适配层: 底座数组(单精度 ppm/cm) → 双精度核输入(g N m^-2/d 内部),
+    ! 返回 kg N ha^-1 d^-1 的 UNO3/UNH4 候选。诊断填充既有 r_* 账本与 rnk 扩展数组。
+    integer,intent(in)::nlayr
+    real,intent(in)::bd(:),depth(:),ll(:),dul(:),sat(:),no3(:),nh4(:),kg2ppm(:)
+    real,intent(out)::uno3(:),unh4(:)
+    real(dp),intent(in)::feedback
+    type(rnk_layer)::lay
+    type(rnk_diag)::dg(2)
+    real(dp)::wet,theta0,leng
+    integer::l
+    uno3=0; unh4=0
+    do l=1,nlayr
+      ! wet 因子与 legacy R2 同口径 (LL→DUL→SAT 三角形)
+      wet=max(0._dp,min(1._dp,(theta_snapshot(l)-real(ll(l),dp))/max(real(dul(l)-ll(l),dp),1.e-12_dp)))
+      if(theta_snapshot(l)>dul(l)) wet=max(0._dp,min(1._dp,(real(sat(l),dp)-theta_snapshot(l))/ &
+        max(real(sat(l)-dul(l),dp),1.e-12_dp)))
+      leng=100._dp*rlv_snapshot(l)*real(depth(l),dp)
+      ! SPAM 快照 theta 已含 -0.5*RWU/Δz 中点修正; 还原日初 theta0 供公共核重算 theta_mid
+      theta0=theta_snapshot(l)+0.5_dp*rwu_snapshot(l)/max(real(depth(l),dp),1.e-9_dp)
+      lay%p(rnk_NO3)=real(no3(l),dp); lay%p(rnk_NH4)=real(nh4(l),dp)
+      lay%bd=real(bd(l),dp); lay%kg2ppm=real(kg2ppm(l),dp); lay%dlayr=real(depth(l),dp)
+      lay%rlv=real(rlv_snapshot(l),dp); lay%theta0=theta0; lay%rwu=rwu_snapshot(l)
+      lay%f_root=feedback*sqrt(max(0._dp,wet))
+      lay%frac_high=1._dp; lay%frac_low=1._dp
+      ! A 臂层导度 G = 0.001*D_eq*wet*Lr; NO3 继承底座 v4-R2 diffusion_k, NH4 用登记先验
+      lay%g_transport(rnk_NO3)=.001_dp*diffusion_k*wet*leng
+      lay%g_transport(rnk_NH4)=.001_dp*rnk_nh4_diff*wet*leng
+      call rnk_layer_A(rnk_par,lay,dg)
+      uno3(l)=real(10*dg(rnk_NO3)%candidate)
+      unh4(l)=real(10*dg(rnk_NH4)%candidate)
+      r_bulk(l)=dg(rnk_NO3)%c_bulk; r_cr(l)=dg(rnk_NO3)%c_root
+      r_mf(l)=dg(rnk_NO3)%mf_potential; r_diff(l)=dg(rnk_NO3)%diffusive_flux
+      r_mem(l)=rnk_membrane(rnk_par,rnk_NO3,dg(rnk_NO3)%c_root,dg(rnk_NO3)%root_length, &
+        lay%f_root,1._dp,1._dp)
+      r_rnk_bulk4(l)=dg(rnk_NH4)%c_bulk; r_rnk_cr4(l)=dg(rnk_NH4)%c_root; r_rnk_mf4(l)=dg(rnk_NH4)%mf_potential
+      r_rnk_branch(:,l)=(/dg(rnk_NO3)%branch,dg(rnk_NH4)%branch/)
+      r_rnk_cap(:,l)=(/dg(rnk_NO3)%stock_cap,dg(rnk_NH4)%stock_cap/)
+      r_rnk_capped(:,l)=(/dg(rnk_NO3)%stock_capped,dg(rnk_NH4)%stock_capped/)
     end do
     r_candidate3(1:nlayr)=real(uno3(1:nlayr),dp)/10
     r_candidate4(1:nlayr)=real(unh4(1:nlayr),dp)/10
