@@ -91,6 +91,11 @@ module CG_Nitrogen
   integer, save :: r_rnk_branch(2,NL)=0
   real(dp), save :: r_rnk_cap(2,NL)=0, r_rnk_mf4(NL)=0, r_rnk_bulk4(NL)=0, r_rnk_cr4(NL)=0
   logical, save :: r_rnk_capped(2,NL)=.false.
+  real(dp), save :: r_rnk_stock_before(2,NL)=0, r_rnk_theta0(NL)=0, r_rnk_diff(2,NL)=0
+  real(dp), save :: r_rnk_accept3(NL)=0, r_rnk_accept4(NL)=0
+  integer, save :: r_rnk_source_day=-1
+  integer, save :: rnk_ledger_unit=0
+  logical, save :: rnk_ledger_opened=.false.
   integer,save::root_output_unit=0
   logical,save::root_opened=.false.
   public :: NI_LOAD, NI_RESET, NI_ENABLED, NI_CURVES, NI_FEEDBACK
@@ -1206,6 +1211,8 @@ contains
     reserve_pending=.false.;reserve_residual=0
     lai_accept_calls=0;lai_area_calls=0;lai_dm_raw=0;lai_dm_request=0;lai_area=0
     r_rnk_branch=0; r_rnk_cap=0; r_rnk_mf4=0; r_rnk_bulk4=0; r_rnk_cr4=0; r_rnk_capped=.false.
+    r_rnk_stock_before=0; r_rnk_theta0=0; r_rnk_diff=0; r_rnk_accept3=0; r_rnk_accept4=0
+    r_rnk_source_day=-1
   end subroutine
   subroutine NI_BEGIN(weights)
     real,intent(in)::weights(3)
@@ -1302,6 +1309,11 @@ contains
     end if
     d_u3=sum(real(uno3(1:nlayr),dp))/10
     d_u4=sum(real(unh4(1:nlayr),dp))/10
+    if(rnk_mode==RNK_MODE_A) then
+      ! 账本: 接受链缩放后的逐层接受量 (g N m^-2), 供 LayerRootNUptake.csv
+      r_rnk_accept3(1:nlayr)=real(uno3(1:nlayr),dp)/10
+      r_rnk_accept4(1:nlayr)=real(unh4(1:nlayr),dp)/10
+    end if
     call spread(q3,d_u3,q_no3_max*carrier)
     call spread(q4,d_u4,q_nh4_max*carrier)
     tr3=real(d_u3); tr4=real(d_u4); trnu=tr3+tr4
@@ -1424,7 +1436,7 @@ contains
     real,intent(in)::weights(3),losses(3),root_weights(:),org_n(3),lai,wcrlf
     real(dp)::fraction(3),out3(3),out4(3),growth(3),denom,alpha,target,nraw,nniraw(2),nnifun(2),deficit(2),surplus(2)
     real(dp)::functional_n(2)
-    integer::l,ios
+    integer::l,s,ios
     if(.not.NI_ENABLED()) return
     if(reserve_pending)error stop 'NI P2: reserve stock was not committed'
     growth=max(0._dp,real(weights,dp)+max(0._dp,real(losses,dp))-w_begin)
@@ -1592,6 +1604,34 @@ contains
           r_candidate3(l),r_candidate4(l),r_final3(l),r_final4(l)
       end do
     end if
+    if(rnk_mode==RNK_MODE_A) then
+      ! RNK 逐层逐形态账本 (计划 §6): source_day 为候选计算日, soil_commit_day 为
+      ! 最终 UNO3/UNH4 交土壤扣除日 (驱动层同日内植物 RATE → 土壤 RATE, 此处断言同日)。
+      if(r_rnk_source_day>control%YRDOY) error stop 'RNK: uptake snapshot from a future day'
+      if(r_rnk_source_day==control%YRDOY) then
+        if(.not.rnk_ledger_opened) then
+          open(newunit=rnk_ledger_unit,file='LayerRootNUptake.csv',status='new',action='write',iostat=ios)
+          if(ios/=0) error stop 'RNK: layer ledger already exists or cannot be opened'
+          write(rnk_ledger_unit,'(A)') 'run,yrdoy,layer,species,source_day,soil_commit_day,'// &
+            'theta0,theta_mid,rwu_cm_d,rlv_cm_cm3,'// &
+            'stock_before_gN_m2,c_bulk_mgN_L,c_root_mgN_L,'// &
+            'mf_potential_gN_m2,diffusive_gN_m2,candidate_gN_m2,'// &
+            'accepted_gN_m2,deducted_gN_m2,stock_cap_gN_m2,solver_status'
+          rnk_ledger_opened=.true.
+        end if
+        do l=1,nlayr
+          do s=1,2
+            write(rnk_ledger_unit,'(I0,5(",",I0),13(",",ES24.15E3),",",I0)') &
+              control%RUN,control%YRDOY,l,s,r_rnk_source_day,control%YRDOY, &
+              r_rnk_theta0(l),theta_snapshot(l),rwu_snapshot(l),rlv_snapshot(l), &
+              r_rnk_stock_before(s,l),rnk_cb(s,l),rnk_cr(s,l),rnk_mf(s,l), &
+              r_rnk_diff(s,l),rnk_cand(s,l),rnk_acc(s,l),rnk_fin(s,l), &
+              r_rnk_cap(s,l),rnk_status(s,l)
+          end do
+        end do
+        flush(rnk_ledger_unit)
+      end if
+    end if
   end subroutine
   subroutine NI_RETURN_LITTER(sno3,snh4,nlayr)
     integer,intent(in)::nlayr
@@ -1655,6 +1695,7 @@ contains
     feedback=exp(-pool_beta*sum(q3)/max(q_no3_max*sum(carrier),1.e-12_dp))
     if(rnk_mode==RNK_MODE_A) then
       ! 公共核 A 臂: 双形态双亲和米氏 + 等效根际运输 (T2 2026-11-12)
+      r_rnk_source_day=control%YRDOY
       call NI_ROOT_UPTAKE_RNK(nlayr,bd,depth,ll,dul,sat,no3,nh4,kg2ppm,uno3,unh4,feedback)
       return
     end if
@@ -1681,6 +1722,35 @@ contains
     r_candidate3(1:nlayr)=real(uno3(1:nlayr),dp)/10
     r_candidate4(1:nlayr)=real(unh4(1:nlayr),dp)/10
   end subroutine
+  ! ---- RNK 账本辅助: 按形态选择既有/扩展诊断数组 ----
+  elemental real(dp) function rnk_cb(s,l)
+    integer,intent(in)::s,l
+    rnk_cb=merge(r_bulk(l),r_rnk_bulk4(l),s==rnk_NO3)
+  end function rnk_cb
+  elemental real(dp) function rnk_cr(s,l)
+    integer,intent(in)::s,l
+    rnk_cr=merge(r_cr(l),r_rnk_cr4(l),s==rnk_NO3)
+  end function rnk_cr
+  elemental real(dp) function rnk_mf(s,l)
+    integer,intent(in)::s,l
+    rnk_mf=merge(r_mf(l),r_rnk_mf4(l),s==rnk_NO3)
+  end function rnk_mf
+  elemental real(dp) function rnk_cand(s,l)
+    integer,intent(in)::s,l
+    rnk_cand=merge(r_candidate3(l),r_candidate4(l),s==rnk_NO3)
+  end function rnk_cand
+  elemental real(dp) function rnk_acc(s,l)
+    integer,intent(in)::s,l
+    rnk_acc=merge(r_rnk_accept3(l),r_rnk_accept4(l),s==rnk_NO3)
+  end function rnk_acc
+  elemental real(dp) function rnk_fin(s,l)
+    integer,intent(in)::s,l
+    rnk_fin=merge(r_final3(l),r_final4(l),s==rnk_NO3)
+  end function rnk_fin
+  elemental integer function rnk_status(s,l)
+    integer,intent(in)::s,l
+    rnk_status=r_rnk_branch(s,l)*10+merge(1,0,r_rnk_capped(s,l))
+  end function rnk_status
   subroutine NI_ROOT_UPTAKE_RNK(nlayr,bd,depth,ll,dul,sat,no3,nh4,kg2ppm,uno3,unh4,feedback)
     ! RootNUptake 公共核适配层: 底座数组(单精度 ppm/cm) → 双精度核输入(g N m^-2/d 内部),
     ! 返回 kg N ha^-1 d^-1 的 UNO3/UNH4 候选。诊断填充既有 r_* 账本与 rnk 扩展数组。
@@ -1720,6 +1790,10 @@ contains
       r_rnk_branch(:,l)=(/dg(rnk_NO3)%branch,dg(rnk_NH4)%branch/)
       r_rnk_cap(:,l)=(/dg(rnk_NO3)%stock_cap,dg(rnk_NH4)%stock_cap/)
       r_rnk_capped(:,l)=(/dg(rnk_NO3)%stock_capped,dg(rnk_NH4)%stock_capped/)
+      r_rnk_stock_before(:,l)=(/real(no3(l),dp),real(nh4(l),dp)/)/ &
+        merge(real(kg2ppm(l),dp),1._dp,real(kg2ppm(l),dp)>0._dp)/10._dp
+      r_rnk_theta0(l)=theta0
+      r_rnk_diff(:,l)=(/dg(rnk_NO3)%diffusive_flux,dg(rnk_NH4)%diffusive_flux/)
     end do
     r_candidate3(1:nlayr)=real(uno3(1:nlayr),dp)/10
     r_candidate4(1:nlayr)=real(unh4(1:nlayr),dp)/10
