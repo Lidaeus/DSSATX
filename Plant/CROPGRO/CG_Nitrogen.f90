@@ -6,7 +6,7 @@ module CG_Nitrogen
   use ieee_arithmetic, only: ieee_is_finite, ieee_next_after
   use ModuleDefs, only: ControlType, SwitchType, NL
   use RootNUptake, only: rnk_dp, rnk_params, rnk_layer, rnk_diag, &
-    rnk_NO3, rnk_NH4, rnk_layer_A, rnk_membrane, rnk_validate, &
+    rnk_NO3, rnk_NH4, rnk_layer_A, rnk_layer_B, rnk_membrane, rnk_validate, &
     RNK_MODE_A, RNK_MODE_B
   implicit none
   private
@@ -87,8 +87,10 @@ module CG_Nitrogen
   real(dp), save :: rnk_km_high(2)=0, rnk_km_low(2)=0
   real(dp), save :: rnk_vmax_high(2)=0, rnk_vmax_low(2)=0
   real(dp), save :: rnk_kd(2)=0, rnk_residual(2)=0, rnk_nh4_diff=0
+  real(dp), save :: rnk_radius=0, rnk_diffmol=0, rnk_tort=0
   type(rnk_params), save :: rnk_par
   integer, save :: r_rnk_branch(2,NL)=0
+  integer, save :: r_rnk_flag(2,NL)=0
   real(dp), save :: r_rnk_cap(2,NL)=0, r_rnk_mf4(NL)=0, r_rnk_bulk4(NL)=0, r_rnk_cr4(NL)=0
   logical, save :: r_rnk_capped(2,NL)=.false.
   real(dp), save :: r_rnk_stock_before(2,NL)=0, r_rnk_theta0(NL)=0, r_rnk_diff(2,NL)=0
@@ -1008,7 +1010,7 @@ contains
       reserve_capacity,reserve_fill_tau,reserve_protect,build_min_leaf,build_min_stem, &
       remob_rate_mode,remob_rate_max,functional_rate_max,lai_cn_mode,lai_cn_shape
     namelist /ROOTNUPTAKE/ rnk_mode,rnk_km_high,rnk_km_low,rnk_vmax_high,rnk_vmax_low, &
-      rnk_kd,rnk_residual,rnk_nh4_diff
+      rnk_kd,rnk_residual,rnk_nh4_diff,rnk_radius,rnk_diffmol,rnk_tort
     logical :: rnk_present
     if(loaded) then
       if(NI_ENABLED()) then
@@ -1121,8 +1123,7 @@ contains
           error stop 'RNK: invalid ROOTNUPTAKE namelist'
         end if
         if(rnk_mode<0.or.rnk_mode>2) error stop 'RNK: transport mode must be 0(off),1(A),2(B)'
-        if(rnk_mode==2) error stop 'RNK: radial transport B is delivered with T3; not in this build'
-        if(rnk_mode==1) then
+        if(rnk_mode>=1) then
           if(.not.NI_ENABLED()) error stop 'RNK: common kernel requires enabled NI integration'
           if(NI_ROOT_MODE()<=0) error stop 'RNK: common kernel requires actual-water root mode (root_mode>=1)'
           rnk_par%km_high=rnk_km_high; rnk_par%km_low=rnk_km_low
@@ -1138,7 +1139,14 @@ contains
               error stop 'RNK: parameter validation failed'
             end if
           end block
-          if(rnk_nh4_diff<=0) error stop 'RNK: positive NH4 effective diffusion prior required'
+          if(rnk_mode==RNK_MODE_A .and. rnk_nh4_diff<=0) &
+            error stop 'RNK(A): positive NH4 effective diffusion prior required'
+          if(rnk_mode==RNK_MODE_B .and. &
+             (rnk_radius<=0.or.rnk_tort<=0.or.rnk_diffmol<0)) &
+            error stop 'RNK(B): positive root radius and tortuosity, nonnegative molecular diffusion required'
+          rnk_par%root_radius_m=rnk_radius
+          rnk_par%molecular_diffusion_m2d=rnk_diffmol
+          rnk_par%tortuosity=rnk_tort
         end if
       else
         close(unit)
@@ -1210,7 +1218,7 @@ contains
     reserve_n=0;reserve_begin=0;reserve_fill=0;reserve_release=0;reserve_sen_recovery=0;reserve_litter=0
     reserve_pending=.false.;reserve_residual=0
     lai_accept_calls=0;lai_area_calls=0;lai_dm_raw=0;lai_dm_request=0;lai_area=0
-    r_rnk_branch=0; r_rnk_cap=0; r_rnk_mf4=0; r_rnk_bulk4=0; r_rnk_cr4=0; r_rnk_capped=.false.
+    r_rnk_branch=0; r_rnk_flag=0; r_rnk_cap=0; r_rnk_mf4=0; r_rnk_bulk4=0; r_rnk_cr4=0; r_rnk_capped=.false.
     r_rnk_stock_before=0; r_rnk_theta0=0; r_rnk_diff=0; r_rnk_accept3=0; r_rnk_accept4=0
     r_rnk_source_day=-1
   end subroutine
@@ -1309,7 +1317,7 @@ contains
     end if
     d_u3=sum(real(uno3(1:nlayr),dp))/10
     d_u4=sum(real(unh4(1:nlayr),dp))/10
-    if(rnk_mode==RNK_MODE_A) then
+    if(rnk_mode>=RNK_MODE_A) then
       ! 账本: 接受链缩放后的逐层接受量 (g N m^-2), 供 LayerRootNUptake.csv
       r_rnk_accept3(1:nlayr)=real(uno3(1:nlayr),dp)/10
       r_rnk_accept4(1:nlayr)=real(unh4(1:nlayr),dp)/10
@@ -1604,7 +1612,7 @@ contains
           r_candidate3(l),r_candidate4(l),r_final3(l),r_final4(l)
       end do
     end if
-    if(rnk_mode==RNK_MODE_A) then
+    if(rnk_mode>=RNK_MODE_A) then
       ! RNK 逐层逐形态账本 (计划 §6): source_day 为候选计算日, soil_commit_day 为
       ! 最终 UNO3/UNH4 交土壤扣除日 (驱动层同日内植物 RATE → 土壤 RATE, 此处断言同日)。
       if(r_rnk_source_day>control%YRDOY) error stop 'RNK: uptake snapshot from a future day'
@@ -1693,8 +1701,8 @@ contains
       error stop 'NI: missing or stale actual root water snapshot'
     if(legacy_nh4<0 .and. rnk_mode/=RNK_MODE_A) error stop 'NI: native NH4 species capacity was not initialized'
     feedback=exp(-pool_beta*sum(q3)/max(q_no3_max*sum(carrier),1.e-12_dp))
-    if(rnk_mode==RNK_MODE_A) then
-      ! 公共核 A 臂: 双形态双亲和米氏 + 等效根际运输 (T2 2026-11-12)
+    if(rnk_mode>=RNK_MODE_A) then
+      ! 公共核: 1=A(等效根际运输, T2) 2=B(径向有限体积, T3)
       r_rnk_source_day=control%YRDOY
       call NI_ROOT_UPTAKE_RNK(nlayr,bd,depth,ll,dul,sat,no3,nh4,kg2ppm,uno3,unh4,feedback)
       return
@@ -1749,7 +1757,8 @@ contains
   end function rnk_fin
   elemental integer function rnk_status(s,l)
     integer,intent(in)::s,l
-    rnk_status=r_rnk_branch(s,l)*10+merge(1,0,r_rnk_capped(s,l))
+    ! 编码: branch*10 + 裁剪位 + 100*solver_flag (B 臂重试耗尽=100+)
+    rnk_status=r_rnk_branch(s,l)*10+merge(1,0,r_rnk_capped(s,l))+100*r_rnk_flag(s,l)
   end function rnk_status
   subroutine NI_ROOT_UPTAKE_RNK(nlayr,bd,depth,ll,dul,sat,no3,nh4,kg2ppm,uno3,unh4,feedback)
     ! RootNUptake 公共核适配层: 底座数组(单精度 ppm/cm) → 双精度核输入(g N m^-2/d 内部),
@@ -1779,7 +1788,12 @@ contains
       ! A 臂层导度 G = 0.001*D_eq*wet*Lr; NO3 继承底座 v4-R2 diffusion_k, NH4 用登记先验
       lay%g_transport(rnk_NO3)=.001_dp*diffusion_k*wet*leng
       lay%g_transport(rnk_NH4)=.001_dp*rnk_nh4_diff*wet*leng
-      call rnk_layer_A(rnk_par,lay,dg)
+      if(rnk_mode==RNK_MODE_B) then
+         ! B 臂 (T3): 径向平流-扩散有限体积, g_transport 不参与
+         call rnk_layer_B(rnk_par,lay,dg)
+      else
+         call rnk_layer_A(rnk_par,lay,dg)
+      end if
       uno3(l)=real(10*dg(rnk_NO3)%candidate)
       unh4(l)=real(10*dg(rnk_NH4)%candidate)
       r_bulk(l)=dg(rnk_NO3)%c_bulk; r_cr(l)=dg(rnk_NO3)%c_root
@@ -1788,6 +1802,7 @@ contains
         lay%f_root,1._dp,1._dp)
       r_rnk_bulk4(l)=dg(rnk_NH4)%c_bulk; r_rnk_cr4(l)=dg(rnk_NH4)%c_root; r_rnk_mf4(l)=dg(rnk_NH4)%mf_potential
       r_rnk_branch(:,l)=(/dg(rnk_NO3)%branch,dg(rnk_NH4)%branch/)
+      r_rnk_flag(:,l)=(/dg(rnk_NO3)%solver_flag,dg(rnk_NH4)%solver_flag/)
       r_rnk_cap(:,l)=(/dg(rnk_NO3)%stock_cap,dg(rnk_NH4)%stock_cap/)
       r_rnk_capped(:,l)=(/dg(rnk_NO3)%stock_capped,dg(rnk_NH4)%stock_capped/)
       r_rnk_stock_before(:,l)=(/real(no3(l),dp),real(nh4(l),dp)/)/ &
