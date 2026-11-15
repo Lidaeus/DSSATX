@@ -1,0 +1,215 @@
+{
+  "scope": "DSSAT 4.8.6.4 root uptake P1 engineering verification. The 25SP inputs were replayed with the same root NML settings for a compatibility check.",
+  "date": "2026-11-12",
+  "base_commit": "8056a8df46b866be661ef3e47374d518f59884b1",
+  "patch": {
+    "path": "D:\\Tomato_Cal\\subprojects\\critical_n\\root_n_kernel_20261112\\p1_4864\\root_nitrogen_p1_4864.patch",
+    "sha256": "17007412a078704d643448dd64a22aeed3a917c17d373b4557793fdebf7f5ee2"
+  },
+  "patch_verification": "git apply --check and git apply on an isolated copy; all four applied files equal build sources after line-ending normalization.",
+  "sources": {
+    "Plant/CROPGRO/CG_Nitrogen.f90": {
+      "baseline_sha256": "645ff34f6c04c403302c9e37f167cf23f6d5d19dc9b80f6553659156b9a4285d",
+      "p1_sha256": "8122c9b75344991c09da712b51312d5e7f374acdc41be0c12b1c9bd038c6939c"
+    },
+    "Plant/CROPGRO/RootNUptake.f90": {
+      "baseline_sha256": "3655e1e7f48241f58dc290bf3d687f40817bee94e249457ccfc3d7146d02c2f6",
+      "p1_sha256": "cfbaabec7ba82daa1a8ea5840563b2eb898cad4a2be4276fdabd62e67ffa4f71"
+    },
+    "SPAM/SPAM.for": {
+      "baseline_sha256": "d65dab0319092d07431fd92a2e08be0abcbda595a86670f642469dbcd8b6c033",
+      "p1_sha256": "00a16eeb038c0904b798fd89698fa19c13dc3e4d9282292c02fc13712904ae36"
+    },
+    "Soil/Inorganic_N/SOILNI.for": {
+      "baseline_sha256": "6ac400645af3371e2c465178cf399bcf14c139d391c3bc203f61b7f77c738125",
+      "p1_sha256": "1194e90653904612c1265de6c267f74a95001c8719a6e5ae2eee59393b6ea1cd"
+    }
+  },
+  "engine": {
+    "path": "D:\\workspace\\dssat4864-rootn-p1\\build\\bin\\dscsm048.exe",
+    "sha256": "6816b1e7e73704eb25452fbc7143190ac15c067f666e5af0801baa9420890272"
+  },
+  "base_engine": {
+    "path": "D:\\Tomato_Cal_worktrees\\dssat4864-rootn-T2-20261112\\build\\bin\\dscsm048.exe",
+    "sha256": "b4f32f6820fe1028e6be76a72f84c78f9fe7b4b244a8c1d9a8558ebb329bc21a"
+  },
+  "official_engine": {
+    "path": "C:\\DSSAT48\\DSCSM048.EXE",
+    "sha256": "92173d5f63bc60d58839630b9a29f57632a19b373cab0faa8ad70362d98f5c7a"
+  },
+  "build": {
+    "compiler": "GNU Fortran 16.2.0",
+    "generator": "Ninja",
+    "type": "RELEASE",
+    "configure": "cmake -S <p1_source> -B <p1_source>/build -G Ninja -DCMAKE_BUILD_TYPE=RELEASE",
+    "command": "cmake --build <p1_source>/build --target dscsm048 --parallel 8",
+    "full_build_log": {
+      "path": "D:\\workspace\\dssat4864-rootn-p1\\build\\build-p1.log",
+      "sha256": "557178318ebda01b5b1067a761b07029ced9378af2739aefe0fb3dc1a2640208"
+    },
+    "final_build_log": {
+      "path": "D:\\workspace\\dssat4864-rootn-p1\\build\\rebuild-final.log",
+      "sha256": "89d21cbbc2c6fbb63f51e00ac12d318a6b8932b19583c76c2b14bb10bb0b36bb"
+    }
+  },
+  "native_tests": {
+    "A": {
+      "checks": 25,
+      "log": {
+        "path": "D:\\workspace\\dssat4864-rootn-p1\\native_p1\\test_A.log",
+        "sha256": "7560e21587f182ea5e643e560423e197fe8a87268b7b74ecc9f8efc30df9c300"
+      }
+    },
+    "B": {
+      "checks": 28,
+      "log": {
+        "path": "D:\\workspace\\dssat4864-rootn-p1\\native_p1\\test_B.log",
+        "sha256": "3459937d7167b8c07b481cf1bf1900ce449b072d7017b5737e342e9e9190301c"
+      }
+    }
+  },
+  "replay_verifier": {
+    "path": "D:\\Tomato_Cal\\subprojects\\critical_n\\root_n_kernel_20261112\\p1_4864\\verify_p1.py",
+    "sha256": "4faaa43c16fca6ffe61cbc08b39408a01ca8ff7e55b9fd6dfa592d2ffa662d58"
+  },
+  "season_replays": {
+    "26sp": {
+      "run_dir": "D:\\workspace\\dssat4864-rootn-p1\\p1_verified_26sp",
+      "results": [
+        {
+          "arm": "off",
+          "byte_identical_reference_ledgers": [
+            "LayerNIntegration.csv",
+            "PlantABudget.csv",
+            "PlantCCash.csv",
+            "PlantNIntegration.csv",
+            "PlantNLAI.csv",
+            "PlantNLeaf.csv",
+            "PlantNLuxury.csv",
+            "PlantNP2.csv",
+            "PlantNRemob.csv",
+            "PlantNV3.csv",
+            "PlantNV4.csv"
+          ]
+        },
+        {
+          "arm": "A",
+          "rows": 39312,
+          "matched_soil_rows": 39000,
+          "pending_rows": 312,
+          "pending_positive_rows": 102,
+          "dry_rows_theta0_below_LL": 190,
+          "max_radial_mass_residual_gN_m2": 0.0,
+          "max_soil_cumulative_difference_gN_m2": 2.009029995164724e-05,
+          "run_1_deducted_kgN_ha": 211.27894815776446,
+          "run_1_pending_kgN_ha": 0.8404397852718828
+        },
+        {
+          "arm": "B",
+          "rows": 39312,
+          "matched_soil_rows": 39000,
+          "pending_rows": 312,
+          "pending_positive_rows": 102,
+          "dry_rows_theta0_below_LL": 176,
+          "max_radial_mass_residual_gN_m2": 3.763656053479281e-14,
+          "max_soil_cumulative_difference_gN_m2": 1.6016157516673957e-05,
+          "run_1_deducted_kgN_ha": 211.3534817193204,
+          "run_1_pending_kgN_ha": 0.8380149416625502
+        }
+      ],
+      "input_configs": {
+        "off": {
+          "path": "D:\\workspace\\dssat4864-rootn-p1\\p1_verified_26sp\\off\\NIntegration.nml",
+          "sha256": "2892165fa45fd09ffb6e7ecda25f5216c7d0246e88ceee68bc0d2e9061c97443"
+        },
+        "A": {
+          "path": "D:\\workspace\\dssat4864-rootn-p1\\p1_verified_26sp\\A\\NIntegration.nml",
+          "sha256": "73ba183c8b631080d385dca124199eae370c7073f88a650df4f4be0aeac7a910"
+        },
+        "B": {
+          "path": "D:\\workspace\\dssat4864-rootn-p1\\p1_verified_26sp\\B\\NIntegration.nml",
+          "sha256": "0b359ec01cf0980788eaa880f0ae7deb605a9010f4ec065ce73324b0cc9f77f7"
+        }
+      },
+      "batch": {
+        "path": "D:\\workspace\\dssat4864-rootn-p1\\p1_verified_26sp\\A\\DSSBatch.v48",
+        "sha256": "c8196718057c91ce57683903a41287f385d62a0c4f2527e35f89a81b784b8299"
+      }
+    },
+    "25sp": {
+      "run_dir": "D:\\workspace\\dssat4864-rootn-p1\\p1_verified_25sp",
+      "results": [
+        {
+          "arm": "off",
+          "byte_identical_reference_ledgers": [
+            "LayerNIntegration.csv",
+            "PlantABudget.csv",
+            "PlantCCash.csv",
+            "PlantNIntegration.csv",
+            "PlantNLAI.csv",
+            "PlantNLeaf.csv",
+            "PlantNLuxury.csv",
+            "PlantNP2.csv",
+            "PlantNRemob.csv",
+            "PlantNV3.csv",
+            "PlantNV4.csv"
+          ]
+        },
+        {
+          "arm": "A",
+          "rows": 24960,
+          "matched_soil_rows": 24752,
+          "pending_rows": 208,
+          "pending_positive_rows": 71,
+          "dry_rows_theta0_below_LL": 74,
+          "max_radial_mass_residual_gN_m2": 0.0,
+          "max_soil_cumulative_difference_gN_m2": 1.3335746331222254e-05,
+          "run_1_deducted_kgN_ha": 210.49519755668146,
+          "run_1_pending_kgN_ha": 2.975516251288355
+        },
+        {
+          "arm": "B",
+          "rows": 24960,
+          "matched_soil_rows": 24752,
+          "pending_rows": 208,
+          "pending_positive_rows": 71,
+          "dry_rows_theta0_below_LL": 68,
+          "max_radial_mass_residual_gN_m2": 3.852473895449293e-14,
+          "max_soil_cumulative_difference_gN_m2": 1.0251377997150257e-05,
+          "run_1_deducted_kgN_ha": 210.74577208073944,
+          "run_1_pending_kgN_ha": 2.9624475091695786
+        }
+      ],
+      "input_configs": {
+        "off": {
+          "path": "D:\\workspace\\dssat4864-rootn-p1\\p1_verified_25sp\\off\\NIntegration.nml",
+          "sha256": "2892165fa45fd09ffb6e7ecda25f5216c7d0246e88ceee68bc0d2e9061c97443"
+        },
+        "A": {
+          "path": "D:\\workspace\\dssat4864-rootn-p1\\p1_verified_25sp\\A\\NIntegration.nml",
+          "sha256": "73ba183c8b631080d385dca124199eae370c7073f88a650df4f4be0aeac7a910"
+        },
+        "B": {
+          "path": "D:\\workspace\\dssat4864-rootn-p1\\p1_verified_25sp\\B\\NIntegration.nml",
+          "sha256": "0b359ec01cf0980788eaa880f0ae7deb605a9010f4ec065ce73324b0cc9f77f7"
+        }
+      },
+      "batch": {
+        "path": "D:\\workspace\\dssat4864-rootn-p1\\p1_verified_25sp\\A\\DSSBatch.v48",
+        "sha256": "7af3c66abaa1ffb095fa972e46dd831a963d2d146e3736e55a446416c9f20064"
+      }
+    }
+  },
+  "soil_schedule": "SOILNI RATE consumes the previous plant flux. SEASEND records pending flux with commit day 0 and zero actual deduction.",
+  "project_pytest": {
+    "passed_before_stop": 25,
+    "failed": "test_cross_season_evaluation.py::test_nitrogen_dilution_trajectories",
+    "failure": "The unchanged historical CSV gives early leaf N 4.56% and late leaf N 4.59%."
+  },
+  "excluded_from_P1": [
+    "V15 changes",
+    "calibration",
+    "scientific interpretation of A/B",
+    "configuration-template changes"
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "task": "T0 基线与数据冻结",
+  "date": "2026-11-12",
+  "executor": "ZCode agent (会话执行)",
+  "plan_doc": "D:\\Tomato_Cal\\subprojects\\DSSAT_root_nitrogen_execution_plan.md",
+  "plan_doc_sha256": "c7e3298586600fdba41980eadf264672c362ccb6e5bac45f7cd27c7da87fcc36",
+  "constraint_docs_read": [
+    "critical_n/AGENTS.md (用户约束: 无分季/关键日期护栏; 率定目标仅限DSSAT直接对应变量)",
+    "02_MECHANISTIC_AND_MATHEMATICAL_BLUEPRINT.md §2.2 (v4-R2 联立平衡核)",
+    "DSSAT_4.8.6.4_根系吸收_氮同化与分配一体化改进方案_v2.md §R.3-R.6"
+  ],
+  "base_4820_v15": {
+    "frozen_source": "critical_n/vnext_v15_s1/source",
+    "freeze_manifest": "critical_n/vnext_v15_s1/freeze_manifest.json",
+    "freeze_baseline_sha256": "107ec95f443af66eb30d53769496836414131d6befd6ab2f34cd00ef98b137fc",
+    "overlays": [
+      "critical_n/n_buffer_v15/source/v15_s3_v4root",
+      "critical_n/n_buffer_v15/source/v15_s4_nstate"
+    ],
+    "windows_build_manifest": "critical_n/v15_s4_nstate/build_windows/build_manifest.json",
+    "windows_binary": "critical_n/v15_s4_nstate/build_windows/v15_s4_nstate.exe",
+    "windows_binary_sha256": {
+      "recorded": "7221b07d935d1f706c94e369a1a4d02c94a1b2e21778b8d7bdae7edc1fa81b9d",
+      "recomputed_20261112": "7221b07d935d1f706c94e369a1a4d02c94a1b2e21778b8d7bdae7edc1fa81b9d",
+      "match": true
+    },
+    "compiler": "WinLibs gfortran 16.2.0 (x86_64-ucrt-posix-seh), flags 见 build_manifest.json (-O3 -ffpe-trap=invalid,zero,overflow 等)",
+    "overlay_hash_note": "n_buffer_v15/source/v15_s4_nstate/NUPTAK.for (38c15e5c, LF) 与 v15_s4_nstate/NUPTAK.for (9c4e1609, CRLF) 内容一致,仅换行符差异; N_BUFFER_V2.f90 两份哈希相同 (7996a5d1)"
+  },
+  "base_4864_v4": {
+    "source_worktree": "D:\\Tomato_Cal_worktrees\\dssat4864-n-v4-lai-20261103",
+    "source_commit": "4cb77b686751c4426fc0057309a42d37f01c9e08",
+    "worktree_clean_20261112": true,
+    "delivery_manifest": "critical_n/reports/n_v4_lai_20261103/delivery_manifest.json",
+    "r4_build_receipt": "critical_n/reports/n_v4_lai_20261103/bin/r4/build_receipt.json (r0-r4 全在位)",
+    "binary": "critical_n/reports/n_v4_lai_20261103/bin/dscsm048_v4_lai_r4.exe",
+    "binary_sha256": {
+      "recorded": "11d98149af76d78453c4693f24ed9f7a532d7851dab881d9002b724f1bad2a8b",
+      "recomputed_20261112": "11d98149af76d78453c4693f24ed9f7a532d7851dab881d9002b724f1bad2a8b",
+      "match": true
+    },
+    "frozen_baseline_config_root": {
+      "root_mode": 2.0,
+      "root_v": 0.0004512584673906178,
+      "root_k": 14.056671705277106,
+      "diffusion_k": 0.006471577381848008,
+      "phi": 54.56142049525302
+    },
+    "root_entry": "Plant/CROPGRO/CG_Nitrogen.f90 (NI_CAPTURE_WATER/NI_ROOT_KERNEL/NI_ROOT_UPTAKE/NI_ACCEPT_UPTAKE/NI_ASSIMILATE)"
+  },
+  "protected_executables": {
+    "C:\\DSSAT48\\DSCSM048.EXE": {
+      "expected": "92173d5f63bc60d58839630b9a29f57632a19b373cab0faa8ad70362d98f5c7a",
+      "recomputed_20261112": "92173d5f63bc60d58839630b9a29f57632a19b373cab0faa8ad70362d98f5c7a",
+      "match": true
+    }
+  },
+  "field_cases": {
+    "coord5_25SP": "critical_n/official_vs_coord5_refreshed_20261110/replay/coord5/25SP (完整运行沙箱: DSSBatch.v48/输入/输出)",
+    "coord5_26SP": "critical_n/official_vs_coord5_refreshed_20261110/replay/coord5/26SP (同上)"
+  },
+  "interface_inventory": {
+    "base_4864": "NI_ROOT_KERNEL: 单形态单亲和 MM, mf=0.01*RWU*Cb, capacity=Lr*vmax*poolfactor, mem(Cb)<=mf 短路否则 64 步二分 mem(cr)=mf+0.001*kd*wet*Lr*(Cb-cr); 库存截断 (ppm-0.25|0.50)/kg2ppm; NH4 原生速率-饱和式; feedback=exp(-pool_beta*Q/Qmax)*sqrt(wet)",
+    "base_4820_v15": "S3/S4 NUPTAK.for 接入 nb_root_capture/nb_settle_root; S4 psi*=nb_get_uptake_psi(); 见蓝图 §2.2/§2.3"
+  },
+  "T0_conclusion": "两底座冻结资产完整、哈希全部复核一致,田间工况在位,官方执行体未受侵扰。T0 完成,可进入 T1。",
+  "open_notes": [
+    "NH4 km/vmax 无本地耗竭实测,首轮使用注明来源的文献先验(SYNTHETIC 标识),满足计划 §3.1 '缺实测参数时可用明确标识的合成参数完成单测'",
+    "vmax 单位换算: V15 旧常数 0.003/0.015 (kg N ha^-1 口径) → 0.0003/0.0015 g N m^-1 root d^-1 起点,待 RTNO3 比例核对"
+  ]
+}

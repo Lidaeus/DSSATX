@@ -1,0 +1,44 @@
+{
+  "task": "T3 径向运输 B 数值实现",
+  "date": "2026-11-12",
+  "commit": "(worktree dssat4864-rootn-T2-20261112 第三个根吸提交)",
+  "module": {
+    "file": "source/RootNUptake.f90 (worktree Plant/CROPGRO 同一源)",
+    "sha256": "3655e1e7f48241f58dc290bf3d687f40817bee94e249457ccfc3d7146d02c2f6",
+    "new_api": "rnk_layer_B(par, layer, diag, n_cells=8, n_substeps=24)"
+  },
+  "numerical_scheme": {
+    "geometry": "对数面网格, b=sqrt(a^2+h/(pi*Lr)), Σ vol_i = h; 无有效根长直接零通量",
+    "state": "单元质量 M_i = V_i(theta+rho_b*Kd)*C_i; 初始均匀浓度 Σ M_i == DSSAT 库存 (Cb 与 A 臂代数一致)",
+    "water": "内向体积通量 W_k = 0.01*RWU*(b^2-r_k^2)/(b^2-a^2) (根表处=0.01*RWU); theta(t)=theta_mid-0.01*RWU*t/h 带 THETA_FLOOR; 干限按剩余可抽水比例缩放平流",
+    "solute": "内面迎风平流+隐式扩散(Thomas 三对角), 有效扩散=tau*theta*D_mol 含水相分数与曲折度; 每内面一份通量一减一加; 根表守恒吸收边界=同一米氏组合式取最内单元浓度; 外缘零溶质通量",
+    "solve": "日内 24 子步起步, Picard<=12 (收敛容差 1e-11 相对), 负浓度/不收敛 → 子步减半重试(<=12, 从原子步状态), 耗尽则候选置零+solver_flag=1, 禁止静默回退 A; 每日 flush 账本, 径向状态日内释放, 次日从 DSSAT 实扣后库存重建"
+  },
+  "unit_acceptance": {
+    "result": "15/15 passed (tests/test_root_n_uptake_B.f90, -fcheck=all -ffpe-trap)",
+    "cases": ["无氮/无根/膜全关→零", "零水纯扩散(uptake>0,闭合,根表耗竭, D=0对照)", "水流+弱膜≈U(Cb)±2%", "NH4 吸附缓冲(Kd1<Kd0)", "库存逼近底数裁剪", "无液相 UNDEFINED", "网格8→16+子步减半 0.55%≤1%", "质量闭合<1e-9"]
+  },
+  "engine_integration": {
+    "config": "&ROOTNUPTAKE rnk_mode=2 + rnk_radius/rnk_diffmol/rnk_tort (校验: radius>0, tort>0, diffmol>=0)",
+    "dispatch": "NI_ROOT_UPTAKE ≥RNK_MODE_A 分派; 适配层 B 不用 g_transport; 账本两臂通用 (B 的 solver_status 编码 branch*10+cap+100*solver_flag)"
+  },
+  "field_smoke": {
+    "run": "runs/n4864_rnkB_smoke (r4_lai_slow 同工况, 12 处理, 4.5s)",
+    "ledger_audit": "39312 行: 同日提交 100%, candidate>=accepted>=deducted 全序, 库存上限全守, solver 无失败(无 100+ 状态)",
+    "soil_cross_check": "Run1 土壤 NUCM=211.35 vs 账本累计 212.19 kg N/ha (0.4%)",
+    "AB_paired_preview": {
+      "NO3_season_deducted": "A 219.85 vs B 221.67 g/m2 (+0.8%)",
+      "NH4_season_deducted": "A 3.42 vs B 6.65 g/m2 (+94%)",
+      "note": "B 的径向扩散+吸附缓冲打通 A 臂质流导度覆盖不到的铵通道 —— 正是计划 §6 期望 A/B 对照揭示的运输差异; 先验参数未率定, 数值仅工程验证"
+    }
+  },
+  "regressions_held": {
+    "off_mode": "55/55 文件零实质差异 (维持)",
+    "A_arm_unit": "25/25 通过 (模块扩展后复跑)",
+    "pulse_test": "10/10 通过 (最终二进制复跑)"
+  },
+  "open_notes": [
+    "theta 干限下平流按比例缩放为工程处理, 计划 §5 未细定; 已在代码注释与本文档标明",
+    "分子扩散/曲折度为固定先验 (1.64e-4 m2/d / 0.5), 收据登记; 无本地实测"
+  ]
+}
