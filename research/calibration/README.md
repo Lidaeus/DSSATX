@@ -3,8 +3,8 @@
 The IES entry maps bounded mechanism parameters into one or more DSSAT
 namelists and extracts explicitly selected native output rows. It stages the
 case, saves checksums and runs each forward evaluation in a private directory.
-Tomato_Cal is optional. Keep this environment available to the PEST forward
-operator.
+Use the DSSATX virtual environment. When starting PEST directly in an
+existing case, activate that environment so the staged launcher finds Python.
 
 ```sh
 python -m pip install -r research/calibration/requirements.txt

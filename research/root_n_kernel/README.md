@@ -16,3 +16,14 @@ python research/root_n_kernel/p1_4864/replay_local.py \
 The verifier audits candidate/accepted/actual deduction and checks the
 off-mode CSV bytes against T3. This case checks integration and conservation.
 The historical 25SP compatibility replay has a separate source receipt.
+
+The two-day pulse check targets the original T3 timing. Build the
+`archive/root-n-t3` worktree at `<t3>/build`, then run:
+
+```sh
+bash research/root_n_kernel/tests/run_pulse_test.sh /path/to/t3 build/t3-pulse
+```
+
+Use the P1 replay above for the later cross-day debit contract. The historical
+Windows launchers and verification paths are retained at
+`archive/pre-standalone-root-n`.

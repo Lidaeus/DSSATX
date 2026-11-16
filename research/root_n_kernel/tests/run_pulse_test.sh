@@ -1,17 +1,29 @@
-#!/bin/bash
-# run_pulse_test.sh — 编译并执行两日单脉冲审计 (需先完成引擎 build 以获得 .mod)
-set -e
-REPO=/d/Tomato_Cal_worktrees/dssat4864-rootn-T2-20261112
-T=/d/Tomato_Cal/subprojects/critical_n/root_n_kernel_20261112
-OUT=$T/runs/rnk_pulse_test
-FC=$(grep '^CMAKE_Fortran_COMPILER:' $REPO/build/CMakeCache.txt | cut -d= -f2)
-rm -rf $OUT && mkdir -p $OUT/mod $OUT/run
-FLAGS='-ffree-line-length-none -fcheck=all -finit-real=snan -ffpe-trap=invalid,zero,overflow'
-"$FC" $FLAGS -J$OUT/mod -I$REPO/build/mod -c $REPO/Plant/CROPGRO/RootNUptake.f90 -o $OUT/mod/RootNUptake.o
-"$FC" $FLAGS -J$OUT/mod -I$REPO/build/mod -I$OUT/mod -c $REPO/Plant/CROPGRO/CG_Nitrogen.f90 -o $OUT/mod/CG_Nitrogen.o
-"$FC" $FLAGS -I$REPO/build/mod -I$OUT/mod $T/tests/rnk_pulse_test.f90 $OUT/mod/CG_Nitrogen.o $OUT/mod/RootNUptake.o \
-  -o $OUT/mod/rnk_pulse_test.exe -static -static-libgcc -static-libgfortran
-cd $OUT/run
+#!/usr/bin/env bash
+# Reproduce the two-day pulse contract from the original T3 engine.
+set -euo pipefail
+
+if [[ $# != 2 ]]; then
+    printf 'Usage: %s T3_SOURCE_TREE NEW_OUTPUT_DIRECTORY\n' "$0" >&2
+    exit 2
+fi
+
+here="$(cd "$(dirname "$0")" && pwd)"
+repo="$(cd "$1" && pwd)"
+build="$repo/build"
+if [[ "$(git -C "$repo" rev-parse --short=8 HEAD)" != 8056a8df ]]; then
+    printf 'The pulse contract uses the T3 engine at commit 8056a8df.\n' >&2
+    exit 2
+fi
+fc="$(sed -n 's/^CMAKE_Fortran_COMPILER:[^=]*=//p' "$build/CMakeCache.txt")"
+mkdir "$2"
+out="$(cd "$2" && pwd)"
+mkdir "$out/mod" "$out/run"
+flags=(-ffree-line-length-none -fcheck=all -finit-real=snan -ffpe-trap=invalid,zero,overflow)
+cd "$out/run"
+"$fc" "${flags[@]}" -J"$out/mod" -I"$build/mod" -c "$repo/Plant/CROPGRO/RootNUptake.f90" -o "$out/mod/RootNUptake.o"
+"$fc" "${flags[@]}" -J"$out/mod" -I"$build/mod" -I"$out/mod" -c "$repo/Plant/CROPGRO/CG_Nitrogen.f90" -o "$out/mod/CG_Nitrogen.o"
+"$fc" "${flags[@]}" -I"$build/mod" -I"$out/mod" "$here/rnk_pulse_test.f90" \
+    "$out/mod/CG_Nitrogen.o" "$out/mod/RootNUptake.o" -o "$out/mod/rnk_pulse_test"
 cat > NIntegration.nml <<'EOF'
 &NINTEGRATION
  ni_stage=5, root_mode=2,
@@ -34,4 +46,5 @@ cat > NIntegration.nml <<'EOF'
  rnk_nh4_diff=0.005
 /
 EOF
-$OUT/mod/rnk_pulse_test.exe
+unset DSSAT_N_CONFIG
+"$out/mod/rnk_pulse_test"

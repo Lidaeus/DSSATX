@@ -1,18 +1,5 @@
-from concurrent.futures import ThreadPoolExecutor
 import csv
-import json
-from pathlib import Path
-import os
-import shutil
-import subprocess
-import sys
 
-ROOT = Path(__file__).resolve().parents[1]
-CASE_NAMES = {
-    "off": "n4864_off_regression",
-    "A": "n4864_rnkA_smoke",
-    "B": "n4864_rnkB_smoke",
-}
 SPECIES = {"1": "UNO3", "2": "UNH4"}
 
 
@@ -99,55 +86,3 @@ def audit(run_dir, arm, expected_runs):
         "run_1_pending_kgN_ha": 10 * pending_by_run["1"],
     }
 
-
-def prepare_run(run, source, field_case):
-    run.mkdir()
-    inputs = {file.name: file for file in source.iterdir()
-              if file.is_file() and file.suffix.lower() not in {".out", ".csv", ".log", ".lst", ".exe"}}
-    if field_case is not None:
-        inputs = {name: file for name, file in inputs.items() if file.suffix.lower() in {".cde", ".nml"}}
-        inputs.update({file.name: file for file in field_case.iterdir() if file.is_file()
-                       and file.suffix.lower() in {".inp", ".inh", ".v48", ".sol", ".cul", ".eco",
-                                                   ".spe", ".tma", ".tmt", ".tmx", ".wth", ".cde"}})
-    for name, file in inputs.items():
-        shutil.copy2(file, run / name)
-
-
-def execute(run, exe, trace_enabled):
-    with (run / "stdout.log").open("wb") as stdout, (run / "stderr.log").open("wb") as stderr:
-        subprocess.run([str(exe), "B", "DSSBatch.v48"], cwd=run, stdout=stdout, stderr=stderr, check=True,
-                       env=dict(os.environ, DSSAT_P0_TRACE="1" if trace_enabled else "0"), timeout=120)
-
-
-def replay(arm, exe, output, field_case=None, baseline_engine=None):
-    source = ROOT / "runs" / CASE_NAMES[arm]
-    run = output / arm
-    prepare_run(run, source, field_case)
-    execute(run, exe, arm != "off")
-    if arm == "off":
-        assert not (run / "LayerRootNUptake.csv").exists()
-        if field_case is not None:
-            reference = output / "off_reference"
-            prepare_run(reference, source, field_case)
-            execute(reference, baseline_engine, False)
-        else:
-            reference = source
-        ledgers = sorted(file.name for file in reference.glob("*.csv"))
-        assert ledgers
-        for name in ledgers:
-            assert (run / name).read_bytes() == (reference / name).read_bytes(), name
-        return {"arm": arm, "byte_identical_reference_ledgers": ledgers}
-    expected_runs = sum(".TMX" in line.upper() for line in (run / "DSSBatch.v48").read_text().splitlines())
-    return audit(run, arm, expected_runs)
-
-
-if __name__ == "__main__":
-    engine, destination, *optional = map(lambda value: Path(value).resolve(), sys.argv[1:])
-    if len(optional) not in (0, 2):
-        raise SystemExit("usage: verify_p1.py ENGINE DESTINATION [FIELD_CASE_DIR BASELINE_ENGINE]")
-    destination.mkdir()
-    with ThreadPoolExecutor(max_workers=3) as executor:
-        results = list(executor.map(lambda arm: replay(arm, engine, destination, *optional), CASE_NAMES))
-    report = json.dumps(results, indent=2)
-    (destination / "audit.json").write_text(report + "\n", encoding="utf-8")
-    print(report)

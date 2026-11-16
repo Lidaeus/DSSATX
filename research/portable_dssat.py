@@ -61,7 +61,10 @@ def prepare_case(args):
             shutil.copyfile(path, work / path.name)
     shutil.copyfile(config, work / "NIntegration.nml")
     shutil.copyfile(ENGINE / "Data/Pest/TMGRO048.PST", work / "TMGRO048.PST")
-    local_profile(work / ("DSSATPRO.v48" if os.name == "nt" else "DSSATPRO.L48"))
+    if os.name == "nt":
+        shutil.copyfile(FIXTURE / "DSSATPRO.v48", work / "DSSATPRO.v48")
+    else:
+        local_profile(work / "DSSATPRO.L48")
     return work
 
 

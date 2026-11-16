@@ -1,0 +1,2 @@
+-r calibration/requirements.txt
+-r n_diagnostics/requirements.txt

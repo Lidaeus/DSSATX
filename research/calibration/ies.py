@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 import shutil
-import shlex
+import os
 import subprocess
 import sys
 
@@ -93,11 +93,11 @@ def prepare(args, executable):
     pst.observation_data["weight"] = targets.loc[pst.obs_names, "weight"]
     if sys.platform == "win32":
         launcher = work / "forward.cmd"
-        launcher.write_text(f'@"{sys.executable}" -X utf8 forward.py\n', encoding="utf-8")
+        launcher.write_text("@python -X utf8 forward.py\n", encoding="utf-8")
         pst.model_command = ["cmd /c forward.cmd"]
     else:
         launcher = work / "forward.sh"
-        launcher.write_text(f"#!/bin/sh\nexec {shlex.quote(sys.executable)} -X utf8 forward.py\n")
+        launcher.write_text("#!/bin/sh\nexec python3 -X utf8 forward.py\n")
         launcher.chmod(0o755)
         pst.model_command = ["./forward.sh"]
     pst.control_data.noptmax = args.updates
@@ -132,9 +132,13 @@ def main():
         parser.error(f"PEST++ executable not found: {args.pestpp_ies}")
     work = prepare(args, engine)
     if pest:
+        # Resolve Python from the selected environment without sealing its path in the case.
+        env = dict(os.environ, PATH=os.pathsep.join(
+            (str(Path(sys.executable).parent), os.environ.get("PATH", "")),
+        ))
         with (work / "pestpp-ies.log").open("wb") as log:
             subprocess.run([str(Path(pest).resolve()), "mechanism.pst"], cwd=work, stdout=log,
-                           stderr=subprocess.STDOUT, check=True)
+                           stderr=subprocess.STDOUT, env=env, check=True)
         objectives = pd.read_csv(work / "mechanism.phi.actual.csv")
         if objectives.empty or objectives["iteration"].max() < args.updates:
             raise RuntimeError("PEST++ stopped before the requested IES update; see pestpp-ies.log")
