@@ -1,5 +1,7 @@
 # N v3: C4 isolated physiology and stock-budget branch
 
+> Historical workflow. Its original scripts are preserved at `archive/pre-standalone-root-n`. Use the [current suite](../../RESEARCH.md) for new runs.
+
 User approval 2026-11-03 authorizes the reviewed C0-C3 sequence, including
 the individually reported V15 S1 principles V1-V3. This does not authorize
 old 4.8.2.0 file replacement, fruit dilution or zero-cost assimilation.

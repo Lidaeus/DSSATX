@@ -1,5 +1,7 @@
 # C3/C4 diagnostics and latest-C4 research calibration
 
+> Historical workflow. Its original scripts are preserved at `archive/pre-standalone-root-n`. Use the [current suite](../../RESEARCH.md) for new runs.
+
 User requested both frozen-version diagnostics and a new latest-C4 calibration
 on 2026-11-03. Output and working directories stay separate from existing runs.
 No production/official executable, previous delivery or input is replaced.

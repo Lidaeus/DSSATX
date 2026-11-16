@@ -1,5 +1,7 @@
 # V4 P0/P1：固定基线下分离机制，再进入共同接受与储备
 
+> Historical workflow. Its original scripts are preserved at `archive/pre-standalone-root-n`. Use the [current suite](../../RESEARCH.md) for new runs.
+
 ## 当前LAI优先入口（2026-11-03）
 
 本工作树从7c981878建立独立分支`codex/n-v4-lai-20261103`，按用户要求显著压低

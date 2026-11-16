@@ -1,5 +1,7 @@
 # 4.8.6.4 氮机制 v2 分阶段开发准备
 
+> Historical workflow. Its original scripts are preserved at `archive/pre-standalone-root-n`. Use the [current suite](../../RESEARCH.md) for new runs.
+
 本目录包含准备、P0b追踪及五阶段氮机制的实现/工程验证。**新机制已接通；小型联合率定入口见下，原生bug按用户要求延期统一处理。工程smoke不代表正式参数率定或机制有效性验证。**
 
 ## 当前入口：五阶段实现

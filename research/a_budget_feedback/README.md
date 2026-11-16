@@ -1,5 +1,7 @@
 # A: actual acceptance, budgets and soft leaf feedback
 
+> Historical workflow. Its original scripts are preserved at `archive/pre-standalone-root-n`. Use the [current suite](../../RESEARCH.md) for new runs.
+
 Based on official v4.8.6.4 plus the frozen five-stage integration at
 `a1bfa80678c3e9ca87d4991f373af36038539688`. New mechanism changes require
 `budget_revision=1` with stage >= 4. Mode 0 and revision 0 retain the old
