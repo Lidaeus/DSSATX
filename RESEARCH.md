@@ -11,14 +11,15 @@ source .venv/bin/activate
 Install `pestpp-ies` as a system tool or give `ies.py` its executable path.
 On macOS the Fortran build uses CMake, Ninja and gfortran.
 
-Build the 4.8.6.4 engine and keep its runs isolated from application projects.
+Build the 4.8.6.4 engine from this checkout. This branch's native and
+whole-crop validation entry points are documented in the
+[root nitrogen guide](research/root_n_kernel/README.md).
 
 ```sh
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 cmake --build build --target dscsm048
-python research/portable_dssat.py native-tests --build build --out build/native-checks
-python research/portable_dssat.py smoke --exe build/bin/dscsm048 --out build/smoke-4864
+bash research/root_n_kernel/p1_4864/run_native_tests.sh build/native-p1
 ```
 
 - `main` follows the 4.8.6.4 engine through the macOS and V7 work.

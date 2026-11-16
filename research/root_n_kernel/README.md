@@ -5,9 +5,12 @@ Tag `archive/root-n-t3` records that T3 baseline. The original verification
 receipt describes its Windows tests and archived paths.
 
 Build both engines with CMake and use the checked-in case and engineering
-namelist for a local 26SP audit:
+namelist for a local 26SP audit. The T3 reference can be built from the
+`archive/root-n-t3` tag in a temporary Git worktree. Run the native A/B tests
+from the P1 checkout before comparing whole-crop runs.
 
 ```sh
+bash research/root_n_kernel/p1_4864/run_native_tests.sh build/native-p1
 python research/root_n_kernel/p1_4864/replay_local.py \
   --engine build/bin/dscsm048 --t3-engine /path/to/t3/dscsm048 \
   --out build/p1-audit
