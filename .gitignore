@@ -67,3 +67,6 @@ Plant/ORYZA
 .vs/*
 .history/*
 Resources/R*
+# Python research tools
+__pycache__/
+.venv/

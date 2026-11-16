@@ -1,0 +1,5 @@
+name,file,column,treatment,yrdoy,observed,weight
+fresh_4,FreshWt.OUT,CHFPW,4,,70486.20000000001,0.001
+fresh_5,FreshWt.OUT,CHFPW,5,,74314.8,0.001
+fresh_6,FreshWt.OUT,CHFPW,6,,63513.0,0.001
+fresh_7,FreshWt.OUT,CHFPW,7,,63925.2,0.001

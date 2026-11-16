@@ -1,0 +1,21 @@
+tn,date,variable,observed,raw_sd,n_rep,depth_label,depth_top_cm,depth_bottom_cm,dssat_layer_weights,season,role,simulated,comparison_status,model_error,dap,unit,treatment,treatment_label,water_level,nitrogen_level,dataset_role,obs_t_ha,sim_t_ha
+5,2025-07-11,CHFPW,64125.46799999999,3120.756699678456,3,,,,,25SP,validation,68627.7,matched,,117.0,kg fresh/ha,5,W3_N0,W3,N0,validation,64.125468,68.62769999999999
+10,2025-07-11,CHFPW,60002.775,11109.467894908426,3,,,,,25SP,validation,53344.9,matched,,117.0,kg fresh/ha,10,W1_N3,W1,N3,validation,60.002775,53.3449
+11,2025-07-11,CHFPW,60771.942,135.94203810080194,3,,,,,25SP,validation,53716.2,matched,,117.0,kg fresh/ha,11,W1_N2,W1,N2,validation,60.771942,53.7162
+4,2025-07-11,CHFPW,67085.1319090909,5608.031052679844,3,,,,,25SP,validation,66512.4,matched,,117.0,kg fresh/ha,4,W3_N1,W3,N1,validation,67.08513190909089,66.5124
+3,2025-07-11,CHFPW,69584.229,5322.049601553244,3,,,,,25SP,validation,67029.1,matched,,117.0,kg fresh/ha,3,W3_N2,W3,N2,validation,69.58422900000001,67.0291
+12,2025-07-11,CHFPW,59129.19,3809.5061722875553,3,,,,,25SP,validation,53685.5,matched,,117.0,kg fresh/ha,12,W1_N1,W1,N1,validation,59.12919,53.6855
+2,2025-07-11,CHFPW,69104.88,7669.415532013633,3,,,,,25SP,validation,66969.3,matched,,117.0,kg fresh/ha,2,W3_N3,W3,N3,validation,69.10488000000001,66.9693
+13,2025-07-11,CHFPW,55252.215,4912.165346225326,3,,,,,25SP,validation,51333.2,matched,,117.0,kg fresh/ha,13,W1_N0,W1,N0,validation,55.252215,51.3332
+1,2026-07-17,CHFPW,66681.0,4623.435514852567,3,,,,,26SP,calibration,71421.1,matched,,125.0,kg fresh/ha,1,W3_N3,W3,N3,calibration,66.681,71.42110000000001
+12,2026-07-17,CHFPW,51579.0,3517.29626275638,3,,,,,26SP,calibration,48929.8,matched,,125.0,kg fresh/ha,12,W1_N0,W1,N0,calibration,51.579,48.9298
+10,2026-07-17,CHFPW,60600.15,2487.0257522792176,3,,,,,26SP,calibration,63120.5,matched,,125.0,kg fresh/ha,10,W1_N1,W1,N1,calibration,60.60015,63.1205
+9,2026-07-17,CHFPW,60892.19999999999,4362.499324928314,3,,,,,26SP,calibration,55921.0,matched,,125.0,kg fresh/ha,9,W3_N0,W3,N0,calibration,60.89219999999999,55.921
+8,2026-07-17,CHFPW,67075.2,3353.4927523404585,3,,,,,26SP,calibration,71878.2,matched,,125.0,kg fresh/ha,8,W2_N1,W2,N1,calibration,67.0752,71.87819999999999
+7,2026-07-17,CHFPW,63925.2,3715.1411332545695,3,,,,,26SP,calibration,71336.4,matched,,125.0,kg fresh/ha,7,W3_N1,W3,N1,calibration,63.9252,71.3364
+2,2026-07-17,CHFPW,71869.95000000001,3372.761227466303,3,,,,,26SP,calibration,71650.8,matched,,125.0,kg fresh/ha,2,W2_N3,W2,N3,calibration,71.86995000000002,71.6508
+11,2026-07-17,CHFPW,61632.45,763.5325189538435,3,,,,,26SP,calibration,58825.5,matched,,125.0,kg fresh/ha,11,W2_N0,W2,N0,calibration,61.63245,58.8255
+6,2026-07-17,CHFPW,63513.0,4536.566750307987,3,,,,,26SP,calibration,62920.1,matched,,125.0,kg fresh/ha,6,W1_N2,W1,N2,calibration,63.513,62.9201
+5,2026-07-17,CHFPW,74314.8,920.90188402457,3,,,,,26SP,calibration,71789.3,matched,,125.0,kg fresh/ha,5,W2_N2,W2,N2,calibration,74.3148,71.7893
+4,2026-07-17,CHFPW,70486.20000000001,5949.114098754533,3,,,,,26SP,calibration,71537.8,matched,,125.0,kg fresh/ha,4,W3_N2,W3,N2,calibration,70.48620000000001,71.5378
+3,2026-07-17,CHFPW,66913.2,1468.8827182590194,3,,,,,26SP,calibration,62719.3,matched,,125.0,kg fresh/ha,3,W1_N3,W1,N3,calibration,66.9132,62.719300000000004
