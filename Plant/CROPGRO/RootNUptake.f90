@@ -2,7 +2,7 @@
 !!
 !! 双形态（NO3-, NH4+）独立参数双亲和米氏跨膜动力学 + 等效根际运输 A 臂
 !! （质流 + 浓度差扩散代数根表平衡, 64 步区间二分）。B 臂（径向有限体积
-!! 平流-扩散）由 T3 在本模块扩展, 当前 transport_mode=B 返回未实现状态。
+!! 平流-扩散）使用日内有限体积。配对试验共用浓度、扩散参数和膜动力学。
 !!
 !! 设计约束（DSSAT_root_nitrogen_execution_plan.md §3）:
 !!  * 纯计算模块: 不依赖 ModuleData / CROPGRO 全局状态 / 文件 IO。
@@ -48,10 +48,8 @@ module RootNUptake
       !> ---- B 臂参数 (T3, 径向有限体积) ----
       !> 有效吸收根半径 m (典型细根 0.1-0.2 mm, 记录测量条件)
       real(rnk_dp) :: root_radius_m = 1.0e-4_rnk_dp
-      !> 液相分子扩散系数 m^2 d^-1 (NO3- ~1.9e-9 m^2/s ≈ 1.64e-4; NH4+ 相近)
-      real(rnk_dp) :: molecular_diffusion_m2d = 1.64e-4_rnk_dp
-      !> 曲折度无量纲因子 (固定先验, 记录来源; 首版不随含水量变化)
-      real(rnk_dp) :: tortuosity = 0.5_rnk_dp
+      !> Species-specific free-water diffusion, m^2/day.
+      real(rnk_dp) :: species_diffusion_m2d(RNK_NSPECIES) = [1.64e-4_rnk_dp, 1.50e-4_rnk_dp]
    end type rnk_params
 
    !> 单层输入(适配层换算后)
@@ -62,16 +60,16 @@ module RootNUptake
       real(rnk_dp) :: dlayr = 0._rnk_dp               ! 土层厚度 cm
       real(rnk_dp) :: rlv = 0._rnk_dp                 ! 根长密度 cm root cm^-3 soil
       real(rnk_dp) :: theta0 = 0._rnk_dp              ! 日初总容积含水率 L L^-1
+      real(rnk_dp) :: porosity = 0._rnk_dp         ! DSSAT saturation water content, used for diffusion only
       real(rnk_dp) :: rwu = 0._rnk_dp                 ! 实际根系吸水 cm d^-1
       real(rnk_dp) :: f_root = 1._rnk_dp              ! 根活性/反馈因子(如 sqrt(wet)*psi 反馈)
       real(rnk_dp) :: frac_high(RNK_NSPECIES) = 1._rnk_dp ! 高亲和系统活跃分数 fH
       real(rnk_dp) :: frac_low(RNK_NSPECIES) = 1._rnk_dp  ! 低亲和系统活跃分数 fL
-      !> A 臂层导度 G (g N m^-2 d^-1)/(mg N L^-1), 已含水分因子与根长
-      !! (建议 G = 0.001 * D_eq * f_water(theta) * Lr, D_eq 继承各底座 v4-R2)
-      real(rnk_dp) :: g_transport(RNK_NSPECIES) = 0._rnk_dp
    end type rnk_layer
 
    !> 单层诊断输出
+   real(rnk_dp), parameter :: RNK_NOT_APPLICABLE = -99._rnk_dp
+
    type, public :: rnk_diag
       real(rnk_dp) :: c_bulk = 0._rnk_dp       ! 体相孔隙水浓度 mg N L^-1 (无液相时为 0 且 status=UNDEFINED)
       real(rnk_dp) :: c_root = 0._rnk_dp       ! 根表平衡浓度 mg N L^-1
@@ -85,6 +83,14 @@ module RootNUptake
       logical :: stock_capped = .false.        ! 候选被库存上限裁剪
       !> ---- B 臂扩展诊断 (A 臂保持 0) ----
       real(rnk_dp) :: advective_flux = 0._rnk_dp  ! 指定控制面(面 1)日内累计内向平流 g N m^-2
+      real(rnk_dp) :: bulk_diffusion = 0._rnk_dp ! common D_bulk, m^2/day
+      real(rnk_dp) :: steady_residual = RNK_NOT_APPLICABLE
+      real(rnk_dp) :: c_bulk_end = RNK_NOT_APPLICABLE
+      real(rnk_dp) :: c_root_mean = RNK_NOT_APPLICABLE
+      real(rnk_dp) :: c_bulk_mean = RNK_NOT_APPLICABLE
+      real(rnk_dp) :: hats_candidate = 0._rnk_dp
+      real(rnk_dp) :: lats_candidate = 0._rnk_dp
+      logical :: zero_diffusion = .false.
       real(rnk_dp) :: mass_error = 0._rnk_dp     ! 日质量闭合残差 (M0 - Mend - candidate)
       integer :: n_retries = 0                   ! 子步减半重试次数
       integer :: solver_flag = 0                 ! 0=收敛; 1=重试耗尽(候选置零,土壤持有)
@@ -146,22 +152,70 @@ contains
       integer, intent(in) :: s
       real(rnk_dp), intent(in) :: cr, root_length, f_root, frac_high, frac_low
       real(rnk_dp) :: u
-      u = root_length*f_root*(frac_high*par%vmax_high(s)*cr/(par%km_high(s) + cr) + &
-                              frac_low*par%vmax_low(s)*cr/(par%km_low(s) + cr))
+      real(rnk_dp) :: terms(2)
+      terms = membrane_terms(par, s, cr, frac_high, frac_low)
+      u = root_length*f_root*(terms(1) + terms(2))
    end function rnk_membrane
+
+   pure function membrane_terms(par, s, cr, frac_high, frac_low) result(terms)
+      type(rnk_params), intent(in) :: par
+      integer, intent(in) :: s
+      real(rnk_dp), intent(in) :: cr, frac_high, frac_low
+      real(rnk_dp) :: terms(2)
+      terms(1) = frac_high*par%vmax_high(s)*cr/(par%km_high(s) + cr)
+      terms(2) = frac_low*par%vmax_low(s)*cr/(par%km_low(s) + cr)
+   end function membrane_terms
+
+   pure subroutine split_candidate(par, layer, s, cr, uptake, diag)
+      type(rnk_params), intent(in) :: par
+      type(rnk_layer), intent(in) :: layer
+      integer, intent(in) :: s
+      real(rnk_dp), intent(in) :: cr, uptake
+      type(rnk_diag), intent(inout) :: diag
+      real(rnk_dp) :: terms(2), hats
+      if (uptake <= 0._rnk_dp) return
+      terms = membrane_terms(par, s, cr, layer%frac_high(s), layer%frac_low(s))
+      hats = uptake*(terms(1)/(terms(1) + terms(2)))
+      diag%hats_candidate = diag%hats_candidate + hats
+      diag%lats_candidate = diag%lats_candidate + (uptake - hats)
+   end subroutine split_candidate
+
+   pure function concentration(par, layer, species, theta) result(cb)
+      type(rnk_params), intent(in) :: par
+      type(rnk_layer), intent(in) :: layer
+      integer, intent(in) :: species
+      real(rnk_dp), intent(in) :: theta
+      real(rnk_dp) :: cb, capacity
+      cb = 0._rnk_dp
+      capacity = theta + layer%bd*par%kd_sorption(species)
+      if (theta > 0._rnk_dp .and. capacity > 0._rnk_dp) then
+         cb = (max(0._rnk_dp, layer%p(species))/layer%kg2ppm/10._rnk_dp) / &
+              ((layer%dlayr/100._rnk_dp)*capacity)
+      end if
+   end function concentration
+
+   pure function bulk_diffusion(par, layer, species, theta) result(db)
+      type(rnk_params), intent(in) :: par
+      type(rnk_layer), intent(in) :: layer
+      integer, intent(in) :: species
+      real(rnk_dp), intent(in) :: theta
+      real(rnk_dp) :: db, water
+      water = max(0._rnk_dp, min(theta, layer%porosity))
+      db = par%species_diffusion_m2d(species)*water**(10._rnk_dp/3._rnk_dp)/layer%porosity**2
+   end function bulk_diffusion
 
    !> A 臂单层求解。返回两形态候选吸收(g N m^-2 d^-1)与诊断。
    pure subroutine rnk_layer_A(par, layer, diag)
       type(rnk_params), intent(in) :: par
       type(rnk_layer), intent(in) :: layer
       type(rnk_diag), intent(out) :: diag(RNK_NSPECIES)
-      real(rnk_dp) :: theta_mid, lr, mf, cb, cr, lo, hi, mid, mem_cb, u, cap
+      real(rnk_dp) :: theta_mid, lr, mf, cb, cr, lo, hi, mid, mem_cb, u, cap, g, annulus, geometry
       integer :: s, it
       logical :: no_liquid
 
       ! 1. 含水率中点与液相判定 (§3.2-1)
       theta_mid = layer%theta0 - 0.5_rnk_dp*layer%rwu/layer%dlayr
-      no_liquid = (theta_mid <= 0._rnk_dp)
+      no_liquid = layer%theta0 - max(0._rnk_dp, layer%rwu)/layer%dlayr <= 0._rnk_dp
       ! 3. 层有效根长 m root m^-2
       lr = 100._rnk_dp*layer%rlv*layer%dlayr
 
@@ -183,9 +237,18 @@ contains
             cycle
          end if
 
-         ! 2. 体相浓度 (§3.2-2): Cb = p*BD/(theta_mid + BD*Kd), mg N L^-1 孔隙水
-         !    无液相(theta_mid<=0)时该层已在上方按 UNDEFINED/ZERO 短路或仅作诊断
-         cb = layer%p(s)*layer%bd/max(theta_mid + layer%bd*par%kd_sorption(s), 1.e-12_rnk_dp)
+         cb = concentration(par, layer, s, layer%theta0)
+         diag(s)%bulk_diffusion = bulk_diffusion(par, layer, s, theta_mid)
+         diag(s)%zero_diffusion = diag(s)%bulk_diffusion == 0._rnk_dp
+         ! Steady radial diffusion conductance with the same soil annulus as B.
+         ! Advection remains the separate bulk-water supply term in this formulation.
+         annulus = (layer%dlayr/100._rnk_dp)/(acos(-1._rnk_dp)*lr*par%root_radius_m**2)
+         if (annulus < 1.e-4_rnk_dp) then
+            geometry = annulus*(0.5_rnk_dp - annulus/6._rnk_dp)
+         else
+            geometry = (1._rnk_dp + annulus)*log(1._rnk_dp + annulus)/annulus - 1._rnk_dp
+         end if
+         g = lr*4._rnk_dp*acos(-1._rnk_dp)*diag(s)%bulk_diffusion/geometry
          diag(s)%c_bulk = cb
 
          ! 4. 质流供给潜力 (膜限速分支下不是实际输入, 仅记账)
@@ -194,18 +257,30 @@ contains
 
          mem_cb = rnk_membrane(par, s, cb, lr, layer%f_root, &
                                layer%frac_high(s), layer%frac_low(s))
-         if (mem_cb <= mf) then
-            ! 膜不限制: Cr = Cb, 候选 = U(Cb) (§3.2-4 第一支)
+         cap = diag(s)%stock_cap
+         if (g > 0._rnk_dp) then
+            lo = 0._rnk_dp
+            hi = cb + mf/g
+            do it = 1, 64
+               mid = lo + 0.5_rnk_dp*(hi - lo)
+               u = rnk_membrane(par, s, mid, lr, layer%f_root, layer%frac_high(s), layer%frac_low(s))
+               if (min(u, cap) > mf + g*(cb - mid)) then
+                  hi = mid
+               else
+                  lo = mid
+               end if
+            end do
+            cr = lo + 0.5_rnk_dp*(hi - lo)
+            diag(s)%branch = RNK_BRANCH_BISECT
+         else if (mem_cb <= mf) then
             cr = cb
             diag(s)%branch = RNK_BRANCH_MEMBRANE
          else
-            ! 二分求 U(Cr) = MF + G*(Cb-Cr), Cr ∈ [0, Cb] (§3.2-4 第二支)
             lo = 0._rnk_dp
             hi = cb
             do it = 1, 64
                mid = 0.5_rnk_dp*(lo + hi)
-               if (rnk_membrane(par, s, mid, lr, layer%f_root, layer%frac_high(s), layer%frac_low(s)) > &
-                   mf + layer%g_transport(s)*(cb - mid)) then
+               if (rnk_membrane(par, s, mid, lr, layer%f_root, layer%frac_high(s), layer%frac_low(s)) > mf) then
                   hi = mid
                else
                   lo = mid
@@ -215,15 +290,18 @@ contains
             diag(s)%branch = RNK_BRANCH_BISECT
          end if
          diag(s)%c_root = cr
-         diag(s)%diffusive_flux = layer%g_transport(s)*max(0._rnk_dp, cb - cr)
+         diag(s)%diffusive_flux = g*(cb - cr)
 
          u = rnk_membrane(par, s, cr, lr, layer%f_root, layer%frac_high(s), layer%frac_low(s))
-         cap = diag(s)%stock_cap
          if (u > cap) then
             u = cap
             diag(s)%stock_capped = .true.
          end if
          diag(s)%candidate = u
+         if (g > 0._rnk_dp) diag(s)%steady_residual = mf + diag(s)%diffusive_flux - u
+         diag(s)%c_root_mean = cr
+         diag(s)%c_bulk_mean = cb
+         call split_candidate(par, layer, s, cr, u, diag(s))
       end do
    end subroutine rnk_layer_A
 
@@ -249,8 +327,9 @@ contains
       real(rnk_dp) :: capfn, capfc, m0tot, mendtot, c0, cap_rate
       real(rnk_dp) :: m(NMAX), c(NMAX), cstar, u0, du, uend
       real(rnk_dp) :: lo(NMAX), di(NMAX), up(NMAX), rhs(NMAX), cp(NMAX)
-      real(rnk_dp) :: cand, advcum, difcum, dfacenow
-      real(rnk_dp) :: dface_k, dum, piv
+      real(rnk_dp) :: cand, advcum, difcum, dfacenow, step_uptake
+      real(rnk_dp) :: bulk_end, bulk_integral, root_integral
+      real(rnk_dp) :: dface_k, dum, piv, face_diff(NMAX - 1)
       integer :: nretry, sflag
       logical :: conv, ok
 
@@ -271,8 +350,7 @@ contains
          diag(s)%candidate = 0._rnk_dp
       end do
       if (lr <= 0._rnk_dp .or. layer%f_root <= 0._rnk_dp .or. theta0 - max(0._rnk_dp, layer%rwu)/layer%dlayr <= 0._rnk_dp .or. &
-          par%root_radius_m <= 0._rnk_dp .or. par%molecular_diffusion_m2d < 0._rnk_dp .or. &
-          par%tortuosity <= 0._rnk_dp) then
+          par%root_radius_m <= 0._rnk_dp) then
          do s = 1, RNK_NSPECIES
             if (theta0 - max(0._rnk_dp, layer%rwu)/layer%dlayr <= 0._rnk_dp) then
                diag(s)%branch = RNK_BRANCH_UNDEFINED
@@ -307,13 +385,19 @@ contains
          ! ---- 初始化: 均匀浓度, Σ M_i == DSSAT 输入库存 ----
          m0tot = layer%p(s)/merge(layer%kg2ppm, 1._rnk_dp, layer%kg2ppm > 0._rnk_dp)/10._rnk_dp
          capfc = theta0 + layer%bd*par%kd_sorption(s)
-         c0 = m0tot/(h*capfc)
+         c0 = concentration(par, layer, s, theta0)
+         diag(s)%bulk_diffusion = bulk_diffusion(par, layer, s, diag(s)%theta_mid)
+         diag(s)%zero_diffusion = diag(s)%bulk_diffusion == 0._rnk_dp
+         do k = 1, nc - 1
+            face_diff(k) = lr*2._rnk_dp*pi_*rf(k)*diag(s)%bulk_diffusion/max(rgrad(k), 1.e-15_rnk_dp)
+         end do
          diag(s)%c_bulk = c0
          diag(s)%mf_potential = 0.01_rnk_dp*max(0._rnk_dp, layer%rwu)*c0
          do k = 1, nc
             m(k) = vol(k)*capfc*c0
          end do
          cand = 0._rnk_dp; advcum = 0._rnk_dp; difcum = 0._rnk_dp
+         bulk_end = c0; bulk_integral = 0._rnk_dp; root_integral = 0._rnk_dp
          nretry = 0; sflag = 0; t = 0._rnk_dp; dt = 1._rnk_dp/real(ns0, rnk_dp)
          do while (t < 1._rnk_dp - 1.0e-12_rnk_dp)
             dt = min(dt, 1._rnk_dp - t)
@@ -342,23 +426,19 @@ contains
                      du = 0._rnk_dp
                   end if
                   ! 组装三对角 (未知 cn), 内面: 迎风平流 + 隐式扩散
-                  dfacenow = lr*2._rnk_dp*pi_*rf(1)*par%tortuosity*theta_new* &
-                             par%molecular_diffusion_m2d/max(rgrad(1), 1.0e-15_rnk_dp)
+                  dfacenow = face_diff(1)
                   di(1) = cp(1) + dt*(dfacenow + du)
                   up(1) = -dt*(wadv0(1) + dfacenow)
                   rhs(1) = m(1) - dt*u0 + dt*du*cstar
                   do k = 2, nc - 1
-                     dfacenow = lr*2._rnk_dp*pi_*rf(k)*par%tortuosity*theta_new* &
-                                par%molecular_diffusion_m2d/max(rgrad(k), 1.0e-15_rnk_dp)
-                     dface_k = lr*2._rnk_dp*pi_*rf(k - 1)*par%tortuosity*theta_new* &
-                               par%molecular_diffusion_m2d/max(rgrad(k - 1), 1.0e-15_rnk_dp)
+                     dfacenow = face_diff(k)
+                     dface_k = face_diff(k - 1)
                      lo(k) = -dt*dface_k
                      di(k) = cp(k) + dt*(dfacenow + wadv0(k - 1) + dface_k)
                      up(k) = -dt*(wadv0(k) + dfacenow)
                      rhs(k) = m(k)
                   end do
-                  dface_k = lr*2._rnk_dp*pi_*rf(nc - 1)*par%tortuosity*theta_new* &
-                            par%molecular_diffusion_m2d/max(rgrad(nc - 1), 1.0e-15_rnk_dp)
+                  dface_k = face_diff(nc - 1)
                   lo(nc) = -dt*dface_k
                   di(nc) = cp(nc) + dt*(wadv0(nc - 1) + dface_k)
                   rhs(nc) = m(nc)
@@ -394,14 +474,18 @@ contains
             ! 收敛: 结算质量、吸收与控制面通量
             uend = rnk_membrane(par, s, c(1), lr, layer%f_root, layer%frac_high(s), layer%frac_low(s))
             if (uend > cap_rate) diag(s)%stock_capped = .true.
-            cand = cand + min(dt*max(0._rnk_dp, uend), max(0._rnk_dp, diag(s)%stock_cap - cand))
-            dfacenow = lr*2._rnk_dp*pi_*rf(1)*par%tortuosity*theta_new* &
-                       par%molecular_diffusion_m2d/max(rgrad(1), 1.0e-15_rnk_dp)
+            step_uptake = min(dt*max(0._rnk_dp, uend), max(0._rnk_dp, diag(s)%stock_cap - cand))
+            cand = cand + step_uptake
+            dfacenow = face_diff(1)
             advcum = advcum + dt*wadv0(1)*c(2)
             difcum = difcum + dt*dfacenow*(c(2) - c(1))
             do k = 1, nc
                m(k) = cp(k)*c(k)
             end do
+            bulk_end = sum(m(1:nc))/(h*capfn)
+            bulk_integral = bulk_integral + dt*bulk_end
+            root_integral = root_integral + dt*c(1)
+            call split_candidate(par, layer, s, c(1), step_uptake, diag(s))
             t = t + dt
          end do
          mendtot = sum(m(1:nc))
@@ -414,10 +498,15 @@ contains
          diag(s)%branch = RNK_BRANCH_RADIAL
          if (sflag /= 0) then
             diag(s)%candidate = 0._rnk_dp
+            diag(s)%hats_candidate = 0._rnk_dp
+            diag(s)%lats_candidate = 0._rnk_dp
             diag(s)%mass_error = m0tot - mendtot
             cycle
          end if
          diag(s)%candidate = cand
+         diag(s)%c_bulk_end = bulk_end
+         diag(s)%c_root_mean = root_integral/t
+         diag(s)%c_bulk_mean = bulk_integral/t
       end do
    end subroutine rnk_layer_B
 

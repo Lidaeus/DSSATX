@@ -8,11 +8,3 @@
  state_timing=1, pods_n_state=1, budget_revision=1, c4_budget=1, leaf_coupling=1, c4_photo=1,
  remob_mode=1, luxury_priority=1, remob_tau=8., protect_beta=0.5, slow_ratio=3.
 /
-
-&ROOTNUPTAKE
- rnk_mode=1,
- rnk_km_high=0.28,0.5, rnk_km_low=35.,50.,
- rnk_vmax_high=0.0003,0.0004, rnk_vmax_low=0.0015,0.002,
- rnk_kd=0.,1., rnk_residual=0.25,0.5, rnk_nh4_diff=0.005,
- rnk_radius=0.0001, rnk_diffmol=0.000164, rnk_tort=0.5
-/

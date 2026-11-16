@@ -21,15 +21,13 @@ program test_root_n_uptake_B
    par%residual_ppm(RNK_NH4) = 0.50_rnk_dp
    par%source_tag(RNK_NH4) = 'literature-prior'
    par%root_radius_m = 1.0e-4_rnk_dp
-   par%molecular_diffusion_m2d = 1.64e-4_rnk_dp
-   par%tortuosity = 0.5_rnk_dp
 
    kg2ppm = 1._rnk_dp/(1.3_rnk_dp*0.1_rnk_dp*20._rnk_dp)
    lay%bd = 1.3_rnk_dp; lay%kg2ppm = kg2ppm; lay%dlayr = 20._rnk_dp
    lay%p(RNK_NO3) = 10._rnk_dp*kg2ppm
    lay%p(RNK_NH4) = 10._rnk_dp*kg2ppm
    lay%theta0 = 0.255_rnk_dp; lay%rwu = 0.20_rnk_dp
-   lay%rlv = 1.0_rnk_dp; lay%f_root = 1._rnk_dp
+   lay%rlv = 1.0_rnk_dp; lay%f_root = 1._rnk_dp; lay%porosity=0.45_rnk_dp
 
    ! ---- 1. 无氮 → ZERO ----
    block
@@ -68,7 +66,7 @@ program test_root_n_uptake_B
                  d(RNK_NO3)%mass_error, 0._rnk_dp, nfail)
       call check('B pure-diffusion c_root < c_bulk (depletion)', d(RNK_NO3)%c_root < d(RNK_NO3)%c_bulk, &
                  d(RNK_NO3)%c_root, d(RNK_NO3)%c_bulk, nfail)
-      p0 = par; p0%molecular_diffusion_m2d = 0._rnk_dp
+      p0 = par; p0%species_diffusion_m2d = 0._rnk_dp
       call rnk_layer_B(p0, l, d0)
       call check('B D=0 uptake < D>0 uptake (diffusion supplies)', &
                  d0(RNK_NO3)%candidate < d(RNK_NO3)%candidate, &
@@ -77,18 +75,21 @@ program test_root_n_uptake_B
                  d0(RNK_NO3)%mass_error, 0._rnk_dp, nfail)
    end block
 
-   ! ---- 5. 水流 + 弱膜吸收: candidate ≈ U(C_bulk) (膜限速) ----
+   ! ---- 5. Weak membrane: integral is close to the rate at mean root concentration ----
    block
       type(rnk_layer) :: l; type(rnk_diag) :: d(RNK_NSPECIES)
       type(rnk_params) :: pw
-      real(rnk_dp) :: ucb
+      real(rnk_dp) :: mean_rate
       pw = par; pw%vmax_high(RNK_NO3) = 3.e-7_rnk_dp; pw%vmax_low(RNK_NO3) = 1.5e-6_rnk_dp
       l = lay
       call rnk_layer_B(pw, l, d)
-      ucb = rnk_membrane(pw, RNK_NO3, d(RNK_NO3)%c_bulk, d(RNK_NO3)%root_length, &
+      mean_rate = rnk_membrane(pw, RNK_NO3, d(RNK_NO3)%c_root_mean, d(RNK_NO3)%root_length, &
                          l%f_root, 1._rnk_dp, 1._rnk_dp)
-      call check('B weak membrane: cand ~= U(Cb) within 2%', &
-                 abs(d(RNK_NO3)%candidate - ucb) <= 0.02_rnk_dp*ucb, d(RNK_NO3)%candidate, ucb, nfail)
+      call check('B weak membrane: uptake agrees with mean root concentration', &
+                 abs(d(RNK_NO3)%candidate - mean_rate) <= 0.01_rnk_dp*mean_rate, d(RNK_NO3)%candidate, mean_rate, nfail)
+      call check('B weak membrane: mean root enrichment under actual water uptake', &
+                 d(RNK_NO3)%c_root_mean > d(RNK_NO3)%c_bulk_mean, &
+                 d(RNK_NO3)%c_root_mean, d(RNK_NO3)%c_bulk_mean, nfail)
       call check('B weak membrane mass closure', abs(d(RNK_NO3)%mass_error) < 1.e-9_rnk_dp, &
                  d(RNK_NO3)%mass_error, 0._rnk_dp, nfail)
    end block
@@ -141,13 +142,13 @@ program test_root_n_uptake_B
       call check('B no-liquid UNDEFINED', d(RNK_NO3)%branch == RNK_BRANCH_UNDEFINED, 0._rnk_dp, 0._rnk_dp, nfail)
    end block
 
-   ! ---- 9. 网格 8→16 且子步减半: 日累计变化 ≤ max(1%, 0.001 g/m2/d) ----
-   call rnk_layer_B(par, lay, dg, n_cells=8, n_substeps=24)
+   ! ---- 9. Fixed 16-cell time-step comparison ----
+   call rnk_layer_B(par, lay, dg, n_cells=16, n_substeps=24)
    c_base = dg(RNK_NO3)%candidate
    call rnk_layer_B(par, lay, dg, n_cells=16, n_substeps=48)
    c_fine = dg(RNK_NO3)%candidate
    rel = abs(c_fine - c_base)/max(max(abs(c_fine), abs(c_base)), 1.e-30_rnk_dp)
-   call check('B grid/substep convergence <= 1% or 0.001', &
+   call check('B fixed-grid step refinement <= 1% or 0.001', &
               rel <= 0.01_rnk_dp .or. abs(c_fine - c_base) <= 1.0e-3_rnk_dp, &
               c_base, c_fine, nfail)
    write (*, '(a,2es16.6)') '     coarse/fine daily candidates: ', c_base, c_fine
@@ -167,6 +168,43 @@ program test_root_n_uptake_B
               dg(RNK_NO3)%candidate, dg(RNK_NO3)%stock_cap, nfail)
    write (*, '(a,3es16.6)') '     cand/mf/diff: ', dg(RNK_NO3)%candidate, dg(RNK_NO3)%mf_potential, &
       dg(RNK_NO3)%diffusive_flux
+
+   ! The paired profile must pass identical soil concentrations, diffusion and
+   ! stock ceilings to both transport formulations.
+   block
+      type(rnk_layer) :: l
+      type(rnk_params) :: common
+      type(rnk_diag) :: a(RNK_NSPECIES), b(RNK_NSPECIES)
+      real(rnk_dp) :: db, cb, deficit
+      integer :: species
+      common = par
+      l = lay
+      l%porosity = 0.45_rnk_dp
+      call rnk_layer_A(common, l, a)
+      call rnk_layer_B(common, l, b)
+      do species = 1, RNK_NSPECIES
+         db = common%species_diffusion_m2d(species)*a(species)%theta_mid**(10._rnk_dp/3._rnk_dp)/l%porosity**2
+         cb = l%p(species)*l%bd/(l%theta0 + l%bd*common%kd_sorption(species))
+         call check('paired: same initial equilibrium concentration', a(species)%c_bulk == b(species)%c_bulk .and. &
+                    abs(a(species)%c_bulk - cb) < 1.e-12_rnk_dp, a(species)%c_bulk, cb, nfail)
+         call check('paired: same Millington-Quirk bulk diffusion', a(species)%bulk_diffusion == b(species)%bulk_diffusion .and. &
+                    abs(b(species)%bulk_diffusion - db) < 1.e-15_rnk_dp, b(species)%bulk_diffusion, db, nfail)
+         call check('paired: same stock ceiling', a(species)%stock_cap == b(species)%stock_cap, &
+                    a(species)%stock_cap, b(species)%stock_cap, nfail)
+         deficit = min(rnk_membrane(common, species, a(species)%c_root, a(species)%root_length, &
+                   l%f_root, 1._rnk_dp, 1._rnk_dp), a(species)%stock_cap) - &
+                   (a(species)%mf_potential + a(species)%diffusive_flux)
+         call check('paired: steady root boundary closes', abs(deficit) < 1.e-10_rnk_dp, deficit, 0._rnk_dp, nfail)
+         call check('paired: dynamic root boundary conserves stock', abs(b(species)%mass_error) < 1.e-9_rnk_dp .and. &
+                    b(species)%solver_flag == 0 .and. b(species)%candidate > 0._rnk_dp, b(species)%mass_error, 0._rnk_dp, nfail)
+      end do
+      l%theta0 = 0.09_rnk_dp
+      l%rwu = 0._rnk_dp
+      call rnk_layer_A(common, l, a)
+      call rnk_layer_B(common, l, b)
+      call check('paired: liquid below LL permits pure diffusion', a(RNK_NO3)%candidate > 0._rnk_dp .and. &
+                 b(RNK_NO3)%candidate > 0._rnk_dp, b(RNK_NO3)%candidate, 0._rnk_dp, nfail)
+   end block
 
    if (nfail > 0) then
       write (*, '(a,i0,a)') 'FAIL: ', nfail, ' check(s) failed'

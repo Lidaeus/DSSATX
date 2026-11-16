@@ -16,3 +16,5 @@ flags=(-ffree-line-length-none -fcheck=all -ffpe-trap=invalid,zero,overflow -J"$
 "$fc" "${flags[@]}" "$here/test_root_n_uptake_B.f90" "$out/kernel.o" -o "$out/test_b"
 "$out/test_a"
 "$out/test_b"
+"$fc" "${flags[@]}" "$here/transport_resolution.f90" "$out/kernel.o" -o "$out/transport_resolution"
+(cd "$out" && ./transport_resolution)

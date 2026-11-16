@@ -1,9 +1,10 @@
 import csv
+import math
 
 SPECIES = {"1": "UNO3", "2": "UNH4"}
 
 
-def audit(run_dir, arm, expected_runs):
+def audit(run_dir, arm, expected_runs, expected_shared=None):
     trace_rates = {}
     season_end = {}
     soil_totals = {}
@@ -23,7 +24,15 @@ def audit(run_dir, arm, expected_runs):
 
     with (run_dir / "LayerRootNUptake.csv").open(newline="") as stream:
         rows = list(csv.DictReader(stream))
-    assert rows and all(len(row) == 25 and None not in row for row in rows)
+    assert rows and all(len(row) in (25, 28, 35) and None not in row for row in rows)
+    if expected_shared is True or (expected_shared is False and "transport_mode" in rows[0]):
+        modes = {(int(row.get("transport_mode", -1)), int(row.get("shared_transport", -1))) for row in rows}
+        assert modes == {({"A": 1, "B": 2}[arm], int(expected_shared))}, modes
+    if expected_shared:
+        for species in SPECIES:
+            assert any(row["species"] == species and float(row["deducted_gN_m2"]) > 0 for row in rows), (
+                arm, species, "no soil uptake in the paired 26SP fixture"
+            )
     matched = set()
     deducted_by_run = {}
     pending_by_run = {}
@@ -41,6 +50,17 @@ def audit(run_dir, arm, expected_runs):
         deducted, pending, settled, accepted, candidate, cap = (
             float(row[f"{key}_gN_m2"]) for key in ("deducted", "pending", "settled", "accepted", "candidate", "stock_cap")
         )
+        if expected_shared and "hats_candidate_gN_m2" in row:
+            hats, lats = (float(row[f"{name}_candidate_gN_m2"]) for name in ("hats", "lats"))
+            assert min(hats, lats) >= 0 and math.isclose(hats + lats, candidate, rel_tol=1e-7, abs_tol=1e-12), identity
+            residual = float(row["steady_residual_gN_m2"])
+            bulk_end = float(row["c_bulk_end_mgN_L"])
+            means = [float(row[f"c_{name}_mean_mgN_L"]) for name in ("root", "bulk")]
+            assert all(math.isfinite(value) for value in (residual, bulk_end, *means)), identity
+            if arm == "A" and float(row["d_bulk_m2_d"]) > 0:
+                assert abs(residual) < 1e-8, identity
+            if arm == "B" and int(row["solver_status"]) // 10 == 3:
+                assert min(bulk_end, *means) >= -1e-12, identity
         assert abs(settled - deducted - pending) < 1e-10, identity
         assert 0 <= settled <= accepted + 1e-10 and accepted <= candidate + 1e-10, identity
         assert candidate <= cap + 2e-7, identity

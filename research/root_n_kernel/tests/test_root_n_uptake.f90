@@ -33,10 +33,11 @@ program test_root_n_uptake
    lay%bd = 1.3_rnk_dp; lay%kg2ppm = kg2ppm; lay%dlayr = 20._rnk_dp
    lay%p(RNK_NO3) = 10._rnk_dp*kg2ppm      ! 3.846154 mg/kg
    lay%p(RNK_NH4) = 10._rnk_dp*kg2ppm
-   lay%theta0 = 0.255_rnk_dp; lay%rwu = 0.20_rnk_dp        ! theta_mid = 0.25
+   lay%theta0 = 0.25_rnk_dp; lay%rwu = 0.20_rnk_dp         ! theta_mid = 0.245
    lay%rlv = 1.0_rnk_dp                                     ! Lr = 2000 m/m2
    lay%f_root = 1._rnk_dp
-   lay%g_transport = 0._rnk_dp                              ! 纯质流+膜, 无扩散补给
+   lay%porosity = 0.45_rnk_dp
+   par%species_diffusion_m2d = 0._rnk_dp                   ! Pure mass flow with membrane uptake
 
    ! ---- 1. NO3 手算: Cb=20, MF=0.04 g/m2/d, 二分分支 ----
    call rnk_layer_A(par, lay, dg)
@@ -47,8 +48,8 @@ program test_root_n_uptake
               dg(RNK_NO3)%mf_potential, 0.04_rnk_dp, nfail)
    call check('NO3 branch==BISECT', dg(RNK_NO3)%branch == RNK_BRANCH_BISECT, &
               real(dg(RNK_NO3)%branch, rnk_dp), 2._rnk_dp, nfail)
-   call check('NO3 theta_mid==0.25', abs(dg(RNK_NO3)%theta_mid - 0.25_rnk_dp) < tol, &
-              dg(RNK_NO3)%theta_mid, 0.25_rnk_dp, nfail)
+   call check('NO3 theta_mid==0.245', abs(dg(RNK_NO3)%theta_mid - 0.245_rnk_dp) < tol, &
+              dg(RNK_NO3)%theta_mid, 0.245_rnk_dp, nfail)
    ! 联立平衡残差 |U(Cr) - MF| (G=0) 应接近 0
    res = abs(rnk_membrane(par, RNK_NO3, dg(RNK_NO3)%c_root, dg(RNK_NO3)%root_length, &
               lay%f_root, 1._rnk_dp, 1._rnk_dp) - dg(RNK_NO3)%mf_potential)
@@ -68,9 +69,10 @@ program test_root_n_uptake
    block
       type(rnk_layer) :: l2
       type(rnk_diag) :: d2(RNK_NSPECIES)
-      l2 = lay; l2%p(RNK_NO3) = 0.30_rnk_dp; l2%g_transport(RNK_NO3) = 0.5_rnk_dp
-      ! Cb=0.3*1.3/0.25=1.56, cap=(0.3-0.25)*2.6/10=0.013 g/m2; 供给远超 cap
-      call rnk_layer_A(par, l2, d2)
+      type(rnk_params) :: diffusive
+      l2 = lay; l2%p(RNK_NO3) = 0.251_rnk_dp
+      diffusive = par; diffusive%species_diffusion_m2d(RNK_NO3) = 1.64e-4_rnk_dp
+      call rnk_layer_A(diffusive, l2, d2)
       call check('low-N capped flag', d2(RNK_NO3)%stock_capped, 1._rnk_dp, 1._rnk_dp, nfail)
       call check('low-N candidate==cap', &
                  abs(d2(RNK_NO3)%candidate - d2(RNK_NO3)%stock_cap) < 1.e-12_rnk_dp, &
@@ -146,8 +148,10 @@ program test_root_n_uptake
       type(rnk_layer) :: l8
       type(rnk_diag) :: d8(RNK_NSPECIES)
       real(rnk_dp) :: resid
-      l8 = lay; l8%rwu = 0._rnk_dp; l8%g_transport(RNK_NO3) = 0.05_rnk_dp
-      call rnk_layer_A(par, l8, d8)
+      type(rnk_params) :: diffusive
+      l8 = lay; l8%rwu = 0._rnk_dp
+      diffusive = par; diffusive%species_diffusion_m2d(RNK_NO3) = 1.64e-4_rnk_dp
+      call rnk_layer_A(diffusive, l8, d8)
       call check('pure-diffusion branch==BISECT', d8(RNK_NO3)%branch == RNK_BRANCH_BISECT, &
                  real(d8(RNK_NO3)%branch, rnk_dp), 2._rnk_dp, nfail)
       resid = abs(rnk_membrane(par, RNK_NO3, d8(RNK_NO3)%c_root, d8(RNK_NO3)%root_length, &

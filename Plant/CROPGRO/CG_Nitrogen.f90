@@ -84,11 +84,13 @@ module CG_Nitrogen
   real(dp), save :: r_mf(NL)=0,r_diff(NL)=0,r_mem(NL)=0,r_cr(NL)=0,r_bulk(NL)=0
   real(dp), save :: r_candidate3(NL)=0,r_candidate4(NL)=0,r_final3(NL)=0,r_final4(NL)=0
   ! --- RootNUptake 公共核 (T2 2026-11-12): 0=off(冻结行为), 1=A(等效根际运输) ---
-  integer, save :: rnk_mode=0
+  integer, save :: rnk_mode=0, rnk_radial_cells=8
+  real(dp), save :: rnk_species_diffusion(2)=[1.64e-4_dp,1.50e-4_dp]
+  type(rnk_diag), save :: r_rnk_transport(2,NL)
   real(dp), save :: rnk_km_high(2)=0, rnk_km_low(2)=0
   real(dp), save :: rnk_vmax_high(2)=0, rnk_vmax_low(2)=0
-  real(dp), save :: rnk_kd(2)=0, rnk_residual(2)=0, rnk_nh4_diff=0
-  real(dp), save :: rnk_radius=0, rnk_diffmol=0, rnk_tort=0
+  real(dp), save :: rnk_kd(2)=0, rnk_residual(2)=0
+  real(dp), save :: rnk_radius=0
   type(rnk_params), save :: rnk_par
   integer, save :: r_rnk_branch(2,NL)=0
   integer, save :: r_rnk_flag(2,NL)=0
@@ -1001,7 +1003,8 @@ contains
     type(ControlType),intent(in)::control
     type(SwitchType),intent(in)::switch
     character(512)::path,message
-    integer::ios,unit,status,length
+    integer::ios,unit,status,length,i,k
+    integer,parameter::group_len=len('&ROOTNUPTAKE')
     logical::exists
     namelist /NINTEGRATION/ ni_stage,root_mode,q_no3_max,q_nh4_max, &
       assim_no3_v,assim_nh4_v,assim_no3_k,assim_nh4_k, &
@@ -1013,7 +1016,7 @@ contains
       reserve_capacity,reserve_fill_tau,reserve_protect,build_min_leaf,build_min_stem, &
       remob_rate_mode,remob_rate_max,functional_rate_max,lai_cn_mode,lai_cn_shape
     namelist /ROOTNUPTAKE/ rnk_mode,rnk_km_high,rnk_km_low,rnk_vmax_high,rnk_vmax_low, &
-      rnk_kd,rnk_residual,rnk_nh4_diff,rnk_radius,rnk_diffmol,rnk_tort
+      rnk_kd,rnk_residual,rnk_radius,rnk_species_diffusion,rnk_radial_cells
     logical :: rnk_present
     if(loaded) then
       if(NI_ENABLED()) then
@@ -1115,7 +1118,17 @@ contains
       do
         read(unit,'(A)',iostat=ios) message
         if(ios/=0) exit
-        if(index(adjustl(message),'&ROOTNUPTAKE')==1) rnk_present=.true.
+        do i=1,len_trim(message)
+          k=iachar(message(i:i))
+          if(k>=iachar('a').and.k<=iachar('z')) message(i:i)=achar(k-32)
+        end do
+        i=verify(message,' '//achar(9))
+        if(i==0.or.i>len(message)-group_len) cycle
+        if(message(i:i+group_len-1)=='&ROOTNUPTAKE'.and. &
+           scan(message(i+group_len:i+group_len),' /!'//achar(9))/=0) then
+          rnk_present=.true.
+          exit
+        end if
       end do
       if(rnk_present) then
         rewind(unit)
@@ -1126,6 +1139,8 @@ contains
           error stop 'RNK: invalid ROOTNUPTAKE namelist'
         end if
         if(rnk_mode<0.or.rnk_mode>2) error stop 'RNK: transport mode must be 0(off),1(A),2(B)'
+        if(rnk_mode==RNK_MODE_B.and.all(rnk_radial_cells/=[8,16])) &
+          error stop 'RNK: radial grid must use 8 or 16 cells'
         if(rnk_mode>=1) then
           if(.not.NI_ENABLED()) error stop 'RNK: common kernel requires enabled NI integration'
           if(NI_ROOT_MODE()<=0) error stop 'RNK: common kernel requires actual-water root mode (root_mode>=1)'
@@ -1142,14 +1157,12 @@ contains
               error stop 'RNK: parameter validation failed'
             end if
           end block
-          if(rnk_mode==RNK_MODE_A .and. rnk_nh4_diff<=0) &
-            error stop 'RNK(A): positive NH4 effective diffusion prior required'
-          if(rnk_mode==RNK_MODE_B .and. &
-             (rnk_radius<=0.or.rnk_tort<=0.or.rnk_diffmol<0)) &
-            error stop 'RNK(B): positive root radius and tortuosity, nonnegative molecular diffusion required'
+          if(.not.all(ieee_is_finite([rnk_radius,rnk_species_diffusion]))) &
+            error stop 'RNK: nonfinite transport parameters'
+          if(rnk_radius<=0.or.any(rnk_species_diffusion<0)) &
+            error stop 'RNK: require positive radius and nonnegative species diffusivities'
+          rnk_par%species_diffusion_m2d=rnk_species_diffusion
           rnk_par%root_radius_m=rnk_radius
-          rnk_par%molecular_diffusion_m2d=rnk_diffmol
-          rnk_par%tortuosity=rnk_tort
         end if
       else
         close(unit)
@@ -1665,25 +1678,33 @@ contains
     integer::l,s,ios
     real(dp)::settled
     character(len=18)::soil_status
+    type(rnk_diag)::diagnostic
     if(.not.rnk_ledger_opened) then
       open(newunit=rnk_ledger_unit,file='LayerRootNUptake.csv',status='new',action='write',iostat=ios)
       if(ios/=0) error stop 'RNK: layer ledger already exists or cannot be opened'
       write(rnk_ledger_unit,'(A)') 'run,yrdoy,layer,species,source_day,soil_commit_day,'// &
         'theta0,theta_mid,rwu_cm_d,rlv_cm_cm3,stock_before_gN_m2,c_bulk_mgN_L,c_root_mgN_L,'// &
         'mf_potential_gN_m2,diffusive_gN_m2,candidate_gN_m2,accepted_gN_m2,deducted_gN_m2,stock_cap_gN_m2,'// &
-        'settled_gN_m2,pending_gN_m2,radial_advective_gN_m2,radial_mass_error_gN_m2,solver_status,soil_status'
+        'settled_gN_m2,pending_gN_m2,radial_advective_gN_m2,radial_mass_error_gN_m2,solver_status,soil_status,'// &
+        'transport_mode,shared_transport,d_bulk_m2_d,zero_diffusion,steady_residual_gN_m2,'// &
+        'c_bulk_end_mgN_L,c_root_mean_mgN_L,c_bulk_mean_mgN_L,hats_candidate_gN_m2,lats_candidate_gN_m2'
       rnk_ledger_opened=.true.
     end if
     soil_status=merge('committed         ','pending_season_end',commit_day/=0)
     do l=1,nlayr
       do s=1,2
         settled=rnk_fin(s,l)
-        write(rnk_ledger_unit,'(I0,5(",",I0),17(",",ES24.15E3),",",I0,",",A)') &
+        diagnostic=r_rnk_transport(s,l)
+        write(rnk_ledger_unit,'(I0,5(",",I0),17(",",ES24.15E3),",",I0,",",A,2(",",I0),",",ES24.15E3, &
+             & ",",I0,6(",",ES24.15E3))') &
           r_rnk_pending_run,r_rnk_source_day,l,s,r_rnk_source_day,commit_day, &
           r_rnk_theta0(l),theta_snapshot(l),rwu_snapshot(l),rlv_snapshot(l), &
           r_rnk_stock_before(s,l),rnk_cb(s,l),rnk_cr(s,l),rnk_mf(s,l), &
           r_rnk_diff(s,l),rnk_cand(s,l),rnk_acc(s,l),deducted(s,l),r_rnk_cap(s,l), &
-          settled,settled-deducted(s,l),r_rnk_adv(s,l),r_rnk_mass_error(s,l),rnk_status(s,l),trim(soil_status)
+          settled,settled-deducted(s,l),r_rnk_adv(s,l),r_rnk_mass_error(s,l),rnk_status(s,l),trim(soil_status), &
+          rnk_mode,1,diagnostic%bulk_diffusion,merge(1,0,diagnostic%zero_diffusion), &
+          diagnostic%steady_residual,diagnostic%c_bulk_end,diagnostic%c_root_mean,diagnostic%c_bulk_mean, &
+          diagnostic%hats_candidate,diagnostic%lats_candidate
       end do
     end do
     flush(rnk_ledger_unit)
@@ -1765,7 +1786,7 @@ contains
     if(rnk_mode>=RNK_MODE_A) then
       ! 公共核: 1=A(等效根际运输, T2) 2=B(径向有限体积, T3)
       r_rnk_source_day=control%YRDOY
-      call NI_ROOT_UPTAKE_RNK(nlayr,bd,depth,ll,dul,sat,no3,nh4,kg2ppm,uno3,unh4,feedback)
+      call NI_ROOT_UPTAKE_RNK(nlayr,bd,depth,ll,sat,no3,nh4,kg2ppm,uno3,unh4,feedback)
       return
     end if
     uno3=0; unh4=0
@@ -1821,24 +1842,19 @@ contains
     ! 编码: branch*10 + 裁剪位 + 100*solver_flag (B 臂重试耗尽=100+)
     rnk_status=r_rnk_branch(s,l)*10+merge(1,0,r_rnk_capped(s,l))+100*r_rnk_flag(s,l)
   end function rnk_status
-  subroutine NI_ROOT_UPTAKE_RNK(nlayr,bd,depth,ll,dul,sat,no3,nh4,kg2ppm,uno3,unh4,feedback)
+  subroutine NI_ROOT_UPTAKE_RNK(nlayr,bd,depth,ll,sat,no3,nh4,kg2ppm,uno3,unh4,feedback)
     ! RootNUptake 公共核适配层: 底座数组(单精度 ppm/cm) → 双精度核输入(g N m^-2/d 内部),
     ! 返回 kg N ha^-1 d^-1 的 UNO3/UNH4 候选。诊断填充既有 r_* 账本与 rnk 扩展数组。
     integer,intent(in)::nlayr
-    real,intent(in)::bd(:),depth(:),ll(:),dul(:),sat(:),no3(:),nh4(:),kg2ppm(:)
+    real,intent(in)::bd(:),depth(:),ll(:),sat(:),no3(:),nh4(:),kg2ppm(:)
     real,intent(out)::uno3(:),unh4(:)
     real(dp),intent(in)::feedback
     type(rnk_layer)::lay
     type(rnk_diag)::dg(2)
-    real(dp)::wet,theta0,leng,extractable
+    real(dp)::theta0,extractable
     integer::l
     uno3=0; unh4=0
     do l=1,nlayr
-      ! wet 因子与 legacy R2 同口径 (LL→DUL→SAT 三角形)
-      wet=max(0._dp,min(1._dp,(theta_snapshot(l)-real(ll(l),dp))/max(real(dul(l)-ll(l),dp),1.e-12_dp)))
-      if(theta_snapshot(l)>dul(l)) wet=max(0._dp,min(1._dp,(real(sat(l),dp)-theta_snapshot(l))/ &
-        max(real(sat(l)-dul(l),dp),1.e-12_dp)))
-      leng=100._dp*rlv_snapshot(l)*real(depth(l),dp)
       theta0=theta0_snapshot(l)
       extractable=max(0._dp,theta0-real(ll(l),dp))*real(depth(l),dp)
       if(rwu_snapshot(l)>extractable+1.e-6_dp.or. &
@@ -1849,14 +1865,16 @@ contains
       lay%p(rnk_NO3)=real(no3(l),dp); lay%p(rnk_NH4)=real(nh4(l),dp)
       lay%bd=real(bd(l),dp); lay%kg2ppm=real(kg2ppm(l),dp); lay%dlayr=real(depth(l),dp)
       lay%rlv=real(rlv_snapshot(l),dp); lay%theta0=theta0; lay%rwu=rwu_snapshot(l)
-      lay%f_root=feedback*sqrt(max(0._dp,wet))
+      if(.not.all(ieee_is_finite([lay%bd,lay%kg2ppm,real(sat(l),dp)]))) &
+        error stop 'RNK: nonfinite soil geometry'
+      if(min(lay%bd,lay%kg2ppm,real(sat(l),dp))<=0.or.sat(l)>1.) &
+        error stop 'RNK: invalid bulk density, conversion factor or saturation'
+      lay%porosity=real(sat(l),dp)
+      ! The shared membrane response depends on plant N status.
+      lay%f_root=feedback
       lay%frac_high=1._dp; lay%frac_low=1._dp
-      ! A 臂层导度 G = 0.001*D_eq*wet*Lr; NO3 继承底座 v4-R2 diffusion_k, NH4 用登记先验
-      lay%g_transport(rnk_NO3)=.001_dp*diffusion_k*wet*leng
-      lay%g_transport(rnk_NH4)=.001_dp*rnk_nh4_diff*wet*leng
       if(rnk_mode==RNK_MODE_B) then
-         ! B 臂 (T3): 径向平流-扩散有限体积, g_transport 不参与
-         call rnk_layer_B(rnk_par,lay,dg)
+         call rnk_layer_B(rnk_par,lay,dg,n_cells=rnk_radial_cells)
          if(any(dg%solver_flag/=0).or.any(abs(dg%mass_error)>1.e-9_dp)) then
            write(*,'(A,I0,A,I0,A,I0)') 'RNK: radial solve failed, run ',water_run,', day ',water_day,', layer ',l
            error stop 'RNK: radial convergence or mass closure failure'
@@ -1877,6 +1895,7 @@ contains
       r_rnk_capped(:,l)=(/dg(rnk_NO3)%stock_capped,dg(rnk_NH4)%stock_capped/)
       r_rnk_stock_before(:,l)=(/real(no3(l),dp),real(nh4(l),dp)/)/ &
         merge(real(kg2ppm(l),dp),1._dp,real(kg2ppm(l),dp)>0._dp)/10._dp
+      r_rnk_transport(:,l)=dg
       r_rnk_adv(:,l)=dg%advective_flux
       r_rnk_mass_error(:,l)=dg%mass_error
       r_rnk_theta0(l)=theta0
