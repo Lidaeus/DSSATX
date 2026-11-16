@@ -1,0 +1,49 @@
+{
+  "task": "T2 两底座接线 — 4.8.6.4 侧",
+  "date": "2026-11-12",
+  "dev_worktree": "D:\\Tomato_Cal_worktrees\\dssat4864-rootn-T2-20261112",
+  "branch": "codex/rootn-t2-20261112 (自冻结提交 4cb77b68 分出, 冻结 worktree 未动)",
+  "commit": "b0c00fb8",
+  "files_changed": [
+    "Plant/CROPGRO/RootNUptake.f90 (新增, SHA=d844b175..., 与 T1 登记一致)",
+    "Plant/CROPGRO/CG_Nitrogen.f90 (+~150 行)",
+    "CMakeLists.txt (+1 源项, 在 CG_Nitrogen 之前)"
+  ],
+  "wiring": {
+    "config": "&ROOTNUPTAKE NML 组 (NIntegration.nml 内可选); 缺席=mode0=冻结行为; 显式请求但 NI 关闭/root_mode<1/参数非法 → error stop; mode=2(B) 显式拒绝(T3 交付)",
+    "branch_point": "NI_ROOT_UPTAKE 在 feedback 计算后分派 NI_ROOT_UPTAKE_RNK 并返回; legacy_nh4 守卫对 RNK 路径豁免(NH4 由核处理)",
+    "adapter": "theta0 = SPAM 快照(theta 已含 -0.5*RWU/Δz 中点修正) + 0.5*RWU/Δz 还原日初; wet 因子与 legacy R2 同口径; f_root=feedback*sqrt(wet); G(NO3)=0.001*diffusion_k*wet*Lr (继承 v4-R2); G(NH4)=0.001*rnk_nh4_diff*wet*Lr (文献先验 0.005)",
+    "ledger": "r_* 账本照填(NO3 诊断); rnk 扩展数组: r_rnk_branch/cap/capped + NH4 bulk/cr/mf; LayerNIntegration.csv 列暂未扩展(现列已覆盖 theta/RWU/Cb/Cr/MF/Diff/mem/候选/最终)"
+  },
+  "build": {
+    "cmake": "Ninja + WinLibs gfortran 16.2.0, RELEASE, 冻结构建同参 (-fbounds-check -ffpe-trap=invalid,zero,overflow 等)",
+    "result": "1084/1084 目标链接成功, build/bin/dscsm048.exe"
+  },
+  "regression_off_mode": {
+    "case": "r4_lai_slow (XXQL2601, 12 处理)",
+    "method": "独立沙箱 runs/n4864_off_regression, 新二进制 + 无 &ROOTNUPTAKE, 与 r4 基线输出逐文件比对(仅规范化版本横幅/日期)",
+    "result": "55/55 文件零实质差异; LayerNIntegration.csv 与 PlantNIntegration.csv 逐字节一致"
+  },
+  "smoke_mode_A": {
+    "run": "runs/n4864_rnkA_smoke (同工况 + mode=1 工程先验参数)",
+    "result": "exit 0, 无 stderr; 逐层浓度 40-75 mgN/L, 候选 0.006-0.01 gN/m2/d, 物理有界(库存上限生效)",
+    "season_totals_vs_baseline": {
+      "NO3_candidate": "919.0 vs 471.0 (先验 vmax 未率定, 偏高 ~2x)",
+      "NH4_candidate": "3.98 vs 42.7 (文献先验远低于 legacy 速率式)",
+      "NO3_final_accepted": "219.85 vs 215.03 (+2.2%, 接受链主导)",
+      "NH4_final_accepted": "3.42 vs 6.53"
+    },
+    "note": "首轮固定先验参数, 结果属 '先验驱动' 工程验证, 不作科学结论 (计划 §6 采用原则)"
+  },
+  "pending_for_T2_full": [
+    "V15 S4 (4.8.2.0) 侧接线与重链接回归 (用户指示押后, 最后执行)"
+  ],
+  "ledger_and_audit": {
+    "commit": "6a5a12b1",
+    "ledger": "LayerRootNUptake.csv (仅 RNK 模式写出): run,yrdoy,layer,species,source_day,soil_commit_day,theta0,theta_mid,rwu,rlv,stock_before,c_bulk,c_root,mf_potential,diffusive,candidate,accepted,deducted,stock_cap,solver_status; 未来日/跨日错配 error stop; 每日 flush",
+    "pulse_test": "tests/rnk_pulse_test.f90 两日单脉冲 10/10 通过: 无漏扣(全同化时 deducted==accepted)、无重扣、第二日用更新库存(无陈旧复用)、累计扣除≤初始库存、账本行 source==commit",
+    "field_audit": "39312 行账本全过: 同日提交 39312/39312, candidate>=accepted>=deducted 全序, 库存上限全守",
+    "soil_cross_check": "Run1 土壤侧 NUCM=211.28 kg/ha vs 账本累计 212.12 kg/ha (偏差 0.4%, 单精度累计/凋落物归还口径量级)",
+    "off_regression_after_ledger": "55/55 维持零实质差异, off 模式无 RNK 账本文件"
+  }
+}

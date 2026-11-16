@@ -240,13 +240,13 @@ contains
       type(rnk_diag), intent(out) :: diag(RNK_NSPECIES)
       integer, intent(in), optional :: n_cells, n_substeps
       integer, parameter :: NMAX = 64, NRETRY_MAX = 12, NPICARD = 12
-      real(rnk_dp), parameter :: THETA_FLOOR = 1.0e-6_rnk_dp, NEG_TOL = -1.0e-12_rnk_dp
+      real(rnk_dp), parameter :: NEG_TOL = -1.0e-12_rnk_dp
       integer :: nc, ns0, s, k, itry, ipic
       real(rnk_dp) :: pi_, h, lr, a_root, b_root
       real(rnk_dp) :: rf(0:NMAX), rc(NMAX)
       real(rnk_dp) :: vol(NMAX), wadv0(NMAX - 1), rgrad(NMAX - 1)
-      real(rnk_dp) :: theta0, theta_now, theta_new, wrate, fw, t, dt
-      real(rnk_dp) :: capfn, capfc, m0tot, mendtot, c0
+      real(rnk_dp) :: theta0, theta_now, theta_new, wrate, t, dt
+      real(rnk_dp) :: capfn, capfc, m0tot, mendtot, c0, cap_rate
       real(rnk_dp) :: m(NMAX), c(NMAX), cstar, u0, du, uend
       real(rnk_dp) :: lo(NMAX), di(NMAX), up(NMAX), rhs(NMAX), cp(NMAX)
       real(rnk_dp) :: cand, advcum, difcum, dfacenow
@@ -262,19 +262,19 @@ contains
       ! ---- 几何 (§5): b = sqrt(a^2 + h/(pi*Lr)), 对数面网格 ----
       h = layer%dlayr/100._rnk_dp
       lr = 100._rnk_dp*layer%rlv*layer%dlayr
-      theta0 = layer%theta0 - 0.5_rnk_dp*layer%rwu/layer%dlayr
+      theta0 = layer%theta0
       do s = 1, RNK_NSPECIES
-         diag(s)%theta_mid = theta0
+         diag(s)%theta_mid = theta0 - 0.5_rnk_dp*layer%rwu/layer%dlayr
          diag(s)%root_length = lr
          diag(s)%stock_cap = max(0._rnk_dp, layer%p(s) - par%residual_ppm(s))/ &
                              merge(layer%kg2ppm, 1._rnk_dp, layer%kg2ppm > 0._rnk_dp)/10._rnk_dp
          diag(s)%candidate = 0._rnk_dp
       end do
-      if (lr <= 0._rnk_dp .or. layer%f_root <= 0._rnk_dp .or. theta0 <= THETA_FLOOR .or. &
+      if (lr <= 0._rnk_dp .or. layer%f_root <= 0._rnk_dp .or. theta0 - max(0._rnk_dp, layer%rwu)/layer%dlayr <= 0._rnk_dp .or. &
           par%root_radius_m <= 0._rnk_dp .or. par%molecular_diffusion_m2d < 0._rnk_dp .or. &
           par%tortuosity <= 0._rnk_dp) then
          do s = 1, RNK_NSPECIES
-            if (theta0 <= THETA_FLOOR) then
+            if (theta0 - max(0._rnk_dp, layer%rwu)/layer%dlayr <= 0._rnk_dp) then
                diag(s)%branch = RNK_BRANCH_UNDEFINED
             else
                diag(s)%branch = RNK_BRANCH_ZERO
@@ -319,17 +319,16 @@ contains
             dt = min(dt, 1._rnk_dp - t)
             ok = .false.
             do itry = 0, NRETRY_MAX
-               theta_now = max(theta0 - wrate*t, THETA_FLOOR)
-               theta_new = max(theta0 - wrate*(t + dt), THETA_FLOOR)
-               fw = 1._rnk_dp
-               if (wrate*dt > 0._rnk_dp) fw = (theta_now - theta_new)/(wrate*dt)
+               theta_now = theta0 - wrate*t
+               theta_new = theta0 - wrate*(t + dt)
+               cap_rate = max(0._rnk_dp, diag(s)%stock_cap - cand)/dt
                capfc = theta_now + layer%bd*par%kd_sorption(s)
                capfn = theta_new + layer%bd*par%kd_sorption(s)
                do k = 1, nc
                   c(k) = m(k)/(vol(k)*capfc)
                   cp(k) = vol(k)*capfn
                end do
-               cstar = c(1)
+               cstar = max(0._rnk_dp, c(1))
                conv = .false.
                do ipic = 1, NPICARD
                   ! 根表米氏线性化 (在 cstar 处)
@@ -337,11 +336,16 @@ contains
                   du = lr*layer%f_root*(layer%frac_high(s)*par%vmax_high(s)*par%km_high(s)/ &
                        (par%km_high(s) + cstar)**2 + layer%frac_low(s)*par%vmax_low(s)*par%km_low(s)/ &
                        (par%km_low(s) + cstar)**2)
+                  ! Apply the remaining daily stock budget at the root boundary.
+                  if (u0 >= cap_rate) then
+                     u0 = cap_rate
+                     du = 0._rnk_dp
+                  end if
                   ! 组装三对角 (未知 cn), 内面: 迎风平流 + 隐式扩散
                   dfacenow = lr*2._rnk_dp*pi_*rf(1)*par%tortuosity*theta_new* &
                              par%molecular_diffusion_m2d/max(rgrad(1), 1.0e-15_rnk_dp)
                   di(1) = cp(1) + dt*(dfacenow + du)
-                  up(1) = -dt*(fw*wadv0(1) + dfacenow)
+                  up(1) = -dt*(wadv0(1) + dfacenow)
                   rhs(1) = m(1) - dt*u0 + dt*du*cstar
                   do k = 2, nc - 1
                      dfacenow = lr*2._rnk_dp*pi_*rf(k)*par%tortuosity*theta_new* &
@@ -349,14 +353,14 @@ contains
                      dface_k = lr*2._rnk_dp*pi_*rf(k - 1)*par%tortuosity*theta_new* &
                                par%molecular_diffusion_m2d/max(rgrad(k - 1), 1.0e-15_rnk_dp)
                      lo(k) = -dt*dface_k
-                     di(k) = cp(k) + dt*(dfacenow + fw*wadv0(k - 1) + dface_k)
-                     up(k) = -dt*(fw*wadv0(k) + dfacenow)
+                     di(k) = cp(k) + dt*(dfacenow + wadv0(k - 1) + dface_k)
+                     up(k) = -dt*(wadv0(k) + dfacenow)
                      rhs(k) = m(k)
                   end do
                   dface_k = lr*2._rnk_dp*pi_*rf(nc - 1)*par%tortuosity*theta_new* &
                             par%molecular_diffusion_m2d/max(rgrad(nc - 1), 1.0e-15_rnk_dp)
                   lo(nc) = -dt*dface_k
-                  di(nc) = cp(nc) + dt*(fw*wadv0(nc - 1) + dface_k)
+                  di(nc) = cp(nc) + dt*(wadv0(nc - 1) + dface_k)
                   rhs(nc) = m(nc)
                   ! Thomas 求解 (原地)
                   do k = 2, nc
@@ -369,7 +373,7 @@ contains
                      c(k) = (rhs(k) - up(k)*c(k + 1))/di(k)
                   end do
                   dum = abs(c(1) - cstar)
-                  cstar = c(1)
+                  cstar = max(0._rnk_dp, c(1))
                   if (dum <= 1.0e-11_rnk_dp*(1._rnk_dp + abs(cstar))) then
                      conv = .true.; exit
                   end if
@@ -389,10 +393,11 @@ contains
             end if
             ! 收敛: 结算质量、吸收与控制面通量
             uend = rnk_membrane(par, s, c(1), lr, layer%f_root, layer%frac_high(s), layer%frac_low(s))
-            cand = cand + dt*uend
+            if (uend > cap_rate) diag(s)%stock_capped = .true.
+            cand = cand + min(dt*max(0._rnk_dp, uend), max(0._rnk_dp, diag(s)%stock_cap - cand))
             dfacenow = lr*2._rnk_dp*pi_*rf(1)*par%tortuosity*theta_new* &
                        par%molecular_diffusion_m2d/max(rgrad(1), 1.0e-15_rnk_dp)
-            advcum = advcum + dt*fw*wadv0(1)*c(2)
+            advcum = advcum + dt*wadv0(1)*c(2)
             difcum = difcum + dt*dfacenow*(c(2) - c(1))
             do k = 1, nc
                m(k) = cp(k)*c(k)
@@ -411,10 +416,6 @@ contains
             diag(s)%candidate = 0._rnk_dp
             diag(s)%mass_error = m0tot - mendtot
             cycle
-         end if
-         if (cand > diag(s)%stock_cap) then
-            cand = diag(s)%stock_cap
-            diag(s)%stock_capped = .true.
          end if
          diag(s)%candidate = cand
       end do

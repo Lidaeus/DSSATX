@@ -71,7 +71,8 @@ C=======================================================================
       USE FertType_mod
       USE ModuleData
       USE CG_P0Trace
-      USE CG_Nitrogen, ONLY: NI_RETURN_LITTER
+      USE CG_Nitrogen, ONLY: NI_RETURN_LITTER,
+     &    NI_ROOT_SOIL_DEBIT, NI_ROOT_SOIL_END
       USE FloodModule
       USE ModSoilMix
       IMPLICIT  NONE
@@ -375,6 +376,7 @@ C=======================================================================
 !       removed from the soil today and the balance will be off.
         WTNUP = WTNUP + (UNO3(L) + UNH4(L)) / 10.    !g[N]/m2 cumul.
       ENDDO
+      CALL NI_ROOT_SOIL_DEBIT(CONTROL,NLAYR,UNO3,UNH4)
 
 !     P0b read-only trace; no model state is assigned.
       IF (P0_ENABLED()) THEN
@@ -1066,6 +1068,7 @@ C=======================================================================
 !***********************************************************************
       ELSEIF (DYNAMIC .EQ. OUTPUT .OR. DYNAMIC .EQ. SEASEND) THEN
       IF (DYNAMIC .EQ. SEASEND) THEN
+      CALL NI_ROOT_SOIL_END(CONTROL,NLAYR)
 !     P0b read-only trace; no model state is assigned.
       IF (P0_ENABLED()) THEN
         CALL P0_V(CONTROL,'soil_season_end',

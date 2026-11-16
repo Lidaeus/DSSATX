@@ -1,0 +1,44 @@
+{
+  "task": "T1 公共核与运输 A",
+  "date": "2026-11-12",
+  "deliverables": {
+    "module": "source/RootNUptake.f90",
+    "module_sha256": "d844b17557d90680a7e913d1f460251039667a702ce6bd964cecb0de0fb92f32",
+    "param_template": "source/RootNUptake.nml.template",
+    "param_template_sha256": "95f3d4607f4ea28d18fc455f170646fda6fc37ed712fcfe7169450d087b2d530",
+    "unit_test": "tests/test_root_n_uptake.f90",
+    "unit_test_sha256": "fe5b894305a39403c3d6a11ad0ef88267bfc50bda1ff3787c0e8e440a90c1e1f"
+  },
+  "design_conformance": {
+    "自由格式纯计算模块": "无 ModuleData/CROPGRO 全局依赖, 无文件 IO, 全过程 pure",
+    "双精度": "selected_real_kind(15,307)",
+    "双形态双亲和米氏": "U(Cr)=Lr*f_root*[fH*VH*Cr/(KH+Cr)+fL*VL*Cr/(KL+Cr)]",
+    "单位": "内部 g N m^-2 与 d; 适配层负责底座数组 kg N ha^-1 换算(×10)",
+    "A 臂二分": "U(Cb)<=MF 短路(Cr=Cb), 否则 [0,Cb] 64 步二分 U(Cr)=MF+G*(Cb-Cr), 分支记账 MEMBRANE/BISECT",
+    "质流供给潜力": "mf_potential 单列, 膜限速分支不误记为实际输入",
+    "Cb 含吸附": "p*BD/(theta_mid+BD*Kd); theta_mid=theta0-0.5*RWU/DLAYR",
+    "库存上限": "max(0,(p-residual_ppm))/KG2PPM/10 g m^-2; KG2PPM=1/(0.1*BD*DLAYR)(已核 4.8.6.4 INSOIL.for:120 及 CENTURY AMINRL 用法)",
+    "无液相": "theta_mid<=0 → 净吸收 0 + 浓度 UNDEFINED (含 rwu>0 的水账异常情形)",
+    "库存底数": "NO3 0.25 / NH4 0.50 mg N kg^-1",
+    "初始化检查": "rnk_validate: 0<KH<KL, vmax>0, kd>=0, residual>=0, 有限值, source_tag 必填",
+    "transport_mode": "0=off/1=A/2=B; B 为 T3 占位"
+  },
+  "hand_calc_anchors_passed": [
+    "NO3: Cb=20 mg/L (层厚20cm, theta_mid=0.25, 10 kg N/ha, BD=1.3)",
+    "NO3: MF=0.04 g/m2/d = 0.40 kg N/ha/d (RWU=0.20 cm/d)",
+    "NH4: Cb=3.2258 mg/L (同库存, Kd=1.0 L/kg)",
+    "stock_cap=0.935 g/m2 (= 10 kg/ha - 0.25ppm*2.6)"
+  ],
+  "test_result": "25/25 passed (gfortran 16.2.0, -fcheck=all -ffpe-trap=invalid,zero,overflow)",
+  "test_command": "gfortran -O2 -fcheck=all -ffpe-trap=... -Jbuild -c source/RootNUptake.f90 && gfortran ... tests/test_root_n_uptake.f90 && ./build/test_root_n_uptake.exe",
+  "parameter_status": {
+    "NO3": "工程初值: km 0.28/35.0, vmax 0.0003/0.0015 (V15 换算起点, UNCALIBRATED)",
+    "NH4": "文献先验 (SYNTHETIC 标识): km 0.5/50.0, vmax 0.0004/0.0020, Kd 1.0; 待本地耗竭数据替换",
+    "g_transport": "适配层传入层导度; D_eq(NO3) 继承 V15 S3 0.005 / 4864 C4 0.00647"
+  },
+  "interface_for_T2": {
+    "type(rnk_params)/type(rnk_layer)/type(rnk_diag)": "适配层组装输入(单位换算+反馈因子), 读诊断出 UNO3/UNH4 与账本",
+    "rnk_layer_A(par, layer, diag)": "逐层纯过程, 双形态同调"
+  },
+  "next": "T2 两底座接线 (依赖本接口冻结)"
+}

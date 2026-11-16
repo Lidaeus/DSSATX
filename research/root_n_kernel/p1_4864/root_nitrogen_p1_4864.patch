@@ -1,0 +1,464 @@
+diff --git a/Plant/CROPGRO/CG_Nitrogen.f90 b/Plant/CROPGRO/CG_Nitrogen.f90
+--- a/Plant/CROPGRO/CG_Nitrogen.f90
++++ b/Plant/CROPGRO/CG_Nitrogen.f90
+@@ -73,7 +73,8 @@
+   real(dp), save :: q3(3)=0, q4(3)=0, carrier(3)=0, w_begin(3)=0
+   real(dp), save :: litter3(NL)=0, litter4(NL)=0, returned_litter=0
+   real(dp), save :: theta_snapshot(NL)=0, rwu_snapshot(NL)=0, rlv_snapshot(NL)=0
+-  integer, save :: water_day=-1, water_run=-1
++  integer, save :: water_day=-1, water_run=-1, water_nlayr=0
++  real(dp), save :: theta0_snapshot(NL)=0
+   real(dp), save :: cmin(2)=0, ccrit(2)=0, cmax(2)=0, structural_fraction=1, growth_factor=1
+   real(dp), save :: d_q_begin=0, d_u3=0, d_u4=0, d_a3=0, d_a4=0
+   real(dp), save :: d_cost=0, d_refund=0, d_litter=0, d_residual=0
+@@ -95,7 +96,8 @@
+   logical, save :: r_rnk_capped(2,NL)=.false.
+   real(dp), save :: r_rnk_stock_before(2,NL)=0, r_rnk_theta0(NL)=0, r_rnk_diff(2,NL)=0
+   real(dp), save :: r_rnk_accept3(NL)=0, r_rnk_accept4(NL)=0
+-  integer, save :: r_rnk_source_day=-1
++  real(dp), save :: r_rnk_adv(2,NL)=0, r_rnk_mass_error(2,NL)=0
++  integer, save :: r_rnk_source_day=-1, r_rnk_pending_run=-1, r_rnk_pending_nlayr=0
+   integer, save :: rnk_ledger_unit=0
+   logical, save :: rnk_ledger_opened=.false.
+   integer,save::root_output_unit=0
+@@ -103,7 +105,8 @@
+   public :: NI_LOAD, NI_RESET, NI_ENABLED, NI_CURVES, NI_FEEDBACK
+   public :: NI_BEGIN, NI_ACCEPT_UPTAKE, NI_ASSIMILATE, NI_SETTLE, NI_END
+   public :: NI_RETURN_LITTER, NI_SOIL_INPUT, NI_SET_NH4
+-  public :: NI_CAPTURE_WATER, NI_ROOT_MODE, NI_ROOT_UPTAKE
++  public :: NI_CAPTURE_WATER, NI_ROOT_MODE, NI_ROOT_UPTAKE, NI_COMMON_ROOT_ENABLED
++  public :: NI_ROOT_SOIL_DEBIT, NI_ROOT_SOIL_END
+   public :: NI_TARGETS, NI_REFERENCES, NI_GROWTH, NI_LEAF_FACTOR
+   public :: NI_TOTAL_Q, NI_CURVE_KERNEL, NI_ROOT_KERNEL, NI_ASSIM_KERNEL
+   public :: NI_PREASSIM, NI_MERGE_OLD
+@@ -1207,6 +1210,7 @@
+     end if
+   end subroutine
+   subroutine NI_RESET()
++    if(r_rnk_pending_run/=-1) error stop 'RNK: season reset before reporting pending uptake'
+     q3=0; q4=0; carrier=0; w_begin=0; litter3=0; litter4=0
+     returned_litter=0; water_ready=.false.; ready=.false.; growth_factor=1
+     cmin=0; ccrit=0; cmax=0; d_pending=0
+@@ -1612,35 +1616,81 @@
+           r_candidate3(l),r_candidate4(l),r_final3(l),r_final4(l)
+       end do
+     end if
+-    if(rnk_mode>=RNK_MODE_A) then
+-      ! RNK 逐层逐形态账本 (计划 §6): source_day 为候选计算日, soil_commit_day 为
+-      ! 最终 UNO3/UNH4 交土壤扣除日 (驱动层同日内植物 RATE → 土壤 RATE, 此处断言同日)。
+-      if(r_rnk_source_day>control%YRDOY) error stop 'RNK: uptake snapshot from a future day'
+-      if(r_rnk_source_day==control%YRDOY) then
+-        if(.not.rnk_ledger_opened) then
+-          open(newunit=rnk_ledger_unit,file='LayerRootNUptake.csv',status='new',action='write',iostat=ios)
+-          if(ios/=0) error stop 'RNK: layer ledger already exists or cannot be opened'
+-          write(rnk_ledger_unit,'(A)') 'run,yrdoy,layer,species,source_day,soil_commit_day,'// &
+-            'theta0,theta_mid,rwu_cm_d,rlv_cm_cm3,'// &
+-            'stock_before_gN_m2,c_bulk_mgN_L,c_root_mgN_L,'// &
+-            'mf_potential_gN_m2,diffusive_gN_m2,candidate_gN_m2,'// &
+-            'accepted_gN_m2,deducted_gN_m2,stock_cap_gN_m2,solver_status'
+-          rnk_ledger_opened=.true.
+-        end if
+-        do l=1,nlayr
+-          do s=1,2
+-            write(rnk_ledger_unit,'(I0,5(",",I0),13(",",ES24.15E3),",",I0)') &
+-              control%RUN,control%YRDOY,l,s,r_rnk_source_day,control%YRDOY, &
+-              r_rnk_theta0(l),theta_snapshot(l),rwu_snapshot(l),rlv_snapshot(l), &
+-              r_rnk_stock_before(s,l),rnk_cb(s,l),rnk_cr(s,l),rnk_mf(s,l), &
+-              r_rnk_diff(s,l),rnk_cand(s,l),rnk_acc(s,l),rnk_fin(s,l), &
+-              r_rnk_cap(s,l),rnk_status(s,l)
+-          end do
+-        end do
+-        flush(rnk_ledger_unit)
+-      end if
+-    end if
+-  end subroutine
++    if(NI_COMMON_ROOT_ENABLED() .and. r_rnk_source_day==control%YRDOY) then
++      if(r_rnk_pending_run/=-1) error stop 'RNK: previous uptake was not reported by soil'
++      r_rnk_pending_run=control%RUN
++      r_rnk_pending_nlayr=nlayr
++    end if
++  end subroutine
++
++  logical function NI_COMMON_ROOT_ENABLED()
++    NI_COMMON_ROOT_ENABLED=rnk_mode>=RNK_MODE_A
++  end function
++
++  subroutine NI_ROOT_SOIL_DEBIT(control,nlayr,uno3,unh4)
++    type(ControlType),intent(in)::control
++    integer,intent(in)::nlayr
++    real,intent(in)::uno3(:),unh4(:)
++    real(dp)::deducted(2,nlayr)
++    if(.not.NI_COMMON_ROOT_ENABLED()) return
++    if(r_rnk_pending_run==-1) then
++      if(any(uno3(1:nlayr)/=0.) .or. any(unh4(1:nlayr)/=0.)) &
++        error stop 'RNK: soil debit without pending plant uptake'
++      return
++    end if
++    if(control%RUN/=r_rnk_pending_run.or.nlayr/=r_rnk_pending_nlayr.or.control%YRDOY<=r_rnk_source_day) &
++      error stop 'RNK: soil debit does not follow the pending plant uptake'
++    deducted(rnk_NO3,:)=real(uno3(1:nlayr),dp)/10
++    deducted(rnk_NH4,:)=real(unh4(1:nlayr),dp)/10
++    if(any(deducted(rnk_NO3,:)/=r_final3(1:nlayr)).or.any(deducted(rnk_NH4,:)/=r_final4(1:nlayr))) &
++      error stop 'RNK: soil debit differs from the settled plant uptake'
++    call NI_WRITE_ROOT_LEDGER(nlayr,control%YRDOY,deducted)
++  end subroutine
++
++  subroutine NI_ROOT_SOIL_END(control,nlayr)
++    type(ControlType),intent(in)::control
++    integer,intent(in)::nlayr
++    real(dp)::deducted(2,nlayr)
++    if(.not.NI_COMMON_ROOT_ENABLED().or.r_rnk_pending_run==-1) return
++    if(control%RUN/=r_rnk_pending_run.or.nlayr/=r_rnk_pending_nlayr.or.control%YRDOY<r_rnk_source_day) &
++      error stop 'RNK: season end does not match the pending plant uptake'
++    ! Preserve the native season boundary. Report the pending flux without a soil mutation.
++    deducted=0
++    call NI_WRITE_ROOT_LEDGER(nlayr,0,deducted)
++  end subroutine
++
++  subroutine NI_WRITE_ROOT_LEDGER(nlayr,commit_day,deducted)
++    integer,intent(in)::nlayr,commit_day
++    real(dp),intent(in)::deducted(2,nlayr)
++    integer::l,s,ios
++    real(dp)::settled
++    character(len=18)::soil_status
++    if(.not.rnk_ledger_opened) then
++      open(newunit=rnk_ledger_unit,file='LayerRootNUptake.csv',status='new',action='write',iostat=ios)
++      if(ios/=0) error stop 'RNK: layer ledger already exists or cannot be opened'
++      write(rnk_ledger_unit,'(A)') 'run,yrdoy,layer,species,source_day,soil_commit_day,'// &
++        'theta0,theta_mid,rwu_cm_d,rlv_cm_cm3,stock_before_gN_m2,c_bulk_mgN_L,c_root_mgN_L,'// &
++        'mf_potential_gN_m2,diffusive_gN_m2,candidate_gN_m2,accepted_gN_m2,deducted_gN_m2,stock_cap_gN_m2,'// &
++        'settled_gN_m2,pending_gN_m2,radial_advective_gN_m2,radial_mass_error_gN_m2,solver_status,soil_status'
++      rnk_ledger_opened=.true.
++    end if
++    soil_status=merge('committed         ','pending_season_end',commit_day/=0)
++    do l=1,nlayr
++      do s=1,2
++        settled=rnk_fin(s,l)
++        write(rnk_ledger_unit,'(I0,5(",",I0),17(",",ES24.15E3),",",I0,",",A)') &
++          r_rnk_pending_run,r_rnk_source_day,l,s,r_rnk_source_day,commit_day, &
++          r_rnk_theta0(l),theta_snapshot(l),rwu_snapshot(l),rlv_snapshot(l), &
++          r_rnk_stock_before(s,l),rnk_cb(s,l),rnk_cr(s,l),rnk_mf(s,l), &
++          r_rnk_diff(s,l),rnk_cand(s,l),rnk_acc(s,l),deducted(s,l),r_rnk_cap(s,l), &
++          settled,settled-deducted(s,l),r_rnk_adv(s,l),r_rnk_mass_error(s,l),rnk_status(s,l),trim(soil_status)
++      end do
++    end do
++    flush(rnk_ledger_unit)
++    r_rnk_pending_run=-1
++    r_rnk_pending_nlayr=0
++  end subroutine
++
+   subroutine NI_RETURN_LITTER(sno3,snh4,nlayr)
+     integer,intent(in)::nlayr
+     real,intent(inout)::sno3(:),snh4(:)
+@@ -1650,15 +1700,26 @@
+     returned_litter=returned_litter+10*(sum(litter3)+sum(litter4))
+     litter3=0; litter4=0
+   end subroutine
+-  subroutine NI_CAPTURE_WATER(control,nlayr,rwu,theta,rlv)
++  subroutine NI_CAPTURE_WATER(control,nlayr,rwu,theta,rlv,depth)
+     type(ControlType),intent(in)::control
+     integer,intent(in)::nlayr
+     real,intent(in)::rwu(:),theta(:),rlv(:)
++    real,intent(in),optional::depth(:)
+     if(.not.NI_ENABLED()) return
+-    water_day=control%YRDOY; water_run=control%RUN; water_ready=.true.
++    water_day=control%YRDOY; water_run=control%RUN; water_nlayr=nlayr; water_ready=.true.
+     rwu_snapshot(1:nlayr)=real(rwu(1:nlayr),dp)
+     theta_snapshot(1:nlayr)=real(theta(1:nlayr),dp)
+     rlv_snapshot(1:nlayr)=real(rlv(1:nlayr),dp)
++    if(NI_COMMON_ROOT_ENABLED()) then
++      if(.not.present(depth)) error stop 'RNK: pre-extraction water snapshot requires layer depths'
++      if(any(.not.ieee_is_finite(theta(1:nlayr))).or.any(.not.ieee_is_finite(rwu(1:nlayr))).or. &
++         any(.not.ieee_is_finite(depth(1:nlayr))).or.any(.not.ieee_is_finite(rlv(1:nlayr)))) &
++        error stop 'RNK: non-finite root water snapshot'
++      if(any(depth(1:nlayr)<=0.).or.any(theta(1:nlayr)<0.).or.any(rwu(1:nlayr)<0.)) &
++        error stop 'RNK: invalid root water snapshot'
++      theta0_snapshot(1:nlayr)=real(theta(1:nlayr),dp)
++      theta_snapshot(1:nlayr)=theta0_snapshot(1:nlayr)-0.5_dp*rwu_snapshot(1:nlayr)/real(depth(1:nlayr),dp)
++    end if
+   end subroutine
+   subroutine NI_ROOT_KERNEL(cbulk,water,rootlength,vmax,km,kd,poolfactor,mode,uptake,cr)
+     real(dp),intent(in)::cbulk,water,rootlength,vmax,km,kd,poolfactor
+@@ -1697,9 +1758,9 @@
+     real,intent(out)::uno3(:),unh4(:)
+     real(dp)::theta,wet,length,concentration,potential,cr,feedback
+     integer::l
+-    if(.not.water_ready.or.water_run/=control%RUN.or.water_day/=control%YRDOY) &
++    if(.not.water_ready.or.water_run/=control%RUN.or.water_day/=control%YRDOY.or.water_nlayr/=nlayr) &
+       error stop 'NI: missing or stale actual root water snapshot'
+-    if(legacy_nh4<0 .and. rnk_mode/=RNK_MODE_A) error stop 'NI: native NH4 species capacity was not initialized'
++    if(legacy_nh4<0 .and. .not.NI_COMMON_ROOT_ENABLED()) error stop 'NI: native NH4 species capacity was not initialized'
+     feedback=exp(-pool_beta*sum(q3)/max(q_no3_max*sum(carrier),1.e-12_dp))
+     if(rnk_mode>=RNK_MODE_A) then
+       ! 公共核: 1=A(等效根际运输, T2) 2=B(径向有限体积, T3)
+@@ -1769,7 +1830,7 @@
+     real(dp),intent(in)::feedback
+     type(rnk_layer)::lay
+     type(rnk_diag)::dg(2)
+-    real(dp)::wet,theta0,leng
++    real(dp)::wet,theta0,leng,extractable
+     integer::l
+     uno3=0; unh4=0
+     do l=1,nlayr
+@@ -1778,8 +1839,13 @@
+       if(theta_snapshot(l)>dul(l)) wet=max(0._dp,min(1._dp,(real(sat(l),dp)-theta_snapshot(l))/ &
+         max(real(sat(l)-dul(l),dp),1.e-12_dp)))
+       leng=100._dp*rlv_snapshot(l)*real(depth(l),dp)
+-      ! SPAM 快照 theta 已含 -0.5*RWU/Δz 中点修正; 还原日初 theta0 供公共核重算 theta_mid
+-      theta0=theta_snapshot(l)+0.5_dp*rwu_snapshot(l)/max(real(depth(l),dp),1.e-9_dp)
++      theta0=theta0_snapshot(l)
++      extractable=max(0._dp,theta0-real(ll(l),dp))*real(depth(l),dp)
++      if(rwu_snapshot(l)>extractable+1.e-6_dp.or. &
++         (rwu_snapshot(l)>0._dp.and.theta0<=rwu_snapshot(l)/real(depth(l),dp))) then
++        write(*,'(A,I0,A,I0,A,I0)') 'RNK: invalid water budget, run ',water_run,', day ',water_day,', layer ',l
++        error stop 'RNK: actual extraction exceeds available water'
++      end if
+       lay%p(rnk_NO3)=real(no3(l),dp); lay%p(rnk_NH4)=real(nh4(l),dp)
+       lay%bd=real(bd(l),dp); lay%kg2ppm=real(kg2ppm(l),dp); lay%dlayr=real(depth(l),dp)
+       lay%rlv=real(rlv_snapshot(l),dp); lay%theta0=theta0; lay%rwu=rwu_snapshot(l)
+@@ -1791,6 +1857,10 @@
+       if(rnk_mode==RNK_MODE_B) then
+          ! B 臂 (T3): 径向平流-扩散有限体积, g_transport 不参与
+          call rnk_layer_B(rnk_par,lay,dg)
++         if(any(dg%solver_flag/=0).or.any(abs(dg%mass_error)>1.e-9_dp)) then
++           write(*,'(A,I0,A,I0,A,I0)') 'RNK: radial solve failed, run ',water_run,', day ',water_day,', layer ',l
++           error stop 'RNK: radial convergence or mass closure failure'
++         end if
+       else
+          call rnk_layer_A(rnk_par,lay,dg)
+       end if
+@@ -1807,6 +1877,8 @@
+       r_rnk_capped(:,l)=(/dg(rnk_NO3)%stock_capped,dg(rnk_NH4)%stock_capped/)
+       r_rnk_stock_before(:,l)=(/real(no3(l),dp),real(nh4(l),dp)/)/ &
+         merge(real(kg2ppm(l),dp),1._dp,real(kg2ppm(l),dp)>0._dp)/10._dp
++      r_rnk_adv(:,l)=dg%advective_flux
++      r_rnk_mass_error(:,l)=dg%mass_error
+       r_rnk_theta0(l)=theta0
+       r_rnk_diff(:,l)=(/dg(rnk_NO3)%diffusive_flux,dg(rnk_NH4)%diffusive_flux/)
+     end do
+diff --git a/Plant/CROPGRO/RootNUptake.f90 b/Plant/CROPGRO/RootNUptake.f90
+--- a/Plant/CROPGRO/RootNUptake.f90
++++ b/Plant/CROPGRO/RootNUptake.f90
+@@ -240,13 +240,13 @@
+       type(rnk_diag), intent(out) :: diag(RNK_NSPECIES)
+       integer, intent(in), optional :: n_cells, n_substeps
+       integer, parameter :: NMAX = 64, NRETRY_MAX = 12, NPICARD = 12
+-      real(rnk_dp), parameter :: THETA_FLOOR = 1.0e-6_rnk_dp, NEG_TOL = -1.0e-12_rnk_dp
++      real(rnk_dp), parameter :: NEG_TOL = -1.0e-12_rnk_dp
+       integer :: nc, ns0, s, k, itry, ipic
+       real(rnk_dp) :: pi_, h, lr, a_root, b_root
+       real(rnk_dp) :: rf(0:NMAX), rc(NMAX)
+       real(rnk_dp) :: vol(NMAX), wadv0(NMAX - 1), rgrad(NMAX - 1)
+-      real(rnk_dp) :: theta0, theta_now, theta_new, wrate, fw, t, dt
+-      real(rnk_dp) :: capfn, capfc, m0tot, mendtot, c0
++      real(rnk_dp) :: theta0, theta_now, theta_new, wrate, t, dt
++      real(rnk_dp) :: capfn, capfc, m0tot, mendtot, c0, cap_rate
+       real(rnk_dp) :: m(NMAX), c(NMAX), cstar, u0, du, uend
+       real(rnk_dp) :: lo(NMAX), di(NMAX), up(NMAX), rhs(NMAX), cp(NMAX)
+       real(rnk_dp) :: cand, advcum, difcum, dfacenow
+@@ -262,19 +262,19 @@
+       ! ---- 几何 (§5): b = sqrt(a^2 + h/(pi*Lr)), 对数面网格 ----
+       h = layer%dlayr/100._rnk_dp
+       lr = 100._rnk_dp*layer%rlv*layer%dlayr
+-      theta0 = layer%theta0 - 0.5_rnk_dp*layer%rwu/layer%dlayr
++      theta0 = layer%theta0
+       do s = 1, RNK_NSPECIES
+-         diag(s)%theta_mid = theta0
++         diag(s)%theta_mid = theta0 - 0.5_rnk_dp*layer%rwu/layer%dlayr
+          diag(s)%root_length = lr
+          diag(s)%stock_cap = max(0._rnk_dp, layer%p(s) - par%residual_ppm(s))/ &
+                              merge(layer%kg2ppm, 1._rnk_dp, layer%kg2ppm > 0._rnk_dp)/10._rnk_dp
+          diag(s)%candidate = 0._rnk_dp
+       end do
+-      if (lr <= 0._rnk_dp .or. layer%f_root <= 0._rnk_dp .or. theta0 <= THETA_FLOOR .or. &
++      if (lr <= 0._rnk_dp .or. layer%f_root <= 0._rnk_dp .or. theta0 - max(0._rnk_dp, layer%rwu)/layer%dlayr <= 0._rnk_dp .or. &
+           par%root_radius_m <= 0._rnk_dp .or. par%molecular_diffusion_m2d < 0._rnk_dp .or. &
+           par%tortuosity <= 0._rnk_dp) then
+          do s = 1, RNK_NSPECIES
+-            if (theta0 <= THETA_FLOOR) then
++            if (theta0 - max(0._rnk_dp, layer%rwu)/layer%dlayr <= 0._rnk_dp) then
+                diag(s)%branch = RNK_BRANCH_UNDEFINED
+             else
+                diag(s)%branch = RNK_BRANCH_ZERO
+@@ -319,17 +319,16 @@
+             dt = min(dt, 1._rnk_dp - t)
+             ok = .false.
+             do itry = 0, NRETRY_MAX
+-               theta_now = max(theta0 - wrate*t, THETA_FLOOR)
+-               theta_new = max(theta0 - wrate*(t + dt), THETA_FLOOR)
+-               fw = 1._rnk_dp
+-               if (wrate*dt > 0._rnk_dp) fw = (theta_now - theta_new)/(wrate*dt)
++               theta_now = theta0 - wrate*t
++               theta_new = theta0 - wrate*(t + dt)
++               cap_rate = max(0._rnk_dp, diag(s)%stock_cap - cand)/dt
+                capfc = theta_now + layer%bd*par%kd_sorption(s)
+                capfn = theta_new + layer%bd*par%kd_sorption(s)
+                do k = 1, nc
+                   c(k) = m(k)/(vol(k)*capfc)
+                   cp(k) = vol(k)*capfn
+                end do
+-               cstar = c(1)
++               cstar = max(0._rnk_dp, c(1))
+                conv = .false.
+                do ipic = 1, NPICARD
+                   ! 根表米氏线性化 (在 cstar 处)
+@@ -337,11 +336,16 @@
+                   du = lr*layer%f_root*(layer%frac_high(s)*par%vmax_high(s)*par%km_high(s)/ &
+                        (par%km_high(s) + cstar)**2 + layer%frac_low(s)*par%vmax_low(s)*par%km_low(s)/ &
+                        (par%km_low(s) + cstar)**2)
++                  ! Apply the remaining daily stock budget at the root boundary.
++                  if (u0 >= cap_rate) then
++                     u0 = cap_rate
++                     du = 0._rnk_dp
++                  end if
+                   ! 组装三对角 (未知 cn), 内面: 迎风平流 + 隐式扩散
+                   dfacenow = lr*2._rnk_dp*pi_*rf(1)*par%tortuosity*theta_new* &
+                              par%molecular_diffusion_m2d/max(rgrad(1), 1.0e-15_rnk_dp)
+                   di(1) = cp(1) + dt*(dfacenow + du)
+-                  up(1) = -dt*(fw*wadv0(1) + dfacenow)
++                  up(1) = -dt*(wadv0(1) + dfacenow)
+                   rhs(1) = m(1) - dt*u0 + dt*du*cstar
+                   do k = 2, nc - 1
+                      dfacenow = lr*2._rnk_dp*pi_*rf(k)*par%tortuosity*theta_new* &
+@@ -349,14 +353,14 @@
+                      dface_k = lr*2._rnk_dp*pi_*rf(k - 1)*par%tortuosity*theta_new* &
+                                par%molecular_diffusion_m2d/max(rgrad(k - 1), 1.0e-15_rnk_dp)
+                      lo(k) = -dt*dface_k
+-                     di(k) = cp(k) + dt*(dfacenow + fw*wadv0(k - 1) + dface_k)
+-                     up(k) = -dt*(fw*wadv0(k) + dfacenow)
++                     di(k) = cp(k) + dt*(dfacenow + wadv0(k - 1) + dface_k)
++                     up(k) = -dt*(wadv0(k) + dfacenow)
+                      rhs(k) = m(k)
+                   end do
+                   dface_k = lr*2._rnk_dp*pi_*rf(nc - 1)*par%tortuosity*theta_new* &
+                             par%molecular_diffusion_m2d/max(rgrad(nc - 1), 1.0e-15_rnk_dp)
+                   lo(nc) = -dt*dface_k
+-                  di(nc) = cp(nc) + dt*(fw*wadv0(nc - 1) + dface_k)
++                  di(nc) = cp(nc) + dt*(wadv0(nc - 1) + dface_k)
+                   rhs(nc) = m(nc)
+                   ! Thomas 求解 (原地)
+                   do k = 2, nc
+@@ -369,7 +373,7 @@
+                      c(k) = (rhs(k) - up(k)*c(k + 1))/di(k)
+                   end do
+                   dum = abs(c(1) - cstar)
+-                  cstar = c(1)
++                  cstar = max(0._rnk_dp, c(1))
+                   if (dum <= 1.0e-11_rnk_dp*(1._rnk_dp + abs(cstar))) then
+                      conv = .true.; exit
+                   end if
+@@ -389,10 +393,11 @@
+             end if
+             ! 收敛: 结算质量、吸收与控制面通量
+             uend = rnk_membrane(par, s, c(1), lr, layer%f_root, layer%frac_high(s), layer%frac_low(s))
+-            cand = cand + dt*uend
++            if (uend > cap_rate) diag(s)%stock_capped = .true.
++            cand = cand + min(dt*max(0._rnk_dp, uend), max(0._rnk_dp, diag(s)%stock_cap - cand))
+             dfacenow = lr*2._rnk_dp*pi_*rf(1)*par%tortuosity*theta_new* &
+                        par%molecular_diffusion_m2d/max(rgrad(1), 1.0e-15_rnk_dp)
+-            advcum = advcum + dt*fw*wadv0(1)*c(2)
++            advcum = advcum + dt*wadv0(1)*c(2)
+             difcum = difcum + dt*dfacenow*(c(2) - c(1))
+             do k = 1, nc
+                m(k) = cp(k)*c(k)
+@@ -412,10 +417,6 @@
+             diag(s)%mass_error = m0tot - mendtot
+             cycle
+          end if
+-         if (cand > diag(s)%stock_cap) then
+-            cand = diag(s)%stock_cap
+-            diag(s)%stock_capped = .true.
+-         end if
+          diag(s)%candidate = cand
+       end do
+    end subroutine rnk_layer_B
+diff --git a/SPAM/SPAM.for b/SPAM/SPAM.for
+--- a/SPAM/SPAM.for
++++ b/SPAM/SPAM.for
+@@ -47,6 +47,7 @@
+       USE ModuleData
+       USE CG_P0Trace
+       USE CG_Nitrogen, ONLY: NI_ROOT_MODE, NI_CAPTURE_WATER,
++     &    NI_COMMON_ROOT_ENABLED,
+      &  NI_OPEN_DAY
+       USE FloodModule
+ 
+@@ -76,7 +77,7 @@
+       REAL DLAYR(NL), DUL(NL), LL(NL), RLV(NL), RWU(NL),
+      &    SAT(NL), ST(NL), SW(NL), SW_AVAIL(NL), !SWAD(NL),
+      &    SWDELTS(NL), SWDELTU(NL), SWDELTX(NL), UPFLOW(NL)
+-      REAL ES_LYR(NL)
++      REAL ES_LYR(NL), ROOT_THETA0(NL)
+ 
+ !     Root water uptake computed by some plant routines (optional)
+       REAL UH2O(NL)
+@@ -437,11 +438,30 @@
+             ENDDO
+           END SELECT
+ 
++!         XTRACT overwrites SW_AVAIL with water above LL.
++          IF (NI_COMMON_ROOT_ENABLED()) THEN
++            ROOT_THETA0(1:NLAYR) = SW_AVAIL(1:NLAYR)
++            IF (P0_ENABLED()) THEN
++              CALL P0_L(CONTROL,'rnk_pre_extract','theta0',
++     &          ROOT_THETA0,NLAYR)
++              CALL P0_L(CONTROL,'rnk_pre_extract','LL',LL,NLAYR)
++              CALL P0_L(CONTROL,'rnk_pre_extract','DLAYR',DLAYR,NLAYR)
++            ENDIF
++          ENDIF
+ !         Calculate actual soil water uptake and transpiration rates
+           CALL XTRACT(
+      &      NLAYR, DLAYR, LL, SW, SW_AVAIL, TRWUP, UH2O,  !Input
+      &      EP, RWU,                                      !Input/Output
+      &      SWDELTX, TRWU)                                !Output
++          IF (NI_COMMON_ROOT_ENABLED()) THEN
++            IF (ABS(SUM(RWU(1:NLAYR))-TRWU) .GT.
++     &          MAX(1.E-6,ABS(TRWU)*1.E-5) .OR.
++     &          ABS(EP-10.*TRWU) .GT.
++     &          MAX(1.E-5,ABS(EP)*1.E-5))
++     &        ERROR STOP 'RNK: inconsistent SPAM uptake and EP'
++            CALL NI_CAPTURE_WATER(CONTROL,NLAYR,RWU(1:NLAYR),
++     &        ROOT_THETA0(1:NLAYR),RLV(1:NLAYR),DLAYR(1:NLAYR))
++          ENDIF
+         ENDIF   !ISWWAT = 'Y'
+       ENDIF
+ 
+@@ -458,7 +478,8 @@
+       CALL PUT('SPAM', 'EOP', EOP)
+       CALL PUT('SPAM', 'EVAP',EVAP)
+       CALL PUT('SPAM', 'UH2O',RWU)
+-      IF (NI_ROOT_MODE().GT.0) THEN
++      IF (NI_ROOT_MODE().GT.0 .AND.
++     &    .NOT. NI_COMMON_ROOT_ENABLED()) THEN
+         CALL NI_CAPTURE_WATER(CONTROL,NLAYR,RWU(1:NLAYR),
+      &    MAX(0.,SW_AVAIL(1:NLAYR)+LL(1:NLAYR)-
+      &    0.5*RWU(1:NLAYR)/MAX(1.E-9,DLAYR(1:NLAYR))),
+diff --git a/Soil/Inorganic_N/SOILNI.for b/Soil/Inorganic_N/SOILNI.for
+--- a/Soil/Inorganic_N/SOILNI.for
++++ b/Soil/Inorganic_N/SOILNI.for
+@@ -71,7 +71,8 @@
+       USE FertType_mod
+       USE ModuleData
+       USE CG_P0Trace
+-      USE CG_Nitrogen, ONLY: NI_RETURN_LITTER
++      USE CG_Nitrogen, ONLY: NI_RETURN_LITTER,
++     &    NI_ROOT_SOIL_DEBIT, NI_ROOT_SOIL_END
+       USE FloodModule
+       USE ModSoilMix
+       IMPLICIT  NONE
+@@ -375,6 +376,7 @@
+ !       removed from the soil today and the balance will be off.
+         WTNUP = WTNUP + (UNO3(L) + UNH4(L)) / 10.    !g[N]/m2 cumul.
+       ENDDO
++      CALL NI_ROOT_SOIL_DEBIT(CONTROL,NLAYR,UNO3,UNH4)
+ 
+ !     P0b read-only trace; no model state is assigned.
+       IF (P0_ENABLED()) THEN
+@@ -1066,6 +1068,7 @@
+ !***********************************************************************
+       ELSEIF (DYNAMIC .EQ. OUTPUT .OR. DYNAMIC .EQ. SEASEND) THEN
+       IF (DYNAMIC .EQ. SEASEND) THEN
++      CALL NI_ROOT_SOIL_END(CONTROL,NLAYR)
+ !     P0b read-only trace; no model state is assigned.
+       IF (P0_ENABLED()) THEN
+         CALL P0_V(CONTROL,'soil_season_end',

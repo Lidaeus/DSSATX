@@ -47,6 +47,7 @@ C=======================================================================
       USE ModuleData
       USE CG_P0Trace
       USE CG_Nitrogen, ONLY: NI_ROOT_MODE, NI_CAPTURE_WATER,
+     &    NI_COMMON_ROOT_ENABLED,
      &  NI_OPEN_DAY
       USE FloodModule
 
@@ -76,7 +77,7 @@ C=======================================================================
       REAL DLAYR(NL), DUL(NL), LL(NL), RLV(NL), RWU(NL),
      &    SAT(NL), ST(NL), SW(NL), SW_AVAIL(NL), !SWAD(NL),
      &    SWDELTS(NL), SWDELTU(NL), SWDELTX(NL), UPFLOW(NL)
-      REAL ES_LYR(NL)
+      REAL ES_LYR(NL), ROOT_THETA0(NL)
 
 !     Root water uptake computed by some plant routines (optional)
       REAL UH2O(NL)
@@ -437,11 +438,30 @@ C=======================================================================
             ENDDO
           END SELECT
 
+!         XTRACT overwrites SW_AVAIL with water above LL.
+          IF (NI_COMMON_ROOT_ENABLED()) THEN
+            ROOT_THETA0(1:NLAYR) = SW_AVAIL(1:NLAYR)
+            IF (P0_ENABLED()) THEN
+              CALL P0_L(CONTROL,'rnk_pre_extract','theta0',
+     &          ROOT_THETA0,NLAYR)
+              CALL P0_L(CONTROL,'rnk_pre_extract','LL',LL,NLAYR)
+              CALL P0_L(CONTROL,'rnk_pre_extract','DLAYR',DLAYR,NLAYR)
+            ENDIF
+          ENDIF
 !         Calculate actual soil water uptake and transpiration rates
           CALL XTRACT(
      &      NLAYR, DLAYR, LL, SW, SW_AVAIL, TRWUP, UH2O,  !Input
      &      EP, RWU,                                      !Input/Output
      &      SWDELTX, TRWU)                                !Output
+          IF (NI_COMMON_ROOT_ENABLED()) THEN
+            IF (ABS(SUM(RWU(1:NLAYR))-TRWU) .GT.
+     &          MAX(1.E-6,ABS(TRWU)*1.E-5) .OR.
+     &          ABS(EP-10.*TRWU) .GT.
+     &          MAX(1.E-5,ABS(EP)*1.E-5))
+     &        ERROR STOP 'RNK: inconsistent SPAM uptake and EP'
+            CALL NI_CAPTURE_WATER(CONTROL,NLAYR,RWU(1:NLAYR),
+     &        ROOT_THETA0(1:NLAYR),RLV(1:NLAYR),DLAYR(1:NLAYR))
+          ENDIF
         ENDIF   !ISWWAT = 'Y'
       ENDIF
 
@@ -458,7 +478,8 @@ C=======================================================================
       CALL PUT('SPAM', 'EOP', EOP)
       CALL PUT('SPAM', 'EVAP',EVAP)
       CALL PUT('SPAM', 'UH2O',RWU)
-      IF (NI_ROOT_MODE().GT.0) THEN
+      IF (NI_ROOT_MODE().GT.0 .AND.
+     &    .NOT. NI_COMMON_ROOT_ENABLED()) THEN
         CALL NI_CAPTURE_WATER(CONTROL,NLAYR,RWU(1:NLAYR),
      &    MAX(0.,SW_AVAIL(1:NLAYR)+LL(1:NLAYR)-
      &    0.5*RWU(1:NLAYR)/MAX(1.E-9,DLAYR(1:NLAYR))),

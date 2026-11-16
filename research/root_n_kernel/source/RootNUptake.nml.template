@@ -1,0 +1,47 @@
+! RootNUptake 公共核参数模板 (T1, 2026-11-12)
+! 单位与初值口径见 DSSAT_root_nitrogen_execution_plan.md §3.1。
+! 每个底座独立加载本模板; 同一 RootNUptake.f90 源文件在两条构建中
+! 必须登记同一 SHA-256。首轮固定全部根际与膜参数 (不进率定域)。
+&ROOTNUPTAKE
+ ! transport_mode: 0=off(底座冻结行为) 1=A(等效根际运输) 2=B(T3)
+ transport_mode = 1
+
+ ! ---- NO3- (species 1) 工程初值: km/vmax 来自 V15/计划换算 ----
+ ! km: mg N L^-1 孔隙水; vmax: g N m^-1 root d^-1
+ no3_km_high = 0.28
+ no3_km_low = 35.0
+ ! V15 旧常数 0.003/0.015 (kg N ha^-1 口径) → 0.0003/0.0015 起点,
+ ! 待 RTNO3 比例及归一化核对 (计划 §3.1)
+ no3_vmax_high = 0.0003
+ no3_vmax_low = 0.0015
+ ! 硝态氮首版零吸附
+ no3_kd_sorption = 0.0
+ ! 库存底数 mg N kg^-1 干土
+ no3_residual_ppm = 0.25
+
+ ! ---- NH4+ (species 2): 文献先验 (SYNTHETIC, 待本地耗竭数据替换) ----
+ ! km 先验: NH4+ HATS Km ~10-100 uM ≈ 0.14-1.4 mg N/L (取 0.5);
+ ! LATS 弱亲和 ~50 mg N/L。vmax 先验略高于 NO3 (喜铵倾向), 未经本地辨识。
+ nh4_km_high = 0.5
+ nh4_km_low = 50.0
+ nh4_vmax_high = 0.0004
+ nh4_vmax_low = 0.0020
+ ! 铵吸附固定值, 测量口径/先验来源须在收据中登记 (基准例 Kd=1.0 L kg^-1)
+ nh4_kd_sorption = 1.0
+ nh4_residual_ppm = 0.50
+
+ ! ---- A 臂导度继承 (适配层传入层导度 G, 非 NML 直配) ----
+ ! G_layer = 0.001 * D_eq * f_water(theta) * Lr
+ !   D_eq(NO3): V15 S3 工程值 0.005 / 4.8.6.4 C4 率定值 0.00647
+ !              (L water m^-1 root d^-1, 各底座 v4-R2 等效扩散系数)
+ !   D_eq(NH4): 固定物理先验, 待登记推导
+ !   f_water: 底座既有 wet 因子 (LL→DUL→SAT 三角形)
+
+ ! ---- B 臂 (T3 已交付): 径向平流-扩散有限体积 ----
+ ! 有效吸收根半径 m (典型细根 0.1-0.2 mm, 记录测量条件)
+ rnk_radius = 0.0001
+ ! 液相分子扩散 m^2 d^-1 (NO3- ≈ NH4+ ≈ 1.9e-9 m^2/s; 固定先验)
+ rnk_diffmol = 0.000164
+ ! 曲折度无量纲 (固定先验 0.5, 首版不随含水量变化)
+ rnk_tort = 0.5
+/
