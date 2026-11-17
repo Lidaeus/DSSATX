@@ -5,6 +5,7 @@ module CG_Nitrogen
   use iso_fortran_env, only: real64
   use ieee_arithmetic, only: ieee_is_finite, ieee_next_after
   use ModuleDefs, only: ControlType, SwitchType, NL
+  use CG_P0Trace, only: P0_V, P0_ENABLED
   use RootNUptake, only: rnk_dp, rnk_params, rnk_layer, rnk_diag, &
     rnk_NO3, rnk_NH4, rnk_layer_A, rnk_layer_B, rnk_membrane, rnk_validate, &
     RNK_MODE_A, RNK_MODE_B
@@ -30,6 +31,8 @@ module CG_Nitrogen
   real(dp),save :: lai_c_actual=0,lai_veg_c=0,lai_veg_n=0,lai_build=0,lai_sla=0,lai_area=0
   real(dp),save :: lai_min_begin=0,lai_crit_begin=0
   real(dp),save :: veg_z_end=1,day_veg_z=1
+  real(dp),save :: psi_end=0,day_psi=0
+  logical,save :: psi_end_valid=.false.,day_psi_valid=.false.
   real(dp),save :: mob_safe(4)=0,mob_func(4)=0,mob_plan(4)=0,mob_returned(4)=0
   real(dp),save :: mob_gap=0,mob_accept=0,mob_new_used=0,mob_c_paid=0
   integer,save :: mob_unit=0
@@ -111,6 +114,7 @@ module CG_Nitrogen
   public :: NI_ROOT_SOIL_DEBIT, NI_ROOT_SOIL_END
   public :: NI_TARGETS, NI_REFERENCES, NI_GROWTH, NI_LEAF_FACTOR
   public :: NI_TOTAL_Q, NI_CURVE_KERNEL, NI_ROOT_KERNEL, NI_ASSIM_KERNEL
+  public :: NI_PSI_KERNEL, NI_ROOT_PSI_FACTOR
   public :: NI_PREASSIM, NI_MERGE_OLD
   public :: NI_ORG_BEGIN, NI_ORG_END
   public :: NI_SPLIT
@@ -854,14 +858,16 @@ contains
   end function
   subroutine NI_OPEN_DAY(control)
     type(ControlType),intent(in)::control
-    if(state_timing==0.and.pods_n_state==0) return
+    if(state_timing==0.and.pods_n_state==0.and.rnk_mode<RNK_MODE_A) return
     if(day_run==control%RUN.and.day_date==control%YRDOY) return
     day_run=control%RUN;day_date=control%YRDOY
     day_valid=ready.and.end_run==control%RUN
     day_source=-1;day_z=0;day_growth=1;day_veg_z=1
+    day_psi=0;day_psi_valid=.false.
     if(day_valid) then
       if(end_day>=control%YRDOY) error stop 'NI v3: current/future state in day snapshot'
       day_source=end_day;day_z=z_end;day_growth=growth_factor;day_veg_z=veg_z_end
+      day_psi=psi_end;day_psi_valid=psi_end_valid
     end if
   end subroutine
   subroutine NI_SYNC_STATE(control,nstres)
@@ -1229,6 +1235,7 @@ contains
     cmin=0; ccrit=0; cmax=0; d_pending=0
     end_run=-1;end_day=-1;day_run=-1;day_date=-1;day_source=-1
     day_valid=.false.;z_end=0;day_z=0;day_growth=1
+    psi_end=0;day_psi=0;psi_end_valid=.false.;day_psi_valid=.false.
     veg_z_end=1;day_veg_z=1;mob_safe=0;mob_func=0;mob_plan=0;mob_returned=0
     sen_frac=0;sen_plan_dm=0;sen_available=0;mob_sen=0;c4_nloss=0;c4_area_dead=0
     mob_rate_cap=0;mob_function_cap=0
@@ -1460,7 +1467,7 @@ contains
     integer,intent(in)::nlayr
     real,intent(in)::weights(3),losses(3),root_weights(:),org_n(3),lai,wcrlf
     real(dp)::fraction(3),out3(3),out4(3),growth(3),denom,alpha,target,nraw,nniraw(2),nnifun(2),deficit(2),surplus(2)
-    real(dp)::functional_n(2)
+    real(dp)::functional_n(2),shoot_w(2),shoot_n,shoot_min,shoot_crit,shoot_max
     integer::l,s,ios
     if(.not.NI_ENABLED()) return
     if(reserve_pending)error stop 'NI P2: reserve stock was not committed'
@@ -1488,6 +1495,17 @@ contains
       call references(real(weights,dp))
       functional_n=real(org_n(1:2),dp)
       if(NI_RESERVES())functional_n=functional_n-reserve_n
+      shoot_w=real(weights(1:2),dp)
+      shoot_n=sum(functional_n)
+      shoot_min=sum(shoot_w*cmin)
+      shoot_crit=sum(shoot_w*ccrit)
+      shoot_max=sum(shoot_w*cmax)
+      call NI_PSI_KERNEL(shoot_n,shoot_min,shoot_crit,shoot_max,psi_end,psi_end_valid)
+      if(rnk_mode>=RNK_MODE_A.and.P0_ENABLED()) then
+        call P0_V(control,'rnk_psi_end','psi,valid,N_func,N_min,N_crit,N_max', &
+          [real(psi_end),real(merge(1,0,psi_end_valid)),real(shoot_n), &
+           real(shoot_min),real(shoot_crit),real(shoot_max)])
+      end if
       z_end=(functional_n/max(real(weights(1:2),dp),1.e-12_dp)-cmin)/(ccrit-cmin)
       veg_z_end=(sum(functional_n)-sum(real(weights(1:2),dp)*cmin))/ &
         max(sum(real(weights(1:2),dp)*(ccrit-cmin)),1.e-12_dp)
@@ -1772,6 +1790,25 @@ contains
     end do
     cr=(lo+hi)/2; uptake=capacity*cr/(km+cr)
   end subroutine
+  pure subroutine NI_PSI_KERNEL(n,n_min,n_crit,n_max,psi,valid)
+    real(dp),intent(in)::n,n_min,n_crit,n_max
+    real(dp),intent(out)::psi
+    logical,intent(out)::valid
+    real(dp)::span
+    psi=0
+    valid=.false.
+    if(.not.all(ieee_is_finite([n,n_min,n_crit,n_max])))return
+    if(n_min<0.or.n_crit-n_min<=1.e-12_dp.or.n_max-n_crit<=1.e-12_dp)return
+    span=merge(n_crit-n_min,n_max-n_crit,n<=n_crit)
+    psi=(min(n_max,max(n_min,n))-n_crit)/span
+    valid=.true.
+  end subroutine
+  pure real(dp) function NI_ROOT_PSI_FACTOR(psi,valid,beta) result(factor)
+    real(dp),intent(in)::psi,beta
+    logical,intent(in)::valid
+    factor=1
+    if(valid)factor=exp(-beta*max(0._dp,psi)**2)
+  end function
   subroutine NI_ROOT_UPTAKE(control,nlayr,bd,depth,ll,dul,sat,no3,nh4,kg2ppm,uno3,unh4)
     type(ControlType),intent(in)::control
     integer,intent(in)::nlayr
@@ -1782,13 +1819,19 @@ contains
     if(.not.water_ready.or.water_run/=control%RUN.or.water_day/=control%YRDOY.or.water_nlayr/=nlayr) &
       error stop 'NI: missing or stale actual root water snapshot'
     if(legacy_nh4<0 .and. .not.NI_COMMON_ROOT_ENABLED()) error stop 'NI: native NH4 species capacity was not initialized'
-    feedback=exp(-pool_beta*sum(q3)/max(q_no3_max*sum(carrier),1.e-12_dp))
     if(rnk_mode>=RNK_MODE_A) then
-      ! 公共核: 1=A(等效根际运输, T2) 2=B(径向有限体积, T3)
+      ! Both transport arms use the same committed organic-N state at day open.
+      call NI_OPEN_DAY(control)
+      feedback=NI_ROOT_PSI_FACTOR(day_psi,day_psi_valid,pool_beta)
+      if(P0_ENABLED()) then
+        call P0_V(control,'rnk_psi_feedback','psi,valid,source_day,membrane_factor', &
+          [real(day_psi),real(merge(1,0,day_psi_valid)),real(day_source),real(feedback)])
+      end if
       r_rnk_source_day=control%YRDOY
       call NI_ROOT_UPTAKE_RNK(nlayr,bd,depth,ll,sat,no3,nh4,kg2ppm,uno3,unh4,feedback)
       return
     end if
+    feedback=exp(-pool_beta*sum(q3)/max(q_no3_max*sum(carrier),1.e-12_dp))
     uno3=0; unh4=0
     do l=1,nlayr
       theta=theta_snapshot(l)

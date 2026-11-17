@@ -45,8 +45,8 @@ The runner stages identical input files and changes only `rnk_mode` between
 the two active runs. Both use the equilibrium pore-water concentration at
 the pre-extraction water content, the same exchangeable ammonium
 partition, and the same species-specific dual-affinity membrane kinetics
-and daily extractable stock. Both use the existing plant N feedback without
-the legacy triangular wetness factor on membrane capacity. The model
+and daily extractable stock. Both regulate membrane capacity with the
+same shoot N status and apply no additional triangular wetness factor. The model
 holds the Millington–Quirk effective diffusion coefficient fixed at the
 same extraction midpoint for the day in both methods. DSSAT `SAT` supplies
 porosity for diffusion. The concentration calculation uses the actual
@@ -96,6 +96,33 @@ single-layer sensitivity probe uses the 26SP 80–100 cm layer's bulk density
 and `SAT` as inputs. Its density-derived `POROS` is about 0.445, compared
 with `SAT=0.498`. The alternate value is used only in the probe. No runtime
 porosity selector is needed.
+
+### Shoot N status and root feedback
+
+At day close, sum actual functional organic N in leaves and stems. The
+sum excludes inorganic Q and subtracts the explicit organic reserve when
+that reserve mode is enabled. Each reference stock is the sum of the
+respective organ dry mass times its minimum, critical, or upper reference
+concentration. The signed index `psi` is zero at the critical stock.
+Divide the signed difference from critical by the minimum-to-critical
+span for a deficiency and the critical-to-upper span for a surplus.
+Clamp the index to [-1, 1]. These references do not alter organ inventory.
+
+The common root kernel opens the day with the last committed shoot state
+from the same treatment. It multiplies both affinity capacities for both
+N species by `exp(-pool_beta * max(0, psi)**2)`. Deficiency, critical
+status, and missing references give a neutral factor of one. The
+unavailable state covers initialization before the first committed
+state and runs that do not enable organ curves. This reuses the
+`pool_beta` coefficient. The legacy root path continues to use that
+coefficient with inorganic pool occupancy. Soil debit, storage-capacity
+acceptance, assimilation, and the existing shoot response functions
+follow their existing rules.
+
+With `DSSAT_P0_TRACE=1`, `rnk_psi_end` reports the day-close stock,
+reference stocks and signed state, and `rnk_psi_feedback` reports the
+state, its source date and the multiplier used by the root kernel.
+The layer ledger retains the same schema.
 
 ### Paired ledger diagnostics
 

@@ -9,8 +9,28 @@ program native_n_tests
   real(dp)::a3,a4,u,cr,low,nc,high,low2,nc2,high2
   real::un3(NL),un4(NL),s3(NL),s4(NL),rw(NL),tr3,tr4,trnu,pg,nass,rsp3,rsp4,refund
   real::w(3),loss(3),n(3),q_before,q_after,fp,unused,nold,actual_u
+  real(dp)::psi
+  logical::psi_valid
   integer::checks
   checks=0
+  call NI_PSI_KERNEL(.7_dp,.4_dp,1._dp,1.25_dp,psi,psi_valid)
+  call check(psi_valid.and.abs(psi+.5_dp)<1.e-14_dp,'psi: deficit uses minimum-critical span')
+  call check(NI_ROOT_PSI_FACTOR(psi,psi_valid,1._dp)==1,'psi: full membrane capacity in deficit')
+  call NI_PSI_KERNEL(1._dp,.4_dp,1._dp,1.25_dp,psi,psi_valid)
+  call check(psi_valid.and.psi==0,'psi: critical inventory is zero')
+  call check(NI_ROOT_PSI_FACTOR(psi,psi_valid,1._dp)==1,'psi: critical inventory is neutral')
+  call NI_PSI_KERNEL(1.125_dp,.4_dp,1._dp,1.25_dp,psi,psi_valid)
+  call check(psi_valid.and.psi==.5_dp,'psi: surplus uses critical-upper span')
+  call check(abs(NI_ROOT_PSI_FACTOR(psi,psi_valid,1._dp)-exp(-.25_dp))<1.e-14_dp,'psi: smooth root downregulation')
+  call NI_PSI_KERNEL(2._dp,.4_dp,1._dp,1.25_dp,psi,psi_valid)
+  call check(psi_valid.and.psi==1,'psi: luxury state is bounded')
+  call check(NI_ROOT_PSI_FACTOR(psi,psi_valid,1._dp)<exp(-.25_dp),'psi: stronger surplus lowers root capacity')
+  call check(NI_ROOT_PSI_FACTOR(psi,psi_valid,0._dp)==1,'psi: zero beta means no downregulation')
+  call NI_PSI_KERNEL(.1_dp,.4_dp,1._dp,1.25_dp,psi,psi_valid)
+  call check(psi_valid.and.psi==-1,'psi: severe deficit is bounded')
+  call NI_PSI_KERNEL(0._dp,0._dp,0._dp,0._dp,psi,psi_valid)
+  call check(.not.psi_valid.and.psi==0,'psi: no standing shoot gives no state')
+  call check(NI_ROOT_PSI_FACTOR(1._dp,psi_valid,1._dp)==1,'psi: unavailable state gives neutral capacity')
   call NI_ASSIM_KERNEL(1.1_dp,.1_dp,1._dp,1._dp,.14_dp,1.1_dp,.1_dp,1._dp,10._dp,2._dp,1._dp,1._dp,a3,a4)
   call check(abs(a3-.5_dp)<1.e-14_dp.and.abs(a4-.07_dp)<1.e-14_dp,'manual conversion fluxes')
   call check(abs(1.1_dp-a3-.6_dp)<1.e-14_dp.and.abs(.1_dp-a4-.03_dp)<1.e-14_dp,'manual species inventories')
