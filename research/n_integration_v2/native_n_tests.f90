@@ -9,7 +9,7 @@ program native_n_tests
   real(dp)::a3,a4,u,cr,low,nc,high,low2,nc2,high2
   real::un3(NL),un4(NL),s3(NL),s4(NL),rw(NL),tr3,tr4,trnu,pg,nass,rsp3,rsp4,refund
   real::w(3),loss(3),n(3),q_before,q_after,fp,unused,nold,actual_u
-  real(dp)::psi
+  real(dp)::psi,accepted_dm(3),accepted_n(3),repair(3),fruit(2),cost(3),scale,accepted_r(2)
   logical::psi_valid
   integer::checks
   checks=0
@@ -41,6 +41,17 @@ program native_n_tests
   call NI_PSI_KERNEL(0._dp,0._dp,0._dp,0._dp,psi,psi_valid)
   call check(.not.psi_valid.and.psi==0,'psi: no standing shoot gives no state')
   call check(NI_ROOT_PSI_FACTOR(1._dp,psi_valid,1._dp)==1,'psi: unavailable state gives neutral capacity')
+  call NI_JOINT_KERNEL(3._dp,.015_dp,[1._dp,1._dp,0._dp],[.02_dp,.02_dp,0._dp],[.04_dp,.04_dp,0._dp], &
+    [1._dp,1._dp,1._dp],[.25_dp,.25_dp,.25_dp],[0._dp,0._dp],[0._dp,0._dp,0._dp], &
+    accepted_dm,accepted_n,repair,fruit,cost,scale,3._dp,0._dp,[.1_dp,.1_dp],accepted_r)
+  call check(sum(accepted_r)==0,'organic reserve: no allocation under construction N shortage')
+  call NI_JOINT_KERNEL(3._dp,.25_dp,[1._dp,1._dp,0._dp],[.02_dp,.02_dp,0._dp],[.04_dp,.04_dp,0._dp], &
+    [1._dp,1._dp,1._dp],[.25_dp,.25_dp,.25_dp],[0._dp,0._dp],[0._dp,0._dp,0._dp], &
+    accepted_dm,accepted_n,repair,fruit,cost,scale,3._dp,0._dp,[.1_dp,.1_dp],accepted_r)
+  call check(all(accepted_r>0).and.all(accepted_r<=.1_dp),'organic reserve: surplus reaches bounded receivers')
+  call check(sum(accepted_n+repair)+sum(accepted_r)+fruit(2)<=.25_dp+1.e-12_dp.and. &
+    sum(accepted_dm*cost)+3*(sum(accepted_n)+sum(accepted_r))<=3._dp+1.e-12_dp, &
+    'organic reserve: payable in the shared N and C budgets')
   call NI_ASSIM_KERNEL(1.1_dp,.1_dp,1._dp,1._dp,.14_dp,1.1_dp,.1_dp,1._dp,10._dp,2._dp,1._dp,1._dp,a3,a4)
   call check(abs(a3-.5_dp)<1.e-14_dp.and.abs(a4-.07_dp)<1.e-14_dp,'manual conversion fluxes')
   call check(abs(1.1_dp-a3-.6_dp)<1.e-14_dp.and.abs(.1_dp-a4-.03_dp)<1.e-14_dp,'manual species inventories')

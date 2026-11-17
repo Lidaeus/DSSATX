@@ -33,6 +33,7 @@ module CG_Nitrogen
   real(dp),save :: veg_z_end=1,day_veg_z=1
   real(dp),save :: day_substrate_fill=0
   real(dp),save :: psi_end=0,day_psi=0
+  real(dp),save :: leaf_photo_mean=0,leaf_photo_critical=0,leaf_photo_min_ratio=0
   logical,save :: psi_end_valid=.false.,day_psi_valid=.false.
   real(dp),save :: mob_safe(4)=0,mob_func(4)=0,mob_plan(4)=0,mob_returned(4)=0
   real(dp),save :: mob_gap=0,mob_accept=0,mob_new_used=0,mob_c_paid=0
@@ -59,6 +60,7 @@ module CG_Nitrogen
   real(dp),save :: reserve_n(2)=0,reserve_begin(2)=0,reserve_fill(2)=0,reserve_release(2)=0
   real(dp),save :: reserve_sen_recovery(2)=0,reserve_litter(2)=0,reserve_residual(2)=0
   real(dp),save :: joint_dm_req(3)=0,joint_build(3)=0,joint_target(3)=0,joint_agr(3)=0,joint_proi(3)=0
+  real(dp),save :: joint_reserve(2)=0
   real(dp),save :: joint_dm(3)=0,joint_nn(3)=0,joint_repair(3)=0,joint_repair_used(3)=0
   real(dp),save :: joint_unitcost(3)=0,joint_carbon=0,joint_nitrogen=0,joint_fruit_req(2)=0
   real(dp),save :: joint_fruit_cap(2)=0,joint_fruit_used(2)=0,joint_scale=1,mob_repair_used=0
@@ -249,17 +251,23 @@ contains
     NI_DAILY_ORGANIC=reserve_mode==2
   end function
   pure subroutine NI_JOINT_KERNEL(carbon,nitrogen,dm,build,target,agr,proi,fruit,repair, &
-      accepted_dm,accepted_n,accepted_repair,fruit_cap,cost,scale,assim_price,free_n)
+      accepted_dm,accepted_n,accepted_repair,fruit_cap,cost,scale,assim_price,free_n,reserve,accepted_reserve)
     real(dp),intent(in)::carbon,nitrogen,dm(3),build(3),target(3),agr(3),proi(3),fruit(2),repair(3)
     real(dp),intent(out)::accepted_dm(3),accepted_n(3),accepted_repair(3),fruit_cap(2),cost(3),scale
-    real(dp),intent(in),optional::assim_price,free_n
+    real(dp),intent(in),optional::assim_price,free_n,reserve(2)
+    real(dp),intent(out),optional::accepted_reserve(2)
+    real(dp)::reserve_request(2),reserved
     real(dp)::lower,total,gap,blend,composition(3),nreq,creq,price,free,lo,hi,mid,expense,veg_fraction,planned_dm(3)
     integer::i
     lower=sum(dm*build)+fruit(2)+sum(repair)
     total=sum(dm*target)+fruit(2)+sum(repair)
-    gap=max(0._dp,total-lower)
+    reserve_request=0
+    if(present(reserve)) reserve_request=max(0._dp,reserve)
+    gap=max(0._dp,total-lower)+sum(reserve_request)
     blend=max(0._dp,min(1._dp,(max(0._dp,nitrogen)-lower)/max(gap,1.e-30_dp)))
     composition=build+blend*(target-build)
+    reserve_request=reserve_request*blend
+    reserved=sum(reserve_request)
     cost=agr*(1-(composition/.16_dp-proi)/(1-proi))
     planned_dm=dm
     if(present(assim_price).and.present(free_n))then
@@ -268,13 +276,13 @@ contains
       ! Vegetative potential must first include its own N acquisition cost;
       ! otherwise ample-N plants spuriously lose fruit C to oversubscribed
       ! veg potential. Scarce N is still shared by ALL receivers below.
-      expense=fruit(1)+max(0._dp,fruit(2)+sum(repair)-free)*price
+      expense=fruit(1)+max(0._dp,fruit(2)+sum(repair)+reserved-free)*price
       if(expense<=max(0._dp,carbon))then
         lo=0;hi=1
         do i=1,64
           mid=.5_dp*(lo+hi)
           expense=fruit(1)+mid*sum(dm*cost)+ &
-            max(0._dp,fruit(2)+sum(repair)+mid*sum(dm*composition)-free)*price
+            max(0._dp,fruit(2)+sum(repair)+reserved+mid*sum(dm*composition)-free)*price
           if(expense<=max(0._dp,carbon))then
             lo=mid
           else
@@ -285,7 +293,7 @@ contains
       endif
     endif
     creq=sum(planned_dm*cost)+fruit(1)
-    nreq=sum(planned_dm*composition)+fruit(2)+sum(repair)
+    nreq=sum(planned_dm*composition)+fruit(2)+sum(repair)+reserved
     scale=1
     if(creq>0)scale=min(scale,max(0._dp,carbon)/creq)
     if(nreq>0)scale=min(scale,max(0._dp,nitrogen)/nreq)
@@ -305,6 +313,7 @@ contains
     endif
     accepted_dm=planned_dm*scale;accepted_n=accepted_dm*composition
     accepted_repair=repair*scale;fruit_cap=fruit*scale
+    if(present(accepted_reserve)) accepted_reserve=reserve_request*scale
   end subroutine
   real function NI_P2_CARBON(pg)
     real,intent(in)::pg
@@ -326,6 +335,8 @@ contains
   subroutine NI_P2_PLAN(carbon,nitrogen,fruit_c,fruit_n,root_target)
     real,intent(in)::carbon,nitrogen,fruit_c,fruit_n,root_target
     real(dp)::repair(3),nonreserve(3),target(3),amount,surviving_mass(3),price,free,accepted_n
+    real(dp)::reserve_request(2),reserve_surviving(2),band(2),feasible_dm(3),feasible_repair(3),feasible_fruit(2)
+    real(dp)::trial_n(3),trial_cost(3),trial_scale,substrate,base_demand,availability
     integer::i
     if(.not.NI_COMMON())return
     if(p2_plan_calls/=0)error stop 'NI P2: repeated common acceptance'
@@ -340,8 +351,30 @@ contains
     target=[ccrit,real(root_target,dp)]
     repair=max(0._dp,(target*surviving_mass-nonreserve)/max(1.e-6_dp,1-target/.16_dp))*(1-exp(-1/growth_tau))
     where(surviving_mass<=1.e-4_dp)repair=0
-    call NI_JOINT_KERNEL(joint_carbon,joint_nitrogen,joint_dm_req,joint_build,joint_target,joint_agr,joint_proi, &
-      joint_fruit_req,repair,joint_dm,joint_nn,joint_repair,joint_fruit_cap,joint_unitcost,joint_scale,price,free)
+    reserve_request=0
+    feasible_dm=joint_dm_req; feasible_repair=repair; feasible_fruit=joint_fruit_req
+    if(NI_DAILY_ORGANIC())then
+      ! Find the feasible structural demand before budgeting optional
+      ! reserve. Potential growth can be much larger than payable growth.
+      call NI_JOINT_KERNEL(joint_carbon,joint_nitrogen,joint_dm_req,joint_build,joint_target,joint_agr,joint_proi, &
+        joint_fruit_req,repair,feasible_dm,trial_n,feasible_repair,feasible_fruit,trial_cost,trial_scale,price,free)
+      ! Above-critical enrichment is optional. Its availability follows
+      ! today's root substrate relative to feasible structural N demand.
+      substrate=d_u3+d_u4
+      base_demand=sum(trial_n)+sum(feasible_repair)+feasible_fruit(2)
+      availability=substrate/max(1.e-30_dp,substrate+base_demand)
+      joint_target(1:2)=joint_target(1:2)+availability*max(0._dp,cmax-joint_target(1:2))
+      ! Make live organic reserve a real receiver in the same C/N budget.
+      ! Optional new-tissue enrichment and storage share only the N above
+      ! the minimum viable growth/repair request.
+      reserve_surviving=max(0._dp,reserve_begin*(1-sen_frac(1:2))-mob_safe(1:2))
+      band=min(reserve_capacity,cmax-ccrit)
+      reserve_request=max(0._dp,band*surviving_mass(1:2)-reserve_surviving)*(1-exp(-1/reserve_fill_tau))
+      where(surviving_mass(1:2)<=1.e-4_dp.or.mob_safe(1:2)>1.e-12_dp)reserve_request=0
+    endif
+    call NI_JOINT_KERNEL(joint_carbon,joint_nitrogen,feasible_dm,joint_build,joint_target,joint_agr,joint_proi, &
+      feasible_fruit,feasible_repair,joint_dm,joint_nn,joint_repair,joint_fruit_cap,joint_unitcost,joint_scale,price,free, &
+      reserve_request,joint_reserve)
     ! Only conservative rounding at the native float32 boundary, no new solve.
     do i=1,3
       amount=joint_dm(i);joint_dm(i)=real(flux32(amount),dp)
@@ -350,7 +383,8 @@ contains
       joint_repair(i)=real(flux32(joint_repair(i)),dp)
     enddo
     joint_fruit_cap=real([flux32(joint_fruit_cap(1)),flux32(joint_fruit_cap(2))],dp)
-    accepted_n=sum(joint_nn)+sum(joint_repair)+joint_fruit_cap(2)
+    joint_reserve=real([flux32(joint_reserve(1)),flux32(joint_reserve(2))],dp)
+    accepted_n=sum(joint_nn)+sum(joint_repair)+joint_fruit_cap(2)+sum(joint_reserve)
     joint_assim_n=max(0._dp,accepted_n-free);joint_assim_c=joint_assim_n*price
     joint_assim_unused=max(0._dp,d_a3+d_a4-joint_assim_n)
   end subroutine
@@ -652,6 +686,7 @@ contains
       r_cap=reserve_capacity*max(mass,carrier(1:2)*(1-sen_frac(1:2)))
       r_goal=max(0._dp,(gapc*mass-r_surv)/max(1.e-6_dp,1-gapc/.16_dp))
       r_room=min(max(0._dp,r_cap-r_surv),r_goal)*(1-exp(-1/reserve_fill_tau))
+      if(NI_DAILY_ORGANIC())r_room=max(0._dp,r_room-reserve_fill)
       where(mass<=1.e-4_dp.or.donor_n(1:2)>1.e-12_dp)r_room=0
       room=repair+r_room
     endif
@@ -965,6 +1000,7 @@ contains
     real,intent(in)::available,dm(3),nn(3),cad(3),cr(3),root_target
     real,intent(out)::nad(3),unused
     real(dp)::mass(3),stock(3),target(3),room(3),total,amount
+    real(dp)::extra(2),external_left,retained(2),unused_donor
     mass=max(0._dp,w_begin+real(dm,dp)+real(cad,dp)-donor_n/.16_dp-real(cr,dp))
     stock=max(0._dp,org_start+real(nn,dp)-donor_n)
     if(NI_COMMON().or.NI_RESERVES())then
@@ -991,6 +1027,17 @@ contains
     if(total>0) nad=real(amount*room/total)
     if(NI_COMMON())then
       joint_repair_used=real(nad,dp);mob_repair_used=sum(joint_repair_used)
+    endif
+    if(NI_DAILY_ORGANIC())then
+      ! Spend committed external N above actual growth and functional
+      ! repair. Do not cycle unused internal donor credit into reserve.
+      unused_donor=max(0._dp,sum(mob_plan)-joint_fruit_used(2)-sum(real(nn,dp))-sum(real(nad,dp)))
+      external_left=max(0._dp,real(available,dp)-sum(real(nad,dp))-unused_donor)
+      retained=max(0._dp,reserve_begin*(1-sen_frac(1:2))-mob_safe(1:2))
+      extra=min(joint_reserve,max(0._dp,reserve_capacity*mass(1:2)-retained))
+      extra=extra*min(1._dp,external_left/max(sum(extra),1.e-30_dp))
+      reserve_fill=real([flux32(extra(1)),flux32(extra(2))],dp)
+      nad(1:2)=nad(1:2)+real(reserve_fill)
     endif
     unused=max(0.,available-sum(nad))
     refill_n=real(nad,dp)
@@ -1258,6 +1305,7 @@ contains
     day_valid=.false.;z_end=0;day_z=0;day_growth=1
     psi_end=0;day_psi=0;psi_end_valid=.false.;day_psi_valid=.false.
     day_substrate_fill=0
+    leaf_photo_mean=0;leaf_photo_critical=0;leaf_photo_min_ratio=0
     veg_z_end=1;day_veg_z=1;mob_safe=0;mob_func=0;mob_plan=0;mob_returned=0
     sen_frac=0;sen_plan_dm=0;sen_available=0;mob_sen=0;c4_nloss=0;c4_area_dead=0
     mob_rate_cap=0;mob_function_cap=0
@@ -1291,7 +1339,7 @@ contains
     reserve_begin=reserve_n;reserve_fill=0;reserve_release=0;reserve_sen_recovery=0;reserve_litter=0
     reserve_pending=NI_RESERVES();reserve_residual=0
     p2_plan_calls=0;p2_veg_calls=0;mob_repair_used=0
-    joint_dm_req=0;joint_dm=0;joint_nn=0;joint_repair=0;joint_repair_used=0;joint_fruit_req=0
+    joint_dm_req=0;joint_dm=0;joint_nn=0;joint_reserve=0;joint_repair=0;joint_repair_used=0;joint_fruit_req=0
     joint_build=0;joint_target=0;joint_agr=0;joint_proi=0;joint_unitcost=0
     joint_carbon=0;joint_nitrogen=0;joint_fruit_cap=0;joint_fruit_used=0;joint_scale=1
     joint_assim_n=0;joint_assim_c=0;joint_assim_unused=0
@@ -1559,7 +1607,8 @@ contains
     integer,intent(in)::nlayr
     real,intent(in)::weights(3),losses(3),root_weights(:),org_n(3),lai,wcrlf
     real(dp)::fraction(3),out3(3),out4(3),growth(3),denom,alpha,target,nraw,nniraw(2),nnifun(2),deficit(2),surplus(2)
-    real(dp)::functional_n(2),shoot_w(2),shoot_n,shoot_min,shoot_crit,shoot_max
+    real(dp)::functional_n(2),shoot_w(2),shoot_n,shoot_min,shoot_crit,shoot_max,functional_psi
+    logical::functional_psi_valid
     integer::l,s,ios
     if(.not.NI_ENABLED()) return
     if(reserve_pending)error stop 'NI P2: reserve stock was not committed'
@@ -1613,12 +1662,31 @@ contains
         max(sum(real(weights(1:2),dp)*(ccrit-cmin)),1.e-12_dp)
       nraw=(functional_n(1)/max(real(weights(1),dp),1.e-12_dp)-cmin(1))/(ccrit(1)-cmin(1))
       target=min(1._dp,max(0._dp,nraw))
+      if(NI_DAILY_ORGANIC())then
+        ! Reserve is a future N source. It can suppress additional root
+        ! uptake but cannot remove a functional deficit before delivery.
+        call NI_PSI_KERNEL(sum(functional_n),shoot_min,shoot_crit,shoot_max,functional_psi,functional_psi_valid)
+        target=1+min(0._dp,functional_psi)
+      endif
       if(.not.ready) then
         growth_factor=target
       else if(ni_stage>=5) then
         alpha=1-exp(-1/growth_tau); growth_factor=growth_factor+alpha*(target-growth_factor)
       end if
+      if(NI_DAILY_ORGANIC().and.P0_ENABLED()) call P0_V(control,'rnk_psi_growth', &
+        'psi_functional,valid,raw_growth,growth_end', &
+        [real(functional_psi),real(merge(1,0,functional_psi_valid)),real(target),real(growth_factor)])
       structural_fraction=max(0._dp,real(weights(1)-wcrlf,dp))/max(real(weights(1),dp),1.e-12_dp)
+      if(NI_DAILY_ORGANIC())then
+        ! Preserve the host sun/shade N gradient. Store yesterday's
+        ! matching N concentration and critical value on the same basis.
+        leaf_photo_critical=0
+        if(weights(1)-wcrlf>1.e-4)then
+          leaf_photo_mean=100*functional_n(1)/real(weights(1)-wcrlf,dp)
+          leaf_photo_critical=100*ccrit(1)*real(weights(1),dp)/real(weights(1)-wcrlf,dp)
+          leaf_photo_min_ratio=cmin(1)/ccrit(1)
+        endif
+      endif
     end if
     ready=.true.
     if(NI_LEAF_COUPLED())then
@@ -2117,7 +2185,14 @@ contains
   end function
   real function NI_LEAF_FACTOR(rnitp,slw,slwref)
     real,intent(in)::rnitp,slw,slwref
-    real(dp)::functional,reference,ratio,whole_slw
+    real(dp)::functional,reference,ratio,whole_slw,deficit
+    if(NI_DAILY_ORGANIC().and.leaf_photo_critical>0)then
+      reference=max(1.e-6_dp,leaf_photo_critical+real(rnitp,dp)-leaf_photo_mean)
+      ratio=max(0._dp,real(rnitp,dp))/reference
+      deficit=min(1._dp,max(0._dp,(1-ratio)/max(1.e-6_dp,1-leaf_photo_min_ratio)))
+      NI_LEAF_FACTOR=real(1-deficit**2.5_dp)
+      return
+    endif
     functional=max(0._dp,(real(rnitp,dp)/100*structural_fraction-cmin(1))*real(slw,dp))
     reference=(ccrit(1)-cmin(1))*real(slwref,dp)
     if(NI_REVISED()) then
