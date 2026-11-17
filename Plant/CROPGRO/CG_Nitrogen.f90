@@ -31,6 +31,7 @@ module CG_Nitrogen
   real(dp),save :: lai_c_actual=0,lai_veg_c=0,lai_veg_n=0,lai_build=0,lai_sla=0,lai_area=0
   real(dp),save :: lai_min_begin=0,lai_crit_begin=0
   real(dp),save :: veg_z_end=1,day_veg_z=1
+  real(dp),save :: day_substrate_fill=0
   real(dp),save :: psi_end=0,day_psi=0
   logical,save :: psi_end_valid=.false.,day_psi_valid=.false.
   real(dp),save :: mob_safe(4)=0,mob_func(4)=0,mob_plan(4)=0,mob_returned(4)=0
@@ -112,7 +113,7 @@ module CG_Nitrogen
   public :: NI_RETURN_LITTER, NI_SOIL_INPUT, NI_SET_NH4
   public :: NI_CAPTURE_WATER, NI_ROOT_MODE, NI_ROOT_UPTAKE, NI_COMMON_ROOT_ENABLED
   public :: NI_ROOT_SOIL_DEBIT, NI_ROOT_SOIL_END
-  public :: NI_TARGETS, NI_REFERENCES, NI_GROWTH, NI_LEAF_FACTOR
+  public :: NI_TARGETS, NI_REFERENCES, NI_BUILD_REFERENCES, NI_GROWTH, NI_LEAF_FACTOR
   public :: NI_TOTAL_Q, NI_CURVE_KERNEL, NI_ROOT_KERNEL, NI_ASSIM_KERNEL
   public :: NI_PSI_KERNEL, NI_ROOT_PSI_FACTOR, NI_BUFFER_INFLOW
   public :: NI_PREASSIM, NI_MERGE_OLD
@@ -1236,6 +1237,7 @@ contains
     end_run=-1;end_day=-1;day_run=-1;day_date=-1;day_source=-1
     day_valid=.false.;z_end=0;day_z=0;day_growth=1
     psi_end=0;day_psi=0;psi_end_valid=.false.;day_psi_valid=.false.
+    day_substrate_fill=0
     veg_z_end=1;day_veg_z=1;mob_safe=0;mob_func=0;mob_plan=0;mob_returned=0
     sen_frac=0;sen_plan_dm=0;sen_available=0;mob_sen=0;c4_nloss=0;c4_area_dead=0
     mob_rate_cap=0;mob_function_cap=0
@@ -1253,6 +1255,10 @@ contains
     ! Carrier follows live tissue loss but not internal carbohydrate/protein mining.
     ! It is an explicit storage-support proxy, not an observed dry-mass compartment.
     carrier=max(carrier,w_begin)
+    if(NI_SUBSTRATE_TARGET_ON())then
+      day_substrate_fill=min(1._dp,max(0._dp,(sum(q3)+sum(q4))/ &
+        max(1.e-12_dp,(q_no3_max+q_nh4_max)*sum(carrier))))
+    endif
     d_q_begin=sum(q3)+sum(q4); d_u3=0; d_u4=0; d_a3=0; d_a4=0
     d_cost=0; d_refund=0; d_litter=0
     old_a3=0;old_a4=0;old_rsp3=0;old_rsp4=0
@@ -1848,6 +1854,9 @@ contains
       if(P0_ENABLED()) then
         call P0_V(control,'rnk_psi_feedback','psi,valid,source_day,membrane_factor', &
           [real(day_psi),real(merge(1,0,day_psi_valid)),real(day_source),real(feedback)])
+        if(NI_SUBSTRATE_TARGET_ON()) call P0_V(control,'rnk_tissue_target', &
+          'fill,leaf_crit,stem_crit,leaf_max,stem_max,leaf_target,stem_target', &
+          [real(day_substrate_fill),real(ccrit),real(cmax),real(NI_TISSUE_TARGET())])
       end if
       r_rnk_source_day=control%YRDOY
       call NI_ROOT_UPTAKE_RNK(nlayr,bd,depth,ll,sat,no3,nh4,kg2ppm,uno3,unh4,feedback)
@@ -1997,12 +2006,32 @@ contains
     call NI_V4_CURVE_KERNEL(w,stem_a,stem_b,stem_inf,merge(stem_min_ratio,min_ratio,stem_min_ratio>0), &
       max_ratio,curve_w0,cmin(2),ccrit(2),cmax(2))
   end subroutine
+  logical function NI_SUBSTRATE_TARGET_ON()
+    NI_SUBSTRATE_TARGET_ON=rnk_mode>=RNK_MODE_A.and.NI_REVISED().and.luxury_priority==0.and. &
+      .not.(NI_COMMON().or.NI_RESERVES().or.NI_LAI_ON())
+  end function
+  function NI_TISSUE_TARGET() result(target)
+    real(dp) :: target(2)
+    target=ccrit
+    if(NI_SUBSTRATE_TARGET_ON()) target=ccrit+day_substrate_fill*(cmax-ccrit)
+  end function
   subroutine NI_TARGETS(wleaf,wstem,fnil,fnis)
     real,intent(in)::wleaf,wstem
     real,intent(inout)::fnil,fnis
+    real(dp)::target(2)
     if(.not.NI_CURVES()) return
     call references([real(wleaf,dp),real(wstem,dp),0._dp])
-    fnil=real(ccrit(1)); fnis=real(ccrit(2))
+    ! Mineral substrate supports optional incorporation above the critical
+    ! composition. Actual new tissue still needs assimilated N and carbon.
+    target=NI_TISSUE_TARGET()
+    fnil=real(target(1)); fnis=real(target(2))
+  end subroutine
+  subroutine NI_BUILD_REFERENCES(leaf,stem)
+    real,intent(inout)::leaf,stem
+    ! Extra N capacity must not increase the minimum cost of making tissue.
+    if(NI_SUBSTRATE_TARGET_ON()) then
+      leaf=real(ccrit(1)); stem=real(ccrit(2))
+    endif
   end subroutine
   subroutine NI_REFERENCES(leafmax,stemmax)
     real,intent(out)::leafmax,stemmax

@@ -139,6 +139,22 @@ core refill targets the critical reference and additional assimilation
 uses the later discretionary carbon budget. Keep the same setting in
 both arms.
 
+With the shared revised growth and refill path, new leaf and stem
+tissue can use additional nitrogen above the critical reference.
+Freeze the inorganic stock fraction at day open:
+`fill=(QNO3+QNH4)/[(q_no3_max+q_nh4_max)*sum(carrier)]`.
+Use the same bounded fraction in the forecast and allocation of new
+growth: `target=critical+fill*(upper-critical)`.
+The upper band is an optional receiver for organic N during new
+growth, not a concentration assigned to existing tissue. Native
+minimum construction uses the critical composition as its reference.
+Actual incorporation still requires finite assimilation, carbon, and
+accepted new tissue. The reference curves and the definition of `psi`
+are independent of this target. Explicit separate reserve, joint
+acceptance, or independent leaf C/N modes retain their own rules.
+With P0 tracing, `rnk_tissue_target` records the frozen fraction,
+organ references and the two new-tissue targets.
+
 With `DSSAT_P0_TRACE=1`, `rnk_psi_end` reports the day-close stock,
 reference stocks and signed state, and `rnk_psi_feedback` reports the
 state, its source date and the multiplier used by the root kernel.

@@ -46,7 +46,7 @@ C========================================================================
      &  NI_REVISED, NI_VEG_RECONCILE, NI_REFILL, NI_EXPANSION,
      &  NI_V4_STORAGE_SHIFT, NI_COMMON, NI_P2_POTENTIAL,
      &  NI_P2_VEG_ACCEPT,NI_LAI_ON,NI_LAI_REQUEST,NI_LAI_BUILD,
-     &  NI_LAI_ACCEPT,NI_LAI_RECORD
+     &  NI_LAI_ACCEPT,NI_LAI_RECORD,NI_BUILD_REFERENCES
       USE ModuleDefs
       USE ModuleData
       IMPLICIT NONE
@@ -242,8 +242,11 @@ C========================================================================
       NIMINL=PROLFG
       NIMINS=PROSTG
       IF (NI_CURVES()) THEN
-        NIMINL=FNINL/0.16*MIN(1.,PROLFG/PROLFI)
-        NIMINS=FNINS/0.16*MIN(1.,PROSTG/PROSTI)
+        NIMINL=FNINL
+        NIMINS=FNINS
+        CALL NI_BUILD_REFERENCES(NIMINL,NIMINS)
+        NIMINL=NIMINL/0.16*MIN(1.,PROLFG/PROLFI)
+        NIMINS=NIMINS/0.16*MIN(1.,PROSTG/PROSTI)
         FNINLG=NIMINL*0.16
         FNINSG=NIMINS*0.16
       ENDIF
