@@ -160,6 +160,52 @@ reference stocks and signed state, and `rnk_psi_feedback` reports the
 state, its source date and the multiplier used by the root kernel.
 The layer ledger retains the same schema.
 
+### S1-inspired organic buffer and NSTFAC
+
+Run `p1_4864/replay_local.py --organic-buffer` to select the paired
+organic buffer study. The active recipe sets `reserve_mode=2`,
+`common_acceptance=1`, and `luxury_priority=1`. The recipe writes
+NSTFAC=0.60 into the prepared TMGRO048.SPE for each case. Use
+`--nstfac` to vary it in a separate replay. Frozen source inputs
+and the default replay stay available for earlier studies.
+
+Each leaf and stem organ has functional organic N and a remobilizable
+reserve. The reserve is part of organ organic N. The forecast requests
+N for new tissue, a fraction of the functional deficit, and a fraction
+of the reserve vacancy. The existing joint allocation shares actual
+carbon and N among reproductive growth, new vegetative tissue, and
+functional repair. Remaining assimilation capacity and discretionary
+carbon can fill bounded leaf and stem reserves after those uses.
+When N is short, the existing donor ledger uses remobilizable reserve
+before drawing more slowly from functional tissue. Fruit composition
+and the stateful call count of PODS are preserved.
+
+The root transport models still provide species- and layer-specific
+candidates. The candidates fund today's finite assimilation with
+carbon cost. The host can reject provisional assimilation; the
+substrate then becomes available to eligible reserves on the same
+day. Only N committed to organic receivers is charged to the soil.
+There is no standing inorganic stock, no day-to-day mineral buffer
+capacity, and no concentration surcharge on new tissue based on that
+stock. The root `psi` in this mode reads total leaf/stem organic N
+including reserves, with the upper reference equal to the critical
+stock plus nominal reserve capacity. The organ growth, photosynthesis
+and senescence signals use functional N according to their existing
+rules. `rnk_psi_organic` identifies the quantities used for root
+feedback. Modes 0 and 1 retain the inorganic buffer.
+
+NSTFAC only controls the native fallback in VEGGR, through
+`SUPPN/(NDMNEW*NSTFAC)`. The active daily feedback already calls
+`NI_GROWTH()`, and common acceptance uses that state for its growth
+budget. To retire NSTFAC for the research path, first audit its
+remaining calls during initialization and on treatment reset. Then
+use neutral nitrogen partitioning before a valid state is committed,
+and the existing bounded functional-N signal from the previous day
+after initialization. Retain separate water and phosphorus stress
+and the actual C/N limits on biomass. Verify the replacement with
+low-N and resupply runs and repeat the NSTFAC sensitivity check before
+dropping it from any research input specification.
+
 ### Paired ledger diagnostics
 
 For the steady formulation with positive diffusion,

@@ -15,13 +15,32 @@ sys.path.insert(0, str(HERE.parents[1]))
 from portable_dssat import prepare_case, run
 
 
+def write_nstfac(species_file, value):
+    lines = species_file.read_bytes().splitlines(keepends=True)
+    records = [i for i, line in enumerate(lines) if b"XPODF, NSTFAC,NREXP,NRMIN" in line]
+    if len(records) != 1:
+        raise ValueError("Expected one NSTFAC row in the prepared species file")
+    index, = records
+    line = lines[index]
+    field = f"{value:6.3f}".encode("ascii")
+    lines[index] = line[:6] + field + line[12:]
+    species_file.write_bytes(b"".join(lines))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("engine", "t3-engine", "out"):
         parser.add_argument(f"--{name}", type=Path, required=True)
     parser.add_argument("--radial-cells", type=int, choices=(8, 16), default=8,
                         help="Transient radial grid for the active pair; nominal substeps are fixed at 24")
+    parser.add_argument("--organic-buffer", action="store_true",
+                        help="Use the S1-inspired leaf/stem organic buffer in active A/B runs")
+    parser.add_argument("--nstfac", type=float,
+                        help="Set NSTFAC in prepared species files (organic-buffer default: 0.60)")
     args = parser.parse_args()
+    nstfac = args.nstfac if args.nstfac is not None else (0.60 if args.organic_buffer else None)
+    if nstfac is not None and not 0.1 <= nstfac <= 1.0:
+        parser.error("--nstfac must be in [0.1, 1.0]")
     engines = {
         arm: (args.t3_engine if arm == "off-t3" else args.engine).resolve(strict=True)
         for arm in ("off-t3", "off", "A", "B")
@@ -34,7 +53,8 @@ def main():
     results = []
     config_inputs = {}
     base_text = config.read_text()
-    experiment_text = base_text + (HERE.parent / "source/RootNUptake.nml.template").read_text()
+    active_config = HERE / "p1_organic.nml" if args.organic_buffer else config
+    experiment_text = active_config.read_text() + (HERE.parent / "source/RootNUptake.nml.template").read_text()
     off_text = base_text + "\n&ROOTNUPTAKE rnk_mode=0 /\n"
     for arm, mode in (("off-t3", 0), ("off", 0), ("A", 1), ("B", 2)):
         case = prepare_case(SimpleNamespace(config=config, out=out / arm))
@@ -44,6 +64,8 @@ def main():
         if mode and args.radial_cells == 16:
             config_text = config_text.replace(f"rnk_mode={mode},", f"rnk_mode={mode}, rnk_radial_cells=16,")
         nml.write_text(config_text)
+        if nstfac is not None:
+            write_nstfac(case / "TMGRO048.SPE", nstfac)
         config_inputs[arm] = hashlib.sha256(nml.read_bytes()).hexdigest()
         run([str(engines[arm]), "CRGRO048", "B", "DSSBatch.v48"], case, "dssat", env)
         if mode:
@@ -58,6 +80,8 @@ def main():
             raise ValueError(f"Off-mode ledger changed: {file.name}")
     receipt = {
         "shared_transport": True,
+        "organic_buffer": args.organic_buffer,
+        "nstfac_override": nstfac,
         "radial_cells": args.radial_cells,
         "nominal_substeps": 24,
         "common_arm_config_sha256": hashlib.sha256(experiment_text.encode()).hexdigest(),

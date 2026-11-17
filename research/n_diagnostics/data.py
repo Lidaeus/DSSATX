@@ -130,7 +130,7 @@ def freeze(case,metadata,out,label,profile,extra_n=None,extra_n_unit=None,compar
             missing=[col for col in cols if col not in frame]
             if missing:optional.append(name+' missing optional fields: '+', '.join(missing))
             d=merge_daily(d,frame.reindex(columns=KEY+cols),cols,name)
-    reserve_status='enabled' if config.get('reserve_mode')==1 else 'disabled' if config.get('reserve_mode',0)==0 else 'unknown'
+    reserve_status='enabled' if config.get('reserve_mode') in (1,2) else 'disabled' if config.get('reserve_mode',0)==0 else 'unknown'
     if reserve_status=='disabled':
         d['R_end_leaf']=0.;d['R_end_stem']=0.
         optional.append('R is disabled, not a measured zero reserve')

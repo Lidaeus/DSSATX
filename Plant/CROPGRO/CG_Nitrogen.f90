@@ -109,7 +109,7 @@ module CG_Nitrogen
   integer,save::root_output_unit=0
   logical,save::root_opened=.false.
   public :: NI_LOAD, NI_RESET, NI_ENABLED, NI_CURVES, NI_FEEDBACK
-  public :: NI_BEGIN, NI_ACCEPT_UPTAKE, NI_ASSIMILATE, NI_SETTLE, NI_END
+  public :: NI_BEGIN, NI_ACCEPT_UPTAKE, NI_ASSIMILATE, NI_SETTLE, NI_CLOSE_DAILY_UPTAKE, NI_END
   public :: NI_RETURN_LITTER, NI_SOIL_INPUT, NI_SET_NH4
   public :: NI_CAPTURE_WATER, NI_ROOT_MODE, NI_ROOT_UPTAKE, NI_COMMON_ROOT_ENABLED
   public :: NI_ROOT_SOIL_DEBIT, NI_ROOT_SOIL_END
@@ -243,7 +243,10 @@ contains
     NI_COMMON=common_acceptance==1
   end function
   logical function NI_RESERVES()
-    NI_RESERVES=reserve_mode==1
+    NI_RESERVES=reserve_mode>0
+  end function
+  logical function NI_DAILY_ORGANIC()
+    NI_DAILY_ORGANIC=reserve_mode==2
   end function
   pure subroutine NI_JOINT_KERNEL(carbon,nitrogen,dm,build,target,agr,proi,fruit,repair, &
       accepted_dm,accepted_n,accepted_repair,fruit_cap,cost,scale,assim_price,free_n)
@@ -589,6 +592,18 @@ contains
     real,intent(in)::total,new_n,root_target
     real(dp)::target(3),room(3),functional(3)
     NI_CORE_DEMAND=total
+    if(NI_DAILY_ORGANIC())then
+      ! Organic receivers set the daily ceiling. Capacity is for the
+      ! reserve in living tissue, rather than for a standing mineral pool.
+      functional=org_start
+      functional(1:2)=functional(1:2)-reserve_begin
+      target=[ccrit,real(root_target,dp)]
+      room=max(0._dp,(target*w_begin-functional)/max(1.e-6_dp,1-target/.16_dp))
+      where(w_begin<=1.e-4_dp) room=0
+      NI_CORE_DEMAND=real(max(0._dp,real(new_n,dp))+(1-exp(-1/reserve_fill_tau))* &
+        (sum(room)+sum(max(0._dp,reserve_capacity*w_begin(1:2)-reserve_begin))))
+      return
+    endif
     if(luxury_priority/=1) return
     target=[ccrit(1),ccrit(2),real(root_target,dp)]
     functional=org_start
@@ -987,7 +1002,7 @@ contains
     NI_CURVES=ni_stage>=4
   end function
   logical function NI_SPLIT()
-    NI_SPLIT=ni_stage>=2
+    NI_SPLIT=ni_stage>=2.and..not.NI_DAILY_ORGANIC()
   end function
   logical function NI_FEEDBACK()
     NI_FEEDBACK=ni_stage>=5.and.ready
@@ -1075,7 +1090,8 @@ contains
     else if(remob_rate_max/=-1.or.functional_rate_max/=-1)then
       error stop 'NI LAI: unused rate limits require remob_rate_mode=1'
     endif
-    if(min(common_acceptance,reserve_mode)<0.or.max(common_acceptance,reserve_mode)>1)error stop 'NI P2: invalid mode'
+    if(min(common_acceptance,reserve_mode)<0.or.common_acceptance>1.or.reserve_mode>2) &
+      error stop 'NI P2: invalid mode'
     if(.not.all(ieee_is_finite([build_min_leaf,build_min_stem])))error stop 'NI P2: nonfinite new-tissue settings'
     if((build_min_leaf/=-1.and.(build_min_leaf<=0.or.build_min_leaf>1)).or. &
       (build_min_stem/=-1.and.(build_min_stem<=0.or.build_min_stem>1)))error stop 'NI P2: new-tissue fraction must be (0,1]'
@@ -1086,7 +1102,7 @@ contains
         remob_mode/=1.or.luxury_priority/=1)error stop 'NI P2: complete C4/C1-C3 routes required'
       if(leaf_expansion_mode/=0)error stop 'NI P2: common acceptance replaces the P1 expansion ablation'
     endif
-    if(reserve_mode==1)then
+    if(NI_RESERVES())then
       if(.not.all(ieee_is_finite([reserve_capacity,reserve_fill_tau,reserve_protect])))error stop 'NI P2: nonfinite reserve settings'
       if(reserve_capacity<=0.or.reserve_capacity>=.16_dp.or.reserve_fill_tau<=0.or. &
         reserve_protect<0.or.reserve_protect>=1)error stop 'NI P2: explicit reserve capacity, rate and protection required'
@@ -1200,8 +1216,12 @@ contains
     if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N') &
       error stop 'NI: first integration supports nonfixing TM nitrogen simulation only'
     if(switch%ISWDIS/='N') error stop 'NI: inorganic pest export is not implemented; pests must be off'
-    if(q_no3_max<=0.or.q_nh4_max<=0.or.q_nh4_max>=q_no3_max) &
+    if(NI_DAILY_ORGANIC())then
+      if(rnk_mode<RNK_MODE_A.or..not.NI_COMMON().or.NI_LAI_ON()) &
+        error stop 'NI organic buffer requires the paired root kernel and joint acceptance'
+    else if(q_no3_max<=0.or.q_nh4_max<=0.or.q_nh4_max>=q_no3_max)then
       error stop 'NI: explicit positive species capacities are required; NH4 capacity must be smaller'
+    endif
     if(ni_stage>=2) then
       if(min(assim_no3_v,assim_nh4_v,assim_no3_k,assim_nh4_k)<=0) &
         error stop 'NI: explicit positive specific assimilation capacities and substrate constants required'
@@ -1348,7 +1368,9 @@ contains
     p3=sum(real(uno3(1:nlayr),dp))/10; p4=sum(real(unh4(1:nlayr),dp))/10
     if(minval(uno3(1:nlayr))<0.or.minval(unh4(1:nlayr))<0) error stop 'NI: negative gross uptake candidate'
     cap3=q_no3_max*sum(carrier); cap4=q_nh4_max*sum(carrier)
-    if(rnk_mode>=RNK_MODE_A)then
+    if(NI_DAILY_ORGANIC())then
+      limit3=p3; limit4=p4
+    else if(rnk_mode>=RNK_MODE_A)then
       limit3=NI_BUFFER_INFLOW(p3,cap3,sum(q3))
       limit4=NI_BUFFER_INFLOW(p4,cap4,sum(q4))
     else
@@ -1374,8 +1396,15 @@ contains
       r_rnk_accept3(1:nlayr)=real(uno3(1:nlayr),dp)/10
       r_rnk_accept4(1:nlayr)=real(unh4(1:nlayr),dp)/10
     end if
-    call spread(q3,d_u3,q_no3_max*carrier)
-    call spread(q4,d_u4,q_nh4_max*carrier)
+    if(NI_DAILY_ORGANIC())then
+      ! Today's provisional inflow is substrate for finite assimilation.
+      ! Its uncommitted fraction is cancelled before the soil debit.
+      q3=d_u3*carrier/max(sum(carrier),1.e-30_dp)
+      q4=d_u4*carrier/max(sum(carrier),1.e-30_dp)
+    else
+      call spread(q3,d_u3,q_no3_max*carrier)
+      call spread(q4,d_u4,q_nh4_max*carrier)
+    endif
     tr3=real(d_u3); tr4=real(d_u4); trnu=tr3+tr4
     d_pending=d_u3+d_u4
   end subroutine
@@ -1456,39 +1485,74 @@ contains
     fraction=min(1._dp,max(0._dp,real(unaccepted,dp))/max(d_a3+d_a4,1.e-30_dp))
     if(unaccepted>=real(d_a3+d_a4)) fraction=1
     ret3=d_a3*fraction; ret4=d_a4*fraction
-    ! Return provisional, unassimilated substrate; no organic stock was committed.
-    ! Old-stock conversion can free provisional room. If allocation rejects it,
-    ! roll back the STILL UNPUBLISHED layer uptake, not soil already debited.
-    excess=max(0._dp,sum(q3)+ret3-q_no3_max*sum(carrier))
-    if(excess>d_u3+1.e-10_dp) error stop 'NI: NO3 receiver cannot reconcile candidate uptake'
-    if(d_u3>0.and.excess>0) then
-      scale=max(0._dp,1-excess/d_u3)
-      do l=1,nlayr
-        uno3(l)=flux32(real(uno3(l),dp)*scale)
-      end do
-    end if
-    new_u=sum(real(uno3(1:nlayr),dp))/10
-    total=sum(q3)+ret3-(d_u3-new_u)
-    q3=max(0._dp,total)*carrier/max(sum(carrier),1.e-30_dp); d_u3=new_u
-    excess=max(0._dp,sum(q4)+ret4-q_nh4_max*sum(carrier))
-    if(excess>d_u4+1.e-10_dp) error stop 'NI: NH4 receiver cannot reconcile candidate uptake'
-    if(d_u4>0.and.excess>0) then
-      scale=max(0._dp,1-excess/d_u4)
-      do l=1,nlayr
-        unh4(l)=flux32(real(unh4(l),dp)*scale)
-      end do
-    end if
-    new_u=sum(real(unh4(1:nlayr),dp))/10
-    total=sum(q4)+ret4-(d_u4-new_u)
-    q4=max(0._dp,total)*carrier/max(sum(carrier),1.e-30_dp);d_u4=new_u
-    tr3=real(d_u3);tr4=real(d_u4);trnu=tr3+tr4;d_pending=d_u3+d_u4
-    r_final3(1:nlayr)=real(uno3(1:nlayr),dp)/10
-    r_final4(1:nlayr)=real(unh4(1:nlayr),dp)/10
+    if(NI_DAILY_ORGANIC())then
+      q3=q3+ret3*carrier/max(sum(carrier),1.e-30_dp)
+      q4=q4+ret4*carrier/max(sum(carrier),1.e-30_dp)
+    else
+      ! Return provisional, unassimilated substrate; no organic stock was committed.
+      ! Old-stock conversion can free provisional room. If allocation rejects it,
+      ! roll back the STILL UNPUBLISHED layer uptake, not soil already debited.
+      excess=max(0._dp,sum(q3)+ret3-q_no3_max*sum(carrier))
+      if(excess>d_u3+1.e-10_dp) error stop 'NI: NO3 receiver cannot reconcile candidate uptake'
+      if(d_u3>0.and.excess>0) then
+        scale=max(0._dp,1-excess/d_u3)
+        do l=1,nlayr
+          uno3(l)=flux32(real(uno3(l),dp)*scale)
+        end do
+      end if
+      new_u=sum(real(uno3(1:nlayr),dp))/10
+      total=sum(q3)+ret3-(d_u3-new_u)
+      q3=max(0._dp,total)*carrier/max(sum(carrier),1.e-30_dp); d_u3=new_u
+      excess=max(0._dp,sum(q4)+ret4-q_nh4_max*sum(carrier))
+      if(excess>d_u4+1.e-10_dp) error stop 'NI: NH4 receiver cannot reconcile candidate uptake'
+      if(d_u4>0.and.excess>0) then
+        scale=max(0._dp,1-excess/d_u4)
+        do l=1,nlayr
+          unh4(l)=flux32(real(unh4(l),dp)*scale)
+        end do
+      end if
+      new_u=sum(real(unh4(1:nlayr),dp))/10
+      total=sum(q4)+ret4-(d_u4-new_u)
+      q4=max(0._dp,total)*carrier/max(sum(carrier),1.e-30_dp);d_u4=new_u
+      tr3=real(d_u3);tr4=real(d_u4);trnu=tr3+tr4;d_pending=d_u3+d_u4
+      r_final3(1:nlayr)=real(uno3(1:nlayr),dp)/10
+      r_final4(1:nlayr)=real(unh4(1:nlayr),dp)/10
+    endif
     d_a3=d_a3-ret3; d_a4=d_a4-ret4
     cost_old=real(rsp3,dp)+real(rsp4,dp)
     rsp3=real(real(rsp3,dp)*(1-fraction)); rsp4=real(real(rsp4,dp)*(1-fraction))
     d_cost=real(rsp3,dp)+real(rsp4,dp)
     d_refund=cost_old-d_cost; refund_c=real(d_refund); nassim=real(d_a3+d_a4)
+  end subroutine
+  subroutine NI_CLOSE_DAILY_UPTAKE(uno3,unh4,nlayr,tr3,tr4,trnu,nassim)
+    integer,intent(in)::nlayr
+    real,intent(inout)::uno3(:),unh4(:),tr3,tr4,trnu,nassim
+    real(dp)::settled(2)
+    if(.not.NI_DAILY_ORGANIC())return
+    call NI_SCALE_TO_ASSIMILATION(uno3(1:nlayr),d_u3,d_a3,sum(q3),settled(1))
+    call NI_SCALE_TO_ASSIMILATION(unh4(1:nlayr),d_u4,d_a4,sum(q4),settled(2))
+    d_u3=settled(1); d_u4=settled(2)
+    ! Reconcile layer rounding at the native real32 boundary.
+    d_a3=d_u3; d_a4=d_u4
+    q3=0; q4=0
+    tr3=real(d_u3); tr4=real(d_u4); trnu=tr3+tr4
+    nassim=trnu; d_pending=d_u3+d_u4
+    r_final3(1:nlayr)=real(uno3(1:nlayr),dp)/10
+    r_final4(1:nlayr)=real(unh4(1:nlayr),dp)/10
+  end subroutine
+  subroutine NI_SCALE_TO_ASSIMILATION(layers,uptake,assim,unused,settled)
+    real,intent(inout)::layers(:)
+    real(dp),intent(in)::uptake,assim,unused
+    real(dp),intent(out)::settled
+    real(dp)::scale
+    integer::l
+    if(abs(uptake-assim-unused)>1.e-9_dp)error stop 'NI: provisional substrate did not close'
+    scale=max(0._dp,min(1._dp,assim/max(uptake,1.e-30_dp)))
+    do l=1,size(layers)
+      layers(l)=flux32(real(layers(l),dp)*scale)
+    enddo
+    settled=sum(real(layers,dp))/10
+    if(abs(settled-assim)>1.e-6_dp)error stop 'NI: daily soil debit rounding exceeds native tolerance'
   end subroutine
   subroutine NI_END(control,weights,losses,root_weights,nlayr,org_n,lai,wcrlf)
     type(ControlType),intent(in)::control
@@ -1517,8 +1581,11 @@ contains
     d_residual=sum(q3)+sum(q4)-d_q_begin-d_u3-d_u4+d_a3+d_a4+d_litter
     if(abs(d_residual)>1.e-9_dp.or.minval(q3)<-1.e-12_dp.or.minval(q4)<-1.e-12_dp) &
       error stop 'NI: incremental inorganic N conservation failure'
-    if(any(q3>q_no3_max*carrier+1.e-9_dp).or.any(q4>q_nh4_max*carrier+1.e-9_dp)) &
+    if(NI_DAILY_ORGANIC())then
+      if(any(q3/=0).or.any(q4/=0))error stop 'NI: daily mineral substrate was not settled'
+    else if(any(q3>q_no3_max*carrier+1.e-9_dp).or.any(q4>q_nh4_max*carrier+1.e-9_dp))then
       error stop 'NI: storage capacity exceeded'
+    endif
     if(NI_CURVES()) then
       call references(real(weights,dp))
       functional_n=real(org_n(1:2),dp)
@@ -1528,11 +1595,18 @@ contains
       shoot_min=sum(shoot_w*cmin)
       shoot_crit=sum(shoot_w*ccrit)
       shoot_max=sum(shoot_w*cmax)
+      if(NI_DAILY_ORGANIC())then
+        ! Root feedback senses total vegetative organic N, including reserve.
+        shoot_n=sum(real(org_n(1:2),dp))
+        shoot_max=shoot_crit+reserve_capacity*sum(shoot_w)
+      endif
       call NI_PSI_KERNEL(shoot_n,shoot_min,shoot_crit,shoot_max,psi_end,psi_end_valid)
       if(rnk_mode>=RNK_MODE_A.and.P0_ENABLED()) then
         call P0_V(control,'rnk_psi_end','psi,valid,N_func,N_min,N_crit,N_max', &
-          [real(psi_end),real(merge(1,0,psi_end_valid)),real(shoot_n), &
+          [real(psi_end),real(merge(1,0,psi_end_valid)),real(sum(functional_n)), &
            real(shoot_min),real(shoot_crit),real(shoot_max)])
+        if(NI_DAILY_ORGANIC()) call P0_V(control,'rnk_psi_organic','N_signal,N_reserve', &
+          [real(shoot_n),real(sum(reserve_n))])
       end if
       z_end=(functional_n/max(real(weights(1:2),dp),1.e-12_dp)-cmin)/(ccrit-cmin)
       veg_z_end=(sum(functional_n)-sum(real(weights(1:2),dp)*cmin))/ &

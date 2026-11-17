@@ -1448,6 +1448,8 @@ C-----------------------------------------------------------------------
           NADST=NIV3NAD(2)
           NADRT=NIV3NAD(3)
         ENDIF
+        CALL NI_CLOSE_DAILY_UPTAKE(UNO3,UNH4,NLAYR,
+     &    TRNO3U,TRNH4U,TRNU,NASSIMD)
         NFORGROW=NASSIMD
       ENDIF
       PGAVL = PGAVL - AGRVG * (WLDOTN + WSDOTN + WRDOTN)

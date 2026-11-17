@@ -1,0 +1,11 @@
+&NINTEGRATION
+ common_acceptance=1, reserve_mode=2,
+ reserve_capacity=.004, reserve_fill_tau=3., reserve_protect=.02,
+ ni_stage=5, root_mode=2,
+ assim_no3_v=.003, assim_nh4_v=.006, assim_no3_k=.001, assim_nh4_k=.00005,
+ root_v=.0002, root_k=10., diffusion_k=.005, pool_beta=1.,
+ leaf_a=.042, leaf_b=.30, stem_a=.025, stem_b=.35,
+ min_ratio=.40, max_ratio=1.25, photo_floor=.05, photo_gamma=1., growth_tau=2.,
+ state_timing=1, pods_n_state=1, budget_revision=1, c4_budget=1, leaf_coupling=1, c4_photo=1,
+ remob_mode=1, luxury_priority=1, remob_tau=8., protect_beta=0.5, slow_ratio=3.
+/
