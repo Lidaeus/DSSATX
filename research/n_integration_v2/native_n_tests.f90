@@ -13,6 +13,16 @@ program native_n_tests
   logical::psi_valid
   integer::checks
   checks=0
+  call check(NI_BUFFER_INFLOW(0._dp,1._dp,.8_dp)==0,'storage: zero supply gives zero uptake')
+  call check(NI_BUFFER_INFLOW(10._dp,1._dp,1._dp)==0,'storage: full pool gives zero uptake')
+  a3=NI_BUFFER_INFLOW(.5_dp,1._dp,.8_dp)
+  a4=NI_BUFFER_INFLOW(1._dp,1._dp,.8_dp)
+  call check(0<a3.and.a3<a4.and.a4<.2_dp,'storage: supply contrast survives hard-cap regime')
+  call check(abs(NI_BUFFER_INFLOW(1.e-10_dp,1._dp,.8_dp)/1.e-10_dp-.2_dp)<1.e-10_dp, &
+    'storage: low exposure approaches open fraction')
+  call check(NI_BUFFER_INFLOW(.5_dp,1._dp,.9_dp)<a3,'storage: fullness reduces uptake at fixed supply')
+  call check(abs(a4-(a3+NI_BUFFER_INFLOW(.5_dp,1._dp,.8_dp+a3)))<1.e-14_dp, &
+    'storage: splitting supply without withdrawals preserves uptake')
   call NI_PSI_KERNEL(.7_dp,.4_dp,1._dp,1.25_dp,psi,psi_valid)
   call check(psi_valid.and.abs(psi+.5_dp)<1.e-14_dp,'psi: deficit uses minimum-critical span')
   call check(NI_ROOT_PSI_FACTOR(psi,psi_valid,1._dp)==1,'psi: full membrane capacity in deficit')

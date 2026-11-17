@@ -114,7 +114,7 @@ module CG_Nitrogen
   public :: NI_ROOT_SOIL_DEBIT, NI_ROOT_SOIL_END
   public :: NI_TARGETS, NI_REFERENCES, NI_GROWTH, NI_LEAF_FACTOR
   public :: NI_TOTAL_Q, NI_CURVE_KERNEL, NI_ROOT_KERNEL, NI_ASSIM_KERNEL
-  public :: NI_PSI_KERNEL, NI_ROOT_PSI_FACTOR
+  public :: NI_PSI_KERNEL, NI_ROOT_PSI_FACTOR, NI_BUFFER_INFLOW
   public :: NI_PREASSIM, NI_MERGE_OLD
   public :: NI_ORG_BEGIN, NI_ORG_END
   public :: NI_SPLIT
@@ -1317,24 +1317,46 @@ contains
     if(amount>total+1.e-10_dp) error stop 'NI: assimilation exceeds substrate'
     if(total>0) pool=pool*max(0._dp,1._dp-amount/total)
   end subroutine
+  pure real(dp) function NI_BUFFER_INFLOW(potential,capacity,stock) result(inflow)
+    real(dp),intent(in) :: potential,capacity,stock
+    real(dp) :: exposure,fraction
+    inflow=0
+    if(capacity<=0.or.potential<=0.or.stock>=capacity)return
+    ! Finite storage: dQ/dt = potential_rate*(1-Q/capacity).
+    ! Integrate over the candidate interval at fixed carrier and with no
+    ! concurrent withdrawals. The surrounding split call accounts for assimilation.
+    exposure=potential/capacity
+    if(exposure<.1_dp)then
+      fraction=2*exp(-.5_dp*exposure)*sinh(.5_dp*exposure)
+    else
+      fraction=1-exp(-exposure)
+    endif
+    inflow=(capacity-max(0._dp,stock))*fraction
+  end function
   subroutine NI_ACCEPT_UPTAKE(uno3,unh4,nlayr,tr3,tr4,trnu)
     integer,intent(in)::nlayr
     real,intent(inout)::uno3(:),unh4(:)
     real,intent(out)::tr3,tr4,trnu
-    real(dp)::p3,p4,h3,h4,scale
+    real(dp)::p3,p4,cap3,cap4,limit3,limit4,scale
     integer::l
     p3=sum(real(uno3(1:nlayr),dp))/10; p4=sum(real(unh4(1:nlayr),dp))/10
     if(minval(uno3(1:nlayr))<0.or.minval(unh4(1:nlayr))<0) error stop 'NI: negative gross uptake candidate'
-    h3=max(0._dp,q_no3_max*sum(carrier)-sum(q3))
-    h4=max(0._dp,q_nh4_max*sum(carrier)-sum(q4))
+    cap3=q_no3_max*sum(carrier); cap4=q_nh4_max*sum(carrier)
+    if(rnk_mode>=RNK_MODE_A)then
+      limit3=NI_BUFFER_INFLOW(p3,cap3,sum(q3))
+      limit4=NI_BUFFER_INFLOW(p4,cap4,sum(q4))
+    else
+      limit3=max(0._dp,cap3-sum(q3))
+      limit4=max(0._dp,cap4-sum(q4))
+    endif
     if(p3>0) then
-      scale=min(1._dp,h3/p3)
+      scale=min(1._dp,limit3/p3)
       do l=1,nlayr
         uno3(l)=flux32(real(uno3(l),dp)*scale)
       end do
     end if
     if(p4>0) then
-      scale=min(1._dp,h4/p4)
+      scale=min(1._dp,limit4/p4)
       do l=1,nlayr
         unh4(l)=flux32(real(unh4(l),dp)*scale)
       end do

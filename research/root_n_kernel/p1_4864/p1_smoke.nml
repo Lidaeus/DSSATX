@@ -6,5 +6,5 @@
  leaf_a=.042, leaf_b=.30, stem_a=.025, stem_b=.35,
  min_ratio=.40, max_ratio=1.25, photo_floor=.05, photo_gamma=1., growth_tau=2.,
  state_timing=1, pods_n_state=1, budget_revision=1, c4_budget=1, leaf_coupling=1, c4_photo=1,
- remob_mode=1, luxury_priority=1, remob_tau=8., protect_beta=0.5, slow_ratio=3.
+ remob_mode=1, luxury_priority=0, remob_tau=8., protect_beta=0.5, slow_ratio=3.
 /

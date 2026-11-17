@@ -115,9 +115,29 @@ status, and missing references give a neutral factor of one. The
 unavailable state covers initialization before the first committed
 state and runs that do not enable organ curves. This reuses the
 `pool_beta` coefficient. The legacy root path continues to use that
-coefficient with inorganic pool occupancy. Soil debit, storage-capacity
-acceptance, assimilation, and the existing shoot response functions
-follow their existing rules.
+coefficient with inorganic pool occupancy.
+
+For both radial transport modes, the candidate is the layer supply
+computed before admission into the plant inorganic pool. For each ion,
+let P be the total candidate over the day, K its pool capacity, and Q
+the stock at admission (after any early assimilation). The effective
+inflow rate decreases with the unoccupied fraction: dQ/dt = P(t)(1-Q/K),
+where P(t) is the candidate rate. With fixed capacity and no concurrent
+withdrawals within this split, the accepted total is
+(K-Q)(1-exp(-P/K)), distributed in proportion to layer candidates.
+It tends to the available space for very large supply, retains a
+supply response before saturation, and cannot exceed either the
+candidate or the space. It uses the existing pool capacities and
+leaves actual soil debit in the existing settlement path.
+
+Use `luxury_priority=0` in the shared NIntegration configuration for
+the paired study. This uses the existing demand budget that includes
+old-tissue refill and allows growth surplus to refill leaves and
+stems toward the upper reference. Assimilation remains limited by
+substrate, kinetics and available carbon. With `luxury_priority=1`,
+core refill targets the critical reference and additional assimilation
+uses the later discretionary carbon budget. Keep the same setting in
+both arms.
 
 With `DSSAT_P0_TRACE=1`, `rnk_psi_end` reports the day-close stock,
 reference stocks and signed state, and `rnk_psi_feedback` reports the
