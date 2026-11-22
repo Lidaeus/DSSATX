@@ -6,9 +6,8 @@ module CG_Nitrogen
   use ieee_arithmetic, only: ieee_is_finite, ieee_next_after
   use ModuleDefs, only: ControlType, SwitchType, NL
   use CG_P0Trace, only: P0_V, P0_ENABLED
-  use RootNUptake, only: rnk_dp, rnk_params, rnk_layer, rnk_diag, &
-    rnk_NO3, rnk_NH4, rnk_layer_A, rnk_layer_B, rnk_membrane, rnk_validate, &
-    RNK_MODE_A, RNK_MODE_B
+  use CG_RootNUptakeAdapter, only: RNK_LOAD, RNK_RESET, RNK_CAPTURE, RNK_ACCEPT, RNK_PUBLISH, RNK_CANDIDATES, &
+    NI_COMMON_ROOT_ENABLED, NI_ROOT_SOIL_DEBIT, NI_ROOT_SOIL_END
   implicit none
   private
   integer, parameter :: dp=real64
@@ -80,7 +79,6 @@ module CG_Nitrogen
   real(dp), save :: litter3(NL)=0, litter4(NL)=0, returned_litter=0
   real(dp), save :: theta_snapshot(NL)=0, rwu_snapshot(NL)=0, rlv_snapshot(NL)=0
   integer, save :: water_day=-1, water_run=-1, water_nlayr=0
-  real(dp), save :: theta0_snapshot(NL)=0
   real(dp), save :: cmin(2)=0, ccrit(2)=0, cmax(2)=0, structural_fraction=1, growth_factor=1
   real(dp), save :: d_q_begin=0, d_u3=0, d_u4=0, d_a3=0, d_a4=0
   real(dp), save :: d_cost=0, d_refund=0, d_litter=0, d_residual=0
@@ -89,25 +87,6 @@ module CG_Nitrogen
   real(dp), save :: org_begin=0,org_off_begin=0,leak_begin=0,legacy_n_res=0,legacy_c_overrun=0
   real(dp), save :: r_mf(NL)=0,r_diff(NL)=0,r_mem(NL)=0,r_cr(NL)=0,r_bulk(NL)=0
   real(dp), save :: r_candidate3(NL)=0,r_candidate4(NL)=0,r_final3(NL)=0,r_final4(NL)=0
-  ! --- RootNUptake 公共核 (T2 2026-11-12): 0=off(冻结行为), 1=A(等效根际运输) ---
-  integer, save :: rnk_mode=0, rnk_radial_cells=8
-  real(dp), save :: rnk_species_diffusion(2)=[1.64e-4_dp,1.50e-4_dp]
-  type(rnk_diag), save :: r_rnk_transport(2,NL)
-  real(dp), save :: rnk_km_high(2)=0, rnk_km_low(2)=0
-  real(dp), save :: rnk_vmax_high(2)=0, rnk_vmax_low(2)=0
-  real(dp), save :: rnk_kd(2)=0, rnk_residual(2)=0
-  real(dp), save :: rnk_radius=0
-  type(rnk_params), save :: rnk_par
-  integer, save :: r_rnk_branch(2,NL)=0
-  integer, save :: r_rnk_flag(2,NL)=0
-  real(dp), save :: r_rnk_cap(2,NL)=0, r_rnk_mf4(NL)=0, r_rnk_bulk4(NL)=0, r_rnk_cr4(NL)=0
-  logical, save :: r_rnk_capped(2,NL)=.false.
-  real(dp), save :: r_rnk_stock_before(2,NL)=0, r_rnk_theta0(NL)=0, r_rnk_diff(2,NL)=0
-  real(dp), save :: r_rnk_accept3(NL)=0, r_rnk_accept4(NL)=0
-  real(dp), save :: r_rnk_adv(2,NL)=0, r_rnk_mass_error(2,NL)=0
-  integer, save :: r_rnk_source_day=-1, r_rnk_pending_run=-1, r_rnk_pending_nlayr=0
-  integer, save :: rnk_ledger_unit=0
-  logical, save :: rnk_ledger_opened=.false.
   integer,save::root_output_unit=0
   logical,save::root_opened=.false.
   public :: NI_LOAD, NI_RESET, NI_ENABLED, NI_CURVES, NI_FEEDBACK
@@ -228,7 +207,7 @@ contains
     nonreserve=org_start(1)
     if(NI_RESERVES())nonreserve=nonreserve-reserve_begin(1)
     if(.not.lai_opened)then
-      open(newunit=lai_unit,file='PlantNLAI.csv',status='new',action='write',iostat=ios)
+      open(newunit=lai_unit,file='PlantNLAI.csv',status='replace',action='write',iostat=ios)
       if(ios/=0)error stop 'NI LAI: cannot create leaf growth ledger'
       write(lai_unit,'(A)')'run,yrdoy,lai_cn_mode,accept_calls,area_calls,shape,state_smoothed,state_raw_leaf,'// &
         'state_response,N_nonreserve_begin,W_leaf_begin,N_min_begin,N_crit_begin,dm_leaf_potential,dm_leaf_request,'// &
@@ -474,7 +453,7 @@ contains
     real,intent(in)::n(3)
     integer::ios
     if(.not.p2_opened)then
-      open(newunit=p2_unit,file='PlantNP2.csv',status='new',action='write',iostat=ios)
+      open(newunit=p2_unit,file='PlantNP2.csv',status='replace',action='write',iostat=ios)
       if(ios/=0)error stop 'NI P2: cannot create common/reserve ledger'
       write(p2_unit,'(A)')'run,yrdoy,common_acceptance,reserve_mode,plan_calls,veg_calls,C_available,N_available,'// &
         'fruit_C_request,fruit_N_request,fruit_C_cap,fruit_N_cap,fruit_C_used,fruit_N_used,common_scale,'// &
@@ -565,7 +544,7 @@ contains
       error stop 'NI C4: actual carbohydrate expenditure imbalance'
     endif
     if(.not.cash_opened) then
-      open(newunit=cash_unit,file='PlantCCash.csv',status='new',action='write',iostat=ios)
+      open(newunit=cash_unit,file='PlantCCash.csv',status='replace',action='write',iostat=ios)
       if(ios/=0)error stop 'NI C4: cannot create carbohydrate expenditure ledger'
       write(cash_unit,'(A)')'run,yrdoy,PG,actual_C_mined,maintenance,N_assim,N_resynthesis,veg_growth,fruit_growth,'// &
         'storage_cost,CH2O_residual,C_equivalent_residual,predicted_unused_not_a_stock,'// &
@@ -909,7 +888,7 @@ contains
   end function
   subroutine NI_OPEN_DAY(control)
     type(ControlType),intent(in)::control
-    if(state_timing==0.and.pods_n_state==0.and.rnk_mode<RNK_MODE_A) return
+    if(state_timing==0.and.pods_n_state==0.and..not.NI_COMMON_ROOT_ENABLED()) return
     if(day_run==control%RUN.and.day_date==control%YRDOY) return
     day_run=control%RUN;day_date=control%YRDOY
     day_valid=ready.and.end_run==control%RUN
@@ -1072,8 +1051,7 @@ contains
     type(ControlType),intent(in)::control
     type(SwitchType),intent(in)::switch
     character(512)::path,message
-    integer::ios,unit,status,length,i,k
-    integer,parameter::group_len=len('&ROOTNUPTAKE')
+    integer::ios,unit,status,length
     logical::exists
     namelist /NINTEGRATION/ ni_stage,root_mode,q_no3_max,q_nh4_max, &
       assim_no3_v,assim_nh4_v,assim_no3_k,assim_nh4_k, &
@@ -1084,9 +1062,6 @@ contains
       photo_reference_mode,photo_sln_ref,leaf_expansion_mode,v4_diagnostics,common_acceptance,reserve_mode, &
       reserve_capacity,reserve_fill_tau,reserve_protect,build_min_leaf,build_min_stem, &
       remob_rate_mode,remob_rate_max,functional_rate_max,lai_cn_mode,lai_cn_shape
-    namelist /ROOTNUPTAKE/ rnk_mode,rnk_km_high,rnk_km_low,rnk_vmax_high,rnk_vmax_low, &
-      rnk_kd,rnk_residual,rnk_radius,rnk_species_diffusion,rnk_radial_cells
-    logical :: rnk_present
     if(loaded) then
       if(NI_ENABLED()) then
         if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
@@ -1179,65 +1154,10 @@ contains
        max(state_timing,pods_n_state,remob_mode,luxury_priority)>1) error stop 'NI v3: switches must be 0 or 1'
     if(ni_stage/=5.and.max(state_timing,pods_n_state,remob_mode,luxury_priority)>0) &
       error stop 'NI v3: opt-in modes require stage5; stage0 cannot silently activate them'
-    ! --- RootNUptake 公共核配置: &ROOTNUPTAKE 缺席即 mode=0(冻结行为) ---
-    inquire(file=trim(path),exist=exists)
-    if(exists) then
-      open(newunit=unit,file=trim(path),status='old',action='read',iostat=ios)
-      if(ios/=0) error stop 'RNK: cannot reopen configuration'
-      rnk_present=.false.
-      do
-        read(unit,'(A)',iostat=ios) message
-        if(ios/=0) exit
-        do i=1,len_trim(message)
-          k=iachar(message(i:i))
-          if(k>=iachar('a').and.k<=iachar('z')) message(i:i)=achar(k-32)
-        end do
-        i=verify(message,' '//achar(9))
-        if(i==0.or.i>len(message)-group_len) cycle
-        if(message(i:i+group_len-1)=='&ROOTNUPTAKE'.and. &
-           scan(message(i+group_len:i+group_len),' /!'//achar(9))/=0) then
-          rnk_present=.true.
-          exit
-        end if
-      end do
-      if(rnk_present) then
-        rewind(unit)
-        read(unit,nml=ROOTNUPTAKE,iostat=ios,iomsg=message)
-        close(unit)
-        if(ios/=0) then
-          write(*,'(A)') trim(message)
-          error stop 'RNK: invalid ROOTNUPTAKE namelist'
-        end if
-        if(rnk_mode<0.or.rnk_mode>2) error stop 'RNK: transport mode must be 0(off),1(A),2(B)'
-        if(rnk_mode==RNK_MODE_B.and.all(rnk_radial_cells/=[8,16])) &
-          error stop 'RNK: radial grid must use 8 or 16 cells'
-        if(rnk_mode>=1) then
-          if(.not.NI_ENABLED()) error stop 'RNK: common kernel requires enabled NI integration'
-          if(NI_ROOT_MODE()<=0) error stop 'RNK: common kernel requires actual-water root mode (root_mode>=1)'
-          rnk_par%km_high=rnk_km_high; rnk_par%km_low=rnk_km_low
-          rnk_par%vmax_high=rnk_vmax_high; rnk_par%vmax_low=rnk_vmax_low
-          rnk_par%kd_sorption=rnk_kd; rnk_par%residual_ppm=rnk_residual
-          rnk_par%source_tag(rnk_NO3)='v15-engineering'
-          rnk_par%source_tag(rnk_NH4)='literature-prior'
-          block
-            character(160) :: rnk_msg
-            rnk_msg=rnk_validate(rnk_par,NL)
-            if(len_trim(rnk_msg)>0) then
-              write(*,'(A)') trim(rnk_msg)
-              error stop 'RNK: parameter validation failed'
-            end if
-          end block
-          if(.not.all(ieee_is_finite([rnk_radius,rnk_species_diffusion]))) &
-            error stop 'RNK: nonfinite transport parameters'
-          if(rnk_radius<=0.or.any(rnk_species_diffusion<0)) &
-            error stop 'RNK: require positive radius and nonnegative species diffusivities'
-          rnk_par%species_diffusion_m2d=rnk_species_diffusion
-          rnk_par%root_radius_m=rnk_radius
-        end if
-      else
-        close(unit)
-        rnk_mode=0
-      end if
+    call RNK_LOAD(path)
+    if(NI_COMMON_ROOT_ENABLED()) then
+      if(.not.NI_ENABLED()) error stop 'RNK: common kernel requires enabled NI integration'
+      if(NI_ROOT_MODE()<=0) error stop 'RNK: common kernel requires actual-water root mode (root_mode>=1)'
     end if
     if(.not.NI_ENABLED()) return
     if(budget_revision<0.or.budget_revision>1) error stop 'NI: budget_revision must be 0 or 1'
@@ -1264,8 +1184,8 @@ contains
       error stop 'NI: first integration supports nonfixing TM nitrogen simulation only'
     if(switch%ISWDIS/='N') error stop 'NI: inorganic pest export is not implemented; pests must be off'
     if(NI_DAILY_ORGANIC())then
-      if(rnk_mode<RNK_MODE_A.or..not.NI_COMMON().or.NI_LAI_ON()) &
-        error stop 'NI organic buffer requires the paired root kernel and joint acceptance'
+      if(.not.NI_COMMON_ROOT_ENABLED().or..not.NI_COMMON().or.NI_LAI_ON()) &
+        error stop 'NI organic buffer requires the steady root kernel and joint acceptance'
     else if(q_no3_max<=0.or.q_nh4_max<=0.or.q_nh4_max>=q_no3_max)then
       error stop 'NI: explicit positive species capacities are required; NH4 capacity must be smaller'
     endif
@@ -1297,7 +1217,7 @@ contains
     end if
   end subroutine
   subroutine NI_RESET()
-    if(r_rnk_pending_run/=-1) error stop 'RNK: season reset before reporting pending uptake'
+    call RNK_RESET()
     q3=0; q4=0; carrier=0; w_begin=0; litter3=0; litter4=0
     returned_litter=0; water_ready=.false.; ready=.false.; growth_factor=1
     cmin=0; ccrit=0; cmax=0; d_pending=0
@@ -1312,9 +1232,6 @@ contains
     reserve_n=0;reserve_begin=0;reserve_fill=0;reserve_release=0;reserve_sen_recovery=0;reserve_litter=0
     reserve_pending=.false.;reserve_residual=0
     lai_accept_calls=0;lai_area_calls=0;lai_dm_raw=0;lai_dm_request=0;lai_area=0
-    r_rnk_branch=0; r_rnk_flag=0; r_rnk_cap=0; r_rnk_mf4=0; r_rnk_bulk4=0; r_rnk_cr4=0; r_rnk_capped=.false.
-    r_rnk_stock_before=0; r_rnk_theta0=0; r_rnk_diff=0; r_rnk_accept3=0; r_rnk_accept4=0
-    r_rnk_source_day=-1
   end subroutine
   subroutine NI_BEGIN(weights)
     real,intent(in)::weights(3)
@@ -1418,7 +1335,7 @@ contains
     cap3=q_no3_max*sum(carrier); cap4=q_nh4_max*sum(carrier)
     if(NI_DAILY_ORGANIC())then
       limit3=p3; limit4=p4
-    else if(rnk_mode>=RNK_MODE_A)then
+    else if(NI_COMMON_ROOT_ENABLED())then
       limit3=NI_BUFFER_INFLOW(p3,cap3,sum(q3))
       limit4=NI_BUFFER_INFLOW(p4,cap4,sum(q4))
     else
@@ -1439,11 +1356,7 @@ contains
     end if
     d_u3=sum(real(uno3(1:nlayr),dp))/10
     d_u4=sum(real(unh4(1:nlayr),dp))/10
-    if(rnk_mode>=RNK_MODE_A) then
-      ! 账本: 接受链缩放后的逐层接受量 (g N m^-2), 供 LayerRootNUptake.csv
-      r_rnk_accept3(1:nlayr)=real(uno3(1:nlayr),dp)/10
-      r_rnk_accept4(1:nlayr)=real(unh4(1:nlayr),dp)/10
-    end if
+    if(NI_COMMON_ROOT_ENABLED()) call RNK_ACCEPT(nlayr,uno3,unh4)
     if(NI_DAILY_ORGANIC())then
       ! Today's provisional inflow is substrate for finite assimilation.
       ! Its uncommitted fraction is cancelled before the soil debit.
@@ -1635,6 +1548,8 @@ contains
     else if(any(q3>q_no3_max*carrier+1.e-9_dp).or.any(q4>q_nh4_max*carrier+1.e-9_dp))then
       error stop 'NI: storage capacity exceeded'
     endif
+    if(NI_COMMON_ROOT_ENABLED().and.P0_ENABLED()) call P0_V(control,'rnk_pool_capacity', &
+      'QNO3_max,QNH4_max',merge([0.,0.],real([q_no3_max,q_nh4_max]*sum(carrier)),NI_DAILY_ORGANIC()))
     if(NI_CURVES()) then
       call references(real(weights,dp))
       functional_n=real(org_n(1:2),dp)
@@ -1650,7 +1565,7 @@ contains
         shoot_max=shoot_crit+reserve_capacity*sum(shoot_w)
       endif
       call NI_PSI_KERNEL(shoot_n,shoot_min,shoot_crit,shoot_max,psi_end,psi_end_valid)
-      if(rnk_mode>=RNK_MODE_A.and.P0_ENABLED()) then
+      if(NI_COMMON_ROOT_ENABLED().and.P0_ENABLED()) then
         call P0_V(control,'rnk_psi_end','psi,valid,N_func,N_min,N_crit,N_max', &
           [real(psi_end),real(merge(1,0,psi_end_valid)),real(sum(functional_n)), &
            real(shoot_min),real(shoot_crit),real(shoot_max)])
@@ -1691,7 +1606,7 @@ contains
     ready=.true.
     if(NI_LEAF_COUPLED())then
       if(.not.leaf_opened)then
-        open(newunit=leaf_unit,file='PlantNLeaf.csv',status='new',action='write',iostat=ios)
+        open(newunit=leaf_unit,file='PlantNLeaf.csv',status='replace',action='write',iostat=ios)
         if(ios/=0)error stop 'NI C4: cannot create leaf fate ledger'
         write(leaf_unit,'(A)')'run,yrdoy,sen_DM_leaf_planned,sen_DM_stem_planned,cell_loss_leaf,cell_loss_stem,cell_loss_root,'// &
           'sen_available_leaf,sen_available_stem,sen_N_leaf,sen_N_stem,sen_N_root,sen_N_shell,'// &
@@ -1703,7 +1618,7 @@ contains
     endif
     if(max(state_timing,pods_n_state)>0) then
       if(.not.v3_opened) then
-        open(newunit=v3_unit,file='PlantNV3.csv',status='new',action='write',iostat=ios)
+        open(newunit=v3_unit,file='PlantNV3.csv',status='replace',action='write',iostat=ios)
         if(ios/=0) error stop 'NI v3: cannot create day-state ledger'
         write(v3_unit,'(A)')'run,yrdoy,state_timing,pods_n_state,source_yrdoy,valid,'// &
           'growth_day,z_leaf_day,z_stem_day,pod_n_factor,growth_end,z_leaf_end,z_stem_end'
@@ -1718,7 +1633,7 @@ contains
     if(NI_REVISED())call write_lai(control,lai)
     if(v4_diagnostics==1)then
       if(.not.v4_opened)then
-        open(newunit=v4_unit,file='PlantNV4.csv',status='new',action='write',iostat=ios)
+        open(newunit=v4_unit,file='PlantNV4.csv',status='replace',action='write',iostat=ios)
         if(ios/=0)error stop 'NI V4: cannot create mechanism ledger'
         write(v4_unit,'(A)')'run,yrdoy,photo_reference_mode,leaf_expansion_mode,leaf_min_ratio,stem_min_ratio,'// &
           'leaf_inf,stem_inf,photo_sln_ref,leaf_gate,veg_before_leaf,veg_before_stem,veg_before_root,'// &
@@ -1732,7 +1647,7 @@ contains
     endif
     if(luxury_priority==1) then
       if(.not.lux_opened)then
-        open(newunit=lux_unit,file='PlantNLuxury.csv',status='new',action='write',iostat=ios)
+        open(newunit=lux_unit,file='PlantNLuxury.csv',status='replace',action='write',iostat=ios)
         if(ios/=0)error stop 'NI v3: cannot create priority ledger'
         write(lux_unit,'(A)')'run,yrdoy,luxury_priority,cap_no3,cap_nh4,core_no3,core_nh4,late_no3,late_nh4,'// &
           'C_available,C_late,C_storage_before,C_storage_after,C_reserved,A_function_late,A_luxury,'// &
@@ -1745,7 +1660,7 @@ contains
     endif
     if(NI_REMOB_ON()) then
       if(.not.mob_opened) then
-        open(newunit=mob_unit,file='PlantNRemob.csv',status='new',action='write',iostat=ios)
+        open(newunit=mob_unit,file='PlantNRemob.csv',status='replace',action='write',iostat=ios)
         if(ios/=0) error stop 'NI v3: cannot create remobilization ledger'
         write(mob_unit,'(A)')'run,yrdoy,remob_mode,tau,protect_beta,slow_ratio,severity,veg_z_day,growth_severity_day,'// &
           'gap,acceptance_prediction,new_growth_N_actual,C_remob_actual,'// &
@@ -1762,7 +1677,7 @@ contains
     endif
     if(NI_REVISED()) then
       if(.not.audit_opened) then
-        open(newunit=audit_unit,file='PlantABudget.csv',status='new',action='write',iostat=ios)
+        open(newunit=audit_unit,file='PlantABudget.csv',status='replace',action='write',iostat=ios)
         if(ios/=0) error stop 'NI A: cannot create actual acceptance ledger'
         write(audit_unit,'(A)') 'run,yrdoy,budget_revision,curve_w0,photo_slw_ref,'// &
           'organic_begin_including_seed,organic_end_including_seed,cumulative_loss_begin,cumulative_loss_end,'// &
@@ -1783,8 +1698,8 @@ contains
       surplus=max(0._dp,real(org_n(1:2),dp)-ccrit*real(weights(1:2),dp))
     end if
     if(.not.opened) then
-      open(newunit=output_unit,file='PlantNIntegration.csv',status='new',action='write',iostat=ios)
-      if(ios/=0) error stop 'NI: output exists or cannot be created'
+      open(newunit=output_unit,file='PlantNIntegration.csv',status='replace',action='write',iostat=ios)
+      if(ios/=0) error stop 'NI: cannot create plant nitrogen ledger'
       write(output_unit,'(A)') 'run,yrdoy,stage,QNO3,QNH4,U_NO3,U_NH4,A_NO3,A_NH4,C_assim,C_refund,'// &
         'inorg_litter,pending_litter,Q_residual,carrier_leaf,carrier_stem,carrier_root,'// &
         'leaf_min,leaf_crit,leaf_max,stem_min,stem_crit,stem_max,growth_factor,pending_uptake,soil_litter_returned_kg_ha,'// &
@@ -1804,8 +1719,8 @@ contains
       nniraw,nnifun,deficit,surplus
     if(NI_ROOT_MODE()>0) then
       if(.not.root_opened) then
-        open(newunit=root_output_unit,file='LayerNIntegration.csv',status='new',action='write',iostat=ios)
-        if(ios/=0) error stop 'NI: layer diagnostic already exists or cannot be opened'
+        open(newunit=root_output_unit,file='LayerNIntegration.csv',status='replace',action='write',iostat=ios)
+        if(ios/=0) error stop 'NI: cannot create layer nitrogen ledger'
         write(root_output_unit,'(A)') 'run,yrdoy,layer,theta_transport,RWU_cm,'// &
           'Cbulk_mgN_L,Cr_potential_mgN_L,MF_candidate_gN_m2,Diff_potential_gN_m2,'// &
           'membrane_potential_gN_m2,NO3_candidate_gN_m2,NH4_candidate_gN_m2,NO3_final_gN_m2,NH4_final_gN_m2'
@@ -1817,87 +1732,7 @@ contains
           r_candidate3(l),r_candidate4(l),r_final3(l),r_final4(l)
       end do
     end if
-    if(NI_COMMON_ROOT_ENABLED() .and. r_rnk_source_day==control%YRDOY) then
-      if(r_rnk_pending_run/=-1) error stop 'RNK: previous uptake was not reported by soil'
-      r_rnk_pending_run=control%RUN
-      r_rnk_pending_nlayr=nlayr
-    end if
-  end subroutine
-
-  logical function NI_COMMON_ROOT_ENABLED()
-    NI_COMMON_ROOT_ENABLED=rnk_mode>=RNK_MODE_A
-  end function
-
-  subroutine NI_ROOT_SOIL_DEBIT(control,nlayr,uno3,unh4)
-    type(ControlType),intent(in)::control
-    integer,intent(in)::nlayr
-    real,intent(in)::uno3(:),unh4(:)
-    real(dp)::deducted(2,nlayr)
-    if(.not.NI_COMMON_ROOT_ENABLED()) return
-    if(r_rnk_pending_run==-1) then
-      if(any(uno3(1:nlayr)/=0.) .or. any(unh4(1:nlayr)/=0.)) &
-        error stop 'RNK: soil debit without pending plant uptake'
-      return
-    end if
-    if(control%RUN/=r_rnk_pending_run.or.nlayr/=r_rnk_pending_nlayr.or.control%YRDOY<=r_rnk_source_day) &
-      error stop 'RNK: soil debit does not follow the pending plant uptake'
-    deducted(rnk_NO3,:)=real(uno3(1:nlayr),dp)/10
-    deducted(rnk_NH4,:)=real(unh4(1:nlayr),dp)/10
-    if(any(deducted(rnk_NO3,:)/=r_final3(1:nlayr)).or.any(deducted(rnk_NH4,:)/=r_final4(1:nlayr))) &
-      error stop 'RNK: soil debit differs from the settled plant uptake'
-    call NI_WRITE_ROOT_LEDGER(nlayr,control%YRDOY,deducted)
-  end subroutine
-
-  subroutine NI_ROOT_SOIL_END(control,nlayr)
-    type(ControlType),intent(in)::control
-    integer,intent(in)::nlayr
-    real(dp)::deducted(2,nlayr)
-    if(.not.NI_COMMON_ROOT_ENABLED().or.r_rnk_pending_run==-1) return
-    if(control%RUN/=r_rnk_pending_run.or.nlayr/=r_rnk_pending_nlayr.or.control%YRDOY<r_rnk_source_day) &
-      error stop 'RNK: season end does not match the pending plant uptake'
-    ! Preserve the native season boundary. Report the pending flux without a soil mutation.
-    deducted=0
-    call NI_WRITE_ROOT_LEDGER(nlayr,0,deducted)
-  end subroutine
-
-  subroutine NI_WRITE_ROOT_LEDGER(nlayr,commit_day,deducted)
-    integer,intent(in)::nlayr,commit_day
-    real(dp),intent(in)::deducted(2,nlayr)
-    integer::l,s,ios
-    real(dp)::settled
-    character(len=18)::soil_status
-    type(rnk_diag)::diagnostic
-    if(.not.rnk_ledger_opened) then
-      open(newunit=rnk_ledger_unit,file='LayerRootNUptake.csv',status='new',action='write',iostat=ios)
-      if(ios/=0) error stop 'RNK: layer ledger already exists or cannot be opened'
-      write(rnk_ledger_unit,'(A)') 'run,yrdoy,layer,species,source_day,soil_commit_day,'// &
-        'theta0,theta_mid,rwu_cm_d,rlv_cm_cm3,stock_before_gN_m2,c_bulk_mgN_L,c_root_mgN_L,'// &
-        'mf_potential_gN_m2,diffusive_gN_m2,candidate_gN_m2,accepted_gN_m2,deducted_gN_m2,stock_cap_gN_m2,'// &
-        'settled_gN_m2,pending_gN_m2,radial_advective_gN_m2,radial_mass_error_gN_m2,solver_status,soil_status,'// &
-        'transport_mode,shared_transport,d_bulk_m2_d,zero_diffusion,steady_residual_gN_m2,'// &
-        'c_bulk_end_mgN_L,c_root_mean_mgN_L,c_bulk_mean_mgN_L,hats_candidate_gN_m2,lats_candidate_gN_m2'
-      rnk_ledger_opened=.true.
-    end if
-    soil_status=merge('committed         ','pending_season_end',commit_day/=0)
-    do l=1,nlayr
-      do s=1,2
-        settled=rnk_fin(s,l)
-        diagnostic=r_rnk_transport(s,l)
-        write(rnk_ledger_unit,'(I0,5(",",I0),17(",",ES24.15E3),",",I0,",",A,2(",",I0),",",ES24.15E3, &
-             & ",",I0,6(",",ES24.15E3))') &
-          r_rnk_pending_run,r_rnk_source_day,l,s,r_rnk_source_day,commit_day, &
-          r_rnk_theta0(l),theta_snapshot(l),rwu_snapshot(l),rlv_snapshot(l), &
-          r_rnk_stock_before(s,l),rnk_cb(s,l),rnk_cr(s,l),rnk_mf(s,l), &
-          r_rnk_diff(s,l),rnk_cand(s,l),rnk_acc(s,l),deducted(s,l),r_rnk_cap(s,l), &
-          settled,settled-deducted(s,l),r_rnk_adv(s,l),r_rnk_mass_error(s,l),rnk_status(s,l),trim(soil_status), &
-          rnk_mode,1,diagnostic%bulk_diffusion,merge(1,0,diagnostic%zero_diffusion), &
-          diagnostic%steady_residual,diagnostic%c_bulk_end,diagnostic%c_root_mean,diagnostic%c_bulk_mean, &
-          diagnostic%hats_candidate,diagnostic%lats_candidate
-      end do
-    end do
-    flush(rnk_ledger_unit)
-    r_rnk_pending_run=-1
-    r_rnk_pending_nlayr=0
+    if(NI_COMMON_ROOT_ENABLED()) call RNK_PUBLISH(control,nlayr,r_final3,r_final4)
   end subroutine
 
   subroutine NI_RETURN_LITTER(sno3,snh4,nlayr)
@@ -1919,16 +1754,7 @@ contains
     rwu_snapshot(1:nlayr)=real(rwu(1:nlayr),dp)
     theta_snapshot(1:nlayr)=real(theta(1:nlayr),dp)
     rlv_snapshot(1:nlayr)=real(rlv(1:nlayr),dp)
-    if(NI_COMMON_ROOT_ENABLED()) then
-      if(.not.present(depth)) error stop 'RNK: pre-extraction water snapshot requires layer depths'
-      if(any(.not.ieee_is_finite(theta(1:nlayr))).or.any(.not.ieee_is_finite(rwu(1:nlayr))).or. &
-         any(.not.ieee_is_finite(depth(1:nlayr))).or.any(.not.ieee_is_finite(rlv(1:nlayr)))) &
-        error stop 'RNK: non-finite root water snapshot'
-      if(any(depth(1:nlayr)<=0.).or.any(theta(1:nlayr)<0.).or.any(rwu(1:nlayr)<0.)) &
-        error stop 'RNK: invalid root water snapshot'
-      theta0_snapshot(1:nlayr)=real(theta(1:nlayr),dp)
-      theta_snapshot(1:nlayr)=theta0_snapshot(1:nlayr)-0.5_dp*rwu_snapshot(1:nlayr)/real(depth(1:nlayr),dp)
-    end if
+    if(NI_COMMON_ROOT_ENABLED()) call RNK_CAPTURE(nlayr,theta,rwu,rlv,depth,theta_snapshot)
   end subroutine
   subroutine NI_ROOT_KERNEL(cbulk,water,rootlength,vmax,km,kd,poolfactor,mode,uptake,cr)
     real(dp),intent(in)::cbulk,water,rootlength,vmax,km,kd,poolfactor
@@ -1989,8 +1815,8 @@ contains
     if(.not.water_ready.or.water_run/=control%RUN.or.water_day/=control%YRDOY.or.water_nlayr/=nlayr) &
       error stop 'NI: missing or stale actual root water snapshot'
     if(legacy_nh4<0 .and. .not.NI_COMMON_ROOT_ENABLED()) error stop 'NI: native NH4 species capacity was not initialized'
-    if(rnk_mode>=RNK_MODE_A) then
-      ! Both transport arms use the same committed organic-N state at day open.
+    if(NI_COMMON_ROOT_ENABLED()) then
+      ! Use the committed organic-N state at day open.
       call NI_OPEN_DAY(control)
       feedback=NI_ROOT_PSI_FACTOR(day_psi,day_psi_valid,pool_beta)
       if(P0_ENABLED()) then
@@ -2000,8 +1826,10 @@ contains
           'fill,leaf_crit,stem_crit,leaf_max,stem_max,leaf_target,stem_target', &
           [real(day_substrate_fill),real(ccrit),real(cmax),real(NI_TISSUE_TARGET())])
       end if
-      r_rnk_source_day=control%YRDOY
-      call NI_ROOT_UPTAKE_RNK(nlayr,bd,depth,ll,sat,no3,nh4,kg2ppm,uno3,unh4,feedback)
+      call RNK_CANDIDATES(control,nlayr,bd,depth,ll,sat,no3,nh4,kg2ppm,feedback,uno3,unh4, &
+        r_bulk,r_cr,r_mf,r_diff,r_mem)
+      r_candidate3(1:nlayr)=real(uno3(1:nlayr),dp)/10
+      r_candidate4(1:nlayr)=real(unh4(1:nlayr),dp)/10
       return
     end if
     feedback=exp(-pool_beta*sum(q3)/max(q_no3_max*sum(carrier),1.e-12_dp))
@@ -2024,98 +1852,6 @@ contains
       potential=.1_dp*length*sqrt(wet)*max(0._dp,1-exp(-.08_dp*real(nh4(l),dp)))*legacy_nh4
       potential=min(potential,max(0._dp,real(nh4(l)-.5,dp)/real(kg2ppm(l),dp)/10))
       unh4(l)=flux32(10*potential)
-    end do
-    r_candidate3(1:nlayr)=real(uno3(1:nlayr),dp)/10
-    r_candidate4(1:nlayr)=real(unh4(1:nlayr),dp)/10
-  end subroutine
-  ! ---- RNK 账本辅助: 按形态选择既有/扩展诊断数组 ----
-  elemental real(dp) function rnk_cb(s,l)
-    integer,intent(in)::s,l
-    rnk_cb=merge(r_bulk(l),r_rnk_bulk4(l),s==rnk_NO3)
-  end function rnk_cb
-  elemental real(dp) function rnk_cr(s,l)
-    integer,intent(in)::s,l
-    rnk_cr=merge(r_cr(l),r_rnk_cr4(l),s==rnk_NO3)
-  end function rnk_cr
-  elemental real(dp) function rnk_mf(s,l)
-    integer,intent(in)::s,l
-    rnk_mf=merge(r_mf(l),r_rnk_mf4(l),s==rnk_NO3)
-  end function rnk_mf
-  elemental real(dp) function rnk_cand(s,l)
-    integer,intent(in)::s,l
-    rnk_cand=merge(r_candidate3(l),r_candidate4(l),s==rnk_NO3)
-  end function rnk_cand
-  elemental real(dp) function rnk_acc(s,l)
-    integer,intent(in)::s,l
-    rnk_acc=merge(r_rnk_accept3(l),r_rnk_accept4(l),s==rnk_NO3)
-  end function rnk_acc
-  elemental real(dp) function rnk_fin(s,l)
-    integer,intent(in)::s,l
-    rnk_fin=merge(r_final3(l),r_final4(l),s==rnk_NO3)
-  end function rnk_fin
-  elemental integer function rnk_status(s,l)
-    integer,intent(in)::s,l
-    ! 编码: branch*10 + 裁剪位 + 100*solver_flag (B 臂重试耗尽=100+)
-    rnk_status=r_rnk_branch(s,l)*10+merge(1,0,r_rnk_capped(s,l))+100*r_rnk_flag(s,l)
-  end function rnk_status
-  subroutine NI_ROOT_UPTAKE_RNK(nlayr,bd,depth,ll,sat,no3,nh4,kg2ppm,uno3,unh4,feedback)
-    ! RootNUptake 公共核适配层: 底座数组(单精度 ppm/cm) → 双精度核输入(g N m^-2/d 内部),
-    ! 返回 kg N ha^-1 d^-1 的 UNO3/UNH4 候选。诊断填充既有 r_* 账本与 rnk 扩展数组。
-    integer,intent(in)::nlayr
-    real,intent(in)::bd(:),depth(:),ll(:),sat(:),no3(:),nh4(:),kg2ppm(:)
-    real,intent(out)::uno3(:),unh4(:)
-    real(dp),intent(in)::feedback
-    type(rnk_layer)::lay
-    type(rnk_diag)::dg(2)
-    real(dp)::theta0,extractable
-    integer::l
-    uno3=0; unh4=0
-    do l=1,nlayr
-      theta0=theta0_snapshot(l)
-      extractable=max(0._dp,theta0-real(ll(l),dp))*real(depth(l),dp)
-      if(rwu_snapshot(l)>extractable+1.e-6_dp.or. &
-         (rwu_snapshot(l)>0._dp.and.theta0<=rwu_snapshot(l)/real(depth(l),dp))) then
-        write(*,'(A,I0,A,I0,A,I0)') 'RNK: invalid water budget, run ',water_run,', day ',water_day,', layer ',l
-        error stop 'RNK: actual extraction exceeds available water'
-      end if
-      lay%p(rnk_NO3)=real(no3(l),dp); lay%p(rnk_NH4)=real(nh4(l),dp)
-      lay%bd=real(bd(l),dp); lay%kg2ppm=real(kg2ppm(l),dp); lay%dlayr=real(depth(l),dp)
-      lay%rlv=real(rlv_snapshot(l),dp); lay%theta0=theta0; lay%rwu=rwu_snapshot(l)
-      if(.not.all(ieee_is_finite([lay%bd,lay%kg2ppm,real(sat(l),dp)]))) &
-        error stop 'RNK: nonfinite soil geometry'
-      if(min(lay%bd,lay%kg2ppm,real(sat(l),dp))<=0.or.sat(l)>1.) &
-        error stop 'RNK: invalid bulk density, conversion factor or saturation'
-      lay%porosity=real(sat(l),dp)
-      ! The shared membrane response depends on plant N status.
-      lay%f_root=feedback
-      lay%frac_high=1._dp; lay%frac_low=1._dp
-      if(rnk_mode==RNK_MODE_B) then
-         call rnk_layer_B(rnk_par,lay,dg,n_cells=rnk_radial_cells)
-         if(any(dg%solver_flag/=0).or.any(abs(dg%mass_error)>1.e-9_dp)) then
-           write(*,'(A,I0,A,I0,A,I0)') 'RNK: radial solve failed, run ',water_run,', day ',water_day,', layer ',l
-           error stop 'RNK: radial convergence or mass closure failure'
-         end if
-      else
-         call rnk_layer_A(rnk_par,lay,dg)
-      end if
-      uno3(l)=real(10*dg(rnk_NO3)%candidate)
-      unh4(l)=real(10*dg(rnk_NH4)%candidate)
-      r_bulk(l)=dg(rnk_NO3)%c_bulk; r_cr(l)=dg(rnk_NO3)%c_root
-      r_mf(l)=dg(rnk_NO3)%mf_potential; r_diff(l)=dg(rnk_NO3)%diffusive_flux
-      r_mem(l)=rnk_membrane(rnk_par,rnk_NO3,dg(rnk_NO3)%c_root,dg(rnk_NO3)%root_length, &
-        lay%f_root,1._dp,1._dp)
-      r_rnk_bulk4(l)=dg(rnk_NH4)%c_bulk; r_rnk_cr4(l)=dg(rnk_NH4)%c_root; r_rnk_mf4(l)=dg(rnk_NH4)%mf_potential
-      r_rnk_branch(:,l)=(/dg(rnk_NO3)%branch,dg(rnk_NH4)%branch/)
-      r_rnk_flag(:,l)=(/dg(rnk_NO3)%solver_flag,dg(rnk_NH4)%solver_flag/)
-      r_rnk_cap(:,l)=(/dg(rnk_NO3)%stock_cap,dg(rnk_NH4)%stock_cap/)
-      r_rnk_capped(:,l)=(/dg(rnk_NO3)%stock_capped,dg(rnk_NH4)%stock_capped/)
-      r_rnk_stock_before(:,l)=(/real(no3(l),dp),real(nh4(l),dp)/)/ &
-        merge(real(kg2ppm(l),dp),1._dp,real(kg2ppm(l),dp)>0._dp)/10._dp
-      r_rnk_transport(:,l)=dg
-      r_rnk_adv(:,l)=dg%advective_flux
-      r_rnk_mass_error(:,l)=dg%mass_error
-      r_rnk_theta0(l)=theta0
-      r_rnk_diff(:,l)=(/dg(rnk_NO3)%diffusive_flux,dg(rnk_NH4)%diffusive_flux/)
     end do
     r_candidate3(1:nlayr)=real(uno3(1:nlayr),dp)/10
     r_candidate4(1:nlayr)=real(unh4(1:nlayr),dp)/10
@@ -2149,7 +1885,7 @@ contains
       max_ratio,curve_w0,cmin(2),ccrit(2),cmax(2))
   end subroutine
   logical function NI_SUBSTRATE_TARGET_ON()
-    NI_SUBSTRATE_TARGET_ON=rnk_mode>=RNK_MODE_A.and.NI_REVISED().and.luxury_priority==0.and. &
+    NI_SUBSTRATE_TARGET_ON=NI_COMMON_ROOT_ENABLED().and.NI_REVISED().and.luxury_priority==0.and. &
       .not.(NI_COMMON().or.NI_RESERVES().or.NI_LAI_ON())
   end function
   function NI_TISSUE_TARGET() result(target)

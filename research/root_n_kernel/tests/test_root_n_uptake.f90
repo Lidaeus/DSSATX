@@ -4,6 +4,7 @@
 !!   → Cb=20 mg/L, MF=0.40 kg N/ha/d (=0.04 g/m2/d)
 !!   同库存 NH4, BD=1.30, Kd=1.0 → Cb≈3.226 mg/L
 program test_root_n_uptake
+   use ieee_arithmetic, only: ieee_value, ieee_positive_inf, ieee_quiet_nan
    use RootNUptake
    implicit none
 
@@ -68,15 +69,78 @@ program test_root_n_uptake
    ! ---- 4. 库存裁剪: 低氮层 + 大扩散导度使膜/供给超过库存 → 候选截断 ----
    block
       type(rnk_layer) :: l2
-      type(rnk_diag) :: d2(RNK_NSPECIES)
-      type(rnk_params) :: diffusive
-      l2 = lay; l2%p(RNK_NO3) = 0.251_rnk_dp
+      type(rnk_diag) :: d2(RNK_NSPECIES), uncapped(RNK_NSPECIES)
+      type(rnk_params) :: diffusive, no_floor
+      l2 = lay; l2%p = par%residual_ppm + 0.0001_rnk_dp
       diffusive = par; diffusive%species_diffusion_m2d(RNK_NO3) = 1.64e-4_rnk_dp
       call rnk_layer_A(diffusive, l2, d2)
       call check('low-N capped flag', d2(RNK_NO3)%stock_capped, 1._rnk_dp, 1._rnk_dp, nfail)
       call check('low-N candidate==cap', &
                  abs(d2(RNK_NO3)%candidate - d2(RNK_NO3)%stock_cap) < 1.e-12_rnk_dp, &
                  d2(RNK_NO3)%candidate, d2(RNK_NO3)%stock_cap, nfail)
+      no_floor = diffusive
+      no_floor%residual_ppm = 0
+      call rnk_layer_A(no_floor, l2, uncapped)
+      call check('stock cap below mass flow for both ions', all(d2%stock_cap<d2%mf_potential), 0._rnk_dp, 0._rnk_dp, nfail)
+      call check('low-N candidates equal cap', all(d2%candidate==d2%stock_cap), 0._rnk_dp, 0._rnk_dp, nfail)
+      call check('stock cap preserves root concentration', all(d2%c_root==uncapped%c_root), 0._rnk_dp, 0._rnk_dp, nfail)
+      call check('root concentration bounded and diffusion inward', all(d2%c_root<=d2%c_bulk).and.all(d2%diffusive_flux>=0), &
+                 0._rnk_dp, 0._rnk_dp, nfail)
+      call check('uncapped balance closes', maxval(abs(d2%steady_residual))<1.e-12_rnk_dp, 0._rnk_dp, 0._rnk_dp, nfail)
+      l2%p = [par%residual_ppm(RNK_NO3), 0.9_rnk_dp*par%residual_ppm(RNK_NH4)]
+      call rnk_layer_A(diffusive, l2, d2)
+      call check('at or below residual: no solve and no uptake', &
+                 all(d2%branch==RNK_BRANCH_ZERO).and.all(d2%candidate==0), 0._rnk_dp, 0._rnk_dp, nfail)
+      l2 = lay
+      l2%rlv = 1.e-4_rnk_dp
+      call rnk_layer_A(diffusive, l2, d2)
+      call check('positive diffusion permits membrane limitation', all(d2%branch==RNK_BRANCH_MEMBRANE), &
+                 0._rnk_dp, 0._rnk_dp, nfail)
+      call check('membrane limitation uses bulk concentration', all(d2%c_root==d2%c_bulk).and.all(d2%diffusive_flux==0), &
+                 0._rnk_dp, 0._rnk_dp, nfail)
+   end block
+
+   block
+      type(rnk_params) :: invalid
+      call check('valid parameters', rnk_validate(par,1)=='', 0._rnk_dp, 0._rnk_dp, nfail)
+      invalid=par
+      invalid%root_radius_m=0
+      call check('reject zero radius', rnk_validate(invalid,1)/='', 0._rnk_dp, 0._rnk_dp, nfail)
+      invalid%root_radius_m=ieee_value(0._rnk_dp,ieee_quiet_nan)
+      call check('reject NaN radius', rnk_validate(invalid,1)/='', 0._rnk_dp, 0._rnk_dp, nfail)
+      invalid=par
+      invalid%species_diffusion_m2d(1)=-1
+      call check('reject negative diffusivity', rnk_validate(invalid,1)/='', 0._rnk_dp, 0._rnk_dp, nfail)
+      invalid%species_diffusion_m2d(1)=ieee_value(0._rnk_dp,ieee_positive_inf)
+      call check('reject infinite diffusivity', rnk_validate(invalid,1)/='', 0._rnk_dp, 0._rnk_dp, nfail)
+      invalid=par
+      invalid%penetration_coeff=-1
+      call check('reject negative penetration coefficient', rnk_validate(invalid,1)/='', 0._rnk_dp, 0._rnk_dp, nfail)
+      invalid%penetration_coeff=ieee_value(0._rnk_dp,ieee_quiet_nan)
+      call check('reject NaN penetration coefficient', rnk_validate(invalid,1)/='', 0._rnk_dp, 0._rnk_dp, nfail)
+   end block
+
+   block
+      type(rnk_params) :: corrected
+      type(rnk_layer) :: l
+      type(rnk_diag) :: result(RNK_NSPECIES)
+      corrected=par
+      corrected%penetration_coeff=1.5_rnk_dp
+      l=lay
+      call rnk_layer_A(corrected,l,result)
+      call check('zero diffusion preserves the mass-flow result', all(result%candidate==dg%candidate), &
+                 0._rnk_dp, 0._rnk_dp, nfail)
+      corrected%species_diffusion_m2d=1.5e-4_rnk_dp
+      l%rwu=0
+      call rnk_layer_A(corrected,l,result)
+      call check('zero water uptake permits bounded diffusion', all(result%candidate>=0).and.all(result%c_root<=result%c_bulk), &
+                 0._rnk_dp, 0._rnk_dp, nfail)
+      l%rlv=0
+      call rnk_layer_A(corrected,l,result)
+      call check('correction gives zero uptake without roots', all(result%candidate==0), 0._rnk_dp, 0._rnk_dp, nfail)
+      l%rlv=lay%rlv; l%theta0=0
+      call rnk_layer_A(corrected,l,result)
+      call check('correction gives zero uptake without liquid', all(result%candidate==0), 0._rnk_dp, 0._rnk_dp, nfail)
    end block
 
    ! ---- 5. 膜不限制分支: 极小根长 U(Cb)<=MF → Cr=Cb ----
@@ -148,7 +212,7 @@ program test_root_n_uptake
       type(rnk_layer) :: l8
       type(rnk_diag) :: d8(RNK_NSPECIES)
       real(rnk_dp) :: resid
-      type(rnk_params) :: diffusive
+      type(rnk_params) :: diffusive, no_floor
       l8 = lay; l8%rwu = 0._rnk_dp
       diffusive = par; diffusive%species_diffusion_m2d(RNK_NO3) = 1.64e-4_rnk_dp
       call rnk_layer_A(diffusive, l8, d8)

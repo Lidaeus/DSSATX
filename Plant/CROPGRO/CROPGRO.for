@@ -1451,6 +1451,13 @@ C-----------------------------------------------------------------------
         CALL NI_CLOSE_DAILY_UPTAKE(UNO3,UNH4,NLAYR,
      &    TRNO3U,TRNH4U,TRNU,NASSIMD)
         NFORGROW=NASSIMD
+        IF (NI_COMMON_ROOT_ENABLED() .AND. P0_ENABLED()) THEN
+          CALL P0_V(CONTROL,'rnk_plant_settled',
+     &      'TRNO3U,TRNH4U,TRNU,PGAVL,NASSIMD,RSPNO3,RSPNH4,'
+     &      //'RNO3C,RNH4C',
+     &      (/TRNO3U,TRNH4U,TRNU,PGAVL,NASSIMD,RSPNO3,RSPNH4,
+     &      RNO3C,RNH4C/))
+        ENDIF
       ENDIF
       PGAVL = PGAVL - AGRVG * (WLDOTN + WSDOTN + WRDOTN)
       NAVL = NAVL - (NGRLF + NGRST + NGRRT)

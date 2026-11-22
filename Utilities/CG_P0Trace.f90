@@ -51,9 +51,9 @@ contains
     integer :: ios
     if (.not. P0_ENABLED()) return
     if (.not. opened) then
-      open(newunit=log_unit, file='P0Trace.csv', status='new', &
+      open(newunit=log_unit, file='P0Trace.csv', status='replace', &
            action='write', iostat=ios)
-      if (ios /= 0) error stop 'P0 trace: output exists or cannot be opened'
+      if (ios /= 0) error stop 'P0 trace: cannot open trace output'
       write(log_unit,'(A)') &
         'seq,run,yrdoy,das,dynamic,event,layer,key,value,text'
       opened = .true.

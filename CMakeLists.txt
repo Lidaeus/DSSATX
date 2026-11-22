@@ -117,6 +117,7 @@ set(
         "Utilities/ModuleDefs.for"
         "Utilities/CG_P0Trace.f90"
         "Plant/CROPGRO/RootNUptake.f90"
+        "Plant/CROPGRO/CG_RootNUptakeAdapter.f90"
         "Plant/CROPGRO/CG_Nitrogen.f90"
         "Utilities/DATES.for"
         "Utilities/ERROR.for"

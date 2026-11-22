@@ -1,13 +1,14 @@
-! Append to the same file as &NINTEGRATION. The paired experiment varies only
-! rnk_mode: 0=off, 1=steady equivalent transport, 2=transient radial transport.
+! Append to the same file as &NINTEGRATION.
+! rnk_mode: 0=off, 1=steady equivalent transport.
 ! Vmax units: g N/(m root day). Km: mg N/L. Kd: L/kg. Residual: mg N/kg dry soil.
-! Production uses mode 1. Mode 2 is a research comparison at 8 or 16 cells.
-! Mode 2 uses 24 nominal substeps in production and research replays.
+! Optional sorbing NH4 penetration: positive coefficient enables it, 0 uses the full cylinder.
 ! Species order: NO3, NH4. Values are fixed engineering priors.
 &rootnuptake
  rnk_mode=1,
+ rnk_source_tag="v15-engineering","literature-prior",
  rnk_km_high=0.28,0.5, rnk_km_low=35.,50.,
  rnk_vmax_high=0.0003,0.0004, rnk_vmax_low=0.0015,0.002,
  rnk_kd=0.,1., rnk_residual=0.25,0.5,
+ rnk_penetration_coeff=0.,
  rnk_radius=0.0001, rnk_species_diffusion=0.000164,0.000150
 /

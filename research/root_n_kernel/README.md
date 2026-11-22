@@ -1,4 +1,4 @@
-# 4.8.6.4 root nitrogen A/B and P1
+# 4.8.6.4 steady root nitrogen
 
 The P1 changes from Tomato_Cal `6431551c` were applied to `8056a8df`.
 Tag `archive/root-n-t3` records that T3 baseline. The original verification
@@ -6,7 +6,7 @@ receipt describes its Windows tests and archived paths.
 
 Build both engines with CMake and use the checked-in case and engineering
 namelist for a local 26SP audit. The T3 reference can be built from the
-`archive/root-n-t3` tag in a temporary Git worktree. Run the native A/B tests
+`archive/root-n-t3` tag in a temporary Git worktree. Run the native steady-kernel tests
 from the P1 checkout before comparing whole-crop runs.
 
 ```sh
@@ -31,71 +31,32 @@ Use the P1 replay above for the later cross-day debit contract. The historical
 Windows launchers and verification paths are retained at
 `archive/pre-standalone-root-n`.
 
-## Paired rhizosphere transport comparison
+## Steady rhizosphere transport
 
-Use the same DSSATX executable and one case for both transport methods:
+Append `source/RootNUptake.nml.template` to the file containing
+`&NINTEGRATION`. The active kernel uses `rnk_mode=1`. Use `rnk_mode=0`
+or omit the group to use the historical integration route. For the
+historical two-transport study, check out `929914ab` in a separate worktree.
 
-```sh
-python research/root_n_kernel/p1_4864/replay_local.py \
-  --engine build/bin/dscsm048 --t3-engine /path/to/t3/dscsm048 \
-  --radial-cells 16 --out build/paired-transport-26sp
-```
+The steady kernel computes the equilibrium pore-water concentration using
+pre-extraction water and the exchangeable stock. Ammonium's water plus
+sorption capacity is `theta + bulk_density * Kd`. DSSAT `SAT` supplies
+porosity in Millington–Quirk diffusion, evaluated at the water extraction
+midpoint, computed with the layer depth from the SPAM water snapshot.
+Concentration and root geometry use the crop-side soil layer depth. Set both species' parameter provenance with `rnk_source_tag`.
+Older steady configurations that omit the field use `unspecified`.
 
-The runner stages identical input files and changes only `rnk_mode` between
-the two active runs. Both use the equilibrium pore-water concentration at
-the pre-extraction water content, the same exchangeable ammonium
-partition, and the same species-specific dual-affinity membrane kinetics
-and daily extractable stock. Both regulate membrane capacity with the
-same shoot N status and apply no additional triangular wetness factor. The model
-holds the Millington–Quirk effective diffusion coefficient fixed at the
-same extraction midpoint for the day in both methods. DSSAT `SAT` supplies
-porosity for diffusion. The concentration calculation uses the actual
-liquid water content. The fixed diffusion and membrane parameters are
-engineering inputs.
+When mass flow can meet membrane uptake evaluated at bulk concentration,
+root and bulk concentrations are equal and diffusion is zero. Otherwise,
+the kernel bisects the concentration interval from zero to bulk to balance
+membrane uptake against mass flow plus inward diffusive supply. The
+extractable inventory caps the resulting uptake. At or below the residual
+stock concentration, there is no uptake and the equilibrium is skipped.
 
-Mode 1 uses a steady equivalent radial diffusion conductance with an
-explicit bulk mass-flow term. Mode 2 integrates radial advection and
-diffusion inside the same geometry, updating local liquid concentration
-during the day. These are experimental alternatives in one model. The
-comparison keeps the DSSAT plant acceptance and soil debit schedule intact.
-
-Append the production template to the file containing `&NINTEGRATION`.
-Mode 1 is the production default for this 26SP decision. Mode 2 is a research
-comparison using 24 nominal substeps and either 8 cells (default for mode 2)
-or 16 cells (comparison tier). Use `rnk_radial_cells=16` for the latter.
-The 26SP wall-time and CPU measurements used three interleaved complete runs
-per configuration with P0 tracing disabled. The new engine always uses the
-common inputs in both active modes. Historical P1 input switches belong to
-the historical P1 checkout. Mode 0 still bypasses the common kernel. The
-ledger retains its mode and shared-input columns and the bulk diffusion value. In the paired comparison,
-`c_bulk_mgN_L` is the initial equilibrium concentration in both methods.
-Mode 1 reports the steady surface solution and equivalent diffusion
-flux. Mode 2 reports the end-of-day concentration of its innermost cell
-and the integrated diffusion across the first internal face.
-
-The transient solver still initializes each day from the layer inventory.
-With zero uptake of water and zero diffusion, the initially accessible
-mass in the innermost cell can contribute a small, mesh-dependent uptake.
-This is a documented limitation. Hydraulic lift is a separate water and
-solute redistribution process for future investigation. The compiled
-kernel lives in `Plant/CROPGRO/RootNUptake.f90`; the copy under
-`research/root_n_kernel/source` preserves the T3 delivery.
-
-### Resolution and porosity probes
-
-`run_native_tests.sh` also writes `transport_resolution.csv` and
-`transport_porosity.csv` to its new output directory. The transient probe
-crosses 8, 16 and 32 radial cells with 24, 48 and 96 nominal substeps,
-using the existing logarithmically spaced faces. It covers a normal layer,
-a dry layer, and an extremely dry day followed by rewetting. The rewet
-case starts with the inventory left on the dry day and adds only water.
-The radial profile is homogenized at the day boundary as in the engine.
-
-Both production formulations still use DSSAT `SAT` for porosity. The
-single-layer sensitivity probe uses the 26SP 80–100 cm layer's bulk density
-and `SAT` as inputs. Its density-derived `POROS` is about 0.445, compared
-with `SAT=0.498`. The alternate value is used only in the probe. No runtime
-porosity selector is needed.
+The pure kernel lives in `Plant/CROPGRO/RootNUptake.f90`.
+`CG_RootNUptakeAdapter` translates layer inputs and holds the source day's
+diagnostics until the following soil debit. This keeps plant N allocation
+and shoot feedback in `CG_Nitrogen`.
 
 ### Shoot N status and root feedback
 
@@ -117,7 +78,7 @@ state and runs that do not enable organ curves. This reuses the
 `pool_beta` coefficient. The legacy root path continues to use that
 coefficient with inorganic pool occupancy.
 
-For both radial transport modes, the candidate is the layer supply
+The candidate is the layer supply
 computed before admission into the plant inorganic pool. For each ion,
 let P be the total candidate over the day, K its pool capacity, and Q
 the stock at admission (after any early assimilation). The effective
@@ -130,14 +91,13 @@ supply response before saturation, and cannot exceed either the
 candidate or the space. It uses the existing pool capacities and
 leaves actual soil debit in the existing settlement path.
 
-Use `luxury_priority=0` in the shared NIntegration configuration for
-the paired study. This uses the existing demand budget that includes
+Use `luxury_priority=0` to include optional refill above the critical
+reference in the NIntegration demand budget. This uses the existing demand budget that includes
 old-tissue refill and allows growth surplus to refill leaves and
 stems toward the upper reference. Assimilation remains limited by
 substrate, kinetics and available carbon. With `luxury_priority=1`,
 core refill targets the critical reference and additional assimilation
-uses the later discretionary carbon budget. Keep the same setting in
-both arms.
+uses the later discretionary carbon budget.
 
 With the shared revised growth and refill path, new leaf and stem
 tissue can use additional nitrogen above the critical reference.
@@ -162,7 +122,7 @@ The layer ledger retains the same schema.
 
 ### S1-inspired organic buffer and NSTFAC
 
-Run `p1_4864/replay_local.py --organic-buffer` to select the paired
+Run `p1_4864/replay_local.py --organic-buffer` to select the steady
 organic buffer study. The active recipe sets `reserve_mode=2`,
 `common_acceptance=1`, and `luxury_priority=1`. The recipe writes
 NSTFAC=0.60 into the prepared TMGRO048.SPE for each case. Use
@@ -212,56 +172,68 @@ and the actual C/N limits on biomass. Verify the replacement with
 low-N and resupply runs and repeat the NSTFAC sensitivity check before
 dropping it from any research input specification.
 
-### Paired ledger diagnostics
+### Layer ledger
 
-For the steady formulation with positive diffusion,
-`steady_residual_gN_m2` is the sum of the bulk mass-flow and equivalent
-diffusive supply minus the stock-limited root boundary uptake.
-`zero_diffusion=1` identifies an evaluated zero-diffusion case.
-Unavailable residuals and concentrations use `-99`.
+`steady_residual_gN_m2` compares potential mass flow plus diffusion
+with the membrane rate before the stock limit, for layers that use the
+balance solver. A residual of `-99` marks a branch where that equation
+does not apply. `zero_diffusion=1` identifies an evaluated zero-diffusion
+case. The concentration mean columns reproduce the steady concentrations
+when the kernel evaluates them. The three former transient-only fields
+remain in the 35-column CSV for historical readers, with zeros in the
+two radial flux/residual columns and `-99` in the end-of-day bulk column.
 
-For transient transport, pair `c_bulk_end_mgN_L` with the existing
-`c_root_mgN_L` for the same end-of-day time. The transient layer mean
-comes from total remaining radial mass divided by the layer's end-of-day
-water-plus-sorption capacity. `c_bulk_mean_mgN_L` and
-`c_root_mean_mgN_L` are duration-weighted concentrations over accepted
-substeps. The steady means equal the constant concentrations used in its
-daily balance. The transient concentrations refer to the transport solve
-before the plant's acceptance and settlement stages.
+`hats_candidate_gN_m2` and `lats_candidate_gN_m2` partition candidate
+uptake after the stock cap according to their shares of the membrane rate.
+The candidate supplied to the engine is converted to single precision.
+Actual soil debit is checked against the settled plant uptake with
+a tolerance of `1e-6 * max(1, abs(settled))` in g N/m² per layer and ion.
+Run identity, layer count and ordering are checked separately.
 
-`hats_candidate_gN_m2` and `lats_candidate_gN_m2` partition the transport
-candidate. At an active stock limit, the allowed uptake is split using
-each term's share of the membrane rate at the solved concentration.
-The sum can differ from the engine's single-precision candidate by
-rounding. These are modeled contributions to candidate uptake.
+The first ledger write in a DSSAT process replaces the previous file.
+At each season end the adapter records any pending final-day uptake and
+closes the file. Subsequent treatments append to the same batch ledger.
 
-Both initial aqueous partitioning and transient cell storage use
-`theta + bulk_density * Kd`. Using that storage term already represents
-equilibrium sorption retardation. Dividing the bulk diffusion coefficient
-by the same term again would apply it twice. The steady formulation
-uses the same partition for its initial bulk concentration. Its
-conductance is an equilibrium flux law without a transient storage term.
+### Optional ammonium penetration radius
 
-### 26SP selection
+Set `rnk_penetration_coeff=1.5` to run the offline candidate in the
+steady kernel. The production template uses zero. The 1.5 setting is an explicit
+research option for ammonium-dominated or strongly sorbing soils. Positive values
+shorten the equivalent diffusion radius only for ammonium with positive
+sorption and effective diffusion. The apparent diffusivity divides
+`D_bulk` by `theta_mid + bulk_density * Kd` solely in the one-day
+penetration length. The steady conductance itself uses `D_bulk`.
+The stock cap, mass-flow term and membrane kinetics use the same inputs.
 
-Use `compare_transport.py` with the steady case, the 8-cell transient case
-and the 16-cell transient case. It joins by run, day, layer and N species.
-Moisture uses the 16-cell transient midpoint relative to DSSAT LL. A half-LL
-cutoff labels extreme dryness for reporting only. Early means DAP 0–30.
-An irrigation or N application window includes the event day and the next
-two days. Low RLV is the bottom quartile of positive RLV in the transient
-16-cell layer/day records. The reported absolute percentage divides the sum of absolute
-layer/day differences by the sum of the corresponding method means.
-The grid comparison is an engineering sensitivity, and includes feedback
-from separate whole-crop runs at the two resolutions.
+```sh
+bash research/root_n_kernel/tests/run_penetration_benchmark.sh build/nh4-benchmark
+bash research/root_n_kernel/tests/run_buffer_pulse.sh build build/steady-pulse
+```
 
-For estimated radial relaxation, the outer cylinder radius uses RLV and
-the configured root radius. Bulk density is recovered from the reserved
-mass on rows above the store floor. The resulting times are descriptive
-time scales. Mean versus end-of-day ratios compare contemporaneous
-concentration definitions, and HATS shares describe modeled partitioning.
+The offline benchmark builds the historical 32-cell and 96-substep
+reference in a private output directory. Cases include four moisture
+conditions, three root densities and three sorption coefficients.
+Its nitrate check compares candidates bit for bit across the coefficient
+sweep. Positive penetration coefficients improve the strong-sorption
+and dry subsets near 1.5, with a larger positive signed bias across the
+other cases. The correction increases diffusion conductance for a
+shortened shell. A case that already overpredicts uptake can retain or
+increase its bias.
 
-The production choice is based on the 26SP nitrate-dominated case and
-near-equivalent whole-crop trajectories. The two modes differ materially
-for ammonium supply, so this test gives no general equivalence result
-for ammonium-dominated environments.
+The production steady run carries unassimilated nitrogen into the next day
+within its nitrate and ammonium capacities. The organic-buffer control
+(`--organic-buffer`, `reserve_mode=2`) refunds and
+cancels any unsettled provisional uptake and closes both inorganic
+pools at zero. The carbon-limitation pulse tests the persistent store.
+
+The season audit separately checks published layer uptake, next-day
+soil debit, pool capacity and N assimilation charges. For the combined
+season N balance, initial seed N is included in opening plant stocks.
+Cumulative harvest and other exported organic N enter through the
+organic loss ledger. Inorganic litter and the final-day plant uptake
+pending at the soil boundary are explicit terms. At nitrogen settlement,
+the audit requires a finite, nonnegative `PGAVL`. It also requires one
+actual carbon cash entry per plant nitrogen day, with an absolute
+`CH2O_residual` below `1e-5` g CH₂O/m² each day. The minimum predicted
+`PGAVL` after vegetative growth and carbohydrate storage is reported for
+regression monitoring.

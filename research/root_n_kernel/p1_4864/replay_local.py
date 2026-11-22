@@ -1,8 +1,9 @@
-"""Rebuild the local 26SP off/A/B audit with explicitly selected engines."""
+"""Rebuild the local 26SP off/steady audit with explicitly selected engines."""
 
 import argparse
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import sys
@@ -31,45 +32,44 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("engine", "t3-engine", "out"):
         parser.add_argument(f"--{name}", type=Path, required=True)
-    parser.add_argument("--radial-cells", type=int, choices=(8, 16), default=8,
-                        help="Transient radial grid for the active pair; nominal substeps are fixed at 24")
     parser.add_argument("--organic-buffer", action="store_true",
-                        help="Use the S1-inspired leaf/stem organic buffer in active A/B runs")
+                        help="Use the S1-inspired leaf/stem organic buffer in the active steady run")
     parser.add_argument("--nstfac", type=float,
                         help="Set NSTFAC in prepared species files (organic-buffer default: 0.60)")
+    parser.add_argument("--penetration-coeff", type=float, default=0.0,
+                        help="Test a positive NH4 penetration coefficient on the steady case")
     args = parser.parse_args()
+    if not math.isfinite(args.penetration_coeff) or args.penetration_coeff < 0:
+        parser.error("--penetration-coeff must be finite and nonnegative")
     nstfac = args.nstfac if args.nstfac is not None else (0.60 if args.organic_buffer else None)
     if nstfac is not None and not 0.1 <= nstfac <= 1.0:
         parser.error("--nstfac must be in [0.1, 1.0]")
     engines = {
         arm: (args.t3_engine if arm == "off-t3" else args.engine).resolve(strict=True)
-        for arm in ("off-t3", "off", "A", "B")
+        for arm in ("off-t3", "off", "A")
     }
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     config = HERE / "p1_smoke.nml"
     env = dict(os.environ, DSSAT_HOME=f".{os.sep}", DSSAT_P0_TRACE="1")
     env.pop("DSSAT_N_CONFIG", None)
-    results = []
     config_inputs = {}
     base_text = config.read_text()
     active_config = HERE / "p1_organic.nml" if args.organic_buffer else config
-    experiment_text = active_config.read_text() + (HERE.parent / "source/RootNUptake.nml.template").read_text()
+    template = (HERE.parent / "source/RootNUptake.nml.template").read_text()
+    template = template.replace("rnk_penetration_coeff=0.", f"rnk_penetration_coeff={args.penetration_coeff:.16e}", 1)
+    experiment_text = active_config.read_text() + template
     off_text = base_text + "\n&ROOTNUPTAKE rnk_mode=0 /\n"
-    for arm, mode in (("off-t3", 0), ("off", 0), ("A", 1), ("B", 2)):
+    for arm in engines:
         case = prepare_case(SimpleNamespace(config=config, out=out / arm))
         nml = case / "NIntegration.nml"
-        text = experiment_text if mode else off_text
-        config_text = text.replace("rnk_mode=1,", f"rnk_mode={mode},")
-        if mode and args.radial_cells == 16:
-            config_text = config_text.replace(f"rnk_mode={mode},", f"rnk_mode={mode}, rnk_radial_cells=16,")
-        nml.write_text(config_text)
+        nml.write_text(experiment_text if arm == "A" else off_text)
         if nstfac is not None:
             write_nstfac(case / "TMGRO048.SPE", nstfac)
         config_inputs[arm] = hashlib.sha256(nml.read_bytes()).hexdigest()
         run([str(engines[arm]), "CRGRO048", "B", "DSSBatch.v48"], case, "dssat", env)
-        if mode:
-            results.append(audit(case, arm, 12, expected_shared=True))
+        if arm == "A":
+            steady_audit = audit(case, 12)
         elif (case / "LayerRootNUptake.csv").exists():
             raise ValueError(f"{arm}: root ledger unexpectedly enabled")
     reference = sorted((out / "off-t3").glob("*.csv"))
@@ -81,13 +81,12 @@ def main():
     receipt = {
         "shared_transport": True,
         "organic_buffer": args.organic_buffer,
+        "nh4_penetration_coeff": args.penetration_coeff,
         "nstfac_override": nstfac,
-        "radial_cells": args.radial_cells,
-        "nominal_substeps": 24,
         "common_arm_config_sha256": hashlib.sha256(experiment_text.encode()).hexdigest(),
         "arm_config_sha256": config_inputs,
         "matching_off_csv": [file.name for file in reference],
-        "active_arms": results,
+        "steady": steady_audit,
     }
     (out / "audit.json").write_text(json.dumps(receipt, indent=2) + "\n")
 
