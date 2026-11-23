@@ -21,6 +21,9 @@ program native_p1_tests
     call check(cc<=previous.and.lo<cc.and.cc<hi.and.cc>=.015_real64,'ordered, diluting references retain asymptote')
     previous=cc
   enddo
+  call check(NI_NATIVE_MOB_FACTOR(0.,.true.)==1.,'protected donor receives no native N acceleration')
+  call check(NI_NATIVE_MOB_FACTOR(0.,.false.)==1.3,'native late donor retains its acceleration')
+  call check(NI_NATIVE_MOB_FACTOR(1.,.true.)==NI_NATIVE_MOB_FACTOR(1.,.false.),'N sufficiency joins both donor routes')
   call check(NI_LUX_KERNEL(-.5_real64,.25_real64)==1,'luxury factor leaves deficiency unchanged')
   call check(NI_LUX_KERNEL(0._real64,.25_real64)==1,'luxury factor joins at the critical point')
   call check(NI_LUX_KERNEL(.5_real64,.25_real64)==.9375_real64,'luxury factor follows the squared surplus')

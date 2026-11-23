@@ -351,3 +351,7 @@ The persistent inorganic B4 route supports opt-in luxury-N carbon partition
 and new pod-set responses. The default mode remains 0. See the
 [26SP execution report](p1_4864/luxury_response.zh.md) for the mechanism
 choices, neutral controls, and ablation results.
+
+
+See the [nitrogen endpoint audit](p1_4864/n_endpoints.zh.md) for the previous-day
+state mapping, protected donor-rate change and reproductive budget checks.

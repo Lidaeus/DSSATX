@@ -41,7 +41,8 @@ C=======================================================================
 !-----------------------------------------------------------------------
       USE CG_Nitrogen, ONLY: NI_CURVES, NI_TARGETS,
      &  NI_REFERENCES, NI_FEEDBACK, NI_GROWTH, NI_REVISED,
-     &  NI_XFRT_FACTOR
+     &  NI_XFRT_FACTOR, NI_REMOB_ON, NI_NATIVE_MOB_FACTOR, NI_V4_TRACE,
+     &  NI_COMMON_ROOT_ENABLED
       USE CG_P0Trace, ONLY: P0_ENABLED, P0_V
       USE ModuleDefs
       USE ModuleData
@@ -63,7 +64,7 @@ C=======================================================================
 
       REAL FRLFM, FRSTMM, YY, XX, TMPFAC
       REAL REDPUN,TMPFCS,PAGE,REDSHL,SDMAX,CDMSH,GDMSH,ADDSHL
-      REAL TEMXFR,CAVTOT,GDMSDO,CNOLD,XFRT_C,XFRT_LUX
+      REAL TEMXFR,CAVTOT,GDMSDO,CNOLD,XFRT_C,XFRT_LUX,N_MOB_ACCEL
       REAL NVSTL,NVSTS,NVSTR,FRNLFT
       REAL TABEX,CURV
       REAL POTLIP, POTCAR
@@ -247,12 +248,23 @@ C=======================================================================
 !     NOW, DXR57 HITS CLOSE TO 1 AT MATURITY AND PREVENTS THAT
 !-----------------------------------------------------------------------
       NMOBR  = NVSMOB * NMOBMX * TDUMX
+      N_MOB_ACCEL=1.0
       IF (DAS .GT. NR5) THEN
+!       Protected remobilization owns the N response. Retain the
+!       native stage, thermal and water limits for the donor ceiling.
+        N_MOB_ACCEL=NI_NATIVE_MOB_FACTOR(NSTRES,
+     &    NI_REMOB_ON().AND.NI_COMMON_ROOT_ENABLED())
         NMOBR = NMOBMX * TDUMX2 * (1.0 + 0.5*(1.0 - SWFAC))
-     &      * (1.0 + 0.3*(1.0 - NSTRES)) * (NVSMOB + (1. - NVSMOB)
+     &      * N_MOB_ACCEL * (NVSMOB + (1. - NVSMOB)
      &      * MAX(XPOD,DXR57**2.))
       ENDIF
       NMINEP = NMOBR * (WNRLF + WNRST + WNRRT + WNRSH)
+      IF (NI_V4_TRACE()) THEN
+        CALL P0_V(CONTROL,'n_mobilization_input',
+     &    'NSTRES,NMOBR,N_acceleration,after_NR5',
+     &    (/NSTRES,NMOBR,N_MOB_ACCEL,
+     &      REAL(MERGE(1,0,DAS.GT.NR5))/))
+      ENDIF
 
 !-----------------------------------------------------------------------
       IF (DAS .GE. NR1) THEN

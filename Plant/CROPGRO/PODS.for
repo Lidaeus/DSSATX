@@ -46,6 +46,7 @@
       USE ModuleDefs
       USE ModuleData
       USE CG_Nitrogen, ONLY: NI_PODS, NI_POD_FACTOR, NI_XFRT_FACTOR,
+     &  NI_V4_TRACE,
      &  NI_COMMON, NI_P2_POD_BUDGET
       USE CG_P0Trace, ONLY: P0_ENABLED, P0_V
       IMPLICIT NONE
@@ -91,6 +92,7 @@
       REAL SUPDAY, SDMAXX, SHRAT, WTABR, START, PNAGE, FLWFRC, FLADD
       REAL ACTSW, POTSW, DSW, FLAYR, CURV, TABEX
       REAL CUMSIG, CNSTRES, AGRSD3, ANINSD
+      REAL REPRO_N_SCALE, SHELL_N_FRACTION
       REAL NIP2NAVL,NIP2PGPOT
       REAL RNITPD, POTLIP, POTCAR, XFRT_LUX
       REAL CRSD, NRSD, NREQ
@@ -423,6 +425,14 @@
 !     Slow response to change in N stress.
 !-----------------------------------------------------------------------
         CNSTRES = 0.875 * CNSTRES + 0.125 * NSTRES
+!       Reproductive memory sets shell composition and flower supply.
+!       The leaf-N factor independently limits a new pod cohort.
+        REPRO_N_SCALE = CNSTRES**0.5
+        SHELL_N_FRACTION = FNINSH * REPRO_N_SCALE
+        IF (NI_V4_TRACE())
+     &    CALL P0_V(CONTROL,'repro_n_memory',
+     &      'NSTRES,CNSTRES,flower_N_scale,shell_N_fraction',
+     &      (/NSTRES,CNSTRES,REPRO_N_SCALE,SHELL_N_FRACTION/))
         CPSTRES = 0.875 * CPSTRES + 0.125 * PStres2
 !     chp added CPSTRES here, but not implemented -- need Ken's input
 !     03/24/2004
@@ -615,18 +625,18 @@ C-GH          IF (SHELN(NPP) .GE. 0.001 .AND. GRRAT1 .GE. 0.001) THEN
               IF (SHELN(NPP) .GT. 0.0 .AND. GRRAT1 .GT. 0.0) THEN
                 IF (PAGE .GE. LNGPEG) THEN
                   ADDSHL = MIN(PGLEFT/AGRSH1,GRRAT1 * SHELN(NPP),
-     &              NLEFT/(FNINSH*CNSTRES**0.5))
+     &              NLEFT/SHELL_N_FRACTION)
                   SUPDAY = MIN((PGLEFT/AGRSH1)/(GRRAT1*SHELN(NPP)),
-     &              (NLEFT/(FNINSH*CNSTRES**0.5))/(GRRAT1 * SHELN(NPP)),
+     &              (NLEFT/SHELL_N_FRACTION)/(GRRAT1 * SHELN(NPP)),
      &              SWADD1)
                   IF (SUPDAY .GE. 1.0) SUPDAY = 1.0
                 ELSE
                   IF (SHLAG .LT. 0.001) SHLAG = 0.001
                   ADDSHL = MIN(PGLEFT/AGRSH1 ,GRRAT1*SHELN(NPP)*SHLAG,
-     &                     NLEFT/(FNINSH*CNSTRES**0.5))
+     &                     NLEFT/SHELL_N_FRACTION)
                   SUPDAY = MIN(
      &                     (PGLEFT/AGRSH1)/(GRRAT1*SHELN(NPP)*SHLAG),
-     &                     (NLEFT/(FNINSH*CNSTRES**0.5))/
+     &                     (NLEFT/SHELL_N_FRACTION)/
      &                     (GRRAT1*SHELN(NPP)*SHLAG), SWADD1)
                   IF (SUPDAY .GE. 1.0) SUPDAY = 1.0
                 ENDIF
@@ -646,11 +656,11 @@ C-GH          IF (SHELN(NPP) .GE. 0.001 .AND. GRRAT1 .GE. 0.001) THEN
 !     and the remaining C (PGLEFT) and N (LEFT)
 !-----------------------------------------------------------------------
               WSHDTN = WSHDTN + ADDSHL
-              NGRSH = NGRSH + ADDSHL * PROSHI * 0.16 * CNSTRES**0.5
+              NGRSH = NGRSH + ADDSHL * PROSHI * 0.16 * REPRO_N_SCALE
               IF (PGLEFT .LT. 1.0E-6) PGLEFT=0.0          !NBP
               IF (ADDSHL .LT. 1.0E-6) ADDSHL=0.0          !NBP
               PGLEFT = MAX(0.0,(PGLEFT - ADDSHL * AGRSH1))
-              NLEFT  = MAX(0.0,(NLEFT - ADDSHL * (FNINSH*CNSTRES**0.5)))
+              NLEFT  = MAX(0.0,(NLEFT - ADDSHL * SHELL_N_FRACTION))
             ENDIF
 !!-----------------------------------------------------------------------
 !!     Grow shells if greater than 1 day old
@@ -778,12 +788,12 @@ C-GH          IF (SHELN(NPP) .GE. 0.001 .AND. GRRAT1 .GE. 0.001) THEN
      &       MIN(SWADD1,SWADD2,RNITPD) * MAX((1.0 - ACCAGE),0.0)
 !    &       * MAX((1.0 - ACCAGE),0.0) * (1.0 + TURADD)
           SHELN(NR2TIM + 1) = MIN(PODADD, PGNPOD/(SHMAXG*AGRSH1),
-     &      FLADD, NAVPOD/(SHMAXG*(FNINSH*CNSTRES**0.5)))
+     &      FLADD, NAVPOD/(SHMAXG*SHELL_N_FRACTION))
           IF (P0_ENABLED()) THEN
             CALL P0_V(CONTROL,'pods_set_budget',
      &      'PODADD,C_limit,flower_limit,N_limit,selected,RNITPD',
      &      (/PODADD,PGNPOD/(SHMAXG*AGRSH1),FLADD,
-     &      NAVPOD/(SHMAXG*(FNINSH*CNSTRES**0.5)),
+     &      NAVPOD/(SHMAXG*SHELL_N_FRACTION),
      &      SHELN(NR2TIM+1),RNITPD/))
           ENDIF
 !-----------------------------------------------------------------------
@@ -801,17 +811,24 @@ C-GH          IF (SHELN(NPP) .GE. 0.001 .AND. GRRAT1 .GE. 0.001) THEN
           IF (DAS .GE. NDSET .AND. TRIGGR .EQ. 1) THEN
             SHELN(NR2TIM + 1) = 0.0
           ENDIF
+          IF (NI_V4_TRACE())
+     &      CALL P0_V(CONTROL,'new_pod_gate','accepted_count',
+     &        (/SHELN(NR2TIM + 1)/))
 !-----------------------------------------------------------------------
         ENDIF         !End of DAS>NR2 Pod and flower growth section
 !-----------------------------------------------------------------------
         FLWADD = 2. * PMAX * TEMPOD * (DRPP**1.3) *
-     &     MIN(SWADD1,SWADD2,CNSTRES**0.5)
+     &     MIN(SWADD1,SWADD2,REPRO_N_SCALE)
 !    &     MIN(SWADD1,SWADD2,CNSTRES**0.5) * (1.0 + TURADD)
         FLWN(NR1TIM + 1) = MIN(FLWADD,PGNPOD/(SHMAXG*0.1*AGRSH1),
-     &     NAVPOD/(SHMAXG*0.1*(FNINSH*CNSTRES**0.5)))
+     &     NAVPOD/(SHMAXG*0.1*SHELL_N_FRACTION))
         IF (DAS .GE. NDSET .AND. TRIGGR .EQ. 1) THEN
           FLWN(NR1TIM + 1) = 0.
         ENDIF
+        IF (NI_V4_TRACE())
+     &    CALL P0_V(CONTROL,'new_flower_gate',
+     &      'water_limit,potential_count,accepted_count',
+     &      (/MIN(SWADD1,SWADD2),FLWADD,FLWN(NR1TIM + 1)/))
 !-----------------------------------------------------------------------
 !     Calculate number of pods, including those with and without seeds
 !-----------------------------------------------------------------------

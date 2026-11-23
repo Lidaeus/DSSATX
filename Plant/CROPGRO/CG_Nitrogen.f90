@@ -108,6 +108,7 @@ module CG_Nitrogen
   public :: NI_EXPANSION, NI_AREA_REFILL, NI_MINIMUM
   public :: NI_OPEN_DAY, NI_SYNC_STATE, NI_PODS, NI_POD_FACTOR, NI_POD_KERNEL
   public :: NI_LUX_KERNEL, NI_XFRT_FACTOR
+  public :: NI_NATIVE_MOB_FACTOR, NI_V4_TRACE
   public :: NI_REMOB_ON, NI_REMOB_KERNEL, NI_REMOB_PLAN, NI_REMOB_SETTLE, NI_REMOB_REPRO
   public :: NI_CORE_DEMAND, NI_LUXURY, NI_LATE_KERNEL, NI_REDUCTION_RESP
   public :: NI_LUX_ON
@@ -762,6 +763,15 @@ contains
   logical function NI_REMOB_ON()
     NI_REMOB_ON=ni_stage==5.and.budget_revision==1.and.remob_mode==1
   end function
+  pure real function NI_NATIVE_MOB_FACTOR(nstress,protected) result(factor)
+    real,intent(in)::nstress
+    logical,intent(in)::protected
+    factor=1.
+    if(.not.protected)factor=1.0+0.3*(1.0-nstress)
+  end function
+  logical function NI_V4_TRACE()
+    NI_V4_TRACE=v4_diagnostics==1.and.P0_ENABLED()
+  end function
   pure subroutine NI_REMOB_KERNEL(n,w,cm,cc,legacy,rate,tau,slow,beta,z,gap,carbon,cost,safe,func,safe_max,func_max)
     real(dp),intent(in)::n(4),w(4),cm(2),cc(2),legacy(4),rate,tau,slow,beta,z,gap,carbon,cost
     real(dp),intent(out)::safe(4),func(4)
@@ -952,6 +962,7 @@ contains
     day_psi=0;day_psi_valid=.false.
     if(day_valid) then
       if(end_day>=control%YRDOY) error stop 'NI v3: current/future state in day snapshot'
+      ! Leaf status and whole-shoot status share a source date, not a concentration basis.
       day_source=end_day;day_z=z_end;day_growth=growth_factor;day_veg_z=veg_z_end
       day_psi=psi_end;day_psi_valid=psi_end_valid
     end if
