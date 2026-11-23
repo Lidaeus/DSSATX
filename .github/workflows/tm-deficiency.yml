@@ -1,0 +1,30 @@
+name: TM deficiency regression
+
+on:
+  push:
+    branches: [research/root-n-4864]
+  pull_request:
+    branches: [research/root-n-4864]
+
+permissions:
+  contents: read
+
+jobs:
+  tm-deficiency:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gfortran ninja-build
+      - name: Configure
+        run: >-
+          cmake -S . -B build/tm-deficiency-ci -G Ninja
+          -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=gfortran
+          -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DDSSAT_TM_DEFICIENCY_TEST=ON
+      - name: Build
+        run: cmake --build build/tm-deficiency-ci --parallel 4
+      - name: Run 26SP conservation and repeatability regression
+        run: ctest --test-dir build/tm-deficiency-ci --output-on-failure
