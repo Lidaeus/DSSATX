@@ -272,3 +272,43 @@ The 26SP field replay saturates the SLN curve at 0.18, and the 0.70
 sensitivity run exercises its unsaturated range. The candidate remains
 under evaluation because the matched treatments still fail the strict
 biomass and fresh-yield gradient criteria.
+
+### Fixed SLN scan and 26SP root N interruption
+
+Use the isolated diagnostic build to scan the B3 and B4 fixed functional SLN
+reference and measure the carbon balance at entry to PODS. The build copies an
+explicit Git revision, adds probes to that copy, and compiles a separate engine.
+The 20-day pulse begins at 26SP DAP 50 and withholds both forms of new nitrogen
+at crop acceptance. Soil pools, potential root transport, previously committed
+soil debits, and assimilation from the standing inorganic pool are still
+computed. The pulse is only available in this diagnostic build.
+
+```sh
+python3 research/root_n_kernel/p1_4864/build_sln_probe.py \
+  --ref 07f1be5f --out build/26sp-sln-probe
+python3 research/root_n_kernel/p1_4864/replay_sln_pulse.py \
+  --engine build/26sp-sln-probe/engine/bin/dscsm048 --out build/26sp-sln-replay
+```
+
+The matched-soil run writes `late_carbon_paired.csv` with daily W3 N0, N1,
+and N0−N1 values for days 181–198. The RSP submitted before PODS and the
+settled assimilation expenditure are both recorded. `pulse_paired.csv`
+contains uninterrupted and interrupted daily trajectories. `receipt.json`
+contains nitrogen and carbon audits, saturation counts and the first day
+each paired signal exceeds a 5% difference. Photosynthesis call shares are
+counts of solver evaluations. The default pulse compares 1.10 with the first
+tested reference that clears the B4 W3 N0/N1 reversal, if any.
+
+In the matched W3 replay, 1.50 removed the final N0/N1 yield reversal in
+B4 by 0.074 t/ha. B3 retained the reversal, and B4 still failed the strict
+diminishing-increment criterion. Across the original field treatments,
+the unweighted same-date cumulative fresh-yield RMSE increased from 18.55
+to 28.21 t/ha. Keep both the existing engineering reference and the higher
+references as research controls.
+
+Both pulses reduced QNO3 on DAP 50 and reduced functional leaf N on DAP 51.
+The direct nitrogen constraint on accepted new leaf area acted on DAP 50.
+The canopy photo factor separated by more than 5% on DAP 52. Extra
+nitrogen-driven senescence increased smoothly, with DAP 51–52 crossings
+at the diagnostic tolerance. Audit the direct assimilation-to-assembly
+response alongside the delayed tissue-state response.

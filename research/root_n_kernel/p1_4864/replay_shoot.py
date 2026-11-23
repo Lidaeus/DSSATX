@@ -40,8 +40,8 @@ STOP_DOY = 152
 DONORS = ("leaf", "stem", "root", "shell")
 
 
-def stage_config(stage, options):
-    config = TEMPLATE.read_text(encoding="ascii")
+def stage_config(stage, options, template=TEMPLATE):
+    config = template.read_text(encoding="ascii")
     for name, value in (STAGES[stage] | options).items():
         pattern = rf"\b{name}\s*=\s*[-.\d]+"
         config, count = re.subn(pattern, f"{name}={value}", config)
