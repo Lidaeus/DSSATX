@@ -90,7 +90,7 @@ C========================================================================
       REAL TGRO(TS)
       
 !     FO - Cotton-Nitrogen
-      REAL NSTFAC, PNSTRES, XNSTRES
+      REAL NSTFAC, PNSTRES, XNSTRES, PARTITION_N
 
 !     P module
       REAL PStres2
@@ -291,8 +291,10 @@ C-----------------------------------------------------------------------
       NSTRES = XNSTRES * 0.5 + PNSTRES * 0.5
       ENDIF
       
-!      FRRT  = ATOP * (1.0 - (MIN(TURFAC,NSTRES)))*(1.0-FRRT) + FRRT
-      FRRT  = ATOP * (1.0 - (MIN(TURFAC, NSTRES, PStres2))) * 
+!     Leaf C/N acceptance applies the N state once to the leaf request.
+      PARTITION_N=NSTRES
+      IF (NI_LAI_ON()) PARTITION_N=1.0
+      FRRT  = ATOP * (1.0 - MIN(TURFAC,PARTITION_N,PStres2)) *
      &                    (1.0 - FRRT) + FRRT
 C-----------------------------------------------------------------------
 C     Cumulative turgor factor that remembers veg drought stress

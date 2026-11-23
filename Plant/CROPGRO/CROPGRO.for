@@ -1730,6 +1730,7 @@ C-----------------------------------------------------------------------
         CALL P0_TEXT(CONTROL,'cg_reset','MEPHO',MEPHO)
       ENDIF
       ELSEIF (DYNAMIC .EQ. SEASEND) THEN
+      CALL NI_CLOSE_LEDGERS()
 !     P0b read-only trace; no model state is assigned.
       IF (P0_ENABLED()) THEN
         CALL P0_V(CONTROL,'cg_season_end',

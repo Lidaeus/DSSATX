@@ -1,0 +1,34 @@
+! 26SP B4 engineering candidate for tomato/eggplant (TM, MEPHO=L).
+! Persistent inorganic N, shared steady RNK, limited protected remobilization,
+! fixed functional SLN, coupled senescence, and single C/N leaf acceptance.
+! SLN reference is in g N/m2 leaf. 0.18 corresponds to the engineering curve
+! at about 100 g leaf DM/m2 soil and 28 g leaf DM/m2 leaf.
+! Senescence rate is a provisional daily maximum before stress scaling.
+&NINTEGRATION
+ ni_stage=5, root_mode=2,
+ q_no3_max=.003, q_nh4_max=.0001,
+ assim_no3_v=.003, assim_nh4_v=.006, assim_no3_k=.001, assim_nh4_k=.00005,
+ root_v=.0002, root_k=10., diffusion_k=.005, pool_beta=1.,
+ leaf_a=.042, leaf_b=.30, stem_a=.025, stem_b=.35,
+ min_ratio=.40, max_ratio=1.25, photo_floor=.05, photo_gamma=1., growth_tau=2.,
+ state_timing=1, pods_n_state=1, budget_revision=1, c4_budget=1, leaf_coupling=1, c4_photo=1,
+ remob_mode=1, luxury_priority=0, remob_tau=8., protect_beta=0.5, slow_ratio=3.,
+ remob_rate_mode=1, remob_rate_max=0.01, functional_rate_max=0.001,
+ photo_reference_mode=1, photo_sln_ref=0.18,
+ n_sen_rate=0.01, lai_cn_mode=1, lai_cn_shape=2.,
+ common_acceptance=0, reserve_mode=0
+/
+! Append to the same file as &NINTEGRATION.
+! rnk_mode: 0=off, 1=steady equivalent transport.
+! Vmax units: g N/(m root day). Km: mg N/L. Kd: L/kg. Residual: mg N/kg dry soil.
+! Optional sorbing NH4 penetration: positive coefficient enables it, 0 uses the full cylinder.
+! Species order: NO3, NH4. Values are fixed engineering priors.
+&rootnuptake
+ rnk_mode=1,
+ rnk_source_tag="v15-engineering","literature-prior",
+ rnk_km_high=0.28,0.5, rnk_km_low=35.,50.,
+ rnk_vmax_high=0.0003,0.0004, rnk_vmax_low=0.0015,0.002,
+ rnk_kd=0.,1., rnk_residual=0.25,0.5,
+ rnk_penetration_coeff=0.,
+ rnk_radius=0.0001, rnk_species_diffusion=0.000164,0.000150
+/

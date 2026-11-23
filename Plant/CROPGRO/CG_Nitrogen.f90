@@ -52,6 +52,7 @@ module CG_Nitrogen
   real(dp),save :: photo_sln_ref=-1,veg_before(3)=0,veg_after(3)=0,storage_shift=0
   integer,save :: photo_reference_mode=0,leaf_expansion_mode=0,v4_diagnostics=0,v4_unit=0
   logical,save :: v4_opened=.false.
+  integer,save :: photo_legacy=0
   integer,save :: common_acceptance=0,reserve_mode=0,p2_unit=0,p2_plan_calls=0,p2_veg_calls=0
   real(dp),save :: reserve_capacity=-1,reserve_fill_tau=-1,reserve_protect=-1
   real(dp),save :: build_min_leaf=-1,build_min_stem=-1
@@ -95,6 +96,7 @@ module CG_Nitrogen
   public :: NI_CAPTURE_WATER, NI_ROOT_MODE, NI_ROOT_UPTAKE, NI_COMMON_ROOT_ENABLED
   public :: NI_ROOT_SOIL_DEBIT, NI_ROOT_SOIL_END
   public :: NI_TARGETS, NI_REFERENCES, NI_BUILD_REFERENCES, NI_GROWTH, NI_LEAF_FACTOR
+  public :: NI_PHOTO_REPLACED, NI_CLOSE_LEDGERS
   public :: NI_TOTAL_Q, NI_CURVE_KERNEL, NI_ROOT_KERNEL, NI_ASSIM_KERNEL
   public :: NI_PSI_KERNEL, NI_ROOT_PSI_FACTOR, NI_BUFFER_INFLOW
   public :: NI_PREASSIM, NI_MERGE_OLD
@@ -117,6 +119,42 @@ module CG_Nitrogen
   public :: NI_P2_CARBON,NI_P2_UNUSED_ASSIM
   public :: NI_LAI_ON,NI_LAI_REQUEST,NI_LAI_BUILD,NI_LAI_ACCEPT,NI_LAI_RECORD,NI_LAI_AREA,NI_LAI_CN_KERNEL
 contains
+  logical function NI_OPEN_LEDGER(unit,path) result(needs_header)
+    integer,intent(inout)::unit
+    character(*),intent(in)::path
+    integer::ios
+    ! The zero sentinel is preserved until the first open of each process.
+    needs_header=unit==0
+    if(needs_header)then
+      open(newunit=unit,file=path,status='replace',action='write',iostat=ios)
+    else
+      open(newunit=unit,file=path,status='old',position='append',action='write',iostat=ios)
+    endif
+    if(ios/=0)then
+      write(*,'(A)') trim(path)
+      error stop 'NI: cannot open diagnostic ledger'
+    endif
+  end function
+  subroutine NI_CLOSE_LEDGER(unit,is_open)
+    integer,intent(in)::unit
+    logical,intent(inout)::is_open
+    if(.not.is_open)return
+    close(unit)
+    is_open=.false.
+  end subroutine
+  subroutine NI_CLOSE_LEDGERS()
+    call NI_CLOSE_LEDGER(lai_unit,lai_opened)
+    call NI_CLOSE_LEDGER(p2_unit,p2_opened)
+    call NI_CLOSE_LEDGER(cash_unit,cash_opened)
+    call NI_CLOSE_LEDGER(leaf_unit,leaf_opened)
+    call NI_CLOSE_LEDGER(v3_unit,v3_opened)
+    call NI_CLOSE_LEDGER(v4_unit,v4_opened)
+    call NI_CLOSE_LEDGER(lux_unit,lux_opened)
+    call NI_CLOSE_LEDGER(mob_unit,mob_opened)
+    call NI_CLOSE_LEDGER(audit_unit,audit_opened)
+    call NI_CLOSE_LEDGER(output_unit,opened)
+    call NI_CLOSE_LEDGER(root_output_unit,root_opened)
+  end subroutine
   logical function NI_LAI_ON()
     NI_LAI_ON=lai_cn_mode==1
   end function
@@ -198,21 +236,22 @@ contains
     type(ControlType),intent(in)::control
     real,intent(in)::lai
     real(dp)::nonreserve
-    integer::ios
+    ! Only coupled GROW uses NI_LAI_AREA. The remobilization-only control
+    ! keeps native area integration and is audited through PlantNRemob.csv.
+    if(.not.NI_LEAF_COUPLED())return
     if(max(lai_cn_mode,remob_rate_mode,v4_diagnostics)==0)return
     ! Standalone pool/remobilization drivers do not execute VEGGR/GROW.
-    ! Full-crop replay separately requires all 1512 coupled ledger rows.
     if(lai_cn_mode==0.and.lai_accept_calls==0.and.lai_area_calls==0)return
     if(lai_accept_calls/=1.or.lai_area_calls/=1)error stop 'NI LAI: missing acceptance or area integration'
     nonreserve=org_start(1)
     if(NI_RESERVES())nonreserve=nonreserve-reserve_begin(1)
     if(.not.lai_opened)then
-      open(newunit=lai_unit,file='PlantNLAI.csv',status='replace',action='write',iostat=ios)
-      if(ios/=0)error stop 'NI LAI: cannot create leaf growth ledger'
-      write(lai_unit,'(A)')'run,yrdoy,lai_cn_mode,accept_calls,area_calls,shape,state_smoothed,state_raw_leaf,'// &
-        'state_response,N_nonreserve_begin,W_leaf_begin,N_min_begin,N_crit_begin,dm_leaf_potential,dm_leaf_request,'// &
-        'C_available_veg,N_available_veg,C_used_veg,N_used_veg,dm_leaf_actual,N_leaf_actual,C_leaf_actual,'// &
-        'build_N_leaf,SLA_new,new_leaf_area,old_leaf_area_lost,LAI_end,N_uptake_day,N_assim_day'
+      if(NI_OPEN_LEDGER(lai_unit,'PlantNLAI.csv'))then
+        write(lai_unit,'(A)')'run,yrdoy,lai_cn_mode,accept_calls,area_calls,shape,state_smoothed,state_raw_leaf,'// &
+          'state_response,N_nonreserve_begin,W_leaf_begin,N_min_begin,N_crit_begin,dm_leaf_potential,dm_leaf_request,'// &
+          'C_available_veg,N_available_veg,C_used_veg,N_used_veg,dm_leaf_actual,N_leaf_actual,C_leaf_actual,'// &
+          'build_N_leaf,SLA_new,new_leaf_area,old_leaf_area_lost,LAI_end,N_uptake_day,N_assim_day'
+      endif
       lai_opened=.true.
     endif
     write(lai_unit,'(5(I0,","),*(ES24.15E3,:,","))')control%RUN,control%YRDOY,lai_cn_mode,lai_accept_calls,lai_area_calls, &
@@ -451,19 +490,18 @@ contains
   subroutine write_p2(control,n)
     type(ControlType),intent(in)::control
     real,intent(in)::n(3)
-    integer::ios
     if(.not.p2_opened)then
-      open(newunit=p2_unit,file='PlantNP2.csv',status='replace',action='write',iostat=ios)
-      if(ios/=0)error stop 'NI P2: cannot create common/reserve ledger'
-      write(p2_unit,'(A)')'run,yrdoy,common_acceptance,reserve_mode,plan_calls,veg_calls,C_available,N_available,'// &
-        'fruit_C_request,fruit_N_request,fruit_C_cap,fruit_N_cap,fruit_C_used,fruit_N_used,common_scale,'// &
-        'dm_request_leaf,dm_request_stem,dm_request_root,dm_accept_leaf,dm_accept_stem,dm_accept_root,'// &
-        'N_accept_leaf,N_accept_stem,N_accept_root,unit_C_leaf,unit_C_stem,unit_C_root,'// &
-        'repair_accept_leaf,repair_accept_stem,repair_accept_root,repair_used_leaf,repair_used_stem,repair_used_root,'// &
-        'R_begin_leaf,R_begin_stem,R_end_leaf,R_end_stem,R_fill_leaf,R_fill_stem,R_fast_leaf,R_fast_stem,'// &
-        'R_sen_recovery_leaf,R_sen_recovery_stem,R_litter_leaf,R_litter_stem,R_residual_leaf,R_residual_stem,'// &
-        'R_capacity_leaf,R_capacity_stem,N_nonreserve_leaf,N_nonreserve_stem,C_assim_accepted,N_assim_accepted,'// &
-        'build_N_leaf,build_N_stem,build_N_root,target_N_leaf,target_N_stem,target_N_root'
+      if(NI_OPEN_LEDGER(p2_unit,'PlantNP2.csv'))then
+        write(p2_unit,'(A)')'run,yrdoy,common_acceptance,reserve_mode,plan_calls,veg_calls,C_available,N_available,'// &
+          'fruit_C_request,fruit_N_request,fruit_C_cap,fruit_N_cap,fruit_C_used,fruit_N_used,common_scale,'// &
+          'dm_request_leaf,dm_request_stem,dm_request_root,dm_accept_leaf,dm_accept_stem,dm_accept_root,'// &
+          'N_accept_leaf,N_accept_stem,N_accept_root,unit_C_leaf,unit_C_stem,unit_C_root,'// &
+          'repair_accept_leaf,repair_accept_stem,repair_accept_root,repair_used_leaf,repair_used_stem,repair_used_root,'// &
+          'R_begin_leaf,R_begin_stem,R_end_leaf,R_end_stem,R_fill_leaf,R_fill_stem,R_fast_leaf,R_fast_stem,'// &
+          'R_sen_recovery_leaf,R_sen_recovery_stem,R_litter_leaf,R_litter_stem,R_residual_leaf,R_residual_stem,'// &
+          'R_capacity_leaf,R_capacity_stem,N_nonreserve_leaf,N_nonreserve_stem,C_assim_accepted,N_assim_accepted,'// &
+          'build_N_leaf,build_N_stem,build_N_root,target_N_leaf,target_N_stem,target_N_root'
+      endif
       p2_opened=.true.
     endif
     write(p2_unit,'(2(I0,","),*(ES24.15E3,:,","))')control%RUN,control%YRDOY, &
@@ -532,7 +570,6 @@ contains
     type(ControlType),intent(in)::control
     real,intent(in)::pg,main,draw(4),assim,mob,veg,fruit,store,predicted_unused,main_potential
     real(dp)::res,scale
-    integer::ios
     if(.not.NI_C4_ON()) return
     res=real(pg,dp)+sum(real(draw,dp))-real(main,dp)-real(assim,dp)-real(mob,dp) &
       -real(veg,dp)-real(fruit,dp)-real(store,dp)
@@ -544,11 +581,11 @@ contains
       error stop 'NI C4: actual carbohydrate expenditure imbalance'
     endif
     if(.not.cash_opened) then
-      open(newunit=cash_unit,file='PlantCCash.csv',status='replace',action='write',iostat=ios)
-      if(ios/=0)error stop 'NI C4: cannot create carbohydrate expenditure ledger'
-      write(cash_unit,'(A)')'run,yrdoy,PG,actual_C_mined,maintenance,N_assim,N_resynthesis,veg_growth,fruit_growth,'// &
-        'storage_cost,CH2O_residual,C_equivalent_residual,predicted_unused_not_a_stock,'// &
-        'maintenance_potential,maintenance_unpaid'
+      if(NI_OPEN_LEDGER(cash_unit,'PlantCCash.csv'))then
+        write(cash_unit,'(A)')'run,yrdoy,PG,actual_C_mined,maintenance,N_assim,N_resynthesis,veg_growth,fruit_growth,'// &
+          'storage_cost,CH2O_residual,C_equivalent_residual,predicted_unused_not_a_stock,'// &
+          'maintenance_potential,maintenance_unpaid'
+      endif
       cash_opened=.true.
     endif
     write(cash_unit,'(2(I0,","),12(ES24.15E3,","),ES24.15E3)')control%RUN,control%YRDOY,real(pg,dp), &
@@ -1061,7 +1098,7 @@ contains
       c4_budget,leaf_coupling,n_sen_rate,c4_photo,leaf_min_ratio,stem_min_ratio,leaf_inf,stem_inf, &
       photo_reference_mode,photo_sln_ref,leaf_expansion_mode,v4_diagnostics,common_acceptance,reserve_mode, &
       reserve_capacity,reserve_fill_tau,reserve_protect,build_min_leaf,build_min_stem, &
-      remob_rate_mode,remob_rate_max,functional_rate_max,lai_cn_mode,lai_cn_shape
+      remob_rate_mode,remob_rate_max,functional_rate_max,lai_cn_mode,lai_cn_shape,photo_legacy
     if(loaded) then
       if(NI_ENABLED()) then
         if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
@@ -1096,7 +1133,7 @@ contains
     if(.not.ieee_is_finite(lai_cn_shape))error stop 'NI LAI: nonfinite leaf response'
     if(lai_cn_mode==1)then
       if(ni_stage/=5.or.budget_revision/=1.or.c4_budget/=1.or.leaf_coupling/=1.or.c4_photo/=1.or. &
-        state_timing/=1.or.pods_n_state/=1.or.remob_mode/=1.or.luxury_priority/=1) &
+        state_timing/=1.or.pods_n_state/=1.or.remob_mode/=1) &
         error stop 'NI LAI: leaf model requires complete revised C4 routes'
       if(leaf_expansion_mode/=0)error stop 'NI LAI: duplicate expansion policy'
       if(lai_cn_shape<1.or.lai_cn_shape>4)error stop 'NI LAI: explicit response shape in [1,4] required'
@@ -1136,12 +1173,18 @@ contains
     if((leaf_min_ratio/=-1.and.(leaf_min_ratio<=0.or.leaf_min_ratio>=1)).or. &
       (stem_min_ratio/=-1.and.(stem_min_ratio<=0.or.stem_min_ratio>=1)))error stop 'NI V4: invalid minimum ratio'
     if(leaf_inf<0.or.stem_inf<0)error stop 'NI V4: negative asymptote'
-    if(max(photo_reference_mode,leaf_expansion_mode,v4_diagnostics)>0.or.leaf_min_ratio/=-1.or. &
+    if(max(leaf_expansion_mode,v4_diagnostics)>0.or.leaf_min_ratio/=-1.or. &
       stem_min_ratio/=-1.or.max(leaf_inf,stem_inf)>0)then
       if(ni_stage/=5.or.budget_revision/=1.or.c4_photo/=1.or.leaf_coupling/=1) &
         error stop 'NI V4: experiments require complete C4 stage5/A'
     endif
-    if(photo_reference_mode==1.and.photo_sln_ref<=0)error stop 'NI V4: explicit area-N reference required'
+    if(photo_legacy<0.or.photo_legacy>1)error stop 'NI: invalid native photosynthesis control'
+    if(photo_legacy==1.and.(ni_stage/=5.or.c4_photo/=0.or.photo_reference_mode/=0)) &
+      error stop 'NI: native photosynthesis control requires stage5 with area-N switches off'
+    if(photo_reference_mode==1)then
+      if(c4_photo/=1.or.photo_sln_ref<=0)error stop 'NI V4: fixed reference requires area-N feedback and positive reference'
+      if(reserve_mode==2)error stop 'NI V4: fixed area-N reference and daily organic photosynthesis are different policies'
+    endif
     if(min(c4_budget,leaf_coupling,c4_photo)<0.or.max(c4_budget,leaf_coupling,c4_photo)>1)error stop 'NI C4: invalid mode'
     if(.not.ieee_is_finite(n_sen_rate).or.n_sen_rate<0.or.n_sen_rate>1)error stop 'NI C4: invalid senescence rate'
     if(c4_budget==1.and.(ni_stage/=5.or.budget_revision/=1.or.state_timing/=1.or.pods_n_state/=1)) &
@@ -1522,7 +1565,7 @@ contains
     real(dp)::fraction(3),out3(3),out4(3),growth(3),denom,alpha,target,nraw,nniraw(2),nnifun(2),deficit(2),surplus(2)
     real(dp)::functional_n(2),shoot_w(2),shoot_n,shoot_min,shoot_crit,shoot_max,functional_psi
     logical::functional_psi_valid
-    integer::l,s,ios
+    integer::l,s
     if(.not.NI_ENABLED()) return
     if(reserve_pending)error stop 'NI P2: reserve stock was not committed'
     growth=max(0._dp,real(weights,dp)+max(0._dp,real(losses,dp))-w_begin)
@@ -1606,11 +1649,11 @@ contains
     ready=.true.
     if(NI_LEAF_COUPLED())then
       if(.not.leaf_opened)then
-        open(newunit=leaf_unit,file='PlantNLeaf.csv',status='replace',action='write',iostat=ios)
-        if(ios/=0)error stop 'NI C4: cannot create leaf fate ledger'
-        write(leaf_unit,'(A)')'run,yrdoy,sen_DM_leaf_planned,sen_DM_stem_planned,cell_loss_leaf,cell_loss_stem,cell_loss_root,'// &
-          'sen_available_leaf,sen_available_stem,sen_N_leaf,sen_N_stem,sen_N_root,sen_N_shell,'// &
-          'litter_N_leaf,litter_N_stem,litter_N_root,old_area_lost,n_sen_rate'
+        if(NI_OPEN_LEDGER(leaf_unit,'PlantNLeaf.csv'))then
+          write(leaf_unit,'(A)')'run,yrdoy,sen_DM_leaf_planned,sen_DM_stem_planned,cell_loss_leaf,cell_loss_stem,cell_loss_root,'// &
+            'sen_available_leaf,sen_available_stem,sen_N_leaf,sen_N_stem,sen_N_root,sen_N_shell,'// &
+            'litter_N_leaf,litter_N_stem,litter_N_root,old_area_lost,n_sen_rate'
+        endif
         leaf_opened=.true.
       endif
       write(leaf_unit,'(2(I0,","),15(ES24.15E3,","),ES24.15E3)')control%RUN,control%YRDOY,sen_plan_dm,sen_frac, &
@@ -1618,10 +1661,10 @@ contains
     endif
     if(max(state_timing,pods_n_state)>0) then
       if(.not.v3_opened) then
-        open(newunit=v3_unit,file='PlantNV3.csv',status='replace',action='write',iostat=ios)
-        if(ios/=0) error stop 'NI v3: cannot create day-state ledger'
-        write(v3_unit,'(A)')'run,yrdoy,state_timing,pods_n_state,source_yrdoy,valid,'// &
-          'growth_day,z_leaf_day,z_stem_day,pod_n_factor,growth_end,z_leaf_end,z_stem_end'
+        if(NI_OPEN_LEDGER(v3_unit,'PlantNV3.csv'))then
+          write(v3_unit,'(A)')'run,yrdoy,state_timing,pods_n_state,source_yrdoy,valid,'// &
+            'growth_day,z_leaf_day,z_stem_day,pod_n_factor,growth_end,z_leaf_end,z_stem_end'
+        endif
         v3_opened=.true.
       end if
       write(v3_unit,'(6(I0,","),6(ES24.15E3,","),ES24.15E3)')control%RUN,control%YRDOY, &
@@ -1633,11 +1676,11 @@ contains
     if(NI_REVISED())call write_lai(control,lai)
     if(v4_diagnostics==1)then
       if(.not.v4_opened)then
-        open(newunit=v4_unit,file='PlantNV4.csv',status='replace',action='write',iostat=ios)
-        if(ios/=0)error stop 'NI V4: cannot create mechanism ledger'
-        write(v4_unit,'(A)')'run,yrdoy,photo_reference_mode,leaf_expansion_mode,leaf_min_ratio,stem_min_ratio,'// &
-          'leaf_inf,stem_inf,photo_sln_ref,leaf_gate,veg_before_leaf,veg_before_stem,veg_before_root,'// &
-          'veg_after_leaf,veg_after_stem,veg_after_root,storage_shift_leaf_to_stem'
+        if(NI_OPEN_LEDGER(v4_unit,'PlantNV4.csv'))then
+          write(v4_unit,'(A)')'run,yrdoy,photo_reference_mode,leaf_expansion_mode,leaf_min_ratio,stem_min_ratio,'// &
+            'leaf_inf,stem_inf,photo_sln_ref,leaf_gate,veg_before_leaf,veg_before_stem,veg_before_root,'// &
+            'veg_after_leaf,veg_after_stem,veg_after_root,storage_shift_leaf_to_stem'
+        endif
         v4_opened=.true.
       endif
       write(v4_unit,'(4(I0,","),12(ES24.15E3,","),ES24.15E3)') control%RUN,control%YRDOY, &
@@ -1647,11 +1690,11 @@ contains
     endif
     if(luxury_priority==1) then
       if(.not.lux_opened)then
-        open(newunit=lux_unit,file='PlantNLuxury.csv',status='replace',action='write',iostat=ios)
-        if(ios/=0)error stop 'NI v3: cannot create priority ledger'
-        write(lux_unit,'(A)')'run,yrdoy,luxury_priority,cap_no3,cap_nh4,core_no3,core_nh4,late_no3,late_nh4,'// &
-          'C_available,C_late,C_storage_before,C_storage_after,C_reserved,A_function_late,A_luxury,'// &
-          'NAD_late_leaf,NAD_late_stem,cost_no3,cost_nh4'
+        if(NI_OPEN_LEDGER(lux_unit,'PlantNLuxury.csv'))then
+          write(lux_unit,'(A)')'run,yrdoy,luxury_priority,cap_no3,cap_nh4,core_no3,core_nh4,late_no3,late_nh4,'// &
+            'C_available,C_late,C_storage_before,C_storage_after,C_reserved,A_function_late,A_luxury,'// &
+            'NAD_late_leaf,NAD_late_stem,cost_no3,cost_nh4'
+        endif
         lux_opened=.true.
       endif
       write(lux_unit,'(3(I0,","),16(ES24.15E3,","),ES24.15E3)') control%RUN,control%YRDOY, &
@@ -1660,14 +1703,14 @@ contains
     endif
     if(NI_REMOB_ON()) then
       if(.not.mob_opened) then
-        open(newunit=mob_unit,file='PlantNRemob.csv',status='replace',action='write',iostat=ios)
-        if(ios/=0) error stop 'NI v3: cannot create remobilization ledger'
-        write(mob_unit,'(A)')'run,yrdoy,remob_mode,tau,protect_beta,slow_ratio,severity,veg_z_day,growth_severity_day,'// &
-          'gap,acceptance_prediction,new_growth_N_actual,C_remob_actual,'// &
-          'plan_leaf,plan_stem,plan_root,plan_shell,returned_leaf,returned_stem,returned_root,returned_shell,'// &
-          'safe_leaf,safe_stem,safe_root,safe_shell,function_leaf,function_stem,function_root,function_shell,'// &
-          'rate_mode,rate_max,functional_rate_max,capR_leaf,capR_stem,capR_root,capR_shell,'// &
-          'capF_leaf,capF_stem,capF_root,capF_shell'
+        if(NI_OPEN_LEDGER(mob_unit,'PlantNRemob.csv'))then
+          write(mob_unit,'(A)')'run,yrdoy,remob_mode,tau,protect_beta,slow_ratio,severity,veg_z_day,growth_severity_day,'// &
+            'gap,acceptance_prediction,new_growth_N_actual,C_remob_actual,'// &
+            'plan_leaf,plan_stem,plan_root,plan_shell,returned_leaf,returned_stem,returned_root,returned_shell,'// &
+            'safe_leaf,safe_stem,safe_root,safe_shell,function_leaf,function_stem,function_root,function_shell,'// &
+            'rate_mode,rate_max,functional_rate_max,capR_leaf,capR_stem,capR_root,capR_shell,'// &
+            'capF_leaf,capF_stem,capF_root,capF_shell'
+        endif
         mob_opened=.true.
       endif
       write(mob_unit,'(3(I0,","),*(ES24.15E3,:,","))') control%RUN,control%YRDOY, &
@@ -1677,12 +1720,12 @@ contains
     endif
     if(NI_REVISED()) then
       if(.not.audit_opened) then
-        open(newunit=audit_unit,file='PlantABudget.csv',status='replace',action='write',iostat=ios)
-        if(ios/=0) error stop 'NI A: cannot create actual acceptance ledger'
-        write(audit_unit,'(A)') 'run,yrdoy,budget_revision,curve_w0,photo_slw_ref,'// &
-          'organic_begin_including_seed,organic_end_including_seed,cumulative_loss_begin,cumulative_loss_end,'// &
-          'leak_begin,leak_end,A_committed,organic_residual,veg_C_available,veg_C_actual,leaf_expansion_factor,'// &
-          'refill_leaf,refill_stem,refill_root,mobilized_leaf,mobilized_stem,mobilized_root'
+        if(NI_OPEN_LEDGER(audit_unit,'PlantABudget.csv'))then
+          write(audit_unit,'(A)') 'run,yrdoy,budget_revision,curve_w0,photo_slw_ref,'// &
+            'organic_begin_including_seed,organic_end_including_seed,cumulative_loss_begin,cumulative_loss_end,'// &
+            'leak_begin,leak_end,A_committed,organic_residual,veg_C_available,veg_C_actual,leaf_expansion_factor,'// &
+            'refill_leaf,refill_stem,refill_root,mobilized_leaf,mobilized_stem,mobilized_root'
+        endif
         audit_opened=.true.
       end if
       write(audit_unit,'(I0,2(",",I0),19(",",ES24.15E3))') control%RUN,control%YRDOY,budget_revision, &
@@ -1698,15 +1741,15 @@ contains
       surplus=max(0._dp,real(org_n(1:2),dp)-ccrit*real(weights(1:2),dp))
     end if
     if(.not.opened) then
-      open(newunit=output_unit,file='PlantNIntegration.csv',status='replace',action='write',iostat=ios)
-      if(ios/=0) error stop 'NI: cannot create plant nitrogen ledger'
-      write(output_unit,'(A)') 'run,yrdoy,stage,QNO3,QNH4,U_NO3,U_NH4,A_NO3,A_NH4,C_assim,C_refund,'// &
-        'inorg_litter,pending_litter,Q_residual,carrier_leaf,carrier_stem,carrier_root,'// &
-        'leaf_min,leaf_crit,leaf_max,stem_min,stem_crit,stem_max,growth_factor,pending_uptake,soil_litter_returned_kg_ha,'// &
-        'legacy_organic_N_residual,legacy_growth_C_overrun,QNO3_leaf,QNO3_stem,QNO3_root,QNH4_leaf,QNH4_stem,QNH4_root,'// &
-        'Norg_leaf,Norg_stem,Norg_root,Corg_leaf,Corg_stem,Corg_root,Ctotal_leaf,Ctotal_stem,Ctotal_root,'// &
-        'W_leaf,W_stem,W_root,functional_leaf_N_per_area,NNI_raw_leaf,NNI_raw_stem,NNI_functional_leaf,NNI_functional_stem,'// &
-        'Ndeficit_leaf,Ndeficit_stem,Nsurplus_leaf,Nsurplus_stem'
+      if(NI_OPEN_LEDGER(output_unit,'PlantNIntegration.csv'))then
+        write(output_unit,'(A)') 'run,yrdoy,stage,QNO3,QNH4,U_NO3,U_NH4,A_NO3,A_NH4,C_assim,C_refund,'// &
+          'inorg_litter,pending_litter,Q_residual,carrier_leaf,carrier_stem,carrier_root,'// &
+          'leaf_min,leaf_crit,leaf_max,stem_min,stem_crit,stem_max,growth_factor,pending_uptake,soil_litter_returned_kg_ha,'// &
+          'legacy_organic_N_residual,legacy_growth_C_overrun,QNO3_leaf,QNO3_stem,QNO3_root,QNH4_leaf,QNH4_stem,QNH4_root,'// &
+          'Norg_leaf,Norg_stem,Norg_root,Corg_leaf,Corg_stem,Corg_root,Ctotal_leaf,Ctotal_stem,Ctotal_root,'// &
+          'W_leaf,W_stem,W_root,functional_leaf_N_per_area,NNI_raw_leaf,NNI_raw_stem,NNI_functional_leaf,NNI_functional_stem,'// &
+          'Ndeficit_leaf,Ndeficit_stem,Nsurplus_leaf,Nsurplus_stem'
+      endif
       opened=.true.
     end if
     write(output_unit,'(I0,2(",",I0),52(",",ES24.15E3))') control%RUN,control%YRDOY,ni_stage, &
@@ -1719,11 +1762,11 @@ contains
       nniraw,nnifun,deficit,surplus
     if(NI_ROOT_MODE()>0) then
       if(.not.root_opened) then
-        open(newunit=root_output_unit,file='LayerNIntegration.csv',status='replace',action='write',iostat=ios)
-        if(ios/=0) error stop 'NI: cannot create layer nitrogen ledger'
-        write(root_output_unit,'(A)') 'run,yrdoy,layer,theta_transport,RWU_cm,'// &
-          'Cbulk_mgN_L,Cr_potential_mgN_L,MF_candidate_gN_m2,Diff_potential_gN_m2,'// &
-          'membrane_potential_gN_m2,NO3_candidate_gN_m2,NH4_candidate_gN_m2,NO3_final_gN_m2,NH4_final_gN_m2'
+        if(NI_OPEN_LEDGER(root_output_unit,'LayerNIntegration.csv'))then
+          write(root_output_unit,'(A)') 'run,yrdoy,layer,theta_transport,RWU_cm,'// &
+            'Cbulk_mgN_L,Cr_potential_mgN_L,MF_candidate_gN_m2,Diff_potential_gN_m2,'// &
+            'membrane_potential_gN_m2,NO3_candidate_gN_m2,NH4_candidate_gN_m2,NO3_final_gN_m2,NH4_final_gN_m2'
+        endif
         root_opened=.true.
       end if
       do l=1,nlayr
@@ -1886,7 +1929,7 @@ contains
   end subroutine
   logical function NI_SUBSTRATE_TARGET_ON()
     NI_SUBSTRATE_TARGET_ON=NI_COMMON_ROOT_ENABLED().and.NI_REVISED().and.luxury_priority==0.and. &
-      .not.(NI_COMMON().or.NI_RESERVES().or.NI_LAI_ON())
+      .not.(NI_COMMON().or.NI_RESERVES())
   end function
   function NI_TISSUE_TARGET() result(target)
     real(dp) :: target(2)
@@ -1918,6 +1961,9 @@ contains
   real function NI_GROWTH()
     NI_GROWTH=real(growth_factor)
     if(state_timing==1.and.day_valid) NI_GROWTH=real(day_growth)
+  end function
+  logical function NI_PHOTO_REPLACED()
+    NI_PHOTO_REPLACED=NI_FEEDBACK().and.photo_legacy==0
   end function
   real function NI_LEAF_FACTOR(rnitp,slw,slwref)
     real,intent(in)::rnitp,slw,slwref

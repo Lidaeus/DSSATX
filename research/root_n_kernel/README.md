@@ -237,3 +237,38 @@ actual carbon cash entry per plant nitrogen day, with an absolute
 `CH2O_residual` below `1e-5` g CH₂O/m² each day. The minimum predicted
 `PGAVL` after vegetative growth and carbohydrate storage is reported for
 regression monitoring.
+
+### TM deficiency response ablation
+
+`source/TMDeficiency.nml.template` is a candidate input for tomato and eggplant
+using TM with `MEPHO='L'`. Copy it as `NIntegration.nml`. The steady root
+transport, persistent inorganic store, organ curves, day-state timing, pod
+response, and revised C/N accounting are common to the ablation. B1 uses the
+native leaf photosynthesis via the `photo_legacy=1` ablation switch. B2 adds
+protected remobilization (rate limits 0.01 and 0.001 d⁻¹). B3 replaces the
+light-response nitrogen factors with the existing fixed-reference functional
+SLN curve. B4a adds leaf-turnover coupling, and B4 adds single-acceptance
+C/N leaf expansion. The fixed SLN reference (0.18 g N/m² leaf), daily
+senescence coefficient (0.01), and expansion shape (2) are engineering priors.
+
+Run the numerical and same-directory regression by configuring CMake with
+`-DDSSAT_TM_DEFICIENCY_TEST=ON`, building, and running CTest. To keep detailed
+ledgers, 26SP observations, nutrient-gradient checks, and paired cessation
+outputs, run the full replay from the repository root.
+
+```sh
+python3 research/root_n_kernel/p1_4864/replay_shoot.py \
+  --engine build/bin/dscsm048 --out build/tm-deficiency-replay
+```
+
+The field and matched-soil checks report strict N0→N3 slope criteria
+separately from conservation. The matched comparison uses each water
+regime's N2 soil-analysis and initial-condition levels for all four doses.
+The cessation input omits N-only fertilizer starting at DOY 152. Soil
+mineral N and ongoing root uptake are still simulated. The audit compares
+canopy gross photosynthesis and gross photosynthesis less whole-plant
+maintenance, since the model's daily canopy output is gross photosynthesis.
+The 26SP field replay saturates the SLN curve at 0.18, and the 0.70
+sensitivity run exercises its unsaturated range. The candidate remains
+under evaluation because the matched treatments still fail the strict
+biomass and fresh-yield gradient criteria.

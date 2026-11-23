@@ -661,6 +661,17 @@ set(
 )
 ADD_EXECUTABLE(${EXECUTABLE_NAME} ${source_list})
 
+option(DSSAT_TM_DEFICIENCY_TEST "Enable the full-season TM deficiency regression" OFF)
+if(DSSAT_TM_DEFICIENCY_TEST)
+    enable_testing()
+    find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+    add_test(NAME tm_deficiency_26sp
+        COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/research/root_n_kernel/p1_4864/replay_shoot.py"
+            --engine "$<TARGET_FILE:${EXECUTABLE_NAME}>")
+    set_tests_properties(tm_deficiency_26sp PROPERTIES TIMEOUT 120)
+endif()
+
 foreach(source IN LISTS source_list)
     get_filename_component(source_path "${source}" PATH)
     string(REPLACE "/" "\\" source_path_msvc "${source_path}")
