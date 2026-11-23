@@ -59,16 +59,19 @@ def prepare_experiment(file_x, scenario):
     output = []
     edits = 0
     references = {t: group[2] for group in GROUPS.values() for t in group}
+    reference_w2 = GROUPS["W2"][2]
     for line in file_x.read_text(encoding="ascii").splitlines(keepends=True):
         if line.startswith("*"):
             section = line
         fields = list(re.finditer(r"\S+", line))
         if fields and fields[0].group().isdigit():
-            if scenario == "matched" and section.startswith("*TREATMENTS"):
+            if scenario in ("matched", "common-soil", "common-sa", "common-ic") and section.startswith("*TREATMENTS"):
                 treatment = int(fields[0].group())
                 level = references[treatment]
+                sa = reference_w2 if scenario in ("common-soil", "common-sa") else level
+                ic = reference_w2 if scenario in ("common-soil", "common-ic") else level
                 start, end = fields[7].end() - 3, fields[8].end()
-                line = line[:start] + f"{level:3d}{level:3d}" + line[end:]
+                line = line[:start] + f"{sa:3d}{ic:3d}" + line[end:]
                 edits += 1
             if scenario == "stop" and section.startswith("*FERTILIZERS (INORGANIC)"):
                 _, day, _, _, _, n, *other = (f.group() for f in fields)

@@ -44,6 +44,8 @@ def prepare(args, executable):
     targets = input_table(
         args.observations, ("name", "file", "column", "treatment", "yrdoy", "observed", "weight"),
     )
+    if "preflight_only" in targets and targets.preflight_only.ne(0).any() and args.updates > 0:
+        raise ValueError("This observation table is restricted to zero-update preflight")
     if not np.isfinite(bounds[["init", "lower", "upper"]]).all().all() or not (
         bounds.lower.lt(bounds.upper) & bounds.init.between(bounds.lower, bounds.upper)
     ).all():
@@ -105,6 +107,10 @@ def prepare(args, executable):
     pst.parameter_data["partrans"] = "none"
     pst.observation_data["obsval"] = targets.loc[pst.obs_names, "observed"]
     pst.observation_data["weight"] = targets.loc[pst.obs_names, "weight"]
+    if "group" in targets:
+        if not targets.group.str.fullmatch(r"[a-z][a-z0-9_]{0,19}", na=False).all():
+            raise ValueError("Invalid observation group names")
+        pst.observation_data["obgnme"] = targets.loc[pst.obs_names, "group"]
     if sys.platform == "win32":
         launcher = work / "forward.cmd"
         launcher.write_text("@python -X utf8 forward.py\n", encoding="utf-8")

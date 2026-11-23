@@ -1,11 +1,10 @@
-"""Replay the lowest actual-Phi member of the final IES iteration."""
+"""Replay the best final IES member or the base point of a zero-update preflight."""
 
 import argparse
 import json
 import math
 from pathlib import Path
 import re
-from tempfile import TemporaryDirectory
 
 import pandas as pd
 from ies import sha
@@ -39,33 +38,48 @@ def replay(work, out):
     history = pd.read_csv(work / "mechanism.phi.actual.csv")
     final = history.iloc[-1]
     iteration = int(final["iteration"])
-    parameters = pd.read_csv(
-        work / f"mechanism.{iteration}.par.csv", index_col=0, float_precision="round_trip",
-    )
-    parameters.index = parameters.index.astype(str)
-    phi = final.reindex(parameters.index).dropna()
-    member = phi.idxmin()
-    best = parameters.loc[member].rename(str.lower)
+    ensemble = work / f"mechanism.{iteration}.par.csv"
+    if iteration == 0 and not ensemble.is_file():
+        base = pd.read_csv(work / "mechanism.base.par", sep=r"\s+", skiprows=1,
+                           names=["name", "value", "scale", "offset"], float_precision="round_trip")
+        if not base.scale.eq(1).all() or not base.offset.eq(0).all():
+            raise ValueError("Zero-update replay requires unscaled base parameters")
+        best = base.set_index("name", verify_integrity=True)["value"].rename(str.lower)
+        member = "base"
+    else:
+        parameters = pd.read_csv(ensemble, index_col=0, float_precision="round_trip")
+        parameters.index = parameters.index.astype(str)
+        phi = final.reindex(parameters.index).dropna()
+        member = phi.idxmin()
+        best = parameters.loc[member].rename(str.lower)
     targets = pd.read_csv(work / "observations.csv", dtype={"name": str})
     out.mkdir(parents=True, exist_ok=False)
-    with TemporaryDirectory(prefix="dssatx-replay-") as directory:
-        files = {}
-        for filename in config["templates"]:
-            generated = Path(directory) / filename
-            generated.write_text(render_template(work / f"{filename}.tpl", best), encoding="utf-8")
-            files[generated] = filename
-        predicted = evaluate(work / "inputs", engine, targets, files, out / "dssat.log")
+    configs = out / "configs"
+    configs.mkdir()
+    files = {}
+    for filename in config["templates"]:
+        generated = configs / filename
+        generated.write_text(render_template(work / f"{filename}.tpl", best), encoding="utf-8")
+        files[generated] = filename
+    predicted = evaluate(work / "inputs", engine, targets, files, out / "dssat.log")
+    bounds = pd.read_csv(work / "bounds.csv").set_index("name").loc[best.index]
+    span = bounds.upper - bounds.lower
+    lower_distance = (best - bounds.lower) / span
+    upper_distance = (bounds.upper - best) / span
+    distance = pd.concat((lower_distance, upper_distance), axis=1).min(axis=1)
     comparison = targets.assign(simulated=predicted)
     comparison["phi_contribution"] = (
         (comparison.simulated - comparison.observed) * comparison.weight
     ) ** 2
     actual = float(comparison.phi_contribution.sum())
-    recorded = float(phi.loc[member])
+    recorded = float(final[member])
     comparison.to_csv(out / "comparison.csv", index=False)
     best.to_csv(out / "parameters.csv", header=["value"])
     (out / "receipt.json").write_text(json.dumps({
         "iteration": iteration, "member": member, "phi_recorded": recorded,
         "phi_replayed": actual, "engine_sha256": manifest["engine_sha256"],
+        "distance_to_nearest_bound_as_fraction_of_range": distance.to_dict(),
+        "rendered_config_sha256": {filename: sha(path) for path, filename in files.items()},
     }, indent=2) + "\n")
     if not math.isclose(actual, recorded, rel_tol=1e-5, abs_tol=1e-7):
         raise ValueError("Replayed Phi differs from the final ensemble record")
