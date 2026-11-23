@@ -45,7 +45,7 @@
 !-----------------------------------------------------------------------
       USE ModuleDefs
       USE ModuleData
-      USE CG_Nitrogen, ONLY: NI_PODS, NI_POD_FACTOR,
+      USE CG_Nitrogen, ONLY: NI_PODS, NI_POD_FACTOR, NI_XFRT_FACTOR,
      &  NI_COMMON, NI_P2_POD_BUDGET
       USE CG_P0Trace, ONLY: P0_ENABLED, P0_V
       IMPLICIT NONE
@@ -92,7 +92,7 @@
       REAL ACTSW, POTSW, DSW, FLAYR, CURV, TABEX
       REAL CUMSIG, CNSTRES, AGRSD3, ANINSD
       REAL NIP2NAVL,NIP2PGPOT
-      REAL RNITPD, POTLIP, POTCAR
+      REAL RNITPD, POTLIP, POTCAR, XFRT_LUX
       REAL CRSD, NRSD, NREQ
 
 !     Puncture variables, not yet functional
@@ -409,7 +409,11 @@
       IF (YRDOY .GE. YRNR1 .AND. YRNR1 .GT. 0) THEN
         NR1TIM = MAX(TIMDIF(YRNR1,YRDOY),0)
 !-----------------------------------------------------------------------
-        PGAVLR = PGAVL * XFRT
+        XFRT_LUX = NI_XFRT_FACTOR()
+        PGAVLR = PGAVL * (XFRT * XFRT_LUX)
+        IF (XFRT_LUX.LT.1.0.AND.P0_ENABLED())
+     &    CALL P0_V(CONTROL,'lux_pods','XFRT_base,XFRT_eff,C_rep_cap',
+     &      (/XFRT,XFRT*XFRT_LUX,PGAVLR/))
         NIP2NAVL=NAVL
         NIP2PGPOT=PGAVLR
         CALL NI_P2_POD_BUDGET(PGAVLR,NIP2NAVL)

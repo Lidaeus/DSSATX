@@ -343,3 +343,11 @@ The canopy photo factor separated by more than 5% on DAP 52. Extra
 nitrogen-driven senescence increased smoothly, with DAP 51–52 crossings
 at the diagnostic tolerance. Audit the direct assimilation-to-assembly
 response alongside the delayed tissue-state response.
+
+
+### Luxury nitrogen response ablation
+
+The persistent inorganic B4 route supports opt-in luxury-N carbon partition
+and new pod-set responses. The default mode remains 0. See the
+[26SP execution report](p1_4864/luxury_response.zh.md) for the mechanism
+choices, neutral controls, and ablation results.

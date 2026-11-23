@@ -21,6 +21,11 @@ program native_p1_tests
     call check(cc<=previous.and.lo<cc.and.cc<hi.and.cc>=.015_real64,'ordered, diluting references retain asymptote')
     previous=cc
   enddo
+  call check(NI_LUX_KERNEL(-.5_real64,.25_real64)==1,'luxury factor leaves deficiency unchanged')
+  call check(NI_LUX_KERNEL(0._real64,.25_real64)==1,'luxury factor joins at the critical point')
+  call check(NI_LUX_KERNEL(.5_real64,.25_real64)==.9375_real64,'luxury factor follows the squared surplus')
+  call check(NI_LUX_KERNEL(1.2_real64,.25_real64)==.75_real64,'luxury factor caps at the upper reference')
+  call check(NI_LUX_KERNEL(1._real64,0._real64)==1,'zero luxury amplitude is neutral')
   call check(NI_V4_PHOTO_KERNEL(0._real64,1._real64,.05_real64,1._real64)==.05_real64,'zero function reaches floor')
   call check(NI_V4_PHOTO_KERNEL(20._real64,1._real64,.05_real64,1._real64)==1,'excess N cannot amplify capacity')
   call check(abs(NI_V4_PHOTO_KERNEL(.8_real64,1._real64,.05_real64,1._real64)-.81_real64)<1.e-14_real64, &

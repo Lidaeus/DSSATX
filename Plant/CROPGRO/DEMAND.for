@@ -40,7 +40,9 @@ C=======================================================================
 
 !-----------------------------------------------------------------------
       USE CG_Nitrogen, ONLY: NI_CURVES, NI_TARGETS,
-     &  NI_REFERENCES, NI_FEEDBACK, NI_GROWTH, NI_REVISED
+     &  NI_REFERENCES, NI_FEEDBACK, NI_GROWTH, NI_REVISED,
+     &  NI_XFRT_FACTOR
+      USE CG_P0Trace, ONLY: P0_ENABLED, P0_V
       USE ModuleDefs
       USE ModuleData
       IMPLICIT NONE
@@ -61,7 +63,7 @@ C=======================================================================
 
       REAL FRLFM, FRSTMM, YY, XX, TMPFAC
       REAL REDPUN,TMPFCS,PAGE,REDSHL,SDMAX,CDMSH,GDMSH,ADDSHL
-      REAL TEMXFR,CAVTOT,GDMSDO,CNOLD
+      REAL TEMXFR,CAVTOT,GDMSDO,CNOLD,XFRT_C,XFRT_LUX
       REAL NVSTL,NVSTS,NVSTR,FRNLFT
       REAL TABEX,CURV
       REAL POTLIP, POTCAR
@@ -451,11 +453,18 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
 !     XFRT = XFRUIT * RNIT * TEMXFR   !NEED TO FIX FOR DAYLENGTH EFFECT
       XFRT = MIN(XFRT,1.0)
       XFRT = MAX(XFRT,0.0)
+!     Use the luxury factor for carbon allocation. Preserve the
+!     native reproductive-stage signal used by SLA and flower fate.
+      XFRT_LUX = NI_XFRT_FACTOR()
+      XFRT_C = XFRT * XFRT_LUX
+      IF (XFRT_LUX.LT.1.0.AND.P0_ENABLED())
+     &  CALL P0_V(CONTROL,'lux_demand','XFRT_base,XFRT_eff,C_rep_cap',
+     &    (/XFRT,XFRT_C,PGAVL*XFRT_C/))
 !-----------------------------------------------------------------------
 !    Total Potential Available CH2O for Reprod Growth (CAVTOT)
 !    and total CH2O needed for potential reproductive growth (CDMREP)
 !-----------------------------------------------------------------------
-      CAVTOT = PGAVL * XFRT
+      CAVTOT = PGAVL * XFRT_C
       CDMREP = CDMSH + CDMSD
 !-----------------------------------------------------------------------
 !    Adjust C-Demand for New Growth if C-Available is Less than C Demand
@@ -494,9 +503,9 @@ C 24 changed to TS by Bruce Kimball on 3Jul17
 !-----------------------------------------------------------------------
 !     Check to See if New Vegetative Tissue Can Be Grown, Using PGAVL
 !-----------------------------------------------------------------------
-      CDMVEG = MAX(0.0,(1.-XFRT)*PGAVL)
+      CDMVEG = MAX(0.0,(1.-XFRT_C)*PGAVL)
       NDMVEG = 0.0
-      CDMVEG = (PGAVL * XFRT - CDMREP) + CDMVEG
+      CDMVEG = (CAVTOT - CDMREP) + CDMVEG
 
 !-----------------------------------------------------------------------
 !       This is from documentation:  check no longer needed?? chp
