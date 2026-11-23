@@ -4,26 +4,11 @@ import argparse
 import json
 import math
 from pathlib import Path
-import re
 
 import pandas as pd
 from ies import sha
-from forward import evaluate
-
-
-def render_template(template, values):
-    header, body = template.read_text().split("\n", 1)
-    marker = re.escape(header.split()[1])
-
-    def replace(match):
-        name = match[1].strip().lower()
-        value = format(values[name], ".17g")
-        width = len(match[0])
-        if len(value) > width:
-            raise ValueError(f"Template field for {name} is too narrow for a precise replay")
-        return value.rjust(width)
-
-    return re.sub(fr"{marker}([^\r\n{marker}]+){marker}", replace, body)
+from crop_cards import materialize
+from forward import evaluate, render_template
 
 
 def replay(work, out):
@@ -61,6 +46,11 @@ def replay(work, out):
         generated = configs / filename
         generated.write_text(render_template(work / f"{filename}.tpl", best), encoding="utf-8")
         files[generated] = filename
+    if config.get("crop_cards"):
+        names = {field["name"] for entry in config["crop_cards"].values() for field in entry["fields"]}
+        crops, readback = materialize(config["crop_cards"], work / "inputs", best.loc[sorted(names)].to_dict(), configs)
+        files.update(crops)
+        (out / "crop_readback.json").write_text(json.dumps(readback, indent=2) + "\n", encoding="ascii")
     predicted = evaluate(work / "inputs", engine, targets, files, out / "dssat.log")
     bounds = pd.read_csv(work / "bounds.csv").set_index("name").loc[best.index]
     span = bounds.upper - bounds.lower

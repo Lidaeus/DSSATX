@@ -11,7 +11,8 @@ WORDER=['W1','W2','W3']
 def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 def dump(path,obj):Path(path).write_text(json.dumps(obj,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
 
-def native_table(path):
+def native_table(path, *, allow_numeric_overflow=False):
+    """Read daily output, optionally retaining Fortran overflow fields as NaN."""
     rows=[];run=None;trt=None;columns=None;label=None
     for line in Path(path).read_text(errors='replace').splitlines():
         if line.startswith('*RUN'):
@@ -21,7 +22,10 @@ def native_table(path):
         elif re.match(r'^\s*TREATMENT\s+\d+',line):trt=int(re.search(r'TREATMENT\s+(\d+)',line)[1])
         elif line.startswith('@YEAR'):columns=line[1:].split()
         elif columns and re.match(r'^\s+20\d{2}\s',line):
-            values=list(map(float,line.split()))
+            values = [
+                float("nan") if allow_numeric_overflow and re.fullmatch(r"\*+", field) else float(field)
+                for field in line.split()
+            ]
             if len(values)!=len(columns):raise ValueError(f'{path}: field count mismatch')
             if run is None or trt is None:raise ValueError('Daily rows without explicit run/treatment mapping')
             row=dict(zip(columns,values));row.update(run=run,treatment=trt,treatment_label_native=label)
@@ -97,8 +101,12 @@ def freeze(case,metadata,out,label,profile,extra_n=None,extra_n_unit=None,compar
         actual={k:float(v) for k,v in re.findall(r'(\w+)\s*=\s*([-+\d.eE]+)',p.read_text())}
         if any(k in actual and actual[k]!=v for k,v in config.items()):raise ValueError('Receipt/NML mismatch')
         config=actual|config
-    gro=native_table(used('PlantGro.OUT')).sort_values(KEY).reset_index(drop=True)
-    fresh=native_table(used('FreshWt.OUT')).sort_values(KEY).reset_index(drop=True)
+    gro=native_table(used('PlantGro.OUT'), allow_numeric_overflow=True).sort_values(KEY).reset_index(drop=True)
+    fresh=native_table(used('FreshWt.OUT'), allow_numeric_overflow=True).sort_values(KEY).reset_index(drop=True)
+    for native, required, columns in [('PlantGro.OUT', gro, ['DAP','LAID','LWAD','SWAD','NSTD']),
+                                      ('FreshWt.OUT', fresh, ['CHFPW','HFPOW','CHNUM'])]:
+        if not np.isfinite(required[columns].to_numpy()).all():
+            raise ValueError(f'{native}: invalid or overflowed plotted daily field')
     ni=csv('PlantNIntegration.csv');cash=csv('PlantCCash.csv')
     if ni is None or cash is None:raise ValueError('This adapter requires PlantNIntegration and actual PlantCCash outputs')
     d=gro[KEY+['treatment','treatment_label_native','DAP','LAID','LWAD','SWAD','NSTD']].copy()

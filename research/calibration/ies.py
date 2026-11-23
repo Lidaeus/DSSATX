@@ -8,6 +8,7 @@ import shutil
 import os
 import subprocess
 import sys
+from tempfile import TemporaryDirectory
 
 import numpy as np
 import pandas as pd
@@ -15,7 +16,8 @@ import pyemu
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "n_diagnostics"))
 from data import sha
-from forward import evaluate
+from crop_cards import VALUES, materialize, read_map
+from forward import evaluate, render_template
 
 
 def input_table(path, columns):
@@ -58,7 +60,7 @@ def prepare(args, executable):
         raise ValueError("Targets must name native DSSAT OUT files")
 
     templates = {}
-    for path in args.templates:
+    for path in args.templates or ():
         if path.suffix.lower() != ".tpl" or Path(path.stem).suffix.lower() != ".nml":
             raise ValueError("Templates must use the engine's <name>.nml.tpl naming")
         if path.stem.lower() in (name.lower() for name in templates):
@@ -75,11 +77,22 @@ def prepare(args, executable):
     if any(not path.is_file() or path.suffix.lower() in {".out", ".exe", ".log"} for path in inputs.iterdir()):
         raise ValueError("The input case must be a flat directory of model inputs")
 
+    crop_map = args.crop_map.resolve(strict=True) if args.crop_map else None
+    cards = read_map(crop_map, inputs, bounds) if crop_map else {}
+    card_names = {field["name"] for entry in cards.values() for field in entry["fields"]}
+    nml_names = {name for template in templates.values()
+                 for name in pyemu.pst_utils.parse_tpl_file(str(template))}
+    if card_names & nml_names:
+        raise ValueError(f"Crop aliases overlap namelist parameters: {sorted(card_names & nml_names)}")
+    if card_names | nml_names != set(bounds.index):
+        raise ValueError("Template and crop-map parameter names must match the bounds table")
+
     work = args.out.resolve()
     work.mkdir(parents=True, exist_ok=False)
     shutil.copytree(inputs, work / "inputs")
     here = Path(__file__).resolve().parent
     shutil.copyfile(here / "forward.py", work / "forward.py")
+    shutil.copyfile(here / "crop_cards.py", work / "crop_cards.py")
     shutil.copyfile(here.parent / "n_diagnostics/data.py", work / "data.py")
     for source in templates.values():
         shutil.copyfile(source, work / source.name)
@@ -88,16 +101,33 @@ def prepare(args, executable):
     (work / "simulated.ins").write_text(
         "pif ~\n" + "".join(f"l1 !{name}!\n" for name in targets.index), encoding="ascii",
     )
-    (work / "forward.json").write_text(
-        json.dumps({"engine": str(executable), "templates": list(templates)}), encoding="utf-8",
-    )
-    baseline = evaluate(
-        work / "inputs", executable, targets.reset_index(), {}, work / "baseline.log",
-    )
+    runtime = {"engine": str(executable), "templates": list(templates), "crop_cards": cards}
+    (work / "forward.json").write_text(json.dumps(runtime, indent=2), encoding="utf-8")
+    pst_templates = [str(work / path.name) for path in templates.values()]
+    pst_inputs = [str(work / name) for name in templates]
+    if cards:
+        shutil.copyfile(crop_map, work / "crop_map.csv")
+        carrier = work / f"{VALUES}.tpl"
+        carrier.write_text("ptf ~\nname,value\n" +
+                           "".join(f"{name},~ {name:25s} ~\n" for name in sorted(card_names)), encoding="ascii")
+        pst_templates.append(str(carrier))
+        pst_inputs.append(str(work / VALUES))
+    with TemporaryDirectory(prefix="dssatx-preflight-") as directory:
+        out_point = Path(directory)
+        initial = bounds["init"]
+        overrides = {}
+        for filename, source in templates.items():
+            path = out_point / filename
+            path.write_text(render_template(source, initial), encoding="utf-8")
+            overrides[path] = filename
+        if cards:
+            crops, readback = materialize(cards, work / "inputs", initial.loc[sorted(card_names)].to_dict(), out_point)
+            overrides.update(crops)
+            (work / "baseline_crop_readback.json").write_text(json.dumps(readback, indent=2) + "\n", encoding="ascii")
+        baseline = evaluate(work / "inputs", executable, targets.reset_index(), overrides, work / "baseline.log")
     (work / "simulated.txt").write_text("".join(f"{value:.17g}\n" for value in baseline), encoding="ascii")
     pst = pyemu.Pst.from_io_files(
-        [str(work / source.name) for source in templates.values()],
-        [str(work / name) for name in templates],
+        pst_templates, pst_inputs,
         [str(work / "simulated.ins")], [str(work / "simulated.txt")], pst_path=".",
     )
     if set(pst.par_names) != set(bounds.index) or set(pst.obs_names) != set(targets.index):
@@ -128,7 +158,7 @@ def prepare(args, executable):
     manifest = {str(path.relative_to(work)): sha(path) for path in work.rglob("*") if path.is_file() and path.name not in {"baseline.log", "simulated.txt"}}
     (work / "run_manifest.json").write_text(json.dumps({
         "engine": str(executable), "engine_sha256": sha(executable),
-        "members": args.members, "updates": args.updates, "seed": args.seed,
+        "members": args.members, "updates": args.updates, "seed": args.seed, "workers": args.workers,
         "inputs_sha256": manifest,
     }, indent=2) + "\n", encoding="utf-8")
     return work
@@ -138,14 +168,21 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for key in ("engine", "inputs", "bounds", "observations", "out"):
         parser.add_argument(f"--{key}", type=Path, required=True)
-    parser.add_argument("--template", dest="templates", action="append", type=Path, required=True)
+    parser.add_argument("--template", dest="templates", action="append", type=Path,
+                        help="Template for a DSSAT namelist, repeat for multiple files")
+    parser.add_argument("--crop-map", type=Path, help="CSV mapping IES aliases to CUL, ECO or SPE fields")
     parser.add_argument("--pestpp-ies", help="Run the prepared case using this executable")
     parser.add_argument("--members", type=int, default=8)
+    parser.add_argument("--workers", type=int, default=1, help="Run PEST++ with local isolated worker directories")
     parser.add_argument("--updates", type=int, default=1)
     parser.add_argument("--seed", type=int, default=12345)
     args = parser.parse_args()
+    if not args.templates and not args.crop_map:
+        parser.error("Provide --template, --crop-map, or both")
     if args.members < 3 or args.updates < 0:
         parser.error("Require at least three members and zero or more updates")
+    if args.workers < 1 or (args.workers > 1 and not args.pestpp_ies):
+        parser.error("Parallel execution requires --pestpp-ies and a positive worker count")
     engine = args.engine.resolve(strict=True)
     pest = shutil.which(args.pestpp_ies) if args.pestpp_ies else None
     if args.pestpp_ies and pest is None:
@@ -156,12 +193,27 @@ def main():
         env = dict(os.environ, PATH=os.pathsep.join(
             (str(Path(sys.executable).parent), os.environ.get("PATH", "")),
         ))
-        with (work / "pestpp-ies.log").open("wb") as log:
-            subprocess.run([str(Path(pest).resolve()), "mechanism.pst"], cwd=work, stdout=log,
-                           stderr=subprocess.STDOUT, env=env, check=True)
+        pest = str(Path(pest).resolve())
+        if args.workers > 1:
+            worker_root = work.with_name(f"{work.name}-workers")
+            worker_root.mkdir()
+            seed = worker_root / "seed"
+            shutil.copytree(work, seed)
+            original_path = os.environ["PATH"]
+            os.environ["PATH"] = env["PATH"]
+            try:
+                pyemu.os_utils.start_workers(str(seed), pest, "mechanism.pst", num_workers=args.workers,
+                                             master_dir=str(work), reuse_master=True,
+                                             worker_root=str(worker_root), cleanup=False)
+            finally:
+                os.environ["PATH"] = original_path
+        else:
+            with (work / "pestpp-ies.log").open("wb") as log:
+                subprocess.run([pest, "mechanism.pst"], cwd=work, stdout=log,
+                               stderr=subprocess.STDOUT, env=env, check=True)
         objectives = pd.read_csv(work / "mechanism.phi.actual.csv")
         if objectives.empty or objectives["iteration"].max() < args.updates:
-            raise RuntimeError("PEST++ stopped before the requested IES update; see pestpp-ies.log")
+            raise RuntimeError("PEST++ stopped before the requested IES update; see mechanism.rec")
     print(work)
 
 
