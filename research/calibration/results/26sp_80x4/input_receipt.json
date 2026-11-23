@@ -1,0 +1,67 @@
+{
+  "stage": "2A joint calibration",
+  "holdout_treatments": [
+    7,
+    10
+  ],
+  "parameter_profile": "joint_crop_and_namelist",
+  "parameter_count": 61,
+  "parameter_count_by_scope": {
+    "strong": 21,
+    "weak": 20,
+    "mechanism": 20
+  },
+  "training_rows_by_group": {
+    "lai": 28,
+    "leaf_n": 28,
+    "shoot_dm": 56,
+    "fresh": 35
+  },
+  "positive_weight_rows_by_group": {
+    "lai": 28,
+    "shoot_dm": 56,
+    "fresh": 35,
+    "leaf_n": 12
+  },
+  "holdout_rows_by_group": {
+    "lai": 8,
+    "leaf_n": 8,
+    "shoot_dm": 16,
+    "fresh": 10
+  },
+  "stage_2b_treatments": [
+    1,
+    2,
+    3
+  ],
+  "stage_2b_rows_by_group": {
+    "lai": 12,
+    "leaf_n": 12,
+    "shoot_dm": 24,
+    "fresh": 15
+  },
+  "leaf_n_proxy": {
+    "active_levels": [
+      "N0",
+      "N1"
+    ],
+    "sigma_floor_pct_points": 0.5,
+    "diagnostic_only_yrdoy": 2026198,
+    "digestion_recovery_verified": false
+  },
+  "input_source_sha256": {
+    "XXQL2601.TMX": "208687ee892a153a7d0b0776fd1af4dc2da0ffe73666bf2816c5136ac08c4bce",
+    "XXQL2601.TMA": "848114f59718d8a7eb20003d23b6680b1f0d2bbc7fda695eb96388a5365e1450",
+    "XXQL2601.TMT": "7108f68fa2f488e910b0f43225502996749eeb64446ee2d395e56caee882e3ea",
+    "SOIL.SOL": "505babba2acb6691c0f54e1f8339b745b4d75204e1c26e5c0d7b46da6ea91f15",
+    "XXTW2403.WTH": "8dbc5f13b54bca7a0e5b33a9ba03383397c9da552a8a38ab0d37ae28beb944f8",
+    "TMGRO048.CUL": "92a373800d68b46d07601777e1579fff7b976f74190814bc6e0494eda7c4455b",
+    "TMGRO048.ECO": "9f2d43d335a4455679d701116d861a1915c1010a79d002e60ca4db74fe3d73ff",
+    "TMGRO048.SPE": "59fb51f8d4314615973038843994160cf612443c789ba938092ba0af0bb1d0f7",
+    "DSSBatch.v48": "c8196718057c91ce57683903a41287f385d62a0c4f2527e35f89a81b784b8299",
+    "observation_uncertainty.csv": "dd5cff5ad0c9045f09501acc92e7834182d6e7b80883715b5517ba1b38038dfa",
+    "plant_npk_source_values.csv": "88f4a0b4592ae86ba39bf09c3aa0a6f2ee58eb3007d8c42df64613caa50b46fd",
+    "treatment_metadata.csv": "b24ba4e8fbf80a643652b6a89202e9850cd60f1dfdcd5000d9e259a4425b5e52"
+  },
+  "parameter_design_sha256": "5d8887901d84b461dc08e04d9c5846b4873e67ab66be167302478365973eb933"
+}

@@ -1,0 +1,4 @@
+# Preserve frozen result and model cards at their recorded byte precision.
+*.csv -text whitespace=cr-at-eol
+*.json -text whitespace=cr-at-eol
+configs/* -text whitespace=cr-at-eol,-blank-at-eol

@@ -1,0 +1,18 @@
+{
+  "max_daily_inorganic_residual_gN_m2": 7.407269242420966e-16,
+  "max_season_plant_N_residual_gN_m2": 3.384542563364401e-06,
+  "max_pool_fraction": 1.0000000511191878,
+  "min_PGAVL_at_settlement_gCH2O_m2": 0.0011381272925063968,
+  "max_assimilation_cost_difference_gCH2O_m2": 6.16012019172274e-07,
+  "max_daily_cash_residual_gCH2O_m2": 3.41515988111496e-06,
+  "min_PGAVL_end_of_growth_gCH2O_m2": -0.5194604992866516,
+  "rows": 39312,
+  "matched_soil_rows": 39000,
+  "pending_rows": 312,
+  "pending_positive_rows": 108,
+  "dry_rows_theta0_below_LL": 148,
+  "max_steady_residual_gN_m2": 6.661338147750939e-16,
+  "max_soil_cumulative_difference_gN_m2": 1.2603023865409568e-05,
+  "run_1_deducted_kgN_ha": 277.75415057874244,
+  "run_1_pending_kgN_ha": 0.9016082715243102
+}

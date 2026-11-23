@@ -221,3 +221,6 @@ g CH₂O/m²，氮结算时 `PGAVL` 最小为 0。
 - [繁殖碳分配与氮需求](../../Plant/CROPGRO/DEMAND.for)、[果实候选与队列](../../Plant/CROPGRO/PODS.for)、[叶茎根分配](../../Plant/CROPGRO/VEGGR.for)
 - [DSSATX 联合预检和参数映射说明](README.md)
 - [Tomato_Cal 固定宽度写卡参考](https://github.com/Lidaeus/Tomato_Cal/blob/d140781cbba40b5a3264045f888512b7191211c6/src/dssat/run_dssat.py#L2287)
+
+[80×4 最终结果与诊断图册](results/26sp_80x4/README.md)记录了第 4 轮最优成员
+的参数、逐目标拟合指标、独立复跑与守恒审计。

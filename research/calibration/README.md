@@ -115,3 +115,7 @@ and the requested and read-back values in `crop_readback.json`.
 The two N1 holdouts and the N3 observations remain separate from the
 fitting objective. Luxury mode remains disabled for this N0–N2 task.
 Verify the replay and conservation ledgers before adopting any parameter set.
+
+The [80×4 result archive](results/26sp_80x4/README.md) contains the selected
+parameters and rendered cards, independent replay, fit metrics, conservation
+audit, and data for the diagnostic atlas.

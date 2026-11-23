@@ -1,0 +1,34 @@
+{
+  "run": "26sp-full-joint-80x4",
+  "pdf": {
+    "path": "output/pdf/diagnostic_atlas.pdf",
+    "pages": 9,
+    "sha256": "8add4949a4fe02f1dcad807f64320cc442e3e8c480b6ba5f2cdd9dc9d511ea32"
+  },
+  "native_sources_sha256": {
+    "diagnostic_daily.csv": "a11da2fea48c7a08431e7165077028b23b0ca2b41846f462f9001535487407fc",
+    "LayerRootNUptake.csv": "e718344fba64a988bc9063e4676c62d0da700c77ebe74fc10f8c946dbefc1430"
+  },
+  "archive_sha256": {
+    "atlas_daily.csv": "a6b5894339fe94cb19feafb0f32083769f4aafe90ce3f164fb2b064cce7b4b04",
+    "atlas_layer_settlement.csv": "837732cac1beba9697e47f31cd471b0e4f43749806ac232a7006e5f132b0e3e2",
+    "balance_audit.json": "c6f9d15f82e50491e4c902e1ce1ec2e677531c4c9a308044756f6efc6f7e53eb",
+    "best_parameters.csv": "1be87772c10885eb121e5075b77bf8b04e98db5a36186a991872ebbb52143063",
+    "boundary_replay.json": "3e4c42d5c0683175052babebf25ca5215ebcc9b629d60424eb349e5bd1ee0597",
+    "bounds.csv": "4184ed057f1291989a4c62751a928c125e1ece1858d9c2fa2acb42ab2296fa5a",
+    "configs/NIntegration.nml": "5baf49f4f4d00177e3852065bdecb542b8c06495fd2dfa000e1839fdf09cf114",
+    "configs/TMGRO048.CUL": "d2f935ff78dc5393e58c1be497fde1ec720d443d81ff4a38468469b71b60f6b5",
+    "configs/TMGRO048.ECO": "211be9c25269f3b877e59c4eac8aa30caf30cb1103a348850fb5e373ed704859",
+    "configs/TMGRO048.SPE": "ac9996f52431b57cd3657095eb846ed1efd0c59dfb0bd12d7533c0d48ca878b5",
+    "crop_readback.json": "318c71c4137509ee1f428b6a1f0c9032c7a0a1d74f128d2addf87b583b3665d0",
+    "fit_metrics.csv": "584570efc0512165c141061cdf8533adf7e31708e26be2af95e0a6b1581478fb",
+    "ies_final_parameters.csv": "0527f89780a7412f113fe6f7638db33babc3ba390a006221f03eeb64e51479bd",
+    "ies_phi_history.csv": "677f04dd3a6b30dabd675a36def171014ff7b41d3dca87ae4da8653124ff3f4a",
+    "input_receipt.json": "7e5ec74b75689054ef14ec71145d3dd68f7f700abb1df50f1795cca7260e8a18",
+    "matched_observations.csv": "5dd5a079f8ba12b512214aedf55bd5a54d287f8fea02daad7006c083e932e629",
+    "parameter_design.csv": "5d8887901d84b461dc08e04d9c5846b4873e67ab66be167302478365973eb933",
+    "replay_receipt.json": "b7d49468ae8b59e0648b702f6e414ee69037564e1aee315d1f1a533e81de30e5",
+    "run_manifest.json": "ea630ae1d47a0615f82969cc113482a9f69a3d091fed6e8a65dcac358da234fd",
+    "terminal_yield_pairs.csv": "d11178ba74ad2044ab04b78f4d18e6e2e8fab0f2e7c90502dfaea8288cab6b57"
+  }
+}
