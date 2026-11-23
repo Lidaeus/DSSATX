@@ -8,8 +8,8 @@ import os
 from pathlib import Path
 from statistics import mean
 
-from replay_shoot import GROUPS, TEMPLATE, audit, digest, prepare_case, prepare_experiment, run
-from replay_signal_chain import enable_fixed_diagnostics, matrix
+from replay_shoot import GROUPS, TEMPLATE, audit, digest, prepare_experiment, run
+from replay_signal_chain import EXPERIMENT_INPUTS, matrix, stage_fixed_case
 from replay_sln_pulse import CUT, REFILL, write_records
 
 LIGHT_END = CUT + 5
@@ -33,11 +33,9 @@ def attenuate(path):
     path.write_text("".join(lines), encoding="ascii")
 
 
-def trial(engine, config, out, name):
-    case = prepare_case(argparse.Namespace(config=config, out=out / name))
-    settings = enable_fixed_diagnostics(config)
-    (case / "NIntegration.nml").write_text(settings, encoding="ascii")
-    prepare_experiment(case / "XXQL2601.TMX", "matched")
+def trial(engine, config, out, name, *, inputs, background):
+    case = stage_fixed_case(config, out / name, inputs)
+    prepare_experiment(case / "XXQL2601.TMX", background)
     weather = case / "XXTW2403.WTH"
     if name == "weak-light":
         attenuate(weather)
@@ -50,6 +48,7 @@ def trial(engine, config, out, name):
     return name, {(r["run"], r["yrdoy"]): r for r in daily}, {
         "config_sha256": digest(case / "NIntegration.nml"),
         "weather_sha256": digest(weather), "audit": audit(case, 12),
+        "case_input_sha256": {name: digest(case / name) for name in EXPERIMENT_INPUTS},
     }
 
 
@@ -57,6 +56,7 @@ def compare(reference, pulse, kind):
     assert all(row == pulse[key] for key, row in reference.items() if key[1] < CUT)
     result = {}
     end = LIGHT_END if kind == "weak-light" else REFILL
+    response = RESPONSE | {"q_no3": 1} if kind == "weak-light" else RESPONSE
     for water, group in GROUPS.items():
         for index, run_id in enumerate(group):
             c = [reference[run_id, d] for d in range(CUT, end)]
@@ -79,7 +79,7 @@ def compare(reference, pulse, kind):
                 name: next((cut["dap"] for base, cut in zip(c, p)
                             if base[name] is not None and cut[name] is not None
                             and direction * (cut[name] - base[name]) > max(1e-8, 0.05 * abs(base[name]))), None)
-                for name, direction in RESPONSE.items()
+                for name, direction in response.items()
             }
             result[f"{water}_N{index}"] = entry
     return result
@@ -90,14 +90,18 @@ def main():
     parser.add_argument("--engine", type=Path, required=True)
     parser.add_argument("--config", type=Path, default=TEMPLATE)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--inputs", type=Path, help="Use the experiment, weather, soil and crop cards from this case")
+    parser.add_argument("--background", choices=("matched", "common-soil", "common-sa", "common-ic"), default="matched")
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     engine = args.engine.resolve(strict=True)
     config = args.config.resolve(strict=True)
+    inputs = args.inputs.resolve(strict=True) if args.inputs else None
+    worker = partial(trial, engine, config, out, inputs=inputs, background=args.background)
     with ProcessPoolExecutor(max_workers=3) as pool:
         trials = {name: (daily, receipt) for name, daily, receipt in pool.map(
-            partial(trial, engine, config, out), ("control", "weak-light", "cutoff"))}
+            worker, ("control", "weak-light", "cutoff"))}
     control = trials["control"][0]
     receipt = {name: meta | {"paired": compare(control, daily, name)}
                for name, (daily, meta) in trials.items() if name != "control"}

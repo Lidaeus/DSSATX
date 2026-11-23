@@ -46,7 +46,12 @@ def instrument(source):
     if(P0_ENABLED()) call P0_LOCAL('sln_n_senescence','extra_DM', [NI_N_SEN_EXTRA])""")
     anchor = "      NI_LEAF_FACTOR=real(NI_V4_PHOTO_KERNEL(10000._dp*functional,photo_sln_ref,photo_floor,photo_gamma))"
     insert(nitrogen, anchor, anchor + """
-      if(P0_ENABLED()) call P0_LOCAL('sln_photo','functional_SLN,factor',[real(10000._dp*functional),NI_LEAF_FACTOR])""")
+      if(P0_ENABLED()) call P0_LOCAL('sln_photo','functional_SLN,factor',[real(10000._dp*functional),NI_LEAF_FACTOR])
+      if(P0_ENABLED().and.NI_C4_PHOTO())then
+        call P0_LOCAL('sln_photo_basis','uncapped_SLN,critical_SLN,whole_LMA,cmin,ccrit', &
+          real([10000._dp*whole_slw*max(0._dp,real(rnitp,dp)/100*structural_fraction-cmin(1)), &
+                10000._dp*whole_slw*(ccrit(1)-cmin(1)),10000._dp*whole_slw,cmin(1),ccrit(1)]))
+      endif""")
 
 
 def main():

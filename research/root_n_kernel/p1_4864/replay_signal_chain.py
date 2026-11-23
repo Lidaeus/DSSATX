@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 from statistics import mean
 
 from replay_luxury import run_case, set_n_supply
@@ -18,6 +19,8 @@ from replay_shoot import (
     prepare_experiment, run,
 )
 
+EXPERIMENT_INPUTS = ("XXQL2601.TMX", "XXQL2601.TMA", "XXQL2601.TMT", "SOIL.SOL",
+                     "XXTW2403.WTH", "TMGRO048.CUL", "TMGRO048.ECO", "TMGRO048.SPE", "DSSBatch.v48")
 TRACE = {
     "rnk_psi_feedback": {"psi", "membrane_factor"},
     "rnk_pool_capacity": {"QNO3_max"},
@@ -28,6 +31,7 @@ TRACE = {
     "sln_n_senescence": {"extra_DM"},
     "c4_canopy_n": {"LAISL", "LAISH"},
     "sln_photo": {"functional_SLN", "factor"},
+    "sln_photo_basis": {"uncapped_SLN", "critical_SLN", "whole_LMA", "cmin", "ccrit"},
     "pods_set_budget": {"PODADD", "C_limit", "flower_limit", "N_limit"},
     "new_pod_gate": {"accepted_count"},
 }
@@ -195,6 +199,7 @@ def gradient(treatments):
         slopes = [delta / step for delta, step in zip(increments, dose_steps)]
         result[name] = {"values": values, "delta": increments, "slope_per_kg_n": slopes,
                         "increasing": all(delta >= 0 for delta in increments),
+                        "diminishing_0_to_2": slopes[0] > slopes[1] >= 0,
                         "diminishing_0_to_3": min(increments[:3]) >= 0 and slopes[0] > slopes[1] > slopes[2]}
     return result
 
@@ -215,24 +220,34 @@ def enable_fixed_diagnostics(config):
     return settings
 
 
-def trial(engine, out, spec, *, background, config):
+def stage_fixed_case(config, out, inputs=None):
+    case = prepare_case(argparse.Namespace(config=config, out=out))
+    if inputs is not None:
+        for name in EXPERIMENT_INPUTS:
+            shutil.copyfile(inputs / name, case / name)
+    (case / "NIntegration.nml").write_text(enable_fixed_diagnostics(config), encoding="ascii")
+    return case
+
+
+def trial(engine, out, spec, *, background, config, inputs):
     label, scenario, overrides, scale = spec
     if config is None:
         case, audit_result = run_case(engine, out, scenario, 0, label=label, overrides=overrides,
                                       vmax_scale=scale, background=background)
     else:
-        case = prepare_case(argparse.Namespace(config=config, out=out / scenario))
-        settings = enable_fixed_diagnostics(config)
+        case = stage_fixed_case(config, out / scenario, inputs)
         nml = case / "NIntegration.nml"
-        nml.write_text(settings, encoding="ascii")
         file_x = case / "XXQL2601.TMX"
         prepare_experiment(file_x, background)
         set_n_supply(file_x, scenario)
         env = dict(os.environ, DSSAT_HOME=f".{os.sep}", DSSAT_P0_TRACE="1", DSSAT_SLN_PROBE_CUT="0")
         env.pop("DSSAT_N_CONFIG", None)
         run([str(engine), "CRGRO048", "B", "DSSBatch.v48"], case, "dssat", env)
-        audit_result = audit(case, 12) | {"config_sha256": digest(nml), "file_x_sha256": digest(file_x),
-                                        "engine_sha256": digest(engine), "source_config_sha256": digest(config)}
+        audit_result = audit(case, 12) | {
+            "config_sha256": digest(nml), "file_x_sha256": digest(file_x),
+            "engine_sha256": digest(engine), "source_config_sha256": digest(config),
+            "case_input_sha256": {name: digest(case / name) for name in EXPERIMENT_INPUTS},
+        }
     daily, seasonal = matrix(case)
     with (case / "signal_daily.csv").open("w", newline="", encoding="ascii") as stream:
         writer = csv.DictWriter(stream, fieldnames=list(daily[0]))
@@ -248,9 +263,12 @@ def main():
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--config", type=Path,
                         help="Audit one rendered B4 parameter point on the matched and synthetic N4 cases")
+    parser.add_argument("--inputs", type=Path, help="Use the experiment, weather, soil and crop cards from this case")
     parser.add_argument("--background", choices=("matched", "common-soil", "common-sa", "common-ic"), default="matched",
                         help="Scan matched W-specific backgrounds, or compare B4 with W2–N2 SA, IC or both")
     args = parser.parse_args()
+    if args.inputs and not args.config:
+        parser.error("--inputs requires a fixed --config")
     engine = args.engine.resolve(strict=True)
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
@@ -264,7 +282,8 @@ def main():
         knobs = [(baseline, {}, 1)]
     specs = [(label, scenario, {"v4_diagnostics": 1} | settings, scale)
              for label, settings, scale in knobs for scenario in ("matched", "double-N3")]
-    worker = partial(trial, engine, out, background=args.background, config=config)
+    inputs = args.inputs.resolve(strict=True) if args.inputs else None
+    worker = partial(trial, engine, out, background=args.background, config=config, inputs=inputs)
     with ProcessPoolExecutor(max_workers=min(6, len(specs))) as pool:
         runs = {(label, scenario): result for label, scenario, result in pool.map(worker, specs)}
     receipt = {}

@@ -360,3 +360,7 @@ See the [26SP signal-chain execution report](p1_4864/signal_chain_execution.zh.m
 for the five-level diagnostics, root supply scans, pulse rehearsals and IES admission
 checks. The current luxury shoot configuration accepts modes 0 and 1. Use the
 archived `c076cac4` build for the original mode 2 ablation.
+
+The [canopy and calibration review](p1_4864/canopy_review_execution.zh.md) tracks
+the SASC70 crop-card contrast, assimilation and SLN ablations, and the N0–N2
+admission and pulse checks at the recovered-size diagnostic point.
