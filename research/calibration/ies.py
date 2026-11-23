@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import re
 from pathlib import Path
 import shutil
 import os
@@ -27,6 +28,17 @@ def input_table(path, columns):
     return frame.set_index("name", verify_integrity=True)
 
 
+def require_fixed_sln_reference(template):
+    with template.open(encoding="utf-8-sig") as stream:
+        header = stream.readline().split()
+        if len(header) != 2 or header[0].lower() not in {"ptf", "jtf"}:
+            return
+        delimiter = re.escape(header[1])
+        assignment = rf"^[^!\n]*\bphoto_sln_ref\s*=\s*(?:![^\n]*\n\s*)*{delimiter}"
+        if re.search(assignment, stream.read(), flags=re.IGNORECASE | re.MULTILINE):
+            raise ValueError(f"{template}: set photo_sln_ref to a fixed value before the IES run")
+
+
 def prepare(args, executable):
     bounds = input_table(args.bounds, ("name", "init", "lower", "upper"))
     targets = input_table(
@@ -49,7 +61,9 @@ def prepare(args, executable):
             raise ValueError("Templates must use the engine's <name>.nml.tpl naming")
         if path.stem.lower() in (name.lower() for name in templates):
             raise ValueError(f"Duplicate template destination {path.stem}")
-        templates[path.stem] = path.resolve(strict=True)
+        template = path.resolve(strict=True)
+        require_fixed_sln_reference(template)
+        templates[path.stem] = template
 
     inputs = args.inputs.resolve(strict=True)
     profile = "DSSATPRO.v48" if sys.platform == "win32" else "DSSATPRO.L48"

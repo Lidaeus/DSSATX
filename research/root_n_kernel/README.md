@@ -242,10 +242,12 @@ regression monitoring.
 
 ### TM deficiency response ablation
 
-`source/TMDeficiency.nml.template` is a research input for tomato and eggplant
-using TM with `MEPHO='L'`. Copy it as `NIntegration.nml` and set a positive
-`photo_sln_ref` for the experiment. The shared root route uses the kinetics
-in `&ROOTNUPTAKE` and the feedback setting `pool_beta`. The steady root
+`source/TMDeficiency.nml.template` uses the 26SP working
+`photo_sln_ref=1.05` g N/m² leaf for TM with `MEPHO='L'`. The candidate
+band is 0.95–1.25 g N/m² leaf. Keep the anchor fixed during cultivar IES
+and reassess it with independent leaf photosynthesis–SLN observations
+when transferring it to another species. The shared root route uses the
+kinetics in `&ROOTNUPTAKE` and the feedback setting `pool_beta`. The steady root
 transport, persistent inorganic store, organ curves, day-state timing, pod
 response, and revised C/N accounting are common to the ablation. B1 uses the
 native leaf photosynthesis via the `photo_legacy=1` ablation switch. B2 adds
@@ -293,9 +295,10 @@ computed. The pulse is only available in this diagnostic build.
 
 ```sh
 python3 research/root_n_kernel/p1_4864/build_sln_probe.py \
-  --ref 07f1be5f --out build/26sp-sln-probe
+  --ref HEAD --out build/26sp-sln-probe
 python3 research/root_n_kernel/p1_4864/replay_sln_pulse.py \
-  --engine build/26sp-sln-probe/engine/bin/dscsm048 --out build/26sp-sln-replay
+  --engine build/26sp-sln-probe/engine/bin/dscsm048 \
+  --out build/26sp-sln-replay --scan-only
 ```
 
 The matched-soil run writes `late_carbon_paired.csv` with daily W3 N0, N1,
@@ -303,11 +306,31 @@ and N0−N1 values for days 181–198. The RSP submitted before PODS and the
 settled assimilation expenditure are both recorded. `pulse_paired.csv`
 contains uninterrupted and interrupted daily trajectories. `receipt.json`
 contains nitrogen and carbon audits, saturation counts and the first day
-each paired signal exceeds a 5% difference. Photosynthesis call shares are
-counts of solver evaluations. The default pulse compares 1.10 with the first
-tested reference that clears the B4 W3 N0/N1 reversal, if any.
+each paired signal exceeds a 5% difference. The updated scan tests
+0.95, 1.05, 1.15, 1.20 and 1.25 within the candidate band, with 0.90
+and 1.35 for sensitivity and 0.18 as the frozen control. Functional SLN
+percentiles and saturation fractions summarize solver evaluations.
+Omit `--scan-only` to run the pulse at 1.05 or set `--pulse-ref` to
+another value in the scan. To reproduce the original experiment, build
+`--ref 07f1be5f` and replay with `--historical`.
 
-In the matched W3 replay, 1.50 removed the final N0/N1 yield reversal in
+The reference curve uses standing leaf plus stem dry mass in t/ha.
+Using the TM0008 standard `SLAVR=208` cm²/g as an illustrative conversion
+gives a specific leaf mass of 48.1 g/m². At 1, 3 and 5 t/ha, the critical
+functional SLN ceilings on that mass basis are about 1.21, 0.87 and
+0.75 g N/m² leaf. At 1 t/ha and the species `SLWREF` basis of 28 g/m²,
+the corresponding estimate is 0.706. The model uses the actual sunlit
+and shaded leaf mass per area and carbohydrate fraction at each call.
+
+With the 26SP root-partition fixes, the 0.18 control had a simulated
+functional SLN 5th–95th percentile interval of 0.65–1.10 g N/m² leaf.
+At 1.05, 81.3% of B4 calls were below saturation. The late W3 mean
+factors were 0.958 for N0 and 0.935 for N3. The 1.05 working anchor
+exercises the response with a smaller increase in field fresh-yield
+RMSE than 1.15. The N0/N1 yield reversal and the late leaf-level factor
+ordering remain open validation targets.
+
+In the original matched W3 replay, 1.50 removed the final N0/N1 yield reversal in
 B4 by 0.074 t/ha. B3 retained the reversal, and B4 still failed the strict
 diminishing-increment criterion. Across the original field treatments,
 the unweighted same-date cumulative fresh-yield RMSE increased from 18.55

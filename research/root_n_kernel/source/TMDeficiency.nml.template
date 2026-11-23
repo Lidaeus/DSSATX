@@ -1,8 +1,9 @@
 ! 26SP B4 research template for tomato/eggplant (TM, MEPHO=L).
 ! Persistent inorganic N, shared steady RNK, limited protected remobilization,
 ! fixed functional SLN, coupled senescence, and single C/N leaf acceptance.
-! Set photo_sln_ref explicitly in g N/m2 leaf for the intended experiment.
-! The 0.18 value is reserved for the frozen 26SP engineering control.
+! 26SP working SLN band: 0.95-1.25 g N/m2 leaf.
+! Keep the 1.05 anchor fixed in cultivar IES. 0.18 is a historical control.
+! Reassess the anchor with leaf photosynthesis data for a different species.
 ! Senescence rate is a provisional daily maximum before stress scaling.
 &NINTEGRATION
  ni_stage=5, root_mode=2,
@@ -14,7 +15,7 @@
  state_timing=1, pods_n_state=1, budget_revision=1, c4_budget=1, leaf_coupling=1, c4_photo=1,
  remob_mode=1, luxury_priority=0, remob_tau=8., protect_beta=0.5, slow_ratio=3.,
  remob_rate_mode=1, remob_rate_max=0.01, functional_rate_max=0.001,
- photo_reference_mode=1,
+ photo_reference_mode=1, photo_sln_ref=1.05,
  n_sen_rate=0.01, lai_cn_mode=1, lai_cn_shape=2.,
  common_acceptance=0, reserve_mode=0
 /

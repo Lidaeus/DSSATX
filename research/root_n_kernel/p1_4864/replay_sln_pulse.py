@@ -6,16 +6,18 @@ from concurrent.futures import ThreadPoolExecutor
 import csv
 import json
 from pathlib import Path
-from statistics import mean
+from statistics import mean, quantiles
 from time import perf_counter
 import os
 
 from replay_shoot import (
-    DAYS, audit, audit_shoot, daily_csv, digest, native_crop,
+    DAYS, FROZEN_SLN_REF, audit, audit_shoot, daily_csv, digest, native_crop,
     prepare_case, prepare_experiment, run, stage_config, trace_shoot,
 )
 
-REFERENCES = (0.18, 0.9, 1.1, 1.3, 1.5)
+REFERENCE_BAND = (0.95, 1.25)
+REFERENCES = (FROZEN_SLN_REF, 0.90, 0.95, 1.05, 1.15, 1.20, 1.25, 1.35)
+HISTORICAL_REFERENCES = (FROZEN_SLN_REF, 0.90, 1.10, 1.30, 1.50)
 EARLY, CUT, REFILL, FOLLOWUP = 2026120, 2026123, 2026143, 2026148
 W3 = (9, 7, 4, 1)
 W2 = (11, 8, 5, 2)
@@ -74,14 +76,16 @@ def test_case(engine, base, stage, reference, cutoff=False):
         assert abs(row["MAINR"] - cash[day]["maintenance"]) < 1e-6, day
     receipt["window_181_198"] = {}
     for r in W3:
-        values = [f for (n, d), row in photo.items() if n == r and 2026181 <= d <= 2026198 for f in row["factor"]]
+        late = [row for (n, d), row in photo.items() if n == r and 2026181 <= d <= 2026198]
         receipt["window_181_198"][r] = {
-            "photo": response(values),
+            "photo": response([f for row in late for f in row["factor"]]),
+            "functional_sln_gN_m2_leaf": sln_percentiles(late),
             **{key: sum(pods[r, day][key] for day in range(2026181, 2026199))
                for key in ("PG", "MAINR", "RSPNO3", "RSPNH4", "PGAVL")},
             "fruit_C": sum(cash[r, day]["fruit_growth"] for day in range(2026181, 2026199)),
         }
     receipt["all_photo"] = response([f for row in photo.values() for f in row["factor"]])
+    receipt["all_functional_sln_gN_m2_leaf"] = sln_percentiles(photo.values())
     harvest = native_crop(case / "FreshWt.OUT")
     for water, group in (("W2", W2), ("W3", W3)):
         yields = [harvest[max(day for day in harvest if day[0] == r)]["CHFPW"] for r in group]
@@ -94,6 +98,12 @@ def response(values):
     assert values
     return {"calls": len(values), "fraction_below_one": sum(f < 1 for f in values) / len(values),
             "mean": mean(values), "min": min(values)}
+
+
+def sln_percentiles(rows):
+    values = [sln for row in rows for sln in row["functional_SLN"]]
+    cuts = quantiles(values, n=20, method="inclusive")
+    return {"p05": cuts[0], "median": cuts[9], "p95": cuts[18]}
 
 
 def write_records(path, rows):
@@ -183,42 +193,58 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--engine", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--pulse-ref", type=float, choices=REFERENCES[1:])
+    parser.add_argument("--historical", action="store_true", help="Reproduce the original reference scan")
+    parser.add_argument("--scan-only", action="store_true", help="Save the scan without running a new pulse")
+    parser.add_argument("--pulse-ref", type=float, help="Use one positive reference from the selected scan")
     args = parser.parse_args()
+    references = HISTORICAL_REFERENCES if args.historical else REFERENCES
+    if args.pulse_ref is not None and args.pulse_ref not in references[1:]:
+        parser.error("--pulse-ref must be a non-control value in the selected scan")
     engine = args.engine.resolve(strict=True)
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
-    all_cases = [(stage, reference) for stage in ("B3", "B4") for reference in REFERENCES]
+    all_cases = [(stage, reference) for stage in ("B3", "B4") for reference in references]
 
     def execute(job):
-        print(f"Running {job[0]} at {job[1]:.2f}", flush=True)
-        return job, test_case(engine, out, *job)
+        stage, reference = job
+        print(f"Running {stage} at {reference:.2f}", flush=True)
+        return test_case(engine, out, stage, reference)
 
+    scan, failed = {}, {}
     with ThreadPoolExecutor(max_workers=3) as pool:
-        scan = dict(pool.map(execute, all_cases))
+        futures = {job: pool.submit(execute, job) for job in all_cases}
+        for (stage, reference), future in futures.items():
+            try:
+                scan[stage, reference] = future.result()
+            except RuntimeError as exc:
+                if not args.scan_only:
+                    raise
+                failed[f"{stage}-{reference:.2f}"] = str(exc)
+    if not scan:
+        raise RuntimeError(f"No reference completed: {failed}")
     carbon = [row for job, result in scan.items() for row in carbon_rows(*job, result)]
     write_records(out / "late_carbon_paired.csv", carbon)
-    passing = [ref for ref in REFERENCES[1:] if all(
-        scan[stage, ref][1]["W3"]["N0_minus_N1"] <= 0 for stage in ("B3", "B4")
-    )]
-    passing_b4 = [ref for ref in REFERENCES[1:] if scan["B4", ref][1]["W3"]["N0_minus_N1"] <= 0]
-    # Compare a central reference with the first endpoint that clears the B4 reversal.
-    refs = [args.pulse_ref]
-    if args.pulse_ref is None:
-        selected = (passing or passing_b4)[:1]
-        refs = sorted({1.1, *selected})
-    pulse, pulse_receipts = [], {}
-    for reference in refs:
-        cutoff = test_case(engine, out, "B4", reference, cutoff=True)
-        profile = pulse_rows(scan["B4", reference], cutoff)
-        pulse.extend({"SLN_ref": reference, **row} for row in profile)
-        pulse_receipts[str(reference)] = cutoff[1] | {"first_5pct_change_DAP": pulse_onsets(profile)}
-    write_records(out / "pulse_paired.csv", pulse)
+    passing_b4 = [ref for ref in references[1:]
+                  if ("B4", ref) in scan and scan["B4", ref][1]["W3"]["N0_minus_N1"] <= 0]
+    passing = [ref for ref in passing_b4
+               if ("B3", ref) in scan and scan["B3", ref][1]["W3"]["N0_minus_N1"] <= 0]
     results = {
         "engine_sha256": digest(engine), "W3_passing_both": passing, "W3_passing_B4": passing_b4,
+        "working_reference_band": REFERENCE_BAND, "failed_cases": failed,
         "scan": {f"{stage}-{ref:.2f}": v[1] for (stage, ref), v in scan.items()},
-        "pulse_runs": pulse_receipts, "pulse_window_DAP": [50, 69],
     }
+    if not args.scan_only:
+        refs = [args.pulse_ref]
+        if args.pulse_ref is None:
+            refs = sorted({1.10, *(passing or passing_b4)[:1]}) if args.historical else [1.05]
+        pulse, pulse_receipts = [], {}
+        for reference in refs:
+            cutoff = test_case(engine, out, "B4", reference, cutoff=True)
+            profile = pulse_rows(scan["B4", reference], cutoff)
+            pulse.extend({"SLN_ref": reference, **row} for row in profile)
+            pulse_receipts[str(reference)] = cutoff[1] | {"first_5pct_change_DAP": pulse_onsets(profile)}
+        write_records(out / "pulse_paired.csv", pulse)
+        results.update(pulse_runs=pulse_receipts, pulse_window_DAP=[50, 69])
     (out / "receipt.json").write_text(json.dumps(results, indent=2) + "\n", encoding="ascii")
 
 

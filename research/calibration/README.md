@@ -25,6 +25,11 @@ value in the native unit and its weight. A blank date selects the final
 reported value in that run. The CLI can also prepare inputs alone by
 omitting `--pestpp-ies`.
 
+For the TM deficiency model, keep `photo_sln_ref` as a numeric value in
+`NIntegration.nml` and any PEST template used for the trial. The standalone
+IES preparer checks this assignment for PEST placeholders. The 26SP working
+anchor comes from the independent SLN reference scan.
+
 Replay the final ensemble's lowest actual-Phi member and verify the objective
 against the IES record:
 
