@@ -5,7 +5,7 @@ module CG_Nitrogen
   use iso_fortran_env, only: real64
   use ieee_arithmetic, only: ieee_is_finite, ieee_next_after
   use ModuleDefs, only: ControlType, SwitchType, NL
-  use CG_P0Trace, only: P0_V, P0_ENABLED
+  use CG_P0Trace, only: P0_V, P0_LOCAL, P0_ENABLED
   use CG_RootNUptakeAdapter, only: RNK_LOAD, RNK_RESET, RNK_CAPTURE, RNK_ACCEPT, RNK_PUBLISH, RNK_CANDIDATES, &
     NI_COMMON_ROOT_ENABLED, NI_ROOT_SOIL_DEBIT, NI_ROOT_SOIL_END
   implicit none
@@ -34,6 +34,8 @@ module CG_Nitrogen
   real(dp),save :: psi_end=0,day_psi=0
   integer,save :: lux_veg_mode=0
   real(dp),save :: lux_xfrt_drop=0,lux_psi_threshold=0
+  ! Experimental receiver settings for the persistent inorganic route.
+  real(dp),save :: org_reserve_cap(2)=0,refill_tau=0
   real(dp),save :: leaf_photo_mean=0,leaf_photo_critical=0,leaf_photo_min_ratio=0
   logical,save :: psi_end_valid=.false.,day_psi_valid=.false.
   real(dp),save :: mob_safe(4)=0,mob_func(4)=0,mob_plan(4)=0,mob_returned(4)=0
@@ -1040,11 +1042,20 @@ contains
     real,intent(in)::amount
     storage_shift=real(amount,dp)
   end subroutine
+  pure function NI_REFILL_ROOM(mass,stock,target) result(room)
+    real(dp),intent(in)::mass(:),stock(:),target(:)
+    real(dp)::room(size(mass))
+    ! Incoming protein adds both N and DM: solve stock+x=target*(mass+x/0.16).
+    room=max(0._dp,(target*mass-stock)/max(1.e-6_dp,1-target/.16_dp))
+    where(mass<=1.e-4_dp) room=0
+  end function
+
   subroutine NI_REFILL(available,dm,nn,cad,cr,root_target,nad,unused)
     real,intent(in)::available,dm(3),nn(3),cad(3),cr(3),root_target
     real,intent(out)::nad(3),unused
     real(dp)::mass(3),stock(3),target(3),room(3),total,amount
     real(dp)::extra(2),external_left,retained(2),unused_donor
+    real(dp)::repair_room(3),luxury_room(2),repair(3),luxury(2),day_fraction
     mass=max(0._dp,w_begin+real(dm,dp)+real(cad,dp)-donor_n/.16_dp-real(cr,dp))
     stock=max(0._dp,org_start+real(nn,dp)-donor_n)
     if(NI_COMMON().or.NI_RESERVES())then
@@ -1055,10 +1066,9 @@ contains
       max(0._dp,reserve_begin*(1-sen_frac(1:2))-mob_safe(1:2)))
     target=[cmax(1),cmax(2),real(root_target,dp)]
     if(luxury_priority==1) target(1:2)=ccrit
-    ! Refill adds protein mass NAD/0.16 as well as N: solve receiver space
-    ! with that mass explicitly, independently of new-growth fractions.
-    room=max(0._dp,(target*mass-stock)/max(1.e-6_dp,1-target/.16_dp))
-    where(mass<=1.e-4_dp) room=0
+    ! Keep the dilution-based state normalization and new-tissue reference independent.
+    where(org_reserve_cap>0) target(1:2)=ccrit+org_reserve_cap
+    room=NI_REFILL_ROOM(mass,stock,target)
     total=sum(room);amount=min(max(0._dp,real(available,dp)),total)
     ! Internal growth credit must not be consumed by luxury or same-pool
     ! refill. Cancel its unused reservation before accepting external surplus.
@@ -1068,7 +1078,25 @@ contains
       room=min(room,joint_repair)
       total=sum(room);amount=min(max(0._dp,real(available,dp)),total)
     endif
-    if(total>0) nad=real(amount*room/total)
+    if(refill_tau>0) then
+      repair_room=NI_REFILL_ROOM(mass,stock,[ccrit,real(root_target,dp)])
+      ! Stable evaluation of 1-exp(-1/tau) for both small and large tau.
+      if(refill_tau<=.025_dp)then
+        day_fraction=1
+      else
+        day_fraction=.5_dp/refill_tau
+        day_fraction=2*exp(-day_fraction)*sinh(day_fraction)
+      endif
+      luxury_room=max(0._dp,room(1:2)-repair_room(1:2))*day_fraction
+      repair=repair_room*min(1._dp,amount/max(sum(repair_room),1.e-30_dp))
+      luxury=luxury_room*min(1._dp,max(0._dp,amount-sum(repair))/max(sum(luxury_room),1.e-30_dp))
+      nad=real(repair+[luxury,0._dp])
+      if(P0_ENABLED()) call P0_LOCAL('refill_partition', &
+        'repair_leaf,repair_stem,repair_root,luxury_leaf,luxury_stem,limit_leaf,limit_stem', &
+        real([repair,luxury,luxury_room]))
+    else if(total>0)then
+      nad=real(amount*room/total)
+    endif
     if(NI_COMMON())then
       joint_repair_used=real(nad,dp);mob_repair_used=sum(joint_repair_used)
     endif
@@ -1118,6 +1146,7 @@ contains
     character(512)::path,message
     integer::ios,unit,status,length
     logical::exists
+    real(dp)::critical_peak(2),upper_peak(2),lower_peak
     namelist /NINTEGRATION/ ni_stage,root_mode,q_no3_max,q_nh4_max, &
       assim_no3_v,assim_nh4_v,assim_no3_k,assim_nh4_k, &
       root_v,root_k,diffusion_k,pool_beta,leaf_a,leaf_b,stem_a,stem_b, &
@@ -1127,7 +1156,7 @@ contains
       photo_reference_mode,photo_sln_ref,leaf_expansion_mode,v4_diagnostics,common_acceptance,reserve_mode, &
       reserve_capacity,reserve_fill_tau,reserve_protect,build_min_leaf,build_min_stem, &
       remob_rate_mode,remob_rate_max,functional_rate_max,lai_cn_mode,lai_cn_shape,photo_legacy, &
-      lux_veg_mode,lux_xfrt_drop,lux_psi_threshold
+      lux_veg_mode,lux_xfrt_drop,lux_psi_threshold,org_reserve_cap,refill_tau
     if(loaded) then
       if(NI_ENABLED()) then
         if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
@@ -1242,6 +1271,13 @@ contains
       if(.not.NI_ENABLED()) error stop 'RNK: common kernel requires enabled NI integration'
       if(NI_ROOT_MODE()<=0) error stop 'RNK: common kernel requires actual-water root mode (root_mode>=1)'
     end if
+    if(.not.all(ieee_is_finite([org_reserve_cap,refill_tau]))) error stop 'NI: nonfinite refill settings'
+    if(any(org_reserve_cap<0).or.refill_tau<0) error stop 'NI: negative refill settings'
+    if(any(org_reserve_cap>0).or.refill_tau>0)then
+      if(.not.NI_C4_ON().or..not.NI_LEAF_COUPLED().or..not.NI_COMMON_ROOT_ENABLED().or. &
+         common_acceptance/=0.or.reserve_mode/=0.or.luxury_priority/=0) &
+        error stop 'NI: experimental refill requires the B4 persistent inorganic route'
+    endif
     if(.not.NI_ENABLED()) return
     if(budget_revision<0.or.budget_revision>1) error stop 'NI: budget_revision must be 0 or 1'
     if(min(state_timing,pods_n_state)<0.or.max(state_timing,pods_n_state)>1) &
@@ -1295,6 +1331,14 @@ contains
         error stop 'NI: invalid organ soft-reference curves'
       if(max(leaf_a,stem_a)*max_ratio>=1) error stop 'NI: reference N fraction must remain below one'
       if(leaf_inf>=leaf_a.or.stem_inf>=stem_a)error stop 'NI V4: asymptote must be below unit-biomass coefficient'
+      if(any(org_reserve_cap>0).or.refill_tau>0)then
+        call NI_V4_CURVE_KERNEL(0._dp,leaf_a,leaf_b,leaf_inf,min_ratio,max_ratio,curve_w0, &
+          lower_peak,critical_peak(1),upper_peak(1))
+        call NI_V4_CURVE_KERNEL(0._dp,stem_a,stem_b,stem_inf,min_ratio,max_ratio,curve_w0, &
+          lower_peak,critical_peak(2),upper_peak(2))
+        where(org_reserve_cap>0) upper_peak=critical_peak+org_reserve_cap
+        if(any(upper_peak>=.12_dp)) error stop 'NI: refill target must stay below 0.12 g N/g DM'
+      endif
     end if
     if(ni_stage>=5) then
       if(switch%MEPHO/='L'.or.switch%MEEVP=='Z') &
