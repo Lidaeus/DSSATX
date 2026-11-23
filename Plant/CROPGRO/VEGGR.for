@@ -91,6 +91,8 @@ C========================================================================
       
 !     FO - Cotton-Nitrogen
       REAL NSTFAC, PNSTRES, XNSTRES, PARTITION_N
+      REAL FRRT_NEUTRAL, SHOOT_LEAF_SHARE, AGR_NEUTRAL
+      REAL LEAF_NEUTRAL, LEAF_ALLOCATED
 
 !     P module
       REAL PStres2
@@ -291,9 +293,14 @@ C-----------------------------------------------------------------------
       NSTRES = XNSTRES * 0.5 + PNSTRES * 0.5
       ENDIF
       
-!     Leaf C/N acceptance applies the N state once to the leaf request.
+!     Retain root foraging. The LAI route compares the resulting
+!     leaf allocation with a ceiling referenced to neutral N partition.
       PARTITION_N=NSTRES
-      IF (NI_LAI_ON()) PARTITION_N=1.0
+      IF (NI_LAI_ON()) THEN
+        FRRT_NEUTRAL=ATOP*(1.0-MIN(TURFAC,PStres2))*(1.0-FRRT)+FRRT
+        FRRT_NEUTRAL=MIN(0.98,MAX(0.02,FRRT_NEUTRAL))
+        PARTITION_N=NI_GROWTH()
+      ENDIF
       FRRT  = ATOP * (1.0 - MIN(TURFAC,PARTITION_N,PStres2)) *
      &                    (1.0 - FRRT) + FRRT
 C-----------------------------------------------------------------------
@@ -331,7 +338,24 @@ C-----------------------------------------------------------------------
       WSDOTN = FRSTM * VGRDEM
       WRDOTN = FRRT * VGRDEM
       IF (NI_REVISED()) THEN
-        CALL NI_LAI_REQUEST(WLDOTN)
+        LEAF_NEUTRAL=WLDOTN
+        LEAF_ALLOCATED=WLDOTN
+        IF (NI_LAI_ON()) THEN
+          IF (PARTITION_N.LT.MIN(TURFAC,PStres2)) THEN
+            SHOOT_LEAF_SHARE=FRLF/(1.0-FRRT)
+            AGR_NEUTRAL=(1.0-FRRT_NEUTRAL)*
+     &        (AGRLF*SHOOT_LEAF_SHARE+AGRSTM*(1.0-SHOOT_LEAF_SHARE))
+     &        +AGRRT*FRRT_NEUTRAL
+            LEAF_NEUTRAL=PGAVL/AGR_NEUTRAL*
+     &        (1.0-FRRT_NEUTRAL)*SHOOT_LEAF_SHARE
+          ENDIF
+        ENDIF
+        CALL NI_LAI_REQUEST(WLDOTN,LEAF_NEUTRAL)
+        IF (NI_LAI_ON().AND.P0_ENABLED()) THEN
+          CALL P0_LOCAL('veg_n_partition',
+     &      'FRRT,FRRT_neutral,leaf_allocated_dm,leaf_neutral_dm',
+     &      (/FRRT,FRRT_NEUTRAL,LEAF_ALLOCATED,LEAF_NEUTRAL/))
+        ENDIF
         CALL NI_LAI_BUILD(FNINLG,FNINSG,FNINL,FNINS)
       ENDIF
 C-----------------------------------------------------------------------

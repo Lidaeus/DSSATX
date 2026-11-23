@@ -170,15 +170,17 @@ contains
     call NI_JOINT_KERNEL(carbon,nitrogen,request,build,target,agr,proi,[0._dp,0._dp],[0._dp,0._dp,0._dp], &
       accepted_dm,accepted_n,unused_repair,unused_fruit,unitcost,scale)
   end subroutine
-  subroutine NI_LAI_REQUEST(dm)
+  subroutine NI_LAI_REQUEST(dm,neutral_dm)
     real,intent(inout)::dm
+    real,intent(in),optional::neutral_dm
     lai_dm_raw=real(dm,dp);lai_state=1; lai_min_begin=cmin(1);lai_crit_begin=ccrit(1)
+    if(present(neutral_dm))lai_dm_raw=real(neutral_dm,dp)
     if(ready)lai_state=growth_factor
     if(state_timing==1.and.day_valid)lai_state=day_growth
     lai_signal=1
     if(NI_LAI_ON())then
       lai_signal=lai_factor(lai_state,lai_cn_shape)
-      dm=flux32(max(0._dp,real(dm,dp))*lai_signal)
+      dm=flux32(max(0._dp,min(real(dm,dp),lai_dm_raw*lai_signal)))
     endif
     lai_dm_request=real(dm,dp)
   end subroutine
@@ -193,11 +195,12 @@ contains
     real,intent(in)::carbon,nitrogen,build(3),target(3),agr(3),proi(3)
     real,intent(inout)::dm(3)
     real,intent(out)::nn(3),cost
-    real(dp)::raw(3),accepted(3),nitrogen_used(3),unitcost(3),scale,factor,total,previous
+    real(dp)::accepted(3),nitrogen_used(3),unitcost(3),scale,total,previous,unused_repair(3),unused_fruit(2)
     integer::i
-    raw=real(dm,dp);raw(1)=lai_dm_raw
-    call NI_LAI_CN_KERNEL(real(carbon,dp),real(nitrogen,dp),raw,real(build,dp),real(target,dp), &
-      real(agr,dp),real(proi,dp),lai_state,lai_cn_shape,accepted,nitrogen_used,unitcost,scale,factor)
+    ! The leaf request has already combined the allocation and area ceilings.
+    call NI_JOINT_KERNEL(real(carbon,dp),real(nitrogen,dp),max(0._dp,real(dm,dp)),real(build,dp), &
+      real(target,dp),real(agr,dp),real(proi,dp),[0._dp,0._dp],[0._dp,0._dp,0._dp], &
+      accepted,nitrogen_used,unused_repair,unused_fruit,unitcost,scale)
     do i=1,3
       previous=accepted(i);dm(i)=flux32(previous)
       if(previous>0)nitrogen_used(i)=nitrogen_used(i)*real(dm(i),dp)/previous
@@ -1221,7 +1224,7 @@ contains
     if(.not.ieee_is_finite(curve_w0).or.curve_w0<=0.or..not.ieee_is_finite(photo_slw_ref).or.photo_slw_ref<=0) &
       error stop 'NI: invalid curve breakpoint or functional leaf reference'
     if(.not.all(ieee_is_finite([q_no3_max,q_nh4_max,assim_no3_v,assim_nh4_v,assim_no3_k,assim_nh4_k, &
-        root_v,root_k,diffusion_k,pool_beta,leaf_a,leaf_b,stem_a,stem_b,min_ratio,max_ratio, &
+        pool_beta,leaf_a,leaf_b,stem_a,stem_b,min_ratio,max_ratio, &
         photo_floor,photo_gamma,growth_tau]))) error stop 'NI: non-finite configuration value'
     if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N') &
       error stop 'NI: first integration supports nonfixing TM nitrogen simulation only'
@@ -1240,9 +1243,13 @@ contains
       if(root_mode<0.or.root_mode>2) error stop 'NI: invalid root mode'
       if(root_mode>0.and.(switch%ISWWAT/='Y'.or.switch%MEEVP=='Z')) &
         error stop 'NI: root mode requires actual non-Z water simulation'
-      if(root_mode>0.and.(min(root_v,root_k)<=0.or.diffusion_k<0.or.pool_beta<0)) &
-        error stop 'NI: explicit root kinetics, diffusion, and pool feedback required'
-      if(root_mode==2.and.diffusion_k<=0) error stop 'NI: R2 requires positive effective diffusion'
+      if(root_mode>0.and.pool_beta<0)error stop 'NI: explicit nonnegative root feedback required'
+      if(.not.NI_COMMON_ROOT_ENABLED())then
+        if(.not.all(ieee_is_finite([root_v,root_k,diffusion_k])))error stop 'NI: non-finite legacy root kinetics'
+        if(root_mode>0.and.(min(root_v,root_k)<=0.or.diffusion_k<0)) &
+          error stop 'NI: explicit legacy root kinetics and diffusion required'
+        if(root_mode==2.and.diffusion_k<=0)error stop 'NI: R2 requires positive effective diffusion'
+      endif
     else if(root_mode/=0) then
       error stop 'NI: root_mode must be 0 before stage 3'
     end if

@@ -246,6 +246,7 @@ contains
          ! Steady radial diffusion conductance of the soil annulus.
          ! Advection remains the separate bulk-water supply term in this formulation.
          annulus = (layer%dlayr/100._rnk_dp)/(acos(-1._rnk_dp)*lr*par%root_radius_m**2)
+         ! The offline penetration benchmark covered sorbing NH4 only.
          if (s == RNK_NH4 .and. par%kd_sorption(s) > 0 .and. par%penetration_coeff > 0 .and. &
              .not. diag(s)%zero_diffusion) then
             app_diffusion = diag(s)%bulk_diffusion/(theta_mid + layer%bd*par%kd_sorption(s))

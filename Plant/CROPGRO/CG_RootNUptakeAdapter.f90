@@ -40,6 +40,9 @@ contains
     namelist /ROOTNUPTAKE/ rnk_mode,rnk_km_high,rnk_km_low,rnk_vmax_high,rnk_vmax_low, &
       rnk_kd,rnk_residual,rnk_radius,rnk_species_diffusion,rnk_source_tag,rnk_penetration_coeff
 
+    if(pending_run/=-1.or.ledger_opened)error stop 'RNK: configuration reload before closing the season'
+    mode=RNK_MODE_OFF
+    parameters=rnk_params()
     open(newunit=unit,file=trim(path),status='old',action='read',iostat=ios)
     if(ios/=0) error stop 'RNK: cannot reopen configuration'
     do

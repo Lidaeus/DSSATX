@@ -36,13 +36,15 @@ ALL_LEDGERS = dict(luxury_priority=1, reserve_mode=1, v4_diagnostics=1,
                    reserve_capacity=0.004, reserve_fill_tau=3, reserve_protect=0.02)
 GROUPS = {"W1": [12, 10, 6, 3], "W2": [11, 8, 5, 2], "W3": [9, 7, 4, 1]}
 DAYS = {(r, d) for r in range(1, 13) for d in range(2026073, 2026199)}
+FROZEN_SLN_REF = 0.18
 STOP_DOY = 152
 DONORS = ("leaf", "stem", "root", "shell")
 
 
 def stage_config(stage, options, template=TEMPLATE):
     config = template.read_text(encoding="ascii")
-    for name, value in (STAGES[stage] | options).items():
+    settings = {"photo_sln_ref": FROZEN_SLN_REF} | STAGES[stage] | options
+    for name, value in settings.items():
         pattern = rf"\b{name}\s*=\s*[-.\d]+"
         config, count = re.subn(pattern, f"{name}={value}", config)
         if count == 0:
@@ -117,6 +119,7 @@ def native_crop(path):
 
 def trace_shoot(case):
     keys = {
+        "veg_n_partition": {"FRRT", "FRRT_neutral", "leaf_allocated_dm", "leaf_neutral_dm"},
         "cg_mobil": {"NMINEA", "RPRO"},
         "c4_grow_flux": {"SLDOT", "SSDOT", "ALFDOT", *(f"Nmobile_{i}" for i in DONORS)},
         "grow_losses": {"NLOFF"},
@@ -136,7 +139,7 @@ def trace_shoot(case):
     return trace, photos
 
 
-def audit_shoot(case, stage, trace, photos, plant, cash):
+def audit_shoot(case, stage, trace, photos, plant, cash, verify_partition=False):
     summary = {}
     if stage != "B1":
         mob = daily_csv(case / "PlantNRemob.csv")
@@ -171,12 +174,22 @@ def audit_shoot(case, stage, trace, photos, plant, cash):
         budget = daily_csv(case / "PlantABudget.csv")
         area_error = 0.0
         residue_error = 0.0
+        max_root_shift = 0.0
         for day, row in lai.items():
             assert row["area_calls"] == row["accept_calls"] == 1, day
             if stage == "B4":
                 assert row["dm_leaf_actual"] <= row["dm_leaf_request"] + 2e-6, day
                 assert row["N_leaf_actual"] >= row["dm_leaf_actual"] * row["build_N_leaf"] - 1e-7, day
                 assert budget[day]["leaf_expansion_factor"] == 1, day
+                if verify_partition:
+                    root, neutral_root, allocated, neutral_leaf = (
+                        trace[day]["veg_n_partition", key]
+                        for key in ("FRRT", "FRRT_neutral", "leaf_allocated_dm", "leaf_neutral_dm")
+                    )
+                    assert -1e-6 <= root - neutral_root, day
+                    requested = max(0, min(allocated, neutral_leaf * row["state_response"]))
+                    assert abs(requested - row["dm_leaf_request"]) < 2e-6, (day, requested)
+                    max_root_shift = max(max_root_shift, root - neutral_root)
             assert min(trace[day]["c4_grow_flux", f"{organ}DOT"] for organ in ("SL", "SS")) >= 0, day
             delta = row["new_leaf_area"] - row["old_leaf_area_lost"]
             assert abs(row["new_leaf_area"] - row["dm_leaf_actual"] * row["SLA_new"]) < 0.001, day
@@ -197,6 +210,9 @@ def audit_shoot(case, stage, trace, photos, plant, cash):
                 assert error < 1e-6, (day, error)
                 residue_error = max(residue_error, error)
         summary.update(lai_rows=len(lai), max_area_difference=area_error, max_residue_difference=residue_error)
+        if verify_partition:
+            assert max_root_shift > 1e-5, "26SP did not exercise nitrogen-driven root partition"
+            summary["max_root_partition_shift"] = max_root_shift
     return summary
 
 
@@ -219,7 +235,7 @@ def run_case(engine, folder, stage, scenario="field", traced=True, **options):
     if traced:
         trace, photos = trace_shoot(case)
         receipt.update(audit(case, 12))
-        receipt.update(audit_shoot(case, stage, trace, photos, plant, cash))
+        receipt.update(audit_shoot(case, stage, trace, photos, plant, cash, verify_partition=stage == "B4"))
     return case, receipt
 
 

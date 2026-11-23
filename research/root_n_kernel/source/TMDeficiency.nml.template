@@ -1,24 +1,24 @@
-! 26SP B4 engineering candidate for tomato/eggplant (TM, MEPHO=L).
+! 26SP B4 research template for tomato/eggplant (TM, MEPHO=L).
 ! Persistent inorganic N, shared steady RNK, limited protected remobilization,
 ! fixed functional SLN, coupled senescence, and single C/N leaf acceptance.
-! SLN reference is in g N/m2 leaf. 0.18 corresponds to the engineering curve
-! at about 100 g leaf DM/m2 soil and 28 g leaf DM/m2 leaf.
+! Set photo_sln_ref explicitly in g N/m2 leaf for the intended experiment.
+! The 0.18 value is reserved for the frozen 26SP engineering control.
 ! Senescence rate is a provisional daily maximum before stress scaling.
 &NINTEGRATION
  ni_stage=5, root_mode=2,
  q_no3_max=.003, q_nh4_max=.0001,
  assim_no3_v=.003, assim_nh4_v=.006, assim_no3_k=.001, assim_nh4_k=.00005,
- root_v=.0002, root_k=10., diffusion_k=.005, pool_beta=1.,
+ pool_beta=1.,
  leaf_a=.042, leaf_b=.30, stem_a=.025, stem_b=.35,
  min_ratio=.40, max_ratio=1.25, photo_floor=.05, photo_gamma=1., growth_tau=2.,
  state_timing=1, pods_n_state=1, budget_revision=1, c4_budget=1, leaf_coupling=1, c4_photo=1,
  remob_mode=1, luxury_priority=0, remob_tau=8., protect_beta=0.5, slow_ratio=3.,
  remob_rate_mode=1, remob_rate_max=0.01, functional_rate_max=0.001,
- photo_reference_mode=1, photo_sln_ref=0.18,
+ photo_reference_mode=1,
  n_sen_rate=0.01, lai_cn_mode=1, lai_cn_shape=2.,
  common_acceptance=0, reserve_mode=0
 /
-! Append to the same file as &NINTEGRATION.
+! Shared steady root transport parameters.
 ! rnk_mode: 0=off, 1=steady equivalent transport.
 ! Vmax units: g N/(m root day). Km: mg N/L. Kd: L/kg. Residual: mg N/kg dry soil.
 ! Optional sorbing NH4 penetration: positive coefficient enables it, 0 uses the full cylinder.

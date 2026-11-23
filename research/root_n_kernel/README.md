@@ -174,10 +174,12 @@ dropping it from any research input specification.
 
 ### Layer ledger
 
-`steady_residual_gN_m2` compares potential mass flow plus diffusion
-with the membrane rate before the stock limit, for layers that use the
-balance solver. A residual of `-99` marks a branch where that equation
-does not apply. `zero_diffusion=1` identifies an evaluated zero-diffusion
+`steady_residual_gN_m2` measures the bisection error of the potential
+balance between mass flow plus diffusion and the membrane rate.
+It retains that meaning on a stock-capped layer. Actual mass closure is
+verified separately against plant settlement and soil debit. A residual
+of `-99` marks a branch without a bisection balance, including
+`RNK_BRANCH_MEMBRANE`. `zero_diffusion=1` identifies an evaluated zero-diffusion
 case. The concentration mean columns reproduce the steady concentrations
 when the kernel evaluates them. The three former transient-only fields
 remain in the 35-column CSV for historical readers, with zeros in the
@@ -240,16 +242,22 @@ regression monitoring.
 
 ### TM deficiency response ablation
 
-`source/TMDeficiency.nml.template` is a candidate input for tomato and eggplant
-using TM with `MEPHO='L'`. Copy it as `NIntegration.nml`. The steady root
+`source/TMDeficiency.nml.template` is a research input for tomato and eggplant
+using TM with `MEPHO='L'`. Copy it as `NIntegration.nml` and set a positive
+`photo_sln_ref` for the experiment. The shared root route uses the kinetics
+in `&ROOTNUPTAKE` and the feedback setting `pool_beta`. The steady root
 transport, persistent inorganic store, organ curves, day-state timing, pod
 response, and revised C/N accounting are common to the ablation. B1 uses the
 native leaf photosynthesis via the `photo_legacy=1` ablation switch. B2 adds
 protected remobilization (rate limits 0.01 and 0.001 d⁻¹). B3 replaces the
 light-response nitrogen factors with the existing fixed-reference functional
 SLN curve. B4a adds leaf-turnover coupling, and B4 adds single-acceptance
-C/N leaf expansion. The fixed SLN reference (0.18 g N/m² leaf), daily
-senescence coefficient (0.01), and expansion shape (2) are engineering priors.
+C/N leaf expansion. B4 retains nitrogen-induced root allocation and caps
+the leaf request by the smaller of its actual allocation and the N-state
+ceiling evaluated at otherwise identical neutral-N partition. The replay
+explicitly uses 0.18 g N/m² leaf for the historical engineering control.
+The daily senescence coefficient (0.01) and expansion shape (2) are
+engineering priors.
 
 Run the numerical and same-directory regression by configuring CMake with
 `-DDSSAT_TM_DEFICIENCY_TEST=ON`, building, and running CTest. To keep detailed

@@ -19,6 +19,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y gfortran ninja-build
+      - name: Run native steady-root and reload checks
+        run: |
+          mkdir -p build
+          bash research/root_n_kernel/p1_4864/run_native_tests.sh build/native-rnk-ci
       - name: Configure
         run: >-
           cmake -S . -B build/tm-deficiency-ci -G Ninja
