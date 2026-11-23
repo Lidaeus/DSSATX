@@ -1,0 +1,65 @@
+{
+  "engine_sha256": "1b8f37ed041aaa6bba0303271c2cdafe13fb439eb06bf763209d311c954f2f51",
+  "member": 4,
+  "iteration": 4,
+  "cases": {
+    "off": {
+      "org_reserve_cap": "0.,0.",
+      "refill_tau": "0.",
+      "config_sha256": "c8ebf90cbc80cba090e7cf2cb5acc0ff0778002fc6c937797df721a064f0e516",
+      "audit": {
+        "max_daily_inorganic_residual_gN_m2": 7.407269242420966e-16,
+        "max_season_plant_N_residual_gN_m2": 3.384542563364401e-06,
+        "max_pool_fraction": 1.0000000511191878,
+        "min_PGAVL_at_settlement_gCH2O_m2": 0.0011381272925063968,
+        "max_assimilation_cost_difference_gCH2O_m2": 6.16012019172274e-07,
+        "max_daily_cash_residual_gCH2O_m2": 3.41515988111496e-06,
+        "min_PGAVL_end_of_growth_gCH2O_m2": -0.5194604992866516,
+        "rows": 39312,
+        "matched_soil_rows": 39000,
+        "pending_rows": 312,
+        "pending_positive_rows": 108,
+        "dry_rows_theta0_below_LL": 148,
+        "max_steady_residual_gN_m2": 6.661338147750939e-16,
+        "max_soil_cumulative_difference_gN_m2": 1.2603023865409568e-05,
+        "run_1_deducted_kgN_ha": 277.75415057874244,
+        "run_1_pending_kgN_ha": 0.9016082715243102
+      }
+    },
+    "on": {
+      "org_reserve_cap": "0.015,0.010",
+      "refill_tau": "4.",
+      "config_sha256": "0cf6080e2a3c8230780db6709f57299c0f3213986f180263d6a7bbe27b45975e",
+      "audit": {
+        "max_daily_inorganic_residual_gN_m2": 6.192962809237201e-16,
+        "max_season_plant_N_residual_gN_m2": 2.1429897046065793e-06,
+        "max_pool_fraction": 1.000000039790451,
+        "min_PGAVL_at_settlement_gCH2O_m2": 0.0011381272925063968,
+        "max_assimilation_cost_difference_gCH2O_m2": 4.6709585355131367e-07,
+        "max_daily_cash_residual_gCH2O_m2": 3.294087946414948e-06,
+        "min_PGAVL_end_of_growth_gCH2O_m2": -0.5156063437461853,
+        "rows": 39312,
+        "matched_soil_rows": 39000,
+        "pending_rows": 312,
+        "pending_positive_rows": 108,
+        "dry_rows_theta0_below_LL": 148,
+        "max_steady_residual_gN_m2": 8.881784197001252e-16,
+        "max_soil_cumulative_difference_gN_m2": 1.6076021417177344e-05,
+        "run_1_deducted_kgN_ha": 284.7749246890046,
+        "run_1_pending_kgN_ha": 1.0561583861708639
+      }
+    }
+  },
+  "baseline_equal_excluding_runtime_timestamp": {
+    "FreshWt.OUT": true,
+    "LayerRootNUptake.csv": true,
+    "PlantABudget.csv": true,
+    "PlantCCash.csv": true,
+    "PlantGro.OUT": true,
+    "PlantN.OUT": true,
+    "PlantNIntegration.csv": true,
+    "PlantNLAI.csv": true,
+    "PlantNLeaf.csv": true,
+    "PlantNV3.csv": true
+  }
+}

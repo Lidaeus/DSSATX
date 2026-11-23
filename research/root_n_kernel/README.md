@@ -364,3 +364,7 @@ archived `c076cac4` build for the original mode 2 ablation.
 The [canopy and calibration review](p1_4864/canopy_review_execution.zh.md) tracks
 the SASC70 crop-card contrast, assimilation and SLN ablations, and the N0–N2
 admission and pulse checks at the recovered-size diagnostic point.
+
+The [organic N refill execution report](p1_4864/organic_refill_execution.zh.md)
+records the opt-in B4 receiver experiments, separate root-supply contrasts,
+and the tissue N observation envelope at the frozen 80×4 IES point.

@@ -1,0 +1,21 @@
+{
+  "calibration_commit": "790a5cec4d129a9a42ec92f36dd936f396f0ab03",
+  "iteration": 4,
+  "member": "4",
+  "model_source_sha256": "e287eb002f0bcb5ccdb9042b5755ab56cc931c5711a25294e5743e000f5bc9c3",
+  "pdf": {
+    "path": "output/pdf/organic_refill_26sp/diagnostic_atlas.pdf",
+    "pages": 5,
+    "sha256": "9f42ec253be469f92f4584eca35adceec64da531f0015ed8d03174d678a349e0"
+  },
+  "archive_sha256": {
+    "atlas_source.csv": "d947cae1a954bfd9ebe9cc8923e1ad51135e0a01db304ca975750886d9c1066f",
+    "configs/off.nml": "c8ebf90cbc80cba090e7cf2cb5acc0ff0778002fc6c937797df721a064f0e516",
+    "configs/on.nml": "0cf6080e2a3c8230780db6709f57299c0f3213986f180263d6a7bbe27b45975e",
+    "contrast_receipt.json": "2b1ae09c861ad35ccfbc72ad17b33beb05861dfcd062241a75f01745a1f543a3",
+    "field_replay_receipt.json": "482ac0e211c379d0bacb59afbc6c7bed78925e1042be91cfefb977acf2730056",
+    "gradient_summary.csv": "e1001f45c6712dc5f428afc7187cf9ef722f1f17ce19e7a7830521e7478ac78a",
+    "leaf_n_observation_envelope.csv": "807cca1644b928e3ad11f4ba13660ed60878a21db40dedbbce69221a8eca92e0",
+    "organ_n_diagnostics.csv": "18f1cbaa4c699a8177e2b2cb6da33e4d344de1251651a59336fb96a67dc63a16"
+  }
+}

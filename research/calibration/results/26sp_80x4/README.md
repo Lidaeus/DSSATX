@@ -47,3 +47,7 @@ four updates, eight workers, and seed 20261123. Use the archive's
 working prior has changed. The training objective uses 131 positive
 weights. W1–N1, W3–N1 and N3 remain held out, and the archive preserves
 the subset roles in the matched table.
+
+The [paired organic N refill follow-up](../26sp_organic_refill/README.md)
+uses this archived optimum, with the B4 refill options toggled in matched
+field replays.
