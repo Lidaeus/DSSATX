@@ -42,3 +42,11 @@ exercise the toolchain. The V15 branch has a separate S4 example. The full
 historical C4 and S4 designs used additional parameter cards, targets, and
 run selection rules. Keep those runs tied to their original files and
 frozen objectives.
+
+For the 26SP staged signal-chain study, `prepare_26sp_signal.py` accepts the
+original SASC70 experiment package as an explicit local input. It writes
+multi-response observations, provisional bounds, an input receipt and two
+treatment holdouts. Use `--updates 0` for this bundle until the nitrogen
+observation operator and the mechanistic admission criteria are verified.
+The `preflight_only` marker blocks IES updates. The shared `rnk_vmax_scale`
+controls both affinity ranges and nitrogen forms through one parameter.

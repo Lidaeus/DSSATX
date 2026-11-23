@@ -355,3 +355,8 @@ choices, neutral controls, and ablation results.
 
 See the [nitrogen endpoint audit](p1_4864/n_endpoints.zh.md) for the previous-day
 state mapping, protected donor-rate change and reproductive budget checks.
+
+See the [26SP signal-chain execution report](p1_4864/signal_chain_execution.zh.md)
+for the five-level diagnostics, root supply scans, pulse rehearsals and IES admission
+checks. The current luxury shoot configuration accepts modes 0 and 1. Use the
+archived `c076cac4` build for the original mode 2 ablation.
