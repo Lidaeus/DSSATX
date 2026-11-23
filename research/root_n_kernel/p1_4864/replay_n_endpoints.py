@@ -110,13 +110,13 @@ def main():
 
     def trial(mode):
         settings = {"photo_sln_ref": 1.05, "v4_diagnostics": 1, "lux_veg_mode": mode}
-        if mode == 2:
-            settings.update(lux_xfrt_drop=0.25, lux_pod_drop=0.20)
+        if mode == 1:
+            settings.update(lux_xfrt_drop=0.25)
         case, receipt = run_case(engine, out / f"mode{mode}", "B4", "matched", **settings)
         return str(mode), receipt | {"endpoints": audit_endpoint_routes(case, mode)}
 
     with ThreadPoolExecutor(max_workers=2) as pool:
-        results = dict(pool.map(trial, (0, 2)))
+        results = dict(pool.map(trial, (0, 1)))
     (out / "endpoint_audit.json").write_text(json.dumps(results, indent=2) + "\n", encoding="ascii")
     print("26SP endpoint and conservation audits passed")
 

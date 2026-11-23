@@ -10,6 +10,7 @@ program test_rnk_reload
 
   call write_config('default.nml', .false.)
   call write_config('blocked_diffusion.nml', .true.)
+  call write_config('scaled.nml', .false., .5)
   open(newunit=unit,file='disabled.nml',status='replace')
   write(unit,'(a)') '&ROOTNUPTAKE rnk_mode=0 /'
   close(unit)
@@ -25,6 +26,10 @@ program test_rnk_reload
   first=uptake(diffusion)
   if(first<=0.or.diffusion<=0)error stop 'Default diffusion must support uptake without water extraction'
 
+  call RNK_LOAD('scaled.nml')
+  last=uptake(diffusion)
+  if(last<=0.or.last>=first)error stop 'Scaling all membrane capacities should reduce uptake'
+
   call RNK_LOAD('blocked_diffusion.nml')
   last=uptake(diffusion)
   if(diffusion/=0.or.last>=first)error stop 'Explicit zero diffusion must override the default'
@@ -33,16 +38,17 @@ program test_rnk_reload
 
   call RNK_LOAD('default.nml')
   last=uptake(diffusion)
-  if(first/=last)error stop 'Previously loaded diffusion leaked into the default'
+  if(first/=last)error stop 'Previously loaded scale or diffusion leaked into the default'
   call RNK_LOAD('no_root_group.nml')
   if(NI_COMMON_ROOT_ENABLED())error stop 'A missing root group retained the prior root mode'
   print '(a)', 'RNK reload checks passed'
 
 contains
 
-  subroutine write_config(path,zero_diffusion)
+  subroutine write_config(path,zero_diffusion,scale)
     character(*),intent(in)::path
     logical,intent(in)::zero_diffusion
+    real,intent(in),optional::scale
     integer::unit
     open(newunit=unit,file=path,status='replace')
     write(unit,'(a)') '&ROOTNUPTAKE rnk_mode=1, rnk_radius=.0001,', &
@@ -50,6 +56,7 @@ contains
       ' rnk_vmax_high=.0003,.0004, rnk_vmax_low=.0015,.002,', &
       ' rnk_kd=0.,1., rnk_residual=.25,.5, rnk_source_tag="test","test",'
     if(zero_diffusion)write(unit,'(a)') ' rnk_species_diffusion=0.,0.,'
+    if(present(scale))write(unit,'(a,f6.3)') ' rnk_vmax_scale=',scale
     write(unit,'(a)') '/'
     close(unit)
   end subroutine

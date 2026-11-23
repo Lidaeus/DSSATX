@@ -5,6 +5,8 @@
 ! Keep the 1.05 anchor fixed in cultivar IES. 0.18 is a historical control.
 ! Reassess the anchor with leaf photosynthesis data for a different species.
 ! Senescence rate is a provisional daily maximum before stress scaling.
+! lux_veg_mode: 0 is off by default. Mode 1 uses lux_xfrt_drop for reproductive C.
+! lux_psi_threshold optionally delays onset.
 &NINTEGRATION
  ni_stage=5, root_mode=2,
  q_no3_max=.003, q_nh4_max=.0001,
@@ -23,7 +25,7 @@
 ! rnk_mode: 0=off, 1=steady equivalent transport.
 ! Vmax units: g N/(m root day). Km: mg N/L. Kd: L/kg. Residual: mg N/kg dry soil.
 ! Optional sorbing NH4 penetration: positive coefficient enables it, 0 uses the full cylinder.
-! Species order: NO3, NH4. Values are fixed engineering priors.
+! Species order: NO3, NH4. Optional rnk_vmax_scale defaults to 1 for both species.
 &rootnuptake
  rnk_mode=1,
  rnk_source_tag="v15-engineering","literature-prior",

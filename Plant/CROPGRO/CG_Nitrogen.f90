@@ -33,7 +33,7 @@ module CG_Nitrogen
   real(dp),save :: day_substrate_fill=0
   real(dp),save :: psi_end=0,day_psi=0
   integer,save :: lux_veg_mode=0
-  real(dp),save :: lux_xfrt_drop=0,lux_pod_drop=0
+  real(dp),save :: lux_xfrt_drop=0,lux_psi_threshold=0
   real(dp),save :: leaf_photo_mean=0,leaf_photo_critical=0,leaf_photo_min_ratio=0
   logical,save :: psi_end_valid=.false.,day_psi_valid=.false.
   real(dp),save :: mob_safe(4)=0,mob_func(4)=0,mob_plan(4)=0,mob_returned(4)=0
@@ -936,21 +936,19 @@ contains
     ! V15 functional-response shape; new daily Z, not its old state scale.
     f=1-(1-max(0._dp,min(1._dp,z)))**2
   end function
-  pure real(dp) function NI_LUX_KERNEL(psi,amplitude) result(factor)
-    real(dp),intent(in)::psi,amplitude
-    factor=1-amplitude*min(1._dp,max(0._dp,psi))**2
+  pure real(dp) function NI_LUX_KERNEL(psi,amplitude,threshold) result(factor)
+    real(dp),intent(in)::psi,amplitude,threshold
+    real(dp)::surplus
+    surplus=max(0._dp,(min(1._dp,psi)-threshold)/(1._dp-threshold))
+    factor=1-amplitude*surplus**2
   end function
   real function NI_XFRT_FACTOR()
     NI_XFRT_FACTOR=1
-    if(lux_veg_mode>0.and.day_psi_valid)NI_XFRT_FACTOR=real(NI_LUX_KERNEL(day_psi,lux_xfrt_drop))
-  end function
-  real function NI_POD_LUX_FACTOR()
-    NI_POD_LUX_FACTOR=1
-    if(lux_veg_mode==2.and.day_psi_valid)NI_POD_LUX_FACTOR=real(NI_LUX_KERNEL(day_psi,lux_pod_drop))
+    if(lux_veg_mode>0.and.day_psi_valid) &
+      NI_XFRT_FACTOR=real(NI_LUX_KERNEL(day_psi,lux_xfrt_drop,lux_psi_threshold))
   end function
   real function NI_POD_FACTOR()
-    ! Whole-shoot surplus can coexist with functional leaf deficiency.
-    NI_POD_FACTOR=real(NI_POD_KERNEL(day_z(1)))*NI_POD_LUX_FACTOR()
+    NI_POD_FACTOR=real(NI_POD_KERNEL(day_z(1)))
   end function
   subroutine NI_OPEN_DAY(control)
     type(ControlType),intent(in)::control
@@ -1129,7 +1127,7 @@ contains
       photo_reference_mode,photo_sln_ref,leaf_expansion_mode,v4_diagnostics,common_acceptance,reserve_mode, &
       reserve_capacity,reserve_fill_tau,reserve_protect,build_min_leaf,build_min_stem, &
       remob_rate_mode,remob_rate_max,functional_rate_max,lai_cn_mode,lai_cn_shape,photo_legacy, &
-      lux_veg_mode,lux_xfrt_drop,lux_pod_drop
+      lux_veg_mode,lux_xfrt_drop,lux_psi_threshold
     if(loaded) then
       if(NI_ENABLED()) then
         if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
@@ -1229,17 +1227,17 @@ contains
     if(ni_stage/=5.and.max(state_timing,pods_n_state,remob_mode,luxury_priority)>0) &
       error stop 'NI v3: opt-in modes require stage5; stage0 cannot silently activate them'
     call RNK_LOAD(path)
-    if(lux_veg_mode<0.or.lux_veg_mode>2)error stop 'NI: invalid lux_veg_mode'
-    if(.not.all(ieee_is_finite([lux_xfrt_drop,lux_pod_drop])))error stop 'NI: nonfinite luxury response amplitude'
-    if(min(lux_xfrt_drop,lux_pod_drop)<0.or.max(lux_xfrt_drop,lux_pod_drop)>.5_dp) &
-      error stop 'NI: luxury response amplitudes must be in [0,.5]'
+    if(lux_veg_mode<0.or.lux_veg_mode>1)error stop 'NI: lux_veg_mode must be 0 (off) or 1 (reproductive C)'
+    if(.not.ieee_is_finite(lux_psi_threshold))error stop 'NI: nonfinite luxury response threshold'
+    if(lux_psi_threshold<0.or.lux_psi_threshold>=1)error stop 'NI: luxury response threshold must be in [0,1)'
+    if(.not.ieee_is_finite(lux_xfrt_drop))error stop 'NI: nonfinite luxury response amplitude'
+    if(lux_xfrt_drop<0.or.lux_xfrt_drop>.5_dp)error stop 'NI: luxury response amplitude must be in [0,.5]'
     if(lux_veg_mode>0)then
       if(.not.NI_C4_ON().or..not.NI_COMMON_ROOT_ENABLED().or.common_acceptance/=0.or.reserve_mode/=0) &
         error stop 'NI: luxury shoot response requires the revised steady-root persistent inorganic route'
     else if(lux_xfrt_drop/=0)then
-      error stop 'NI: lux_xfrt_drop requires lux_veg_mode=1 or 2'
+      error stop 'NI: lux_xfrt_drop requires lux_veg_mode=1'
     endif
-    if(lux_veg_mode/=2.and.lux_pod_drop/=0)error stop 'NI: lux_pod_drop requires lux_veg_mode=2'
     if(NI_COMMON_ROOT_ENABLED()) then
       if(.not.NI_ENABLED()) error stop 'RNK: common kernel requires enabled NI integration'
       if(NI_ROOT_MODE()<=0) error stop 'RNK: common kernel requires actual-water root mode (root_mode>=1)'
@@ -1720,9 +1718,10 @@ contains
     end_run=control%RUN;end_day=control%YRDOY
     if(max(common_acceptance,reserve_mode)>0)call write_p2(control,org_n)
     if(NI_REVISED())call write_lai(control,lai)
+    ! Keep the retired pod factor neutral in the P0 trace schema.
     if(P0_ENABLED().and.lux_veg_mode>0.and.day_psi_valid.and.day_psi>0) &
       call P0_V(control,'lux_shoot_state','psi,xfrt_factor,pod_lux_factor,pod_def_factor', &
-        [real(day_psi),NI_XFRT_FACTOR(),NI_POD_LUX_FACTOR(),real(NI_POD_KERNEL(day_z(1)))])
+        [real(day_psi),NI_XFRT_FACTOR(),1.,NI_POD_FACTOR()])
     if(v4_diagnostics==1)then
       if(.not.v4_opened)then
         if(NI_OPEN_LEDGER(v4_unit,'PlantNV4.csv'))then

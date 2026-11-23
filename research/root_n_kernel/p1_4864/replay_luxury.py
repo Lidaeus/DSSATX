@@ -1,4 +1,4 @@
-"""Run the 26SP luxury-N allocation and pod-set ablations with fixed B4 inputs."""
+"""Run the 26SP luxury-N allocation ablation with fixed B4 inputs."""
 
 import argparse
 from collections import defaultdict
@@ -14,8 +14,7 @@ from replay_shoot import (
     prepare_case, prepare_experiment, run, stage_config, trace_shoot,
 )
 
-MODES = ({}, {"lux_veg_mode": 1, "lux_xfrt_drop": 0.25},
-         {"lux_veg_mode": 2, "lux_xfrt_drop": 0.25, "lux_pod_drop": 0.20})
+MODES = ({}, {"lux_veg_mode": 1, "lux_xfrt_drop": 0.25})
 SCENARIOS = ("matched", "double-N3", "low-mineral-N", "deficient")
 POSITIVES = ("uptake_kg_ha", "peak_lai", "end_lai", "leaf_dm", "stem_dm", "maintenance")
 NEGATIVES = ("harvest_index", "fresh_yield")
@@ -65,9 +64,11 @@ def diagnostics(path):
     return events, shade
 
 
-def check_state(trace, mode):
+def check_state(trace, options):
     counts = defaultdict(int)
-    limited_set = defaultdict(int)
+    responses = defaultdict(int)
+    mode = options.get("lux_veg_mode", 0)
+    threshold = options.get("lux_psi_threshold", 0)
     for day in sorted(DAYS):
         record = trace[day]
         root = record["rnk_psi_feedback"]
@@ -83,9 +84,12 @@ def check_state(trace, mode):
         counts[day[0]] += 1
         state = record["lux_shoot_state"]
         assert state["psi"] == psi, day
-        xf = 1 - MODES[mode]["lux_xfrt_drop"] * psi ** 2
-        pf = 1 - MODES[mode].get("lux_pod_drop", 0) * psi ** 2
-        assert abs(state["xfrt_factor"] - xf) < 1e-7 and abs(state["pod_lux_factor"] - pf) < 1e-7, day
+        surplus = max(0, (min(1, psi) - threshold) / (1 - threshold))
+        xf = 1 - options["lux_xfrt_drop"] * surplus ** 2
+        responses[day[0]] += state["xfrt_factor"] < 1.0
+        if xf == 1:
+            assert "lux_demand" not in record and "lux_pods" not in record, day
+        assert abs(state["xfrt_factor"] - xf) < 1e-7 and state["pod_lux_factor"] == 1, day
         for event in ("lux_demand", "lux_pods"):
             if event in record:
                 budget = record[event]
@@ -94,11 +98,8 @@ def check_state(trace, mode):
             assert record["lux_demand"]["XFRT_eff"] == record["lux_pods"]["XFRT_eff"], day
         if "pods_set_budget" in record:
             set_budget = record["pods_set_budget"]
-            assert abs(set_budget["RNITPD"] - state["pod_def_factor"] * pf) < 1e-7, day
-            other = min(set_budget[key] for key in ("C_limit", "flower_limit", "N_limit"))
-            if mode == 2 and pf < 1.0 and set_budget["PODADD"] < other:
-                limited_set[day[0]] += 1
-    return {str(r): {"active_days": counts[r], "pre_gate_pod_ceiling_binds_days": limited_set[r]}
+            assert abs(set_budget["RNITPD"] - state["pod_def_factor"]) < 1e-7, day
+    return {str(r): {"active_days": counts[r], "xfrt_response_days": responses[r]}
             for r in range(1, 13)}
 
 
@@ -141,14 +142,25 @@ def gradients(rows):
     return result
 
 
-def run_case(engine, out, scenario, mode, legacy=False):
+def run_case(engine, out, scenario, mode, legacy=False, *, overrides=None, label=None, vmax_scale=1, background="matched"):
     name = f"{scenario}-mode{mode}" + ("-reference" if legacy else "")
+    if label:
+        name += f"-{label}"
     case = prepare_case(argparse.Namespace(config=TEMPLATE, out=out / name))
     config = case / "NIntegration.nml"
-    options = {"photo_sln_ref": 1.05} | MODES[mode]
+    options = {"photo_sln_ref": 1.05} | MODES[mode] | (overrides or {})
     if mode == 0 and not legacy:
         options["lux_veg_mode"] = 0
     settings = stage_config("B4", options)
+    if vmax_scale != 1:
+        for field in ("rnk_vmax_high", "rnk_vmax_low"):
+            pattern = rf"(\b{field}\s*=\s*)([.\deE+-]+)\s*,\s*([.\deE+-]+)"
+            def scaled(match):
+                values = [float(match.group(i)) * vmax_scale for i in (2, 3)]
+                return match.group(1) + ", ".join(f"{value:.12g}" for value in values)
+            settings, count = re.subn(pattern, scaled, settings)
+            if count != 1:
+                raise ValueError(f"Expected one two-species assignment for {field}")
     if scenario == "deficient":
         # Exercise the neutral branch for a whole season even with soil mineralization.
         regular = "rnk_vmax_high=0.0003,0.0004, rnk_vmax_low=0.0015,0.002,"
@@ -157,16 +169,16 @@ def run_case(engine, out, scenario, mode, legacy=False):
         settings = settings.replace(regular, limited)
     config.write_text(settings, encoding="ascii")
     file_x = case / "XXQL2601.TMX"
-    prepare_experiment(file_x, "matched")
+    prepare_experiment(file_x, background)
     set_n_supply(file_x, scenario)
     env = dict(os.environ, DSSAT_HOME=f".{os.sep}", DSSAT_P0_TRACE="1")
     env.pop("DSSAT_N_CONFIG", None)
     print(f"Running {name}", flush=True)
     run([str(engine), "CRGRO048", "B", "DSSBatch.v48"], case, "dssat", env)
-    return case, analyze_case(engine, case, mode)
+    return case, analyze_case(engine, case, options)
 
 
-def analyze_case(engine, case, mode):
+def analyze_case(engine, case, options):
     plant = daily_csv(case / "PlantNIntegration.csv")
     cash = daily_csv(case / "PlantCCash.csv")
     trace, photo = trace_shoot(case)
@@ -176,7 +188,7 @@ def analyze_case(engine, case, mode):
                "file_x_sha256": digest(case / "XXQL2601.TMX")}
     receipt.update(audit(case, 12))
     receipt.update(audit_shoot(case, "B4", trace, photo, plant, cash, verify_partition=True))
-    return receipt | {"runs": metrics, "signals": check_state(state, mode), "gradient": gradients(metrics)}
+    return receipt | {"runs": metrics, "signals": check_state(state, options), "gradient": gradients(metrics)}
 
 
 def identical_csv(control, other):
@@ -216,7 +228,7 @@ def write_receipt(out, cases, receipts, ref):
     baseline = identical_csv(ref, cases["matched", 0])
     low = [e for e in receipts["deficient", 0]["runs"].values()]
     assert all(row["positive_psi_days"] == 0 and row["max_nni"] <= 1 for row in low), "Low-N control crossed NNI=1"
-    equality = {mode: identical_csv(cases["deficient", 0], cases["deficient", mode]) for mode in (1, 2)}
+    equality = {mode: identical_csv(cases["deficient", 0], cases["deficient", mode]) for mode in (1,)}
     result = {
         "cases": {f"{scenario}-mode{mode}": receipt for (scenario, mode), receipt in receipts.items()},
         "baseline_identical_csv": baseline, "all_season_low_N_identical_csv": equality,

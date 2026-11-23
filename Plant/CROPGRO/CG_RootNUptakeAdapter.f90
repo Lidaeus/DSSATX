@@ -34,10 +34,10 @@ contains
     character(512)::line
     character(160)::validation
     integer::unit,ios,i,k,rnk_mode
-    real(dp)::rnk_km_high(2),rnk_km_low(2),rnk_vmax_high(2),rnk_vmax_low(2)
+    real(dp)::rnk_km_high(2),rnk_km_low(2),rnk_vmax_high(2),rnk_vmax_low(2),rnk_vmax_scale
     real(dp)::rnk_kd(2),rnk_residual(2),rnk_radius,rnk_species_diffusion(2),rnk_penetration_coeff
     character(32)::rnk_source_tag(2)
-    namelist /ROOTNUPTAKE/ rnk_mode,rnk_km_high,rnk_km_low,rnk_vmax_high,rnk_vmax_low, &
+    namelist /ROOTNUPTAKE/ rnk_mode,rnk_km_high,rnk_km_low,rnk_vmax_high,rnk_vmax_low,rnk_vmax_scale, &
       rnk_kd,rnk_residual,rnk_radius,rnk_species_diffusion,rnk_source_tag,rnk_penetration_coeff
 
     if(pending_run/=-1.or.ledger_opened)error stop 'RNK: configuration reload before closing the season'
@@ -63,6 +63,7 @@ contains
     rewind(unit)
     rnk_mode=RNK_MODE_OFF
     rnk_km_high=0; rnk_km_low=0; rnk_vmax_high=0; rnk_vmax_low=0
+    rnk_vmax_scale=1
     rnk_kd=0; rnk_residual=0; rnk_radius=0
     rnk_species_diffusion=parameters%species_diffusion_m2d
     rnk_source_tag='unspecified'
@@ -76,7 +77,10 @@ contains
     if(rnk_mode/=RNK_MODE_OFF.and.rnk_mode/=RNK_MODE_A) error stop 'RNK: rnk_mode must be 0 (off) or 1 (steady)'
     if(rnk_mode==RNK_MODE_OFF) return
     parameters%km_high=rnk_km_high; parameters%km_low=rnk_km_low
-    parameters%vmax_high=rnk_vmax_high; parameters%vmax_low=rnk_vmax_low
+    if(.not.ieee_is_finite(rnk_vmax_scale))error stop 'RNK: rnk_vmax_scale must be finite'
+    if(rnk_vmax_scale<=0)error stop 'RNK: rnk_vmax_scale must be positive'
+    parameters%vmax_high=rnk_vmax_high*rnk_vmax_scale
+    parameters%vmax_low=rnk_vmax_low*rnk_vmax_scale
     parameters%kd_sorption=rnk_kd; parameters%residual_ppm=rnk_residual
     parameters%source_tag=rnk_source_tag
     parameters%species_diffusion_m2d=rnk_species_diffusion
