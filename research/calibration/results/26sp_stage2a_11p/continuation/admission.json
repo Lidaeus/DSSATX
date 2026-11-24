@@ -1,0 +1,8 @@
+{
+  "qualifying_candidates": [
+    "build/stage2a-continuation/fine-validation/m31",
+    "build/stage2a-continuation/fine-validation/m39",
+    "build/stage2a-continuation/fine-validation/m38"
+  ],
+  "selected": "build/stage2a-continuation/fine-validation/m31"
+}

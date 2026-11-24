@@ -1,0 +1,16 @@
+{
+  "coarse": {
+    "members": 80,
+    "admissible": 0,
+    "exact_low_n": 0,
+    "passes_both_water_physiology": 2,
+    "native_member": 34
+  },
+  "refined": {
+    "members": 80,
+    "admissible": 0,
+    "exact_low_n": 0,
+    "passes_both_water_physiology": 38,
+    "native_member": 8
+  }
+}

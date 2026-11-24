@@ -1,0 +1,44 @@
+! 26SP B4 research template for tomato/eggplant (TM, MEPHO=L).
+! Persistent inorganic N, shared steady RNK, limited protected remobilization,
+! fixed functional SLN, coupled senescence, and single C/N leaf acceptance.
+! 26SP working SLN band: 0.95-1.25 g N/m2 leaf.
+! Keep the 1.05 anchor fixed in cultivar IES. 0.18 is a historical control.
+! Reassess the anchor with leaf photosynthesis data for a different species.
+! Senescence rate is a provisional daily maximum before stress scaling.
+! lux_veg_mode: 0 is off by default. Mode 1 uses lux_xfrt_drop for reproductive C.
+! lux_psi_threshold optionally delays onset.
+&NINTEGRATION
+ lux_xfrt_drop=           0.46778842465821274,
+ lux_hill_k=           0.04586890677637386,
+ lux_psi_threshold=            0.8359392263439953,
+ lux_veg_mode=2,
+ org_reserve_cap=0.,0., refill_tau=0., refill_substrate_target=1,
+ refill_substrate_km=            0.1174889049653281,
+ ni_stage=5, root_mode=2,
+ q_no3_max=             0.008263246880049006, q_nh4_max=  9.062576430357148e-05,
+ assim_no3_v=             0.007674558773526875, assim_nh4_v=  0.0055807427801246555, assim_no3_k=          0.0006119359147263551, assim_nh4_k= 4.8948940259504885e-05,
+ pool_beta=                0.5137088296756747,
+ leaf_a=              0.03776644566356436, leaf_b=                 0.2833722694412034, stem_a=    0.02142862964675621, stem_b=    0.38202524408354727,
+ min_ratio=    0.38014697132425973, max_ratio=                 1.2485834259395652, photo_floor=.05, photo_gamma=1., growth_tau=     1.7937396340718383,
+ state_timing=1, pods_n_state=1, budget_revision=1, c4_budget=1, leaf_coupling=1, c4_photo=1,
+ remob_mode=1, luxury_priority=0, remob_tau=8., protect_beta=     0.6293397629505293, slow_ratio=3.,
+ remob_rate_mode=1, remob_rate_max=   0.009828011439629473, functional_rate_max=   0.001069756751959219,
+ photo_reference_mode=1, photo_sln_ref=1.05,
+ n_sen_rate=   0.017728791643236638, lai_cn_mode=1, lai_cn_shape=      1.386747178073071,
+ common_acceptance=0, reserve_mode=0
+/
+! Shared steady root transport parameters.
+! rnk_mode: 0=off, 1=steady equivalent transport.
+! Vmax units: g N/(m root day). Km: mg N/L. Kd: L/kg. Residual: mg N/kg dry soil.
+! Optional sorbing NH4 penetration: positive coefficient enables it, 0 uses the full cylinder.
+! Species order: NO3, NH4. Optional rnk_vmax_scale defaults to 1 for both species.
+&rootnuptake
+ rnk_vmax_scale=                 0.7520374542358872,
+ rnk_mode=1,
+ rnk_source_tag="v15-engineering","literature-prior",
+ rnk_km_high=0.28,0.5, rnk_km_low=             111.6657867643115,115.,
+ rnk_vmax_high=        0.00013226620334057482,0.00018, rnk_vmax_low=0.0015,0.002,
+ rnk_kd=0.,1., rnk_residual=0.25,0.5,
+ rnk_penetration_coeff=0.,
+ rnk_radius=0.0001, rnk_species_diffusion=0.000164,0.000150
+/

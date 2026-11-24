@@ -1,5 +1,7 @@
 # 26SP 底物填充率旺长对照
 
+本页记录初期固定配置对照。冻结合格 2A 点后的正式率定见[执行报告](formal/execution.zh.md)。
+
 这是完整私有 26SP 的 12 处理配对复跑。F5、F6 各比较一次 `lux_veg_mode=0` 和 `mode=2`，另用 80×4 冻结点做零回归。开启组用方案推荐的 `lux_psi_threshold=0.76`、`lux_hill_k=0.04`、`lux_xfrt_drop=0.50`。这组结果用于验证接线和评估机制，正式阶段 2B 率定由[阶段 2A 验收](../26sp_stage2a_11p/README.md)决定。
 
 [逐水氮处理指标](treatment_summary.csv)、[五组完整回执](paired_receipt.json)和[配对实验配置](configs/)保存逐项结果。表中生殖期从各处理实际开花日 `ADAT` 算到季末，`f` 为日初硝态氮与铵态氮合计填充率。根核诊断和新开关诊断记录的 `f` 逐日一致。

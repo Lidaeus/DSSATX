@@ -131,3 +131,31 @@ and treatment-level results.
 The paired F6 and substrate-fill luxury protocol is documented in the
 [stage 2A archive](results/26sp_stage2a_11p/README.md). Its fixed-parameter
 mode-2 ablations are in the [stage 2B archive](results/26sp_stage2b_lux2/README.md).
+
+
+The [26SP continuation report](results/26sp_stage2a_11p/continuation/execution.zh.md)
+describes the expanded F6 ensemble and the bounded W2 screen. The screen uses
+training data and W2 endpoints to select points for independent native
+validation against both water levels and the complete-treatment holdouts.
+
+When a native 2A replay passes, `prepare_stage2b_26sp.py` checks the engine
+and frozen configuration against that replay and stages only the three Hill
+parameters. Its training table combines N3 fresh fruit and shoot dry mass
+with the corresponding N3−N2 contrasts. The optional `reference_treatment`
+column in an IES observation subtracts that treatment's native value for the
+same file, column and date.
+
+```sh
+python research/calibration/prepare_stage2b_26sp.py \
+  --engine "$engine" --stage "$stage_2a" --assessment "$passed_2a/receipt.json" \
+  --config "$passed_2a/posterior/NIntegration.nml" --out "$stage_2b"
+python research/calibration/ies.py --engine "$engine" --inputs "$stage_2b/inputs" \
+  --template "$stage_2b/NIntegration.nml.tpl" --bounds "$stage_2b/bounds.csv" \
+  --observations "$stage_2b/observations.csv" --members 32 --updates 2 --workers 8 \
+  --seed 20261127 --pestpp-ies pestpp-ies --out "$ies_2b"
+python research/calibration/replay.py --case "$ies_2b" --out "$replay_2b"
+python research/calibration/stage2_26sp.py luxury \
+  --engine "$engine" --stage "$stage_2a" --reference "$passed_2a/receipt.json" \
+  --baseline "$passed_2a/posterior" --config "$replay_2b/configs/NIntegration.nml" \
+  --out "$native_2b"
+```

@@ -1,0 +1,15 @@
+{
+  "iteration": 2,
+  "member": "30",
+  "phi_recorded": 70.3997,
+  "phi_replayed": 70.39967360153032,
+  "engine_sha256": "9cd50853803ee8e65986f6e9352d8e49dfd923047a4321f470ec42ea8e36740f",
+  "distance_to_nearest_bound_as_fraction_of_range": {
+    "lux_hill_k": 0.32336133470467326,
+    "lux_psi_threshold": 0.02537983535002912,
+    "lux_xfrt_drop": 0.12884630136714903
+  },
+  "rendered_config_sha256": {
+    "NIntegration.nml": "b81efd04c8f559099b60b33123e718ff50a0bef180783bf54d9b87dd1bddcd10"
+  }
+}

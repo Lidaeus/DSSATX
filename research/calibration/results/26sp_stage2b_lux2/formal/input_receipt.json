@@ -1,0 +1,17 @@
+{
+  "engine_sha256": "9cd50853803ee8e65986f6e9352d8e49dfd923047a4321f470ec42ea8e36740f",
+  "passed_stage_2a_sha256": "fb6ba5ad1356e89ad0e44519852ef587b141d18db9d4f72e5b4cf12e9c570779",
+  "frozen_config_sha256": "a922c750f86c574185cfc2e9514f60a23a1e0a463c8dbca401be953105ebed07",
+  "stage_files_sha256": {
+    "NIntegration.nml.tpl": "13fa9fb96d0b21363403811e8481826da991078cbe55b741d55cba910a702c1d",
+    "frozen_2a.nml": "a922c750f86c574185cfc2e9514f60a23a1e0a463c8dbca401be953105ebed07",
+    "observations.csv": "58edfe0408057f7e3fc9c7b8e52841481a621eba6fa69096e7466475d7afe900",
+    "bounds.csv": "b4e53c1c0d4f6db4a493218b96ed93de86eb8fda33b8902eee7fe81c3f62f61d"
+  },
+  "target_count_by_group": {
+    "delta_fresh": 15,
+    "delta_shoot_dm": 24,
+    "n3_fresh": 15,
+    "n3_shoot_dm": 24
+  }
+}
