@@ -1,0 +1,51 @@
+{
+  "profile": "f6",
+  "frozen_80x4_parameters": 53,
+  "active_parameters": 11,
+  "positive_observations": 140,
+  "positive_leaf_N": 21,
+  "added_N2_leaf_N": [
+    "ln_pct_4_2026122",
+    "ln_pct_4_2026153",
+    "ln_pct_4_2026180",
+    "ln_pct_5_2026122",
+    "ln_pct_5_2026153",
+    "ln_pct_5_2026180",
+    "ln_pct_6_2026122",
+    "ln_pct_6_2026153",
+    "ln_pct_6_2026180"
+  ],
+  "source_sha256": {
+    "XXQL2601.TMX": "208687ee892a153a7d0b0776fd1af4dc2da0ffe73666bf2816c5136ac08c4bce",
+    "XXQL2601.TMA": "848114f59718d8a7eb20003d23b6680b1f0d2bbc7fda695eb96388a5365e1450",
+    "XXQL2601.TMT": "7108f68fa2f488e910b0f43225502996749eeb64446ee2d395e56caee882e3ea",
+    "SOIL.SOL": "505babba2acb6691c0f54e1f8339b745b4d75204e1c26e5c0d7b46da6ea91f15",
+    "XXTW2403.WTH": "8dbc5f13b54bca7a0e5b33a9ba03383397c9da552a8a38ab0d37ae28beb944f8",
+    "TMGRO048.CUL": "92a373800d68b46d07601777e1579fff7b976f74190814bc6e0494eda7c4455b",
+    "TMGRO048.ECO": "9f2d43d335a4455679d701116d861a1915c1010a79d002e60ca4db74fe3d73ff",
+    "TMGRO048.SPE": "59fb51f8d4314615973038843994160cf612443c789ba938092ba0af0bb1d0f7",
+    "DSSBatch.v48": "c8196718057c91ce57683903a41287f385d62a0c4f2527e35f89a81b784b8299",
+    "observation_uncertainty.csv": "dd5cff5ad0c9045f09501acc92e7834182d6e7b80883715b5517ba1b38038dfa",
+    "plant_npk_source_values.csv": "88f4a0b4592ae86ba39bf09c3aa0a6f2ee58eb3007d8c42df64613caa50b46fd",
+    "treatment_metadata.csv": "b24ba4e8fbf80a643652b6a89202e9850cd60f1dfdcd5000d9e259a4425b5e52"
+  },
+  "frozen_config_sha256": {
+    "NIntegration.nml": "5baf49f4f4d00177e3852065bdecb542b8c06495fd2dfa000e1839fdf09cf114",
+    "TMGRO048.CUL": "d2f935ff78dc5393e58c1be497fde1ec720d443d81ff4a38468469b71b60f6b5",
+    "TMGRO048.SPE": "ac9996f52431b57cd3657095eb846ed1efd0c59dfb0bd12d7533c0d48ca878b5",
+    "TMGRO048.ECO": "211be9c25269f3b877e59c4eac8aa30caf30cb1103a348850fb5e373ed704859"
+  },
+  "stage_files_sha256": {
+    "NIntegration.nml.tpl": "e8dd85b13f377a4085eb1af7b1a3b78ca807b46de181e126bce5af8c8d06998b",
+    "f6_hill.nml": "efa61cb7425ab46d6394bc4ad5b7e38a7957629f75c285b14d17ab82f83f8b1a",
+    "treatment_metadata.csv": "5d00e357975b83443aa806265537c714ff49c3b4da4e6d18c7d9c71043d80078",
+    "f5.nml": "3dfd11289d91ba42d5b9752d3626cd9e53e99c9f98e41cf00b6843f59e7bf374",
+    "f6.nml": "6a025a1bbf8334fb8c6101f508a15891dcefd5ac9df7e29c0133b501935f472a",
+    "control.nml": "b23d05781d57075de665bcca392d22c5813f264ea753a633c6236b9f6472c689",
+    "holdout.csv": "6fb4ba36004eedcfc2e42bc1d056d0ed6e84cdeb5075c8e479926d98dcf7daa2",
+    "stage2b_observations.csv": "a6b2230c5d78f2ee8b13d9b051c938310ef56bba179904996fe33ca9910bbba5",
+    "f5_hill.nml": "b030669b28a2a8445efa572bc96b20d9d56df0ac9a920de6b1d23ffeabe12723",
+    "observations.csv": "688037622c6e76350d24cc834192e9a11923c2d546d8833535d26323df36f283",
+    "bounds.csv": "9ece12aba05339189e4cbaa97cad11772346e6b653677f5b2feadd9360e93f6c"
+  }
+}

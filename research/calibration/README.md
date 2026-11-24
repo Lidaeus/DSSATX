@@ -119,3 +119,15 @@ Verify the replay and conservation ledgers before adopting any parameter set.
 The [80×4 result archive](results/26sp_80x4/README.md) contains the selected
 parameters and rendered cards, independent replay, fit metrics, conservation
 audit, and data for the diagnostic atlas.
+
+## F5 existing-tissue nitrogen refill
+
+The private 26SP F5/F6 workflow checks archived input and card hashes, stages
+11 active parameters, and compares the archived control and both variants.
+See the [execution report](f5_execution.zh.md) for commands, stage 2A criteria
+and treatment-level results.
+
+
+The paired F6 and substrate-fill luxury protocol is documented in the
+[stage 2A archive](results/26sp_stage2a_11p/README.md). Its fixed-parameter
+mode-2 ablations are in the [stage 2B archive](results/26sp_stage2b_lux2/README.md).

@@ -1,0 +1,20 @@
+{
+  "engines": {
+    "before": "9f53274d8967dc22ccf44bf57caa1d9b5b199de8be62d3918fe5a7a12adbeb56",
+    "after": "9cd50853803ee8e65986f6e9352d8e49dfd923047a4321f470ec42ea8e36740f"
+  },
+  "mode1_config_sha256": "c1c49a3b2ce70b2b3d37929492a28f0ffeca60d2473cecd6e37bfa65d7e2b08c",
+  "mode1_parity": {
+    "FreshWt.OUT": true,
+    "LayerRootNUptake.csv": true,
+    "P0Trace.csv": true,
+    "PlantABudget.csv": true,
+    "PlantCCash.csv": true,
+    "PlantGro.OUT": true,
+    "PlantN.OUT": true,
+    "PlantNIntegration.csv": true,
+    "PlantNLAI.csv": true,
+    "PlantNLeaf.csv": true,
+    "PlantNV3.csv": true
+  }
+}

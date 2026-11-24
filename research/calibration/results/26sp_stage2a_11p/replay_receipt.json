@@ -1,0 +1,23 @@
+{
+  "iteration": 2,
+  "member": "17",
+  "phi_recorded": 24.1124,
+  "phi_replayed": 24.112412725985862,
+  "engine_sha256": "9cd50853803ee8e65986f6e9352d8e49dfd923047a4321f470ec42ea8e36740f",
+  "distance_to_nearest_bound_as_fraction_of_range": {
+    "assim_no3_k": 0.029818683368251466,
+    "assim_no3_v": 0.0846302103041294,
+    "leaf_a": 0.4605200768533751,
+    "leaf_b": 0.32289561056296534,
+    "max_ratio": 0.3993371371941183,
+    "pool_beta": 0.01810368776575302,
+    "q_no3_max": 0.2869276149776691,
+    "refill_substrate_km": 0.1748964254032966,
+    "rnk_km_low_no3": 0.25827555340484876,
+    "rnk_vmax_high_no3": 0.25252273643176826,
+    "rnk_vmax_scale": 0.01734796230793938
+  },
+  "rendered_config_sha256": {
+    "NIntegration.nml": "61e86688bf07d9b43b4bb3f2db986ebd1ea57630bbb813bdc1f519631436829d"
+  }
+}
