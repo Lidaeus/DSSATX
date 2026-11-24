@@ -33,9 +33,11 @@ module CG_Nitrogen
   real(dp),save :: day_substrate_fill=0
   real(dp),save :: psi_end=0,day_psi=0
   integer,save :: lux_veg_mode=0
-  real(dp),save :: lux_xfrt_drop=0,lux_psi_threshold=0
+  real(dp),save :: lux_xfrt_drop=0,lux_psi_threshold=0,lux_hill_k=0.10_dp
   ! Experimental receiver settings for the persistent inorganic route.
   real(dp),save :: org_reserve_cap(2)=0,refill_tau=0
+  integer,save :: refill_substrate_target=0
+  real(dp),save :: refill_substrate_km=0._dp
   real(dp),save :: leaf_photo_mean=0,leaf_photo_critical=0,leaf_photo_min_ratio=0
   logical,save :: psi_end_valid=.false.,day_psi_valid=.false.
   real(dp),save :: mob_safe(4)=0,mob_func(4)=0,mob_plan(4)=0,mob_returned(4)=0
@@ -102,14 +104,14 @@ module CG_Nitrogen
   public :: NI_TARGETS, NI_REFERENCES, NI_BUILD_REFERENCES, NI_GROWTH, NI_LEAF_FACTOR
   public :: NI_PHOTO_REPLACED, NI_CLOSE_LEDGERS
   public :: NI_TOTAL_Q, NI_CURVE_KERNEL, NI_ROOT_KERNEL, NI_ASSIM_KERNEL
-  public :: NI_PSI_KERNEL, NI_ROOT_PSI_FACTOR, NI_BUFFER_INFLOW
+  public :: NI_PSI_KERNEL, NI_ROOT_PSI_FACTOR, NI_BUFFER_INFLOW, NI_REFILL_FRACTION
   public :: NI_PREASSIM, NI_MERGE_OLD
   public :: NI_ORG_BEGIN, NI_ORG_END
   public :: NI_SPLIT
   public :: NI_REVISED, NI_VEG_RECONCILE, NI_REFILL, NI_DONORS, NI_RETAIN
   public :: NI_EXPANSION, NI_AREA_REFILL, NI_MINIMUM
   public :: NI_OPEN_DAY, NI_SYNC_STATE, NI_PODS, NI_POD_FACTOR, NI_POD_KERNEL
-  public :: NI_LUX_KERNEL, NI_XFRT_FACTOR
+  public :: NI_LUX_KERNEL, NI_LUX_HILL_KERNEL, NI_XFRT_FACTOR
   public :: NI_NATIVE_MOB_FACTOR, NI_V4_TRACE
   public :: NI_REMOB_ON, NI_REMOB_KERNEL, NI_REMOB_PLAN, NI_REMOB_SETTLE, NI_REMOB_REPRO
   public :: NI_CORE_DEMAND, NI_LUXURY, NI_LATE_KERNEL, NI_REDUCTION_RESP
@@ -944,10 +946,26 @@ contains
     surplus=max(0._dp,(min(1._dp,psi)-threshold)/(1._dp-threshold))
     factor=1-amplitude*surplus**2
   end function
+  pure real(dp) function NI_LUX_HILL_KERNEL(psi,fill,amplitude,threshold,hill_k) result(factor)
+    real(dp),intent(in)::psi,fill,amplitude,threshold,hill_k
+    real(dp)::excess,scale
+    factor=1._dp
+    if(psi<=0.or.fill<=threshold) return
+    excess=fill-threshold
+    ! Normalize before squaring to preserve the Hill response for finite positive widths.
+    scale=max(excess,hill_k)
+    factor=1._dp-amplitude*(excess/scale)**2/((hill_k/scale)**2+(excess/scale)**2)
+  end function
   real function NI_XFRT_FACTOR()
     NI_XFRT_FACTOR=1
-    if(lux_veg_mode>0.and.day_psi_valid) &
+    if(.not.day_psi_valid) return
+    select case(lux_veg_mode)
+    case(1)
       NI_XFRT_FACTOR=real(NI_LUX_KERNEL(day_psi,lux_xfrt_drop,lux_psi_threshold))
+    case(2)
+      ! In mode 2 the threshold refers to the existing day-open NO3 + NH4 fill.
+      NI_XFRT_FACTOR=real(NI_LUX_HILL_KERNEL(day_psi,day_substrate_fill,lux_xfrt_drop,lux_psi_threshold,lux_hill_k))
+    end select
   end function
   real function NI_POD_FACTOR()
     NI_POD_FACTOR=real(NI_POD_KERNEL(day_z(1)))
@@ -1042,6 +1060,12 @@ contains
     real,intent(in)::amount
     storage_shift=real(amount,dp)
   end subroutine
+  pure real(dp) function NI_REFILL_FRACTION(fill,km) result(fraction)
+    real(dp),intent(in)::fill,km
+    fraction=fill
+    if(km>0) fraction=fill*(1._dp+km)/(fill+km)
+  end function
+
   pure function NI_REFILL_ROOM(mass,stock,target) result(room)
     real(dp),intent(in)::mass(:),stock(:),target(:)
     real(dp)::room(size(mass))
@@ -1065,6 +1089,14 @@ contains
     if(NI_RESERVES())stock(1:2)=max(0._dp,stock(1:2)- &
       max(0._dp,reserve_begin*(1-sen_frac(1:2))-mob_safe(1:2)))
     target=[cmax(1),cmax(2),real(root_target,dp)]
+    if(refill_substrate_target==1)then
+      ! Only the existing-tissue target uses the F5 substrate response.
+      if(refill_substrate_km>0)then
+        target(1:2)=ccrit+NI_REFILL_FRACTION(day_substrate_fill,refill_substrate_km)*(cmax-ccrit)
+      else
+        target(1:2)=NI_TISSUE_TARGET()
+      endif
+    endif
     if(luxury_priority==1) target(1:2)=ccrit
     ! Keep the dilution-based state normalization and new-tissue reference independent.
     where(org_reserve_cap>0) target(1:2)=ccrit+org_reserve_cap
@@ -1156,7 +1188,8 @@ contains
       photo_reference_mode,photo_sln_ref,leaf_expansion_mode,v4_diagnostics,common_acceptance,reserve_mode, &
       reserve_capacity,reserve_fill_tau,reserve_protect,build_min_leaf,build_min_stem, &
       remob_rate_mode,remob_rate_max,functional_rate_max,lai_cn_mode,lai_cn_shape,photo_legacy, &
-      lux_veg_mode,lux_xfrt_drop,lux_psi_threshold,org_reserve_cap,refill_tau
+      lux_veg_mode,lux_xfrt_drop,lux_psi_threshold,lux_hill_k,org_reserve_cap,refill_tau, &
+      refill_substrate_target,refill_substrate_km
     if(loaded) then
       if(NI_ENABLED()) then
         if(control%CROP/='TM'.or.switch%ISWNIT/='Y'.or.switch%ISWSYM/='N'.or.switch%ISWDIS/='N') &
@@ -1256,11 +1289,15 @@ contains
     if(ni_stage/=5.and.max(state_timing,pods_n_state,remob_mode,luxury_priority)>0) &
       error stop 'NI v3: opt-in modes require stage5; stage0 cannot silently activate them'
     call RNK_LOAD(path)
-    if(lux_veg_mode<0.or.lux_veg_mode>1)error stop 'NI: lux_veg_mode must be 0 (off) or 1 (reproductive C)'
+    if(lux_veg_mode<0.or.lux_veg_mode>2)error stop 'NI: lux_veg_mode must be 0 (off), 1 (psi), or 2 (substrate fill)'
     if(.not.ieee_is_finite(lux_psi_threshold))error stop 'NI: nonfinite luxury response threshold'
     if(lux_psi_threshold<0.or.lux_psi_threshold>=1)error stop 'NI: luxury response threshold must be in [0,1)'
     if(.not.ieee_is_finite(lux_xfrt_drop))error stop 'NI: nonfinite luxury response amplitude'
     if(lux_xfrt_drop<0.or.lux_xfrt_drop>.5_dp)error stop 'NI: luxury response amplitude must be in [0,.5]'
+    if(.not.ieee_is_finite(lux_hill_k))error stop 'NI: lux_hill_k must be finite and positive'
+    if(lux_hill_k<=0)error stop 'NI: lux_hill_k must be finite and positive'
+    if(lux_veg_mode==2.and..not.NI_SUBSTRATE_TARGET_ON()) &
+      error stop 'NI: substrate-fill luxury response requires the persistent substrate route'
     if(lux_veg_mode>0)then
       if(.not.NI_C4_ON().or..not.NI_COMMON_ROOT_ENABLED().or.common_acceptance/=0.or.reserve_mode/=0) &
         error stop 'NI: luxury shoot response requires the revised steady-root persistent inorganic route'
@@ -1277,6 +1314,18 @@ contains
       if(.not.NI_C4_ON().or..not.NI_LEAF_COUPLED().or..not.NI_COMMON_ROOT_ENABLED().or. &
          common_acceptance/=0.or.reserve_mode/=0.or.luxury_priority/=0) &
         error stop 'NI: experimental refill requires the B4 persistent inorganic route'
+    endif
+    if(refill_substrate_target<0.or.refill_substrate_target>1) &
+      error stop 'NI: refill_substrate_target must be 0 or 1'
+    if(.not.ieee_is_finite(refill_substrate_km)) error stop 'NI: invalid refill_substrate_km'
+    if(refill_substrate_km<0) error stop 'NI: invalid refill_substrate_km'
+    if(refill_substrate_km>0.and.refill_substrate_target/=1) &
+      error stop 'NI: refill_substrate_km requires refill_substrate_target=1'
+    if(refill_substrate_target==1)then
+      if(.not.NI_SUBSTRATE_TARGET_ON().or..not.NI_C4_ON().or..not.NI_LEAF_COUPLED()) &
+        error stop 'NI: refill_substrate_target requires the B4 persistent inorganic route'
+      if(any(org_reserve_cap>0)) &
+        error stop 'NI: refill_substrate_target cannot be combined with org_reserve_cap'
     endif
     if(.not.NI_ENABLED()) return
     if(budget_revision<0.or.budget_revision>1) error stop 'NI: budget_revision must be 0 or 1'
@@ -1766,6 +1815,8 @@ contains
     if(P0_ENABLED().and.lux_veg_mode>0.and.day_psi_valid.and.day_psi>0) &
       call P0_V(control,'lux_shoot_state','psi,xfrt_factor,pod_lux_factor,pod_def_factor', &
         [real(day_psi),NI_XFRT_FACTOR(),1.,NI_POD_FACTOR()])
+    if(P0_ENABLED().and.lux_veg_mode==2) &
+      call P0_V(control,'lux_shoot_substrate','fill', [real(day_substrate_fill)])
     if(v4_diagnostics==1)then
       if(.not.v4_opened)then
         if(NI_OPEN_LEDGER(v4_unit,'PlantNV4.csv'))then
