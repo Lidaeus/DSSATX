@@ -31,6 +31,18 @@ def render_template(template, values):
     return re.sub(fr"{marker}([^\r\n{marker}]+){marker}", replace, body)
 
 
+def native_value(output, row, treatment):
+    rows = output.loc[output.treatment.eq(treatment)]
+    if not pd.isna(row.yrdoy):
+        rows = rows.loc[rows.yrdoy.eq(row.yrdoy)]
+    if rows.run.nunique() != 1:
+        raise ValueError(f"{row.name}: treatment {treatment} has missing or ambiguous runs")
+    value = float(rows.iloc[-1][row.column])
+    if not math.isfinite(value) or value <= -99:
+        raise ValueError(f"{row.name}: invalid or overflowed {row.file} column {row.column}: {value}")
+    return value
+
+
 def evaluate(case, executable, targets, overrides, log):
     environment = os.environ.copy()
     for key in ("DSSAT_N_CONFIG", "DSSAT_ROOT_UPTAKE_NML", "DSSAT_NSTATE_NML"):
@@ -51,14 +63,10 @@ def evaluate(case, executable, targets, overrides, log):
         for filename, group in targets.groupby("file", sort=False):
             output = native_table(scratch / filename, allow_numeric_overflow=True).sort_values("yrdoy")
             for row in group.itertuples(index=False):
-                rows = output.loc[output.treatment.eq(row.treatment)]
-                if not pd.isna(row.yrdoy):
-                    rows = rows.loc[rows.yrdoy.eq(row.yrdoy)]
-                if rows.run.nunique() != 1:
-                    raise ValueError(f"{row.name}: treatment has missing or ambiguous runs")
-                value = float(rows.iloc[-1][row.column])
-                if not math.isfinite(value) or value <= -99:
-                    raise ValueError(f"{row.name}: invalid or overflowed {filename} column {row.column}: {value}")
+                value = native_value(output, row, row.treatment)
+                reference = getattr(row, "reference_treatment", None)
+                if pd.notna(reference):
+                    value -= native_value(output, row, reference)
                 values[row.name] = value
         return [values[name] for name in targets.name]
 

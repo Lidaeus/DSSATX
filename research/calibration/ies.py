@@ -56,6 +56,13 @@ def prepare(args, executable):
         targets.weight.ge(0).all() and targets.weight.gt(0).any()
     ):
         raise ValueError("Targets need finite values and nonnegative weights with at least one positive weight")
+    if "reference_treatment" in targets:
+        comparison = targets.dropna(subset=["reference_treatment"])
+        reference = comparison.reference_treatment
+        if not np.isfinite(reference).all() or not (
+            reference.gt(0) & reference.mod(1).eq(0) & reference.ne(comparison.treatment)
+        ).all():
+            raise ValueError("Each contrast requires a different positive integer reference treatment")
     if not targets.file.str.fullmatch(r"[\w-]+\.OUT", case=False, na=False).all():
         raise ValueError("Targets must name native DSSAT OUT files")
 

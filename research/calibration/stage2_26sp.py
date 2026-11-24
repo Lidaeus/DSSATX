@@ -158,8 +158,8 @@ def low_n_trajectories(stage, off, on):
     return {"same_daily_native_values": same, "max_daily_fresh_abs_change_t_ha": daily_fresh_delta}
 
 
-def stage2b(stage, out, name, result):
-    low = low_n_trajectories(stage, out / name, out / f"{name}_hill")
+def stage2b(stage, off, on, result):
+    low = low_n_trajectories(stage, off, on)
     waters = {}
     for water in ("W2", "W3"):
         row = contrasts(result["groups"], water)
@@ -202,7 +202,8 @@ def compare(engine, stage, out, reference):
     receipt = {
         "engine_sha256": digest(engine), "disabled_parity": parity, "cases": cases,
         "stage_2a": {name: stage2a(cases[name], cases["control"]) for name in ("f5", "f6")},
-        "stage_2b_exploratory": {name: stage2b(stage, out, name, cases[f"{name}_hill"]) for name in ("f5", "f6")},
+        "stage_2b_exploratory": {name: stage2b(stage, out / name, out / f"{name}_hill", cases[f"{name}_hill"])
+                                 for name in ("f5", "f6")},
     }
     write_results(out, receipt)
 
@@ -217,20 +218,40 @@ def posterior(engine, stage, out, reference, config):
                         "stage_2a": stage2a(result, prior["cases"]["control"])})
 
 
+def luxury(engine, stage, out, reference, config, baseline):
+    prior = json.loads(reference.read_text())
+    if prior["stage_2a"]["pass"] is not True:
+        raise ValueError("Stage 2B requires a complete native stage-2A pass")
+    if (digest(engine) != prior["engine_sha256"]
+            or digest(baseline / "NIntegration.nml") != prior["cases"]["posterior"]["config_sha256"]):
+        raise ValueError("The stage-2B engine and off-mode baseline must match the passing 2A replay")
+    out.mkdir(parents=True)
+    on = out / "hill"
+    result = json_values(assess_trial(engine, stage, on, config))
+    write_results(out, {"engine_sha256": digest(engine), "cases": {"hill": result},
+                        "stage_2a_reference_sha256": digest(reference),
+                        "stage_2b": stage2b(stage, baseline, on, result)})
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("action", choices=("compare", "posterior"))
+    ap.add_argument("action", choices=("compare", "posterior", "luxury"))
     for name in ("engine", "stage", "out", "reference"):
         ap.add_argument(f"--{name}", type=Path, required=True)
     ap.add_argument("--config", type=Path)
+    ap.add_argument("--baseline", type=Path)
     args = ap.parse_args()
     engine, stage, out, reference = (getattr(args, name).resolve() for name in ("engine", "stage", "out", "reference"))
     if args.action == "compare":
         compare(engine, stage, out, reference)
-    else:
-        if args.config is None:
-            ap.error("posterior requires --config")
+    elif args.config is None:
+        ap.error(f"{args.action} requires --config")
+    elif args.action == "posterior":
         posterior(engine, stage, out, reference, args.config.resolve())
+    elif args.baseline is None:
+        ap.error("luxury requires --baseline from the passed 2A native replay")
+    else:
+        luxury(engine, stage, out, reference, args.config.resolve(), args.baseline.resolve())
 
 
 if __name__ == "__main__":
