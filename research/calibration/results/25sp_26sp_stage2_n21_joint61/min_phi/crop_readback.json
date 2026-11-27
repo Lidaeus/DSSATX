@@ -1,0 +1,494 @@
+{
+  "lfmax": {
+    "file": "TMGRO048.CUL",
+    "record": "TM0008",
+    "field": "LFMAX",
+    "row": 46,
+    "columns": [
+      79,
+      84
+    ],
+    "requested": 2.666561359402545,
+    "readback": 2.6666
+  },
+  "slavr": {
+    "file": "TMGRO048.CUL",
+    "record": "TM0008",
+    "field": "SLAVR",
+    "row": 46,
+    "columns": [
+      85,
+      90
+    ],
+    "requested": 219.82682775610553,
+    "readback": 219.83
+  },
+  "sizlf": {
+    "file": "TMGRO048.CUL",
+    "record": "TM0008",
+    "field": "SIZLF",
+    "row": 46,
+    "columns": [
+      91,
+      96
+    ],
+    "requested": 271.11401966592916,
+    "readback": 271.11
+  },
+  "podur": {
+    "file": "TMGRO048.CUL",
+    "record": "TM0008",
+    "field": "PODUR",
+    "row": 46,
+    "columns": [
+      121,
+      126
+    ],
+    "requested": 6.0,
+    "readback": 6.0
+  },
+  "xfrt": {
+    "file": "TMGRO048.CUL",
+    "record": "TM0008",
+    "field": "XFRT",
+    "row": 46,
+    "columns": [
+      97,
+      102
+    ],
+    "requested": 0.9146728398670534,
+    "readback": 0.91467
+  },
+  "lnref": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "LNREF",
+    "row": 12,
+    "columns": [
+      19,
+      24
+    ],
+    "requested": 6.5,
+    "readback": 6.5
+  },
+  "fnpgn1": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "FNPGN(1)",
+    "row": 6,
+    "columns": [
+      1,
+      6
+    ],
+    "requested": 2.074271567028903,
+    "readback": 2.0743
+  },
+  "fnpgn2": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "FNPGN(2)",
+    "row": 6,
+    "columns": [
+      7,
+      12
+    ],
+    "requested": 4.1181997812738835,
+    "readback": 4.1182
+  },
+  "senrte": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "SENRTE",
+    "row": 69,
+    "columns": [
+      1,
+      6
+    ],
+    "requested": 0.8145165760734241,
+    "readback": 0.81452
+  },
+  "atop": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "ATOP",
+    "row": 52,
+    "columns": [
+      25,
+      30
+    ],
+    "requested": 0.6361201479722749,
+    "readback": 0.63612
+  },
+  "nmobmx": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "NMOBMX",
+    "row": 36,
+    "columns": [
+      19,
+      24
+    ],
+    "requested": 0.08701927681608537,
+    "readback": 0.08702
+  },
+  "nvsmob": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "NVSMOB",
+    "row": 36,
+    "columns": [
+      25,
+      30
+    ],
+    "requested": 0.4672015721050249,
+    "readback": 0.4672
+  },
+  "prolfi": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "PROLFI",
+    "row": 23,
+    "columns": [
+      1,
+      6
+    ],
+    "requested": 0.33515822642754195,
+    "readback": 0.33516
+  },
+  "prolfg": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "PROLFG",
+    "row": 23,
+    "columns": [
+      7,
+      12
+    ],
+    "requested": 0.23694707082546304,
+    "readback": 0.23695
+  },
+  "prolff": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "PROLFF",
+    "row": 23,
+    "columns": [
+      13,
+      18
+    ],
+    "requested": 0.11519031180911925,
+    "readback": 0.11519
+  },
+  "prosti": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "PROSTI",
+    "row": 23,
+    "columns": [
+      19,
+      24
+    ],
+    "requested": 0.21880521225116792,
+    "readback": 0.21881
+  },
+  "proshi": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "PROSHI",
+    "row": 24,
+    "columns": [
+      19,
+      24
+    ],
+    "requested": 0.1554115087132791,
+    "readback": 0.15541
+  },
+  "rno3c": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "RNO3C",
+    "row": 19,
+    "columns": [
+      1,
+      6
+    ],
+    "requested": 2.26166590918768,
+    "readback": 2.2617
+  },
+  "nstfac": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "NSTFAC",
+    "row": 37,
+    "columns": [
+      7,
+      12
+    ],
+    "requested": 0.5671198908204175,
+    "readback": 0.56712
+  },
+  "rtno3": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "RTNO3",
+    "row": 80,
+    "columns": [
+      1,
+      6
+    ],
+    "requested": 0.011772814632420102,
+    "readback": 0.01177
+  },
+  "rwumx": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "RWUMX",
+    "row": 78,
+    "columns": [
+      37,
+      42
+    ],
+    "requested": 0.029269027815965798,
+    "readback": 0.02927
+  },
+  "rwuep1": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "RWUEP1",
+    "row": 78,
+    "columns": [
+      31,
+      36
+    ],
+    "requested": 1.3400236996660648,
+    "readback": 1.34
+  },
+  "dswbar": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "DSWBAR",
+    "row": 84,
+    "columns": [
+      1,
+      6
+    ],
+    "requested": 15.796604092176834,
+    "readback": 15.797
+  },
+  "xswbar3": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "XSWBAR(3)",
+    "row": 91,
+    "columns": [
+      13,
+      18
+    ],
+    "requested": 0.37051131678455684,
+    "readback": 0.37051
+  },
+  "yswbar3": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "YSWBAR(3)",
+    "row": 92,
+    "columns": [
+      13,
+      18
+    ],
+    "requested": 1.0,
+    "readback": 1.0
+  },
+  "pgeff": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "PGEFF",
+    "row": 11,
+    "columns": [
+      1,
+      6
+    ],
+    "requested": 0.05746114300777757,
+    "readback": 0.05746
+  },
+  "finref": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "FINREF",
+    "row": 56,
+    "columns": [
+      1,
+      6
+    ],
+    "requested": 306.59851996753315,
+    "readback": 306.6
+  },
+  "slaref": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "SLAREF",
+    "row": 56,
+    "columns": [
+      7,
+      12
+    ],
+    "requested": 317.98257383569415,
+    "readback": 317.98
+  },
+  "sizref": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "SIZREF",
+    "row": 56,
+    "columns": [
+      13,
+      18
+    ],
+    "requested": 274.635808926044,
+    "readback": 274.64
+  },
+  "vssink": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "VSSINK",
+    "row": 56,
+    "columns": [
+      19,
+      24
+    ],
+    "requested": 13.050182289831936,
+    "readback": 13.05
+  },
+  "senpor4": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "SENPOR(4)",
+    "row": 75,
+    "columns": [
+      19,
+      24
+    ],
+    "requested": 0.15462760432162334,
+    "readback": 0.15463
+  },
+  "frlff": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "FRLFF",
+    "row": 52,
+    "columns": [
+      19,
+      24
+    ],
+    "requested": 0.28743816240276426,
+    "readback": 0.28744
+  },
+  "frlfmx": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "FRLFMX",
+    "row": 53,
+    "columns": [
+      1,
+      6
+    ],
+    "requested": 0.83957855654775,
+    "readback": 0.83958
+  },
+  "yleaf4": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "YLEAF(4)",
+    "row": 50,
+    "columns": [
+      19,
+      24
+    ],
+    "requested": 0.3886409040326992,
+    "readback": 0.38864
+  },
+  "alphl": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "ALPHL",
+    "row": 38,
+    "columns": [
+      1,
+      6
+    ],
+    "requested": 0.04679589382045115,
+    "readback": 0.0468
+  },
+  "cmobmx": {
+    "file": "TMGRO048.SPE",
+    "record": "",
+    "field": "CMOBMX",
+    "row": 36,
+    "columns": [
+      1,
+      6
+    ],
+    "requested": 0.020731522289938676,
+    "readback": 0.02073
+  },
+  "trifl": {
+    "file": "TMGRO048.ECO",
+    "record": "TM0001",
+    "field": "TRIFL",
+    "row": 47,
+    "columns": [
+      91,
+      96
+    ],
+    "requested": 1.8,
+    "readback": 1.8
+  },
+  "rwdth": {
+    "file": "TMGRO048.ECO",
+    "record": "TM0001",
+    "field": "RWDTH",
+    "row": 47,
+    "columns": [
+      97,
+      102
+    ],
+    "requested": 0.5043459893570851,
+    "readback": 0.50435
+  },
+  "rhght": {
+    "file": "TMGRO048.ECO",
+    "record": "TM0001",
+    "field": "RHGHT",
+    "row": 47,
+    "columns": [
+      103,
+      108
+    ],
+    "requested": 0.9110120000856918,
+    "readback": 0.91101
+  },
+  "xfint": {
+    "file": "TMGRO048.ECO",
+    "record": "TM0001",
+    "field": "XFINT",
+    "row": 47,
+    "columns": [
+      139,
+      144
+    ],
+    "requested": 0.4,
+    "readback": 0.4
+  },
+  "xfpht": {
+    "file": "TMGRO048.ECO",
+    "record": "TM0001",
+    "field": "XFPHT",
+    "row": 47,
+    "columns": [
+      133,
+      138
+    ],
+    "requested": 37.320475912486,
+    "readback": 37.32
+  }
+}

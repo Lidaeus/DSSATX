@@ -1,0 +1,3 @@
+# Preserve bytes referenced by run and replay receipts.
+* -text whitespace=cr-at-eol
+**/configs/* -text whitespace=cr-at-eol,-blank-at-eol
