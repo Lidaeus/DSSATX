@@ -78,14 +78,28 @@ def prepare(args, executable):
 
     inputs = args.inputs.resolve(strict=True)
     profile = "DSSATPRO.v48" if sys.platform == "win32" else "DSSATPRO.L48"
-    for required in (profile, "DSSBatch.v48"):
-        if not (inputs / required).is_file():
-            raise ValueError(f"Prepared case needs {required}")
-    if any(not path.is_file() or path.suffix.lower() in {".out", ".exe", ".log"} for path in inputs.iterdir()):
-        raise ValueError("The input case must be a flat directory of model inputs")
+    if "dataset" in targets:
+        if not targets.dataset.str.fullmatch(r"[a-z][a-z0-9_]{0,19}", na=False).all():
+            raise ValueError("Dataset names must be safe subdirectory names")
+        directories = [inputs / dataset for dataset in targets.dataset.unique()]
+        if set(inputs.iterdir()) != set(directories):
+            raise ValueError("Multi-dataset inputs need one directory per dataset")
+        if not np.isfinite(targets.yrdoy).all():
+            raise ValueError("Multi-dataset observations must include an explicit date")
+    else:
+        directories = [inputs]
+    for directory in directories:
+        for required in (profile, "DSSBatch.v48"):
+            if not (directory / required).is_file():
+                raise ValueError(f"Prepared case needs {directory / required}")
+        if any(not path.is_file() or path.suffix.lower() in {".out", ".exe", ".log"} for path in directory.iterdir()):
+            raise ValueError(f"{directory} must be a flat directory of model inputs")
 
     crop_map = args.crop_map.resolve(strict=True) if args.crop_map else None
-    cards = read_map(crop_map, inputs, bounds) if crop_map else {}
+    card_base = directories[0].relative_to(inputs)
+    cards = read_map(crop_map, directories[0], bounds) if crop_map else {}
+    if cards and any(read_map(crop_map, d, bounds) != cards for d in directories[1:]):
+        raise ValueError("Joint crop calibration requires matching frozen cards and active cultivar/ecotype selectors")
     card_names = {field["name"] for entry in cards.values() for field in entry["fields"]}
     nml_names = {name for template in templates.values()
                  for name in pyemu.pst_utils.parse_tpl_file(str(template))}
@@ -109,6 +123,8 @@ def prepare(args, executable):
         "pif ~\n" + "".join(f"l1 !{name}!\n" for name in targets.index), encoding="ascii",
     )
     runtime = {"engine": str(executable), "templates": list(templates), "crop_cards": cards}
+    if cards and card_base != Path("."):
+        runtime["crop_card_base"] = card_base.as_posix()
     (work / "forward.json").write_text(json.dumps(runtime, indent=2), encoding="utf-8")
     pst_templates = [str(work / path.name) for path in templates.values()]
     pst_inputs = [str(work / name) for name in templates]
@@ -128,7 +144,8 @@ def prepare(args, executable):
             path.write_text(render_template(source, initial), encoding="utf-8")
             overrides[path] = filename
         if cards:
-            crops, readback = materialize(cards, work / "inputs", initial.loc[sorted(card_names)].to_dict(), out_point)
+            crops, readback = materialize(cards, work / "inputs" / card_base,
+                                          initial.loc[sorted(card_names)].to_dict(), out_point)
             overrides.update(crops)
             (work / "baseline_crop_readback.json").write_text(json.dumps(readback, indent=2) + "\n", encoding="ascii")
         baseline = evaluate(work / "inputs", executable, targets.reset_index(), overrides, work / "baseline.log")
@@ -161,6 +178,10 @@ def prepare(args, executable):
     pst.pestpp_options.update(
         ies_num_reals=args.members, ies_no_noise=True, ies_include_base=True, random_seed=args.seed,
     )
+    if "dataset" in targets:
+        # A joint run executes multiple model processes; keep the model's own
+        # subprocess timeout as the primary limit during uneven worker loads.
+        pst.pestpp_options.update(overdue_resched_fac=4.0, overdue_giveup_fac=25.0)
     pst.write(str(work / "mechanism.pst"), version=2)
     manifest = {str(path.relative_to(work)): sha(path) for path in work.rglob("*") if path.is_file() and path.name not in {"baseline.log", "simulated.txt"}}
     (work / "run_manifest.json").write_text(json.dumps({
@@ -220,7 +241,11 @@ def main():
                                stderr=subprocess.STDOUT, env=env, check=True)
         objectives = pd.read_csv(work / "mechanism.phi.actual.csv")
         if objectives.empty or objectives["iteration"].max() < args.updates:
-            raise RuntimeError("PEST++ stopped before the requested IES update; see mechanism.rec")
+            record = (work / "mechanism.rec").read_text(errors="replace")
+            if objectives.empty or not all(marker in record for marker in (
+                    "phi-based termination criteria satisfied, all done", "pestpp-ies analysis complete")):
+                raise RuntimeError("PEST++ stopped before the requested IES update; see mechanism.rec")
+            print(f"PEST++ met its Phi convergence criteria after {objectives.iteration.max()} updates")
     print(work)
 
 

@@ -149,8 +149,14 @@ def prepare(experiment, inputs, out, profile="f5"):
 
 
 def run_case(engine, stage, case, config):
-    shutil.copytree(stage / "inputs", case)
+    run_inputs(engine, stage / "inputs", case, config)
+
+
+def run_inputs(engine, inputs, case, config, cards=()):
+    shutil.copytree(inputs, case)
     shutil.copyfile(config, case / "NIntegration.nml")
+    for path in cards:
+        shutil.copyfile(path, case / path.name)
     env = dict(os.environ, DSSAT_HOME="./", DSSAT_P0_TRACE="1", DSSAT_SLN_PROBE_CUT="0")
     for key in ("DSSAT_N_CONFIG", "DSSAT_ROOT_UPTAKE_NML", "DSSAT_NSTATE_NML"):
         env.pop(key, None)

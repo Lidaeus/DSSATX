@@ -1,4 +1,4 @@
-"""Replay the best final IES member or the base point of a zero-update preflight."""
+"""Replay an IES member, defaulting to the best member of the final iteration."""
 
 import argparse
 import json
@@ -11,7 +11,7 @@ from crop_cards import materialize
 from forward import evaluate, render_template
 
 
-def replay(work, out):
+def replay(work, out, iteration=None, member=None):
     manifest = json.loads((work / "run_manifest.json").read_text())
     config = json.loads((work / "forward.json").read_text())
     engine = Path(config["engine"])
@@ -21,10 +21,15 @@ def replay(work, out):
         if sha(work / name) != digest:
             raise ValueError(f"Frozen calibration input changed: {name}")
     history = pd.read_csv(work / "mechanism.phi.actual.csv")
-    final = history.iloc[-1]
+    rows = history if iteration is None else history.loc[history.iteration.eq(iteration)]
+    if rows.empty:
+        raise ValueError(f"No IES record for iteration {iteration}")
+    final = rows.iloc[-1]
     iteration = int(final["iteration"])
     ensemble = work / f"mechanism.{iteration}.par.csv"
     if iteration == 0 and not ensemble.is_file():
+        if member is not None and member != "base":
+            raise ValueError("Only the base point is available for this preflight")
         base = pd.read_csv(work / "mechanism.base.par", sep=r"\s+", skiprows=1,
                            names=["name", "value", "scale", "offset"], float_precision="round_trip")
         if not base.scale.eq(1).all() or not base.offset.eq(0).all():
@@ -35,7 +40,9 @@ def replay(work, out):
         parameters = pd.read_csv(ensemble, index_col=0, float_precision="round_trip")
         parameters.index = parameters.index.astype(str)
         phi = final.reindex(parameters.index).dropna()
-        member = phi.idxmin()
+        member = phi.idxmin() if member is None else member
+        if member not in phi.index:
+            raise ValueError(f"No finite objective for member {member} in iteration {iteration}")
         best = parameters.loc[member].rename(str.lower)
     targets = pd.read_csv(work / "observations.csv", dtype={"name": str})
     out.mkdir(parents=True, exist_ok=False)
@@ -48,7 +55,8 @@ def replay(work, out):
         files[generated] = filename
     if config.get("crop_cards"):
         names = {field["name"] for entry in config["crop_cards"].values() for field in entry["fields"]}
-        crops, readback = materialize(config["crop_cards"], work / "inputs", best.loc[sorted(names)].to_dict(), configs)
+        crops, readback = materialize(config["crop_cards"], work / "inputs" / config.get("crop_card_base", "."),
+                                      best.loc[sorted(names)].to_dict(), configs)
         files.update(crops)
         (out / "crop_readback.json").write_text(json.dumps(readback, indent=2) + "\n", encoding="ascii")
     predicted = evaluate(work / "inputs", engine, targets, files, out / "dssat.log")
@@ -79,8 +87,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--iteration", type=int)
+    parser.add_argument("--member")
     args = parser.parse_args()
-    replay(args.case.resolve(strict=True), args.out.resolve())
+    replay(args.case.resolve(strict=True), args.out.resolve(), args.iteration, args.member)
 
 
 if __name__ == "__main__":

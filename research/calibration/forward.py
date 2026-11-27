@@ -44,6 +44,16 @@ def native_value(output, row, treatment):
 
 
 def evaluate(case, executable, targets, overrides, log):
+    if "dataset" not in targets:
+        return evaluate_batch(case, executable, targets, overrides, log)
+    values = {}
+    for dataset, group in targets.groupby("dataset", sort=False):
+        child_log = log.with_name(f"{log.stem}-{dataset}{log.suffix}")
+        values.update(zip(group.name, evaluate_batch(case / dataset, executable, group, overrides, child_log)))
+    return [values[name] for name in targets.name]
+
+
+def evaluate_batch(case, executable, targets, overrides, log):
     environment = os.environ.copy()
     for key in ("DSSAT_N_CONFIG", "DSSAT_ROOT_UPTAKE_NML", "DSSAT_NSTATE_NML"):
         environment.pop(key, None)
@@ -83,7 +93,8 @@ def main():
     with TemporaryDirectory(prefix="dssatx-crop-cards-") as directory:
         readback = {}
         if config.get("crop_cards"):
-            crops, readback = materialize(config["crop_cards"], inputs, read_values(case / VALUES), Path(directory))
+            crops, readback = materialize(config["crop_cards"], inputs / config.get("crop_card_base", "."),
+                                          read_values(case / VALUES), Path(directory))
             overrides.update(crops)
         values = evaluate(inputs, Path(config["engine"]),
                           pd.read_csv(case / "observations.csv", dtype={"name": str}),
